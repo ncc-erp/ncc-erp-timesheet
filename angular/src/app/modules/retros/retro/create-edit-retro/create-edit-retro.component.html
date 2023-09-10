@@ -1,0 +1,87 @@
+<form [formGroup]="formData">
+    <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title
+        [innerHTML]="title">
+    </h2>
+
+    <div class="form-control-wrapper">
+        <div class="label-wrapper">
+            <label>Name*</label>
+        </div>
+
+        <div class="input-wrapper">
+            <mat-form-field appearance="outline">
+                <mat-label>Name</mat-label>
+                <input matInput  placeholder="{{l('Name')}}" formControlName="name">
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div class="form-control-wrapper">
+        <div class="label-wrapper">
+            <label>Date*</label>
+        </div>
+        <div class="date-list">
+            <div class="date-item">
+                <mat-form-field appearance="outline">
+                    <mat-label>Choose start date</mat-label>
+                    <input matInput [matDatepicker]="pickerStartDate"  formControlName="startDate">
+                    <mat-datepicker-toggle matSuffix [for]="pickerStartDate"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerStartDate></mat-datepicker>
+                </mat-form-field>
+            </div>
+            <span class="text-spacing">To</span>
+            <div class="date-item">
+                <mat-form-field appearance="outline">
+                    <mat-label>Choose end date</mat-label>
+                    <input matInput [matDatepicker]="pickerEndDate" formControlName="endDate">
+                    <mat-datepicker-toggle matSuffix [for]="pickerEndDate"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerEndDate></mat-datepicker>
+                </mat-form-field>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="form-control-wrapper">
+        <div class="label-wrapper">
+            <label>Deadline*</label>
+        </div>
+        <div class="deadline-wrapper">
+            <mat-form-field appearance="outline">
+                <mat-label>Choose deadline date</mat-label>
+                <input matInput [matDatepicker]="deadline" formControlName="deadline">
+                <mat-datepicker-toggle matSuffix [for]="deadline"></mat-datepicker-toggle>
+                <mat-datepicker #deadline></mat-datepicker>
+            </mat-form-field>
+        </div>
+
+        <div class="status-wrapper">
+            <div class="label-status">
+                <label>Status*</label>
+            </div>
+            <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select formControlName="status" [disabled]="action === 1">
+                    <mat-option [value]="0">
+                        Active
+                    </mat-option>
+                    <mat-option [value]="1">
+                        Inactive
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </div>
+
+
+    <mat-dialog-actions align="end">
+        <button class="btn btn-default" mat-raised-button type="button" (click)="close(1)">
+            {{l('Cancel')}}
+        </button>
+        <button mat-raised-button color="primary" [disabled]="!formData.valid" type=" submit" flex="15"
+            (click)="onSave()">
+            {{l('Submit')}}
+        </button>
+    </mat-dialog-actions>
+</form>

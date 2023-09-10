@@ -1,0 +1,77 @@
+<form #createTimesheetForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
+  <div>
+    <h3 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>{{title}} <h5
+        class="pull-right" style="display: inline-block">{{day}} </h5>
+    </h3>
+  </div>
+  <mat-dialog-content class="mat-typography" style="width:400px">
+
+    <mat-form-field>
+      <mat-label>Project</mat-label>
+      <mat-select matInput name="project" [(ngModel)]="selectedProject" required (selectionChange)="onProjectChange()">
+        <mat-option *ngFor="let project of projectIncludingTasks" [value]="project">
+          {{ project.projectName}} - <span class="pm">{{project.listPM}}</span>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="row" style="width:100%; display: flex; flex-direction: row;margin-left: 0;">
+        <mat-form-field style="width: 340px;">
+          <mat-label>Task</mat-label>
+          <mat-select matInput name="task" [(ngModel)]="myTimesheet.projectTaskId" (selectionChange)="onTaskChange()" required>
+            <mat-option *ngFor="let task of selectedProject.tasks" [value]="task.projectTaskId">
+              {{ task.taskName }}
+            </mat-option>
+          </mat-select>      
+        </mat-form-field>
+        <mat-checkbox id="btnDefaultTask" class="btn-check-default" style="margin-left: 10px;" [disabled]="!myTimesheet.projectTaskId" [checked]="defaultTask" (change)="checkDefaultTask()">
+          <span class="btn-check-default" style="margin-top: 15px;">Default</span>
+        </mat-checkbox>
+    </div>
+
+    <mat-form-field *ngIf="selectedProject.projectUserType == APP_CONSTANT.EnumUserType.Shadow">
+      <mat-label>Target user</mat-label>
+      <mat-select matInput name="targetUser" [(ngModel)]="myTimesheet.projectTargetUserId" required>
+        <mat-option *ngFor="let targetUser of selectedProject.targetUsers" [value]="targetUser.projectTargetUserId">
+          {{ targetUser.userName }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <textarea matInput name="note" placeholder="{{l('Note')}}" [(ngModel)]="myTimesheet.note"
+        maxlength="1024"></textarea>
+    </mat-form-field>
+    <mat-form-field>
+      <input type="number" matInput name="workingTime" placeholder="{{l('WorkingTime ')}}"
+        [(ngModel)]="strWorkingTime" [readonly]="isSpecialTask()"
+        required>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="selectedProject.projectUserType == APP_CONSTANT.EnumUserType.Shadow">
+      <input type="number" matInput name="targetUserWorkingTime" placeholder="{{l('Target User WorkingTime ')}}"
+        [(ngModel)]="strTargetUserWorkingTime" required>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Type</mat-label>
+      <mat-select matInput name="typeOfWorks" [(ngModel)]="myTimesheet.typeOfWork"
+        [disabled]="isSpecialTask()">
+        <mat-option *ngFor="let item of  APP_CONFIG.EnumTypeOfWork" [value]="item.value">
+          {{ item.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-checkbox name="isCharged" *ngIf="isShowCharged() " [(ngModel)]="myTimesheet.isCharged">
+      Charged
+    </mat-checkbox>
+
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default" mat-button mat-dialog-close>Cancel</button>
+    <button class="btn btn-primary" [disabled]="isLoading" (click)="Save()" mat-button>Save</button>
+    <button class="btn btn-primary" [disabled]="isLoading" *ngIf="myTimesheet.status===3" (click)="saveAndReset()"
+      mat-button>Save and Reset</button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,384 @@
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card main-content">
+            <div class="header">
+                <h2>{{ "Users" | localize }}</h2>
+                <ul class="header-dropdown m-r--5">
+                    <li>
+                        <button mat-icon-button [matMenuTriggerFor]="headerMenu123"
+                            class="header-dropdown-mat-icon-button">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #headerMenu123="matMenu">
+                            <button mat-menu-item (click)='refresh()'>
+                                <mat-icon>refresh</mat-icon>
+                                <span>{{ "Refresh" | localize }}</span>
+                            </button>
+                        </mat-menu>
+                    </li>
+                </ul>
+            </div>
+            <div style="padding: 20px 5px 0px 5px; display: flex; justify-content: left;">
+                <div class="col-sm-5ths" style="display: flex; justify-content: space-between;">
+                    <div class="col-md-6" style="padding:5px 15px 10px 0">
+                        <button *ngIf="permission.isGranted(ADD_USER)" class="col-sm-4" large mat-raised-button
+                            color="primary" style="width: 123px;" (click)='createOrEdit()'>
+                            <mat-icon>add</mat-icon> New User
+                        </button>
+                    </div>
+                    <div *ngIf="permission.isGranted(UploadWorkingTime)" class="col-md-6" style="padding:5px 15px 10px 15px">
+                        <button large mat-raised-button color="primary" style="width: 123px;" (click)='importExcel()'>
+                            <mat-icon>local_printshop</mat-icon> Import
+                        </button>
+                    </div>
+                </div>
+<div class="col-sm-5ths">
+    <mat-form-field appearance="outline">
+        <mat-label>Position</mat-label>
+
+        <mat-select name="positionId" [(value)]="positionId" (selectionChange)="searchOrFilter()">
+            <mat-option>
+                <ngx-mat-select-search placeholderLabel="Search" [formControl]="positionSearch"
+                noEntriesFoundLabel= "No matching found"></ngx-mat-select-search>
+            </mat-option>
+            <mat-option [value]="-1">All</mat-option>
+            <mat-option *ngFor="let position of listPosition" [value]='position.id'>
+                {{position.name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
+
+                <mat-form-field class="col-md-7 field-padding" appearance="outline" style="width: 880px;">
+                    <mat-icon style="color:#9E9E9E" matPrefix>search</mat-icon>
+                    <mat-label>Search by Username, Name, Surname or Email</mat-label>
+                    <input matInput [(ngModel)]="keyword" name="keyword" (keyup.enter)="searchOrFilter()">
+                    <!--  ngModelChange -->
+                </mat-form-field>
+            </div>
+            <div class="clearfix" style="padding: 0 5px 0px 5px">
+                <mat-form-field class="col-sm-5ths field-padding" appearance="outline">
+                    <mat-label>Active</mat-label>
+                    <mat-select [(value)]="isActive" name="isActive" (selectionChange)="searchOrFilter()">
+                        <mat-option value="100">All</mat-option>
+                        <mat-option value="1">Active</mat-option>
+                        <mat-option value="0">Inactive</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field class="col-sm-5ths field-padding" appearance="outline">
+                    <mat-label>User Type</mat-label>
+                    <mat-select [(value)]="userType" name="User Type" (selectionChange)="searchOrFilter()">
+                        <mat-option value="100">All</mat-option>
+                        <mat-option value="0">Staff</mat-option>
+                        <mat-option value="1">Intern</mat-option>
+                        <mat-option value='2'>Colaborator</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field class="col-sm-5ths field-padding" appearance="outline">
+                    <mat-label>Level</mat-label>
+                    <mat-select [(value)]="level" name="Level" (selectionChange)="searchOrFilter()">
+                        <mat-option value="100">All</mat-option>
+                        <mat-option *ngFor="let item of userLevels" [value]='item.value'>
+                            {{item.name}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field class="col-sm-5ths field-padding" appearance="outline">
+                    <mat-label>Basic Tranner</mat-label>
+                    <mat-select [(value)]="managerId" name="PM" (selectionChange)="searchOrFilter()">
+                        <mat-option value="-1">All</mat-option>
+                        <mat-option value="null">No Trainer</mat-option>
+                        <mat-option *ngFor="let man of managers" [value]='man.id'>
+                            {{man.name}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field class="col-sm-5ths field-padding" appearance="outline">
+                    <mat-label>Branch</mat-label>
+
+                    <mat-select name="branchId" [(value)]="branchId" (selectionChange)="searchOrFilter()">
+                        <mat-option>
+                            <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
+                            noEntriesFoundLabel= "No matching found"></ngx-mat-select-search>
+                        </mat-option>
+
+                        <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
+                            {{branch.displayName}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div style="position: relative; padding: 20px;">
+                <div class="table-responsive" style="border: 0;" id="tbl">
+                    <table class="table table-hover table-striped styleUser" [busy]="isTableLoading">
+                        <thead>
+                            <tr>
+                                <th *ngIf="tableHeader[1].value">
+                                    <div style="display: flex; align-items: center; justify-content: center;">
+                                        <div>{{ tableHeader[1].name | localize }}</div>
+                                        <div>
+                                            <span>
+                                                <mat-icon style="cursor: pointer; margin-top: 4px;"
+                                                    (click)="isExpandUserName = !isExpandUserName">
+                                                    {{isExpandUserName ? 'keyboard_arrow_left' :
+                                                    'keyboard_arrow_right'}}
+                                                </mat-icon>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th *ngIf="tableHeader[2].value" style="min-width: 70px;">
+                                    {{ tableHeader[2].name | localize }}</th>
+                                <th *ngIf="tableHeader[3].value" style="min-width: 70px;">
+                                    {{ tableHeader[3].name | localize }}</th>
+                                <th *ngIf="tableHeader[4].value" style="min-width: 80px;">
+                                    {{ tableHeader[4].name | localize }}</th>
+                                <th *ngIf="tableHeader[5].value">{{ tableHeader[5].name | localize }}</th>
+                                <th *ngIf="tableHeader[6].value">{{ tableHeader[6].name | localize }}</th>
+                                <th *ngIf="tableHeader[7].value">{{ tableHeader[7].name | localize }}</th>
+                                <th *ngIf="tableHeader[8].value && permission.isGranted(VIEW_LEVEL_USER)">{{ tableHeader[8].name | localize }}</th>
+                                <th *ngIf="tableHeader[9].value" style="min-width: 90px;">
+                                    {{ tableHeader[9].name | localize }}</th>
+                                <th *ngIf="tableHeader[10].value" style="min-width: 70px;">
+                                    {{ tableHeader[10].name | localize }}</th>
+                                <th *ngIf="tableHeader[11].value">{{ tableHeader[11].name | localize }}</th>
+                                <th *ngIf="tableHeader[12].value"> {{ tableHeader[12].name  }}</th>
+                                <th *ngIf="tableHeader[13].value" style="min-width: 80px;">
+                                    {{ tableHeader[13].name | localize }}</th>
+                                <th *ngIf="tableHeader[14].value">{{ tableHeader[14].name | localize }}</th>
+                                <th *ngIf="tableHeader[15].value">{{ tableHeader[15].name | localize }}</th>
+                                <th *ngIf="tableHeader[16].value">{{ tableHeader[16].name | localize }}</th>
+                                <!-- <th *ngIf="tableHeader[17].value">{{ tableHeader[17].name | localize }}</th> -->
+                                <th>
+                                    {{ "Actions" | localize }}
+                                    <span class="pointer" style="float: right; height: 20px;">
+                                        <i class="icon-32 material-icons pointer"
+                                            (click)='showOrHideHeader()'>arrow_drop_down</i>
+                                        <div class="dropdown-content" [ngClass]="showHeader ? 'block' : 'none'"
+                                            (clickOutside)="turnOff()">
+                                            <table class="table">
+                                                <tr *ngFor="let item of tableHeader">
+                                                    <mat-checkbox name="item.fieldName" [(ngModel)]="item.value"
+                                                        (change)='changSelection(item)'>
+                                                        <input class="mar-left" [(ngModel)]="item.name" type="text">
+                                                    </mat-checkbox>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="
+                let user of (users
+                  | paginate
+                    : {
+                        id: 'server',
+                        itemsPerPage: pageSize,
+                        currentPage: pageNumber,
+                        totalItems: totalItems
+                      })" (contextmenu)="onContextMenu($event, menuTrigger)"
+                                [className]="user.isLevelUp ? 'bag-yellow' : ''">
+                                <td *ngIf="tableHeader[1].value" (click)="isExpandUserName = !isExpandUserName">
+                                    <div style="display: flex; justify-content: flex-start; align-items: center;"
+                                        [className]="!isExpandUserName && enableExpandName ? 'width200px' : 'fit'"
+                                        (click)="user.expandUser = !user.expandUser">
+                                        <div>
+                                            <img style="width: 80px; height: 80px; border-radius: 50%;"
+                                                [src]='user.avatarFullPath' alt="avatar">
+                                        </div>
+                                        <div style=" height: 80px;"
+                                            [className]="!isExpandUserName ? 'width50 overflow-x' : 'fitmr overflow-x'">
+                                            <div class="overflow-x" [title]='user.userName'>
+                                                {{ user.userName }}
+                                            </div>
+                                            <div class="overflow-x" [title]='user.fullName'>
+                                                {{ user.fullName }}
+                                            </div>
+                                            <div class="overflow-x" [title]='user.emailAddress'>
+                                                {{ user.emailAddress }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <!-- <td *ngIf="tableHeader[2].value">{{user.userCode}}</td> -->
+                                <td *ngIf="tableHeader[2].value">
+                                    <span *ngIf="user.positionId != null">{{ user.positionName}}</span>
+                                </td>
+                                <td *ngIf="tableHeader[3].value">
+                                    <span *ngIf="user.branchId != null">{{ user.branchDisplayName}}</span>
+                                </td>
+                                <td *ngIf="tableHeader[4].value">
+                                    <div *ngIf="user.morningWorking && user.afternoonWorking">
+                                        <p  class="noBreak">
+                                            {{user.morningStartAt }} - {{user.morningEndAt}} ({{user.morningWorking}}h)
+                                        </p>
+                                        <p  class="noBreak">
+                                            {{user.afternoonStartAt }} - {{user.afternoonEndAt}}
+                                            ({{user.afternoonWorking}}h)
+                                        </p>
+                                    </div>
+                                </td>
+                                <td style="text-align: center;" *ngIf="tableHeader[5].value">{{ user.startDateAt }}</td>
+                                <td style="text-align: right;" *ngIf="tableHeader[6].value">{{ user.allowedLeaveDay }}
+                                </td>
+                                <td *ngIf="tableHeader[7].value">
+                                    <div class="align">
+                                        <div>
+                                            <span *ngIf="user.type == 0"
+                                            class="label status-label bg-red">{{userTypes[user.type].label}}</span>
+                                            <span *ngIf="user.type == 1"
+                                            class="label status-label bg-green">{{userTypes[user.type].label}}</span>
+                                            <span *ngIf="user.type == 2"
+                                            class="label status-label bg-blue">{{userTypes[user.type].label}}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td *ngIf="tableHeader[8].value && permission.isGranted(VIEW_LEVEL_USER)">
+                                    <div class="align">
+                                        <span *ngIf="user.level != null">
+                                            <span
+                                                class="label status-label mr-left"
+                                                [ngStyle]=" userLevels[user.level].style">{{userLevels[user.level].name}}
+                                            </span>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td *ngIf="tableHeader[9].value" style="min-width: 0px;">
+                                    <div *ngIf="user.projectUsers" style=" white-space: nowrap;"
+                                        [className]="!user.expandProject ? 'overflow-y' : 'fit'">
+                                        <div *ngFor="let project of user.projectUsers">
+                                            <div class="fix-line">
+                                                {{project.projectName}}
+                                                <span class="label status-label"
+                                                    style="background-color: black; color: white;"
+                                                    *ngIf="project.projectUserType == 2">{{ProjectUserType[project.projectUserType].name}}</span>
+                                                <span *ngIf="project.projectUserType == 1"
+                                                    class="label status-label bg-red">{{ProjectUserType[project.projectUserType].name}}</span>
+                                                <span *ngIf="project.projectUserType !== 1"
+                                                    style="margin-left: 5px; font-weight: 600;" class="pm"
+                                                    title="{{project.pms}}"> {{project.pms}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span *ngIf="user.projectUsers.length >= 5 && !user.expandProject"
+                                        style="cursor: pointer;" (click)="user.expandProject = !user.expandProject"
+                                        title="More...">...</span>
+                                </td>
+                                <td style="text-align: right;" *ngIf="tableHeader[10].value">
+                                    {{ user.salary}}</td>
+                                <td style="text-align: center;" *ngIf="tableHeader[11].value">{{ user.salaryAt }}</td>
+                                <td *ngIf="tableHeader[12].value" align="center">
+                                    <div *ngIf="user.sex != null">
+                                        <span [className]="sexes[user.sex].class">
+                                            {{sexes[user.sex].label}}</span>
+                                    </div>
+                                </td>
+                                <td *ngIf="tableHeader[13].value">
+                                    <div style="text-align: center; margin-bottom: 5px;"
+                                        *ngIf="user.managerAvatarFullPath != null && user.managerAvatarFullPath.length > 0">
+                                        <img style="width: 80px; height: 80px; border-radius: 50%;"
+                                            [src]='user.managerAvatarFullPath' alt="avatar">
+                                    </div>
+                                    <div style="text-align: center;"
+                                        [className]="!user.expandMgName && enableExpandName ? 'width80px' : 'fullWidth'">
+                                        <div (click)='user.expandMgName = !user.expandMgName' [title]='user.managerName'
+                                            class="overflow-x">{{user.managerName}}</div>
+                                    </div>
+                                </td>
+
+                                <td *ngIf="tableHeader[14].value">
+                                    <div style="white-space: nowrap;"
+                                        [className]="!user.expandRole ? 'overflow-y' : ''">
+                                        <div *ngFor="let role of user.roleNames">
+                                            {{role}}
+                                        </div>
+                                    </div>
+                                    <span *ngIf="user.roleNames.length >= 5 && !user.expandRole"
+                                        style="cursor: pointer;" (click)="user.expandRole = !user.expandRole"
+                                        title="More...">...</span>
+                                </td>
+                                <td *ngIf="tableHeader[15].value" align="center">{{user.creationTime}}</td>
+                                <td *ngIf="tableHeader[16].value" align="center">
+                                    <i class="material-icons" *ngIf="user.isActive" style="color:green;">
+                                        check_circle
+                                    </i>
+                                    <i class="material-icons" *ngIf="!user.isActive" style="color:red;">
+                                        error
+                                    </i>
+                                </td>
+                                <!-- <td *ngIf="tableHeader[17].value">
+                                    <span *ngIf="user.positionId != null">{{ user.positionName}}</span>
+                                </td> -->
+                                <td align="center" style="min-width: 50px;">
+                                    <button *ngIf=" permission.isGranted(EDIT_USER) ||
+                                                permission.isGranted(EDIT_USER_ROLE) ||
+                                                permission.isGranted(DELETE_USER) ||
+                                                permission.isGranted(RESET_PASSWORD) ||
+                                                permission.isGranted(UPLOAD_AVATAR) ||
+                                                permission.isGranted(CHANGE_STATUS_USER)    " class="action-button"
+                                        mat-icon-button [matMenuTriggerFor]="actionsMenu">
+                                        <mat-icon>menu</mat-icon>
+                                    </button>
+                                    <div style="visibility: hidden; position: fixed"
+                                        [style.left]="contextMenuPosition.x" [style.top]="contextMenuPosition.y"
+                                        #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionsMenu">
+                                    </div>
+                                    <mat-menu #actionsMenu="matMenu">
+                                        <button *ngIf="permission.isGranted(EDIT_USER)" mat-menu-item
+                                            (click)="editUser(user)">
+                                            <mat-icon>edit</mat-icon>
+                                            <span>{{ "Edit User" | localize }}</span>
+                                        </button>
+
+                                        <button *ngIf="permission.isGranted(EDIT_USER_ROLE)" mat-menu-item
+                                            (click)="editRole(user)">
+                                            <mat-icon>edit_note</mat-icon>
+                                            <span>{{ "Edit Roles" | localize }}</span>
+                                        </button>
+
+                                        <button *ngIf="permission.isGranted(DELETE_USER)" color="primary" mat-menu-item
+                                            (click)="delete(user)">
+                                            <mat-icon>delete</mat-icon>
+                                            <span>{{ "Delete" | localize }}</span>
+                                        </button>
+                                        <button *ngIf="permission.isGranted(RESET_PASSWORD)" mat-menu-item
+                                            (click)="showResetPasswordUserDialog(user)">
+                                            <mat-icon>lock</mat-icon>
+                                            <span>{{ "Reset Password" | localize }}</span>
+                                        </button>
+                                        <button *ngIf="permission.isGranted(UPLOAD_AVATAR)" mat-menu-item
+                                            (click)="upLoadAvatar(user)">
+                                            <mat-icon>cloud_upload</mat-icon>
+                                            <span>{{ "Upload Avatar" | localize }}</span>
+                                        </button>
+                                        <button mat-menu-item
+                                            *ngIf="user.isActive && permission.isGranted(CHANGE_STATUS_USER)"
+                                            (click)="deactivateUser(user.id)">
+                                            <mat-icon>block</mat-icon>
+                                            <span>{{ "Deactivate" | localize }}</span>
+                                        </button>
+                                        <button mat-menu-item
+                                            *ngIf="!user.isActive && permission.isGranted(CHANGE_STATUS_USER)"
+                                            (click)="activateUser(user.id)">
+                                            <mat-icon>done_outline</mat-icon>
+                                            <span>{{ "Activate" | localize }}</span>
+                                        </button>
+                                    </mat-menu>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a class="left" (click)="nextOrPre('left')" cdkDrag>&#8249;</a>
+                    <a class="right" (click)="nextOrPre('right')" cdkDrag>&#8250;</a>
+                </div>
+            </div>
+            <div class="abp-pagination-controls-wrapper">
+                <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
+                    (pageChange)="getDataPage($event)" id="server">
+                </abp-pagination-controls>
+            </div>
+        </div>
+    </div>
+</div>

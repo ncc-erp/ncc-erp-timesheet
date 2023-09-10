@@ -1,0 +1,224 @@
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content" style="min-width:800px">
+      <div class="body" [busy]="isTableLoading">
+        <div class="row">
+          <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+            <h3 *ngIf="typeOfView == APP_CONSTANT.MyTimesheetView.Day">{{displayDay | date: 'yyyy-MM-dd' }}</h3>
+            <h3 *ngIf="typeOfView == APP_CONSTANT.MyTimesheetView.Week"></h3>
+          </div>
+          <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12 text-right">
+            <button style="height:49px" mat-flat-button (click)="refreshData()" color="primary">
+              Refresh
+            </button>
+            &nbsp;
+            <button style="height:49px" mat-flat-button (click)="today()" class="btn bg-green">
+              Today
+            </button>
+            &nbsp;
+            <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+              <mat-button-toggle matTooltip="Previous" matTooltipPosition="above" (click)="back()">
+                <mat-icon>keyboard_arrow_left</mat-icon>
+              </mat-button-toggle>
+              <mat-button-toggle matTooltip="Today" matTooltipPosition="above">
+                <mat-form-field>
+                  <input matInput [readonly]="true" [matDatepicker]="picker1" [(ngModel)]="displayDay"
+                    (dateInput)="customDate()">
+                </mat-form-field>
+
+              </mat-button-toggle>
+              <mat-button-toggle matTooltip="Next" matTooltipPosition="above" (click)="next()">
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+            <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+            <mat-datepicker #picker1></mat-datepicker>
+            <mat-button-toggle-group name="fontStyle" aria-label="Font Style" #group="matButtonToggleGroup" value="day">
+              <mat-button-toggle value="day" (click)="viewBy(APP_CONSTANT.MyTimesheetView.Day)">Day</mat-button-toggle>
+              <mat-button-toggle value="week" (click)="viewBy(APP_CONSTANT.MyTimesheetView.Week)">Week
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+        </div>
+        <!-- By Day -->
+        <mat-tab-group *ngIf="typeOfView == APP_CONSTANT.MyTimesheetView.Day" [selectedIndex]="activeDay"
+          (selectedTabChange)="tabChanged($event)">
+
+          <mat-tab *ngFor="let day of mapDayOfWeek">
+            <ng-template mat-tab-label>
+              <div>
+                <div style="height:20px">{{ day.name }}</div>
+                <div style="height:20px"> {{convertMinuteToHour (day.totalTime) }}</div>
+              </div>
+            </ng-template>
+
+            <div class="table-responsive" style="overflow: hidden">
+              <table class="table table-hover table-striped">
+                <tbody>
+
+                  <tr *ngFor="let item of day.timesheets">
+                    <td>
+                      <span> <b>[{{ item.projectCode }}] [{{item.projectName}}] </b>
+                        ({{item.customerName}}) {{ item.taskName }} - </span>
+                        <span [ngClass]="item.isTemp? 'temp': 'official'">{{item.workType}}</span>
+                      <span><textarea matInput [readonly]="!item.isEditing">{{item.note}}</textarea></span>
+                    </td>
+                    <td style="width: 25px">{{convertMinuteToHour(item.workingTime) }}</td>
+                    <td style="width: 1px">
+                      <h4> <span class=" label bg-teal"
+                          style="margin-top:-10px; padding: 6px 15px; min-width: 90px; border-radius:10px; float: right"
+                          *ngIf="item.status == 1  ">Pending</span> </h4>
+                      <h4> <span class=" label bg-green "
+                          style="margin-top:-10px; padding: 6px 15px; min-width: 90px; border-radius: 10px; float: right"
+                          *ngIf="item.status == 2 ">Approved</span></h4>
+                      <h4><span class=" label bg-grey "
+                          style="margin-top:-10px; padding: 6px 15px; min-width: 90px; border-radius: 10px; float: right"
+                          *ngIf="item.status == 3 ">Rejected</span></h4>
+                      <h4> <span class="label bg-light-green"
+                          style="margin-top:-10px; padding: 6px 15px; min-width: 90px; border-radius: 10px; float: right"
+                          *ngIf="item.status == 0 ">New</span></h4>
+                    </td>
+                    <td style="width: 1px">
+                      <span style="margin-right: 5px" class="label status-label bg-red"
+                        *ngIf="item.typeOfWork == '1'">OT</span>
+
+                      <span class="label status-label bg-green" *ngIf="item.isCharged"
+                        style="margin-right: -20px;">Charged</span>
+                    </td>
+                    <td style="width: 115px">
+                      <button style="width:50px;float: right"
+                        *ngIf="item.status != APP_CONSTANT.TimesheetStatus.Approve && permission.isGranted(DELETE_MY_TIMESHEET)"
+                        (click)="delete(item)" mat-icon-button color="primary">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                      <button style="float: right"
+                        *ngIf="item.status != APP_CONSTANT.TimesheetStatus.Approve && permission.isGranted(EDIT_MY_TIMESHEET)"
+                        (click)="editTimesheetItem(item)" mat-icon-button color="primary">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style="display: flex; justify-content: space-between;">
+                <button
+                  *ngIf="activeDay != 7 && typeOfView == APP_CONSTANT.MyTimesheetView.Day && permission.isGranted(ADD_MY_TIMESHEET)"
+                  mat-flat-button color="primary" (click)="createTimesheetItem()">
+                  <mat-icon>add</mat-icon>
+                </button>
+                <button *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
+                  (click)="submitTimesheet()" mat-flat-button color="primary">
+                  Submit Week for Approval
+                </button>
+              </div>
+            </div>
+          </mat-tab>
+          <mat-tab *ngIf="isMapDayOfWeekLoaded">
+            <ng-template mat-tab-label>
+              <div>
+                <div style="color:black"><b>Total</b></div>
+                <div style="height:20px;color:black"><b> {{convertMinuteToHour(totalWorkingTimeByDay) }} </b></div>
+              </div>
+            </ng-template>
+          </mat-tab>
+
+        </mat-tab-group>
+
+        <!-- By Week -->
+        <div *ngIf="typeOfView == APP_CONSTANT.MyTimesheetView.Week">
+          <table class="table table-hover table-striped">
+            <thead>
+              <tr>
+                <th></th>
+                <th style="text-align:center ; padding: 0px;height:15px"
+                  *ngFor="let day of mapDayOfWeek; let i = index">
+                  {{
+                  day.name }}
+                  <p class='date'>
+                    <small> {{day.dateAt | date: 'yyyy-MM-dd'}} </small>
+                  </p>
+                  <p style="height:15px">{{ convertMinuteToHour(sumWorkingTimeByDay(i)) }}</p>
+
+
+                </th>
+                <th style="text-align:center ; padding: 0px;height:15px">
+                  <p style="margin:5px"> <b>Total</b> </p>
+                  <br>
+                  <p style="height:15px">{{convertMinuteToHour(totalWorkingTime) }}</p>
+
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of mapWeekByTask">
+                <td>
+                  <p><b>[{{ item.projectCode }}] [{{item.projectName}}]</b><span> ({{item.customerName}})</span></p>
+                  <p>{{ item.taskName }}
+                </td>
+                <td *ngIf="!item.isEditing "><input style="width: 50px;" [readonly]="!item.isEditing"
+                    [(ngModel)]="item.monWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
+                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                    [(ngModel)]="item.tueWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
+                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                    [(ngModel)]="item.wedWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
+                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                    [(ngModel)]="item.thuWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
+                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                    [(ngModel)]="item.friWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
+                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                    [(ngModel)]="item.satWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
+                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                    [(ngModel)]="item.sunWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
+
+
+                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.monWorkingTime"
+                    [textMask]="mask2"></td>
+                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.tueWorkingTime"
+                    [textMask]="mask2"></td>
+                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.wedWorkingTime"
+                    [textMask]="mask2"></td>
+                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.thuWorkingTime"
+                    [textMask]="mask2"></td>
+                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.friWorkingTime"
+                    [textMask]="mask2"></td>
+                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.satWorkingTime"
+                    [textMask]="mask2"></td>
+                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.sunWorkingTime"
+                    [textMask]="mask2"></td>
+
+                <td>{{ convertMinuteToHour(item.totalTime) }}</td>
+
+                <td>
+                  <button mat-flat-button *ngIf="item.isAddNew" (click)="SaveList(item)" color="primary" [disabled]="isSaving">
+                    <mat-icon>done</mat-icon>
+                  </button>
+                  <!-- <button mat-flat-button *ngIf="item.isEditable && item.isEditing " (click)="SaveList(item)" color="primary">
+                    <mat-icon>done</mat-icon>
+                  </button> -->
+                  <!-- <button mat-flat-button *ngIf="item.isEditable && !item.isEditing" (click)="edit(item)" color="primary">
+                    <mat-icon>edit</mat-icon>
+                  </button> -->
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button
+            *ngIf="activeDay != 7 && typeOfView == APP_CONSTANT.MyTimesheetView.Week && permission.isGranted(ADD_MY_TIMESHEET)"
+            mat-flat-button color="primary" (click)="createTimesheet()">
+            <mat-icon>add</mat-icon>
+          </button>
+          <button style="float:right" *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
+            (click)="submitTimesheet()" mat-flat-button color="primary">
+            Submit Week for Approval
+          </button>
+
+        </div>
+      </div>
+    </div>
+    <app-mytimesheet-normal-working [isRefresh]="isRefresh" (refreshEvent)="receiveRefresh($event)"></app-mytimesheet-normal-working>
+    <app-mytimesheet-tardiness></app-mytimesheet-tardiness>
+
+
+  </div>
+
+</div>

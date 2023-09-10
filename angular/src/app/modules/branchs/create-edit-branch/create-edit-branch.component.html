@@ -1,0 +1,113 @@
+<form *ngIf="active" #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
+  <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>{{title}}
+    {{branch.id > 0 ? branch.name : ''}}</h2>
+  <div>
+    <div *ngIf="name.errors && (name.dirty || name.touched)" class="text-danger">
+      <div [hidden]="!name.errors.required">
+        Name is required!
+      </div>
+    </div>
+    <mat-dialog-content class="mat-typography">
+      <div class="example-container">
+        <mat-form-field>
+          <input type="text" matInput name="name" placeholder="{{l('Name')}}" [(ngModel)]="branch.name" #name="ngModel"
+            required>
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+  </div>
+
+  <div>
+    <div *ngIf="displayName.errors && (displayName.dirty || displayName.touched)" class="text-danger">
+      <div [hidden]="!name.errors.required">
+        Display Name is required!
+      </div>
+    </div>
+    <mat-dialog-content class="mat-typography">
+      <div class="example-container">
+        <mat-form-field>
+          <input type="text" matInput name="displayName" placeholder="{{l('DisplayName')}}"
+            [(ngModel)]="branch.displayName" #displayName="ngModel" required>
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+  </div>
+
+  <div>
+    <mat-dialog-content class="mat-typography">
+      <div class="example-container">
+        <mat-form-field>
+          <input type="text" matInput name="code" placeholder="{{l('Code')}}"
+            [(ngModel)]="branch.code" #displayName="ngModel" required>
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+  </div>
+
+  <div>
+    <mat-dialog-content class="mat-typography">
+      <div class="example-container">
+        <mat-form-field>
+          <input type="text" matInput name="color" placeholder="{{l('Color')}}"
+            [(ngModel)]="branch.color" #displayName="ngModel" required>
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+  </div>
+
+  <div class="row row-fluid">
+    <div class="col-md-4">
+      <mat-form-field>
+        <input matInput type="text" name="morningStartAt" [placeholder]="'Morning Start At (HH:mm)' | localize"
+          [(ngModel)]="branch.morningStartAt" (ngModelChange)="onChangeTime($event,'morningStartAt','morning')"
+          [textMask]="{mask: maskTime, guide: false}" required />
+      </mat-form-field>
+    </div>
+    <div class="col-md-4">
+      <mat-form-field>
+        <input matInput type="text" name="morningEndAt" [placeholder]="'Morning End At (HH:mm)' | localize"
+          [(ngModel)]="branch.morningEndAt" (ngModelChange)="onChangeTime($event,'morningEndAt','morning')"
+          [textMask]="{mask: maskTime, guide: false}" required />
+      </mat-form-field>
+    </div>
+    <div class="col-md-4">
+      <mat-form-field>
+        <input matInput type="text" name="morningWorking" [placeholder]="'Morning Working Time' | localize"
+          [(ngModel)]="branch.morningWorking" readonly="true" />
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row row-fluid">
+    <div class="col-md-4">
+      <mat-form-field>
+        <input matInput type="text" name="afternoonStartAt"
+          [placeholder]="'Afternoon Start At (HH:mm)' | localize" [(ngModel)]="branch.afternoonStartAt"
+          (ngModelChange)="onChangeTime($event,'afternoonStartAt','afternoon')" [textMask]="{mask: maskTime, guide: false}"
+          required />
+      </mat-form-field>
+    </div>
+    <div class="col-md-4">
+      <mat-form-field>
+        <input matInput type="text" name="afternoonEndAt" [placeholder]="'Afternoon End At (HH:mm)' | localize"
+          [(ngModel)]="branch.afternoonEndAt" (ngModelChange)="onChangeTime($event,'afternoonEndAt','afternoon')"
+          [textMask]="{mask: maskTime, guide: false}" required />
+      </mat-form-field>
+    </div>
+    <div class="col-md-4">
+      <mat-form-field>
+        <input matInput type="text" name="afternoonWorking" [placeholder]="'Afternoon Working Time' | localize"
+          [(ngModel)]="branch.afternoonWorking" readonly="true"/>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default" mat-raised-button type="button" (click)="close(this.closePopup)">
+      {{l('Cancel')}}
+    </button>
+    <button mat-raised-button color="primary" [disabled]="!createForm.form.valid || isSaving" type="submit" flex="15"
+      (click)="save()">
+      {{l('Save')}}
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,4 @@
+<mat-form-field [floatLabel]="label">
+  <mat-label *ngIf="labelTop">{{labelTop}}</mat-label>
+  <input type="text" matInput [placeholder]="placeholder" [formControl]="formControlInput" (keyup)="checkReg($event)">
+</mat-form-field>

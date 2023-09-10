@@ -1,0 +1,3 @@
+const currentLoginInfo = {"result":{"application":{"version":"4.3.0.0","releaseDate":"2021-07-20T09:18:41.8533749+07:00","features":{}},"user":{"name":"Admin","surname":"Admin","userName":"admin","emailAddress":"admin@abc.asia","allowedLeaveDay":null,"type":0,"level":15,"sex":0,"branch":0,"avatarPath":"/avatars/1584606645829_5_test.jpg","morningWorking":"3","morningStartAt":"9:00","morningEndAt":"12:00","afternoonWorking":"5","afternoonStartAt":"13:00","afternoonEndAt":"18:00","isWorkingTimeDefault":false,"id":5},"tenant":null},"targetUrl":null,"success":true,"error":null,"unAuthorizedRequest":false,"__abp":true};
+
+export default currentLoginInfo;

@@ -1,0 +1,7 @@
+.dayOfftbl th{
+    text-align: center;
+    border: 0.1px solid rgba(204, 204, 204, 0.35);
+}
+.dayOfftbl td{
+    border: 0.1px solid rgba(204, 204, 204, 0.35);
+}

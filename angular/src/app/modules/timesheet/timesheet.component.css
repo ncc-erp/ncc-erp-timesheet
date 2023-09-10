@@ -1,0 +1,75 @@
+.heading-checkbox {
+    position: absolute;
+    right: 20px;
+    top: 25%;
+    max-width: 200px;
+    text-align: right;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.heading-checkbox .checkbox-descr, .heading-checkbox .workingtime-text {
+    color: #fff;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.panel-heading {
+    position: relative;
+    overflow: hidden;
+}
+
+.title-date {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.object-name {
+    width: calc(100% - 150px);
+    overflow: hidden;
+    display: inline-block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.status{
+    padding: 3.5px 6px;
+    font-size: 12px;
+    margin-left: 3px;
+}
+.official{
+    color: #3186ff;
+    font-weight: 900;
+  }
+  .temp{
+    color: #9e9e9e;
+    font-weight: 900;
+  }
+  .ml-1{
+    margin-left: 10px;
+  }
+
+  .header{
+    display: flex;
+  }
+  .show-than-default{
+    margin-left: 15px;
+    margin-top: 16px;
+  }
+  .header .title{
+    margin-top: 16px;
+  }
+  .header .gr-filter{
+    display: flex;
+    width: 50%;
+  }
+  .header .gr-filter .item{
+    margin-left: 20px;
+    width: 35%;
+  }
+  ::ng-deep .gr-filter .item .mat-form-field-appearance-outline .mat-form-field-wrapper{
+    margin: 0;
+    padding: 0;
+  }
+  ::ng-deep .m-checkbox .mat-checkbox-inner-container.mat-checkbox-inner-container-no-side-margin{
+    margin-top: 6px;
+  }

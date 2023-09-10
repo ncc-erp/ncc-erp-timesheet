@@ -1,0 +1,53 @@
+.format-col{
+    display: flex;
+    align-items: center;
+}
+.format-col .name-col{
+    padding-right: 20px;
+}
+.edit-form{
+    margin-top: 10px;
+}
+.select-form{
+    display: flex;
+    align-items: baseline;
+}
+.row-item-first{
+    width: 400px;
+    margin-top: 20px;
+}
+.row-item-rest{
+    margin-left: -15px;
+}
+.form-group{
+    margin-bottom: 0px;
+}
+::ng-deep .mat-form-field-wrapper{
+    padding-bottom: 0px;
+}
+.col-form-label{
+    margin-top: 25px;
+}
+.form-group.required .col-form-label:after {
+    color: #D00;
+    content: "*";
+    position: absolute;
+    margin-left: 3px;
+}
+.form-group.required .col-form-label-note:after {
+    color: #D00;
+    content: "*";
+    position: absolute;
+    margin-left: 3px;
+}
+::ng-deep .mat-tooltip{
+    white-space: pre-line;
+    font-size: 14px;
+    line-height: 20px;
+}
+::ng-deep .newLevel .mat-select-disabled span{
+    color: black;
+}
+::ng-deep .zero-star{
+    display: none !important;
+}

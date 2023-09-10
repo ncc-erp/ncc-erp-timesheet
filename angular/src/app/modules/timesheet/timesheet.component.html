@@ -1,0 +1,654 @@
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2 class="title">{{ "Timesheets" | localize }}</h2>
+        <div class="gr-filter">
+          <div class="item">
+            <mat-form-field appearance="outline">
+              <mat-label>Project</mat-label>
+              <mat-select name="projectId" [(value)]="projectId" (selectionChange)="getTimesheets()">
+                <mat-option>
+                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="projectSearch"
+                    noEntriesFoundLabel="No matching found">
+                  </ngx-mat-select-search>
+                </mat-option>
+                <mat-option *ngFor="let project of projects" [value]='project.id'>
+                  {{project.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="item">
+            <mat-form-field appearance="outline">
+              <mat-label>Branch</mat-label>
+              <mat-select name="branchId" [(value)]="branchId" (selectionChange)="getTimesheets()">
+                <mat-option>
+                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
+                    noEntriesFoundLabel="No matching found">
+                  </ngx-mat-select-search>
+                </mat-option>
+                <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
+                  {{branch.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="item">
+            <mat-form-field appearance="outline">
+              <mat-label>Check In</mat-label>
+              <mat-select name="checkIn" [(value)]='checkInFilter' (selectionChange)='getTimesheets()'>
+                <mat-option *ngFor="let item of checkInFilterList" [value]='APP_CONSTANT.HaveCheckInFilter[item]'>
+                  {{item}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="item">
+            <mat-form-field appearance="outline" style="margin-top: 0px; width: 100%;">
+              <mat-label>Search by UserName</mat-label>
+              <input type="search" [(ngModel)]="searchText" name="Search" (keyup.enter)="refresh()" matInput>
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body table-responsive" [busy]="isLoading">
+        <date-selector [type]="APP_CONSTANT.TypeViewHomePage.CustomTime"
+          [defaultFromDate] = "defaultFromDate"
+          [defaultToDate] = "defaultToDate"
+          (onDateSelectorChange)="handleDateSelectorChange($event)">
+        </date-selector>
+        <div class="row">
+          <!-- view by selectbox -->
+          <div class="col-sm-5">
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="form-group form-float">
+                  <div class="example-form">
+                    <mat-form-field>
+                      <mat-select placeholder="Group by" [(ngModel)]="viewBy" name="groupby"
+                        (selectionChange)="onGroupByChange()">
+                        <mat-option *ngFor="let item of APP_CONFIG.TimesheetViewBys" [value]="item.value">
+                          {{ item.name }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+
+              <!-- status filter -->
+              <div class="col-sm-4">
+                <div class="form-group form-float">
+                  <div class="example-form">
+                    <mat-form-field>
+                      <mat-select placeholder="Status" [(ngModel)]="filterStatus" name="Status"
+                        (selectionChange)="getTimesheets()">
+                        <mat-option *ngFor="let item of Timesheet_Statuses" [value]="item.value">
+                          {{ item.name }} ({{ item.count }})
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+              <!--Type filter-->
+              <div class="col-sm-4">
+                <div class="form-group form-float">
+                  <div class="example-form">
+                    <mat-form-field>
+                      <mat-select placeholder="Working type" [(ngModel)]="selectedTypeOfWork" name="selectedTypeOfWork"
+                        (selectionChange)="onSelectedTypeOfWorkChange()">
+                        <mat-option *ngFor="let type of Timesheet_TypeOfWorks" [value]="type.value">
+                          {{ type.name }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-2">
+            <div class="form-group form-float">
+              <div>
+                <button *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
+                  style="width: 100%" class="btn btn-success waves-effect" (click)="btnApprove()">
+                  Approve
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-2">
+            <div class="form-group form-float">
+              <div>
+                <button *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
+                  style="width: 100%" class="btn bg-grey waves-effect" (click)="btnReject()">
+                  Reject
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-2">
+            <div class="form-group form-float">
+              <button *ngIf="permission.isGranted(EXPORT_EXCEL_TIMESHEET)" class="text-center m-t-10" type="submit"
+                style="width: 100%" class="btn bg-red waves-effect" [matMenuTriggerFor]="actionsMenu"
+                [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
+                Export
+              </button>
+            </div>
+            <mat-menu #actionsMenu="matMenu">
+              <button mat-menu-item (click)="btnExport('timesheet')">
+                Export by timesheet
+              </button>
+              <button mat-menu-item (click)="btnExport('day')">
+                Export by day
+              </button>
+              <button mat-menu-item (click)="dialogSelectDay(1)">
+                Export TimeSheet
+              </button>
+              <button mat-menu-item (click)="dialogSelectDay(2)">
+                Export Remote Request
+              </button>
+            </mat-menu>
+          </div>
+          <div class="col-sm-1">
+            <div class="form-group form-float">
+              <div class="example-form m-t-10" class="text-center">
+                <mat-checkbox color="primary" [checked]="checkedCount == totalCount && checkedCount != 0"
+                  [indeterminate]="
+                    checkedCount < totalCount && checkedCount > 0
+                  " (change)="onTotalCheckedChange($event)"></mat-checkbox>
+                <div style="color: #000">
+                  {{ checkedCount }}/{{ totalCount }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Render data -->
+        <!-- View by project -->
+        <div *ngIf="viewBy == APP_CONSTANT.TimesheetViewBy.Project">
+          <div class="panel-group" role="tablist" aria-multiselectable="true">
+            <!-- each project-->
+            <div *ngFor="let project of timesheetsGroup" class="panel panel-col-primary">
+              <div class="panel-heading" role="tab" [attr.id]="'headingProject-' + project.projectId">
+                <h4 class="panel-title">
+                  <a role="button" data-toggle="collapse" [attr.href]="'#collapseProject-' + project.projectId"
+                    aria-expanded="true" aria-controls="'collapseProject-' + project.projectId">
+                    <i class="material-icons">folder</i>
+                    <span class="object-name" title="{{ project.projectName }}">{{ project.projectName }}</span>
+                  </a>
+                </h4>
+                <div class="heading-checkbox">
+                  <span class="workingtime-text">
+                    {{ convertMinuteToHour(project.totalProjectWorkingTime) }}
+                  </span>
+                  <span class="checkbox-descr">{{ project.selectedCount }}/{{ project.totalCount }}</span>
+                  <mat-checkbox color="primary" [checked]="
+                      project.checkStatus ==
+                      APP_CONSTANT.CHECK_STATUS.CHECKED_ALL
+                    " [indeterminate]="
+                      project.checkStatus ==
+                      APP_CONSTANT.CHECK_STATUS.CHECKED_SOME
+                    " (change)="onProjectCheckedChange($event, project)"></mat-checkbox>
+                </div>
+              </div>
+              <div [attr.id]="'collapseProject-' + project.projectId" class="panel-collapse collapse" role="tabpanel"
+                aria-labelledby="'headingProject-'+ project.projectId">
+                <div class="panel-body">
+                  <!-- Child Pj -->
+                  <div class="panel-group" role="tablist" aria-multiselectable="true">
+                    <div *ngFor="let ut of project.userTasks" class="panel panel-col-primary">
+                      <div class="panel-heading" role="tab" [attr.id]="
+                          'headingUser-' + project.projectId + '-' + ut.userId
+                        ">
+                        <h4 class="panel-title">
+                          <a role="button" data-toggle="collapse" [attr.href]="
+                              '#collapseUser-' +
+                              project.projectId +
+                              '-' +
+                              ut.userId
+                            " aria-expanded="false" [attr.aria-controls]="
+                              'collapseUser-' +
+                              project.projectId +
+                              '-' +
+                              ut.userId
+                            " class="collapsed">
+                            <!-- <i class="material-icons">folder_shared</i> -->
+                            <div style="display: flex; align-items: center">
+                              <img [src]="getAvatar(ut)" width="40" height="40" alt="Member"
+                                style="border-radius: 50%; margin-right: 5px" />
+                              <span class="object-name" title="{{ ut.userName }}" style="height: 20px">
+                                {{ ut.userName }}
+                                <span *ngIf="ut.type == 0" class="label status-label bg-red">{{ userTypes[ut.type].label
+                                  }}</span>
+                                <span *ngIf="ut.type == 1" class="label status-label bg-green">{{
+                                  userTypes[ut.type].label }}</span>
+                                <span *ngIf="ut.type == 2" class="label status-label bg-blue">{{
+                                  userTypes[ut.type].label }}</span>
+                                <span *ngIf="ut.level != null">
+                                  <span class="label status-label mr-left" [ngStyle]="userLevels[ut.level].style">{{
+                                    userLevels[ut.level].name }}</span>
+                                </span>
+                                <span class="label status-label" [style.backgroundColor]="ut.branchColor">{{
+                                  ut.branchDisplayName}}</span>
+                                <span class="ml-1" *ngIf="ut.isThanDefaultWorkingHourPerDay">
+                                  <img src="../../assets/images/icon-warning.gif" width="20" style="display: inline">
+                                </span>
+                              </span>
+
+
+
+                            </div>
+                          </a>
+                        </h4>
+                        <div class="heading-checkbox">
+                          <span class="workingtime-text">
+                            {{ convertMinuteToHour(ut.totalUserWorkingTime) }}
+                          </span>
+                          <span class="checkbox-descr">{{ ut.selectedCount }}/{{ ut.totalCount }}</span>
+                          <mat-checkbox color="primary" [checked]="
+                              ut.checkStatus ==
+                              APP_CONSTANT.CHECK_STATUS.CHECKED_ALL
+                            " [indeterminate]="
+                              ut.checkStatus ==
+                              APP_CONSTANT.CHECK_STATUS.CHECKED_SOME
+                            " (change)="onUserCheckedChange($event, ut, project)"></mat-checkbox>
+                        </div>
+                      </div>
+                      <div [attr.id]="
+                          'collapseUser-' + project.projectId + '-' + ut.userId
+                        " class="panel-collapse collapse" role="tabpanel" [attr.aria-labelledby]="
+                          'headingUser-' + project.projectId + '-' + ut.userId
+                        " aria-expanded="false">
+                        <div class="panel-body">
+                          <!--Child Of TimeSheeutGroupByUserCollapse: Day Task Collapse-->
+                          <div class="panel-group" role="tablist" aria-multiselectable="true">
+                            <div *ngFor="let dt of ut.dayTasks; let i = index" class="panel panel-col-primary">
+                              <!-- Heading Child Collap-->
+                              <div class="panel-heading" role="tab" [attr.id]="
+                                  'headingDayTask-' +
+                                  project.projectId +
+                                  '-' +
+                                  ut.userId +
+                                  '-' +
+                                  i
+                                ">
+                                <h4 class="panel-title">
+                                  <a role="button" data-toggle="collapse" [attr.href]="
+                                      '#collapseDayTask-' +
+                                      project.projectId +
+                                      '-' +
+                                      ut.userId +
+                                      '-' +
+                                      i
+                                    " aria-expanded="false" [attr.aria-controls]="
+                                      'collapseDayTask-' +
+                                      project.projectId +
+                                      '-' +
+                                      ut.userId +
+                                      '-' +
+                                      i
+                                    " class="collapsed">
+                                    <i class="material-icons">timelapse</i>
+                                    <span>
+                                      {{ dt.dateAt | date: "yyyy/MM/dd" }}
+                                    </span>
+                                  </a>
+                                </h4>
+                                <div class="heading-checkbox">
+                                  <span class="" *ngIf="dt.isThanDefaultWorkingHourPerDay">
+                                    <img src="../../assets/images/icon-warning.gif" width="20" style="display: inline">
+                                  </span>
+                                  <i class="fa fa-unlock" style="color: white;" *ngIf="dt.isUnlockedByEmployee"></i>
+                                  <span class="workingtime-text">
+                                    {{
+                                    convertMinuteToHour(dt.totalWorkingTime)
+                                    }}
+                                  </span>
+                                  <span class="checkbox-descr">{{ dt.selectedCount }}/{{
+                                    dt.totalCount
+                                    }}</span>
+                                  <mat-checkbox color="primary" [checked]="
+                                      dt.checkStatus ==
+                                      APP_CONSTANT.CHECK_STATUS.CHECKED_ALL
+                                    " [indeterminate]="
+                                      dt.checkStatus ==
+                                      APP_CONSTANT.CHECK_STATUS.CHECKED_SOME
+                                    " (change)="
+                                      onDayTaskCheckedChange(
+                                        $event,
+                                        dt,
+                                        ut,
+                                        project
+                                      )
+                                    "></mat-checkbox>
+                                </div>
+                              </div>
+                              <!-- #Heading Child Collapse-->
+                              <!-- Body Child Collapse -->
+                              <div [attr.id]="
+                                  'collapseDayTask-' +
+                                  project.projectId +
+                                  '-' +
+                                  ut.userId +
+                                  '-' +
+                                  i
+                                " class="panel-collapse collapse" role="tabpanel" [attr.aria-labelledby]="
+                                  'headingDayTask-' +
+                                  project.projectId +
+                                  '-' +
+                                  ut.userId +
+                                  '-' +
+                                  i
+                                " aria-expanded="false" style="height: 0px">
+                                <div class="panel-body">
+                                  <div class="body table-responsive">
+                                    <table class="table table-hover">
+                                      <thead>
+                                        <tr>
+                                          <th>PROJECT</th>
+                                          <th>TASK NAME</th>
+                                          <th>TIME</th>
+                                          <th>STATUS</th>
+                                          <th>WORK TYPE</th>
+                                          <th>NOTE</th>
+                                          <th>L.M TIME</th>
+                                          <th class="text-center">U.UNLOCK</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr *ngFor="let t of dt.timesheets">
+                                          <td>
+                                            <span><b>[{{ t.projectName }}]({{
+                                                t.customerName
+                                                }})
+                                              </b></span>
+                                          </td>
+                                          <td>
+                                            <span>{{ t.taskName }}</span>
+                                          </td>
+                                          <td>
+                                            <span>{{
+                                              convertMinuteToHour(t.workingTime)
+                                              }}</span>
+                                          </td>
+                                          <td>
+                                            <span [innerHtml]="
+                                                convertNumberOfStringStatus(
+                                                  t.status
+                                                )
+                                              "></span>
+                                            <span class="label status-label bg-red status"
+                                              *ngIf="t.typeOfWork == APP_CONSTANT.EnumTypeOfWork.Overtime">OT</span>
+                                            <span class="label status-label status"
+                                              *ngIf="t.typeOfWork == APP_CONSTANT.EnumTypeOfWork.Overtime"
+                                              [ngClass]="t.isCharged ? 'bg-green' :'bg-grey'">
+                                              {{t.isCharged?'Charged':'Non-charged'}}
+                                            </span>
+                                          </td>
+                                          <td><span [ngClass]="t.isTemp?'temp':'official'">{{t.workType}}</span></td>
+                                          <td>
+                                            <span>
+                                              <textarea matInput readonly>{{
+                                                t.mytimesheetNote
+                                              }}</textarea>
+                                            </span>
+                                          </td>
+                                          <td>{{t.lastModificationTime | date:"dd/MM/yyyy HH:mm"}}</td>
+                                          <td class="text-center">
+                                            <i matTooltip="Đã được unlock bởi user" class="fa fa-check text-success"  style="font-size: 2.3rem;"  *ngIf="t.isUnlockedByEmployee"></i>
+                                          </td>
+                                          <td>
+                                            <mat-checkbox color="primary" class="m-checkbox" *ngIf="
+                                                t.isUserInProject && t.status
+                                              " [checked]="t.checked" (change)="
+                                                onTimesheetCheckedChange(
+                                                  $event,
+                                                  t,
+                                                  dt,
+                                                  ut,
+                                                  project
+                                                )
+                                              ">
+                                            </mat-checkbox>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
+                              <!-- #Body Child Collapse -->
+                            </div>
+                          </div>
+                          <!--#Child Of TimeSheetsGroupByUserCollapse: Day Task Collapse-->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- #Child Pj -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- #View by project -->
+
+        <!-- View By People -->
+        <!-- User Collapse -->
+        <div *ngIf="viewBy == APP_CONSTANT.TimesheetViewBy.People">
+          <div class="panel-group" role="tablist" aria-multiselectable="true">
+            <div *ngFor="let ut of timesheetsGroup" class="panel panel-col-primary">
+              <div class="panel-heading" role="tab" [attr.id]="'headingUser-' + ut.userId">
+                <h4 class="panel-title">
+                  <a role="button" data-toggle="collapse" [attr.href]="'#collapseUser-' + ut.userId"
+                    aria-expanded="false" [attr.aria-controls]="'collapseUser-' + ut.userId" class="collapsed">
+                    <!-- <i class="material-icons">folder_shared</i> -->
+                    <div style="display: flex; align-items: center">
+                      <img [src]="getAvatar(ut)" width="40" height="40" alt="Member"
+                        style="border-radius: 50%; margin-right: 5px" />
+                      <span class="object-name" title="{{ ut.userName }}" style="height: 20px">
+                        {{ ut.userName }}
+                        <span *ngIf="ut.type == 0" class="label status-label bg-red">{{ userTypes[ut.type].label
+                          }}</span>
+                        <span *ngIf="ut.type == 1" class="label status-label bg-green">{{ userTypes[ut.type].label
+                          }}</span>
+                        <span *ngIf="ut.type == 2" class="label status-label bg-blue">{{ userTypes[ut.type].label
+                          }}</span>
+                        <span *ngIf="ut.level != null">
+                          <span class="label status-label mr-left" [ngStyle]="userLevels[ut.level].style">{{
+                            userLevels[ut.level].name }}</span>
+                        </span>
+                        <span class="label status-label" [style.backgroundColor]="ut.branchColor">{{
+                          ut.branchDisplayName}}</span>
+                        <span class="ml-1" *ngIf="ut.isThanDefaultWorkingHourPerDay">
+                          <img src="../../assets/images/icon-warning.gif" width="20" style="display: inline">
+                        </span>
+                      </span>
+
+                    </div>
+                  </a>
+                </h4>
+                <div class="heading-checkbox">
+                  <span class="workingtime-text">
+                    {{ convertMinuteToHour(ut.totalUserWorkingTime) }}
+                  </span>
+                  <span class="checkbox-descr">{{ ut.selectedCount }}/{{ ut.totalCount }}</span>
+                  <mat-checkbox color="primary" [checked]="
+                      ut.checkStatus == APP_CONSTANT.CHECK_STATUS.CHECKED_ALL
+                    " [indeterminate]="
+                      ut.checkStatus == APP_CONSTANT.CHECK_STATUS.CHECKED_SOME
+                    " (change)="onUserCheckedChange($event, ut)"></mat-checkbox>
+                </div>
+              </div>
+              <div [attr.id]="'collapseUser-' + ut.userId" class="panel-collapse collapse" role="tabpanel"
+                [attr.aria-labelledby]="'headingUser-' + ut.userId" aria-expanded="false" style="height: 0px">
+                <div class="panel-body">
+                  <!--Child Of TimeSheetsGroupByUserCollapse: Day Task Collapse-->
+                  <div class="panel-group" role="tablist" aria-multiselectable="true">
+                    <div *ngFor="let dt of ut.dayTasks; let i = index" class="panel panel-col-primary">
+                      <!-- Heading Child Collapse-->
+                      <div class="panel-heading" role="tab" [attr.id]="'headingDayTask-' + ut.userId + '-' + i">
+                        <h4 class="panel-title">
+                          <a role="button" data-toggle="collapse" [attr.href]="
+                              '#collapseDayTask-' + ut.userId + '-' + i
+                            " aria-expanded="false" [attr.aria-controls]="
+                              'collapseDayTask-' + ut.userId + '-' + i
+                            " class="collapsed">
+                            <i class="material-icons">timelapse</i>
+                            <span>
+                              {{ dt.dateAt | date: "yyyy/MM/dd" }}
+                            </span>
+                          </a>
+                        </h4>
+                        <div class="heading-checkbox">
+                          <span class="" *ngIf="dt.isThanDefaultWorkingHourPerDay">
+                            <img src="../../assets/images/icon-warning.gif" width="20" style="display: inline">
+                          </span>
+                          <span class="workingtime-text">
+                            {{ convertMinuteToHour(dt.totalWorkingTime) }}
+                          </span>
+                          <span class="checkbox-descr">{{ dt.selectedCount }}/{{ dt.totalCount }}</span>
+                          <mat-checkbox color="primary" [checked]="
+                              dt.checkStatus ==
+                              APP_CONSTANT.CHECK_STATUS.CHECKED_ALL
+                            " [indeterminate]="
+                              dt.checkStatus ==
+                              APP_CONSTANT.CHECK_STATUS.CHECKED_SOME
+                            " (change)="onDayTaskCheckedChange($event, dt, ut)"></mat-checkbox>
+                        </div>
+                      </div>
+                      <!-- #Heading Child Collapse-->
+                      <!-- Body Child Collapse -->
+                      <div [attr.id]="'collapseDayTask-' + ut.userId + '-' + i" class="panel-collapse collapse"
+                        role="tabpanel" [attr.aria-labelledby]="
+                          'headingDayTask-' + ut.userId + '-' + i
+                        " aria-expanded="false" style="height: 0px">
+                        <div class="panel-body">
+                          <div class="body table-responsive">
+                            <table class="table table-hover">
+                              <thead>
+                                <tr>
+                                  <th>PROJECT</th>
+                                  <th>TASK NAME</th>
+                                  <th>TIME</th>
+                                  <th>STATUS</th>
+                                  <th class="text-center">WORK TYPE</th>
+                                  <th>NOTE</th>
+                                  <th>L.M TIME</th>
+                                  <th class="text-center">U.UNLOCK</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr *ngFor="let t of dt.timesheets">
+                                  <td>
+                                    <span><b>[{{ t.projectName }}]({{
+                                        t.customerName
+                                        }})
+                                      </b></span>
+                                  </td>
+                                  <td>
+                                    <span>{{ t.taskName }}</span>
+                                  </td>
+                                  <td>
+                                    <span>{{
+                                      convertMinuteToHour(t.workingTime)
+                                      }}</span>
+                                  </td>
+                                  <td [innerHtml]="
+                                      convertNumberOfStringStatus(
+                                        t.status,
+                                        t.typeOfWork
+                                      )
+                                    "></td>
+                                  <td class="text-center"><span [ngClass]="t.isTemp? 'temp':'official'">{{ t.workType
+                                      }}</span></td>
+                                  <td>
+                                    <span>{{ t.mytimesheetNote }}</span>
+                                  </td>
+                                  <td>{{t.lastModificationTime | date:"dd/MM/yyyy HH:mm"}}</td>
+                                  <td class="text-center">
+                                    <i matTooltip="Đã được unlock bởi user" class="fa fa-check text-success" style="font-size: 2.3rem;" *ngIf="t.isUnlockedByEmployee"></i>
+                                  </td>
+                                  <td>
+                                    <mat-checkbox color="primary" *ngIf="t.isUserInProject && t.status" class="m-checkbox"
+                                      [checked]="t.checked" (change)="
+                                        onTimesheetCheckedChange(
+                                          $event,
+                                          t,
+                                          dt,
+                                          ut
+                                        )
+                                      ">
+                                    </mat-checkbox>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- #Body Child Collapse -->
+                    </div>
+                  </div>
+                  <!--#Child Of TimeSheetsGroupByUserCollapse: Day Task Collapse-->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- #User Collapse -->
+        <!-- #View By People -->
+        <!-- #Render data -->
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal" tabindex="-1" role="dialog" id="modalSelectDay">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ titleExport }}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action=""></form>
+        <mat-form-field appearance="fill">
+          <mat-label>Choose a date</mat-label>
+          <input matInput [matDatepicker]="picker" [(ngModel)]="valueSelectedDay" required />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" (click)="getAlltTimeSheetOrRemote()">
+          Export
+        </button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

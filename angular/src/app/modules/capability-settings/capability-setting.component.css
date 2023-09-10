@@ -1,0 +1,50 @@
+.footer {
+  display: block;
+  min-height: 80px;
+  padding: 0 5px;
+}
+table {
+  border-top: 1px #014c6e;
+}
+thead {
+  background-color: #014c6e !important;
+  color: white;
+}
+thead th {
+  text-align: center;
+  border-color: #014c6e !important;
+}
+thead th:nth-child(2) {
+  text-align: left;
+}
+.usertype-position td {
+  border-bottom: 3px solid white;
+  border-top: 3px solid white;
+  border-left: transparent;
+  border-right: transparent;
+  background-color: #e4e4e4;
+}
+.col-stt {
+  max-width: 100px;
+}
+.col-menu {
+  width: 50px;
+}
+.col-guildLine {
+  width: 100px;
+}
+.col-type {
+  width: 100px;
+}
+.col-coefficient {
+  width: 100px;
+}
+.col-action {
+  width: 180px;
+}
+.limit-guideline {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}

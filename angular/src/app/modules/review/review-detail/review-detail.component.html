@@ -1,0 +1,453 @@
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="height: auto; padding: 0px">
+    <div class="card main-content" style="height: 100%">
+        <div class="header">
+            <div cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle="cdkDragHandle" class="content-box">
+                <div style="display: flex">
+                    <h2 (click)="backToReviewList()">{{ "Review Intern" | localize }}</h2>
+                    <h2 (click)="refreshCurrentPage()">
+                        {{ " / Review detail:" | localize }}
+                    </h2>
+                    <h2 (click)="refreshCurrentPage()" style="font-weight: 900; margin-left: 10px">
+                        {{ reviewMonth }} / {{ reviewYear }}
+                    </h2>
+                </div>
+                <ul class="header-dropdown m-r--5">
+                    <li>
+                        <button mat-icon-button="mat-icon-button" [matMenuTriggerFor]="headerMenu2"
+                            class="header-dropdown-mat-icon-button">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #headerMenu2="matMenu">
+                            <button mat-menu-item="mat-menu-item" (click)="refresh()">
+                                <mat-icon>refresh</mat-icon>
+                                <span>{{ "Refresh" | localize }}</span>
+                            </button>
+                        </mat-menu>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="body row">
+            <div class="remove-margin col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="row">
+                    <div class="remove-margin col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <!-- Seatch By Branch -->
+                        <mat-form-field class="col-lg-3 col-md-6 col-sm-6 col-xs-12" appearance="outline">
+                            <mat-label> {{ "Branch" | localize }}</mat-label>
+                            <mat-select name="branchId" [(value)]="branchId" (selectionChange)="refreshDataFilter()">
+                                <mat-option>
+                                    <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
+                                        noEntriesFoundLabel="No matching found"></ngx-mat-select-search>
+                                </mat-option>
+
+                                <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
+                                    {{branch.displayName}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <!-- Search By Status -->
+                        <mat-form-field class="col-lg-3 col-md-6 col-sm-6 col-xs-12" appearance="outline">
+                            <mat-label> {{ "Status" | localize }}</mat-label>
+                            <mat-select [(value)]="selectedStatus" (selectionChange)="refreshDataFilter()" name="Status">
+                                <mat-option [value]="4">All</mat-option>
+                                <mat-option *ngFor="let status of listStatus"
+                                    [value]="APP_CONSTANT.ReviewStatus[status]">
+                                    {{ status }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <!-- Search By Reviewer -->
+                        <mat-form-field class="col-lg-3 col-md-6 col-sm-6 col-xs-12" appearance="outline">
+                            <mat-label>{{ "Reviewer" | localize }}</mat-label>
+                            <mat-select [(value)]="selectedReviewer" (selectionChange)="refreshDataFilter()" name="Reviewer">
+                                <mat-option>
+                                    <ngx-mat-select-search placeholderLabel="Search" [formControl]="reviewerSearch"
+                                        noEntriesFoundLabel="No matching found">
+                                    </ngx-mat-select-search>
+                                </mat-option>
+                                <mat-option *ngFor="let reviewer of listReviewer" [value]="reviewer.pmId">
+                                    {{ reviewer.pmFullName }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <!-- Current Level -->
+                        <mat-form-field class="col-lg-3 col-md-6 col-sm-6 col-xs-12" appearance="outline">
+                            <mat-label> {{ "Current Level:" | localize }}</mat-label>
+                            <mat-select [(value)]="selectedCurrentLevel" (selectionChange)="refreshDataFilter()"
+                                name="CurrentLevel">
+                                <mat-option [value]="-1">All</mat-option>
+                                <mat-option *ngFor="let level of listLevel" [value]="APP_CONSTANT.LEVEL[level]">
+                                    {{ level }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="remove-margin col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <!-- New Level -->
+                        <mat-form-field class="col-lg-3 col-md-6 col-sm-6 col-xs-12" appearance="outline">
+                            <mat-label> {{ "New Level:" | localize }}</mat-label>
+                            <mat-select [(value)]="selectedNewLevel" (selectionChange)="refreshDataFilter()" name="NewLevel">
+                                <mat-option [value]="-1">All</mat-option>
+                                <mat-option *ngFor="let level of listLevel" [value]="APP_CONSTANT.LEVEL[level]">
+                                    {{ level }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <!-- Level change -->
+                        <mat-form-field class="col-lg-3 col-md-6 col-sm-6 col-xs-12" appearance="outline">
+                            <mat-label>{{ "Level Change:" | localize }}</mat-label>
+                            <mat-select [(ngModel)]="selectedChangeLevel" (selectionChange)="refreshDataFilter()"
+                                name="ChangeLevel">
+                                <mat-option [value]="-1">All</mat-option>
+                                <mat-option *ngFor="let level of listChangeLevel" [value]="level.value">
+                                    {{ level.text }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <!-- Search by name -->
+                        <mat-form-field class="col-lg-3 col-md-6 col-sm-6 col-xs-12" appearance="outline">
+                            <mat-label>Search by User Name</mat-label>
+                            <mat-icon style="color: #9e9e9e" matPrefix="matPrefix">search</mat-icon>
+                            <input matInput="matInput" [(ngModel)]="searchText" (keyup.enter)="refreshDataFilter()" />
+                        </mat-form-field>
+                        <div class="box-menu-right col-lg-8 col-md-12 col-sm-12 col-xs-12">
+                            <button *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AddNew)" type="button"
+                                class="btn-create btn btn-danger" (click)="createReviewDetail()">
+                                <mat-icon>add</mat-icon>
+                                Add New
+                            </button>
+
+                            <button *ngIf="
+                  permission.isGranted(ReviewIntern_ApproveAll)
+                " type="button" matTooltip="Approve cho tất cả các tts đã được review theo filter (có trạng thái là reviewed) và pm tương ứng"
+                                class="btn-approve-all btn btn-warning mr-2" (click)="approveAllUser()">
+                                <mat-icon>check</mat-icon>
+                                Approve All
+                            </button>
+
+                            <button *ngIf="
+                  permission.isGranted(ReviewIntern_ReviewDetail_SendAllEmailsIntern)
+                " type="button" matTooltip="Gửi mail kết quả review cho tất cả các tts đã
+                                                                                                                                                    được review (có trạng thái là reviewed) và pm tương ứng"
+                                class="btn-email-all btn btn-success mr-2" (click)="sendAllEmailsIntern()">
+                                <mat-icon>email</mat-icon>
+                                Send Email Intern
+                            </button>
+                            <button *ngIf="
+                  permission.isGranted(ReviewIntern_ReviewDetail_SendAllEmailsOffical)
+                " type="button" matTooltip="Gửi mail kết quả review cho tất cả các tts đã
+                                                                                                                                                    được review (có trạng thái là reviewed) và pm tương ứng"
+                                class="btn-email-all btn btn-success mr-2" (click)="sendAllEmailsOffical()">
+                                <mat-icon>email</mat-icon>
+                                Send Email Official
+                            </button>
+                            <button *ngIf="
+              permission.isGranted(
+                ReviewIntern_ReviewDetail_SendAllToHRM
+              )
+            " type="button" matTooltip="Update level bên HRM cho tất cả các tts
+            đã được gửi mail (có trạng thái là Sent Email)" class="btn-mail-hrm btn"
+                                (click)="UpdateLevelHRMv2ForAll()">
+                                <mat-icon class="mat-1">upgrade</mat-icon>
+                                <span class="text-center">Send To HRM</span>
+                            </button>
+                            <button type="button" *ngIf="
+              permission.isGranted(
+                ReviewIntern_ReviewDetail_UpdateStarToProject
+              )" class="btn-mail-project btn" (click)="updateToProject()">
+                                <mat-icon>update</mat-icon>
+                                <span>Update To Project</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="
+          table-responsive
+          aboard-review-detail
+          col-lg-12 col-md-12 col-sm-12 col-xs-12
+        " [busy]="isTableLoading">
+                <table class="table table-hover table-bordered table-striped">
+                    <thead class="head-table">
+                        <tr>
+                            <th>{{ "STT" | localize }}</th>
+                            <th>{{ "Action" | localize }}</th>
+                            <th>{{ "User" | localize }}</th>
+                            <th>{{ "Review content" | localize }}</th>
+                            <th>{{ "Reviewer" | localize }}</th>
+                            <th>{{ "History" | localize }}</th>
+                            <th>{{ "Level" | localize }}</th>
+                            <th>{{ "New Level" | localize }}</th>
+                            <th>{{ "Status" | localize }}</th>
+                            <th>{{ "Updated Info" | localize }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="review-detail" *ngFor="
+                let item of listReviewIntern
+                  | paginate
+                    : {
+                        id: 'server',
+                        itemsPerPage: pageSize,
+                        currentPage: pageNumber,
+                        totalItems: totalItems
+                      };
+                index as i
+              ">
+                            <!-- STT -->
+                            <td style="text-align: center">
+                                {{ (pageNumber - 1) * pageSize + i + 1 }}
+                            </td>
+                            <!-- button -->
+                            <td class="action btn-menu">
+                                <button class="menu" mat-stroked-button="mat-stroked-button" [matMenuTriggerFor]="menu">
+                                    <mat-icon>menu</mat-icon>
+                                </button>
+                                <mat-menu #menu="matMenu">
+                                    <button *ngIf="
+                                    isShowBtnEdit(item)
+                    " class="choices" mat-menu-item="mat-menu-item" (click)="updateReview(item)">
+                                        <mat-icon class="mat-18">edit</mat-icon>
+                                        Edit
+                                    </button>
+                                    <button *ngIf="
+                                    isShowBtnChangeReviewer(item)
+                    " class="choices" mat-menu-item="mat-menu-item" (click)="updateReviewer(item)">
+                                        <mat-icon class="mat-18">supervisor_account</mat-icon>
+                                        Change Reviewer
+                                    </button>
+                                     <!-- Ẩn form review cũ sang dùng theo form review mới -->
+                                    <!-- <button *ngIf="
+                                    isShowBtnReview(item)
+                    " class="choices" mat-menu-item="mat-menu-item" (click)="reviewInternship(item)">
+                                        <mat-icon class="mat-18">rate_review</mat-icon>
+                                        Review
+                                    </button> -->
+                                    <button *ngIf="
+                                    isShowBtnReviewByCapability(item)
+                    " class="choices" mat-menu-item="mat-menu-item" (click)="newReviewInternship(item)">
+                                        <mat-icon class="mat-18">rate_review</mat-icon>
+                                        Review
+                                    </button>
+                                    <button *ngIf="
+                                    isShowBtnApprove(item)
+                    " class="choices approve" mat-menu-item="mat-menu-item" (click)="approveReview(item)">
+                                        <mat-icon class="mat-18" style="color: green">fact_check</mat-icon>
+                                        Approve
+                                    </button>
+
+                                    <button *ngIf="
+                  isShowBtnChotLuong(item)
+                    " class="choices" mat-menu-item="mat-menu-item" (click)="confirmSalaryInternship(item)">
+                                        <mat-icon class="mat-18" style="color: #2196f3">monetization_on</mat-icon>
+                                        Chốt Lương
+                                    </button>
+                                    <button *ngIf="isShowBtnReject(item)
+                    " class="choices reject" mat-menu-item="mat-menu-item" (click)="rejectReview(item)">
+                                        <mat-icon class="mat-18" style="color: red">thumb_down_off_alt</mat-icon>
+                                        Reject
+                                    </button>
+                                    <button *ngIf="isShowBtnRejectSentEmail(item)
+                    " class="choices reject" mat-menu-item="mat-menu-item" (click)="rejectSentMail(item)">
+                                        <mat-icon class="mat-18" style="color: red">thumb_down_off_alt</mat-icon>
+                                        Reject sent email
+                                    </button>
+                                    <button *ngIf="checkStatus(item.status, 'print')
+                    " class="choices" mat-menu-item="mat-menu-item" (click)="printReview(item)">
+                                        <mat-icon class="mat-18">print</mat-icon>
+                                        Print
+                                    </button>
+                                    <button *ngIf="
+                                    isShowSendEmail(item)
+                    " class="choices" mat-menu-item="mat-menu-item" (click)="sendEmail(item)">
+                                        <mat-icon class="mat-18">email</mat-icon>
+                                        Send Email
+                                    </button>
+                                    <button *ngIf="
+                      permission.isGranted(
+                        ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern
+                      ) && checkStatus(item.status, 'update to HRM')
+                    " class="choices btn-email" mat-menu-item="mat-menu-item"
+                                        (click)="UpdateLevelHRMv2ForOne(item.id)">
+                                        <mat-icon class="mat-18" style="color: green">upload</mat-icon>
+                                        Send To HRM
+                                    </button>
+                                    <button *ngIf="
+                      permission.isGranted(ReviewIntern_ReviewDetail_Delete)
+                      " class="choices btn-delete" mat-menu-item="mat-menu-item"
+                                        (click)="deleteReviewDetailInternCapability(item.id)">
+                                        <mat-icon class="mat-18" style="color: red">delete</mat-icon>
+                                        Delete
+                                    </button>
+                                </mat-menu>
+                            </td>
+                            <!-- User -->
+                            <td style="padding: 0px">
+                                <div class="info-intern">
+                                    <div>
+                                        <img class="avatar" [src]="getAvatar(item)" alt="avatar" />
+                                    </div>
+                                    <div class="info-intern-box">
+                                        <div class="full-name">{{ item.internName }}</div>
+                                        <div>
+                                            <div class="branch label" *ngIf="item.branchId != null"
+                                                [style.backgroundColor]="item.branchColor">
+                                                {{ item.branchDisplayName }}
+                                            </div>
+                                            <div class="branch label" *ngIf="item.positionId != null"
+                                                [style.backgroundColor]="item.positionColor">
+                                                {{ item.positionShortName }}
+                                            </div>
+                                            <span *ngIf="item.userLevel != null">
+                                                <span class="label status-label mr-left"
+                                                    [ngStyle]="userLevels[item.userLevel].style">{{
+                                                    getLevelById(item.userLevel) }}</span>
+                                            </span>
+                                        </div>
+                                        <div class="email">{{ item.internEmail }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <!-- Review Content -->
+                            <td>
+                                <div (click)="changeStatusNote(item)">
+                                    <textarea rows="10" cols="20" disabled="disabled"
+                                        [ngClass]="item.hideNote == false ? 'preReview' : 'review'"
+                                        data-placement="right" title="Cuộn chuột hoặc Click để mở rộng nội dung"
+                                        disabled="disabled" name="reviewContent" [(ngModel)]="item.note"></textarea>
+                                </div>
+                            </td>
+                            <!-- Reviewer -->
+                            <td style="padding: 0px">
+                                <div class="info-intern">
+                                    <div>
+                                        <img class="avatar" [src]="getAvatarReviewer(item)" alt="avatar" />
+                                    </div>
+                                    <div class="info-intern-box">
+                                        <div class="full-name" *ngIf="item.reviewerName">
+                                            {{ item.reviewerName }}
+                                        </div>
+                                        <div class="full-name" *ngIf="item.reviewerName == null">
+                                            No Reviewer
+                                        </div>
+                                        <div class="email">{{ item.reviewerEmail }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <!-- History -->
+                            <td>
+                                <div style="text-align: center">
+                                    <mat-icon style="cursor: pointer" *ngIf="item.history == false"
+                                        (click)="changeStatusHistory(item)">
+                                        history</mat-icon>
+                                </div>
+                                <div *ngIf="item.history == true"
+                                    [ngClass]="item.more == false ? 'preHistory' : 'history'">
+                                    <div [innerHTML]="item.listHistory" style="white-space: nowrap;"></div>
+                                </div>
+                                <mat-icon *ngIf="item.history == true && item.conditionHistory == true"
+                                    style="padding: 5px 0px 0px 10px; cursor: pointer"
+                                    (click)="changeMoreHistory(item)">more_horiz
+                                </mat-icon>
+                            </td>
+                            <!-- Current Level -->
+                            <td class="block-format">
+                                <span *ngIf="item.currentLevel != null">
+                                    <span class="label status-label mr-left"
+                                        [ngStyle]="userLevels[item.currentLevel].style">
+                                        {{ getLevelById(item.currentLevel) }}
+                                    </span>
+                                    <!-- <div style="display: flex; align-items: center; justify-content: center; margin: 10px;"
+                                        class="col-xl-9" *ngIf="item.previousRateStar">
+                                        <ngx-stars style="font-size: 12px;"
+                                            [color]="getStarColor(item.previousRateStar)"
+                                            [initialStars]="item.previousRateStar" [wholeStars]="true" [readonly]="true"
+                                            [size]="1" [maxStars]="item.previousRateStar"></ngx-stars>
+                                    </div> -->
+                                    <div style="display: flex; align-items: center; justify-content: center; margin: 10px;"
+                                        class="col-xl-9" *ngIf="item.previousAverage">
+                                        {{item.previousAverage}}
+                                        <ngx-stars style="font-size: 12px;margin-top: 2px; margin-left: 3px"
+                                            [color]="getStarColorforReviewInternCapability(item.previousAverage, false)"
+                                            [maxStars]="1" [initialStars]="1" [readonly]="true"></ngx-stars>
+                                    </div>
+                                </span>
+                            </td>
+                            <!-- New Level -->
+                            <td class="block-format">
+                                <span class="branch label status-label ng-star-inserted" *ngIf="item.type != 1"
+                                    [ngClass]="
+                    item.type == 0
+                      ? 'label-default'
+                      : item.type == 1
+                      ? 'label-danger'
+                      : 'label-warning'
+                  ">{{ getType(item.type) }} <br /></span>
+                                <span *ngIf="item.newLevel != null">
+                                    <span *ngIf="isShowLevel(item)" class="label status-label mr-left"
+                                        [ngStyle]="userLevels[item.newLevel].style">{{
+                                        getLevelById(item.newLevel) }}
+                                    </span>
+                                    <br />
+                                    <span class="label status-label mr-left bg-primary" *ngIf="isShowSubLevel(item)">{{
+                                        getSubLevelById(item.subLevel, item.newLevel)
+                                        }}</span>
+                                </span>
+                                <span *ngIf="isShowFullLuong(item)"
+                                    class="label status-label label-danger ng-star-inserted">{{
+                                    "Full Lương" | localize }}
+                                </span>
+                                <!-- <div style="display: flex; align-items: center; justify-content: center; margin: 10px;"
+                                    class="col-xl-9" *ngIf="item.rateStar">
+                                    <ngx-stars style="font-size: 12px;" [color]="getStarColor(item.rateStar, false)"
+                                        [initialStars]="item.rateStar" [wholeStars]="true" [readonly]="true" [size]="1"
+                                        [maxStars]="item.rateStar"></ngx-stars>
+                                </div> -->
+                                <div style="display: flex; align-items: center; justify-content: center; margin: 10px;"
+                                    class="col-xl-9" *ngIf="item.average">
+                                    {{item.average}}
+                                    <ngx-stars style="font-size: 12px;margin-top: 2px; margin-left: 3px"
+                                        [color]="getStarColorforReviewInternCapability(item.average, false)"
+                                        [maxStars]="1" [initialStars]="1" [readonly]="true"></ngx-stars>
+                                </div>
+                            </td>
+                            <!-- Trạng thái -->
+                            <td style="text-align: center">
+                                <div class="label status-label ng-star-inserted" [ngClass]="
+                    item.status == 0
+                      ? 'label-default'
+                      : item.status == 1
+                      ? 'label-success '
+                      : item.status == 2
+                      ? 'label-primary '
+                      : item.status == 3
+                      ? 'label-info'
+                      : 'label-danger'
+                  ">
+                                    {{ getStatusById(item.status) }}
+                                </div>
+                            </td>
+                            <!-- Updated At -->
+                            <td style="padding: 0px">
+                                <div class="info-undated-info">
+                                    <div class="info-intern-box">
+                                        <div class="full-name">{{ item.updatedName }}</div>
+                                        {{ item.updatedAt | date: "dd/MM/yyyy" }}
+                                        <br /> {{ item.updatedAt | date: "hh:mm:ss" }}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="abp-pagination-controls-wrapper">
+            <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
+                (pageChange)="getDataPage($event)" id="server"></abp-pagination-controls>
+        </div>
+    </div>
+</div>

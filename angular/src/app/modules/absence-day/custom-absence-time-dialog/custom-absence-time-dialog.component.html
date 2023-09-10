@@ -1,0 +1,22 @@
+<h1 mat-dialog-title style="text-align: center; cursor: grab;" novalidate cdkDrag cdkDragRootElement=".cdk-overlay-pane"
+  cdkDragHandle>
+  Nhập số giờ vắng mặt
+</h1>
+<mat-dialog-content style="text-align: center">
+  <input type="text" name="time" (ngModelChange)="onchange($event)" [textMask]="mask" [(ngModel)]="customTime.hour"
+    required [formControl]="timeControl">
+</mat-dialog-content>
+<mat-radio-group aria-label="Select an option" class="example-radio-group" [(ngModel)]="customTime.absenceTime">
+  <mat-radio-button (change)="radioChange($event.value)" class="example-radio-button" [value]="1">Đầu giờ</mat-radio-button>
+  <mat-radio-button (change)="radioChange($event.value)" class="example-radio-button" [value]="2">Giữa giờ</mat-radio-button>
+  <mat-radio-button (change)="radioChange($event.value)" class="example-radio-button" [value]="3">Cuối giờ</mat-radio-button>
+</mat-radio-group>
+<div style="color: red; text-align: center;">
+  {{note}}
+</div>
+<mat-dialog-actions align="end">
+  <button mat-raised-button mat-dialog-close>Cancel</button>
+  <button mat-raised-button color="primary" [mat-dialog-close]="customTime" [disabled]="!saving">
+    Save
+  </button>
+</mat-dialog-actions>

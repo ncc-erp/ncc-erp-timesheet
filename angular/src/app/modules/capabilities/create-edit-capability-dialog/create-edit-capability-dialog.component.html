@@ -1,0 +1,62 @@
+<form #capabilityForm="ngForm" style="position: relative" autocomplete="off" id="frm_create_group" novalidate>
+  <h1 style="cursor: grab" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>
+    {{ title | localize
+    }}<b *ngIf="dialogAction == ACTIONDIALOG.EDIT">{{ capabilityDto.name }}</b>
+  </h1>
+  <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0; cursor: pointer">close</mat-icon>
+  <hr />
+  <mat-dialog-content class="mat-typography">
+    <div class="form-group d-flex required">
+      <label class="col-md-2 col-form-label p-t-20 p-l-0 p-r-0" for="nameInput">
+        {{ "Name:" | localize }}
+      </label>
+      <mat-form-field class="edit-form row-item-rest col-xl-10 col-lg-10 col-md-10 col-xs-10 p-l-0 p-r-0"
+        appearance="outline">
+        <input matInput cdkFocusInitial name="capabilityName" id="nameInput" [(ngModel)]="capabilityDto.name" />
+      </mat-form-field>
+    </div>
+    <div class="format-col form-group d-flex required">
+      <label class="col-md-2 col-form-label p-l-0 p-r-0" for="typeInput">
+        {{ "Type:" | localize }}
+      </label>
+      <div class="d-flex col-md-10 p-l-0 p-r-0">
+        <div class="">
+          <input type="radio" id="radioPoint" ng-control="options" name="type" [(ngModel)]="capabilityDto.type"
+            [value]="CapabilityTypeOptions.Point" />
+          <label for="radioPoint">
+            <span>Point</span>
+          </label>
+        </div>
+        <div class="m-l-20">
+          <input type="radio" id="radioType" ng-control="options" name="type" [(ngModel)]="capabilityDto.type"
+            [value]="CapabilityTypeOptions.Text" />
+          <label for="radioType">
+            <span>Text</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="format-col form-group d-flex">
+      <label class="col-md-2 col-form-label p-l-0 p-r-0" for="connectionString">
+        {{ "Note:" | localize }}
+      </label>
+      <div class="edit-form row-item-rest col-xl-10 col-lg-10 col-md-10 col-xs-10 p-l-0 p-r-0" appearance="outline">
+        <angular-editor id="note" [config]="config" [placeholder]="'Enter text here...'"
+          [(ngModel)]="capabilityDto.note" [ngModelOptions]="{ standalone: true }"></angular-editor>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default" mat-raised-button mat-dialog-close [disabled]="saving">
+      {{ l("Cancel") }}
+    </button>
+    <button mat-raised-button color="primary" (click)="saveCapability(false)" cdkFocusInitial
+      [disabled]="!capabilityForm.form.valid || saving">
+      {{ l("Save") }}
+    </button>
+    <button mat-raised-button color="primary" (click)="saveCapability(true)" cdkFocusInitial
+      [disabled]="!capabilityForm.form.valid || saving">
+      {{ l("Save & Close") }}
+    </button>
+  </mat-dialog-actions>
+</form>

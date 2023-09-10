@@ -1,0 +1,148 @@
+<div class="row clearfix">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Check Board" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)='refresh()'>
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="clearfix" style="padding: 20px 5px 0px 5px">
+        <div class="row" style="margin-left: 0; margin-right: 0;">
+          <div class="col-sm-3" style="padding:5px 15px 10px 15px">
+            <button class="col-sm-12" large mat-raised-button color="primary" style="width:180px"
+              (click)='createNewOrEditCheckBoard()'>
+              <mat-icon>add</mat-icon> New Check Board
+            </button>
+          </div>
+          <div class="col-sm-2 field-padding">
+            <div class="form-group field-padding">
+              <div>
+                <file-upload (outputFileInfo)="upLoadCheckBoards($event)" [isLoading]="isLoadingFileUpload"
+                  fileType=".xlsx" [custom]="'btn-customs btn btn-default outline btn-file'" [title]="'Import'">
+                </file-upload>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-7">
+            <mat-form-field appearance='outline' class="style">
+              <mat-label>Search by Username, Full name, User code or Email</mat-label>
+              <mat-icon style="color:#9E9E9E" matPrefix>search</mat-icon>
+              <input matInput [formControl]='inputSearch' (keyup.enter)='search()'>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row row-mar-0" style="margin-top: 10px; margin-right: 0; margin-left: 0;">
+          <div class="col-sm-4">
+            <mat-form-field appearance='outline'>
+              <mat-label>Year</mat-label>
+              <mat-select [(value)]='defaultYear' (selectionChange)='updateMonths()'>
+                <mat-option *ngFor="let year of yearList" [value]='year'>{{year}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-sm-4">
+            <mat-form-field appearance='outline'>
+              <mat-label>Month</mat-label>
+              <mat-select [(value)]='defaultMonth' (selectionChange)="search()">
+                <mat-option *ngFor="let month of monthList" [value]='month'>{{month}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-sm-3">
+            <button [class.spinner]="loading" [disabled]="defaultMonth == 0 || loading" mat-raised-button
+              color='primary' style="width: 150px; margin-top: 8px;" (click)='confirmCheckBoard()'>Confirm</button>
+          </div>
+        </div>
+      </div>
+      <div style="padding: 20px;">
+        <div class="table-responsive" style="border: 0;">
+          <table class="table table-hover table-striped style" [busy]="isTableLoading"
+            style="margin-bottom: 20px; border: 0.5px solid rgba(204, 204, 204, 0.35); border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th style="min-width: 0px;">{{ "STT" | localize }}</th>
+                <th>{{ "Status" | localize }}</th>
+                <th style="min-width: 0px;">{{ "User code" | localize }}</th>
+                <th style="min-width: 100px;">{{ "User name" | localize }}</th>
+                <th>{{ "Date" | localize }}</th>
+                <th style="min-width: 0px;">{{ "Working hours" | localize }}</th>
+                <th style="min-width: 0px;">{{ "Working day" | localize }}</th>
+                <th style="min-width: 0px;">{{ "Check in" | localize }}</th>
+                <th style="min-width: 0px;">{{ "Check out" | localize }}</th>
+                <th>{{ "Check in late" | localize }}</th>
+                <th>{{ "Check out early" | localize }}</th>
+                <th style="min-width: 130px;">{{ "Full name" | localize }}</th>
+                <th>{{ "Address email" | localize }}</th>
+                <th>{{ "Note" | localize }}</th>
+                <th>{{ "Action" | localize }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="
+              let checkBoard of (listCheckBoard
+                | paginate
+                  : {
+                      id: 'server',
+                      itemsPerPage: pageSize,
+                      currentPage: pageNumber,
+                      totalItems: totalItems
+                    }), index as i
+              " (contextmenu)="onContextMenu($event, menuTrigger)">
+                <td style="text-align: right;">{{(pageNumber - 1)*10 + i + 1}}</td>
+                <td style="text-align: center;">
+                  <span *ngIf="checkBoard.status == 100" class="label status-label" style="background: red;">Lock</span>
+                  <span *ngIf="checkBoard.status == 0" class="label status-label" style="background: green;">Upload</span>
+                  <span *ngIf="checkBoard.status == 1" class="label status-label"
+                    style="background: yellow; color: black;">Mannual</span>
+                </td>
+                <td>{{checkBoard.userCode}}</td>
+                <td>{{checkBoard.cbUserName}}</td>
+                <td style="text-align: center;">{{checkBoard.dateAt}}</td>
+                <td style="text-align: right;">{{checkBoard.workingHour}}</td>
+                <td style="text-align: right;">{{checkBoard.workingDay}}</td>
+                <td style="text-align: right;">{{checkBoard.checkInAt}}</td>
+                <td style="text-align: right;">{{checkBoard.checkOutAt}}</td>
+                <td style="text-align: right;">{{checkBoard.checkInLate}}</td>
+                <td style="text-align: right;">{{checkBoard.checkOutEarly}}</td>
+                <td>{{checkBoard.fullName}}</td>
+                <td>{{checkBoard.emailAddress}}</td>
+                <td>{{checkBoard.note}}</td>
+                <td style="text-align: center;">
+                  <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
+                    [style.top]="contextMenuPosition.y" #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actions">
+                  </div>
+                  <button mat-icon-button class="ng-star-inserted" [matMenuTriggerFor]='actions'>
+                    <span class="mat-button-wrapper">
+                      <i class="icon-32 material-icons">menu</i>
+                    </span>
+                  </button>
+                  <mat-menu #actions='matMenu' yPosition='above'>
+                    <button class="mat-menu-item" mat-menu-item (click)='createNewOrEditCheckBoard(checkBoard)'
+                      [disabled]="checkBoard.status == 100">Edit</button>
+                    <button class="text-danger mat-menu-item" mat-menu-item (click)='delete(checkBoard)'
+                      [disabled]="checkBoard.status == 100">Delete</button>
+                  </mat-menu>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="abp-pagination-controls-wrapper">
+        <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)" id="server">
+        </abp-pagination-controls>
+      </div>
+    </div>
+  </div>
+</div>

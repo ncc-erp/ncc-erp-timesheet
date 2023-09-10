@@ -1,0 +1,20 @@
+<form  #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
+  <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>Get Check In/Out from FaceId</h2>
+  <mat-dialog-content class="mat-typography" style="min-width: 400px" >
+    <div class="example-container">
+      <mat-form-field appearance="outline" [busy]="isSaving">
+        <mat-label style="font-weight: normal;">Choose a date</mat-label>
+        <input (dateChange)="onDateValueChange()" matInput [matDatepicker]="picker" [(ngModel)]="dateValue" required 
+        name="transactionDate">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker ></mat-datepicker>
+        </mat-form-field>
+    </div>
+    <div [innerHTML]="resultMessage"></div> 
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default" mat-raised-button mat-dialog-close>Close</button>
+    <button mat-raised-button color="primary" mat-button 
+      [disabled]="!createForm.form.valid || isSaving" (click)= "saveData()">Process</button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,105 @@
+<div class="row clearfix">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="height: auto; padding: 0px">
+    <div class="card">
+      <div class="header">
+        <h2>{{ "Select project team building" | localize }}</h2>
+        <button *ngIf="permission.isGranted(TeamBuilding_Project_SelectProjectTeamBuilding)" style="position: absolute;right: 50px;top: 7px;margin: 0px;" mat-raised-button color="primary"
+          class="btn btn-border btn-add" (click)="onClickBtnSave()" [disabled]="!(listItemChange?.length > 0)">
+          <mat-icon style="margin-right: 8px">save</mat-icon>Save change
+        </button>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body" style="height: 100%">
+        <div class="row">
+          <div class="col-lg-10">
+            <mat-form-field class="example-full-width" appearance="outline">
+              <mat-label>Search by Project Name</mat-label>
+              <input type="search" [(ngModel)]="searchText" name="capabilitySearch" (keyup.enter)="refresh()"
+                matInput />
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+            <mat-form-field appearance="outline">
+              <mat-label>Project Type</mat-label>
+              <mat-select (selectionChange)="handleChangeProjectType($event)" [(value)]="projectType">
+                <ng-container *ngFor="let projectType of listProjectType">
+                  <mat-option [value]="projectType.value">
+                    {{ projectType.title }}
+                  </mat-option>
+                </ng-container>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th style="max-width: 10px" class="text-center">No</th>
+                <th class="text-center">PM</th>
+                <th class="text-center">Project Name</th>
+                <th style="max-width: 70px" class="text-center">
+                  Project Type
+                </th>
+                <th style="max-width: 50px" class="text-center">
+                  IsAllowTeamBuilding
+                  <mat-checkbox name="selectAll" (change)="setAll($event.checked)" matTooltip="Select/DeSelect all"
+                    [checked]="allComplete" [indeterminate]="someComplete()" [color]="'primary'"
+                    style="display: flex; justify-content: center">
+                  </mat-checkbox>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="
+                  let item of projectList
+                    | paginate
+                      : {
+                          id: 'server',
+                          itemsPerPage: pageSize,
+                          currentPage: pageNumber,
+                          totalItems: totalItems
+                        };
+                  index as i
+                ">
+                <td class="text-center">
+                  {{ (pageNumber - 1) * pageSize + i + 1 }}
+                </td>
+                <td class="text-center">{{ item.pmEmail }}</td>
+                <td class="text-center">{{ item.name }}</td>
+                <td class="text-center">
+                  <span>
+                    {{ listProjectType[item.projectType + 1].title }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <mat-checkbox name="isAllowTeamBuilding" [checked]="getIsAllowTeamBuilding(item)" [color]="'primary'"
+                    (change)="handleSelectRequestInfoItem(i, $event)">
+                  </mat-checkbox>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="abp-pagination-controls-wrapper">
+            <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
+              (pageChange)="getDataPage($event)" id="server">
+            </abp-pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+<div >
+  <div class="card-header">
+    <h3>Complain Reply</h3>
+  </div>
+  <div style="margin-top: 15px;">
+    <div class="form-group row">
+      <label class="col-md-3 col-form-label" for="ischarge">Reply Note:</label>
+      <div class="col-md-9 ">
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Reply</mat-label>
+          <textarea matInput placeholder="enter text here" rows="3" [(ngModel)]="complain.noteReply"></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label class="col-md-3 col-form-label" for="ischarge">Status Punish:</label>
+      <div class="col-md-9">
+        <!-- <mat-checkbox [(ngModel)]="complain.isPunishedCheckIn" name="ischarge">is Punish
+        </mat-checkbox> -->
+        <mat-form-field>
+          <mat-select [(ngModel)]="complain.statusPunish">
+            <mat-option *ngFor="let item of APP_CONSTANT.PunishRules" [value] = 'item.value'>
+              {{item.name}}
+          </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+
+
+  </div>
+  <div mat-dialog-actions align="end" class="justify-content-between">
+    <button mat-button mat-raised-button type="button" style="margin-right: 10px;" (click)="cancel()">Cancel</button>
+    <button mat-flat-button type="submit" flex="15" color="primary" (click)="saveAndClose()">Save</button> 
+  </div>
+
+</div>

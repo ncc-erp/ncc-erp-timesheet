@@ -1,0 +1,79 @@
+<div *ngIf="permission.isGranted(VIEW)" class="row clearfix">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Manage Position" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+
+      <div class="body table-responsive">
+        <div class="row clearfix">
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+            <button *ngIf="permission.isGranted(ADD)" mat-raised-button color="primary" class="pull-left"
+              (click)="create()">
+              <mat-icon>add</mat-icon>New Position
+            </button>
+          </div>
+
+          <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 pull-right">
+            <mat-form-field appearance="outline">
+              <mat-label>Search by name, short name, code</mat-label>
+              <input matInput [(ngModel)]="searchText" placeholder="Search by name, short name, code"
+                (keyup.enter)="searchOrFilter()" type="text" maxlength="128">
+              <i class="icon-32 material-icons" matPrefix>search</i>
+            </mat-form-field>
+          </div>
+
+        </div>
+        <table class="table table-hover table-striped">
+          <thead class="bg-light">
+            <tr>
+              <th class="order" style="text-align: center;">#</th>
+              <th>Name</th>
+              <th>Short Name</th>
+              <th>Code</th>
+              <th>Color</th>
+              <th *ngIf="permission.isGranted(DELETE) || permission.isGranted(EDIT)" style="text-align:center">Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let position of listPosition | paginate: { id: 'server', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems };index as i ">
+              <td style="text-align: center;">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
+              <td>{{ position.name }}</td>
+              <td>{{ position.shortName }}</td>
+              <td>{{ position.code }}</td>
+              <td>
+                <span class="label status-label" [style.backgroundColor]="position.color"> {{ position.color }}</span>
+              </td>
+              <td class="action-wrapper">
+                <button *ngIf="permission.isGranted(DELETE)" mat-raised-button (click)="delete(position)"
+                  class="btn btn-danger waves-effect pull-right">Delete</button>
+                <button *ngIf="permission.isGranted(EDIT)" mat-raised-button (click)="edit(position)"
+                  class="btn btn-primary waves-effect pull-right" style="margin-right: 12px;">Edit</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="abp-pagination-controls-wrapper">
+          <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
+              (pageChange)="getDataPage($event)" id="server">
+          </abp-pagination-controls>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,34 @@
+.heading-checkbox {
+    position: absolute;
+    right: 20px;
+    top: 41%;
+    max-width: 200px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.heading-checkbox .checkbox-descr, .heading-checkbox .workingtime-text {
+    color: #fff;
+    font-size: 16px;
+    margin-right: 10px;
+}
+.panel-group .panel .panel-heading a {
+    padding: 0;
+}
+.panel-heading {
+    position: relative;
+    overflow: hidden;
+}
+
+.title-date {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.object-name {
+    width: calc(100% - 60px);
+    overflow: hidden;
+    display: inline-block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

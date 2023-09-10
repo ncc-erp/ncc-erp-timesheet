@@ -1,0 +1,22 @@
+<form *ngIf="active" #reviewForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
+  <mat-dialog-content style="overflow: hidden;">
+    <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane"  cdkDragHandle mat-dialog-title>{{l('New Review')}}</h2>
+    <hr>
+    <mat-form-field class="generic-form" appearance="outline" data-toggle="tooltip" data-placement="right" title="Bấm vào lịch để chọn ngày!">
+      <mat-label>Month and Year</mat-label>
+      <input #input matInput readonly [matDatepicker]="dp" [formControl]="date">
+      <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+      <mat-datepicker #dp
+                      startView="multi-year"
+                      (yearSelected)="chosenYearHandler($event)"
+                      (monthSelected)="chosenMonthHandler($event, dp)"
+                      panelClass="example-month-picker">
+      </mat-datepicker>
+    </mat-form-field>
+    <mat-checkbox style="padding-left: 10px;" [checked]="review.isActive" (change)="review.isActive = !review.isActive">Is Active?</mat-checkbox>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default " mat-raised-button mat-dialog-close (click)="clearInput()" [disabled]="saving">{{l('Cancel')}}</button>
+    <button  mat-raised-button color="primary" [mat-dialog-close]="review" (click)="clearInput()" [disabled]="!reviewForm.form.valid || saving">{{l('Submit')}}</button>
+  </mat-dialog-actions>
+</form>

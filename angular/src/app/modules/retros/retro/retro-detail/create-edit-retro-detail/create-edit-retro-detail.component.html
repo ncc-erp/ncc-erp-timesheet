@@ -1,0 +1,265 @@
+<form [formGroup]="formData" >
+  <h2
+    style="cursor: grab"
+    class="m-b-2"
+    cdkDrag
+    cdkDragRootElement=".cdk-overlay-pane"
+    cdkDragHandle
+    mat-dialog-title
+  >
+    {{ title }}: {{ retroDetail.userName }} <span *ngIf="!isShowSelectorMember()">[{{retroDetail.projectName}}]</span>
+  </h2>
+  <mat-divider></mat-divider>
+
+  <div class="row body-retro-detail" >
+    <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper" *ngIf="isShowSelectorMember()">
+      <label>Project *</label>
+    </div>
+
+    <div class="col-md-4" *ngIf="isShowSelectorMember()">
+      <mat-form-field appearance="outline">
+        <mat-label>Project</mat-label>
+        <mat-select formControlName="projectId" (openedChange)="handleOpenSelectProject()" (selectionChange)="projectChange($event)">
+          <div class="p-2 input-wrapper hang-on">
+            <input
+              type="text"
+              matInput
+              class="search-input"
+              [value]="searchText"
+              placeholder="Search Text"
+              (keydown)="$event.stopPropagation()"
+              (input)="handleChangeSearchText($event)"
+
+            />
+          </div>
+          <ng-container *ngFor="let item of listProjectBySearch">
+            <mat-option [value]="item.id">
+              {{ item.code }} - {{ item.name }}
+            </mat-option>
+          </ng-container>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <ng-container *ngIf="isShowSelectorMember()">
+      <div class="col-md-1 col-sm-1 col-md-1 col-lg-1 label-wrapper">
+        <label>PM *</label>
+      </div>
+
+      <div class="col-md-5">
+        <mat-form-field appearance="outline">
+          <mat-label>PM</mat-label>
+          <mat-select formControlName="pmId" (openedChange)="handleOpenSelectPm()" #select="matSelect" (selectionChange)="pmChange($event)">
+            <div class="p-2 input-wrapper hang-on">
+              <input
+                type="text"
+                matInput
+                class="search-input"
+                [value]="searchPm"
+                placeholder="Search PM by name or email"
+                (input)="handleSearchPm($event)"
+                (keydown)="$event.stopPropagation()"
+              />
+            </div>
+            <ng-container *ngFor="let item of listPmBySearch">
+              <mat-option [value]="item.pmId">
+                 {{item.pmFullName}} - {{ item.pmEmailAddress}}
+              </mat-option>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="isShowSelectorMember()">
+      <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+        <label>Members *</label>
+      </div>
+
+      <div class="col-md-10">
+        <mat-form-field appearance="outline">
+          <mat-label>User</mat-label>
+          <mat-select formControlName="userId" (openedChange)="handleOpenSelectMember()" #select="matSelect" (selectionChange)="memberChange($event)">
+            <div class="p-2 input-wrapper hang-on">
+              <input
+                type="text"
+                matInput
+                class="search-input"
+                [value]="searchUser"
+                placeholder="Search User by name or email"
+                (input)="handleSearchMember($event)"
+                (keydown)="$event.stopPropagation()"
+              />
+            </div>
+            <ng-container *ngFor="let item of listMemberBySearch">
+              <mat-option [value]="item.userId">
+                {{ item.fullNameAndEmail }}
+              </mat-option>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="isEdit()">
+      <!-- PM -->
+      <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+        <label>PM *</label>
+      </div>
+      <div class="col-md-10">
+        <mat-form-field appearance="outline">
+          <mat-label>PM</mat-label>
+          <mat-select formControlName="pmId" [(ngModel)]="retroDetail.pmId" name="sss">
+            <ng-container *ngFor="let item of listPm">
+              <mat-option [value]="item.pmId">
+                {{ item.pmFullName }} - {{ item.pmEmailAddress }}
+              </mat-option>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Branch -->
+      <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+        <label>Branch *</label>
+      </div>
+      <div class="col-md-4">
+        <mat-form-field appearance="outline">
+          <mat-label>Branch</mat-label>
+          <mat-select formControlName="branchId">
+            <ng-container *ngFor="let item of listBranch">
+              <mat-option [value]="item.id">
+                {{ item.displayName }}
+              </mat-option>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Type -->
+      <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+        <label>Type *</label>
+      </div>
+      <div class="col-md-4">
+        <mat-form-field appearance="outline">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="userType">
+            <ng-container *ngFor="let item of listUserType">
+              <mat-option [value]="item.id">
+                {{ item.name }}
+              </mat-option>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Position -->
+      <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+        <label>Position *</label>
+      </div>
+
+      <div class="col-md-4">
+        <mat-form-field appearance="outline">
+          <mat-label>Position</mat-label>
+          <mat-select formControlName="positionId">
+            <ng-container *ngFor="let item of listPosition">
+              <mat-option [value]="item.id">
+                {{ item.name }}
+              </mat-option>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Level -->
+      <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+        <label>Level *</label>
+      </div>
+      <div class="col-md-4">
+        <mat-form-field appearance="outline">
+          <mat-label>Level</mat-label>
+          <mat-select formControlName="userLevel">
+            <ng-container *ngFor="let item of listLevel">
+              <mat-option [value]="item.id">
+                {{ item.name }}
+              </mat-option>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!isEdit()">
+      <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+        <label>Position *</label>
+      </div>
+
+      <div class="col-md-10">
+        <mat-form-field appearance="outline">
+          <mat-label>Position</mat-label>
+          <mat-select formControlName="positionId">
+            <ng-container *ngFor="let item of listPosition">
+              <mat-option [value]="item.id">
+                {{ item.name }}
+              </mat-option>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </ng-container>
+
+    <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+      <label>Point</label>
+    </div>
+
+    <div class="col-md-10">
+      <mat-form-field appearance="outline">
+        <input
+          type="number"
+          matInput
+          max="5"
+          min="0"
+          class="hang-on"
+          (keydown)="$event.stopPropagation()"
+          placeholder="{{ l('Please enter a score between 0 and 5') }}"
+          formControlName="point"
+        />
+      </mat-form-field>
+    </div>
+
+    <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+      <label>Note</label>
+    </div>
+
+    <div class="col-md-10">
+      <mat-form-field appearance="outline">
+        <textarea
+          matInput
+          placeholder="{{ l('Note') }}"
+          rows="8"
+          formControlName="note"
+        ></textarea>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <mat-dialog-actions align="end">
+    <button
+      class="btn btn-default"
+      mat-raised-button
+      type="button"
+      (click)="close(1)"
+    >
+      {{ l("Cancel") }}
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      [disabled]="!formData.valid"
+      type=" submit"
+      flex="15"
+      (click)="onSave()"
+    >
+      {{ l("Submit") }}
+    </button>
+  </mat-dialog-actions>
+</form>

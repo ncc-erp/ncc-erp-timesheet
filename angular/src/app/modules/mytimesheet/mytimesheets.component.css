@@ -1,0 +1,23 @@
+::ng-deep .mat-tab-list .mat-tab-label {
+    min-width: 110px;
+}
+mat-form-field{
+    width:100px;
+}
+mat-button-toggle-group{
+    height:50px ;
+}
+
+    .date{
+        font-size:12px;
+        color: #999;
+    }
+.temp{
+    color: #9E9EB2;
+    font-weight: 900;
+
+}
+.official{
+    color: #3186ff;
+    font-weight: 900;
+}

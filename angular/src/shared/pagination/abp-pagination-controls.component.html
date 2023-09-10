@@ -1,0 +1,54 @@
+<pagination-template #p="paginationApi"
+                     [id]="id"
+                     [maxSize]="maxSize"
+                     (pageChange)="pageChange.emit($event)">
+    <nav class="rela">
+        <ul class="pagination"
+            role="navigation"
+            *ngIf="!(autoHide && p.pages.length <= 1) && totalNumber > selection">
+
+            <li [class.disabled]="p.isFirstPage()" *ngIf="directionLinks">
+                <a *ngIf="!p.isFirstPage()"
+                   (click)="p.previous()">
+                  <i class="material-icons">chevron_left</i>
+                </a>
+                <a *ngIf="p.isFirstPage()">
+                  <i class="material-icons">chevron_left</i>
+                </a>
+            </li>
+
+            <li [class.active]="p.getCurrent() === page.value"
+                *ngFor="let page of p.pages">
+                <a (click)="p.setCurrent(page.value)">{{ page.label }}</a>
+            </li>
+
+            <li [class.disabled]="p.isLastPage()"
+                *ngIf="directionLinks">
+                <a *ngIf="!p.isLastPage()"
+                   (click)="p.next()">
+                 <i class="material-icons">chevron_right</i>
+            </a>
+                <a *ngIf="p.isLastPage()">
+                 <i class="material-icons">chevron_right</i>
+                </a>
+            </li>
+        </ul>
+        <div *ngIf="totalNumber <= selection" style="height: 80px;"></div>
+        <div class="flex">
+            <div>
+                <mat-form-field style="width: 100px;">
+                    <mat-label>Number Items</mat-label>
+                    <mat-select [(value)]="selection" (selectionChange)='change()'>
+                        <mat-option *ngFor="let item of listSelections" [value]="item">
+                            {{item}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="flex-right">
+            Total Items: {{totalNumber}}
+        </div>
+    </nav>
+
+</pagination-template>

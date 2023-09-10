@@ -1,0 +1,257 @@
+
+<div *ngIf="!isFoundEmployeeProfile">
+  <p>Can not found your profile in HRM tool!</p>
+</div>
+<div *ngIf="isFoundEmployeeProfile"  id="profile" class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="height: auto;" [busy]="isLoading">
+  <div class="row px-0">
+    <div class="text-left col-lg-6 col-xs-6"><h4>My profile</h4></div>
+    <div class="text-right col-lg-6 col-xs-6">
+      <button name="update-btn" class="btn btn-primary" (click)="onRefresh()">
+        Refresh
+      </button>
+      <button *ngIf="isShowRequestUpdateInfoBtn()"
+      name="update-btn" class="btn btn-primary ml-2" (click)="onUpdate(userProfile)">
+        Request change info
+      </button>
+    </div>
+  </div>
+  <div class="main-info row">
+    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 user-info-left-side px-0">
+      <div class="card main-content">
+        <div class="card-body">
+          <div class="user-info text-center">
+            <div class="user-info_avatar mt-2">
+              <img style="max-width: 170px; width: 170px; height: 170px; border-radius: 50%; object-fit: cover;"
+              [src]="getAvatar(userAvatarPath)" onError="this.src='assets/images/men.png'" alt="avatar">
+            </div>
+            <div class="user-info_basicinfo">
+              <p class="user-info_fullname">
+                <b>{{userProfile?.fullName}}</b>
+                <i class="ml-3 user-info_gender"
+                  [ngClass]="userProfile?.sex == sexEnum.Female ? 'fa-solid fa-venus mt-2 female text-pink' : 'fa-solid fa-mars mt-2 text-primary' "></i>
+              </p>
+              <p class="mt-1">{{userProfile?.email}}</p>
+              <p>{{userProfile?.phone}}</p>
+              <p class="mt-1">
+                <span class="badge bg-warning">
+                  {{userProfile?.branch}}
+                </span>
+                <span class="badge bg-warning">
+                  {{userProfile?.userTypeName}}
+                </span>
+                <span class="badge bg-warning">
+                  {{userProfile?.jobPosition}}
+                </span>
+                <span class="badge bg-warning">
+                  {{userProfile?.level}}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12 user-info-right-side px-0">
+      <div class="card main-content">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-5 col-md-12 col-sm-12">
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">Full Name</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="mb-0">{{userProfile?.fullName}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">Email</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="mb-0">{{userProfile?.email}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">DOB</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="mb-0">{{userProfile?.birthday | date: "dd/MM/yyy"}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">Branch</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="mb-0">{{userProfile?.branch}}</p>
+                </div>
+              </div>
+              <hr class="displayNone">
+            </div>
+            <div class="col-lg-7 col-md-12 col-sm-12">
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">Usertype</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="mb-0">{{userProfile?.userTypeName}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">Level</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="mb-0">{{userProfile?.level}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">Position</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="mb-0">{{userProfile?.jobPosition}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">Remain leave day</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="mb-0">{{userProfile?.remainLeaveDay}}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-sm-1">
+              <p class="mb-0">Skill</p>
+            </div>
+            <div class="col-sm-11">
+              <span *ngFor="let item of userProfile?.skillNames" class="badge bg-warning">
+                {{item}}
+            </span>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-sm-1">
+              <p class="mb-0">Teams</p>
+            </div>
+            <div class="col-sm-11">
+              <span class="badge bg-warning"
+               *ngFor="let item of userProfile?.teams">{{item}}</span>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  <div class="other-info row">
+    <div class="col-lg-12 col-md-12 px-0">
+      <div class="card main-content" style="height: 100%">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-6 col-md-6">
+              <div class="row">
+                <div class="col-sm-4">
+                  <p class="mb-0">Bank</p>
+                </div>
+                <div class="col-sm-8">
+                  <p class="mb-0">{{userProfile?.bank}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-4">
+                  <p class="mb-0" matTooltip="Số tài khoản ngân hàng">Bank account</p>
+                </div>
+                <div class="col-sm-8">
+                  <p class="mb-0">{{userProfile?.bankAccountNumber}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-4">
+                  <p class="mb-0" matTooltip="Mã số thuế">Tax code</p>
+                </div>
+                <div class="col-sm-8">
+                  <p class="mb-0">{{userProfile?.taxCode}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-4">
+                  <p class="mb-0" matTooltip="Bảo hiểm">Insurance status</p>
+                </div>
+                <div class="col-sm-8">
+                  <p class="mb-0">{{userProfile?.insuranceStatusName}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-4">
+                  <p class="mb-0" matTooltip="Số CCCD/CMT">Identify</p>
+                </div>
+                <div class="col-sm-8">
+                  <p class="mb-0">{{userProfile?.idCard}}</p>
+                </div>
+              </div>
+              <hr class="displayNone">
+            </div>
+            <div class="col-lg-6 col-md-6">
+              <div class="row">
+                <div class="col-sm-4">
+                  <p class="mb-0" matTooltip="Quê quán">Place of origin</p>
+                </div>
+                <div class="col-sm-8">
+                  <p class="mb-0">{{userProfile?.placeOfPermanent}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-4" matTooltip="Nơi thường trú">
+                  <p class="mb-0">Place of residence</p>
+                </div>
+                <div class="col-sm-8">
+                  <p class="mb-0">{{userProfile?.address}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-4">
+                  <p class="mb-0" matTooltip="Ngày cấp">Date of issue</p>
+                </div>
+                <div class="col-sm-8">
+                  <p class="mb-0">{{userProfile?.issuedOn | date: "dd/MM/yyy"}}</p>
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-sm-4">
+                  <p class="mb-0" matTooltip="Cấp bởi">Issued By</p>
+                </div>
+                <div class="col-sm-8">
+                  <p class="mb-0">{{userProfile?.issuedBy}}</p>
+                </div>
+              </div>
+            
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

@@ -1,0 +1,295 @@
+<form [formGroup]="invoiceFormGroup" style="position: relative" autocomplete="off" id="frm_create_group" novalidate>
+  <h1 style="cursor: grab; max-width: 200px;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>
+    {{ "PM Send Request" | localize }} :
+  </h1>
+  <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0; cursor: pointer">close</mat-icon>
+  <hr />
+  <mat-dialog-content class="tab-modal" style="max-height: 100%;">
+    <mat-tab-group>
+      <mat-tab label="General">
+        <div class="row">
+          <div class="format-col form-group row required"
+            style="display: flex; align-items: center; margin-bottom: 0px; padding-left: 16px;">
+      
+            <label class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-form-label" style="width: 77px">
+              {{ "Note:" | localize }}
+            </label>
+            <mat-form-field class="edit-form row-item-rest select-form col-xl-4 col-lg-4 col-md-4 col-xs-4"
+              appearance="outline">
+              <input type="text" matInput="matInput" formControlName="note" name="noteInput" />
+            </mat-form-field>
+      
+            <label class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-form-label" style="width: 142px; margin-left: 112px;">
+              {{ "Invoice amount:" | localize }}
+            </label>
+            <mat-form-field class="col-xl-4 col-lg-4 col-md-4 col-xs-4" appearance="outline" style="padding-right: 0px;">
+              <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0'}" matInput="matInput"
+                formControlName="totalInvoiceAmount" name="totalInvoiceAmountInput" (change)="onInputInvoiceAmountChange()" />
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <mat-form-field appearance="outline">
+                <mat-label>Projects</mat-label>
+                <mat-select name="selectedProjectId" [(value)]="selectedProjectId" (selectionChange)="getAllRequest()">
+                  <mat-form-field class="p-2 input-wrapper" style="
+                      position: sticky;
+                      top: 0;
+                      z-index: 2;
+                      background-color: white;
+                      padding-left: 15px;
+                    ">
+                    <input type="text" matInput name="projectNameSearchInput" class="search-input" placeholder="Search"
+                      [(ngModel)]="this.projectSearch" (keydown)="$event.stopPropagation()" [ngModelOptions]="{standalone: true}"
+                      (ngModelChange)="handleSearchProject()" />
+                  </mat-form-field>
+                  <mat-option value="">All</mat-option>
+                  <mat-option *ngFor="let item of project" [value]="item.projectId">
+                    {{ item.projectName }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <mat-form-field appearance="outline">
+                <mat-label>Branch</mat-label>
+                <mat-select name="selectedBranchId" [(value)]="branchId" (selectionChange)="getAllRequest()">
+                  <mat-form-field class="p-2 input-wrapper" style="
+                      position: sticky;
+                      top: 0;
+                      z-index: 2;
+                      background-color: white;
+                      padding-left: 15px;
+                    ">
+                    <input type="text" matInput name="branchNameSearchInput" class="search-input" placeholder="Search"
+                      [(ngModel)]="this.branchSearch" (keydown)="$event.stopPropagation()" [ngModelOptions]="{standalone: true}"
+                      (ngModelChange)="handleSearchBranch()" />
+                  </mat-form-field>
+                  <mat-option value="">All</mat-option>
+                  <mat-option *ngFor="let item of listBranch" [value]="item.id">
+                    {{ item.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <mat-form-field appearance="outline">
+                <mat-label>Month</mat-label>
+                <mat-select name="selectedMonthNumber" (selectionChange)="getAllRequest()" [(value)]="month">
+                  <mat-option value="">All</mat-option>
+                  <ng-container *ngFor="let m of listMonth">
+                    <mat-option [value]="m">
+                      {{ m }}
+                    </mat-option>
+                  </ng-container>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+            <button style="margin-top: 11px;" mat-raised-button color="primary" type="button" name="addUserButton" (click)="toggleShowAddUserDialog(); $event.stopPropagation()">
+              Add users
+            </button>
+          </div>
+        </div>
+        <div *ngIf="requestInfo.length == 0">No data</div>
+        <div *ngIf="requestInfo.length > 0">
+          <div class="table-responsive d-flex">
+            <div class="fixedHeader" style="max-height: calc(100vh - 450px);" [ngClass]="isShowBtnAddUser ? 'table-team-selected' : 'full-width'">
+              <table class="table table-striped table-hover" [busy]="isLoading">
+                <thead>
+                  <tr>
+                    <th>
+                      <mat-checkbox name="selectAll" (change)="setAll($event.checked)" matTooltip="Select/DeSelect all"
+                        [checked]="allComplete" [indeterminate]="someComplete()" [color]="'primary'"
+                        style="display: flex; justify-content: center">
+                      </mat-checkbox>
+                    </th>
+                    <th>
+                      <span>STT </span>
+                    </th>
+                    <th (click)="handleSortByColumn('employeeFullName')" style="cursor: pointer" name="employeeSortButton">
+                      <span>Employee </span>
+                      <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'employeeFullName'"></i>
+                      <i *ngIf="currentSortColumn !== 'employeeFullName'" class="fas fa-sort"></i>
+                    </th>
+                    <th (click)="handleSortByColumn('branch')" style="cursor: pointer" name="branchSortButton">
+                      <span>Branch </span>
+                      <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'branch'"></i>
+                      <i *ngIf="currentSortColumn !== 'branch'" class="fas fa-sort"></i>
+                    </th>
+                    <th (click)="handleSortByColumn('project')" style="cursor: pointer" name="projectSortButton">
+                      <span>Project </span>
+                      <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'project'"></i>
+                      <i *ngIf="currentSortColumn !== 'project'" class="fas fa-sort"></i>
+                    </th>
+                    <th>Money</th>
+                    <th>Requester</th>
+                    <th (click)="handleSortByColumn('month')" style="cursor: pointer" name="monthSortButton">
+                      <span>Month </span>
+                      <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'month'"></i>
+                      <i *ngIf="currentSortColumn !== 'month'" class="fas fa-sort"></i>
+                    </th>
+                    <th>Year</th>
+                    <th (click)="handleSortByColumn('status')" style="cursor: pointer" name="statusSortButton">
+                      <span>Status </span>
+                      <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'status'"></i>
+                      <i *ngIf="currentSortColumn !== 'status'" class="fas fa-sort"></i>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let request of requestInfo; let i = index">
+                    <td class="text-center">
+                      <mat-checkbox *ngIf="request.status == 0" [name]="'selected' + request.employeeId" [checked]="getIsSelected(request)"
+                        [color]="'primary'" (change)="handleSelectRequestInfoItem(i, $event)">
+                      </mat-checkbox>
+                    </td>
+                    <td style="text-align: center">{{ i + 1 }}</td>
+                    <td style="padding: 0px">
+                      <div class="info-name">
+                        <div class="info-name-box">
+                          <div class="full-name">{{ request.employeeFullName }}</div>
+                          <div class="email">{{ request.employeeEmailAddress }}</div>
+                        </div>
+                        <mat-icon style="color: #ff9800; margin-left: 5px" *ngIf="request.isNotInProject"
+                          matTooltip="This employee is not in your project!">warning</mat-icon>
+                      </div>
+                    </td>
+                    <td style="text-align: center">
+                      <span class="branch label" *ngIf="request.branchId !== null"
+                        [style.backgroundColor]="request.branchColor">
+                        {{ request.branchName }}
+                      </span>
+                    </td>
+                    <td>{{ request.projectName }}</td>
+                    <td>{{ request.money | currency : "VND" : "" }}</td>
+                    <td style="padding: 0px">
+                      <div class="info-name">
+                        <div class="info-name-box">
+                          <div class="full-name">{{ request.requesterFullName }}</div>
+                          <div class="email">{{ request.requesterEmailAddress }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style="text-align: center">
+                      {{ request.applyMonth | date : "MM" }}
+                    </td>
+                    <td>{{ request.applyMonth | date : "yyyy" }}</td>
+                    <td class="text-center">
+                      <span [ngClass]="{
+                          'bg-grey': request.status === 0,
+                          'bg-yellow': request.status === 1
+                        }" class="label status-label">
+                        {{ listStatus[request.status + 1].title }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Add Users -->
+            <div *ngIf="isShowBtnAddUser" class="table-team-select">
+              <mat-expansion-panel [expanded]="true">
+                <app-add-user-other-project *ngIf="isShowBtnAddUser"
+                [isCreateRequest]="true"
+                [requestAdding]="requestAdding"
+                (onAddUsers)="getSelectedUserOtherProject($event)"
+                (onCancel)="closePopup($event)">
+                </app-add-user-other-project>
+              </mat-expansion-panel>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab label="Invoice">
+        <div class="table-responsive">
+            <div class="fixedHeader" style="min-height: 400px; max-height: 400px;">
+              <ng-container *ngFor="let invoiceForm of invoiceFormGroup.get('invoiceFormArray')['controls'];  let i = index"
+                  [formGroup]="invoiceForm">
+                <h4>Invoice Request #{{i + 1}}</h4>
+                <table id="request-teambuilding" class="table table-striped table-hover" [busy]="isLoading">
+                  <thead>
+                    <tr>
+                      <th style="width: 10%">
+
+                      </th>
+                      <th style="width: 50%">
+                        
+                      </th>
+                      <th  style="width: 10%">
+                        
+                      </th> 
+                      <th  style="width: 30%">
+                        
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="flex-direction: column;">
+                        <mat-radio-group aria-label="Select an option" formControlName="isChoosingFile" [name]="'isChoosingFileInput' + (i + 1)" (change)="switchInvoiceTypeResource(i)">
+                          <mat-radio-button [value]="true" [name]="'isChoosingFileButton' + (i + 1)">Invoice File</mat-radio-button>
+                          <br>
+                          <br>
+                          <mat-radio-button [value]="false" [name]="'isChoosingUrlButton' + (i + 1)">Invoice Url</mat-radio-button>
+                        </mat-radio-group>
+                      </td>
+                      <td>
+                        <input class="form-control" type="file" (change)="onFileChange($event, i)" formControlName="invoiceFileName" [name]="'invoiceFileNameInput' + (i + 1)">
+                        <br>
+                        <input class="form-control" type="url" formControlName="invoiceUrl" [name]="'invoiceUrlInput' + (i + 1)">
+                      </td>
+                      <td>
+                        <label>Amount</label>
+                        <br>
+                        <br>
+                        <label>Has VAT</label>
+                      </td>
+                      <td>
+                        <input class="form-control" type="number" formControlName="amount" [name]="'amountInput' + (i + 1)" (change)="calculateTotalInvoiceAmount()">
+                        <br>
+                        <input style="position: static; opacity: 1; height: 24px;" type="checkbox" formControlName="isVat" [name]="'isVatInput' + (i + 1)">
+                      </td>
+                      <td style="align-items: center; text-align: center">
+                        <mat-icon *ngIf="invoiceFormGroup.get('invoiceFormArray').controls.length > 1" class="material-icons-outlined" style="cursor: pointer;" name="deleteInvoiceFormButton" (click)="deleteInvoiceForm(i)">
+                          delete_outline
+                        </mat-icon>
+                      </td>
+                    </tr>
+                    
+                  </tbody>
+                </table>
+              </ng-container>
+              <div style="cursor: pointer; float: right;" (click)="addNewInvoiceForm()" name="AddInvoiceFormButton">
+                <mat-icon class="material-icons-outlined">
+                  add
+                </mat-icon>
+              </div>
+            </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-dialog-content>
+  <mat-dialog-actions style="margin-top: 0px; display: flex; justify-content: space-between;">
+    <div>
+      <span>Remain money: <b>{{ lastRemainMoney | currency : "VND" : "" }}</b></span>
+      <span style="margin-left: 100px;">Total money: <b>{{ getTotalMoney() + lastRemainMoney | currency : "VND" : ""}}</b></span>
+    </div>
+    <div>
+      <button class="btn btn-default" mat-raised-button mat-dialog-close name="cancelButton">
+        {{ l("Cancel") }}
+      </button>
+      <button type="button" mat-raised-button color="primary" (click)="onSaveAndClose()" [disabled]="
+          saving || selectedCheckboxCount === 0 || !invoiceFormGroup.valid" cdkFocusInitial name="submitButton">
+        {{ l("Submit") }}
+      </button>
+    </div>
+  </mat-dialog-actions>
+</form>

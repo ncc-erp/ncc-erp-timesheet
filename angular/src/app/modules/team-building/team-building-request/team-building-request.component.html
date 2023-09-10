@@ -1,0 +1,205 @@
+<div class="row clearfix">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="height: auto; padding: 0px">
+    <div class="card">
+      <div class="header">
+        <h2>{{ "Request history" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body" style="height: 100%">
+        <div class="row">
+          <div class="col-lg-6">
+            <mat-form-field class="example-full-width" appearance="outline">
+              <mat-label>Search by Email Requester, Title</mat-label>
+              <input type="search" [(ngModel)]="searchText" name="Search" (keyup.enter)="refresh()" matInput />
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <mat-form-field appearance="outline">
+                <mat-label>Month</mat-label>
+                <mat-select (selectionChange)="handleFilterMonth($event)" [(ngModel)]="month">
+                  <mat-option [value]="-1">All</mat-option>
+                  <ng-container *ngFor="let m of listMonth">
+                    <mat-option [value]="m">
+                      {{ m }}
+                    </mat-option>
+                  </ng-container>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <mat-form-field appearance="outline">
+                <mat-label>Year</mat-label>
+                <mat-select (selectionChange)="handleFilterYear($event)" [(value)]="year">
+                  <ng-container *ngFor="let y of listYear">
+                    <mat-option [value]="y">
+                      {{ y }}
+                    </mat-option>
+                  </ng-container>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select (selectionChange)="handleFilterStatus($event)" [(value)]="status">
+                  <ng-container *ngFor="let status of listStatus">
+                    <mat-option [value]="status.value">
+                      {{ status.title }}
+                    </mat-option>
+                  </ng-container>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th style="max-width: 32px" class="text-center">No</th>
+                <th style="width: 250px" class="text-center">
+                  Email Requester
+                </th>
+                <th style="width: 250px" class="text-center">Title</th>
+                <th class="text-center">Month</th>
+                <th class="text-center">Year</th>
+                <th style="max-width: 70px" class="text-center">
+                  Request Money
+                </th>
+                <th style="max-width: 70px" class="text-center">
+                  Disbursed Money
+                </th>
+                <th style="max-width: 74px" class="text-center">
+                  Remaining Money
+                </th>
+                <th style="max-width: 50px" class="text-center">
+                  Remaining Money Status
+                </th>
+                <th style="max-width: 50px" class="text-center">Status</th>
+                <th style="max-width: 50px" class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="
+                  let item of listRequest
+                    | paginate
+                      : {
+                          id: 'server',
+                          itemsPerPage: pageSize,
+                          currentPage: pageNumber,
+                          totalItems: totalItems
+                        };
+                  let i = index
+                ">
+                <td class="text-center">
+                  {{ i + 1 + (pageNumber - 1) * pageSize }}
+                </td>
+                <td style="padding: 0px">
+                  <div class="info-name">
+                    <div class="info-name-box">
+                      <div class="full-name">{{item.fullNameRequester}} </div>
+                      <div>{{item.emailRequester}}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center">{{ item.titleRequest }}</td>
+                <td class="text-center">
+                  {{ item.creationTime | date : "MM" }}
+                </td>
+                <td class="text-center">
+                  {{ item.creationTime | date : "yyyy" }}
+                </td>
+                <td class="text-center">{{ item.requestMoney | currency:'VND':''}}</td>
+                <td class="text-center">{{ item.disbursedMoney | currency:'VND':''}}</td>
+                <td class="text-center">{{ item.remainingMoney | currency:'VND':''}}</td>
+                <td class="text-center">
+                  <span *ngIf="item.status == 1" [ngClass]="{
+                      'bg-green': item.remainingMoneyStatus === 0,
+                      'bg-blue': item.remainingMoneyStatus === 1
+                    }" class="label status-label">
+                    {{
+                    listRemainingMoneyStatus[item.remainingMoneyStatus].title
+                    }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span [ngClass]="{
+                      'bg-green': item.status === 0,
+                      'bg-blue': item.status === 1,
+                      'bg-red': item.status === 2,
+                      'bg-yellow': item.status === 3
+                    }" class="label status-label">
+                    {{ listStatus[item.status + 1].title }}
+                  </span>
+                </td>
+                <td style="text-align:center">
+                  <button mat-icon-button [matMenuTriggerFor]="actionsMenu">
+                    <mat-icon>menu</mat-icon>
+                  </button>
+                  <mat-menu #actionsMenu="matMenu">
+                    <ng-container >
+                      <button mat-menu-item (click)="handleAction('disburse', item)"
+                      *ngIf="permission.isGranted(TeamBuilding_DisburseRequest) && ![1,2,3].includes(item.status)">
+                        <mat-icon>attach_money</mat-icon>
+                        <span>{{ "Disburse" | localize }}</span>
+                      </button>
+                      <button mat-menu-item (click)="handleAction('edit', item)"
+                      *ngIf="permission.isGranted(TeamBuilding_EditRequest) && ![1,2,3].includes(item.status)">
+                        <mat-icon>edit</mat-icon>
+                        <span>{{ "Edit" | localize }}</span>
+                      </button>
+                      <button mat-menu-item (click)="handleAction('view detail', item)"
+                      *ngIf="permission.isGranted(TeamBuilding_ViewDetailRequest) && ![2,3].includes(item.status)">
+                        <mat-icon>remove_red_eye</mat-icon>
+                        <span>{{ "View detail" | localize }}</span>
+                      </button>
+                      <button mat-menu-item (click)="handleAction('re-open', item)"
+                      *ngIf="permission.isGranted(TeamBuilding_ReOpenRequest) && ![0,2,3].includes(item.status)">
+                        <mat-icon>replay</mat-icon>
+                        <span>{{ "Re-open" | localize }}</span>
+                      </button>
+                      <button mat-menu-item (click)="handleAction('reject', item)"
+                      *ngIf="permission.isGranted(TeamBuilding_RejectRequest) && ![1,2,3].includes(item.status)">
+                        <mat-icon>close</mat-icon>
+                        <span>{{ "Reject" | localize }}</span>
+                      </button>
+                      <button mat-menu-item (click)="handleAction('cancel', item)"
+                      *ngIf="permission.isGranted(TeamBuilding_CancelRequest) && ![1,2,3].includes(item.status)">
+                        <mat-icon>close</mat-icon>
+                        <span>{{ "Cancel" | localize }}</span>
+                      </button>
+                    </ng-container>
+                  </mat-menu>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="abp-pagination-controls-wrapper">
+          <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
+            (pageChange)="getDataPage($event)" id="server"></abp-pagination-controls>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

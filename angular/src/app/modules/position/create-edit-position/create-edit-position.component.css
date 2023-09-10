@@ -1,0 +1,16 @@
+.pick-color-wrapper {
+    display: flex;
+    align-items: center;
+    height: 56px;
+}
+
+
+.pick-color {
+    width: 50px;
+}
+
+.label-wrapper {
+    display: flex;
+    align-items: center;
+    height: 56px;
+}

@@ -1,0 +1,161 @@
+<div class="row clearfix">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Overtime" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu123="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="clearfix" style="padding: 20px 5px 0px 5px" [busy] ="isLoading">
+        <div class="col-sm-2" style="padding:5px 15px 10px 15px">
+          <mat-form-field appearance="outline">
+            <mat-label>Year</mat-label>
+            <mat-select name="year" [(value)]='year' (selectionChange)="refresh()">
+              <mat-option *ngFor="let item of listYear" [value]='item'>
+                {{item}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-sm-2" style="padding:5px 15px 10px 15px">
+          <mat-form-field appearance="outline">
+            <mat-label>Month</mat-label>
+            <mat-select name="month" [(value)]='month' (selectionChange)="refresh()">
+              <mat-option *ngFor="let item of listMonth" [value]='item'>
+                {{item+1}}
+              </mat-option>
+              
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-sm-4" style="padding:5px 15px 10px 15px">
+          <mat-form-field appearance="outline">
+            <mat-label >Project</mat-label>
+            <mat-select name="projectId" [(value)]="projectId" (selectionChange)="refresh()">
+              <mat-option>
+                <ngx-mat-select-search placeholderLabel="Search" [formControl]="projectSearch"
+                noEntriesFoundLabel= "No matching found"></ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let item of projects" [value]='item.id'>
+                {{item.code}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div> 
+        <div class="col-sm-4" style="padding:5px 15px 10px 15px">
+          <mat-form-field appearance="outline">
+            <mat-label>Search by Name</mat-label>
+            <mat-icon style="color:#9E9E9E" matPrefix>search</mat-icon>
+            <input matInput [(ngModel)]='searchText' (keyup.enter)="refresh()">
+          </mat-form-field>
+        </div>
+      </div>
+      <mat-tab-group style="padding-left: 20px; padding-right: 20px; padding-bottom: 15px;" *ngIf="listOverTime && listOverTime.length">
+        <mat-tab label="Total">
+          <div class="table-responsive" style="overflow-x: auto; border: 0; padding-top: 20px; padding-bottom: 20px;">
+            <table class="table table-hover table-striped style" [busy]="isTableLoading"
+              style="margin-bottom: 0; border: 0.5px solid rgba(204, 204, 204, 0.35); border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="width: 20px; min-width: 0px;">{{ "STT" | localize}}</th>
+                  <th>{{ "User" | localize}}</th>
+                  <th>{{ "Working Hours" | localize}}</th>
+                  <th>{{ "Working Hours x Coefficient" | localize}}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of (listOverTime | paginate
+                : {
+                    id: 'server',
+                    itemsPerPage: pageSize,
+                    currentPage: pageNumber,
+                    totalItems: totalItems
+                  }), index as i">
+                  <td>{{(pageNumber - 1)*pageSize + i + 1}}</td>
+                  <td style="text-align: left;">{{item.fullName}}</td>
+                  <td style="text-align: right;">{{item.totalWorkingHour}}</td>
+                  <td style="text-align: right;">{{item.totalHour}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </mat-tab>
+        <mat-tab label="Detail">
+          <div class="panel-group" role="tablist" aria-multiselectable="true" style="padding-top: 20px;" [busy]="isTableLoading">
+            <div *ngFor="let item of (listOverTime | paginate
+        : {
+            id: 'server',
+            itemsPerPage: pageSize,
+            currentPage: pageNumber,
+            totalItems: totalItems
+          })" class="panel panel-col-primary">
+              <div class="panel-heading" role="tab" [attr.id]="'headingOverTime-' + item.userId">
+                <h4 class="panel-title">
+                  <a role="button" data-toggle="collapse" [attr.href]="'#collapseOverTime-' + item.userId"
+                    aria-expanded="true" aria-controls="'collapseProject-' + project.projectId">
+                    <i class="material-icons">people</i>
+                    <span class="object-name">{{item.fullName}}</span>
+                  </a>
+                </h4>
+                <div class="heading-checkbox">
+                  <span class="workingtime-text">
+                    {{formatHour(item.totalWorkingHour)}} | {{formatHour(item.totalHour)}}
+                  </span>
+                </div>
+              </div>
+              <div [attr.id]="'collapseOverTime-' + item.userId" class="panel-collapse collapse" role="tabpanel"
+                aria-labelledby="'headingOverTime-'+ project.projectId">
+                <div style="padding: 20px;">
+                  <div class="table-responsive" style="overflow-x: auto; border: 0;">
+                    <table class="table table-hover table-striped style"
+                      style="margin-bottom: 0; border: 0.5px solid rgba(204, 204, 204, 0.35); border-collapse: collapse;">
+                      <thead>
+                        <tr>
+                          <th style="width: 20px; min-width: 0px;">{{ "STT" | localize}}</th>
+                          <th>{{ "Date" | localize}}</th>
+                          <th>{{ "Day" | localize}}</th>
+                          <th>{{ "Project" | localize}}</th>
+                          <th>{{ "IsCharged" | localize}}</th>
+                          <th>{{ "Working Hours" | localize}}</th>
+                          <th>{{ "Coefficient" | localize}}</th>
+                          <th>{{ "Working Hours x Coefficient" | localize}}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let ot of item.listOverTimeHour, index as i ">
+                          <td>{{i + 1}}</td>
+                          <td>{{ot.date}}</td>
+                          <td style="text-align: left;">{{ot.dayName}}</td>
+                          <td style="text-align: left;">{{ot.projectName}}</td>
+                          <td style="text-align: left;">{{ot.isCharged}}</td>
+                          <td style="text-align: right;">{{ot.workingHour}}</td>
+                          <td style="text-align: right;">{{ot.coefficient}}</td>
+                          <td style="text-align: right;">{{ot.otHour}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+      <div class="abp-pagination-controls-wrapper">
+        <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)" id="server">
+        </abp-pagination-controls>
+      </div>
+    </div>
+  </div>
+</div>

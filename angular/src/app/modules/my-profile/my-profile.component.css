@@ -1,0 +1,132 @@
+.px-0{
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+p{
+    margin-bottom: 0px;
+}
+.mb-0{
+    margin-bottom: 0px;
+}
+.pl-0{
+    padding-left: 0px;
+}
+.pr-0{
+    padding-right: 0px;
+}
+.text-primary{
+    color: #007bff;
+}
+.text-pink{
+    color: #e83e8c;
+}
+.card{
+    margin: 20px 0px;
+}
+.user-info_avatar img{
+    margin: 20px 0px;
+}
+.user-info_fullname{
+    font-size: 18px;
+}
+.user-info_gender{
+    margin-left: 5px
+}
+
+.user-info-right-side .card-body,.user-info-left-side .card-body ,.other-info .card-body{
+    padding: 20px;
+}
+.main-info{
+    display: flex;
+    align-items: stretch;
+}
+ .user-info-left-side .card.main-content , .user-info-right-side .card.main-content{
+   height: 100% !important;
+   margin-bottom: 0px;
+}
+
+.other-info .card-body{
+    margin-top: 50px;
+}
+.main-info{
+    width: 100%;
+}
+.badge{
+    margin-right: 10px;
+}
+.badge.bg-warning{
+    background-color: #e08b29;
+}
+.mt-1{
+    margin-top: 6px;
+}
+.mr-2{
+    margin-right: 15px;
+}
+.ml-2{
+    margin-left: 15px;
+}
+.row.main-info , .row.other-info{
+    margin: 0px;
+}
+.user-info-right-side .card.main-content{
+    margin-left: 30px;
+}
+.displayNone{
+    display: none;
+}
+::ng-deep .mat-tooltip {
+    font-size: 13px;
+}
+.displayNone{
+    display: none;
+}
+@media (max-width: 767px){
+    ::ng-deep .container-fluid{
+        padding: 0px;
+    }
+    #profile{
+        padding: 0px;
+    }
+    .col-sm-12{
+        width: 100%;
+    }
+    .main-info{
+        display: block;
+    }
+    .user-info-right-side .card.main-content{
+        margin-left: 0px;
+    }
+    .displayNone{
+        display: block;
+    }
+    hr{
+        margin-top : 5px
+    }
+    .other-info .card-body{
+        margin-top: 20px;
+    }
+    
+}
+@media (min-width: 768px) and (max-width: 991px) {
+    .displayNone{
+        display: block;
+    }
+    .user-info-left-side{
+        min-width: 300px;
+    }
+}
+  
+@media (min-width: 992px) and (max-width: 1169px) {
+    .displayNone{
+        display: block;
+    }
+    .user-info-left-side{
+        min-width: 300px;
+    }
+} 
+@media (min-width: 1169px) {
+    .user-info-left-side{
+        min-width: 300px;
+    }
+} 

@@ -1,0 +1,196 @@
+<div class="row clearfix" [@routerTransition]>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card main-content">
+            <div class="header">
+                <h2>{{ title | localize }} : <b>{{role.name}}</b></h2>
+                <button mat-icon-button class="btn-back" (click)="onBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+                <ul class="header-dropdown m-r--5">
+                    <li>
+                        <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+                        <mat-menu #headerMenu="matMenu">
+                            <button mat-menu-item>
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+                        </mat-menu>
+                    </li>
+                </ul>
+            </div>
+            <div class="body">
+                <mat-tab-group>
+                    <!-- TAB DETAILS -->
+                    <mat-tab [label]="'Details' | localize">
+                        <br />
+                        <div class="row-fluid">
+                            <div class="col-md-12">
+                                <mat-form-field>
+                                    <input [readonly]="path === 'view-detail'" matInput name="Name" [placeholder]="'Name' | localize" [(ngModel)]="role.name" required minlength="2" maxlength="32" />
+                                </mat-form-field>
+                                <mat-form-field>
+                                    <input [readonly]="path === 'view-detail'" matInput name="DisplayName" [placeholder]="'DisplayName' | localize" [(ngModel)]="role.displayName" required minlength="2" maxlength="32" />
+                                </mat-form-field>
+                                <mat-form-field>
+                                    <textarea [readonly]="path === 'view-detail'" matInput name="Description" [placeholder]="'RoleDescription' | localize" [(ngModel)]="role.description"></textarea>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div style="text-align: center;">
+                            <button *ngIf="path === 'edit'" mat-flat-button type="submit" color="primary" (click)="onSave()">
+                {{ "Save" | localize }}
+              </button>
+                        </div>
+                    </mat-tab>
+
+                    <!-- TAB PERMISSIONS -->
+                    <mat-tab [label]="'Permissions' | localize">
+                        <br />
+                        <div class="row-fluid">
+                            <div class="col-md-12">
+                                <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
+                                    <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
+                                        <li class="mat-tree-node">
+                                            <button mat-icon-button disabled></button>
+                                            <div class="spinner" *ngIf="node.isLoading">
+                                                <mat-spinner [diameter]="16" style="margin-right: 8px;"></mat-spinner>{{node.displayName}}
+                                            </div>
+                                            <mat-checkbox *ngIf="!node.isLoading" [disabled]="isStatic || isLoading || path === 'view-detail'" [checked]="isSelected(node)" (change)="todoLeafItemSelectionToggle(node)">
+                                                {{node.displayName}}</mat-checkbox>
+                                        </li>
+                                    </mat-tree-node>
+                                    <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+                                        <li>
+                                            <div class="mat-tree-node">
+                                                <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
+                          <mat-icon class="mat-icon-rtl-mirror">
+                            {{!treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                          </mat-icon>
+                        </button>
+                                                <div class="spinner" *ngIf="node.isLoading">
+                                                    <mat-spinner [diameter]="16" style="margin-right: 8px;"></mat-spinner>{{node.displayName}}
+                                                </div>
+                                                <mat-checkbox *ngIf="!node.isLoading" [disabled]="isStatic || isLoading || path === 'view-detail'" [checked]="descendantsAllSelected(node)" [indeterminate]="descendantsPartiallySelected(node)" (change)="todoItemSelectionToggle(node)">
+                                                    {{node.displayName}}</mat-checkbox>
+                                            </div>
+                                            <ul [class.example-tree-invisible]="treeControl.isExpanded(node)">
+                                                <ng-container matTreeNodeOutlet></ng-container>
+                                            </ul>
+                                        </li>
+                                    </mat-nested-tree-node>
+                                </mat-tree>
+                            </div>
+                        </div>
+                    </mat-tab>
+
+                    <!-- TAB USERS -->
+                    <mat-tab [label]="'Users' | localize">
+                        <br />
+                        <div class="body table-responsive team">
+                            <div class="user-table">
+                                <div class="title">
+                                    <b>Member</b>
+                                </div>
+                                <div class="content">
+                                    <table class="table table-hover table-striped">
+                                        <tr *ngFor="let member of selectedMembers; let i = index">
+                                            <td>
+                                                <button *ngIf="path === 'edit'" type="button" (click)="removeMemberFromProject(member, i)" mat-icon-button>
+                          <mat-icon>clear</mat-icon>
+                        </button>
+                                                <img [src]="getAvatar(member)" class="avatar" alt="Member" style="border-radius: 50%;" /> {{member.name}}
+                                                <span class="label status-label" [style.backgroundColor]="member.branchColor">{{ member.branchDisplayName}}</span>
+
+
+                                                <span style="margin-left: 10px;" *ngIf="member.type == 0" class="label status-label bg-red">{{userTypes[member.type].label}}</span>
+                                                <span style="margin-left: 10px;" *ngIf="member.type == 1" class="label status-label bg-green">{{userTypes[member.type].label}}</span>
+                                                <span style="margin-left: 10px;" *ngIf="member.type == 2" class="label status-label bg-blue">{{userTypes[member.type].label}}</span>
+                                                <span class="label status-label bg-grey" style="margin-left: 10px;" *ngIf="member.isActive == false">Inactive</span>
+                                                <span *ngIf="member.level != null">
+                          <span class="label status-label mr-left"
+                            [ngStyle]=" userLevels[member.level].style">{{userLevels[member.level].name}}</span>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <br />
+
+                            <div *ngIf="path === 'edit'" class="user-table">
+                                <div class="title">
+                                    <b>Select role member</b>
+                                </div>
+                                <div class="content">
+                                    <div class="row-fluid">
+                                        <div class="col-md-2">
+                                            <mat-form-field>
+                                                <mat-label>Branch</mat-label>
+                                                <mat-select name="userBranchForFilter" [(value)]="userBranchForFilter" (selectionChange)="searchMember()">
+                                                    <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
+                                                        {{branch.displayName}}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <mat-form-field>
+                                                <mat-label>Type</mat-label>
+                                                <mat-select [(value)]='userTypeForFilter' (selectionChange)="searchMember()">
+                                                    <mat-option [value]="-1">All</mat-option>
+                                                    <mat-option *ngFor="let item of userTypes" [value]="item.value">
+                                                        {{item.label}}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <mat-form-field>
+                                                <mat-label>Level</mat-label>
+                                                <mat-select [(value)]='userLevelForFilter' (selectionChange)="searchMember()">
+                                                    <mat-option [value]="-1">All</mat-option>
+                                                    <mat-option *ngFor="let item of userLevels" [value]="item.value">
+                                                        {{item.name}}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <mat-form-field>
+                                                <mat-icon matPrefix>search</mat-icon>
+                                                <input type="text" matInput placeholder="Search by name" [(ngModel)]="searchMemberText" name="searchMember" (keyup)="searchMember()">
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+
+                                    <table class="table table-hover table-striped">
+                                        <tr *ngFor="let mem of displayActiveMembers; let i = index">
+                                            <td (click)="selectTeam(mem, i)">
+                                                <button type="button" mat-icon-button>
+                          <i class="material-icons">
+                            add_circle_outline
+                          </i>
+                        </button>
+                                                <img [src]="getAvatar(mem)" class="avatar" alt="Member" style="border-radius: 50%;" /> {{mem.name}}
+                                                <span class="label status-label" [style.backgroundColor]="mem.branchColor">{{ mem.branchDisplayName}}</span>
+                                                <span style="margin-left: 10px;" *ngIf="mem.type == 0" class="label status-label bg-red">{{userTypes[mem.type].label}}</span>
+                                                <span style="margin-left: 10px;" *ngIf="mem.type == 1" class="label status-label bg-green">{{userTypes[mem.type].label}}</span>
+                                                <span style="margin-left: 10px;" *ngIf="mem.type == 2" class="label status-label bg-blue">{{userTypes[mem.type].label}}</span>
+                                                <span *ngIf="mem.level != null">
+                          <span class="label status-label mr-left"
+                            [ngStyle]=" userLevels[mem.level].style">{{userLevels[mem.level].name}}</span>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-tab>
+                </mat-tab-group>
+            </div>
+        </div>
+    </div>
+</div>

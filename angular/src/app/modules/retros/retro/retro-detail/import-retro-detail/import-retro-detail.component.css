@@ -1,0 +1,18 @@
+::ng-deep .swal-overlay--show-modal .swal-modal {
+    width: 600px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.form-import {
+    padding-bottom: 24px;
+}
+.text--error{
+    color: crimson;
+}
+.text--warning{
+    color: darkorange;
+}
+.text--succes{
+    color: chartreuse;
+}

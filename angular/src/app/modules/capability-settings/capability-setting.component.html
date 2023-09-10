@@ -1,0 +1,145 @@
+<div *ngIf="permission.isGranted(VIEW)" class="row clearfix">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="height: auto; padding: 0px">
+    <div class="card">
+      <div class="header">
+        <h2>{{ "Capability Settings For Review Interns" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body" style="height: 100%">
+        <div class="row">
+          <div class="col-lg-3">
+            <mat-form-field class="example-full-width" appearance="outline">
+              <mat-label>Search by Capability Name</mat-label>
+              <input type="search" name="capabilitySearch" [(ngModel)]="searchText" (keydown.enter)="refresh()" matInput
+                placeholder="">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label> {{ "Type" | localize }}</mat-label>
+              <mat-select name="capabilityType" [disableOptionCentering]="true" [(value)]="capabilityType"
+                (selectionChange)="refresh()">
+                <mat-option *ngFor="let type of capabilityTypeDropdown" [value]="type.value">
+                  {{type.key}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label> {{ "User type" | localize }}</mat-label>
+              <mat-select name="userType" [disableOptionCentering]="true" [(value)]="userType"
+                (selectionChange)="refresh()">
+                <mat-option *ngFor="let type of userTypeDropDown" [value]="type.value">
+                  {{type.key}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label> {{ "Position" | localize }}</mat-label>
+              <mat-select name="position" [disableOptionCentering]="true" [(value)]="positionId"
+                (selectionChange)="refresh()">
+                <mat-option *ngFor="let type of positionDropDown" [value]="type.value">
+                  {{type.key}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 button-container text-right p-t-10">
+            <button mat-raised-button color="primary" *ngIf="permission.isGranted(ADD)" class="btn remote"
+              [routerLink]="['/app/main/capability-settings/capability-setting']">
+              <mat-icon style="color: white" matPrefix>add</mat-icon>
+              <span>
+                Create
+              </span>
+            </button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th class="col-menu"></th>
+                <th class="col-stt">No</th>
+                <th>Name</th>
+                <th class="col-type">Type</th>
+                <th class="col-coefficient">Coefficient</th>
+                <th class="col-guildLine">GuildLine</th>
+                <th class="col-action">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let item of listPaging | paginate
+              : {
+                  id: 'server',
+                  itemsPerPage: pageSize,
+                  currentPage: pageNumber,
+                  totalItems: totalItems
+                } ; index as i">
+                <tr class="usertype-position">
+                  <td>
+                    <button mat-icon-button (click)="item.expanded = !item.expanded">
+                      <mat-icon *ngIf="!item.expanded">chevron_right</mat-icon>
+                      <mat-icon *ngIf="item.expanded">expand_more</mat-icon>
+                    </button>
+                  </td>
+                  <td><b>{{ (pageNumber - 1) * pageSize + i + 1 }}</b></td>
+                  <td><b>{{item.userTypeName}} {{item.positionName}}</b></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td class="text-center">
+                    <button *ngIf="permission.isGranted(EDIT)" mat-icon-button (click)="onEdit(item)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button *ngIf="permission.isGranted(DELETE)" mat-icon-button (click)="onDelete(item)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+                <ng-container *ngIf="item.expanded" rowspan="100%" colspan="100%">
+                  <tr *ngFor="let capability of item.capabilities" style="border: 0;">
+                    <td colspan="2"></td>
+                    <td>{{capability.capabilityName}}</td>
+                    <td class="text-center">{{CAPABILITY_TYPE[capability.type]}}</td>
+                    <td class="text-center">
+                      <ng-container *ngIf="capability.type == CAPABILITY_TYPE.Point">{{capability.coefficient}}
+                      </ng-container>
+                    </td>
+                    <td>
+                      <div class="max-line-content-1" resizeCell [maxLine]="1"
+                        [innerHtml]="capability.guildeLine | safeHtml"></div>
+                    </td>
+                    <td class="text-center">
+                    </td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="abp-pagination-controls-wrapper">
+          <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
+            (pageChange)="getDataPage($event)" id="server"></abp-pagination-controls>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

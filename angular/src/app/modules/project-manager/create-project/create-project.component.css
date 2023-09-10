@@ -1,0 +1,225 @@
+.inline {
+    display: inline-block !important;
+}
+
+.tab-modal {
+    height: 70vh;
+}
+
+.mat-dialog-content {
+    max-height: 70vh;
+    /* width: 80vw; */
+}
+
+::ng-deep .mat-dialog-container {
+    height: auto;
+}
+
+.mat-tab {
+    width: 100vw;
+}
+
+.m-l-11i {
+    margin-left: 11px !important;
+}
+
+.mat-tab-body-content.ng-trigger.ng-trigger-translateTab {
+    overflow: inherit !important;
+}
+
+.mat-form-field-infix {
+    padding: 0.5em 0 1em 0;
+}
+
+.row-mar-0 {
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+.i-check {
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+.i-check input {
+    display: none;
+}
+
+.i-check span {
+    display: block;
+    position: relative;
+    padding: 10px;
+    border: solid 1px #c1c1c1;
+    width: 100%;
+    border-radius: 5px;
+}
+
+.i-check input:checked+span {
+    border-color: #f36c00;
+    background: #f36c00;
+    color: white;
+}
+
+.table tbody tr td {
+    padding: 5px 0px 0 0px !important;
+    vertical-align: middle;
+}
+
+.member-status-label {
+    margin-left: 10px;
+    vertical-align: text-top;
+    border-radius: 2px;
+}
+
+::ng-deep .label {
+    margin: 0 !important;
+}
+
+.w-40vw {
+    width: 16vw !important;
+}
+
+.mr-left {
+    margin-left: 10px;
+}
+
+.pl-0 {
+    padding-left: 0px;
+}
+
+.mr-top-20 {
+    margin-top: 20px;
+}
+
+.table-responsive tr td,
+th {
+    width: 700px;
+}
+
+.mat-dialog-content.list-member,
+.mat-dialog-content.list-project-member {
+    max-height: 50vh !important;
+    width: 100%;
+}
+
+.list-project-member {
+    margin: 0 -24px 0 0;
+    padding-left: 0;
+}
+
+.list-member {
+    margin: 0;
+    padding-left: 0;
+}
+
+.show-member {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.table-team-selected {
+    width: 60%;
+    margin-bottom: 4px;
+}
+
+.table-team-select {
+    width: 40%;
+    margin-bottom: 4px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+::ng-deep.mat-form-field-wrapper {
+    padding-bottom: 1.34375em !important;
+}
+
+@media (max-width: 1260px) {
+    .c-12 {
+        width: 100%;
+    }
+
+    .mat-dialog-content.list-member {
+        max-height: 47.5vh !important;
+    }
+
+    .mat-dialog-content.list-project-member {
+        max-height: 43vh !important;
+    }
+}
+
+@media (max-width: 994px) {
+    .mat-dialog-content {
+        max-height: 70vh;
+        width: 80vw;
+    }
+
+    .mat-tab {
+        width: 80vw;
+    }
+
+    .mat-dialog-content.list-member {
+        max-height: 36vh !important;
+    }
+
+    .mat-dialog-content.list-project-member {
+        max-height: 36vh !important;
+    }
+}
+
+@media (max-width : 768px) {
+    .table-responsive>.table {
+        width: 550px !important;
+    }
+
+    .table-responsive .mat-expansion-panel {
+        width: 550px;
+    }
+
+    .mat-dialog-content.list-member {
+        max-height: 35vh !important;
+    }
+
+    .mat-dialog-content.list-project-member {
+        max-height: 48vh !important;
+    }
+}
+
+.project-create-edit .ls-closed {
+    position: relative;
+    width: 50px;
+}
+
+.project-create-edit .ls-closed .bars {
+    color: #000;
+}
+
+.project-create-edit .ls-closed .bars:after,
+.project-create-edit .ls-closed .bars:before {
+    top: 0;
+    left: 5px;
+    margin-right: 0;
+}
+
+.project-create-edit .ls-closed .bars:before {
+    content: '\E5C4';
+}
+
+.project-create-edit .ls-closed .bars:after {
+    content: '\E5C8';
+}
+
+::ng-deep .workType .temp .mat-select-value-text span {
+    color: #9E9E9e;
+    font-weight: 900;
+}
+
+::ng-deep .workType .official .mat-select-value-text span {
+    color: #3186ff !important;
+    font-weight: 900;
+}

@@ -1,0 +1,70 @@
+<form #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate style="position: relative;">
+  <h4 class="pin">Request Đi muộn/ Về
+    sớm on <span style="background-color: green; margin-bottom: 2px;">{{selectedDate | date: "dd-MM-yyyy"}}</span></h4>
+  <mat-icon (click)="close(0);$event.stopPropagation();">
+    close</mat-icon>
+  <hr />
+  <mat-dialog-content>
+    <div class="row mb-20 mt-10">
+      <div class="col-md-4 col-sm-2 col-md-4 col-lg-4 col-xl-4">
+        <label>Đi muộn/ Về sớm *</label>
+      </div>
+      <div class="col-md-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
+        <mat-radio-group aria-label="Select an option" class="example-radio-group">
+          <mat-radio-button (change)="radioChange($event.value)" class="example-radio-button"
+            [value]="APP_CONSTANT.OnDayType.BeginOfDay" *ngIf="this.data.absenceTime == 1" checked>Đi muộn
+          </mat-radio-button>
+          <mat-radio-button (change)="radioChange($event.value)" class="example-radio-button"
+            [value]="APP_CONSTANT.OnDayType.EndOfDay" *ngIf="this.data.absenceTime == 3" checked>Về sớm
+          </mat-radio-button>
+          <mat-radio-button (change)="radioChange($event.value)" class="example-radio-button" checked
+            [value]="APP_CONSTANT.OnDayType.BeginOfDay" *ngIf="this.data.absenceTime == 10">Đi muộn
+          </mat-radio-button>
+          <mat-radio-button (change)="radioChange($event.value)" class="example-radio-button"
+            [value]="APP_CONSTANT.OnDayType.EndOfDay" *ngIf="this.data.absenceTime == 10">Về sớm
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 col-sm-2 col-md-4 col-lg-4 col-xl-4">
+        <label>Số giờ *</label>
+      </div>
+      <div class="col-md-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
+        <div *ngIf="customTimeHour.errors && (customTimeHour.dirty || customTimeHour.touched)" class="text-danger">
+          <div [hidden]="!customTimeHour.errors.required">
+            <ng-container> Số giờ is required!</ng-container>
+          </div>
+        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Số giờ</mat-label>
+          <input type="text" matInput name="time" (ngModelChange)="onchange($event)" [textMask]="mask"
+            [(ngModel)]="customTime.hour" required cdkFocusInitial #customTimeHour="ngModel" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 col-sm-2 col-md-4 col-lg-4 col-xl-4">
+        <label>Reason *</label>
+      </div>
+      <div class="col-md-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
+        <div *ngIf="reason.errors && (reason.dirty || reason.touched)" class="text-danger">
+          <div [hidden]="!reason.errors.required">
+            <ng-container> Reason is required!</ng-container>
+          </div>
+        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Reason</mat-label>
+          <textarea name="reason" matInput [(ngModel)]="absenceDayReq.reason" required #reason="ngModel"></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-raised-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="primary" [disabled]="!createForm.form.valid || !saving" (click)="submitReq()">
+      Send request
+    </button>
+  </mat-dialog-actions>
+</form>

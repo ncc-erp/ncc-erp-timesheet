@@ -1,0 +1,54 @@
+<mat-dialog-content >
+        <div *ngIf="timesheet" class="main-content">
+          <div class="header">
+            <h3><b>Approve {{ timesheet.member.name }}'s Timesheet for {{ timesheet.startDate }}-{{ timesheet.endDate }}</b></h3>
+            <h4><b>Pending Hours</b></h4>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="body table-responsive">
+            <table class="table table-hover ">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th class="text-center" *ngFor="let item of enumDate">
+                    <h5>{{ item.date }}</h5>
+                    <p>{{ item.day }}&nbsp;{{ item.month }}</p>
+                  </th>
+                  <th></th> 
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                  <tr *ngFor="let item of timesheet.timesheetItems">
+                    <td [ngClass]="{'isOT': item.typeOfWork == 1}">
+                      <p><b>{{ item.projectName }}</b></p>
+                      <p>{{ item.taskName }}</p>
+                    </td>
+                    <td class="text-center" [ngClass]="{'isOT': item.typeOfWork == 1}"><span matTooltipPosition="above" matTooltip="{{ item.mon.note }}">{{ item.mon.hours }}</span></td>
+                    <td class="text-center" [ngClass]="{'isOT': item.typeOfWork == 1}"><span matTooltipPosition="above" matTooltip="{{ item.tue.note }}">{{ item.tue.hours }}</span></td>
+                    <td class="text-center" [ngClass]="{'isOT': item.typeOfWork == 1}"><span matTooltipPosition="above" matTooltip="{{ item.wed.note }}">{{ item.wed.hours }}</span></td>
+                    <td class="text-center" [ngClass]="{'isOT': item.typeOfWork == 1}"><span matTooltipPosition="above" matTooltip="{{ item.thu.note }}">{{ item.thu.hours }}</span></td>
+                    <td class="text-center" [ngClass]="{'isOT': item.typeOfWork == 1}"><span matTooltipPosition="above" matTooltip="{{ item.fri.note }}">{{ item.fri.hours }}</span></td>
+                    <td class="text-center" [ngClass]="{'isOT': item.typeOfWork == 1}"><span matTooltipPosition="above" matTooltip="{{ item.sat.note }}">{{ item.sat.hours }}</span></td>
+                    <td class="text-center" [ngClass]="{'isOT': item.typeOfWork == 1}"><span matTooltipPosition="above" matTooltip="{{ item.sun.note }}">{{ item.sun.hours }}</span></td>
+                    <td [ngClass]="{'isOT': item.typeOfWork == 1}">{{ item.total.hours}}</td>
+                    <td [ngClass]="{'isOT': item.typeOfWork == 1}"><mat-icon *ngIf="item.isCharged">lock</mat-icon></td>
+                  </tr>
+              </tbody>
+            </table>
+            <button (click)="approveTimesheet()" mat-flat-button color="accent" class="pull-left" >
+              Approve Timesheet
+            </button>
+            <button mat-flat-button color="primary" class="pull-left" style="margin-left:20px" >
+              Email Tien Pham
+            </button>
+            <button (click)="rejectTimesheet()" mat-flat-button color="warn" style="margin-left:20px">
+              Reject
+            </button>
+            <button mat-button type="button" (click)="close(false)">
+              Cancel
+            </button>
+          </div>
+        </div>
+      
+</mat-dialog-content>

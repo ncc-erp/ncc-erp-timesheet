@@ -1,0 +1,1436 @@
+[
+    {
+        "email": "tung.nguyen@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:01",
+        "verifyEndTimeStr": "21:17"
+    },
+    {
+        "email": "hong.nguyenphuong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:43",
+        "verifyEndTimeStr": "18:06"
+    },
+    {
+        "email": "hung.duongviet@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:50",
+        "verifyEndTimeStr": "17:55"
+    },
+    {
+        "email": "minh.lucvan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:38",
+        "verifyEndTimeStr": "18:15"
+    },
+    {
+        "email": "anh.dotuan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:46",
+        "verifyEndTimeStr": "17:39"
+    },
+    {
+        "email": "thai.buiminh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:02",
+        "verifyEndTimeStr": "19:23"
+    },
+    {
+        "email": "nguyentran@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:29",
+        "verifyEndTimeStr": "17:58"
+    },
+    {
+        "email": "hoan.caothi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:19",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "hieu.dohoang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "10:06",
+        "verifyEndTimeStr": "18:59"
+    },
+    {
+        "email": "linh.nguyen@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:13",
+        "verifyEndTimeStr": "18:49"
+    },
+    {
+        "email": "phuc.duong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:31",
+        "verifyEndTimeStr": "18:45"
+    },
+    {
+        "email": "tien.nguyenhuu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:00",
+        "verifyEndTimeStr": "18:38"
+    },
+    {
+        "email": "tien.pham@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:49",
+        "verifyEndTimeStr": "19:20"
+    },
+    {
+        "email": "trung.dotrong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:49",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "ha.nguyen@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:33",
+        "verifyEndTimeStr": "18:35"
+    },
+    {
+        "email": "tuan.nguyenanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:17",
+        "verifyEndTimeStr": "18:46"
+    },
+    {
+        "email": "tung.tranhuy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:56",
+        "verifyEndTimeStr": "21:24"
+    },
+    {
+        "email": "hien.ngothu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:26",
+        "verifyEndTimeStr": "16:41"
+    },
+    {
+        "email": "hoang.nguyenanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:31",
+        "verifyEndTimeStr": "18:06"
+    },
+    {
+        "email": "binh.tran@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:21",
+        "verifyEndTimeStr": "18:04"
+    },
+    {
+        "email": "toai.nguyencong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:26",
+        "verifyEndTimeStr": "20:37"
+    },
+    {
+        "email": "phuong.dangdanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:39",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "quynh.duongthi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:46",
+        "verifyEndTimeStr": "19:08"
+    },
+    {
+        "email": "van.tranngoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:34",
+        "verifyEndTimeStr": "17:39"
+    },
+    {
+        "email": "trung.hoangdinh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:45",
+        "verifyEndTimeStr": "19:20"
+    },
+    {
+        "email": "viet.dangquoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:27",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "trang.vuquynh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:29",
+        "verifyEndTimeStr": "17:23"
+    },
+    {
+        "email": "phi.lekim@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:37",
+        "verifyEndTimeStr": "18:44"
+    },
+    {
+        "email": "van.vu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:25",
+        "verifyEndTimeStr": "19:13"
+    },
+    {
+        "email": "hieu.nguyennam@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "10:35",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "phuonganh.nguyen@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:39",
+        "verifyEndTimeStr": "17:31"
+    },
+    {
+        "email": "truong.lexuan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:16",
+        "verifyEndTimeStr": "18:36"
+    },
+    {
+        "email": "hoang.doanmanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:11",
+        "verifyEndTimeStr": "20:37"
+    },
+    {
+        "email": "thien.nguyenthai@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:28",
+        "verifyEndTimeStr": "18:28"
+    },
+    {
+        "email": "tu.mavan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:08",
+        "verifyEndTimeStr": "18:01"
+    },
+    {
+        "email": "thien.dang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:58",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "tuan.vuthanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:03",
+        "verifyEndTimeStr": "18:28"
+    },
+    {
+        "email": "quang.ledang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:05",
+        "verifyEndTimeStr": "18:27"
+    },
+    {
+        "email": "chi.trantung@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:27",
+        "verifyEndTimeStr": "18:15"
+    },
+    {
+        "email": "tuyen.nguyenngoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:26",
+        "verifyEndTimeStr": "18:16"
+    },
+    {
+        "email": "khanh.doancong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:32",
+        "verifyEndTimeStr": "18:28"
+    },
+    {
+        "email": "manh.vuongtan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:57",
+        "verifyEndTimeStr": "17:34"
+    },
+    {
+        "email": "van.nguyenhong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:08",
+        "verifyEndTimeStr": "18:18"
+    },
+    {
+        "email": "dat.nguyenkim@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:59",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "hang.buithidiem@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:11",
+        "verifyEndTimeStr": "21:12"
+    },
+    {
+        "email": "thao.vuthiphuong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:04",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "manh.nguyenvan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:29",
+        "verifyEndTimeStr": "17:43"
+    },
+    {
+        "email": "anh.doviet@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:41",
+        "verifyEndTimeStr": "18:00"
+    },
+    {
+        "email": "quyen.daothidiem@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:50",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "duong.nguyen@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:13",
+        "verifyEndTimeStr": "18:53"
+    },
+    {
+        "email": "duy.vuvan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:39",
+        "verifyEndTimeStr": "20:03"
+    },
+    {
+        "email": "van.phamhai@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:03",
+        "verifyEndTimeStr": "18:10"
+    },
+    {
+        "email": "thu.leanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:33",
+        "verifyEndTimeStr": "18:27"
+    },
+    {
+        "email": "xuan.vuduy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:05",
+        "verifyEndTimeStr": "18:34"
+    },
+    {
+        "email": "trang.dangthihuyen@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:40",
+        "verifyEndTimeStr": "17:45"
+    },
+    {
+        "email": "thanh.phamtrong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "10:04",
+        "verifyEndTimeStr": "20:37"
+    },
+    {
+        "email": "dai.nguyentuan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:45",
+        "verifyEndTimeStr": "19:09"
+    },
+    {
+        "email": "hieu.nguyenduc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:38",
+        "verifyEndTimeStr": "17:30"
+    },
+    {
+        "email": "minh.nguyentuan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:03",
+        "verifyEndTimeStr": "21:00"
+    },
+    {
+        "email": "nam.nguyenduc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:54",
+        "verifyEndTimeStr": "17:59"
+    },
+    {
+        "email": "cong.nguyenthanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:00",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "huong.dothi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:17",
+        "verifyEndTimeStr": "18:56"
+    },
+    {
+        "email": "chinh.vuquang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:52",
+        "verifyEndTimeStr": "16:03"
+    },
+    {
+        "email": "duy.nguyenxuan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:16",
+        "verifyEndTimeStr": "19:14"
+    },
+    {
+        "email": "dai.phamgiabao@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:15",
+        "verifyEndTimeStr": "18:45"
+    },
+    {
+        "email": "quan.nguyenminh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:02",
+        "verifyEndTimeStr": "17:07"
+    },
+    {
+        "email": "gia.nguyenngochoang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:08",
+        "verifyEndTimeStr": "18:18"
+    },
+    {
+        "email": "huy.buidoanquang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "12:55",
+        "verifyEndTimeStr": "19:48"
+    },
+    {
+        "email": "dung.dangtien@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:54",
+        "verifyEndTimeStr": "18:03"
+    },
+    {
+        "email": "linh.nguyenthiai@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:05",
+        "verifyEndTimeStr": "17:37"
+    },
+    {
+        "email": "hanh.ngomy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:37",
+        "verifyEndTimeStr": "17:41"
+    },
+    {
+        "email": "duong.tranbinh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "13:11",
+        "verifyEndTimeStr": "18:06"
+    },
+    {
+        "email": "anh.phamtien@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:47",
+        "verifyEndTimeStr": "19:10"
+    },
+    {
+        "email": "hien.nguyenvan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:12",
+        "verifyEndTimeStr": "20:54"
+    },
+    {
+        "email": "tien.dovan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:28",
+        "verifyEndTimeStr": "17:49"
+    },
+    {
+        "email": "dai.trinhduc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:39",
+        "verifyEndTimeStr": "19:38"
+    },
+    {
+        "email": "bao.phungchi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:56",
+        "verifyEndTimeStr": "18:33"
+    },
+    {
+        "email": "tai.cumanhtuan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:42",
+        "verifyEndTimeStr": "20:33"
+    },
+    {
+        "email": "hai.nguyensinh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:02",
+        "verifyEndTimeStr": "19:34"
+    },
+    {
+        "email": "hieu.tran@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:33",
+        "verifyEndTimeStr": "19:41"
+    },
+    {
+        "email": "dat.lethanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:43",
+        "verifyEndTimeStr": "18:40"
+    },
+    {
+        "email": "thanh.levan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:29",
+        "verifyEndTimeStr": "19:49"
+    },
+    {
+        "email": "toan.nguyenviet@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:43",
+        "verifyEndTimeStr": "17:56"
+    },
+    {
+        "email": "quang.vonhat@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:33",
+        "verifyEndTimeStr": "17:46"
+    },
+    {
+        "email": "dien.huynhphuc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:32",
+        "verifyEndTimeStr": "17:56"
+    },
+    {
+        "email": "san.hohoai@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:44",
+        "verifyEndTimeStr": "17:40"
+    },
+    {
+        "email": "trinh.phanthithuc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:34",
+        "verifyEndTimeStr": "17:54"
+    },
+    {
+        "email": "hien.dinhthithu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:34",
+        "verifyEndTimeStr": "17:50"
+    },
+    {
+        "email": "dung.buihuu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:53",
+        "verifyEndTimeStr": "17:57"
+    },
+    {
+        "email": "ngan.phankim@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:03",
+        "verifyEndTimeStr": "18:09"
+    },
+    {
+        "email": "ngan.nguyenthu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:40",
+        "verifyEndTimeStr": "17:52"
+    },
+    {
+        "email": "y.levan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:48",
+        "verifyEndTimeStr": "18:04"
+    },
+    {
+        "email": "an.nguyentranthy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:42",
+        "verifyEndTimeStr": "17:52"
+    },
+    {
+        "email": "giang.nguyenthihuong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:41",
+        "verifyEndTimeStr": "17:54"
+    },
+    {
+        "email": "tuyen.lethanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:41",
+        "verifyEndTimeStr": "18:43"
+    },
+    {
+        "email": "nhung.nguyenthi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:37",
+        "verifyEndTimeStr": "18:32"
+    },
+    {
+        "email": "thinh.tranminh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:21",
+        "verifyEndTimeStr": "18:01"
+    },
+    {
+        "email": "trang.vuhoai@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:11",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "giang.nguyenhuong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:44",
+        "verifyEndTimeStr": "17:57"
+    },
+    {
+        "email": "thiet.nguyenba@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:14",
+        "verifyEndTimeStr": "18:34"
+    },
+    {
+        "email": "linh.vutai@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:28",
+        "verifyEndTimeStr": "17:31"
+    },
+    {
+        "email": "huu.daohoang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:59",
+        "verifyEndTimeStr": "19:19"
+    },
+    {
+        "email": "mai.truongthi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:45",
+        "verifyEndTimeStr": "17:57"
+    },
+    {
+        "email": "tuyen.tranvan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:50",
+        "verifyEndTimeStr": "18:41"
+    },
+    {
+        "email": "vu.nguyenbang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:29",
+        "verifyEndTimeStr": "17:31"
+    },
+    {
+        "email": "anh.leduc1@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "18:02",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "nien.phamduy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "13:51",
+        "verifyEndTimeStr": "19:06"
+    },
+    {
+        "email": "anh.buiquynh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:10",
+        "verifyEndTimeStr": "17:43"
+    },
+    {
+        "email": "minh.tranchi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:17",
+        "verifyEndTimeStr": "17:33"
+    },
+    {
+        "email": "thoa.nguyenthi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:27",
+        "verifyEndTimeStr": ""
+    },
+    {
+        "email": "nhung.nguyenthi1@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:31",
+        "verifyEndTimeStr": "17:34"
+    },
+    {
+        "email": "trinh.phamthidiem@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:39",
+        "verifyEndTimeStr": "18:33"
+    },
+    {
+        "email": "hung.truongngoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:50",
+        "verifyEndTimeStr": "20:53"
+    },
+    {
+        "email": "thuy.dangthibich@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:35",
+        "verifyEndTimeStr": "11:58"
+    },
+    {
+        "email": "hoa.tranthi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:35",
+        "verifyEndTimeStr": "12:08"
+    },
+    {
+        "email": "hoang.dohuy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:34",
+        "verifyEndTimeStr": "19:25"
+    },
+    {
+        "email": "an.lethihong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:41",
+        "verifyEndTimeStr": "18:22"
+    },
+    {
+        "email": "giang.nguyenthingan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:29",
+        "verifyEndTimeStr": "18:42"
+    },
+    {
+        "email": "hiep.nguyenvan1@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:54",
+        "verifyEndTimeStr": "18:21"
+    },
+    {
+        "email": "nhi.tranthianh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:11",
+        "verifyEndTimeStr": "18:18"
+    },
+    {
+        "email": "trang.nguyenthithu1@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:08",
+        "verifyEndTimeStr": "17:47"
+    },
+    {
+        "email": "nhan.nguyenquang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:32",
+        "verifyEndTimeStr": "17:44"
+    },
+    {
+        "email": "nghia.trantrong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:58",
+        "verifyEndTimeStr": "18:22"
+    },
+    {
+        "email": "tam.canhlechi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:45",
+        "verifyEndTimeStr": "19:51"
+    },
+    {
+        "email": "lam.tranquang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:56",
+        "verifyEndTimeStr": "18:21"
+    },
+    {
+        "email": "hung.leviet@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:04",
+        "verifyEndTimeStr": "18:00"
+    },
+    {
+        "email": "vinh.nguyenquoc3@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:28",
+        "verifyEndTimeStr": "18:18"
+    },
+    {
+        "email": "hoang.nguyencanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:42",
+        "verifyEndTimeStr": "19:49"
+    },
+    {
+        "email": "hieu.nguyendinh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:38",
+        "verifyEndTimeStr": "18:22"
+    },
+    {
+        "email": "toan.nguyenthanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:55",
+        "verifyEndTimeStr": "17:43"
+    },
+    {
+        "email": "hung.phantrung@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:59",
+        "verifyEndTimeStr": "19:03"
+    },
+    {
+        "email": "tin.phamngocanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:35",
+        "verifyEndTimeStr": "17:58"
+    },
+    {
+        "email": "quang.buingoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:21",
+        "verifyEndTimeStr": "18:01"
+    },
+    {
+        "email": "huy.lexuan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:44",
+        "verifyEndTimeStr": "19:22"
+    },
+    {
+        "email": "ly.huynhthi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:40",
+        "verifyEndTimeStr": "13:31"
+    },
+    {
+        "email": "thanh.maihoai@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:21",
+        "verifyEndTimeStr": "18:00"
+    },
+    {
+        "email": "ngoc.maithuy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:21",
+        "verifyEndTimeStr": "17:59"
+    },
+    {
+        "email": "ha.doanngoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:39",
+        "verifyEndTimeStr": "18:09"
+    },
+    {
+        "email": "khanh.nguyenvan2@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:22",
+        "verifyEndTimeStr": "18:34"
+    },
+    {
+        "email": "tu.nguyenanh1@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:37",
+        "verifyEndTimeStr": "18:23"
+    },
+    {
+        "email": "son.nguyentruong1@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:28",
+        "verifyEndTimeStr": "19:34"
+    },
+    {
+        "email": "linh.dinhvunhat@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:09",
+        "verifyEndTimeStr": "18:08"
+    },
+    {
+        "email": "cuong.nguyenngoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:30",
+        "verifyEndTimeStr": "17:52"
+    },
+    {
+        "email": "luan.nguyenminh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:45",
+        "verifyEndTimeStr": "18:00"
+    },
+    {
+        "email": "thang.nguyenhong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:35",
+        "verifyEndTimeStr": "12:05"
+    },
+    {
+        "email": "hieu.trantrung@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:17",
+        "verifyEndTimeStr": "18:24"
+    },
+    {
+        "email": "vy.nguyentam@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:14",
+        "verifyEndTimeStr": "18:00"
+    },
+    {
+        "email": "hung.phananh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:13",
+        "verifyEndTimeStr": "18:09"
+    },
+    {
+        "email": "long.tranphi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:41",
+        "verifyEndTimeStr": "17:47"
+    },
+    {
+        "email": "minh.nguyendang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:45",
+        "verifyEndTimeStr": "18:31"
+    },
+    {
+        "email": "quan.nguyendinh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "13:03",
+        "verifyEndTimeStr": "18:40"
+    },
+    {
+        "email": "giang.phamvan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:33",
+        "verifyEndTimeStr": "18:09"
+    },
+    {
+        "email": "the.tranthanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:15",
+        "verifyEndTimeStr": "18:09"
+    },
+    {
+        "email": "quang.levan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:43",
+        "verifyEndTimeStr": "18:00"
+    },
+    {
+        "email": "ha.nguyenthi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:14",
+        "verifyEndTimeStr": "17:06"
+    },
+    {
+        "email": "quan.nguyenhuu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:12",
+        "verifyEndTimeStr": "18:34"
+    },
+    {
+        "email": "son.lesytruong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:57",
+        "verifyEndTimeStr": "18:26"
+    },
+    {
+        "email": "hang.nguyenthu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:15",
+        "verifyEndTimeStr": "18:26"
+    },
+    {
+        "email": "linh.tranthuy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "14:27",
+        "verifyEndTimeStr": "19:52"
+    },
+    {
+        "email": "truc.nguyenthanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:27",
+        "verifyEndTimeStr": "17:33"
+    },
+    {
+        "email": "nhan.nguyenvan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:41",
+        "verifyEndTimeStr": "17:36"
+    },
+    {
+        "email": "thu.caothidieu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:36",
+        "verifyEndTimeStr": "18:28"
+    },
+    {
+        "email": "khanh.vungoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:01",
+        "verifyEndTimeStr": "17:33"
+    },
+    {
+        "email": "thao.ngothu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:33",
+        "verifyEndTimeStr": "18:06"
+    },
+    {
+        "email": "my.nghiemthitra@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:54",
+        "verifyEndTimeStr": "18:34"
+    },
+    {
+        "email": "cuong.tranhahuu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:46",
+        "verifyEndTimeStr": "18:06"
+    },
+    {
+        "email": "hieu.vuminh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:35",
+        "verifyEndTimeStr": "17:57"
+    },
+    {
+        "email": "trang.tranthu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:10",
+        "verifyEndTimeStr": "19:35"
+    },
+    {
+        "email": "anh.letien@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:40",
+        "verifyEndTimeStr": "17:36"
+    },
+    {
+        "email": "thuan.nguyenleanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:14",
+        "verifyEndTimeStr": "18:23"
+    },
+    {
+        "email": "the.letien@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:12",
+        "verifyEndTimeStr": "17:56"
+    },
+    {
+        "email": "thanh.vutien@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:13",
+        "verifyEndTimeStr": "18:22"
+    },
+    {
+        "email": "duy.vannhat@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:10",
+        "verifyEndTimeStr": "19:10"
+    },
+    {
+        "email": "duc.tomanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:56",
+        "verifyEndTimeStr": "18:22"
+    },
+    {
+        "email": "dat.nguyensy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "10:34",
+        "verifyEndTimeStr": "18:21"
+    },
+    {
+        "email": "quan.daohong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:35",
+        "verifyEndTimeStr": "18:59"
+    },
+    {
+        "email": "thanh.trantien@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:25",
+        "verifyEndTimeStr": "19:53"
+    },
+    {
+        "email": "van.takhanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:44",
+        "verifyEndTimeStr": "19:09"
+    },
+    {
+        "email": "tam.daonhon@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:58",
+        "verifyEndTimeStr": "17:58"
+    },
+    {
+        "email": "duc.phamhuyen@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "13:02",
+        "verifyEndTimeStr": "17:59"
+    },
+    {
+        "email": "lieu.lethihong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:48",
+        "verifyEndTimeStr": "17:08"
+    },
+    {
+        "email": "hanh.buihong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:37",
+        "verifyEndTimeStr": "17:44"
+    },
+    {
+        "email": "tuan.nguyentrong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:10",
+        "verifyEndTimeStr": "18:41"
+    },
+    {
+        "email": "toan.nguyenduc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:37",
+        "verifyEndTimeStr": "17:58"
+    },
+    {
+        "email": "kien.trinhduy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:33",
+        "verifyEndTimeStr": "18:18"
+    },
+    {
+        "email": "phuc.dangvinh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:51",
+        "verifyEndTimeStr": "17:02"
+    },
+    {
+        "email": "phuong.nguyenhonghang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:01",
+        "verifyEndTimeStr": "17:02"
+    },
+    {
+        "email": "sang.dangngoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:05",
+        "verifyEndTimeStr": "18:19"
+    },
+    {
+        "email": "oanh.lethilan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:42",
+        "verifyEndTimeStr": "17:33"
+    },
+    {
+        "email": "thao.phanhong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:41",
+        "verifyEndTimeStr": "17:59"
+    },
+    {
+        "email": "thach.lengoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "10:57",
+        "verifyEndTimeStr": "18:20"
+    },
+    {
+        "email": "tuan.nguyenhuu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:30",
+        "verifyEndTimeStr": "17:50"
+    },
+    {
+        "email": "thien.nguyenvan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:25",
+        "verifyEndTimeStr": "17:57"
+    },
+    {
+        "email": "dung.hoxuan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:38",
+        "verifyEndTimeStr": "19:48"
+    },
+    {
+        "email": "khoa.dangledang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:26",
+        "verifyEndTimeStr": "18:05"
+    },
+    {
+        "email": "minh.phamanh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "19:18",
+        "verifyEndTimeStr": "21:44"
+    },
+    {
+        "email": "thang.leduc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:35",
+        "verifyEndTimeStr": "17:40"
+    },
+    {
+        "email": "nhat.ngoducminh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:27",
+        "verifyEndTimeStr": "18:35"
+    },
+    {
+        "email": "thinh.nguyenvan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:16",
+        "verifyEndTimeStr": "17:44"
+    },
+    {
+        "email": "huy.luuphuc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "12:08",
+        "verifyEndTimeStr": "18:22"
+    },
+    {
+        "email": "hien.tranthithu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:55",
+        "verifyEndTimeStr": "18:10"
+    },
+    {
+        "email": "thien.dangvan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:27",
+        "verifyEndTimeStr": "17:57"
+    },
+    {
+        "email": "trang.lethithu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:31",
+        "verifyEndTimeStr": "18:11"
+    },
+    {
+        "email": "huy.trannam@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:52",
+        "verifyEndTimeStr": "17:01"
+    },
+    {
+        "email": "khanh.lesy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:59",
+        "verifyEndTimeStr": "16:01"
+    },
+    {
+        "email": "tuan.phamminh2@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:07",
+        "verifyEndTimeStr": "12:09"
+    },
+    {
+        "email": "khanh.nguyenxuangia@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "09:41",
+        "verifyEndTimeStr": "17:44"
+    },
+    {
+        "email": "dat.lethanh2@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:11",
+        "verifyEndTimeStr": "17:58"
+    },
+    {
+        "email": "tinh.laidang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "13:12",
+        "verifyEndTimeStr": "17:45"
+    },
+    {
+        "email": "khanh.daungoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:53",
+        "verifyEndTimeStr": "12:06"
+    },
+    {
+        "email": "huy.vuminh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:57",
+        "verifyEndTimeStr": "12:01"
+    },
+    {
+        "email": "giang.lethithu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:43",
+        "verifyEndTimeStr": "18:08"
+    },
+    {
+        "email": "tin.doancong@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:24",
+        "verifyEndTimeStr": "17:43"
+    },
+    {
+        "email": "huy.nguyenquang1@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:24",
+        "verifyEndTimeStr": "17:32"
+    },
+    {
+        "email": "tin.trananh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:43",
+        "verifyEndTimeStr": "17:52"
+    },
+    {
+        "email": "anh.daovan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:25",
+        "verifyEndTimeStr": "17:50"
+    },
+    {
+        "email": "thuy.phamthiminh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:34",
+        "verifyEndTimeStr": "17:35"
+    },
+    {
+        "email": "nam.trinhhoai@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:40",
+        "verifyEndTimeStr": "17:44"
+    },
+    {
+        "email": "hung.nguyentan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:22",
+        "verifyEndTimeStr": "17:30"
+    },
+    {
+        "email": "hang.phamthiminh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:34",
+        "verifyEndTimeStr": "18:41"
+    },
+    {
+        "email": "tham.vuthi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:29",
+        "verifyEndTimeStr": "17:50"
+    },
+    {
+        "email": "chi.hoangha@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:38",
+        "verifyEndTimeStr": "17:40"
+    },
+    {
+        "email": "anh.nguyenthiphuong1@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:19",
+        "verifyEndTimeStr": "18:02"
+    },
+    {
+        "email": "vu.phamtuan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:00",
+        "verifyEndTimeStr": "17:54"
+    },
+    {
+        "email": "hoang.nguyenviet1@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:06",
+        "verifyEndTimeStr": "18:28"
+    },
+    {
+        "email": "linh.phamtuan@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:31",
+        "verifyEndTimeStr": "17:45"
+    },
+    {
+        "email": "toan.tranvu@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:27",
+        "verifyEndTimeStr": "17:44"
+    },
+    {
+        "email": "hao.doanvonhut@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "08:41",
+        "verifyEndTimeStr": "18:21"
+    },
+    {
+        "email": "truong.huynhphuoc@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "07:55",
+        "verifyEndTimeStr": "11:54"
+    },
+    {
+        "email": "anh.haduy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "11:29",
+        "verifyEndTimeStr": "17:34"
+    },
+    {
+        "email": "yen.tranthikim@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "11:28",
+        "verifyEndTimeStr": "17:34"
+    },
+    {
+        "email": "linh.nguyenduy@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "18:26",
+        "verifyEndTimeStr": "18:26"
+    },
+    {
+        "email": "khai.dochi@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "17:47",
+        "verifyEndTimeStr": "17:48"
+    },
+    {
+        "email": "nhu.nguythitam@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "17:19",
+        "verifyEndTimeStr": "17:19"
+    },
+    {
+        "email": "khanh.tranquang@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "11:47",
+        "verifyEndTimeStr": "17:57"
+    },
+    {
+        "email": "dat.laithe@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "11:47",
+        "verifyEndTimeStr": "17:57"
+    },
+    {
+        "email": "duc.phamtrung@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "11:44",
+        "verifyEndTimeStr": "17:52"
+    },
+    {
+        "email": "thu.nguyenhoanganh@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "17:50",
+        "verifyEndTimeStr": "17:50"
+    },
+    {
+        "email": "nguyen.phangia@ncc.asia",
+        "dateTime": "2022-12-01",
+        "verifyStartTimeStr": "13:11",
+        "verifyEndTimeStr": "18:36"
+    }
+]

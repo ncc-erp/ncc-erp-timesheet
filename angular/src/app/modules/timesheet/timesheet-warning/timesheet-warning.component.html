@@ -1,0 +1,48 @@
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
+  {{title}}
+</h1>
+<mat-dialog-content >
+  <div class="main-content">
+    <div class="body table-responsive">
+      <table class="table table-hover ">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Email</th>
+            <th>Date At</th> 
+            <th>Project Name</th> 
+            <th>Task Name</th>
+            <th>Off Hour</th>
+            <th>Working Hour</th> 
+            <th>Status</th> 
+            <th style="width:300px">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of listTimeSheetWarning; index as i">
+              <td>
+                <mat-checkbox color="primary"  [checked]="getChecked(item.id)"  disabled></mat-checkbox>
+              </td>
+              <td>{{ item.emailAddress}}</td>
+              <td>{{item.dateAt | date:"dd/MM/yyyy"}}</td>
+              <td>{{ item.projectName}}</td>
+              <td>{{ item.taskName}}</td>
+              <td>{{ item.hourOff}}</td>
+              <td>{{ item.workingTimeHour}}</td>
+              <td [innerHtml]="
+                convertNumberOfStringStatus(
+                  item.status
+                )
+              "></td>
+              <td>{{ item.mytimesheetNote}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button mat-dialog-close  (click)="close(false)">Cancel</button>
+  <button mat-raised-button color="primary" (click)="approveTimesheet()">Continue Approve</button>
+</mat-dialog-actions>

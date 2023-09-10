@@ -1,0 +1,153 @@
+<div class="card main-content" style="min-height: 340px !important;" >
+  <div style="display: flex;justify-content:  space-between;" class="header">
+    <h4 style="white-space: nowrap; display: inline;">Interns Info</h4>
+  </div>
+  <div style="margin: 15px 15px !important" id="intern-info">
+    <div class="report">
+      <div class="row report-left">
+
+        <div class="mt-3 margin-r5">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Search by intern email</mat-label>
+            <input matInput type="text" [(ngModel)]="searchText" (keyup.enter)="searchIntern()" placeholder="intern email">
+          </mat-form-field>
+        </div>
+
+        <div class=" margin-r5 display-flex mt-3">
+          <app-multiple-select
+            labelName="Basic Traner"
+            [listOption]="basicTraners"
+            (onChange)="onChangeBasicTrannerSelected($event)"
+            [defaultValue]="selectedBasicTrainerIds"
+            [disabled]="isLoading"
+          >
+          </app-multiple-select>
+        </div>
+        <div class="display-flex mt-3 margin-r5">
+          <app-multiple-select
+            labelName="Branch"
+            [listOption]="branchIds"
+            (onChange)="onChangeBranchSelected($event)"
+            [defaultValue]="selectedBranchIds"
+            [disabled]="isLoading"
+          >
+          </app-multiple-select>
+        </div>
+
+        <div class=" margin-r5">
+          <mat-form-field appearance="outline" class="w-100" style="padding-top: 3px;">
+            <mat-select placeholder="Date Filter" (selectionChange)="onOnboardChange()" [(ngModel)]="dateFilterType">
+              <mat-option *ngFor="let item of dateFilterTypeOptions" [value]="dateFilterTypeOptions.indexOf(item)">
+                <p>{{ item }}</p>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="margin-r5 margin-l14" >
+          <app-date-selector-new (onDateSelectorChange)="onDateChange($event)"
+          [label] = "'Date Type'"
+          ></app-date-selector-new>
+        </div>
+
+        <div class=" margin-l14 button-filter" >
+          <button (click)="getDataPage(1)" mat-flat-button color="primary">Filter</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="" [busy]="isLoading" >
+      <div class="card-body">
+        <div class=" table-responsive">
+          <div class="fixTableHead" style="margin-bottom:15px !important; margin-top:15px !important">
+            <table class="table  text-nowrap styleUser" >
+              <thead>
+                <tr style="border: none;">
+                  <th style="width: 15px;">#</th>
+                  <th style="width: 160px;">Intern </th>
+                  <th style="width: 160px;">Basic Traner</th>
+                  <th *ngFor="let item of listMonth , let i=index" style="width:110px;">{{item}}</th>
+                  <th *ngIf="!listMonth || listMonth.length < 9"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of internsInfo| paginate
+                : {
+                    id: 'server',
+                    itemsPerPage: pageSize,
+                    currentPage: pageNumber,
+                    totalItems: totalItems
+                  } ; let i = index">
+                  <td class="text-center">{{i+1 + (pageNumber - 1) * pageSize}}</td>
+                  <td>
+                    <div style="display: flex; justify-content: flex-start; align-items: center; width: fit-content;">
+                      <div>
+                        <div>
+                          <img style="max-width: 40px;min-width: 40px; height: 40px; border-radius: 50%;"
+                            [src]='getAvatar(item.myInfo.avatarFullPath)' alt="avatar">
+                      </div>
+                      </div>
+                      <div style="margin-left: 3px; width: fit-content;">
+                        <div>
+                          <span>
+                            <strong>{{item.myInfo.fullName}}</strong>
+                          </span>
+                        </div>
+                        <div>
+                          <ng-container *ngIf="item.myInfo.type || item.myInfo.type == 0">
+                            <span class="label "
+                              [ngClass]="item.myInfo.type == 0 ? 'bg-red' : item.myInfo.type == 1 ? 'bg-green' : 'bg-blue'">
+                              {{userTypes[item.myInfo.type]?.label}}
+                            </span>
+                          </ng-container>
+                          <span class="label" [ngStyle]="userLevels[item.myInfo.level].style" *ngIf = "item.myInfo.level && permission.isGranted(InternsInfo_ViewLevelIntern)">
+                            {{item.myInfo.level | level}}
+                          </span>
+                          <span class="label " [style.backgroundColor]="item.myInfo.branchColor" *ngIf="item.myInfo.branchDisplayName">
+                            {{item.myInfo.branchDisplayName}}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display: flex; justify-content: flex-start; align-items: center;" *ngIf = "item.basicTrannerFullName">
+                      <div style="margin-left: 3px;">
+                        <div>
+                          <span>
+                            <strong>{{item.basicTrannerFullName}}</strong>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td *ngFor="let detail of item.reviewDetails ; index as i"
+                  [matTooltip]="detail.reviewerName != null ? 'Reviewer: ' + detail.reviewerName + '\n Review Note: ' + detail.note : ''"
+                  [ngClass]="getClassWarningType(detail.cellColor,detail.hasReview)"
+                  class="text-center month-info">
+                  <div class = "UserJoin">
+                    <i *ngIf="detail.isStart" class="fa fa-circle" aria-hidden="true"><i class="fa fa-circle circle-inside" aria-hidden="true"></i></i>
+                    <i *ngIf="detail.isStop" class="fa fa-circle" aria-hidden="true"><i class="fa fa-square square-inside" aria-hidden="true"></i></i>
+                  </div>
+                  <p style="margin: 0 !important;">{{detail.display}}</p>
+                  <div class="d-flex" style="justify-content: center; align-items: center;">
+                    <p style="margin: 0 3px 5px 0;">{{detail.rateStar}}</p>
+                    <span *ngIf="detail.rateStar" [ngClass]="getStarColorByFloatRateStar(detail.rateStar)">
+                      <mat-icon style="font-size: 22px;">star</mat-icon>
+                    </span>
+                  </div>
+                </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <h4 class="text-center" *ngIf="!internsInfo || !internsInfo.length "> No data!</h4>
+        <div class="abp-pagination-controls-wrapper">
+          <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="pageSizeChange($event)" (pageChange)="getDataPage($event)" id="server">
+          </abp-pagination-controls>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

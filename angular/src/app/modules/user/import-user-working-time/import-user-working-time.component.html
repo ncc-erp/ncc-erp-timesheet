@@ -1,0 +1,15 @@
+<div class="all_dialog">
+  <div class="header_h">
+      <div class="h_drag_and_drop">
+          <h3>Import user working time</h3>
+      </div>
+  </div>
+  <div style="padding-top: 10px; border-top: 1px solid #eee;">
+      <label style="display: block; margin-bottom: 15px;">Choose file</label>
+      <input type="file" class="form-group" id="file" (change)="selectFile($event)">
+  </div>
+  <div style="margin-top: 30px;">
+      <button mat-flat-button color="primary" class="btn_accept" (click)="importExcel()">Import</button>
+      <button mat-raised-button style="margin-left: 10px;" mat-dialog-close>Cancel</button>
+  </div>
+</div>

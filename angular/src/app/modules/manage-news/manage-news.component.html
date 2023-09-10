@@ -1,0 +1,51 @@
+<div class="row clearfix" [@routerTransition]>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card main-content">
+            <div class="header">
+                <h2>{{"Manage News"}}</h2>
+                <!-- refresh -->
+            </div>
+
+            <div class="body table-responsive">
+                <div class="row clearfix">
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                        <button mat-raised-button color="primary" class="pull-left" (click)="createNews()">
+              <mat-icon>add</mat-icon>Create News
+            </button>
+                    </div>
+                </div>
+                <table class="table table-hover table-striped" [busy]="isTableLoading">
+                    <tbody>
+                        <tr *ngFor="let news of lists | paginate: { id: 'server', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems }">
+
+                            <td>
+                                <h4>
+                                    <a class="router" (click)="detailNews(news.id)"><Strong>{{news.title}}</Strong></a>
+                                    <h4><small>{{news.creationTime | date: "yyyy-MM-dd"}}</small></h4>
+                                </h4>
+                                <br>
+                            </td>
+                            <td style="width:50px">
+
+                                <div class="pull-right" id="btnAction" style="margin-bottom: 20px;">
+                                    <button style="margin-top:15px" mat-raised-button [matMenuTriggerFor]="actions">Actions
+                                      <i class="icon-32 material-icons">arrow_drop_down</i>
+                                    </button>
+                                    <mat-menu #actions="matMenu">
+
+                                        <button mat-menu-item (click)="editNews(news)">Edit</button>
+                                        <button class="text-danger" mat-menu-item (click)="delete(news)">Delete</button>
+                                    </mat-menu>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-align: center;" *ngIf="totalItems > pageSize">
+                    <pagination-controls (pageChange)="getDataPage($event)" id="server"></pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- <router-outlet></router-outlet> -->

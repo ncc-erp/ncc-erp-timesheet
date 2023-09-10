@@ -1,0 +1,160 @@
+<div class="row clearfix">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Tardiness / Leave Early" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu123="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="clearfix" style="padding: 20px 5px 0px 5px">
+        <div class="col-sm-2" style="padding:5px 15px 10px 15px">
+          <mat-form-field appearance="outline">
+            <mat-label>Year</mat-label>
+            <mat-select name="year" [(value)]='year' (selectionChange)="refresh()">
+              <mat-option *ngFor="let item of listYear" [value]='item'>
+                {{item}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-sm-2" style="padding:5px 15px 10px 15px">
+          <mat-form-field appearance="outline">
+            <mat-label>Month</mat-label>
+            <mat-select name="month" [(value)]='month' (selectionChange)="refresh();changeRouter();">
+              <mat-option *ngFor="let item of listMonth" [value]='item'>
+                {{item+1}}
+              </mat-option>
+
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-sm-2" style="padding:5px 15px 10px 15px">
+          <mat-form-field  appearance="outline">
+            <mat-label>Branch</mat-label>
+            <mat-select
+              [disabled]="permission.isGranted(VIEW_ONLY_ME_TARDINESS_LEAVE_EARLY) && !permission.isGranted(VIEW_TARDINESS_LEAVE_EARLY)"
+              name="branchId" [(value)]="branchId" (selectionChange)="refresh()">
+              <mat-option>
+                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
+                  noEntriesFoundLabel= "No matching found"></ngx-mat-select-search>
+              </mat-option>
+
+              <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
+                  {{branch.displayName}}
+              </mat-option>
+          </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-sm-3" style="padding:5px 15px 10px 15px">
+          <mat-form-field appearance='outline'>
+            <mat-label>User Email</mat-label>
+            <mat-select [disabled]="permission.isGranted(VIEW_ONLY_ME_TARDINESS_LEAVE_EARLY) && !permission.isGranted(VIEW_TARDINESS_LEAVE_EARLY)" [formControl]='userControl' [(value)]="userId" (selectionChange)="refresh()">
+              <mat-option>
+                <ngx-mat-select-search [formControl]="userSearch" placeholderLabel="Search by Email"
+                noEntriesFoundLabel= "No matching found">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let item of listUserFiltered" [value]='item.id'>
+                {{item.emailAddress}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- <div class="col-sm-2">
+          <file-upload (outputFileInfo)="upLoadTimekeeping($event)" [isLoading]="isLoadingFileUpload" fileType=".xlsx"
+            [custom]="'btn-customs btn btn-default outline btn-file'" [title]="'Import'">
+          </file-upload>
+        </div> -->
+
+        <div class="col-sm-3">
+          <button class="control-btn" *ngIf="permission.isGranted(GET_DATA_TARDINESS_LEAVE_EARLY)" mat-flat-button color="primary" (click)="getDataCheckInInternal()" style="margin-right: 10px;">Get data</button>
+          <button class="control-btn" *ngIf="permission.isGranted(EXPORT_EXCEL)" mat-flat-button color="primary" (click)="exportExcel()">Export Excel</button>
+        </div>
+      </div>
+
+      <div style="position: relative; padding: 20px;" [busy]="isTableLoading">
+        <div class="table-responsive">
+          <table class="table table-hover table-striped styleUser">
+            <thead>
+              <tr>
+                <th style="width: 40px; min-width: 0px;">
+                  {{ "STT" | localize }}
+                </th>
+                <th style="min-width: 250px;">
+                  {{ "User" | localize }}
+                </th>
+                <!-- <th style="min-width: 70px;">
+                  {{ "User Code" | localize }}
+                </th> -->
+                <th style="min-width: 200px; width: 200px;">
+                  {{ "Email" | localize }}
+                </th>
+                <th style="min-width: 160px; width: 160px;">
+                  {{ "Check in late" | localize }}
+                </th>
+                <th style="min-width: 160px; width: 160px;">
+                  {{ "Check out early" | localize }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of (listUser | paginate : {
+                                                id: 'server1',
+                                                itemsPerPage: pageSize,
+                                                currentPage: pageNumber,
+                                                totalItems: totalItems
+                                            }), index as i">
+                <td style="text-align: center;">{{(pageNumber - 1)*pageSize + i + 1}}</td>
+                <td>
+                  <div style="display: flex; justify-content: flex-start; align-items: center; padding: 1rem;">
+                    <div>
+                      <button class="btn-route" (click)="viewDetail(item.userId)">
+                        <img style="max-width: 40px;min-width: 40px; height: 40px; border-radius: 50%;"
+                          [src]='getAvatar(item)' alt="avatar">
+                      </button>
+                    </div>
+                    <div style="margin-left: 3px;">
+                      <div>
+                        <div>
+                          <button class="btn-route"
+                          (click)="viewDetail(item.userId)">{{item.userName}}
+                          </button>
+                        </div>
+                        <div class="label" [style.backgroundColor]="item.branchColor">
+                          {{item.branchDisplayName}}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <!-- <td style="text-align: center;">{{item.userCode}}</td> -->
+                <td style="text-align: left;">{{item.userEmail}}</td>
+                <td style="text-align: center;" [class]="getCss(item.numberOfTardies)">{{item.numberOfTardies}}</td>
+                <td style="text-align: center;" [class]="getCss(item.numberOfLeaveEarly)">{{item.numberOfLeaveEarly}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="abp-pagination-controls-wrapper">
+          <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
+            (pageChange)="getDataPage($event)" id="server1">
+          </abp-pagination-controls>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

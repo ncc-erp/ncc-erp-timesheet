@@ -1,0 +1,289 @@
+<div class="row clearfix" id="off-day-project">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content" [busy]="isLoading">
+      <div class="header">
+        <h2 class="title">{{ "Manage team working calendar" | localize }}</h2>
+        <div class="filter-date">
+          <div class="item">
+            <mat-form-field appearance="outline">
+              <mat-label>Year</mat-label>
+              <mat-select
+                [(value)]="year"
+                (selectionChange)="onDayOffTypeChange()"
+              >
+                <mat-option *ngFor="let item of listYear" [value]="item">
+                  {{ item }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="item">
+            <mat-form-field appearance="outline">
+              <mat-label>Month</mat-label>
+              <mat-select
+                [(value)]="month"
+                (selectionChange)="onDayOffTypeChange()"
+              >
+                <mat-option *ngFor="let item of listMonth" [value]="item">
+                  {{ item + 1 }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="header-dropdown m-r--5 d-flex">
+          <div>
+            <div class="btn-group m-5">
+              <div
+                class="btn btn-primary"
+                mwlCalendarPreviousView
+                [view]="view"
+                [(viewDate)]="viewDate"
+                (viewDateChange)="closeOpenMonthViewDay()"
+              >
+                Previous
+              </div>
+              <div
+                class="btn btn-outline-secondary"
+                mwlCalendarToday
+                [(viewDate)]="viewDate"
+                (viewDateChange)="closeOpenMonthViewDay()"
+              >
+                Today
+              </div>
+              <div
+                class="btn btn-primary"
+                mwlCalendarNextView
+                [view]="view"
+                [(viewDate)]="viewDate"
+                (viewDateChange)="closeOpenMonthViewDay()"
+              >
+                Next
+              </div>
+            </div>
+          </div>
+          <div class="center-flex">
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="headerMenu123"
+              class="header-dropdown-mat-icon-button"
+            >
+              <mat-icon style="margin-top: 20px">more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu123="matMenu">
+              <button mat-menu-item (click)="refreshData()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+      </div>
+      <div class="row text-center p-20">
+        <div class="col-md-2 text-left">
+          <div class="clearfix flex">
+            <mat-form-field appearance="outline">
+              <mat-label>Search by email</mat-label>
+              <input
+                matInput
+                [(ngModel)]="searchText"
+                (keyup.enter)="refreshData()"
+              />
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="col-md-10">
+          <div class="row">
+            <div class="col-md-2">
+              <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select
+                  [(value)]="dayAbsentStatus"
+                  (selectionChange)="onLeaveDayTypeChange()"
+                >
+                  <mat-option
+                    *ngFor="let item of dayAbsentStatusList"
+                    [value]="APP_CONSTANT.AbsenceStatusFilter[item]"
+                  >
+                    {{ item }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-md-2">
+              <app-multiple-select-new
+                labelName="Project"
+                [listOption]="listProject"
+                (onChange)="onChangeListProjectIdSelected($event)"
+                [defaultValue]="listProjectSelected"
+                [disabled]="isLoading"
+              >
+              </app-multiple-select-new>
+            </div>
+            <div class="col-md-2">
+              <mat-form-field appearance="outline">
+                <mat-label>Request Type</mat-label>
+                <mat-select
+                  [(value)]="absentDayType"
+                  (selectionChange)="onLeaveDayTypeChange()"
+                >
+                  <mat-option [value]="-1">All</mat-option>
+                  <mat-option
+                    *ngFor="let item of dayAbsentTypeList"
+                    [value]="APP_CONSTANT.DayAbsenceType[item]"
+                  >
+                    {{ item }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-md-2" >
+              <mat-form-field appearance="outline" *ngIf="absentDayType === 0">
+                <mat-label>Type Of Request Type</mat-label>
+                <mat-select
+                  [(value)]="dayType"
+                  (selectionChange)="onDayTypeChange()"
+                >
+                  <mat-option [value]="-1">All</mat-option>
+                  <mat-option
+                    *ngFor="let item of dayTypeList"
+                    [value]="APP_CONSTANT.AbsenceType[item]"
+                  >
+                    {{ item | dayType  }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-md-3">
+              <mat-form-field appearance="outline" *ngIf="absentDayType === 0">
+                <mat-label>Off Type</mat-label>
+                <mat-select
+                  id="dayOffType"
+                  [(value)]="dayOffType"
+                  (selectionChange)="onDayOffTypeChange()"
+                >
+                  <mat-option [value]="-1">All</mat-option>
+                  <mat-option
+                    *ngFor="let type of dayOffTypes"
+                    [value]="type.id"
+                    >{{ type.name }}</mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-md-1">
+              <button
+                style="height: 44px; margin-top: 4px"
+                mat-flat-button
+                (click)="onFilter()"
+                color="primary"
+              >
+                Filter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br />
+      <div style="padding: 0px 20px 20px; overflow-x: scroll">
+        <div [ngSwitch]="view">
+          <mwl-calendar-month-view
+            class="spe-wrap"
+            *ngSwitchCase="CalendarView.Month"
+            [cellTemplate]="customCellTemplate"
+            [viewDate]="viewDate"
+            [events]="events"
+            [refresh]="refresh"
+            [activeDayIsOpen]="activeDayIsOpen"
+            (beforeViewRender)="getData($event)"
+            (dayClicked)="dayClicked($event.day)"
+          >
+          </mwl-calendar-month-view>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #customCellTemplate let-day="day" let-locale="locale">
+  <div class="cal-cell-top position-relative" style="overflow: hidden">
+    <span class="cal-day-badge" *ngIf="day.cssClass == 'back-red'">Off</span>
+    <!-- <span class="cal-day-badge" *ngIf="day.badgeTotal > 0 && day.cssClass != 'back-red'">{{day.badgeTotal}}</span> -->
+    <span class="cal-day-number">{{
+      day.date | calendarDate : "monthViewDayNumber" : locale
+    }}</span>
+    <div class="cal-day-item">
+      <div *ngFor="let item of day.events">
+        <div
+          style="
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin: 0px 10px;
+          "
+        >
+          <div>
+            <img
+              style="border-radius: 50%"
+              [src]="getAvatar(item)"
+              alt="avatar"
+            />
+          </div>
+          <div>
+            <span style="background-color: #03a9f4" class="pin-wrap">{{
+              item.color.secondary
+            }}</span>
+          </div>
+          <div style="display: flex">
+            <span
+              class="cal-day-badge text-primary day-chip-full-day mr-1"
+              *ngIf="item.meta == 0 && !item.absenceTime"
+              >Off</span
+            >
+            <span
+              class="cal-day-badge text-primary day-chip-tardiness-leave-early mr-1"
+              *ngIf="
+                item.meta == 0 &&
+                item.absenceTime == APP_CONSTANT.OnDayType.BeginOfDay
+              "
+              >ĐM</span
+            >
+            <span
+              class="cal-day-badge text-primary day-chip-tardiness-leave-early mr-1"
+              *ngIf="
+                item.meta == 0 &&
+                item.absenceTime == APP_CONSTANT.OnDayType.EndOfDay
+              "
+              >VS</span
+            >
+            <span
+              class="cal-day-badge text-primary onsite"
+              *ngIf="item.meta == 1"
+              >Onsite</span
+            >
+            <span
+              class="cal-day-badge text-primary remote"
+              *ngIf="item.meta == 2"
+              >Remote</span
+            >
+
+            <span
+              class="mt-1"
+              [ngClass]="getAbsenceClasses(item.color.primary.split(' | ')[0])"
+              >{{
+                getAbsenceText(
+                  item.color.primary.split(
+                    "
+              | "
+                  )[0],
+                  item.color.primary.split(" | ")[1],
+                  item.meta
+                )
+              }}</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

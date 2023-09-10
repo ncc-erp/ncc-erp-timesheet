@@ -1,0 +1,67 @@
+<form #createForm="ngForm" autocomplete="off" id="frm_create_group" class="form-import" novalidate [busy]="isSaving">
+    <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>
+        Import user to retro
+    </h1>
+    <mat-dialog-content class="mat-typography" style="width:450px; height: 140px;">
+      <div class="col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Project</mat-label>
+              <mat-select (openedChange)="handleOpenSelectProject()" (selectionChange)="projectChange($event)" required>
+                <div class="p-2 input-wrapper hang-on">
+                  <input
+                    type="text"
+                    matInput
+                    class="search-input"
+                    [value]="searchText"
+                    placeholder="Search Text"
+                    (keydown)="$event.stopPropagation()"
+                    (input)="handleChangeSearchText($event)"
+
+                  />
+                </div>
+                <ng-container *ngFor="let item of listProjectBySearch">
+                  <mat-option [value]="item.id">
+                    {{ item.code }} - {{ item.name }}
+                  </mat-option>
+                </ng-container>
+              </mat-select>
+            </mat-form-field>
+          </div>
+            <div class="col-md-6">
+              <mat-form-field appearance="outline">
+                <mat-label>PM</mat-label>
+                <mat-select  (openedChange)="handleOpenSelectPm()" #select="matSelect" (selectionChange)="pmChange($event)" [(ngModel)]="pmId" name="pmId" required>
+                  <div class="p-2 input-wrapper hang-on">
+                    <input
+                      type="text"
+                      matInput
+                      class="search-input"
+                      [value]="searchPm"
+                      placeholder="Search PM by name or email"
+                      (input)="handleSearchPm($event)"
+                      (keydown)="$event.stopPropagation()"
+                    />
+                  </div>
+                  <ng-container *ngFor="let item of listPmBySearch">
+                    <mat-option [(value)]="item.pmId" >
+                      <span *ngIf="item.isDefault == true" matTooltip="PM Default!">{{item.pmFullName}} - {{ item.pmEmailAddress}}</span>
+                      <span *ngIf="item.isDefault == false">{{item.pmFullName}} - {{ item.pmEmailAddress}}</span>
+                    </mat-option>
+                  </ng-container>
+                </mat-select>
+              </mat-form-field>
+            </div>
+        <div class="mt-2">
+            <input type="file" class="form-group" id="file" (change)="onSelectFile($event)">
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button class="btn btn-default" mat-raised-button type="button" mat-dialog-close>
+            {{l('Cancel')}}
+        </button>
+        <button mat-raised-button color="primary" [disabled]="!createForm.valid || isSaving" type="submit"
+            flex="15" (click)="onImportExcel()">
+            {{l('Import')}}
+        </button>
+    </mat-dialog-actions>
+</form>

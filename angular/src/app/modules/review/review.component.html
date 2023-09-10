@@ -1,0 +1,141 @@
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="height: auto; padding: 0px">
+  <div class="card main-content" style="height: 100%">
+    <div class="header">
+      <h2>{{ "Review Intern" | localize }}</h2>
+      <ul class="header-dropdown m-r--5">
+        <li>
+          <button mat-icon-button [matMenuTriggerFor]="headerMenu2" class="header-dropdown-mat-icon-button">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #headerMenu2="matMenu">
+            <button mat-menu-item (click)="refresh()">
+              <mat-icon>refresh</mat-icon>
+              <span>{{ "Refresh" | localize }}</span>
+            </button>
+          </mat-menu>
+        </li>
+      </ul>
+    </div>
+    <div class="body row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <button *ngIf="permission.isGranted(ReviewIntern_AddNewReviewByCapability)" type="button"
+          class="btn-format btn-add btn btn-danger btn-size" data-toggle="tooltip"
+          title="Review Intern theo các tiêu chí" (click)="newReviewInternCapability()">
+          <mat-icon>add</mat-icon>
+          New Review
+        </button>
+        <button  *ngIf="permission.isGranted(ReviewIntern_ViewAllReport)"
+        type="button" class="btn-format btn-add btn btn-success btn-size" (click)="viewReport()">
+          <mat-icon>event_note</mat-icon>
+          View Report
+        </button>
+      </div>
+      <div class="table-responsive col-lg-12 col-md-12 col-sm-12 col-xs-12" [busy]="isTableLoading">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>{{ "#" | localize }}</th>
+              <th>{{ "Date" | localize }}</th>
+              <th>{{ "Actions" | localize }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of reviewList; let i = index">
+              <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1">{{ i + 1 }}</td>
+              <td class="time col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                <div (click)="viewReviewDetail(item)">
+                  <span *ngIf="item.isActive == true" style="padding-left: 66px">{{ item.month }} - {{ item.year
+                    }}</span>
+                  <span *ngIf="item.isActive == false" style="padding-left: 80px">{{ item.month }} - {{ item.year
+                    }}</span>
+                  <span *ngIf="item.isActive == true" style="float: right" class="label label-success">Active</span>
+                  <span *ngIf="item.isActive == false" style="float: right" class="label label-danger"> InActive</span>
+                </div>
+              </td>
+              <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                <div class="actions">
+                  <button class="btn-actions" *ngIf="
+                      permission.isGranted(ReviewIntern_DeActive) &&
+                      item.isActive == true
+                    " mat-raised-button (click)="changeDeActive(item.id)">
+                    <i _ngcontent-c13="" class="material-icons ng-star-inserted" style="color: red">
+                      cancel
+                    </i>
+                    DeActivate
+                  </button>
+                  <button class="btn-actions" *ngIf="
+                      permission.isGranted(ReviewIntern_Active) &&
+                      item.isActive == false
+                    " mat-raised-button (click)="changeActive(item.id)">
+                    <i _ngcontent-c13="" class="material-icons ng-star-inserted" style="color: green">
+                      check_circle
+                    </i>
+                    Activate
+                  </button>
+                  <button class="devide-item" *ngIf="permission.isGranted(ReviewIntern_Delete)" mat-raised-button
+                    (click)="deleteListReviewInternCapability(item.id)">
+                    <mat-icon class="mat-18">delete</mat-icon> Delete
+                  </button>
+
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal" tabindex="-1" role="dialog" id="showReportIntern">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Report Internship</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body body-config">
+        <table class="table table-striped table-responsive table-bordered" id="showTableReport">
+          <thead>
+            <tr class="bg-warning">
+              <th>STT</th>
+              <th>Người đào tạo</th>
+              <th>Họ tên</th>
+              <th>Tháng 1</th>
+              <th>Tháng 2</th>
+              <th>Tháng 3</th>
+              <th>Tháng 4</th>
+              <th>Tháng 5</th>
+              <th>Tháng 6</th>
+              <th>Tháng 7</th>
+              <th>Tháng 8</th>
+              <th>Tháng 9</th>
+              <th>Tháng 10</th>
+              <th>Tháng 11</th>
+              <th>Tháng 12</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of reportList; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ item.reviewer }}</td>
+              <td>{{ item.fullname }}</td>
+              <td *ngFor="
+                  let data of item.listLevelForMonth | slice: 1;
+                  let j = index
+                " [ngClass]="customClass(j, item)">
+                {{ data }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

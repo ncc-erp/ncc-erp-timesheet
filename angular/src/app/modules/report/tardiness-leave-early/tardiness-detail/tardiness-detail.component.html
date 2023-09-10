@@ -1,0 +1,379 @@
+<div class="row clearfix">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2 class="one-line title">{{ "Tardiness / Leave Early Detail: " | localize }}
+          <label for="selectMonth" style="margin:6px">Month</label>
+          <mat-form-field class="month" appearance="legacy">
+            <!-- <mat-label>Month</mat-label> -->
+            <mat-select [(value)]="month" (selectionChange)="onDateChange()" name="selectMonth">
+              <mat-option *ngFor="let item of months" [value]='item'>
+                {{item +1}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <label for="selectYear" style="margin:6px">Year</label>
+          <mat-form-field class="year" appearance="legacy">
+            <mat-select [(value)]="year" (selectionChange)="onDateChange()" name="selectYear">
+              <mat-option *ngFor="let item of years" [value]='item'>
+                {{item}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </h2>
+        <button mat-icon-button class="btn-back" (click)="onBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu123="matMenu">
+              <button mat-menu-item (click)="getData()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+
+      <div class="row text-center" style="padding: 15px;">
+        <!-- <div class="col-md-3" style="margin-top: 20px;margin-bottom: 10px;">
+          <div class="btn-group">
+            <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
+              (viewDateChange)="closeOpenMonthViewDay()">
+              Previous
+            </div>
+            <div class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate"
+              (viewDateChange)="closeOpenMonthViewDay()">
+              Today
+            </div>
+            <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate"
+              (viewDateChange)="closeOpenMonthViewDay()">
+              Next
+            </div>
+          </div>
+        </div> -->
+        <div class="col-sm-1 col-md-1"></div>
+        <div class="col-sm-2 col-md-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Day</mat-label>
+            <mat-select [(value)]="selectedDay" (selectionChange)="onDateChange()">
+              <mat-option [value]="-1">All</mat-option>
+              <mat-option *ngFor="let item of dayList" [value]='item'>
+                {{item}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- <div class="clearfix flex">
+          <div class="col-sm-2 col-md-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Month</mat-label>
+              <mat-select [(value)]="month" (selectionChange)="onDateChange()">
+                <mat-option *ngFor="let item of months" [value]='item'>
+                  {{item +1}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-sm-2 col-md-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Year</mat-label>
+              <mat-select [(value)]="year" (selectionChange)="onDateChange()">
+                <mat-option *ngFor="let item of years" [value]='item'>
+                  {{item}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div> -->
+
+        <div class="col-md-2 col-sm-2">
+          <mat-form-field appearance='outline'>
+            <mat-label>User Email</mat-label>
+            <mat-select [disabled]="!permission.isGranted(VIEW_TARDINESS_LEAVE_EARLY)" name="searchUser"
+              [formControl]='userControl' [(ngModel)]="userId" (ngModelChange)="onUserChange()">
+              <mat-option>
+                <ngx-mat-select-search [formControl]="userSearch" placeholderLabel="Search by Email"
+                noEntriesFoundLabel= "No matching found">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option [value]="-1">All</mat-option>
+              <mat-option
+                (click)="viewDetail(item.id)"
+                *ngFor="let item of listUserFiltered" [value]='item.id'>
+                {{item.emailAddress}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-sm-2 col-md-2">
+          <mat-form-field appearance="outline">
+            <mat-label> {{ "Branch" | localize }}</mat-label>
+            <mat-select
+              name="selectedBranch" [(value)]="selectedBranch" (selectionChange)="getData()">
+              <mat-option>
+                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
+                  noEntriesFoundLabel= "No matching found"></ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
+                  {{branch.displayName}}
+              </mat-option>
+          </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-sm-2 col-md-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Trạng thái</mat-label>
+            <mat-select
+              name="selectedStatus" [(value)]="selectedStatus" (selectionChange)="getData()">
+              <mat-option [value]='-1'>All</mat-option>
+              <mat-option *ngFor="let item of APP_CONSTANT.PunishRules" [value] = 'item.value'>
+                {{item.name}}
+              </mat-option>
+          </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-sm-2 col-md-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Complain</mat-label>
+            <mat-select [(value)]="isComplain" (selectionChange)="onComplainChange()">
+              <mat-option [value]='-1'>All</mat-option>
+              <mat-option [value]=true>Complain</mat-option>
+              <mat-option [value]=false>Not Complain</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- <div class="col-md-2 col-sm-2 complain">
+          <mat-checkbox
+          [checked]="isComplain"
+          (change)="onComplainChange()"
+          >
+            Complain?
+          </mat-checkbox>
+        </div> -->
+      </div>
+
+
+
+      <div style="position: relative; padding: 20px;" [busy]="isTableLoading">
+        <div class="table-responsive">
+          <div class="fixTableHead">
+            <table class="table table-hover table-striped styleUser">
+              <thead>
+                <tr style="border:none">
+
+                  <th style="min-width: 50px; max-width: 220px;" rowspan="2"
+                  (click)="handleSortByColumn('userName')" style="cursor: pointer">
+                    {{ "User" | localize }}
+                    <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'userName'"></i>
+                    <i *ngIf="currentSortColumn !== 'userName'" class="fas fa-sort"></i>
+                  </th>
+                  <th style="width: 140px;" rowspan="2">
+                    {{ "Action" | localize }}
+                  </th>
+                  <th style="min-width: 70px; width: 70px;" rowspan="2">
+                    {{ "Date" | localize }}
+                  </th>
+                  <th colspan="2">
+                    {{ "Register time" | localize }}
+                  </th>
+                  <th colspan="2">
+                    {{ "Checking time" | localize }}
+                  </th>
+                  <th style="min-width: 100px;" colspan="2">
+                    {{ "Result" | localize }}
+                  </th>
+                  <th rowspan="2" style="min-width: 50px; max-width: 100px;"
+                  (click)="handleSortByColumn('editByUserName')" style="cursor: pointer">
+                    {{ "Edit by" | localize }}
+                    <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'editByUserName'"></i>
+                    <i *ngIf="currentSortColumn !== 'editByUserName'" class="fas fa-sort"></i>
+                  </th>
+                  <th rowspan="2" style="min-width: 50px; max-width: 100px;">
+                    {{ "Tracker Time" | localize }}
+                  </th>
+
+                  <th style="width: 80px;" rowspan="2">
+                    {{ "Punishment Money" | localize }}
+                  </th>
+                  <!-- <th style="min-width: 113px;" rowspan="2">
+                    {{ "Punishment Name" | localize }}
+                  </th> -->
+                  <th rowspan="2" style="width: 250px;"
+                  (click)="handleSortByColumn('userNote')" style="cursor: pointer">
+                    {{ "Complain" | localize }}
+                    <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'userNote'"></i>
+                    <i *ngIf="currentSortColumn !== 'userNote'" class="fas fa-sort"></i>
+                  </th>
+                  <th rowspan="2" style="width: 250px;"
+                  (click)="handleSortByColumn('noteReplyToString')" style="cursor: pointer">
+                    {{ "Complain Reply" | localize }}
+                    <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'noteReplyToString'"></i>
+                    <i *ngIf="currentSortColumn !== 'noteReplyToString'" class="fas fa-sort"></i>
+                  </th>
+
+                </tr>
+                <tr style="border: none;">
+                  <th style="width: 60px; ">
+                    <div>In</div>
+                  </th>
+                  <th style="width: 60px; ">
+                    <div>Out</div>
+                  </th>
+                  <th style="width: 60px;  ">
+                    <div>In</div>
+                  </th>
+                  <th style="width: 60px;">
+                    <div>Out </div>
+                  </th>
+                  <th style="width: 60px;  ">
+                    <div>Late</div>
+                  </th>
+                  <th style="width: 60px;">
+                    <div>Early</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="let item of listTimekeeping | paginate: { itemsPerPage: itemPerPage, currentPage: page }, index as i">
+                  <td>
+                    <div style="display: flex; justify-content: flex-start; align-items: center;">
+                      <div>
+                        <span mat-dialog-close>
+                          <img style="max-width: 40px;min-width: 40px; height: 40px; border-radius: 50%;"
+                            [src]='getAvatar(item)' alt="avatar">
+                        </span>
+                      </div>
+                      <div style="margin-left: 3px;">
+                        <div>
+                          <div>
+                            <span *ngIf="item.userName!=null" mat-dialog-close>{{item.userName}}
+                            </span>
+                            <br>
+                            <span *ngIf="item.userEmail!=null" mat-dialog-close>{{item.userEmail}}
+                            </span>
+                          </div>
+                          <div *ngIf="item.branchId!=null" class="label status-label" [style.backgroundColor]="item.branchColor">{{ item.branchDisplayName}}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center" style="white-space: nowrap;">
+                    <button *ngIf="!item.isEditing && permission.isGranted(EDIT_TARDINESS_LEAVE_EARLY)"
+                      class="btn btn-default" style="margin-right: 10px;" (click)="item.isEditing=true">
+                      Edit
+                    </button>
+                    <button *ngIf="!item.isEditing && permission.isGranted(Timekeeping_ReplyUserNote)"
+                      class="btn btn-default" (click)="replyComplain(item)">
+                      Reply
+                    </button>
+                    <div *ngIf=" item.isEditing">
+                      <button mat-mini-fab class="btn-success button24" style="margin-right: 10px;"
+                        (click)="onSave(item)">
+                        <mat-icon class="icon24">done</mat-icon>
+                      </button>
+                      <button mat-mini-fab class="btn-danger button24" (click)="onCancel(item)">
+                        <mat-icon class="icon24">close</mat-icon>
+                      </button>
+                    </div>
+                  </td>
+                  <td style="text-align: center;">{{formatDate(item.date)}}</td>
+                  <td style="text-align: center;">
+                    <span *ngIf="!item.isEditing">{{item.registrationTimeStart}}</span>
+                    <mat-form-field *ngIf="item.isEditing" class="time">
+                      <input [textMask]="{mask: maskTime, guide: false}" matInput
+                        [(ngModel)]="item.registrationTimeStart" autocomplete="off">
+                    </mat-form-field>
+                  </td>
+                  <td style="text-align: center;">
+                    <span *ngIf="!item.isEditing">{{item.registrationTimeEnd}}</span>
+                    <mat-form-field *ngIf="item.isEditing" class="time">
+                      <input [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.registrationTimeEnd"
+                        autocomplete="off">
+                    </mat-form-field>
+                  </td>
+                  <td style="text-align: center;">
+                    <span *ngIf="!item.isEditing">{{item.checkIn}}</span>
+                    <mat-form-field *ngIf="item.isEditing" class="time">
+                      <input [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.checkIn"
+                        autocomplete="off">
+                    </mat-form-field>
+                  </td>
+                  <td style="text-align: center;">
+                    <span *ngIf="!item.isEditing">{{item.checkOut}}</span>
+                    <mat-form-field *ngIf="item.isEditing" class="time">
+                      <input [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.checkOut"
+                        autocomplete="off">
+                    </mat-form-field>
+                  </td>
+                  <td style="text-align: center;" [class]="getCss1(item.resultCheckIn)">{{item.resultCheckIn}}</td>
+                  <td style="text-align: center;" [class]="getCss1(item.resultCheckOut)">{{item.resultCheckOut}}</td>
+                  <td class="text-center"><span class="pm" *ngIf="item.editByUserName">{{item.editByUserName}}</span>
+                  </td>
+                  <td style="text-align: center;">
+                    <span *ngIf="!item.isEditing">{{trackerTimeFormat(item.trackerTime)}}</span>
+                    <mat-form-field *ngIf="item.isEditing" class="time">
+                      <input [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.trackerTime"
+                        autocomplete="off">
+                    </mat-form-field>
+                  </td>
+                  <td style="text-align: center;">
+                    <span class="label bg-red" [matTooltip]="item.statusPunish | punishName">{{item.moneyPunish | formatDisplayNumberToK}}</span>
+                    <span *ngIf="item.status && !item.statusPunish > 0" class="label bg-red" matTooltip = "Punish">20k</span>
+                  </td>
+                  <!-- <td style="text-align: center;" class="font-size-13">
+                    <span *ngIf="!item.statusPunish == 0">{{item.statusPunish | punishName}}</span>
+                  </td> -->
+                  <td class="text-center font-size-13" style="min-width: 150px;">
+                    <div>
+                      {{item.userNote}}
+                    </div>
+                  </td>
+                  <td class="text-center font-size-13" style="min-width: 150px;">
+                    {{item.noteReply}}
+                  </td>
+
+
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="margin-top: 20px; display: flex; " class="ml-4">
+          <mat-form-field  style="width: 100px;">
+            <!-- <mat-label>Number items</mat-label> -->
+              <mat-select [(ngModel)]="itemPerPage">
+                <mat-option [value]="10">
+                  10
+                </mat-option >
+                <mat-option [value]="20">
+                  20
+                </mat-option>
+                <mat-option [value]="50">
+                  50
+                </mat-option>
+                <mat-option [value]="70">
+                  70
+                </mat-option>
+                <mat-option [value]="100">
+                  100
+                </mat-option>
+
+              </mat-select>
+          </mat-form-field>
+          <pagination-controls style="margin: 0 auto;" autoHide="true" (pageChange)="page = $event"></pagination-controls>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

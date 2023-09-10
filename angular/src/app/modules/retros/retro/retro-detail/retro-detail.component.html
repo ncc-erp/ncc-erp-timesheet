@@ -1,0 +1,246 @@
+<div class="row clearfix" *ngIf="permission.isGranted(VIEWALLTEAM) || permission.isGranted(VIEWMYTEAM)"
+  id="retro-detail">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ title| localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body table-responsive">
+        <div class="row clearfix">
+          <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 " style="font-size: 13px;">
+            <mat-form-field appearance="outline" id="retro-detail-seach-email">
+              <mat-label>Search by Email</mat-label>
+              <input matInput [(ngModel)]="searchText" placeholder="Search by Email" (keyup.enter)="searchOrFilter()"
+                type="text" maxlength="128">
+              <i class="icon-32 material-icons" matPrefix>search</i>
+            </mat-form-field>
+            <div class="gr-btn-action">
+              <button class="btn  btn-add" (click)="create()" [disabled]="status === 1"
+                *ngIf="permission.isGranted(ADD) || permission.isGranted(ADDTEAM)">
+                <i class="fa-solid fa-square-plus"></i>
+                Add Employee
+              </button>
+              <button class="btn btn-download" (click)="downloadTemplate()"
+                *ngIf="permission.isGranted(DOWNLOADTEMPLATE)">
+                <i class="fa-solid fa-download"></i>
+                Download Template
+              </button>
+              <button class="btn btn-import" (click)="onImportFile()" [disabled]="status === 1"
+                *ngIf="permission.isGranted(IMPORT)">
+                <i class="fas fa-upload"></i>
+                Import</button>
+              <button class="btn  btn-export" (click)="handleExport()" *ngIf="permission.isGranted(EXPORT)">
+                <i class="fa-solid fa-download"></i>
+                Export
+              </button>
+
+            </div>
+          </div>
+
+          <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 " style="font-size: 13px;">
+            <div class="row select-wrapper">
+              <div class="col-md-3">
+                <app-multiple-select labelName="User Type" [listOption]="listUserType"
+                  (onChange)="onChangeListUserTypes($event)" [defaultValue]="listUserTypeSelected">
+                </app-multiple-select>
+              </div>
+              <div class="col-md-3">
+                <app-multiple-select labelName="Level" [listOption]="listLevel" (onChange)="onChangeListLevel($event)"
+                  [defaultValue]="listLevelSelected">
+                </app-multiple-select>
+              </div>
+              <div class="col-md-3">
+                <app-multiple-select labelName="Position" [listOption]="listPosition"
+                  (onChange)="onChangeListPosition($event)" [defaultValue]="listPositionSelected">
+                </app-multiple-select>
+              </div>
+              <div class="col-md-3">
+                <app-multiple-select labelName="Branch" [listOption]="listBranch"
+                  (onChange)="onChangeListBranch($event)" [defaultValue]="listBranchSelected">
+                </app-multiple-select>
+              </div>
+
+              <div class="col-md-3">
+                <app-multiple-select-new labelName="Project" [listOption]="listProject"
+                  (onChange)="onChangeListProject($event)" [defaultValue]="listProjectSelected">
+                </app-multiple-select-new>
+              </div>
+              <div class="col-md-6 custom-slider">
+                <ngx-slider [(value)]="minValue" [(highValue)]="maxValue" [options]="options"></ngx-slider>
+              </div>
+              <div class="col-md-3 list-button">
+                <button mat-raised-button (click)="handleClear()">Clear</button>
+                <button mat-raised-button color="primary" (click)="onFilter()">Search</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered table-striped table-retro-detail">
+            <thead class="bg-light head-table-retro-detail">
+              <tr>
+                <th>No</th>
+                <th>
+                  <div class="th-sort" (click)="handleSortName()">
+                    <Span>Users</Span>
+                    <mat-icon *ngIf="sortByName.value === 2">unfold_more</mat-icon>
+                    <mat-icon *ngIf="sortByName.value === 0">arrow_downward</mat-icon>
+                    <mat-icon *ngIf="sortByName.value === 1">arrow_upward</mat-icon>
+                  </div>
+                </th>
+                <th>
+                  <div class="th-sort" (click)="handleSortPoint()">
+                    <Span>Point</Span>
+                    <mat-icon *ngIf="sortByPoint.value === 2">unfold_more</mat-icon>
+                    <mat-icon *ngIf="sortByPoint.value === 0">arrow_downward</mat-icon>
+                    <mat-icon *ngIf="sortByPoint.value === 1">arrow_upward</mat-icon>
+                  </div>
+                </th>
+                <th>Note</th>
+                <th>Project</th>
+                <th>PM</th>
+                <th>Position</th>
+                <th>
+                  Branch - User Type
+                  <span *ngIf="permission.isGranted(VIEWLEVEL)">- Level</span>
+                </th>
+                <th>Updated at</th>
+                <th *ngIf="handleShowAction()" style="text-align:right">Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container
+                *ngFor="let item of listRetroDetail | paginate: { id: 'server', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems };index as i ">
+                <tr>
+                  <td>
+                    {{ (pageNumber - 1) * pageSize + i + 1 }}
+                  </td>
+                  <!-- Name -->
+                  <td style="padding: 0px">
+                    <div class="info-name">
+                      <div>
+                        <img class="avatar" [src]="getAvatar(item)" alt="avatar" />
+                      </div>
+                      <div class="info-name-box">
+                        <div class="full-name">{{item.fullName}} </div>
+                        <div>
+                          <span class="branch label" *ngIf="item.userBranchId !== null"
+                            [style.backgroundColor]="item.userBranchColor">
+                            {{item.userBranchName}}
+                          </span>
+                          <span *ngIf="item.userType != null" class="spacing-center">
+                            <span *ngIf="item.userType == 0"
+                              class="label status-label bg-red">{{listUserType[item.userType].name}}
+                            </span>
+
+                            <span *ngIf="item.userType == 1"
+                              class="label status-label bg-green">{{listUserType[item.userType].name}}
+                            </span>
+
+                            <span *ngIf="item.userType == 2"
+                              class="label status-label bg-blue">{{listUserType[item.userType].name}}
+                            </span>
+
+                          </span>
+
+                          <span *ngIf="item.userLevel != null &&  permission.isGranted(VIEWLEVEL)">
+                            <span class="label" [ngStyle]="userLevels[item.userLevel].style">{{
+                              getLevelById(item.userLevel) }}</span>
+                          </span>
+
+
+                        </div>
+                        <div class="email">{{item.emailAddress}}</div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td><span>{{item.point.toFixed(1)}}</span></td>
+                  <td>
+                    <div (click)="changeStatusNote(item)">
+                      <textarea rows="10" cols="20" disabled="disabled"
+                        [ngClass]="item.hideNote == false ? 'preReview-note' : 'review-note'" data-placement="right"
+                        title="Cuộn chuột hoặc Click để mở rộng nội dung" disabled="disabled"
+                        name="reviewContent" [(ngModel)]="item.note"></textarea>
+                    </div>
+                  </td>
+                  <td class="project-name">{{item.projectName}}</td>
+                  <td>{{item.pmFullName}}
+                    <br>
+                      {{item.pmEmailAddress}}
+                  </td>
+                  <td>{{item.positionName}}</td>
+                  <td>
+                    <div class="label status-label" *ngIf="item.branchId != null"
+                      [style.backgroundColor]="item.branchColor">
+                      {{item.branchName}}
+                    </div>
+
+                    <span *ngIf="item.type != null" class="spacing-center">
+                      <span *ngIf="item.type == 0" class="label status-label bg-red">{{listUserType[item.type].name}}
+                      </span>
+
+                      <span *ngIf="item.type == 1" class="label status-label bg-green">{{listUserType[item.type].name}}
+                      </span>
+
+                      <span *ngIf="item.type == 2" class="label status-label bg-blue">{{listUserType[item.type].name}}
+                      </span>
+
+                    </span>
+
+                    <span *ngIf="item.level !== null && permission.isGranted(VIEWLEVEL)" class="ml-2">
+                      <span class="label status-label mr-left" [ngStyle]="userLevels[item.level].style">{{
+                        getLevelById(item.level)}}
+                      </span>
+                    </span>
+                  </td>
+                  <td class="updated-at">{{item.updatedAt | date: 'dd/MM/yyyy HH:mm:ss'}} <span
+                      *ngIf="item.updatedName">by</span> {{item.updatedName}} </td>
+                  <td *ngIf="handleShowAction()">
+                    <button mat-icon-button [matMenuTriggerFor]="actionsMenu" *ngIf="status === 0">
+                      <mat-icon>menu</mat-icon>
+                    </button>
+
+                    <mat-menu #actionsMenu="matMenu">
+                      <button mat-menu-item *ngIf="permission.isGranted(EDIT)" (click)="handleAction('edit', item)"
+                        [disabled]="status === 1">
+                        <mat-icon>edit</mat-icon>
+                        <span>{{ 'Edit' | localize }}</span>
+                      </button>
+                      <button mat-menu-item *ngIf="permission.isGranted(DELETE)" (click)="handleAction('delete', item)"
+                        [disabled]="status === 1">
+                        <mat-icon>delete</mat-icon>
+                        <span>{{ 'Delete' | localize }}</span>
+                      </button>
+                    </mat-menu>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+        <h4 class="text-center" *ngIf="listRetroDetail.length === 0"> No data!</h4>
+        <div class="abp-pagination-controls-wrapper">
+          <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
+            (pageChange)="getDataPage($event)" id="server">
+          </abp-pagination-controls>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div class="ts-warning">
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
+  Warning log <b>{{ convertMinuteToHour(myTimesheet.workingTime)}}</b> on <span class="date">{{ warningMyTimesheet.dateAt | date:"dd/MM/yyyy"}}</span>
+</h1>
+<mat-dialog-content>
+  <div class="main-content">
+    <div class="body table-responsive">
+      <table class="table table-hover ">
+        <thead>
+          <tr>
+            <th *ngIf="warningMyTimesheet.isOffDay">Day off</th>
+            <th>Check in</th>
+            <th>Check out</th>
+            <th>Off hour</th>
+            <th>Đi muộn</th>
+            <th>Về sớm</th>
+            <th>Logged timesheet</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-center" *ngIf="warningMyTimesheet.isOffDay">
+              <i class="fa-solid fa-check text-success fa-lg"></i>
+            </td>
+            <td class="text-center">{{ warningMyTimesheet.checkInShow}}</td>
+            <td class="text-center">{{ warningMyTimesheet.checkOutShow}}</td>
+            <td class="text-center">{{ warningMyTimesheet.hourOff}}</td>
+            <td class="text-center">{{ warningMyTimesheet.hourDiMuon}}</td>
+            <td class="text-center">{{ warningMyTimesheet.hourVeSom}}</td>
+            <td class="text-center">{{convertMinuteToHour(warningMyTimesheet.workingTimeLogged) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button mat-dialog-close>Cancel</button>
+  <button mat-raised-button color="primary" [disabled]="isLoading" (click)="handleSave()">Continue</button>
+</mat-dialog-actions>
+</div>

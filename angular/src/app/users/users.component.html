@@ -1,0 +1,117 @@
+<div class="row clearfix" [@routerTransition]>
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Users" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="clearfix" style="padding: 20px 5px 0px 5px">
+        <div class="col-sm-2" style="padding:5px 15px 10px 15px">
+          <button class="col-sm-12" large mat-raised-button color="primary" style="width:123px" (click)="createUser()">
+            <mat-icon>add</mat-icon> New User
+          </button>
+        </div>
+        <div class="col-xs-2 col-md-2 col-sm-2 col-lg-2 field-padding">
+          <div class="form-group field-padding">
+            <div>
+              <file-upload (outputFileInfo)="upLoadUsers($event)" [isLoading]="isLoadingFileUpload"
+                fileType=".xlsx" [custom]="'btn-customs btn btn-default outline btn-file'" [title]="'Import'">
+              </file-upload>
+              <span *ngIf="isFileUploadNotSupport" class="text-danger" style="padding-left: 4rem;">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                {{l('The file is not supported!')}}</span>
+            </div>
+          </div>
+        </div>
+        <mat-form-field class="col-sm-3 field-padding">
+          <mat-select placeholder="Filter" [(value)]="isActive" name="isActive" (selectionChange)="searchOrFilter()">
+            <mat-option value="">All</mat-option>
+            <mat-option value="true">Active</mat-option>
+            <mat-option value="false">Inactive</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="col-sm-5 field-padding">
+          <mat-icon style="color:#9E9E9E" matPrefix>search</mat-icon>
+          <input matInput [placeholder]="l('Search by Username, Fullname or Email')" [(ngModel)]="keyword"
+            name="keyword" (keyup.enter)="searchOrFilter()" (ngModelChange)="clearKeyword($event)">
+        </mat-form-field>
+      </div>
+      <div class="body table-responsive">
+        <table class="table table-hover table-striped" [busy]="isTableLoading">
+          <thead>
+            <tr>
+              <th>{{ "UserName" | localize }}</th>
+              <th>{{ "FullName" | localize }}</th>
+              <th>{{ "EmailAddress" | localize }}</th>
+              <th>{{ "Roles" | localize }}</th>
+              <th>
+                <div style="text-align:center">{{ "IsActive" | localize }}</div>
+              </th>
+              <th>{{ "Actions" | localize }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="
+                let user of (users
+                  | paginate
+                    : {
+                        id: 'server',
+                        itemsPerPage: pageSize,
+                        currentPage: pageNumber,
+                        totalItems: totalItems
+                      })
+              ">
+              <td>{{ user.userName }}</td>
+              <td>{{ user.fullName }}</td>
+              <td>{{ user.emailAddress }}</td>
+              <td>{{ user.roleNames.length > 0 ? user.roleNames : 'BasicUser' }}</td>
+              <td align="center">
+                <i class="material-icons" *ngIf="user.isActive" style="color:green;">
+                  check_circle
+                </i>
+                <i class="material-icons" *ngIf="!user.isActive" style="color:red;">
+                  error
+                </i>
+              </td>
+              <td>
+                <button class="action-button" mat-icon-button [matMenuTriggerFor]="actionsMenu">
+                  <mat-icon>menu</mat-icon>
+                </button>
+                <mat-menu #actionsMenu="matMenu">
+                  <button mat-menu-item (click)="editUser(user)">
+                    <mat-icon>edit</mat-icon>
+                    <span>{{ "Edit" | localize }}</span>
+                  </button>
+                  <button mat-menu-item (click)="delete(user)">
+                    <mat-icon>delete</mat-icon>
+                    <span>{{ "Delete" | localize }}</span>
+                  </button>
+                  <button mat-menu-item (click)="resetPassword(user)">
+                    <mat-icon>lock</mat-icon>
+                    <span>{{ "Reset Password" | localize }}</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="abp-pagination-controls-wrapper" *ngIf="totalItems > pageSize">
+          <abp-pagination-controls (pageChange)="getDataPage($event)" id="server">
+          </abp-pagination-controls>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,114 @@
+<div style="display: flex;justify-content:  space-between;">
+  <h4 style="white-space: nowrap; display: inline;">REPORT REVIEW INTERN {{year}}</h4>
+  <mat-icon style="cursor: pointer;" (click)="_dialogRef.close()">close</mat-icon>
+
+</div>
+<div class="report">
+ 
+  <div class="col  row report-left"> 
+    <mat-form-field appearance="outline" class="item dropdown">  
+      <mat-label>year</mat-label>
+      <mat-select [(ngModel)]="year" (selectionChange)="onYearChange()">
+        <mat-option *ngFor="let item of listYear" [value]="item">{{item}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="item dropdown">
+      <mat-label>Month</mat-label>
+      <mat-select [(ngModel)]="month" (selectionChange)="onMonthChange()">
+        <mat-option *ngFor="let item of monthList" [value]='item'>
+          {{item}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="item dropdown">
+      <mat-label>Level</mat-label>
+      <mat-select [(value)]="level" (selectionChange)="onStatusChange()">
+        <mat-option *ngFor="let item of levelChangeStatus  | keyvalue" [value]='item.key'>
+          {{item.value}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="item">
+      <mat-label>Search Intern</mat-label>
+      <input matInput type="text" [(ngModel)]="searchText" (keyup.enter)="searchIntern()" placeholder="intern email">
+    </mat-form-field>
+
+    <mat-checkbox appearance="outline" class="example-margin item" [checked]="isCurrentInternOnly" (change)="onChangeCurrentInternOnly($event)">
+      Current Intern Only
+    </mat-checkbox>
+
+    
+  </div>
+  <div class="col  row report-right">
+    <button [disabled]="isDisabled" *ngIf="permission.isGranted(ReviewIntern_ExportReport)" 
+      class="control-btn export-btn" mat-flat-button
+      color="primary" (click)="exportReport()">Export Excel
+    </button>
+  </div>
+</div>
+
+<div class="">
+  <div class="card-body">
+    <div class=" table-responsive">
+      <div class="fixTableHead">
+        <table class="table  text-nowrap styleUser" [busy]="isLoading">
+          <thead>
+            <tr style="border: none;">
+              <th>#</th>
+              <th>Intern</th>
+              <!-- <th>Current trainer</th> -->
+              <th *ngFor="let item of monthResult; let i=index">{{item}}</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of reviewReport; let i =index">
+              <td class="text-center">{{i+1}}</td>
+              <td>
+                <div style="display: flex; justify-content: flex-start; align-items: center; width: 250px;">
+                  <div>
+                    <div>
+                      <img style="max-width: 40px;min-width: 40px; height: 40px; border-radius: 50%;"
+                        [src]='getAvatar(item)' alt="avatar">
+                  </div>
+                  </div>
+                  <div style="margin-left: 3px;">
+                    <div>
+                      <span>
+                        <strong>{{item.internName}}</strong>
+                      </span>
+                    </div>
+                    <div>
+                      <ng-container *ngIf="item.type || item.type == 0">
+                        <span class="label "
+                          [ngClass]="item.type == 0 ? 'bg-red' : item.type == 1 ? 'bg-green' : 'bg-blue'">
+                          {{userTypes[item.type]?.label}}
+                        </span>
+                      </ng-container>
+                      <span class="label" style="background-color:#3b2f2f">
+                        {{item.level | level}}
+                      </span>
+                      <span class="label " [style.backgroundColor]="item.branchColor">
+                        {{item.branchDisplayName}}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td *ngFor="let detail of item.reviewDetailForMonths; let j=index"
+              [matTooltip]="detail.reviewerName!=null ? 'Reviewer: ' + detail.reviewerName : null"  
+              [ngClass]="getClassWarningType(detail.warningType,detail.hasReview)"
+              class="text-center month-level">
+              {{detail.newLevel | level}}
+            </td>
+            
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <h4 class="text-center" *ngIf="reviewReport.length ==0"> No data!</h4>
+  </div>
+</div>

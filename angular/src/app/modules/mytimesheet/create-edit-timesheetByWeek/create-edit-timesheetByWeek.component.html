@@ -1,0 +1,46 @@
+<form #createTimesheetByWeekForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
+  <div style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
+    <h3>New My Timesheet </h3>
+  </div>
+  <mat-dialog-content class="mat-typography" style="width:400px">
+    <mat-form-field>
+      <mat-label>Project</mat-label>
+      <mat-select matInput name="project" [(ngModel)]="selectedProject" required (selectionChange)="onProjectchange()">
+        <mat-option *ngFor="let project of projectIncludingTasks" [value]="project">
+          {{ project.projectName}} - <span class="pm">{{project.listPM}}</span>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Task</mat-label>
+      <mat-select matInput name="task" [(ngModel)]="myTimesheet.projectTaskId" required>
+        <mat-option *ngFor="let task of selectedProject.tasks" [value]="task.projectTaskId">
+          {{ task.taskName }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field>
+      <input type="string" matInput name="note" placeholder="{{l('Note')}}" [(ngModel)]="myTimesheet.note"
+        maxlength="255">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Type</mat-label>
+      <mat-select matInput name="typeOfWork" [(ngModel)]="myTimesheet.typeOfWork">
+        <mat-option *ngFor="let item of APP_CONFIG.EnumTypeOfWork" [value]="item.value">
+          {{ item.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-checkbox name="isCharged" *ngIf="isShowCharged() " [(ngModel)]="myTimesheet.isCharged">
+      Charged
+    </mat-checkbox>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default waves-effect" mat-button mat-dialog-close>{{l('Cancel')}}</button>
+    <button class="btn btn-primary waves-effect" mat-button (click)="save()" cdkFocusInitial
+      [disabled]="!createTimesheetByWeekForm.valid">OK</button>
+  </mat-dialog-actions>
+</form>

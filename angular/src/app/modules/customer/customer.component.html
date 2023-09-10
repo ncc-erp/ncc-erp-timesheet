@@ -1,0 +1,67 @@
+<div class="row clearfix" [@routerTransition]>
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Manage Clients" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body table-responsive">
+        <div class="row clearfix">
+          <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+            <button *ngIf="permission.isGranted(ADD_CLIENT)" mat-raised-button color="primary" class="pull-left"
+              (click)="createCustomer()">
+              <mat-icon>add</mat-icon>New Client
+            </button>
+          </div>
+          <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+            <mat-form-field>
+              <input matInput [(ngModel)]="searchText" placeholder="{{l('Search by name or address')}}"
+                (keyup.enter)="searchOrFilter()" type="text" maxlength="128">
+              <i class="icon-32 material-icons" matPrefix>search</i>
+            </mat-form-field>
+          </div>
+
+        </div>
+        <table class="table table-hover table-striped" [busy]="isTableLoading">
+          <thead class="bg-light">
+            <tr>
+              <th>Name</th>
+              <th>Code</th>
+              <th>Address</th>
+              <th *ngIf="permission.isGranted(DELETE_CLIENT) || permission.isGranted(EDIT_CLIENT)" style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let customer of customers | paginate: { id: 'server', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems } ">
+              <td>{{ customer.name }}</td>
+              <td>{{ customer.code }}</td>
+              <td>{{ customer.address }}</td>
+              <td>
+                <button *ngIf="permission.isGranted(DELETE_CLIENT)" mat-raised-button (click)="delete(customer)"
+                  class="btn btn-danger waves-effect pull-right">Delete</button>
+                <button *ngIf="permission.isGranted(EDIT_CLIENT)" mat-raised-button (click)="editCustomer(customer)"
+                  class="btn btn-primary waves-effect pull-right" style="margin-right: 12px;">Edit</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="text-align: center;" *ngIf="totalItems > pageSize">
+          <pagination-controls (pageChange)="getDataPage($event)" id="server"></pagination-controls>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,10 @@
+.wrapper{
+    text-align: center;
+    height: 100vh;
+    background-color: white;
+    padding-top: 10px;
+}
+
+.content{
+    margin:  0 auto;
+}

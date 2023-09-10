@@ -1,0 +1,225 @@
+﻿<div class="card main-content" [@routerTransition]>
+  <div class="body">
+    <date-selector [type]="APP_CONSTANT.TypeViewHomePage.Week"
+      (onDateSelectorChange)="handleDateSelectorChange($event)"></date-selector>
+    <hr style="border-color: #000">
+    <div class="row">
+      <div class="col-md-2 col-sm-12 col-xs-12">
+        <p>Hours Tracked</p>
+        <h2>{{hoursTracked}}</h2>
+      </div>
+      <div class="col-md-5 col-sm-6 col-xs-12">
+        <div class="row">
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <div id="donut_chart" class="dashboard-donut-chart"></div>
+          </div>
+          <div class="col-md-8 col-sm-6 col-xs-12">
+            <!-- <p>Billable Hours</p> -->
+            <div>
+              <div class="square blue"></div><b>{{billable}}</b> Billable
+            </div>
+            <div>
+              <div class="square lightblue"></div><b>{{nonBillable}}</b> No-Billable
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5 col-sm-6 col-xs-12">
+        <div class="row">
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <div id="donut_chart1" class="dashboard-donut-chart"></div>
+          </div>
+          <div class="col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <div class="square blue"></div><b>{{normalWorkingHours}}</b> Normal Working Hours
+            </div>
+            <div>
+              <div class="square lightblue"></div><b>{{overtimeBillable}}</b> Overtime Billable
+            </div>
+            <div>
+              <div class="square violin"></div><b>{{overtimeNonBillable}}</b> Overtime Non-Billable
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="border-top:solid 1px black;padding-top:15px">
+      <div class="tabs">
+        <div class="head row">
+          <div class="col-md-6 col-sm-12 col-xs-12">
+            <ul class="nav nav-tabs" style="display:inline-block">
+              <li class="active"><a data-toggle="tab" href="#home"><b>Clients</b></a></li>
+              <li><a data-toggle="tab" href="#menu1"><b>Projects</b></a></li>
+              <li><a data-toggle="tab" href="#menu2"><b>Tasks</b></a></li>
+              <li><a data-toggle="tab" href="#menu3"><b>Team</b></a></li>
+            </ul>
+          </div>
+
+          <div class="col-md-2 col-sm-6 col-xs-12">
+            <mat-form-field style="max-width:120px">
+              <mat-select>
+                <mat-option value="option1">Export</mat-option>
+                <mat-option value="option2">Export</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-2 col-sm-6 col-xs-12">
+            <button mat-flat-button color="primary">Detailed Report</button>
+          </div>
+          <div class="col-md-2 col-sm-6 col-xs-12">
+            <button mat-flat-button color="primary">
+              <mat-icon>local_printshop</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- clients -->
+        <div class="tab-content" style="background:white; padding:20px;">
+          <div id="home" class="tab-pane fade in active">
+            <div class="table-responsive">
+              <table class="table table-trip" matSort (matSortChange)="sortData($event)">
+                <thead>
+                  <tr>
+                    <th mat-sort-header="customerName">Name</th>
+                    <th mat-sort-header="totalWorkingTime">Hours</th>
+                    <th></th>
+                    <th mat-sort-header="billableWorkingTime">Billable Hours</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of sortedData">
+                    <td>{{ item.customerName }}</td>
+                    <td>{{ item.totalWorkingTime}}</td>
+                    <td style="min-width:100px;">
+                      <div class="progress" style="height:15px ">
+                        <div class="progress-bar " role="progressbar" [attr.aria-valuenow]="item.percent"
+                          aria-valuemin="0" aria-valuemax="100" [style.width.%]="item.percent"></div>
+                      </div>
+                    </td>
+                    <td>{{ item.billableWorkingTime }} ({{ item.percent }}%)</td>
+                  </tr>
+                  <tr>
+                    <th>Total</th>
+                    <th>{{totalHour.totalHourClient}}</th>
+                    <td></td>
+                    <th>{{totalHour.totalBillableHourClient}} ({{percentTime}}%)</th>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- projects -->
+          <div id="menu1" class="tab-pane fade">
+            <div class="table-responsive">
+              <table class="table table-trip" matSort (matSortChange)="sortDataProject($event)">
+                <thead>
+                  <tr>
+                    <th mat-sort-header="customerName">Name</th>
+                    <th mat-sort-header="totalWorkingTime">Hours</th>
+                    <th></th>
+                    <th mat-sort-header="billableWorkingTime">Billable Hours</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of sortedDataProject">
+                    <td>{{ item.projectName }}</td>
+                    <td>{{ item.totalWorkingTime}}</td>
+                    <td style="min-width:100px;">
+                      <div class="progress" style="height:15px ">
+                        <div class="progress-bar bg-green" role="progressbar" [attr.aria-valuenow]="item.percent"
+                          aria-valuemin="0" aria-valuemax="100" [style.width.%]="item.percent"></div>
+                      </div>
+                    </td>
+                    <td>{{ item.billableWorkingTime }} ({{ item.percent }}%)</td>
+                    <!-- <td>
+                                        <button mat-flat-button color="primary" (click)="dowExcel(item.id)">
+                                            <mat-icon>local_printshop</mat-icon>
+                                        </button>
+                                    </td> -->
+                  </tr>
+                  <tr>
+                    <th>Total</th>
+                    <th>{{totalHour.totalHourProject}}</th>
+                    <td></td>
+                    <th>{{totalHour.totalBillableHourProject}} ({{percentTime}}%)</th>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div id="menu2" class="tab-pane fade">
+            <div class="table-responsive">
+              <table class="table table-trip">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Hours</th>
+                    <th></th>
+                    <th>Billable Hours</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let tasks of dataTask; index as i">
+                    <td>{{tasks.taskName}}</td>
+                    <td>{{tasks.totalWorkingTime}}</td>
+                    <td style="min-width:100px;">
+                      <div class="progress" style="height:15px ">
+                        <div class="progress-bar bg-green" role="progressbar" aria-valuenow="62" aria-valuemin="0"
+                          aria-valuemax="100" [style.width.%]="tasks.percent"></div>
+                      </div>
+                    </td>
+                    <td>{{tasks.billableWorkingTime}} ({{ tasks.percent }}%)</td>
+                  </tr>
+                  <tr>
+                    <th>Total</th>
+                    <th>{{totalHour.totalHourTask}}</th>
+                    <td></td>
+                    <th>{{totalHour.totalBillableHourTask}} ({{percentTime}}%)</th>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- team -->
+          <div id="menu3" class="tab-pane fade">
+            <div class="table-responsive">
+              <table class="table table-trip">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Hours</th>
+                    <th></th>
+                    <th>Billable Hours</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let teams of dataTeam; index as i">
+                    <td>{{teams.userName}}</td>
+                    <td>{{teams.totalWorkingTime}}</td>
+                    <td style="min-width:100px;">
+                      <div class="progress" style="height:15px ">
+                        <div class="progress-bar bg-green" role="progressbar" aria-valuenow="62" aria-valuemin="0"
+                          aria-valuemax="100" [style.width.%]="teams.percent"></div>
+                      </div>
+                    </td>
+                    <td>{{teams.billableWorkingTime}} ({{teams.percent}}%)</td>
+                  </tr>
+                  <tr>
+                    <th>Total</th>
+                    <th>{{totalHour.totalHourTeam}}</th>
+                    <td></td>
+                    <th>{{totalHour.totalBillableHourTeam}} ({{percentTime}}%)</th>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

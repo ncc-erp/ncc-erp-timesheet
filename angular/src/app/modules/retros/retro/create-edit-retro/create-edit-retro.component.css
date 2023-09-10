@@ -1,0 +1,48 @@
+.form-control-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.label-wrapper {
+    width: 20%;
+    padding-bottom: 19px;
+}
+
+.input-wrapper {
+    width: 80%;
+}
+
+.date-list {
+    display: flex;
+    gap: 10px;
+    width: 80%;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.date-item {
+    width: 45%;
+    display: flex;
+    align-items: center;
+}
+
+.deadline-wrapper {
+    width: 36%;
+}
+
+.status-wrapper {
+    padding-left: 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.label-status {
+    padding-bottom: 19px;
+}
+
+
+
+.text-spacing {
+    padding-bottom: 19px;
+}

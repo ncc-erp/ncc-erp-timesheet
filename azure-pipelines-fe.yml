@@ -1,0 +1,83 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - dev
+      - stg
+  
+  paths:
+    include:
+      - angular
+      - azure-pipelines-fe.yml
+
+pool:
+  name: 'ERP_DEV'
+
+jobs:
+  - job: checkFile
+    displayName: checkChangedFile
+    steps:
+      - task: ChangedFiles@1
+        name: changedPackageJson
+        inputs:
+          rules: angular/package.json
+          variable: changed
+  
+  - job: AngularBuild
+    dependsOn: checkFile
+    variables:
+      checkCPJ: $[eq(dependencies.checkFile.outputs['changedPackageJson.changed'], 'true')]
+    steps:
+      - script: |
+          cd angular
+          unzip -qo ~/soft/check_node/timesheet/node_modules.zip
+        displayName: 'Copy node modules'
+        # continueOnError: true
+
+      - script: |
+          cd angular/
+          export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+          nvm use 14.15
+          node -v
+          echo "=== INSTALL PACKAGE ==="
+          npm install
+        condition: and(succeeded(), eq(variables['checkCPJ'], 'true'))
+        displayName: 'Install Package'
+
+      - script: |
+          cd angular/
+          echo "=== COPY NEW PACKAGE ==="
+          rm -rf ~/soft/check_node/timesheet/node_modules.zip
+          zip -r ~/soft/check_node/timesheet/node_modules.zip node_modules/
+        condition: and(succeeded(), eq(variables['checkCPJ'], 'true'))
+        displayName: 'Copy Node Modules'
+        
+      - script: |
+          cd angular/
+          export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+          nvm use 14.15
+          echo "=== ReBuild node-sass ==="
+          npm rebuild node-sass
+          echo "=== Build FE Prod ==="
+          ng build --prod
+        displayName: 'Build Frontend'
+      
+      - script: |
+          cd angular/dist
+          zip -r frontend_publish.zip *
+        displayName: 'Compress Build FE'
+        
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: 'angular/dist/frontend_publish.zip'
+          ArtifactName: 'timesheet-fe'
+          publishLocation: 'Container'
+        displayName: 'Publish Artifacts Frontend'

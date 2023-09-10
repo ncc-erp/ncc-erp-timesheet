@@ -1,0 +1,138 @@
+<div class="row clearfix">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2 class="title">{{ "Setting Day Off:" | localize }} <strong>{{ title }}</strong></h2>
+        <div class="filter-date">
+          <div class="item">
+            <mat-form-field appearance="outline">
+              <mat-label>Year</mat-label>
+              <mat-select [(value)]="year" (selectionChange)="selectionChange()">
+                <mat-option *ngFor="let item of listYear" [value]='item'>
+                  {{item}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="item">
+            <mat-form-field appearance="outline">
+              <mat-label>Month</mat-label>
+              <mat-select [(value)]="month" (selectionChange)="selectionChange()">
+                <mat-option *ngFor="let item of listMonth" [value]='item'>
+                  {{item + 1}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <div class="btn-group m-5">
+              <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
+                (viewDateChange)="closeOpenMonthViewDay()">
+                Previous
+              </div>
+              <div class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate"
+                (viewDateChange)="closeOpenMonthViewDay()">
+                Today
+              </div>
+              <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate"
+                (viewDateChange)="closeOpenMonthViewDay()">
+                Next
+              </div>
+            </div>
+          </li>
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu123="matMenu">
+              <button mat-menu-item (click)="ngOnInit()">
+                <mat-icon class="icon-refresh">refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="row text-center" style="padding: 15px;">
+        <!-- <div class="col-md-4" style="padding-top: 10px;">
+          <div class="btn-group">
+            <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
+              (viewDateChange)="closeOpenMonthViewDay()">
+              Previous
+            </div>
+            <div class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate"
+              (viewDateChange)="closeOpenMonthViewDay()">
+              Today
+            </div>
+            <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate"
+              (viewDateChange)="closeOpenMonthViewDay()">
+              Next
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2" style="padding-top: 10px;">
+          <h3>{{ title }}</h3>
+        </div> -->
+        <!-- <div class="col-md-6">
+          <div class="clearfix flex">
+            <div class="col-sm-4">
+              <mat-form-field appearance="outline">
+                <mat-label>Year</mat-label>
+                <mat-select [(value)]="year" (selectionChange)="selectionChange()">
+                  <mat-option *ngFor="let item of listYear" [value]='item'>
+                    {{item}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-sm-4">
+              <mat-form-field appearance="outline">
+                <mat-label>Month</mat-label>
+                <mat-select [(value)]="month" (selectionChange)="selectionChange()">
+                  <mat-option *ngFor="let item of listMonth" [value]='item'>
+                    {{item + 1}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div> -->
+      </div>
+      <br />
+      <div style="padding:0px 20px 20px; overflow-x: scroll;">
+        <div [ngSwitch]="view">
+          <mwl-calendar-month-view *ngSwitchCase="CalendarView.Month" [cellTemplate]="customCellTemplate"
+            [viewDate]="viewDate" [events]="events" [refresh]="refresh" [activeDayIsOpen]="activeDayIsOpen"
+            (dayClicked)="dayClicked($event.day)" (beforeViewRender)="getData($event)">
+          </mwl-calendar-month-view>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #customCellTemplate let-day="day" let-locale="locale">
+  <div class="cal-cell-top" (click)="onContextMenu($event, menuTrigger, day)">
+    <span class="cal-day-badge" *ngIf="day.badgeTotal > 0">Off</span>
+    <span class="cal-day-number">{{ day.date | calendarDate:'monthViewDayNumber':locale }}</span>
+  </div>
+  <small class="flex-between" *ngIf="day.events.length">
+    <div class="overflow-x" style="max-width: 50px;" [title]="day.events[0].title">{{ day.events[0].title}}</div>
+    <div class="overflow-x" style="max-width: 20px;" [title]="day.events[0].color.primary">{{ day.events[0].color.primary }}</div>
+  </small>
+  <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
+    [style.top]="contextMenuPosition.y" #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionsMenu">
+  </div>
+  <mat-menu #actionsMenu="matMenu">
+    <button *ngIf="permission.isGranted(EDIT_DAY_OFF)" mat-menu-item (click)="createOrEditDayOff(day.date, day.events[0])">
+      <mat-icon>edit</mat-icon>
+      <span>{{ "Edit" | localize }}</span>
+    </button>
+    <button *ngIf="permission.isGranted(DELETE_DAY_OFF)" color="primary" mat-menu-item (click)="delete(day.date, day.events[0])">
+      <mat-icon>delete</mat-icon>
+      <span>{{ "Delete" | localize }}</span>
+    </button>
+  </mat-menu>
+</ng-template>

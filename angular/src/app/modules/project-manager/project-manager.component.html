@@ -1,0 +1,117 @@
+<div class="row clearfix">
+  <div class="col-lg 12 col-md-12 col-sm-12 col-sm-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Manage Projects" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="getProjects()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body table-responsive">
+        <div class="row clearfix">
+          <div class="col-lg-3 col-md-3 col-sm-3 col-sx-3" *ngIf="isAdmin">
+            <button *ngIf="permission.isGranted(ADD_PROJECT)" mat-raised-button color="primary" class="btn--add" (click)="createProject()">
+              <mat-icon>add</mat-icon>New Project
+            </button>
+          </div>
+          <div class="col-lg-3 col-md-3 col-sm-3 col-sx-3">
+            <mat-form-field appearance="outline" class="select--status">
+              <mat-select [(value)]="status" (selectionChange)=getProjects()>
+                <mat-option *ngFor="let pStatus of APP_CONFIG.EnumProjectStatus" [value]="pStatus.value">
+                  {{ pStatus.name }} Projects
+                  ({{(pStatus.value == 0 ? activeCount : (pStatus.value == 1 ? deactiveCount : (activeCount + deactiveCount)))}})
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-6 col-sx-6">
+            <mat-form-field appearance="outline" class="search--box">
+              <mat-label>Search by client or project name</mat-label>
+              <input matInput [(ngModel)]="searchKey" (keyup.enter)="getProjects()" type="text" maxlength="128">
+              <i class="icon-32 material-icons" style="padding-right: 5px;" matPrefix>search</i>
+            </mat-form-field>
+          </div>
+        </div>
+        <div [busy]="isTableLoading">
+          <table *ngFor="let customer of mapProjects; index as i" class="table table-hover table-stripped">
+            <thead>
+              <th colspan="4"
+                style="background-color: lightgray; padding-left: 10px; border-radius: 5px; height: 5rem;">
+                <h4>{{customer.customerName}}</h4>
+              </th>
+            </thead>
+            <tbody>
+              <tr *ngFor="let project of customer.items; index as i" (contextmenu)="onContextMenu($event, menuTrigger)">
+                <td class="td--project">
+                  <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
+                    [style.top]="contextMenuPosition.y" #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionsMenu">
+                  </div>
+                  <span align="start" style="line-height: 3; padding-left: 5px;">
+                    {{project.name}}
+                  </span>
+                  <span class="pm">{{project.pms.join(', ')}} </span>
+                  <span class="member">{{project.activeMember}} members</span>
+                  <span *ngIf="project.projectType == 3" class="pType">ODC</span>
+                  <span *ngIf="project.projectType == 2" class="pType">NB</span>
+                  <span *ngIf="project.projectType == 1" class="pType">FF</span>
+                  <span *ngIf="project.projectType == 0" class="pType">T&M</span>
+                  <span class="pTime">
+                    <span align="start">
+                      {{formatDate(project.timeStart)}}
+                    </span>
+                    <span *ngIf="project.timeEnd">
+                      - {{formatDate(project.timeEnd)}}
+                    </span>
+                  </span>
+                  <div class="pull-right" id="btnAction">
+                    <div class="project-label" *ngIf="status == 2">
+                      <h6 class="project-status-label bg-green" *ngIf="project.status == 0">Active</h6>
+                      <h6 class="project-status-label bg-grey" *ngIf="project.status == 1">Inactive</h6>
+                    </div>
+                    <button *ngIf="!isAdmin && permission.isGranted(VIEW_DETAIL_PROJECT)" mat-raised-button class="btn-primary"
+                      (click)="showProjectDetailDialog(project)">View</button>
+                    <button *ngIf="isAdmin" mat-raised-button [matMenuTriggerFor]="actionsMenu">Actions
+                      <i class="icon-32 material-icons">arrow_drop_down</i>
+                    </button>
+                    <mat-menu #actionsMenu="matMenu">
+                      <button *ngIf="permission.isGranted(EDIT_PROJECT)" mat-menu-item (click)="editProject(project)">
+                        <mat-icon>edit</mat-icon>
+                        <span>{{ "Edit" | localize }}</span>
+                      </button>
+                      <button *ngIf="permission.isGranted(VIEW_DETAIL_PROJECT)" color="primary" mat-menu-item (click)="showProjectDetailDialog(project)">
+                        <mat-icon>remove_red_eye</mat-icon>
+                        <span>{{ "View" | localize }}</span>
+                      </button>
+                      <button mat-menu-item *ngIf="project.status == '0' && permission.isGranted(CHANGE_STATUS_PROJECT)" (click)="deactiveProject(project)">
+                        <mat-icon>clear</mat-icon>
+                        <span>{{ "Deactive" | localize }}</span>
+                      </button>
+                      <button mat-menu-item *ngIf="project.status == '1' && permission.isGranted(CHANGE_STATUS_PROJECT)" (click)="activeProject(project)">
+                        <mat-icon>done</mat-icon>
+                        <span>{{ "Active" | localize }}</span>
+                      </button>
+                      <button *ngIf="permission.isGranted(DELETE_PROJECT)" class="text-danger" mat-menu-item (click)="deleteProject(project)">
+                        <mat-icon>delete</mat-icon>
+                        <span>{{ "Delete" | localize }}</span>
+                      </button>
+                    </mat-menu>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

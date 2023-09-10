@@ -1,0 +1,39 @@
+<form #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
+  <h1 mat-dialog-title style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>{{title}}</h1>
+  <mat-dialog-content style="width: 400px">
+    <mat-form-field appearance="outline" *ngIf="data.type == 0 && data.absenceTime == 0">
+      <mat-label>Absence Type</mat-label>
+      <mat-select [(value)]="absenceDayReq.dayOffTypeId">
+        <mat-option *ngFor="let type of dayOffTypes" [value]="type.id">{{type.name}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div *ngIf="reason.errors && (reason.dirty || reason.touched) && data.type != APP_CONSTANT.DayAbsenceType.Remote"
+      class="text-danger">
+      <div [hidden]="!reason.errors.required">
+        <ng-container *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Off"> Reason is required!</ng-container>
+        <ng-container *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Onsite"> Note is required!</ng-container>
+      </div>
+    </div>
+    <mat-form-field appearance="outline">
+      <mat-label *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Off">Reason</mat-label>
+      <mat-label *ngIf="data.type!=APP_CONSTANT.DayAbsenceType.Off">Note</mat-label>
+      <textarea name="reason" matInput [(ngModel)]="absenceDayReq.reason"
+        [required]="data.type != APP_CONSTANT.DayAbsenceType.Remote ? true:false" #reason="ngModel"
+        cdkFocusInitial></textarea>
+    </mat-form-field>
+    <div class="text-center">
+      <div *ngFor="let entry of data.selectedDays | keyvalue">
+        <button class="btn" [ngClass]="getLissClass(entry)" style="min-width: 200px;margin-bottom: 5px;">
+          {{entry.key | date: "dd-MM-yyyy" }}({{getNameByValue(entry)}}<span *ngIf="entry.value.hour">:
+            {{entry.value.hour}}h</span>)
+        </button>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-raised-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="primary" [disabled]="!createForm.form.valid || isSaving" (click)="submitReq()">
+      Save
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,67 @@
+<div style="position: relative;" autocomplete="off" id="frm_create_group" [busy]="isLoading">
+  <div class="row" style="margin-left: 0px;">
+    <div>
+      <h3>Note: [{{requestDetailInfo?.note}}]</h3>
+    </div>
+    <div>
+      <h3>Disburse Money: [{{requestDetailInfo?.disburseMoney  |  currency:'VND':''}} VNĐ]</h3>
+    </div>
+  </div>
+  <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0;
+  cursor: pointer;">close</mat-icon>
+  <hr>
+<div *ngIf="requestDetailInfo?.teamBuildingDetailDtos.length == 0">This status of detail is cancelled or rejected</div>
+  <div *ngIf="requestDetailInfo?.teamBuildingDetailDtos.length > 0">
+    <div class="table-responsive">
+        <div class="fixedHeader" style="max-height: 507px;">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Id</th>
+                        <th>Employee</th>
+                        <th>Branch</th>
+                        <td>Project</td>
+                        <th>Money</th>
+                        <th>Creation Time</th>
+                        <th>Month</th>
+                        <th>Year</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let request of requestDetailInfo?.teamBuildingDetailDtos; let i = index">
+                        <td>{{i+1}}</td>
+                        <td>{{request.id}}</td>
+                        <td>{{request.employeeName}}</td>
+                        <td>
+                          <span class="branch label" *ngIf="request.branchId !== null"
+                            [style.backgroundColor]="request.branchColor">
+                            {{ request.branchName }}
+                          </span>
+                        </td>
+                        <td>{{request.projectName}}</td>
+                        <td>{{request.money |  currency:'VND':'' }}</td>
+                        <td>{{request.creationTime | date: 'dd/MM/yyyy'}}</td>
+                        <td>{{request.applyMonth | date: 'MM' }}</td>
+                        <td>{{request.applyMonth | date: 'yyyy' }}</td>
+                        <td style="height: 47px;">
+                          <mat-icon matTooltip="This employee is not in request 's project!"
+                          *ngIf="request.isWarning == true"
+                          style="color: coral;">report_problem</mat-icon>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+      </div>
+      <!-- <div><span>Remain money: </span><b>{{lastRemainMoney |  currency:'VND':'' }}</b></div> -->
+
+
+           <div style="max-width: 850px; overflow-x: auto; margin-top: 10px;" *ngIf="file.length > 0" class="d-flex">
+            <label style="margin-right: 10px;">Invoice Image/URL:</label>
+            <span *ngFor="let files of file">
+              <button style="margin-right: 10px;" (click)="openUrl(files.url)">{{ files.fileName }}</button>
+            </span>
+           </div>
+  </div>
+</div>

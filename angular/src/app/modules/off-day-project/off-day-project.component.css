@@ -1,0 +1,190 @@
+h3 {
+    margin: 0 0 10px;
+}
+
+pre {
+    background-color: #f5f5f5;
+    padding: 15px;
+}
+.flex-between{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.btn-group{
+    display: inline-flex;
+}
+
+.cal-cell-top .cal-day-badge{
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.cal-cell-top .cal-day-number{
+    margin-top: 5px;
+    margin-bottom: 0px;
+    margin-right: 5px;
+}
+
+.cal-cell-top .cal-day-item{
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
+
+.cal-day-badge{
+    margin-right: 3px; 
+    margin-left: 5px
+}
+
+.cal-day-item img {
+    max-width: 20px;
+    max-height: 20px;
+}
+
+.overflow-x {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 30px;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-wrapper {
+    margin: 0;
+}
+
+.mat-form-field-wrapper{
+    padding: 0;
+}
+
+.pin-wrap {
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    border-radius: 10px;
+    color: white;
+}
+
+::ng-deep .mat-pseudo-checkbox-checked::after {
+    width: 11px !important;
+    height: 5px !important;
+    left: 0.5px !important;
+}
+.filter{
+    margin-left: 0;
+    padding-right: 0px;
+    padding-left: 0;
+    margin-right: 0;
+}
+.date{
+    margin-right: -40px;
+    padding-right: 0px;
+}
+.search-text{
+    padding-left: 0px;
+}
+@media screen and (max-width: 768px) {
+    .flex div {
+        margin-top: 15px;
+    }
+    .filter{
+        margin-left: 0px;
+        padding-right: 15px;
+    }
+    .date{
+        margin-right: 0px;
+        padding-right: 15px;
+        
+    }
+    .search-text{
+        padding-left: 15px;
+    }
+    .search-text .clearfix{
+        padding: 0px 10px;
+    }
+
+}
+
+.day-chip-full-day {
+    background-color:#db0000  !important;
+}
+
+.day-chip-morning {
+    background-color: #0c51a0 !important;
+}
+
+.day-chip-afternoon {
+    background-color: #d000db !important;
+}
+
+.day-chip-custom {
+    background-color:  #f27024 !important;
+}
+
+.onsite{
+    background-color: #009688 !important;  
+}
+.remote{
+    background-color: #0c51a0;
+}
+
+.pr-0{
+    padding-right: 0px;
+}
+.pl-0{
+    padding-left: 0px;
+}
+.pl-10{
+    padding-left: 10px;
+}
+.pr-10{
+    padding-right: 10px;
+}
+.header{
+    display: flex;
+}
+
+.header .title{
+    margin-top: 16px;
+}
+.header .filter-date{
+    display: flex;
+}
+.header .filter-date .item{
+    margin-left: 20px;
+    width: 80px;
+}
+
+::ng-deep .filter-date .item .mat-form-field-appearance-outline .mat-form-field-wrapper{
+    margin: 0;
+    padding: 0;
+}
+.p-20{
+    padding:20px 20px 0px 20px;
+}
+.m-5{
+    margin: 5px;
+}
+.center-flex{
+    display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+::ng-deep .row .mat-form-field-infix{
+    padding: 0.75em 0!important;
+}
+.cal-day-number{
+    position: absolute;
+    right: 5px;
+    top: 0;
+    margin: 0 !important;
+    font-size: 15px !important;
+}

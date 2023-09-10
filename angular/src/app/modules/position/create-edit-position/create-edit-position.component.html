@@ -1,0 +1,78 @@
+<form #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
+  <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title
+    [innerHTML]="title">
+  </h2>
+    
+    
+  <div class="row body-position">
+    <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+      <label>Name *</label>
+    </div>
+  
+    <div class="col-md-10">
+      <div class="example-container">
+        <mat-form-field appearance="outline">
+          <input type="text" matInput name="name" placeholder="{{l('Name')}}" [(ngModel)]="position.name"
+            #name="ngModel" required>
+        </mat-form-field>
+      </div>
+    </div>
+  
+    <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+      <label>Short Name *</label>
+    </div>
+  
+    <div class="col-md-10">
+      <div class="example-container">
+        <mat-form-field appearance="outline">
+          <input type="text" matInput name="shortName" placeholder="{{l('Short Name')}}"
+            [(ngModel)]="position.shortName" #shortName="ngModel" required>
+        </mat-form-field>
+      </div>
+    </div>
+  
+    
+    <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+      <label>Code *</label>
+    </div>
+  
+    <div class="col-md-10">
+      <div class="example-container">
+        <mat-form-field appearance="outline" >
+          <input type="text" matInput name="code" placeholder="{{l('Code')}}" [(ngModel)]="position.code"
+            #code="ngModel" required>
+        </mat-form-field>
+      </div>
+    </div>
+    
+    <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
+      <label>Color *</label>
+    </div>
+  
+    <div class="col-md-10">
+      <div class="example-container row">
+        <div class="col-sm-6 col-md-6 col-lg-6">
+          <mat-form-field appearance="outline">
+            <input type="text" matInput name="color" placeholder="{{l('Color')}}" [(ngModel)]="position.color"
+              #color="ngModel" required>
+          </mat-form-field>
+        </div>
+        <div class="pick-color-wrapper col-sm-6 col-md-6 col-lg-6"> 
+          <input type="color" class="pick-color" [(ngModel)]="position.color"  name="color" >
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default" mat-raised-button type="button" (click)="close(1)">
+      {{l('Cancel')}}
+    </button>
+    <button mat-raised-button color="primary" [disabled]="!createForm.form.valid || isSaving" type="submit" flex="15"
+      (click)="onSave()">
+      {{l('Save')}}
+    </button>
+  </mat-dialog-actions>
+</form>

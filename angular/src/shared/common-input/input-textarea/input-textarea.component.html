@@ -1,0 +1,4 @@
+<mat-form-field class="full-width" [floatLabel]="label">
+  <mat-label *ngIf="labelTop">{{labelTop}}</mat-label>
+  <textarea matInput [placeholder]="placeholder" [rows]="rows" [formControl]="formControlInput" (blur)="onBlur($event)"></textarea>
+</mat-form-field>

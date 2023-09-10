@@ -1,0 +1,13 @@
+.color-label-status {
+    background-color: #4caf50 !important;
+}
+
+.th-sort {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.row-table-retro {
+    height: 56px;
+}

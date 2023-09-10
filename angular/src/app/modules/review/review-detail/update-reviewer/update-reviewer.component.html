@@ -1,0 +1,46 @@
+
+<form *ngIf="active" #reviewForm="ngForm" style="position: relative;" autocomplete="off" id="frm_create_group" novalidate>
+  <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane"  cdkDragHandle mat-dialog-title>{{title | localize}}<b>{{review.internName}}</b></h1>
+  <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0; cursor: pointer;">close</mat-icon>
+  <hr>
+  <mat-dialog-content class="mat-typography">
+    <div *ngIf="!disableSelect" class="format-col form-group row required">
+      <label class="col-md-3 col-form-label" for="connectionString">
+        {{ "Internship:" | localize }}
+        </label>
+      <mat-form-field class="edit-form row-item-rest col-xl-9 col-lg-9 col-md-9 col-xs-9" appearance="outline">
+        <mat-label> {{ "Internship:" | localize }}</mat-label>
+        <mat-select [(ngModel)]="review.internshipId" (selectionChange)="changeCurrentLevel(review.internshipId)" name="Internship">
+          <mat-option>
+            <ngx-mat-select-search placeholderLabel="Search" [formControl]="internshipSearch" 
+            noEntriesFoundLabel= "No matching internship found"></ngx-mat-select-search>
+          </mat-option>
+          <mat-option *ngFor="let internship of listInternship" [value]="internship.internshipId">
+            {{ internship.internName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="format-col form-group row required">
+      <label class="col-md-3 col-form-label" for="connectionString">
+        {{ "Reviewer:" | localize }}
+        </label>
+        <mat-form-field class="edit-form row-item-rest col-xl-9 col-lg-9 col-md-9 col-xs-9" appearance="outline">
+          <mat-label> {{ "Reviewer:" | localize }}</mat-label>
+          <mat-select [(ngModel)]="review.reviewerId" name="Reviewer">
+            <mat-option>
+              <ngx-mat-select-search placeholderLabel="Search" [formControl]="reviewerSearch" 
+              noEntriesFoundLabel= "No matching reviewer found"></ngx-mat-select-search>
+            </mat-option>
+            <mat-option *ngFor="let reviewer of listReviewer" [value]="reviewer.pmId">
+              {{ reviewer.pmFullName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default " mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
+    <button  mat-raised-button  color="primary" (click)="saveReviewDetail()" cdkFocusInitial [disabled]="!reviewForm.form.valid || saving">{{l('Save')}}</button>
+  </mat-dialog-actions>
+</form>

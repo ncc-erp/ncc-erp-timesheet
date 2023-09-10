@@ -1,0 +1,21 @@
+<form autocomplete="off" #createUserModal="ngForm" [busy]="isSaving">
+  <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>{{l(title)}}
+  </h1>
+  <mat-dialog-content style="width:700px;height:auto">
+    <div class="row row-fluid">
+      <ng-template ngFor let-role [ngForOf]="roles">
+        <div class="col-sm-12 col-md-12">
+          <div class="checkbox-wrapper">
+            <mat-checkbox  [checked]="isRoleChecked(role.normalizedName)" (change)="onRoleChange(role, $event)">
+              {{ role.name }}
+            </mat-checkbox>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default" mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
+    <button mat-raised-button color="primary" (keyup.enter)="save()" (click)='save()'>{{l('Save')}}</button>
+  </mat-dialog-actions>
+</form>

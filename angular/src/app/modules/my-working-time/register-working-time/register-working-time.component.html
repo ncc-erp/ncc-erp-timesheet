@@ -1,0 +1,60 @@
+<form class="example-form">
+  <h3>{{title}}</h3>
+  <div class="row">
+    <div class=" col-md-4">
+      <mat-form-field class="example-full-width">
+        <mat-label>Morning start time</mat-label>
+        <input type="time" matInput name="startMorning" [(ngModel)]="data.morningStartTime" required>
+      </mat-form-field>
+    </div>
+    <div class=" col-md-4">
+      <mat-form-field class="example-full-width">
+        <mat-label>Morning end time</mat-label>
+        <input type="time" matInput name="endMorning" [(ngModel)]="data.morningEndTime" required>
+      </mat-form-field>
+    </div>
+    <div class=" col-md-4">
+      <mat-form-field class="example-full-width">
+        <mat-label>Morning working time</mat-label>
+        <input matInput name="morningWorkingTime" [value]="minsToStr(strToMins(data.morningEndTime) - strToMins(data.morningStartTime))" [readonly]="true">
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class=" col-md-4">
+      <mat-form-field class="example-full-width">
+        <mat-label>Afternoon start time</mat-label>
+        <input type="time" matInput name="startAfternoon" [(ngModel)]="data.afternoonStartTime" required>
+      </mat-form-field>
+    </div>
+    <div class=" col-md-4">
+      <mat-form-field class="example-full-width">
+        <mat-label>Afternoon end time</mat-label>
+        <input type="time" matInput name="endAfternoon" [(ngModel)]="data.afternoonEndTime" required>
+      </mat-form-field>
+    </div>
+    <div class=" col-md-4">
+      <mat-form-field class="example-full-width">
+        <mat-label>Afternoon working time</mat-label>
+        <input matInput name="afternoonWorkingTime" [value]="minsToStr(strToMins(data.afternoonEndTime) - strToMins(data.afternoonStartTime))" [readonly]="true" required>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class=" col-md-12">
+      <mat-form-field [ngClass]=" (applyDate.hasError('required') && submitted)?'is-invalid':''">
+        <mat-label>Apply date</mat-label>
+        <input matInput name="timeApply" [(ngModel)]="data.applyDate" #applyDate="ngModel" [matDatepicker]="picker" required>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </div>
+  </div>
+
+</form>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="SaveTime()">Send request to PM</button>
+</div>

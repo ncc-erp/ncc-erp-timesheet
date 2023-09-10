@@ -1,0 +1,83 @@
+<div class="row clearfix" [@routerTransition]>
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Manage Tasks" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="getAllData()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body table-responsive" [busy]="isTableLoading">
+        <div>
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="padding: 0">
+            <button *ngIf="permission.isGranted(ADD_TASK)" mat-raised-button color="primary" class="pull-left" (click)="createTask()" style="margin-top: 4px; margin-left: 10px;">
+              <mat-icon>add</mat-icon>New Task
+            </button>
+          </div>
+          <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+            <mat-form-field appearance="outline" style="width: 450px;">
+              <mat-label>Search by task name</mat-label>
+              <input matInput [(ngModel)]="searchText" (keyup.enter)="searchTask()" type="text" maxlength="128">
+              <i class="icon-32 material-icons" matPrefix>search</i>
+            </mat-form-field>
+          </div>
+        </div>
+        <table *ngFor="let task of mapTasks; index as i" class="table table-hover table-striped"
+          [busy]="isTableLoading">
+          <thead>
+            <tr>
+              <th colspan="4">
+                <h5 style="margin-top: -20px;">{{task.name}} ({{task.items.length}})</h5>
+                <p *ngIf="task.name =='Common Task'" style="font-weight:normal;">These tasks are automatically added
+                  to all new projects </p>
+                <p *ngIf="task.name == 'Other Task'" style="font-weight:normal;">These task must be manually added to
+                  projects </p>
+              </th>
+            </tr>
+
+            <tr>
+              <th style="padding-left: 20px;">Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let listname of task.items; index as i">
+              <td align="start">
+                <button class="btn-primary white-color" *ngIf="permission.isGranted(EDIT_TASK)" mat-raised-button  (click)="editTask(listname)">
+                  <span>Edit</span>
+                </button>
+                {{listname.name}}
+              </td>
+              <td align="end">
+                <div *ngIf="task.name =='Common Task'">
+                  <button *ngIf="listname.isDeleted == false && permission.isGranted(CHANGE_STATUS_TASK)" mat-raised-button (click)="archiveTask(listname)">
+                    <span>Archive</span>
+                  </button>
+                  <button *ngIf="listname.isDeleted == true && permission.isGranted(CHANGE_STATUS_TASK)" mat-raised-button (click)="unArchiveTask(listname)">
+                      <span>Unarchive</span>
+                    </button>
+                  <button class="btn-danger white-color" *ngIf="permission.isGranted(DELETE_TASK)" [disabled]="!listname.isDeleted " mat-raised-button
+                    (click)="deleteTask(listname)">
+                    <span>Delete</span>
+                  </button>
+                </div>
+                <button class="btn-danger white-color" *ngIf="task.name =='Other Task' && permission.isGranted(DELETE_TASK)" mat-raised-button (click)="deleteTask(listname)">
+                  <span>Delete</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

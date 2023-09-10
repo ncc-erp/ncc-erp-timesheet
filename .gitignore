@@ -1,0 +1,14 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# IDEs and editors
+.vs/
+obj/
+bin/
+aspnet-core/src/Timesheet.Web.Host/App_Data/Logs/
+aspnet-core/src/Timesheet.Web.Mvc/App_Data/Logs/
+aspnet-core/src/Timesheet.Migrator/Logs/Logs.txt
+/document
+/.idea/
+aspnet-core/src/Timesheet.Web.Host/wwwroot/avatars/
+/angular/dist.zip
+/angular/timesheet_node_modules.zip

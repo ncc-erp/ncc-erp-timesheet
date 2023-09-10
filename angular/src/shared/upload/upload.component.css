@@ -1,0 +1,94 @@
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+.btn-customs {
+  height: 40px;
+  width: 100%;
+}
+
+.btn-file input[type="file"] {
+  position: absolute;
+  font-size: 50px;
+  opacity: 0;
+  right: 0;
+  top: 0;
+}
+
+.mt-15 {
+  margin-top: 5%;
+}
+
+.tools {
+  background: #000;
+  float: left;
+}
+.tools a {
+  display: block;
+  color: #fff;
+  fill: #fff;
+  height: 48px;
+  width: 48px;
+  text-align: center;
+  line-height: 46px;
+  position: relative;
+}
+.tools a:hover {
+  background: #141414;
+}
+.tools a .desc {
+  position: absolute;
+  display: none;
+  left: 50px;
+  top: 15px;
+  background: #fff;
+  color: #222;
+  font-size: 0.7rem;
+  line-height: 18px;
+  padding: 0px 5px;
+  white-space: nowrap;
+}
+.tools a:hover .desc {
+  display: block;
+}
+svg {
+  display: none;
+  position: absolute;
+}
+.tools a:hover svg {
+  top: 12px;
+  left: 12px;
+  display: block;
+}
+
+.image-upload {
+  position: absolute;
+  bottom: 0;
+  left: 75px;
+}
+
+.image-upload .image-upload__label {
+  display: block;
+  width: 25px;
+  height: 25px;
+  color: #fff;
+  text-align: center;
+  padding: 5px;
+  bottom: 0;
+  background-color: #404040;
+}
+.image-upload .image-upload__input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 1;
+  width: 0;
+  height: 100%;
+  opacity: 0;
+}
+
+.image-upload .image-upload__label:hover {
+  cursor: pointer;
+}

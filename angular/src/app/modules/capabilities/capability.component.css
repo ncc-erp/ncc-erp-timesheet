@@ -1,0 +1,49 @@
+thead th {
+  text-align: center;
+}
+.col-action {
+  width: 150px;
+}
+.col-stt {
+  width: 50px;
+}
+.button-container {
+  margin-top: 10px;
+}
+.footer {
+  display: block;
+  min-height: 80px;
+  padding: 0 5px;
+}
+.guideLine {
+  height: 30px;
+  overflow: hidden;
+}
+.pointer:hover {
+  cursor: pointer;
+}
+.item-note {
+  white-space: pre-line;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+}
+.item-note:hover {
+  cursor: pointer;
+}
+.guildLine-collapse {
+  max-height: 60px;
+  overflow: hidden;
+}
+.guildLine-collapse:after {
+  content: "...";
+}
+.expand {
+}
+.col-apply_settings {
+  width: 300px;
+}
+.apply-settings_content {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}

@@ -1,0 +1,87 @@
+<form #cloneCapabilityForm="ngForm" style="position: relative;" autocomplete="off" id="frm_create_group" novalidate>
+  <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title> {{title |
+    localize}}</h1>
+  <mat-icon (click)="close()" style="position: absolute; top: 0; right: 0; cursor: pointer;">close</mat-icon>
+  <hr>
+  <mat-dialog-content class="mat-typography">
+    <p class="form-group_header">From</p>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group d-flex required">
+          <label class="col-md-3 col-form-label p-t-20 p-l-0 p-r-0" for="nameInput">
+            {{ "User Type:" | localize }}
+          </label>
+          <mat-form-field class="w-100 clone-input" appearance="outline">
+            <mat-select name="fromUserType" [disableOptionCentering]="true" [(ngModel)]="fromUserType" required>
+              <mat-option *ngFor="let userType of userTypeDropDown" [value]="userType.value">
+                {{userType.key}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group d-flex required">
+          <label class="col-md-3 col-form-label p-t-20 p-l-0 p-r-0" for="nameInput">
+            {{ "Position:" | localize }}
+          </label>
+          <mat-form-field class="w-100 clone-input" appearance="outline">
+            <mat-select name="fromPositionId" [disableOptionCentering]="true" [(ngModel)]="fromPositionId" required>
+              <mat-option>
+                <ngx-mat-select-search placeholderLabel="Search" [formControl]="searchFromPosition"
+                  noEntriesFoundLabel="No matching found">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let position of fromPositionDropDown" [value]="position.value">
+                {{position.key}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+    <p class="form-group_header">To</p>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group d-flex required">
+          <label class="col-md-3 col-form-label p-t-20 p-l-0 p-r-0" for="nameInput">
+            {{ "User Type:" | localize }}
+          </label>
+          <mat-form-field class="w-100 clone-input" appearance="outline">
+            <mat-select name="toUserType" [disableOptionCentering]="true" [(ngModel)]="toUserType" required>
+              <mat-option>
+                <ngx-mat-select-search placeholderLabel="Search" [formControl]="searchToPosition"
+                  noEntriesFoundLabel="No matching found">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let userType of userTypeDropDown" [value]="userType.value">
+                {{userType.key}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group d-flex required">
+          <label class="col-md-3 col-form-label p-t-20 p-l-0 p-r-0" for="nameInput">
+            {{ "Position:" | localize }}
+          </label>
+          <mat-form-field class="w-100 clone-input" appearance="outline">
+            <mat-select name="toPositionId" [disableOptionCentering]="true" [(ngModel)]="toPositionId" required>
+              <mat-option *ngFor="let position of toPositionDropDown" [value]="position.value">
+                {{position.key}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default " mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
+    <button mat-raised-button color="primary" (click)="clone(false)" cdkFocusInitial
+      [disabled]="!cloneCapabilityForm.form.valid || saving">{{l('Clone')}}</button>
+    <button mat-raised-button color="primary" (click)="clone(true)" cdkFocusInitial
+      [disabled]="!cloneCapabilityForm.form.valid || saving">{{l('Clone & Close')}}</button>
+  </mat-dialog-actions>
+</form>

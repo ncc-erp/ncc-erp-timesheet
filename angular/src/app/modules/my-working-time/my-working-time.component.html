@@ -1,0 +1,130 @@
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="height: auto;">
+  <div class="card main-content" style="height: 100%">
+    <div class="header">
+      <h2>{{"My working time"}}</h2>
+      <ul class="header-dropdown m-r--5">
+        <li>
+          <button mat-icon-button [matMenuTriggerFor]="headerMenu2" class="header-dropdown-mat-icon-button">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #headerMenu2="matMenu">
+            <button mat-menu-item (click)="refresh()">
+              <mat-icon>refresh</mat-icon>
+              <span>{{ "Refresh" | localize }}</span>
+            </button>
+          </mat-menu>
+        </li>
+      </ul>
+    </div>
+    <div class="body">
+      <form>
+        <div class="row">
+          <div class="col-md-12">
+            <div>
+              <h4 style="padding : 10px 0 0 0; text-align: center;">My current working time</h4>
+              <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 working">
+                  <mat-form-field>
+                    <input matInput name="startMorning" placeholder="Start Morning Time"  [value]="currentWorkingTime.morningStartTime"
+                     [readonly]="true" />
+                  </mat-form-field>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 working">
+                  <mat-form-field class="pass" >
+                    <input matInput name="endMorning " placeholder="End Morning Time" [value]="currentWorkingTime.morningEndTime"
+                      [readonly]="true" />
+                  </mat-form-field>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 working">
+                  <mat-form-field class="pass" >
+                    <input matInput name="morningWorkingTime " placeholder="Morning Working Time" [value]="currentWorkingTime.morningWorkingTime"
+                      [readonly]="true" />
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="row">
+                <div class=" col-lg-4 col-md-4 col-sm-4 col-xs-12 working">
+                  <mat-form-field>
+                    <input matInput name="startAft" placeholder="Start Afternoon Time" [value]="currentWorkingTime.afternoonStartTime"
+                     [readonly]="true" />
+                  </mat-form-field>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 working">
+                  <mat-form-field class="pass" >
+                    <input matInput name="endAft " placeholder="End Afternoon Time" [value]="currentWorkingTime.afternoonEndTime"
+                      [readonly]="true" />
+                  </mat-form-field>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 working">
+                  <mat-form-field class="pass" >
+                    <input matInput name="afternoonWorkingTime " placeholder="Afternoon Working Time" [value]="currentWorkingTime.afternoonWorkingTime"
+                      [readonly]="true" />
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+            <div class="edit-save">
+              <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                <button *ngIf="permission.isGranted(REGISTRATION_MY_WORKING_TIME)" (click)="createTime()" large mat-raised-button color="primary">
+                  <mat-icon>edit</mat-icon>Register new working time
+                </button>
+              </div>
+              <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
+                <p style="color: red;">Cần PM approve, nếu thời điểm PM approve sau Apply Date thì Apply Date là ngày PM approve</p>
+              </div>
+              
+
+            </div>
+          </div>
+        </div>
+      </form>
+      <table class="table table-hover table-striped">
+        <thead>
+          <tr >
+            <th>{{ "NO" | localize }}</th>
+            <th>{{ "Request Time" | localize }}</th>
+            <th>{{ "Apply Date" | localize }}</th>
+            <th>{{ "Details" | localize }}</th>
+            <th>{{ "Status" | localize }}</th>
+            <th>{{ "Actions" | localize }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let infor of registerHistory">
+            <td>{{registerHistory.indexOf(infor) + 1}}</td>
+            <td>{{infor.reqestTime | date: 'dd/MM/yyyy HH:mm'}}</td>
+            <td>{{infor.applyDate | date: 'dd/MM/yyyy'}}</td>
+            <td>
+              <span>Sáng:</span> {{infor.morningStartTime}} - {{infor.morningEndTime}} <br>
+              <span>Chiều:</span> {{infor.afternoonStartTime}} - {{infor.afternoonEndTime}}
+            </td>
+            <td>{{listStatus[infor.status]['name']}}</td>
+            <td style="display: flex; justify-content: center;" *ngIf="infor.status == 1">
+              <button class="action-button" mat-icon-button [matMenuTriggerFor]="actionsMenu">
+                  <mat-icon>menu</mat-icon>
+              </button>
+              <mat-menu #actionsMenu="matMenu">
+                <a *ngIf="permission.isGranted(EDIT_MY_WORKING_TIME)" style="text-decoration: none; color:#000000DE;"
+                  mat-menu-item (click)="editRegister(infor)">
+                  <mat-icon>edit</mat-icon>
+                  <span>{{ "Edit" | localize }}</span>
+                </a>
+                <button *ngIf="permission.isGranted(DELETE_MY_WORKING_TIME)"  mat-menu-item (click)="deleteRegisterInfor(infor)">
+                  <mat-icon>delete</mat-icon>
+                  <span>{{ "Delete" | localize }}</span>
+                </button>
+              </mat-menu>
+            </td>
+            
+              
+            <td *ngIf="infor.status == 2"><mat-icon style="color: green">done</mat-icon></td>
+            <td *ngIf="infor.status == 3"><mat-icon style="color: red">close</mat-icon></td>
+            
+            
+          </tr>
+        </tbody>
+      </table>
+      
+    </div>
+  </div>
+</div>

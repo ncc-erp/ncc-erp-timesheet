@@ -1,0 +1,148 @@
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="height: auto; padding: 0px">
+  <div class="card">
+    <div class="header">
+      <h2>{{ "Capability name " | localize }}</h2>
+      <ul class="header-dropdown m-r--5">
+        <li>
+          <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #headerMenu="matMenu">
+            <button mat-menu-item (click)="refresh()">
+              <mat-icon>refresh</mat-icon>
+              <span>{{ "Refresh" | localize }}</span>
+            </button>
+          </mat-menu>
+        </li>
+      </ul>
+    </div>
+    <div class="body" style="height: 100%">
+      <div class="row">
+        <div class="col-lg-8" style="margin-bottom: 0;">
+          <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 p-r-0 p-l-0" style="margin-bottom: 20px;">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label> {{ "User Type" | localize }}</mat-label>
+              <mat-select name="userType" [disableOptionCentering]="true" [(ngModel)]="userType"
+                (selectionChange)="onUserTypeChange($event.value)">
+                <mat-option *ngFor="let userType of userTypeDropDown" [value]="userType.value">
+                  {{userType.key}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 p-r-0 p-l-2" style="margin-bottom: 0;">
+            <mat-form-field class="w-100" appearance="outline">
+              <mat-label> {{ "Position" | localize }}</mat-label>
+              <mat-select name="position" [disableOptionCentering]="true" [(ngModel)]="positionId"
+                (selectionChange)="onPositionChange($event.value)">
+                <mat-option *ngFor="let position of positionDropdown" [value]="position.value">
+                  {{position.key}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="col-lg-4 text-right action-row">
+          <button class="btn btn-danger m-r-10" mat-raised-button (click)="onClone()">
+            Clone
+          </button>
+          <a [routerLink]="['/app/main/capability-settings']" class="btn btn-primary" mat-raised-button>
+            Back
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="picklist picklist-select col-md-7">
+          <div class="card">
+            <div class="header">
+              <b>Select Capability</b>
+            </div>
+            <div class="header">
+              <mat-form-field class="picklist-search" appearance="outline">
+                <mat-label>Search by Capability Name</mat-label>
+                <input type="search" matInput name="capabilitySearch" [(ngModel)]="searchCapability"
+                  (ngModelChange)="filterCapability($event)" placeholder="">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+            </div>
+            <div class="body">
+              <div class="row p-l-2 p-r-2">
+              </div>
+              <div class="picklist-header">
+                <div class="picklist-header_info">
+                  <div>
+                    Capability Name
+                  </div>
+                  <div class="text-center">
+                    Coefficient
+                  </div>
+                  <div class="text-center">
+                    GuildLine
+                  </div>
+                  <div class="text-center">
+                    Action
+                  </div>
+                </div>
+              </div>
+              <div cdkDropList #selectedList="cdkDropList" [cdkDropListData]="tempCapabilityList"
+                [cdkDropListConnectedTo]="[remainList]" id="selectedList" class="drop-area"
+                (cdkDropListDropped)="drop($event)">
+                <div class="picklist-item selected" *ngFor="let item of tempCapabilityList" cdkDrag>
+                  <div>
+                    {{item.capabilityName}}
+                  </div>
+                  <div style="text-align: center;">
+                    <span *ngIf="item.type == CAPABILITY_TYPE.Point">{{item.coefficient}}</span>
+                  </div>
+                  <div class="max-line-content-1" resizeCell [maxLine]="1" [innerHtml]="item.guildeLine | safeHtml">
+                  </div>
+                  <div style="display: flex;">
+                    <button type="button" mat-icon-button (click)="onEditCapabilitySetting(item)"><i
+                        class="fa-solid fa-edit" style="font-size: 20px;"></i></button>
+                    <button (click)="deleteCapabilitySettingForUserTypePosition(item)" type="button" mat-icon-button>
+                      <i class="fa-solid fa-angle-right" style="font-size: 20px;"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="picklist picklist-avai col-md-5">
+          <div class="card" style="height: 100%;">
+            <div class="header">
+              <b>Available Capability
+              </b>
+            </div>
+            <div class="header">
+              <mat-form-field class="picklist-search" appearance="outline">
+                <mat-label>Search by Capability Name</mat-label>
+                <input type="search" matInput name="remainCapabilitySearch" [(ngModel)]="searchRemainCapability"
+                  (ngModelChange)="filterRemainCapability($event)" placeholder="">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+            </div>
+            <div class="body">
+              <div class="picklist-header_info">
+                <div>
+                  &nbsp;
+                </div>
+                <div>
+                </div>
+              </div>
+              <div cdkDropList #remainList="cdkDropList" [cdkDropListData]="tempRemainCapabilities"
+                [cdkDropListConnectedTo]="[selectedList]" id="remainList" class="drop-area"
+                (cdkDropListDropped)="drop($event)">
+                <div class="picklist-item" *ngFor="let item of tempRemainCapabilities" cdkDrag>
+                  <button (click)="createNewCapabilitySettingForUserTypePosition(item)" type="button" mat-icon-button>
+                    <i class="fa-solid fa-angle-left" style="font-size: 20px;"></i>
+                  </button>
+                  {{item.capabilityName}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

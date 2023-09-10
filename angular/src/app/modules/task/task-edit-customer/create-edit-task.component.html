@@ -1,0 +1,20 @@
+<form *ngIf="active" #taskForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
+  <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane"  cdkDragHandle mat-dialog-title>{{title}} {{task.id > 0 ? task.name : ''}}</h1>
+  <mat-dialog-content class="mat-typography" style="width:450px; height: 140px;">
+    <mat-form-field >
+      <input matInput name="name" placeholder="{{l('Name')}}" [(ngModel)]="task.name" required maxlength="255">
+    </mat-form-field>
+      <mat-form-field>
+        <mat-label>Task Type</mat-label>
+        <mat-select matInput name="type" [(ngModel)]="task.type">
+          <mat-option *ngFor="let task of APP_CONFIG.EnumTaskType" [value] ="task.value">
+            {{ task.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default " mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
+    <button  mat-raised-button color="primary" [mat-dialog-close]="task" cdkFocusInitial [disabled]="!taskForm.form.valid || saving">{{l('Save')}}</button>
+  </mat-dialog-actions>
+</form>

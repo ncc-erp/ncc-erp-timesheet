@@ -1,0 +1,27 @@
+.align-item{
+    display: flex;
+    align-items: center;
+    height: 32px;
+}
+.margin{
+    margin-right: 10px;
+}
+
+.info-name-box{
+    margin: 5px 10px 0px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.info-name{
+    display: flex;
+    align-items: center;
+    max-width: 400px;
+    overflow: hidden;
+}
+.email:hover {
+    text-decoration: underline;
+    cursor: pointer;
+    color: #41a0e4;
+  }

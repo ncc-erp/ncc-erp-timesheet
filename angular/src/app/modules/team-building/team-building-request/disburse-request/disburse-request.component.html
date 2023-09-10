@@ -1,0 +1,85 @@
+<form #disburseRequestForm="ngForm" style="position: relative;" autocomplete="off" id="frm_create_group" novalidate>
+  <p style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>Disburse request ID #{{this.disburseTeambuildingRequestInfoDto.requestId}}</p>
+  <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0;
+  cursor: pointer;">close</mat-icon>
+  <hr>
+  <div>
+    <div style="display: flex; justify-content: space-between;">
+      <p mat-dialog-title>Requester : {{this.disburseTeambuildingRequestInfoDto.requesterName}}</p>
+      <p mat-dialog-title>Total Request Money : {{this.disburseTeambuildingRequestInfoDto.requestMoney}}</p>
+    </div>
+    <p mat-dialog-title>Email : {{this.disburseTeambuildingRequestInfoDto.requesterEmail}}</p>
+  </div>
+  <hr>
+  <mat-dialog-content class="mat-typography">
+        <mat-card>
+        <mat-card-title>
+          Invoice Request List
+        </mat-card-title>
+          <mat-card-content>
+            <table class="table table-striped table-hover table-responsive">
+              <thead>
+                <tr>
+                  <th style="width: 10%">
+                    No
+                  </th>
+                  <th style="width: 20%">
+                    Invoice Amount
+                  </th>
+                  <th style="width: 40%">
+                    Invoice Bill Resource
+                  </th> 
+                  <th style="width: 15%">
+                    Has VAT
+                  </th>
+                  <th style="width: 15%;">
+                    Invoice Amount After Tax
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let invoice of this.disburseTeambuildingRequestInfoDto.invoiceRequests; let i = index">
+                  <td>
+                    <span>Invoice #{{i}}</span>
+                  </td>
+                  <td>
+                    <span>{{invoice.invoiceMoney}}</span>
+                  </td>
+                  <td>
+                    <a target="_blank" href="{{invoice.invoiceResourceUrl}}">{{invoice.invoiceResourceName}}</a>
+                  </td>
+                  <td>
+                    <mat-checkbox [name]="'invoiceVAT' + (i + 1)" [(ngModel)]="invoice.hasVAT"  [ngModelOptions]="{standalone: true}" (ngModelChange)="updateInvoiveStatusInDisburseInvoiceList(i, invoice.hasVAT)"></mat-checkbox>
+                  </td>
+                  <td>
+                    <p>{{calculateInvoiceAmountAfterTaxing(invoice.invoiceMoney, invoice.hasVAT)}}</p>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="5">
+                    <p style="float: right;"><b>{{ "Suggest Disburse Money:" | localize }}</b> {{calculateTotalSuggestedDisburseMoney() | number : "1.0" : "en-US"}} VNĐ</p>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </mat-card-content>
+        </mat-card>
+        <br>
+
+        <div class="align-item format-col form-group row required">
+          <label class="col-md-4 col-form-label" for="connectionString">
+            {{ "Disburse money:" | localize }}
+            </label>
+            <mat-form-field class="col-xl-8 col-lg-8 col-md-8 col-xs-8" appearance="outline">
+              <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0'}"
+              matInput="matInput" [(ngModel)]="disburseMoney" name="money" required/>
+          </mat-form-field>
+        </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+      <button name="cancelButton" class="btn btn-default" mat-raised-button mat-dialog-close >{{l('Cancel')}}</button>
+      <button name="saveButton" mat-raised-button color="primary" (click)="onSaveAndClose()"  cdkFocusInitial>{{l('Save')}}</button>
+  </mat-dialog-actions>
+</form>

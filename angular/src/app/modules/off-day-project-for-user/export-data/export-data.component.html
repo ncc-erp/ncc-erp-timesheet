@@ -1,0 +1,72 @@
+<form [formGroup]="FormExport">
+  <div class="row">
+    <div class="col-sm-6">
+      <mat-form-field>
+        <input matInput [matDatepicker]="picker" placeholder="Start Date" formControlName="fromDateCustomTime">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </div>
+    <div class="col-sm-6">
+      <mat-form-field>
+        <input matInput [matDatepicker]="picker1" placeholder="End Date" formControlName="toDateCustomTime">
+        <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+        <mat-datepicker #picker1></mat-datepicker>
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="row">
+    
+    <div class="col-sm-6">
+      <app-multiple-select labelName="Project" [listOption]="listProject"
+        (onChange)="onChangeListProjectIdSelected($event)" [defaultValue]="listProjectSelected">
+      </app-multiple-select>
+    </div>
+    <div class="col-sm-6">
+      <mat-form-field appearance="outline">
+        <mat-label>Branch</mat-label>
+        <mat-select name="branchId" [(value)]="branchId">
+          <mat-option>
+            <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
+              noEntriesFoundLabel="No matching found">
+            </ngx-mat-select-search>
+          </mat-option>
+          <mat-option value="">All</mat-option>
+          <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
+            {{branch.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select [(value)]="dayAbsentStatus" >
+          <mat-option *ngFor="let item of dayAbsentStatusList" [value]='APP_CONSTANT.AbsenceStatusFilter[item]'>
+            {{item}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="col-sm-6">
+      <mat-form-field appearance="outline">
+        <mat-label>Request Type</mat-label>
+        <mat-select [(value)]="absentDayType">
+          <mat-option [value]="-1">All</mat-option>
+          <mat-option *ngFor="let item of dayAbsentTypeList" [value]='APP_CONSTANT.DayAbsenceType[item]'>
+            {{item}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div> 
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="close(false)">Cancel</button>
+    <button (click)="exportExcelTeamWorkingCalender()" mat-flat-button color="primary" [disabled]="isDisabled">Export</button>
+
+  </div>
+</form>

@@ -1,0 +1,173 @@
+<div class="row clearfix" id="mytimesheettardiness">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content header-filter">
+      <div class="header">
+        <h2 class="title">{{ "Check in punishments" | localize }}</h2>
+        <div class="filter-date">
+          <div class="item">
+            <label>Year: </label>
+            <mat-form-field appearance="outline">
+              <mat-select [(value)]="year" (selectionChange)="onDateChange()">
+                <mat-option *ngFor="let item of years" [value]='item'>
+                  {{item}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="item">
+            <label>Month: </label>
+            <mat-form-field appearance="outline">
+              <mat-select [(value)]="month" (selectionChange)="onDateChange()">
+                <mat-option *ngFor="let item of months" [value]='item'>
+                  {{item +1}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="item">
+            <div class="text-left">
+              <h2>{{ "Total Punished: " | localize }} {{countLate}}</h2>
+            </div>
+          </div>
+          <div class="item">
+            <p class="text-note-complain">
+              Click vào button Complain và nhập nội dung khiếu nại nếu bạn thấy không đúng.
+            </p>
+          </div>
+        </div>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu123="matMenu">
+              <button mat-menu-item (click)="getData()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+
+
+
+      <div style="position: relative; padding: 20px;" [busy]="isTableLoading">
+        <div class="table-responsive">
+          <table class="table table-hover table-striped styleUser">
+            <thead>
+              <tr>
+
+
+                <th style="min-width: 90px; width: 90px;" rowspan="2">
+                  {{ "Date" | localize }}
+                </th>
+                <th style="min-width: 160px;" colspan="2">
+                  {{ "Registration Hours" | localize }}
+                </th>
+                <th style="min-width: 160px;" colspan="2">
+                  {{ "Checking time" | localize }}
+                </th>
+                <th style="width: 80px;" rowspan="2">
+                  {{ "Tracker Time" | localize }}
+                </th>
+                <th style="min-width: 220px;" colspan="2">
+                  {{ "Result" | localize }}
+                </th>
+                <th rowspan="2" style="min-width: 50px; width: 100px;">
+                  {{ "Edited by" | localize }}
+                </th>
+                <th style="width: 80px;" rowspan="2">
+                  {{ "Punishment Money" | localize }}
+                </th>
+                <!-- <th style="width: 150px;" rowspan="2">
+                  {{ "Punishment Name" | localize }}
+                </th> -->
+                <th style="min-width: 150px; max-width: 300px; width: 200px;" rowspan="2">
+                  {{ "Complain" | localize }}
+                </th>
+                <th style="min-width: 150px; max-width: 300px; width: 200px;" rowspan="2">
+                  {{ "Complain Reply" | localize }}
+                </th>
+                <th style="min-width: 150px; " rowspan="2">
+                  {{ "Action" | localize }}
+                </th>
+              </tr>
+              <tr>
+                <th style="width: 100px;">Check in</th>
+                <th style="width: 100px;">Check out</th>
+                <th style="width: 100px;">Check in</th>
+                <th style="width: 100px;">Check out</th>
+                <th style="width: 130px;">Check in late</th>
+                <th style="width: 130px;">Check out early</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of (listTimekeeping), index as i">
+
+                <td style="text-align: center;">{{formatDate(item.date)}}</td>
+                <td style="text-align: center;">
+                  <span>{{item.registrationTimeStart}}</span>
+
+                </td>
+                <td style="text-align: center;">
+                  <span>{{item.registrationTimeEnd}}</span>
+
+                </td>
+                <td style="text-align: center;">
+                  <span>{{item.checkIn}}</span>
+
+                </td>
+                <td style="text-align: center;">
+                  <span>{{item.checkOut}}</span>
+
+                </td>
+                <td style="text-align: center;">
+                  <span>{{trackerTimeFormat(item.trackerTime)}}</span>
+
+                </td>
+                <td style="text-align: center;" [class]="getCss1(item.resultCheckIn)">{{item.resultCheckIn}}</td>
+                <td style="text-align: center;" [class]="getCss1(item.resultCheckOut)">{{item.resultCheckOut}}</td>
+                <td class="text-center"><span class="pm" *ngIf="item.editByUserName">{{item.editByUserName}}</span></td>
+                <td style="text-align: center;">
+                  <span class="label bg-red" [matTooltip]="item.statusPunish | punishName">{{item.moneyPunish | formatDisplayNumberToK}}</span>
+                  <span *ngIf="item.status && !item.statusPunish > 0" class="label bg-red" matTooltip = "Punish">20K</span>
+                </td>
+                <!-- <td style="text-align: center;">
+                  <span *ngIf="!item.statusPunish == 0">{{item.statusPunish | punishName}}</span>
+                </td> -->
+                <td class="text-center">
+                  <span *ngIf="!item.isComplain">{{item.userNote}}</span>
+                  <mat-form-field class="example-full-width mt-2 bg-white " appearance="outline"
+                    *ngIf=" item.isComplain">
+                    <mat-label>Leave a comment</mat-label>
+                    <textarea style="color: black;" matInput #textArea1 [(ngModel)]="item.userNote"></textarea>
+                  </mat-form-field>
+                </td>
+                <td class="text-center">
+                  <p style="white-space: pre-line;">{{item.noteReply}}</p>
+                </td>
+                <td class="text-center">
+
+                  <button *ngIf=" !item.isComplain && permission.isGranted(Timekeeping_UserNote)"
+                    class="btn btn-default" (click)="item.isComplain=true;">
+                    Complain
+                  </button>
+                  <div *ngIf=" item.isComplain">
+                    <button mat-mini-fab class="btn-success button24" style="margin-right: 10px;"
+                      (click)="onSave(item)">
+                      <mat-icon class="icon24">done</mat-icon>
+                    </button>
+                    <button mat-mini-fab class="btn-danger button24" (click)="onCancel(item)">
+                      <mat-icon class="icon24">close</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

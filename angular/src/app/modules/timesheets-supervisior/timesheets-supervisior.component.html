@@ -1,0 +1,284 @@
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Timesheets Monitoring" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="getData()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body" [busy]="isLoading">
+        <date-selector [type]="APP_CONSTANT.TypeViewHomePage.Month"
+          (onDateSelectorChange)="handleDateSelectorChange($event)">
+        </date-selector>
+        <!-- Filter And View Selector -->
+        <div class="row">
+          <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+            <mat-form-field>
+              <mat-select placeholder="View by" [(ngModel)]="viewBy" name="viewBy"
+                (selectionChange)="onGroupByChange()">
+                <mat-option *ngFor="let item of APP_CONFIG.TimesheetSupervisiorViewBys" [value]="item.value">
+                  {{item.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+            <mat-form-field>
+              <mat-select placeholder="Filter status" [(ngModel)]="filterStatus" name="filterStatus"
+                (selectionChange)="getData()">
+                <mat-option *ngFor="let item of Timesheet_Statuses" [value]="item.value">
+                  {{item.name}} ({{item.count}})
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+            <mat-form-field>
+              <mat-select placeholder="Working type" [(ngModel)]="workingType" name="workingType"
+                (selectionChange)="onWorkingTypeChange()">
+                <mat-option *ngFor="let type of Timesheet_TypeOfWorks" [value]="type.value">
+                  {{type.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <!-- #Filter And View Selector -->
+        <!-- View By Project -->
+        <div *ngIf="viewBy == APP_CONSTANT.TimesheetViewBy.Project">
+          <div class="panel-group" role="tablist" aria-multiselectable="true">
+            <div *ngFor="let ut of timesheetsGroup" class="panel panel-col-primary">
+              <div class="panel-heading" role="tab" [attr.id]="'headingProject-' + ut.projectId">
+                <h4 class="panel-title">
+                  <a role="button" data-toggle="collapse" [attr.href]="'#collapseProject-' + ut.projectId"
+                    aria-expanded="true" aria-controls="'collapseProject-' + ut.projectId">
+                    <i class="material-icons">folder</i>
+                    <span>{{ut.projectName}}</span>
+                    <span class="pType">{{ut.listPM}}</span>
+
+                    <span class="pull-right">
+                      {{ convertMinuteToHour(ut.totalProjectWorkingTime) }}
+                    </span>
+                  </a>
+                </h4>
+              </div>
+              <div [attr.id]="'collapseProject-' + ut.projectId" class="panel-collapse collapse" role="tabpanel"
+                aria-labelledby="'headingProject-'+ ut.projectId">
+                <div class="panel-body">
+                  <!-- Child Pj -->
+                  <div class="panel-group" role="tablist" aria-multiselectable="true">
+                    <div *ngFor="let ts of ut.userTasks" class="panel panel-col-primary">
+                      <div class="panel-heading" role="tab" [attr.id]="'headingUser-' + ut.projectId + '-' + ts.userId">
+                        <h4 class="panel-title">
+                          <a role="button" data-toggle="collapse"
+                            [attr.href]="'#collapseUser-' + ut.projectId + '-' + ts.userId" aria-expanded="false"
+                            [attr.aria-controls]="'collapseUser-' + ut.projectId + '-' + ts.userId" class="collapsed">
+                            <span>
+                              <i class="material-icons">folder_shared</i> {{ ts.userName }}
+                            </span>
+                            <span class="pull-right">
+                              {{ convertMinuteToHour(ts.totalUserWorkingTime) }}
+                            </span>
+                          </a>
+                        </h4>
+                      </div>
+                      <div [attr.id]="'collapseUser-' + ut.projectId + '-' + ts.userId" class="panel-collapse collapse"
+                        role="tabpanel" [attr.aria-labelledby]="'headingUser-' + ut.projectId + '-' + ts.userId"
+                        aria-expanded="false" style="height: 0px;">
+                        <div class="panel-body">
+                          <!--Child Of TimeSheetsGroupByUserCollapse: Day Task Collapse-->
+                          <div class="panel-group" role="tablist" aria-multiselectable="true">
+                            <div *ngFor="let dt of ts.dayTasks; let i = index" class="panel panel-col-primary">
+                              <!-- Heading Child Collap-->
+                              <div class="panel-heading" role="tab"
+                                [attr.id]="'headingDayTask-' + ut.projectId + '-' + ts.userId + '-' + i">
+                                <h4 class="panel-title">
+                                  <a role="button" data-toggle="collapse"
+                                    [attr.href]="'#collapseDayTask-' + ut.projectId + '-' + ts.userId + '-' + i"
+                                    aria-expanded="false"
+                                    [attr.aria-controls]="'collapseDayTask-' + ut.projectId + '-' + ts.userId + '-' + i"
+                                    class="collapsed">
+                                    <i class="material-icons">timelapse</i>
+                                    <span>
+                                      {{ dt.dateAt | date: 'yyyy/MM/dd' }}
+                                    </span>
+                                    <span class="pull-right">
+                                      {{ convertMinuteToHour(dt.totalWorkingTime) }}
+                                    </span>
+                                  </a>
+                                </h4>
+                              </div>
+                              <!-- #Heading Child Collapse-->
+                              <!-- Body Child Collapse -->
+                              <div [attr.id]="'collapseDayTask-' + ut.projectId + '-' + ts.userId + '-' + i"
+                                class="panel-collapse collapse" role="tabpanel"
+                                [attr.aria-labelledby]="'headingDayTask-' + ut.projectId + '-' + ts.userId + '-' + i"
+                                aria-expanded="false" style="height: 0px;">
+                                <div class="panel-body">
+                                  <div class="body table-responsive">
+                                    <table class="table table-hover">
+                                      <thead>
+                                        <tr>
+                                          <th>PROJECT</th>
+                                          <th>TASK NAME</th>
+                                          <th>TIME</th>
+                                          <th>STATUS</th>
+                                          <th class="text-center">WORK TYPE</th>
+                                          <th>NOTE</th>
+                                          <th>L.M TIME</th>
+                                          <th class="text-center">U.UNLOCK</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr *ngFor="let t of dt.tasks;">
+                                          <td>
+                                            <span><b>[{{ t.projectName }}]({{ t.customerName }})
+                                              </b></span>
+                                          </td>
+                                          <td><span>{{ t.taskName }}</span></td>
+                                          <td><span>{{ convertMinuteToHour(t.workingTime) }}</span></td>
+                                          <td style="width: 200px;">
+                                            <span [innerHtml]="convertNumberOfStringStatus(t.status)"></span>
+                                            <span class="label status-label bg-red status"
+                                              *ngIf="t.typeOfWork == '1'">OT</span>
+                                            <span class="label status-label status"
+                                              [ngClass]="t.isCharged ? 'bg-green' :'bg-grey'">
+                                              {{t.isCharged?'Charged':'Non-charged'}}
+                                            </span>
+                                          </td>
+                                          <td class="text-center"><span [ngClass]="t.isTemp? 'temp':'official'">{{ t.workType }}</span></td>
+                                          <td><span>{{ t.mytimesheetNote }}</span></td>
+                                          <td>
+                                            {{t.lastModificationTime | date:"dd/MM/yyyy HH:mm"}}
+                                            <span *ngIf="t.lastModifierUser" class="display-block">by {{ t.lastModifierUser }}</span>
+                                          </td>
+                                          <td class="text-center">
+                                            <i matTooltip="Đã được unlock bởi user" class="fa fa-check text-success"  style="font-size: 2.3rem;"  *ngIf="t.isUnlockedByEmployee"></i>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
+                              <!-- #Body Child Collapse -->
+                            </div>
+                          </div>
+                          <!--#Child Of TimeSheetsGroupByUserCollapse: Day Task Collapse-->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- #Child Pj -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- #View By Project -->
+
+        <!-- View By People -->
+        <!-- User Collapse -->
+        <div *ngIf="viewBy == APP_CONSTANT.TimesheetViewBy.People">
+          <div class="panel-group" role="tablist" aria-multiselectable="true">
+            <div *ngFor="let ts of timesheetsGroup" class="panel panel-col-primary">
+              <div class="panel-heading" role="tab" [attr.id]="'headingUser-' + ts.userId">
+                <h4 class="panel-title">
+                  <a role="button" data-toggle="collapse" [attr.href]="'#collapseUser-' + ts.userId"
+                    aria-expanded="false" [attr.aria-controls]="'collapseUser-' + ts.userId" class="collapsed">
+                    <i class="material-icons">folder_shared</i>
+                    <span> {{ ts.userName }}</span>
+                    <span class="pull-right">
+                      {{ convertMinuteToHour(ts.totalUserWorkingTime) }}
+                    </span>
+                  </a>
+                </h4>
+              </div>
+              <div [attr.id]="'collapseUser-' + ts.userId" class="panel-collapse collapse" role="tabpanel"
+                [attr.aria-labelledby]="'headingUser-' + ts.userId" aria-expanded="false" style="height: 0px;">
+                <div class="panel-body">
+                  <!--Child Of TimeSheetsGroupByUserCollapse: Day Task Collapse-->
+                  <div class="panel-group" role="tablist" aria-multiselectable="true">
+                    <div *ngFor="let dt of ts.dayTasks; let i = index" class="panel panel-col-primary">
+                      <!-- Heading Child Collapse-->
+                      <div class="panel-heading" role="tab" [attr.id]="'headingDayTask-' + ts.userId + '-' + i">
+                        <h4 class="panel-title">
+                          <a role="button" data-toggle="collapse"
+                            [attr.href]="'#collapseDayTask-' + ts.userId + '-' + i" aria-expanded="false"
+                            [attr.aria-controls]="'collapseDayTask-' + ts.userId + '-' + i" class="collapsed">
+                            <i class="material-icons">timelapse</i>
+                            <span>
+                              {{ dt.dateAt | date: 'yyyy/MM/dd' }}
+                            </span>
+                            <span class="pull-right">
+                              {{ convertMinuteToHour(dt.totalWorkingTime) }}
+                            </span>
+                          </a>
+                        </h4>
+                      </div>
+                      <!-- #Heading Child Collapse-->
+                      <!-- Body Child Collapse -->
+                      <div [attr.id]="'collapseDayTask-' + ts.userId + '-' + i" class="panel-collapse collapse"
+                        role="tabpanel" [attr.aria-labelledby]="'headingDayTask-' + ts.userId + '-' + i"
+                        aria-expanded="false" style="height: 0px;">
+                        <div class="panel-body">
+                          <div class="body table-responsive">
+                            <table class="table table-hover">
+                              <thead>
+                                <tr>
+                                  <th>PROJECT</th>
+                                  <th>TASK NAME</th>
+                                  <th>TIME</th>
+                                  <th>STATUS</th>
+                                  <th class="text-center">WORK TYPE</th>
+                                  <th>NOTE</th>
+                                  <th>L.M Time</th>
+                                  <th class="text-center" >U.UNLOCK</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr *ngFor="let t of dt.tasks;">
+                                  <td>
+                                    <span><b>[{{ t.projectName }}]({{ t.customerName }})
+                                      </b></span>
+                                  </td>
+                                  <td><span>{{ t.taskName }}</span></td>
+                                  <td><span>{{ convertMinuteToHour(t.workingTime) }}</span></td>
+                                  <td [innerHtml]="convertNumberOfStringStatus(t.status, t.typeOfWork)">
+                                  </td>
+                                  <td class="text-center"><span [ngClass]="t.isTemp? 'temp':'official'">{{ t.workType }}</span></td>
+                                  <td><span>{{ t.mytimesheetNote }}</span></td>
+                                  <td>{{t.lastModificationTime | date:"dd/MM/yyyy HH:mm"}}</td>
+                                  <td class="text-center"><i matTooltip="Đã được unlock bởi user" class="fa fa-check text-success"  style="font-size: 2.3rem;"  *ngIf="t.isUnlockedByEmployee"></i></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- #Body Child Collapse -->
+                    </div>
+                  </div>
+                  <!--#Child Of TimeSheetsGroupByUserCollapse: Day Task Collapse-->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- #User Collapse -->
+        <!-- #View By People -->
+      </div>
+    </div>
+  </div>
+</div>

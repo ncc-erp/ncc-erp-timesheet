@@ -1,0 +1,102 @@
+h3 {
+    margin: 0 0 10px;
+}
+
+pre {
+    background-color: #f5f5f5;
+    padding: 15px;
+}
+
+.flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.cal-month-view .cal-cell-top {
+    max-width: 100px !important;
+}
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.btn-back{
+    position: absolute; 
+    top: 10px; 
+    right: 50px; 
+    z-index: 1;
+}
+
+.overflow-x {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 30px;
+}
+@media screen and (max-width: 500px) {
+    .flex {
+        display: block;
+    }
+}
+.day-chip-full-day {
+    background-color: #db0000  !important;
+}
+
+.day-chip-morning {
+    background-color: #0c51a0  !important;
+}
+
+.day-chip-afternoon {
+    background-color: #d000db  !important;
+}
+.day-custom-time {
+    background-color: #f27024 !important;
+    text-align: center;
+}
+
+.onsite{
+    background-color: #009688 !important;  
+    color: white;
+}
+
+.reason-off-day {
+    text-align: center;
+    color: indianred !important;
+}
+
+.off-day-type-chip {
+    background-color: #5f5f5f;
+}
+
+.cal-day-badge {
+    margin-top: 2px !important;
+}
+
+.status-label{
+    background-color: transparent !important;
+    padding: 3px 0px;
+}
+
+.day-off-state-pending {
+    color: darkgoldenrod !important;
+}
+
+.day-off-state-approved {
+    color: green !important;
+}
+.day-off-state-reject {
+    color: #9e9e9e !important;
+}
+.cal-day-out {
+    opacity: 0.5;
+}
+.cal-day-number{
+    position: absolute;
+    right: 5px;
+    top: 0;
+    margin: 0 !important;
+    font-size: 15px !important;
+}

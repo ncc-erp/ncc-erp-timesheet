@@ -1,0 +1,38 @@
+<form #updateMoneyForm="ngForm" style="position: relative" autocomplete="off" id="frm_update_money_group" novalidate>
+  <h1 style="cursor: grab" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>
+    <div class="align-items-center d-flex">Update punish money
+    </div>
+  </h1>
+  <mat-icon (click)="close()" style="position: absolute; top: 0; right: 0; cursor: pointer">close</mat-icon>
+  <hr />
+  <mat-dialog-content class="mat-typography">
+    <div class="row">
+      <div class="form-group d-flex">
+        <label class="col-md-4 col-form-label p-l-1 p-b-0 align-items-center d-flex" for="nameInput">
+          Punish money:
+        </label>
+        <div class="col-xl-7 col-lg-7 col-md-7 col-xs-7 p-l-0 p-r-0">
+          <div class="align-items-center d-flex">
+            <mat-form-field appearance="outline">
+              <input matInput
+                 currencyMask 
+                 [options]="{prefix: '', align: 'left', thousands: ',', precision: '0'}"
+                 name="money"
+                 [(ngModel)]="inputToUpdate.money"
+                 required />
+          </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions class="mt-0" align="end">
+    <button class="btn btn-default" mat-raised-button mat-dialog-close [disabled]="saving">
+      {{ l("Cancel") }}
+    </button>
+    <button mat-raised-button color="primary" (click)="onSaveAndClose()" 
+      [disabled]="!updateMoneyForm.form.valid || saving">
+      {{ l("Save") }}
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,38 @@
+<h1 mat-dialog-title>{{l("Upload Avatar")}}</h1>
+<mat-dialog-content>
+  <file-upload [page]="'profile'" [isLoading]='isLoading' [fileType]="'image'" (change)="fileChangeEvent($event)">
+  </file-upload>
+
+  <br><br>
+
+  <!-- <div class="container"> -->
+    <!-- <div class="row" style="margin-top: 5%;">
+        <div class="text-center col-md-12">
+            <input type="file" (change)="fileChangeEvent($event)" (outputFileInfo)="show($event)" />
+        </div>
+    </div> -->
+    <div style="margin-top: 5%; height: 500px;">
+        <div class="text-center">
+            <h5>Crop Image</h5>
+            <image-cropper 
+            [imageChangedEvent]="imageChangedEvent" 
+            [maintainAspectRatio]="true" 
+            [aspectRatio]="4 / 4"
+            [resizeToWidth]="256" 
+            format="png" 
+            (imageCropped)="imageCropped($event)" 
+            (imageLoaded)="imageLoaded()"
+            (cropperReady)="cropperReady()" 
+            (loadImageFailed)="loadImageFailed()" style="max-height: 300px; text-align: center;"></image-cropper>
+        </div>
+        <!-- <div class="text-center col-md-4">
+            <h5>Preview</h5>
+            <img style="max-height: 300px; max-width: 200px;" [src]="croppedImage" />
+        </div> -->
+    </div>
+<!-- </div> -->
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button mat-dialog-close>Cancel</button>
+  <button mat-raised-button color='primary' [disabled]='croppedImage == null' [mat-dialog-close]="file">Save</button>
+</mat-dialog-actions>

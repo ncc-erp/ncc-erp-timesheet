@@ -1,0 +1,562 @@
+<form autocomplete="off" #createUserModal="ngForm" style="position: relative;" class="project-create-edit">
+  <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>{{title}} {{ project.id > 0 ?
+    project.name : ''}}</h2>
+  <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0; cursor: pointer;">close</mat-icon>
+  <hr>
+  <mat-dialog-content class="tab-modal">
+    <mat-tab-group>
+      <mat-tab label="General">
+        <div class="m-t-10">
+          <div class="row row-mar-0 mr-top-20">
+            <div class="col-md-2 col-sm-2 col-md-2 col-lg-2">
+              <label>Client*</label>
+            </div>
+            <div class="col-md-6 col-sm-6 col-md-6 col-lg-6">
+              <div *ngIf="projectCustomer.errors && (projectCustomer.dirty || projectCustomer.touched)"
+                class="text-danger">
+                <div [hidden]="!projectCustomer.errors.required">
+                  Project customer is required!
+                </div>
+              </div>
+              <mat-form-field appearance="outline">
+                <mat-select name="customerId" placeholder="Choose a client..." [(ngModel)]="project.customerId"
+                  #projectCustomer="ngModel" required>
+                  <mat-option>
+                    <ngx-mat-select-search placeholderLabel="Search" [formControl]="customerSearch"
+                      noEntriesFoundLabel="No matching found"></ngx-mat-select-search>
+                  </mat-option>
+
+                  <mat-option *ngFor="let cus of listCustomer" [value]='cus.id'>
+                    {{cus.name}} <ng-container *ngIf="cus.code">- [{{cus.code}}] </ng-container>
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-md-4 col-sm-4 col-md-4 col-lg-4" style="margin-top: 5px">
+              <button mat-flat-button color="primary" (click)="createCustomer()">
+                <mat-icon>add</mat-icon>
+                New Client
+              </button>
+            </div>
+          </div>
+          <div class="row row-mar-0">
+            <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 col-xl-2">
+              <label>Project Name*</label>
+            </div>
+            <div class="col-md-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+              <div *ngIf="projectName.errors && (projectName.dirty || projectName.touched)" class="text-danger">
+                <div [hidden]="!projectName.errors.required">
+                  Project name is required!
+                </div>
+              </div>
+              <mat-form-field appearance="outline">
+                <input matInput name="name" [(ngModel)]="project.name" placeholder="Project name" #projectName="ngModel"
+                  required />
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row row-mar-0">
+            <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 col-xl-2">
+              <label>Project Code*</label>
+            </div>
+            <div class="col-md-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+              <div *ngIf="projectCode.errors && (projectCode.dirty || projectCode.touched)" class="text-danger">
+                <div [hidden]="!projectCode.errors.required">
+                  Project code is required!
+                </div>
+              </div>
+              <mat-form-field class="inline" appearance="outline">
+                <input matInput name="code" [(ngModel)]="project.code" placeholder="Project code" #projectCode="ngModel"
+                  required>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row row-mar-0">
+            <div class="col-md-2 col-sm-2 col-md-2 col-lg-2">
+              <label>Dates*</label>
+            </div>
+            <div class="col-md-10 col-sm-10 col-md-10 col-lg-10">
+              <div *ngIf="projectTimeStart.errors && (projectTimeStart.dirty || projectTimeStart.touched)"
+                class="text-danger">
+                <div [hidden]="!projectTimeStart.errors.required">
+                  Time start is required!
+                </div>
+              </div>
+              <div *ngIf="projectTimeEnd.errors && (projectTimeEnd.dirty || projectTimeEnd.touched)"
+                class="text-danger">
+                <div [hidden]="!projectTimeEnd.errors.required">
+                  Time end is required!
+                </div>
+              </div>
+              <div class="inline">
+                <mat-form-field appearance="outline">
+                  <input matInput name="timeStart" [(ngModel)]="project.timeStart" [matDatepicker]="picker"
+                    placeholder="Start at" #projectTimeStart="ngModel">
+                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <span> to </span>
+              <div class="inline">
+                <mat-form-field appearance="outline">
+                  <input matInput name="timeEnd" [(ngModel)]="project.timeEnd" [matDatepicker]="pick"
+                    placeholder="End at" #projectTimeEnd="ngModel">
+                  <mat-datepicker-toggle matSuffix [for]="pick"></mat-datepicker-toggle>
+                  <mat-datepicker #pick></mat-datepicker>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <div class="row row-mar-0">
+            <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 col-xl-2">
+              <label>Note</label>
+            </div>
+            <div class="col-md-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+              <mat-form-field class="example-full-width" appearance="outline">
+                <textarea matInput name="note" [(ngModel)]="project.note" rows="1"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row row-mar-0">
+            <div class="col-md-2 col-sm-2 col-xl-2 col-lg-2">
+              <label>All User</label>
+            </div>
+            <div class="col-md-10 col-sm-10 col-lg-10 col-xl-10">
+              <mat-checkbox name="isAll" [(ngModel)]="project.isAllUserBelongTo">Auto add user as a member of this
+                project when creating new user</mat-checkbox>
+            </div>
+          </div>
+          <div class="row row-mar-0 mr-top-20">
+            <div class="col-md-2 col-sm-2 col-xl-2 col-lg-2">
+              <label>Project Type*</label>
+            </div>
+            <div class="col-md-10 col-sm-10 col-lg-10 col-xl-10">
+              <div class="row">
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
+                  <label class="i-check">
+                    <input type="radio" name="projectType" [value]="projectTypes.Timeandmaterials"
+                      [(ngModel)]="project.projectType">
+                    <span>T&M</span>
+                  </label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
+                  <label class="i-check">
+                    <input type="radio" name="projectType" [value]="projectTypes.Fixedfee"
+                      [(ngModel)]="project.projectType">
+                    <span>Fixed Frice</span>
+                  </label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
+                  <label class="i-check">
+                    <input type="radio" name="projectType" [value]="projectTypes.Nonbillable"
+                      [(ngModel)]="project.projectType">
+                    <span>Non-Bill</span>
+                  </label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
+                  <label class="i-check">
+                    <input type="radio" name="projectType" [value]="projectTypes.ODC" [(ngModel)]="project.projectType">
+                    <span>ODC</span>
+                  </label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 mr-top-20">
+                  <label class="i-check">
+                    <input type="radio" name="projectType" [value]="projectTypes.Product"
+                      [(ngModel)]="project.projectType">
+                    <span>Product</span>
+                  </label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 mr-top-20">
+                  <label class="i-check">
+                    <input type="radio" name="projectType" [value]="projectTypes.Training"
+                      [(ngModel)]="project.projectType">
+                    <span>Training</span>
+                  </label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 mr-top-20">
+                  <label class="i-check">
+                    <input type="radio" name="projectType" [value]="projectTypes.NoSalary"
+                      [(ngModel)]="project.projectType">
+                    <span>NoSalary</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab label="Team">
+        <div style="display:flex;">
+          <div [ngClass]="isShowTeamMember ? 'table-team-selected' : 'full-width'">
+            <mat-expansion-panel [expanded]="true">
+              <mat-expansion-panel-header style="height: 50px;">
+                <mat-panel-title align="center">
+                  <strong>Selected member</strong>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="row-fluid" style="margin-top: -15px;">
+                <div class="col-md-6 c-12 pl-0" style="margin-top: 15px;">
+                  <span style="text-align: left;">
+                    <mat-checkbox (click)="$event.stopPropagation()" [(ngModel)]="isShowDeactiveMember"
+                      (ngModelChange)="filterProjectMember()" name="checkDeactive">Show deactive member
+                    </mat-checkbox>
+                  </span>
+                </div>
+                <!-- <div class="col-md-3 c-12 pl-0" style="margin-top: 15px;">
+                  <span style="text-align: left;">
+                    <mat-checkbox (click)="$event.stopPropagation()" [(ngModel)]="isShowInactiveUser"
+                      (ngModelChange)="filterProjectMember()" name="checkDeactive">Show Inactive user
+                    </mat-checkbox>
+                  </span>
+                </div> -->
+                <div class="col-md-4 c-12 pl-0">
+                  <mat-form-field>
+                    <mat-icon matPrefix>search</mat-icon>
+                    <input type="text" matInput placeholder="Search by name, email"
+                      [(ngModel)]="searchProjectMemberText" name="searchMember" (click)="$event.stopPropagation()"
+                      (keydown)="$event.stopPropagation()" (keyup)="filterProjectMember();$event.stopPropagation()">
+                  </mat-form-field>
+                </div>
+                <div class="col-md-2 c-12 pl-0 show-member">
+                  <button mat-raised-button color="primary" type="button"
+                    (click)="showTeamMember(); $event.stopPropagation()">
+                    {{isShowTeamMember ? "Exit add" : "Add users"}}
+                  </button>
+                </div>
+              </div>
+
+              <div class="mat-dialog-content list-project-member">
+                <table class="table table-hover table-striped list-user">
+                  <tr *ngFor="let member of displayProjectMembers; let i = index">
+                    <td style="display: flex; width: 100%;">
+                      <button type="button" (click)="removeMemberFromProject(member, i)" mat-icon-button>
+                        <mat-icon>clear</mat-icon>
+                      </button>
+                      <div class="user-infor" style="display: flex;">
+                        <div style="display: flex;">
+                          <img [src]="getAvatar(member)" width="60" height="60" alt="Member"
+                            style="border-radius: 50%;" />
+                          <div style="margin-left: 10px;">
+                            <p style="margin-bottom: 5px; margin-top: 5px;">
+                              <strong style="margin-right: 5px;">{{member.name}}</strong>
+                              <span class="label status-label"
+                                [style.backgroundColor]="member.branchColor">{{member.branchDisplayName}}</span>
+
+
+
+                              <span style="margin-left: 10px;" *ngIf="member.type == 0"
+                                class="label status-label bg-red">{{userTypes[member.type].label}}</span>
+                              <span style="margin-left: 10px;" *ngIf="member.type == 1"
+                                class="label status-label bg-green">{{userTypes[member.type].label}}</span>
+                              <span style="margin-left: 10px;" *ngIf="member.type == 2"
+                                class="label status-label bg-blue">{{userTypes[member.type].label}}</span>
+
+                              <span *ngIf="member.level != null">
+                                <span class="label status-label mr-left"
+                                  [ngStyle]=" userLevels[member.level].style">{{userLevels[member.level].name}}</span>
+                              </span>
+                            </p>
+                            <p>
+                              <span>{{member.emailAddress}}</span>
+                              <span style="margin-left: 10px;font-weight: bold;" *ngIf="member.isActive == false">
+                                [Inactive]
+                              </span>
+                            </p>
+                          </div>
+
+                        </div>
+                      </div>
+                    </td>
+                    <td class="w-30vw">
+                      <mat-form-field style="width: 90px;margin-right: 10px;">
+                        <mat-select matInput name="type" [(ngModel)]="member.ptype"
+                          [ngModelOptions]="{standalone: true}" required>
+                          <mat-option *ngFor="let member of APP_CONFIG.EnumUserType" [value]="member.value">
+                            {{ member.name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </td>
+                    <td class="w-30vw">
+                      <mat-form-field style="width: 70px;" class="workType">
+                        <mat-select [disabled]="!permission.isGranted(EditTeamWorkType)" matInput name="isTemp"
+                          [(ngModel)]="member.isTemp" [ngClass]="member.isTemp?'temp':'official'"
+                          [ngModelOptions]="{standalone: true}" required>
+                          <mat-option *ngFor="let item of APP_CONFIG.EnumTypeWork" [value]="item.value">
+                            <span>{{ item.name }}</span>
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </td>
+                    <td>
+                      <button (click)="removeMemberFromProject(member, i)" type="button" mat-icon-button>
+                        <i class="fa-solid fa-angle-right" style="font-size: 20px;"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </mat-expansion-panel>
+
+          </div>
+
+
+          <div *ngIf="isShowTeamMember" class="table-team-select">
+            <mat-expansion-panel [expanded]="true">
+              <mat-expansion-panel-header style="height: 50px;">
+                <mat-panel-title align="center">
+                  <strong>Select team member</strong>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <div class="row-fluid" style="margin-top: -15px;">
+                <div class="col-md-3">
+                  <mat-form-field>
+                    <mat-label>Branch</mat-label>
+                    <mat-select name="branchId" [(value)]="userBranchForFilter" (selectionChange)="searchMember()">
+                      <mat-option>
+                        <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
+                          noEntriesFoundLabel="No matching found"></ngx-mat-select-search>
+                      </mat-option>
+
+                      <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
+                        {{branch.displayName}}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-3">
+                  <mat-form-field>
+                    <mat-label>Type</mat-label>
+                    <mat-select [(value)]='userTypeForFilter' (selectionChange)="searchMember()">
+                      <mat-option [value]="-1">All</mat-option>
+                      <mat-option *ngFor="let item of userTypes" [value]="item.value">
+                        {{item.label}}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                  <mat-form-field>
+                    <mat-icon matPrefix>search</mat-icon>
+                    <input type="text" matInput placeholder="Search by name, email" [(ngModel)]="searchMemberText"
+                      name="searchMember" (keyup)="searchMember()">
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="mat-dialog-content list-member">
+                <table class="table table-hover table-striped list-user">
+                  <tr *ngFor="let mem of displayActiveMembers; let i = index">
+                    <td (click)="selectTeam(mem, i)" style="display: flex;">
+                      <button type="button" mat-icon-button>
+                        <i class="fa-solid fa-angle-left" style="font-size: 20px;"></i>
+                      </button>
+                      <div class="user-infor" style="display: flex;">
+                        <div style="display: flex;">
+                          <img [src]="getAvatar(mem)" width="60" height="60" alt="Member" style="border-radius: 50%;" />
+                          <div style="margin-left: 10px;">
+                            <p style="margin-bottom: 5px; margin-top: 5px;">
+                              <strong style="margin-right: 5px;">{{mem.name}}</strong>
+                              <span class="label status-label"
+                                [style.backgroundColor]="mem.branchColor">{{mem.branchDisplayName}}</span>
+
+
+
+                              <span style="margin-left: 10px;" *ngIf="mem.type == 0"
+                                class="label status-label bg-red">{{userTypes[mem.type].label}}</span>
+                              <span style="margin-left: 10px;" *ngIf="mem.type == 1"
+                                class="label status-label bg-green">{{userTypes[mem.type].label}}</span>
+                              <span style="margin-left: 10px;" *ngIf="mem.type == 2"
+                                class="label status-label bg-blue">{{userTypes[mem.type].label}}</span>
+                                <span style="margin-left: 10px;font-weight: bold;" *ngIf="mem.isActive == false">
+                                  [Inactive]
+                                </span>
+                              <span *ngIf="mem.level != null">
+                                <span class="label status-label mr-left"
+                                  [ngStyle]=" userLevels[mem.level].style">{{userLevels[mem.level].name}}</span>
+                              </span>
+                            </p>
+                            <p><span>{{mem.emailAddress}}</span></p>
+                          </div>
+
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </mat-expansion-panel>
+          </div>
+        </div>
+      </mat-tab>
+      <!-- Tasks Tab -->
+      <mat-tab label="Tasks">
+        <div class="body table-responsive">
+          <table class="table table-hover table-striped">
+            <tr>
+              <th>Tasks</th>
+              <th>Billable
+                <p>
+                  <mat-checkbox (change)="checkAllTask($event)" [checked]="checkAllTaskStatus == 1"
+                    [indeterminate]="checkAllTaskStatus == 2" class="m-l-11i"></mat-checkbox>
+                </p>
+              </th>
+            </tr>
+            <tr *ngFor="let task of projectTasks; index as i">
+              <td>
+                <button type="button" (click)="removeTask(task, i)" mat-icon-button>
+                  <mat-icon>clear</mat-icon>
+                </button>
+                {{task.name}}
+              </td>
+              <td>
+                <mat-checkbox [(ngModel)]="task.billable" (change)="updateCheckAllStatus()"
+                  [ngModelOptions]="{standalone: true}" style="padding-left: 8px;" class="m-l-11i"></mat-checkbox>
+              </td>
+            </tr>
+          </table>
+          <mat-expansion-panel [expanded]="true">
+            <mat-expansion-panel-header>
+              <mat-panel-title align="center">
+                Select task
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <table class="table table-hover table-striped">
+              <tr *ngFor="let task of availableTask; index as i">
+                <td (click)="selectTask(task, i)">
+                  <button type="button" mat-icon-button>
+                    <i class="material-icons">
+                      add_circle_outline
+                    </i>
+                  </button>
+                  {{task.name}}
+                </td>
+                <td>
+                  <p *ngIf="task.type == 0">Common Task</p>
+                  <p *ngIf="task.type == 1">Other Task</p>
+                </td>
+              </tr>
+            </table>
+          </mat-expansion-panel>
+        </div>
+      </mat-tab>
+      <!-- #Tasks Tab -->
+
+
+      <!-- Target User-->
+      <mat-tab label="Target User" *ngIf="isExistShadow()">
+        <div class="body table-responsive">
+          <table class="table table-hover table-striped">
+            <tr>
+              <th>Target User Name</th>
+              <th>Role Name</th>
+            </tr>
+            <tr *ngFor="let targetUser of projectTargetUsers; let i = index">
+              <td class="d-flex">
+                <button type="button" (click)="removeFromTargetUsers(targetUser, i)" mat-icon-button>
+                  <mat-icon>clear</mat-icon>
+                </button>
+                <div>
+                  <div>
+                    {{targetUser.name}}
+                  </div>
+                  {{targetUser.emailAddress}}
+                  <span style="margin-left: 10px;font-weight: bold;" *ngIf="targetUser.isActive == false">
+                    [Inactive]
+                  </span>                  </div>
+              </td>
+              <td class="w-40vw">
+                <mat-form-field class="example-full-width">
+                  <input matInput placeholder="Role name" [(ngModel)]="targetUser.roleName"
+                    [ngModelOptions]="{standalone: true}">
+                </mat-form-field>
+              </td>
+            </tr>
+          </table>
+          <mat-expansion-panel [expanded]="true">
+            <mat-expansion-panel-header>
+              <mat-panel-title align="center">
+                Select team member
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <!-- Search input -->
+            <div class="row-fluid">
+              <div class="col-md-3">
+                <mat-form-field>
+                  <mat-label>Status</mat-label>
+                  <mat-select [(value)]='statusForFilter' (selectionChange)="searchMemberTarget()">
+                    <mat-option *ngFor="let item of status" [value]="item.value">
+                      {{item.label}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-9">
+                <mat-form-field>
+                  <mat-icon matPrefix>search</mat-icon>
+                  <input type="text" matInput placeholder="Search by name, email" [(ngModel)]="searchTargetUserText"
+                    name="searchTargetUser" (keyup)="searchTargetUser()">
+                </mat-form-field>
+              </div>
+            </div>
+
+            <table class="table table-hover table-striped">
+              <tr *ngFor="let member of displayAvailableTargetUsers; index as i">
+                <td class="d-flex" (click)="selectTargetUser(member, i)">
+                  <button type="button" mat-icon-button>
+                    <i class="material-icons">add_circle_outline</i>
+                  </button>
+                  <div>
+                  <div>
+                  {{member.name}}
+                  </div>
+                  {{member.emailAddress}}
+                  <span style="margin-left: 10px;font-weight: bold;" *ngIf="member.isActive == false">
+                    [Inactive]
+                  </span>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </mat-expansion-panel>
+        </div>
+      </mat-tab>
+      <!-- #Target User-->
+
+      <!-- Notification -->
+      <mat-tab label="Notification">
+        <div class="body table-responsive" style="margin-top: 18px">
+          <mat-form-field class="example-full-width">
+            <input matInput placeholder="Komu Channel Id" name="channelId" [(ngModel)]="project.komuChannelId">
+          </mat-form-field>
+          <mat-checkbox class="mt-2 ml-2 text-danger" name="notifySubmitTimesheet"
+            [(ngModel)]="project.isNoticeKMSubmitTS">Submit timesheet</mat-checkbox>
+          <br>
+          <mat-checkbox class="mt-2 ml-2 text-danger" name="notifyRequestOffGoLateAndLeaveEarly"
+            [(ngModel)]="project.isNoticeKMRequestOffDate">Request Off/Remote/Onsite/Đi muộn, về sớm</mat-checkbox>
+          <br>
+          <mat-checkbox class="mt-2 ml-2 text-danger" name="notifyApproveRejectRequestOffGoLateAndLeaveEarly"
+            [(ngModel)]="project.isNoticeKMApproveRequestOffDate">Approve/Reject Request Off/Remote/Onsite/Đi muộn, về
+            sớm</mat-checkbox>
+          <br>
+          <mat-checkbox class="mt-2 ml-2 text-danger" name="notifyRequestChangeWorkingTime"
+            [(ngModel)]="project.isNoticeKMRequestChangeWorkingTime">Request Change Working Time</mat-checkbox>
+          <br>
+          <mat-checkbox class="mt-2 ml-2 text-danger" name="notifyApproveRejectChangeWorkingTime"
+            [(ngModel)]="project.isNoticeKMApproveChangeWorkingTime">Approve/Reject Change Working Time</mat-checkbox>
+          <br>
+        </div>
+      </mat-tab>
+      <!-- #Notification -->
+    </mat-tab-group>
+  </mat-dialog-content>
+  <div mat-dialog-actions align="end">
+    <button class="btn btn-default" mat-raised-button type="button" (click)="close(0)">
+      Cancel
+    </button>
+    <button mat-raised-button color="primary" [disabled]="!createUserModal.valid || isSaving" type="submit" flex="15"
+      (click)="save()" type="button">
+      Save
+    </button>
+  </div>
+</form>

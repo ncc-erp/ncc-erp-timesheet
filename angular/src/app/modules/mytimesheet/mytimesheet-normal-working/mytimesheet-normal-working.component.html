@@ -1,0 +1,102 @@
+<div class="row clearfix" id="normal-working" *ngIf="normalWorkingHourByUserLogin">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" *ngIf="normalWorkingHourByUserLogin?.listWorkingHour?.length > 0">
+      <div class="card main-content header-filter">
+        <div class="header">
+          <h2 class="title">{{ "Summary" | localize }}</h2> 
+          <div class="filter-date">
+            <div class="item">
+              <label class="mt-20">Year: </label>
+              <mat-form-field appearance="outline">
+                <mat-select [(value)]="year" (selectionChange)="onDateChange()">
+                  <mat-option *ngFor="let item of years" [value]='item'>
+                    {{item}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="item">
+              <label class="mt-20">Month: </label>
+              <mat-form-field appearance="outline">
+                <mat-select [(value)]="month" (selectionChange)="onDateChange()">
+                  <mat-option *ngFor="let item of months" [value]='item'>
+                    {{item +1}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="item" >
+              <label class="mt-20">Status: </label>
+              <mat-form-field appearance="outline" style="width: 170px;">
+                <mat-select [(value)]="myTimesheetStatus" (selectionChange)="onDateChange()" style="width: 150px;">
+                  <mat-option *ngFor="let item of myTimesheetStatusList" [value]='APP_CONSTANT.MyTimesheetStatusFilter[item]'>
+                    {{item}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <ul class="header-dropdown m-r--5">
+            <li>
+              <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #headerMenu123="matMenu">
+                <button mat-menu-item (click)="getData()">
+                  <mat-icon>refresh</mat-icon>
+                  <span>{{ "Refresh" | localize }}</span>
+                </button>
+              </mat-menu>
+            </li>
+          </ul>
+        </div>
+  
+        <div style="position: relative; padding: 20px;">
+            <div id="table-detail">
+                <table class="table table-responsive" id="normal-working-table" [busy]="isTableLoading">
+                    <thead>
+                        <tr>
+                          <th class="total-column sticky-left">Total</th>
+                          <th class="total-column sticky-left openTalk">Open Talk
+                          </th>
+                            <th rowspan="2" *ngFor="let day of normalWorkingHourByUserLogin.listWorkingHour"
+                                [className]="day.shortDayName == 'Sat' || day.shortDayName == 'Sun' ? 'color-red date-day' : 'date-day'">
+                                {{day.date}} <br> {{ day.shortDayName}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ng-container>
+                            <tr>
+                                <td class="sticky-left"><b>{{normalWorkingHourByUserLogin.totalWorkingHour}}</b></td>
+                                <td class="sticky-left"><b>{{normalWorkingHourByUserLogin.totalOpenTalk}}</b></td>
+                                <td [id]='"width" + i' *ngFor="let detail of normalWorkingHourByUserLogin.listWorkingHour" class="text-center"
+                                    [ngClass]="getCssClass(detail)" [matTooltip]="detail.infoTooltip"
+                                    matTooltipClass="custom-tooltip">
+                                    <div [className]="detail.isHalfWidth ? 'half-width sticky-left-day' : 'sticky-left-day'">
+                                        <span class="d-block f-size-11">{{detail.workingHour}}
+                                        </span>
+                                        <div class="g-absence">
+                                            <span *ngFor="let absenceDetaiInDay of detail.listAbsenceDetaiInDay"
+                                                [ngClass]="getCssClass2(absenceDetaiInDay)">
+                                                {{showContentCell(absenceDetaiInDay)}}
+                                            </span>
+                                        </div>
+                                        <div class="g-checkin">
+                                            <span class="d-block f-size-11">
+                                                {{detail.checkInShow}}
+                                            </span>
+                                            <span class="d-block f-size-11">
+                                                {{detail.checkOutShow}}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-container>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>

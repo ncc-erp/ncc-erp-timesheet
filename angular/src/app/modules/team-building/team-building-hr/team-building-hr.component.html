@@ -1,0 +1,221 @@
+<div  class="row clearfix">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="height: auto; padding: 0px">
+    <div class="card">
+      <div class="header">
+        <h2>{{ "Team building HR" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body" style="height: 100%">
+        <div class="row">
+          <div class="col-lg-9">
+            <mat-form-field class="example-full-width" appearance="outline">
+              <mat-label>Search by User Name</mat-label>
+              <input type="search" [(ngModel)]="searchText" name="Search" (keyup.enter)="refresh()" matInput>
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-3 margin-btn" style="margin-top: 0">
+            <div class="gr-btn-action flex-btn">
+              <button *ngIf="permission.isGranted(TeamBuilding_DetailHR_Management)" style="margin-top: 10px" mat-raised-button color="primary" class="btn btn-border btn-add" (click) = "create()" >
+                <div>
+                  <i class="fa-solid fa-square-plus" style="margin-right: 8px"></i>
+                  Add Employee
+                </div>
+              </button>
+              <button *ngIf="permission.isGranted(TeamBuilding_DetailHR_GenerateData)" style="margin-top: 10px" mat-raised-button color="primary" class="btn btn-border btn-download" (click) = "generateData()">
+                <i class="fa fa-database" style="margin-bottom: 7px; margin-right: 10px"></i>
+                Generate Data
+              </button>
+
+            </div>
+          </div>
+
+        </div>
+        <div class="row">
+          <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <mat-form-field appearance="outline">
+                <mat-label >Projects</mat-label>
+                <mat-select name="selectedProjectId" [(value)]="selectedProjectId" (selectionChange)="getDataPage(1)">
+                  <mat-form-field class="p-2 input-wrapper" style="
+                  position: sticky;
+                  top: 0;
+                  z-index: 2;
+                  background-color: white;
+                  padding-left: 15px;
+                ">
+                    <input type="text" matInput class="search-input" placeholder="Search" [(ngModel)]="this.projectSearch"
+                      (keydown)="$event.stopPropagation()" (ngModelChange)="handleSearchProject()"/>
+                  </mat-form-field>
+                  <mat-option value="">All</mat-option>
+                  <mat-option *ngFor="let item of project" [value]='item.projectId'>
+                    {{item.projectName}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <mat-form-field appearance="outline">
+                <mat-label >Requester Email Address</mat-label>
+                <mat-select name="selectedRequesterId" [(value)]="selectedRequesterId" (selectionChange)="getDataPage(1)">
+                  <mat-form-field class="p-2 input-wrapper" style="
+                  position: sticky;
+                  top: 0;
+                  z-index: 2;
+                  background-color: white;
+                  padding-left: 15px;
+                ">
+                    <input type="text" matInput class="search-input" placeholder="Search" [(ngModel)]="this.requesterEmailSearch"
+                      (keydown)="$event.stopPropagation()" (ngModelChange)="handleSearch()"/>
+                  </mat-form-field>
+                  <mat-option value="">All</mat-option>
+                  <mat-option *ngFor="let item of requesterEmail" [value]='item.requesterId'>
+                    {{item.requesterEmailAddress}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <mat-form-field appearance="outline">
+                <mat-label>Month</mat-label>
+                <mat-select (selectionChange)="handleFilterMonth($event)" [(value)]="month">
+                  <mat-option [value]="-1">All</mat-option>
+                  <ng-container *ngFor="let m of listMonth">
+                    <mat-option [value]="m">
+                      {{ m }}
+                    </mat-option>
+                  </ng-container>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <mat-form-field appearance="outline">
+                <mat-label>Year</mat-label>
+                <mat-select (selectionChange)="handleFilterYear($event)" [(value)]="year">
+                  <ng-container *ngFor="let y of listYear">
+                    <mat-option [value]="y">
+                      {{y}}
+                    </mat-option>
+                  </ng-container>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+            <div>
+              <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select (selectionChange)="handleFilterStatus($event)" [(value)]="status">
+                  <ng-container *ngFor="let status of listStatus">
+                    <mat-option [value]="status.value">
+                      {{status.title}}
+                    </mat-option>
+                  </ng-container>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th style="max-width: 10px;" class="text-center">No</th>
+                <th class="text-center">Month</th>
+                <th class="text-center">Year</th>
+                <th class="text-center">Project</th>
+                <th class="text-center">PM Project</th>
+                <th class="text-center">User</th>
+                <th class="text-center">Money</th>
+                <th class="text-center">Requester</th>
+                <th class="text-center">Created At</th>
+                <th class="text-center">Updated At</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of listDetail | paginate: { id: 'listDetail', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems };index as i ">
+                <td class="text-center">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
+                <td class="text-center">{{item.applyMonth | date: 'MM' }}</td>
+                <td class="text-center">{{item.applyMonth | date: 'yyyy' }}</td>
+                <td class="text-center">{{item.projectName}}</td>
+                <td class="text-center">{{item.pmEmailAddress}}</td>
+                <td style="padding: 0px">
+                  <div class="info-name">
+                    <div class="info-name-box">
+                      <div class="full-name">{{item.employeeFullName}} </div>
+                      <div class="email">{{item.employeeEmailAddress}}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center">{{item.money | currency:'VND':''}}</td>
+                <td style="padding: 0px">
+                  <div class="info-name">
+                    <div class="info-name-box">
+                      <div class="full-name">{{item.requesterFullName}} </div>
+                      <div class="email">{{item.requesterEmailAddress}}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="updated-at text-center">{{item.creationTime | date: 'dd/MM/yyyy HH:mm:ss'}} <span
+                  *ngIf="item.lastModifierUserName">by</span> {{item.lastModifierUserName}}</td>
+                <td class="updated-at text-center">{{item.updatedAt | date: 'dd/MM/yyyy HH:mm:ss'}} <span
+                  *ngIf="item.updatedName">by</span> {{item.updatedName}}</td>
+                <td class="text-center">
+                  <span [ngClass]="{'bg-grey': item.status === 0, 'bg-yellow': item.status === 1, 'bg-blue': item.status === 2}"
+                    class="label status-label">
+                    {{listStatus[item.status + 1].title}}
+                  </span>
+                </td>
+                <td style="text-align:center">
+                  <button *ngIf="permission.isGranted(TeamBuilding_DetailHR_Management)" mat-icon-button [matMenuTriggerFor]="actionsMenu">
+                    <mat-icon>menu</mat-icon>
+                  </button>
+                  <mat-menu #actionsMenu="matMenu">
+                    <ng-container >
+                      <button mat-menu-item (click)="edit(item)">
+                        <mat-icon>attach_money</mat-icon>
+                        <span>{{ "Edit Money" | localize }}</span>
+                      </button>
+                      <button mat-menu-item (click)="delete(item)">
+                        <mat-icon>delete</mat-icon>
+                        <span>{{ "Delete" | localize }}</span>
+                      </button>
+                    </ng-container>
+                  </mat-menu>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="abp-pagination-controls-wrapper">
+            <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
+                (pageChange)="getDataPage($event)" id="listDetail">
+            </abp-pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

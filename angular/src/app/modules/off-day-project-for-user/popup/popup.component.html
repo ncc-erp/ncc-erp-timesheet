@@ -1,0 +1,102 @@
+<div class="header" cdkDragHandle cdkDrag cdkDragRootElement=".cdk-overlay-pane">
+  <h4 class="pin">
+    List user leave/onsite on
+    <span style="background-color: green; margin-bottom: 2px;">{{ date }}</span>
+  </h4>
+  <button mat-dialog-close style="width: 40px;">
+    <i class="material-icons">close</i>
+  </button>
+</div>
+<mat-dialog-content class="mat-typography">
+  <div class="table-responsive" style="border: 0; max-height: 65vh;">
+    <table class="table table-hover table-striped styleUser">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th style="width: 250px; min-width: 250px;">User</th>
+          <th style="width: fit-content;">Project/PM</th>
+          <th style="min-width: 120px;">Request</th>
+          <th style="width: 136px; min-width: 136px;">Off Type</th>
+          <th style="width: 170px; min-width: 170px;">Created At</th>
+          <th style="width: 170px; min-width: 170px;">Last Modified At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of events, index as i">
+          <td style="text-align: center;">{{i + 1}}</td>
+          <td>
+            <div style="display: flex; justify-content: flex-start; align-items: center; width: 250px;">
+              <div>
+                <button class="btn-route" mat-dialog-close
+                  [routerLink]="['app/main/view-leave-day-of-user/', item.userId]">
+                  <img style="max-width: 40px;min-width: 40px; height: 40px; border-radius: 50%;"
+                    [src]='getAvatar(item)' alt="avatar">
+                </button>
+              </div>
+              <div style="margin-left: 3px;">
+                <div>
+                  <span>
+                    <button class="btn-route" mat-dialog-close
+                      [routerLink]="['app/main/view-leave-day-of-user/', item.userId]">{{item.fullName}} </button>
+                  </span>
+                  <span class="label status-label day-off-state-pending" *ngIf="item.status === 1">
+                    Pending
+                  </span>
+                  <span class="label status-label day-off-state-approved" *ngIf="item.status === 2">
+                    Approved
+                  </span>
+                  <span class="label status-label day-off-state-reject" *ngIf="item.status === 3">
+                    Rejected
+                  </span>
+                </div>
+                <div>
+                  <ng-container *ngIf="item.type || item.type == 0">
+                    <span class="label "
+                      [ngClass]="item.type == 0 ? 'bg-red' : item.type == 1 ? 'bg-green' : 'bg-blue'">
+                      {{userTypes[item.type]?.label}}
+                    </span>
+                  </ng-container>
+                  <!-- <ng-container *ngIf="item.level != null">
+                    <span class="label mr-left"
+                      [ngStyle]=" userLevels[item.level].style">{{userLevels[item.level].name}}</span>
+                  </ng-container> -->
+
+                  <span class="label" [style.backgroundColor]="item.branchColor">
+                    {{item.branchDisplayName}}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td style="text-align: left;">
+            <div *ngFor="let projectItem of item.projectInfos">
+              <div class="row" style="margin-top: 5px;"><b>{{projectItem.projectName}}</b></div>
+              <div class="row d-flex" style="flex-wrap: wrap;">
+                <div class="pm" *ngFor="let item of projectItem.pms" style="margin-bottom: 3px; white-space: nowrap;">{{item.pmFullName}}
+                </div>
+              </div>
+            </div>
+          </td>
+          <!-- <td class="pin" style="text-align: center;">
+            <span [ngClass]="getSexClasses(item)">{{getSexText(item)}}</span>
+          </td> -->
+          <td class="pin" style="text-align: center;">
+            <span [ngClass]="getListTypeClasses(item)">{{getLeaveTypeText(item)}}</span>
+            <span [ngClass]="getListClasses(item)" style="margin-left: 5px;">{{getLeaveText(item)}}</span>
+          </td>
+          <td class="type"  style="text-align: center;">
+            <span *ngIf="item.leavedayType == 0  && !item.absenceTime">{{item.dayOffName}}</span>
+          </td>
+          <td style="text-align: center;">
+            <p>{{item.createTime | date : "dd/MM/yyyy HH:mm:ss"}}</p>
+            <p>by {{item.createBy}}</p>
+          </td>
+          <td style="text-align: center;">
+            <p *ngIf="item.lastModificationTime" >{{item.lastModificationTime | date : "dd/MM/yyyy HH:mm:ss"}}</p>
+            <p *ngIf="item.lastModifierUserName" >by {{item.lastModifierUserName}}</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</mat-dialog-content>

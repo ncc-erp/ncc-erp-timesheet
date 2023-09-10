@@ -1,0 +1,18 @@
+
+<form autocomplete="off" id="frm_create_group" novalidate>
+    <mat-dialog-content class="mat-typography" style="width:450px; height: 500px;">
+      <div *ngFor="let item of menuItems">
+        <mat-form-field >
+            <input matInput [(ngModel)]="item.name" name="item.name"  required maxlength="255" [ngModelOptions]="{standalone: true}">
+          </mat-form-field>  
+          <mat-form-field *ngFor="let detail of item.items" style="margin-left : 20px">
+          <input *ngIf="detail.items" matInput [(ngModel)]="detail.name" name="detail.name"  required maxlength="255" [ngModelOptions]="{standalone: true}">
+          </mat-form-field>  
+        </div>
+      </mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button class="btn btn-default " mat-raised-button mat-dialog-close >Cancel</button>
+    <button mat-raised-button color="primary" [mat-dialog-close]="menuItems"  cdkFocusInitial>Save</button>
+  </mat-dialog-actions>
+</form>

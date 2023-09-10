@@ -1,0 +1,63 @@
+<form #createForm="ngForm" style="position: relative;" autocomplete="off" id="frm_create_group"
+  novalidate>
+  <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>{{"Add employee"
+    | localize}}</h1>
+  <mat-icon (click)="close()" style="position: absolute; top: 0; right: 0;
+  cursor: pointer;">close</mat-icon>
+  <hr>
+  <mat-dialog-content class="mat-typography">
+    <div class="format-col form-group row required align-item">
+      <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 col-form-label">
+        {{ "Employee:" | localize }}
+      </label>
+      <mat-form-field class="row-item-rest col-xl-9 col-lg-9 col-md-9
+      col-xs-9" appearance="outline">
+        <mat-label> {{ "Select employee:" | localize }}</mat-label>
+        <mat-select [(ngModel)]="inputToCreate.employeeId" [disabled]="disableSelect" name="projectUser" required>
+          <mat-form-field class="p-2 input-wrapper" style="
+                                      position: sticky;
+                                      top: 0;
+                                      z-index: 2;
+                                      background-color: white;
+                                      padding-left: 15px;
+                                    ">
+            <input type="text" name="search-user" (keydown)="$event.stopPropagation()" matInput class="search-input"
+              [(ngModel)]="userSearch" (ngModelChange)="handleSearchUser()" />
+          </mat-form-field>
+          <mat-option *ngFor="let pu of listProjectUsers" [value]="pu.id">
+            {{ pu.fullName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="format-col form-group row required align-item">
+      <!-- <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 col-form-label">
+        {{ "Money:" | localize }}
+      </label>
+      <mat-form-field class="row-item-rest col-xl-9 col-lg-9 col-md-9
+      col-xs-9" appearance="outline">
+        <input matInput name="money" placeholder="Money" required
+          [(ngModel)]="inputToCreate.money"/>
+      </mat-form-field> -->
+      <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 col-form-label">
+        {{ "Time:" | localize }}
+      </label>
+        <mat-form-field class="row-item-rest col-xl-9 col-lg-9 col-md-9  col-xs-9" appearance="outline" data-toggle="tooltip" data-placement="right" title="Bấm vào lịch để chọn ngày!">
+        <mat-label>Month and Year</mat-label>
+        <input #input matInput readonly [matDatepicker]="dp" [formControl]="date">
+        <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+        <mat-datepicker #dp
+                        startView="multi-year"
+                        (yearSelected)="chosenYearHandler($event)"
+                        (monthSelected)="chosenMonthHandler($event, dp)"
+                        panelClass="example-month-picker">
+        </mat-datepicker>
+        </mat-form-field>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default" mat-raised-button mat-dialog-close >{{l('Cancel')}}</button>
+    <button mat-raised-button color="primary" (click)="onSaveAndClose()" cdkFocusInitial
+      [disabled]="saving ||!createForm.valid">{{l('Submit')}}</button>
+  </mat-dialog-actions>
+</form>

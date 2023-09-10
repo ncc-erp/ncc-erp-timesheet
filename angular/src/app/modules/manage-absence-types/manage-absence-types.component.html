@@ -1,0 +1,84 @@
+<div class="row clearfix" >
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header" >
+        <h2>Absence Types</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button class="header-dropdown-mat-icon-button" [matMenuTriggerFor]="headerMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body table-responsive">
+        <div>
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="padding: 0">
+            <button *ngIf="permission.isGranted(ADD_LEAVE_TYPE)" mat-raised-button color="primary" class="pull-left" (click)="createAbsence()"
+              style="margin-top: 4px; margin-left: 10px;">
+              <mat-icon>add</mat-icon>New
+            </button>
+          </div>
+          <!-- <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+            <mat-form-field appearance="outline" style="width: 450px;">
+              <mat-label>Search by  name</mat-label>
+              <input matInput  type="text" maxlength="128">
+              <i class="icon-32 material-icons" matPrefix>search</i>
+            </mat-form-field>
+          </div> -->
+        </div>
+        <table class="table table-hover table-striped" [busy]="isTableLoading">
+          <thead>
+            <tr style="margin-bottom:20px">
+              <th style="text-align: left;">STT</th>
+              <th style="padding-left: 20px;">Name</th>
+              <th style="text-align: center;"> Số ngày phép KHÔNG bị trừ</th>
+              <th style="text-align : center">Loại</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let absence of absenceTypes, index as i" style="margin-bottom:20px">
+              <td style="text-align: left;" >
+                {{i}}
+              </td>
+              <td align="start" >
+            
+                {{absence.name}}
+              </td>
+              <td style="text-align: center;">
+                {{absence.length}}
+              </td>
+              <td style="text-align: center;">
+                 <span *ngIf="absence.status==2">Mất ngày phép</span>
+                 <span *ngIf="absence.status==1">Không mất ngày phép</span>
+              </td>
+              <td>
+                <div *ngIf="permission.isGranted(EDIT_LEAVE_TYPE) || permission.isGranted(EDIT_LEAVE_TYPE)" class="pull-right" id="btnAction">
+                  <button  mat-raised-button [matMenuTriggerFor]="actionsMenu">Actions
+                    <i class="icon-32 material-icons">arrow_drop_down</i>
+                  </button>
+                  <mat-menu #actionsMenu="matMenu">
+                    <button *ngIf="permission.isGranted(EDIT_LEAVE_TYPE)" mat-menu-item (click)="editTask(absence)">
+                      <mat-icon>edit</mat-icon>
+                      <span>{{ "Edit" | localize }}</span>
+                  </button>
+                    <button *ngIf="permission.isGranted(DELETE_LEAVE_TYPE)" class="text-danger" mat-menu-item (click)="deleteTask(absence)">  
+                      <mat-icon>delete</mat-icon>
+                      <span>{{ "Delete" | localize }}</span></button>
+                  </mat-menu>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

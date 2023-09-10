@@ -1,0 +1,148 @@
+<div class="row clearfix" [busy]="isLoading">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "My requests" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu123="matMenu">
+              <button mat-menu-item (click)="refreshData()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class=" text-center" style="padding: 17px;">
+        <div class="group">
+          <div class="group-btn">
+            <div *ngIf="isGranted(SEND_REQUEST)" class="item">
+              <button mat-raised-button class="btn btn-danger" (click)="requestOff()">
+                Request Off
+              </button>
+            </div>
+            <div *ngIf="isGranted(SEND_REQUEST)" class="item">
+              <button mat-raised-button class="btn remote" (click)="requestRemote()">
+                Request Remote
+              </button>
+            </div>
+            <div *ngIf="isGranted(SEND_REQUEST)" class="item">
+              <button mat-raised-button class="btn onsite" (click)="requestOnsite()">
+                Request Onsite
+              </button>
+            </div>
+            
+          </div>
+
+
+
+          <div class="group-filter">
+
+            <div class="item">
+              <mat-form-field appearance="outline">
+                <mat-label>Request Type</mat-label>
+                <mat-select [(ngModel)]="absentDayType" (selectionChange)="selectionChange(true)">
+                  <mat-option [value]="-1">All</mat-option>
+                  <mat-option *ngFor="let item of dayAbsentTypeList" [value]='APP_CONSTANT.DayAbsenceType[item]'>
+                    {{item}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="item" *ngIf="absentDayType === 0">
+              <mat-form-field appearance="outline">
+                <mat-label>Type Of Request Type</mat-label>
+                <mat-select [(ngModel)]="dayType" (selectionChange)="selectionChange()">
+                  <mat-option [value]="-1">All</mat-option>
+                  <mat-option *ngFor="let item of dayTypeList" [value]='APP_CONSTANT.AbsenceType[item]'>
+                    {{ item | dayType }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+            </div>
+            <div class="item">
+              <mat-form-field appearance="outline">
+                <mat-label>Year</mat-label>
+                <mat-select [(value)]="year" (selectionChange)="selectionChange($event)">
+                  <mat-option *ngFor="let item of years" [value]='item'>
+                    {{item}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="item" style="margin-right: 0;">
+              <mat-form-field appearance="outline">
+                <mat-label>Month</mat-label>
+                <mat-select [(value)]="month" (selectionChange)="selectionChange($event)">
+                  <mat-option *ngFor="let item of months" [value]='item'>
+                    {{item + 1}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      <br />
+      <div style="padding:0 20px 20px; overflow-x: scroll;">
+        <div [ngSwitch]="view" style="user-select: none;">
+          <mwl-calendar-month-view *ngSwitchCase="calendarView.Month" [cellTemplate]="customCellTemplate"
+            [viewDate]="viewDate" [events]="events" [refresh]="refresh" [activeDayIsOpen]="activeDayIsOpen"
+            (dayClicked)="dayClicked($event)" (beforeViewRender)="getData($event)">
+          </mwl-calendar-month-view>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #customCellTemplate let-day="day" let-locale="locale">
+  <div class="cal-cell-top position-relative">
+    <div style="height: 100%;" class="back-red" *ngIf="day.badgeTotal > 0">
+      <span class="cal-day-badge">Off</span>
+    </div>
+    <div *ngFor="let item of day.events">
+      <div *ngIf="day.badgeTotal <= 0">
+        <span class="cal-day-badge text-primary day-chip-full-day"
+          *ngIf="item.type === 0 && item.absenceTime==null">Off</span>
+        <span class="cal-day-badge text-primary onsite" *ngIf="item.type === 1">Onsite</span>
+        <span class="cal-day-badge text-primary remote" *ngIf="item.type === 2">Remote</span>
+
+        <span class="cal-day-badge text-primary day-chip-full-day"
+          *ngIf="item.cssClass === 'all-day-absence' || item.cssClass === 'all-day-request'">Full Day</span>
+
+        <span class="cal-day-badge text-primary day-chip-morning"
+          *ngIf="item.cssClass === 'morning-absence' || item.cssClass === 'morning-request'">Morning</span>
+
+        <span class="cal-day-badge text-primary day-chip-afternoon"
+          *ngIf="item.cssClass === 'afternoon-absence' || item.cssClass === 'afternoon-request'">Afternoon</span>
+
+        <div class="cal-day-badge text-primary day-custom-time"
+          *ngIf="item.cssClass === 'custom-absence-time' || item.cssClass === 'custom-request-time'">
+          <span *ngIf="item.cssClass === 'custom-request-time' && item.hour==0">Time:</span>
+          <span *ngIf="item.absenceTime == APP_CONSTANT.OnDayType.BeginOfDay && item.hour!=0">Đi muộn:</span>
+          <span *ngIf="item.absenceTime == APP_CONSTANT.OnDayType.EndOfDay && item.hour!=0">Về sớm:</span>
+          <span *ngIf="item.hour!=0">
+            {{item.hour}}h
+          </span>
+        </div>
+        <span [class]="'cal-day-badge status-label ' + getClassByStatus(item.status)" *ngIf="item.status">
+          {{item.status === 1 ? 'Pending' : (item.status === 2 ? 'Approved' : 'Rejected')}}
+        </span>
+      </div>
+    </div>
+    <span class="cal-day-number" [class.cal-day-out]="day.isOut">{{ day.date | calendarDate:'monthViewDayNumber':locale
+      }}
+    </span>
+    <span (mwlClick)="handleViewDetail(day.date)" *ngIf="(day.events.length!=0 && day.cssClass!='back-red' && !day.isNew) || (day.events.length!=1 && day.isNew)"
+      class="view-detail">
+      <mat-icon>more_horiz</mat-icon>
+    </span>
+  </div>
+</ng-template>

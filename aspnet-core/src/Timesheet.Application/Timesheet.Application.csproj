@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <VersionPrefix>1.0.0.0</VersionPrefix>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+    <AssemblyName>Timesheet.Application</AssemblyName>
+    <PackageId>Timesheet.Application</PackageId>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <RootNamespace>Timesheet</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="APIs\Common\**" />
+    <EmbeddedResource Remove="APIs\Common\**" />
+    <None Remove="APIs\Common\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Users\Dto\CreateUserDto.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.95.4" />
+    <PackageReference Include="EPPlus" Version="4.5.3.1" />
+    <PackageReference Include="MassTransit" Version="7.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.2" />
+    <PackageReference Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1003" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Timesheet.Core\Timesheet.Core.csproj" />
+  </ItemGroup>
+</Project>

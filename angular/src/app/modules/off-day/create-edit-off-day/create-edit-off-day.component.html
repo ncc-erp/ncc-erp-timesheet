@@ -1,0 +1,19 @@
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
+  <span class="label status-label bg-green">{{dateShow}}</span>
+</h1>
+<mat-dialog-content>
+  <br>
+  <mat-form-field appearance="outline">
+    <mat-label>Note</mat-label>
+    <input matInput [(ngModel)]="event.title">
+  </mat-form-field>
+  <br>
+  <mat-form-field appearance="outline">
+    <mat-label>Coefficient OT</mat-label>
+    <input type="number" matInput [(ngModel)]="coefficient" required>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-raised-button mat-dialog-close>Cancel</button>
+  <button mat-raised-button color="primary" [disabled]="coefficient <= 0" (click)="save()">Save</button>
+</mat-dialog-actions>
