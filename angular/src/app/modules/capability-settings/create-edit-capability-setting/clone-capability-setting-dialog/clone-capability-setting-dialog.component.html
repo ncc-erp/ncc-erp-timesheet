@@ -78,10 +78,10 @@
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button class="btn btn-default " mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
-    <button mat-raised-button color="primary" (click)="clone(false)" cdkFocusInitial
+    <button name="cancelBtn" class="btn btn-default " mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
+    <button name="closeBtn" mat-raised-button color="primary" (click)="clone(false)" cdkFocusInitial
       [disabled]="!cloneCapabilityForm.form.valid || saving">{{l('Clone')}}</button>
-    <button mat-raised-button color="primary" (click)="clone(true)" cdkFocusInitial
+    <button name="cloneAndCloseBtn" mat-raised-button color="primary" (click)="clone(true)" cdkFocusInitial
       [disabled]="!cloneCapabilityForm.form.valid || saving">{{l('Clone & Close')}}</button>
   </mat-dialog-actions>
 </form>

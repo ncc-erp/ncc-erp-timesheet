@@ -14,7 +14,7 @@
       </mat-form-field>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button class="btn btn-default " mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
-    <button  mat-raised-button color="primary" [mat-dialog-close]="task" cdkFocusInitial [disabled]="!taskForm.form.valid || saving">{{l('Save')}}</button>
+    <button class="btn btn-default " mat-raised-button name="cancelBtn" mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
+    <button  mat-raised-button color="primary" [mat-dialog-close]="task" name="saveBtn" cdkFocusInitial [disabled]="!taskForm.form.valid || saving">{{l('Save')}}</button>
   </mat-dialog-actions>
 </form>

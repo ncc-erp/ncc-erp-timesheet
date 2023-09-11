@@ -47,18 +47,18 @@
           <div class="item">
             <mat-form-field appearance="outline" style="margin-top: 0px; width: 100%;">
               <mat-label>Search by UserName</mat-label>
-              <input type="search" [(ngModel)]="searchText" name="Search" (keyup.enter)="refresh()" matInput>
+              <input type="search" [(ngModel)]="searchText" name="searchText" (keyup.enter)="refresh()" matInput>
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
           </div>
         </div>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
-              <button mat-menu-item (click)="refresh()">
+              <button name="refreshBtn" mat-menu-item (click)="refresh()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -67,7 +67,7 @@
         </ul>
       </div>
       <div class="body table-responsive" [busy]="isLoading">
-        <date-selector [type]="APP_CONSTANT.TypeViewHomePage.CustomTime"
+        <date-selector name="customTimeSelect" [type]="APP_CONSTANT.TypeViewHomePage.CustomTime"
           [defaultFromDate] = "defaultFromDate"
           [defaultToDate] = "defaultToDate"
           (onDateSelectorChange)="handleDateSelectorChange($event)">
@@ -127,7 +127,7 @@
           <div class="col-sm-2">
             <div class="form-group form-float">
               <div>
-                <button *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
+                <button name="approveBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
                   style="width: 100%" class="btn btn-success waves-effect" (click)="btnApprove()">
                   Approve
                 </button>
@@ -137,7 +137,7 @@
           <div class="col-sm-2">
             <div class="form-group form-float">
               <div>
-                <button *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
+                <button name="rejectBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
                   style="width: 100%" class="btn bg-grey waves-effect" (click)="btnReject()">
                   Reject
                 </button>
@@ -146,7 +146,7 @@
           </div>
           <div class="col-sm-2">
             <div class="form-group form-float">
-              <button *ngIf="permission.isGranted(EXPORT_EXCEL_TIMESHEET)" class="text-center m-t-10" type="submit"
+              <button name="exportMenuBtn" *ngIf="permission.isGranted(EXPORT_EXCEL_TIMESHEET)" class="text-center m-t-10" type="submit"
                 style="width: 100%" class="btn bg-red waves-effect" [matMenuTriggerFor]="actionsMenu"
                 [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
                 Export
@@ -170,7 +170,7 @@
           <div class="col-sm-1">
             <div class="form-group form-float">
               <div class="example-form m-t-10" class="text-center">
-                <mat-checkbox color="primary" [checked]="checkedCount == totalCount && checkedCount != 0"
+                <mat-checkbox name="isCheckAll" color="primary" [checked]="checkedCount == totalCount && checkedCount != 0"
                   [indeterminate]="
                     checkedCount < totalCount && checkedCount > 0
                   " (change)="onTotalCheckedChange($event)"></mat-checkbox>
@@ -201,7 +201,7 @@
                     {{ convertMinuteToHour(project.totalProjectWorkingTime) }}
                   </span>
                   <span class="checkbox-descr">{{ project.selectedCount }}/{{ project.totalCount }}</span>
-                  <mat-checkbox color="primary" [checked]="
+                  <mat-checkbox [name]="'isCheckPrject-'+project.projectId" color="primary" [checked]="
                       project.checkStatus ==
                       APP_CONSTANT.CHECK_STATUS.CHECKED_ALL
                     " [indeterminate]="
@@ -264,7 +264,7 @@
                             {{ convertMinuteToHour(ut.totalUserWorkingTime) }}
                           </span>
                           <span class="checkbox-descr">{{ ut.selectedCount }}/{{ ut.totalCount }}</span>
-                          <mat-checkbox color="primary" [checked]="
+                          <mat-checkbox [name]="'isCheckUserTask-'+ut.userId" color="primary" [checked]="
                               ut.checkStatus ==
                               APP_CONSTANT.CHECK_STATUS.CHECKED_ALL
                             " [indeterminate]="
@@ -326,7 +326,7 @@
                                   <span class="checkbox-descr">{{ dt.selectedCount }}/{{
                                     dt.totalCount
                                     }}</span>
-                                  <mat-checkbox color="primary" [checked]="
+                                  <mat-checkbox [name]="'isCheckDayTask-'+(dt.dateAt | date:'dd-MM-yyyy')" color="primary" [checked]="
                                       dt.checkStatus ==
                                       APP_CONSTANT.CHECK_STATUS.CHECKED_ALL
                                     " [indeterminate]="
@@ -417,7 +417,7 @@
                                             <i matTooltip="Đã được unlock bởi user" class="fa fa-check text-success"  style="font-size: 2.3rem;"  *ngIf="t.isUnlockedByEmployee"></i>
                                           </td>
                                           <td>
-                                            <mat-checkbox color="primary" class="m-checkbox" *ngIf="
+                                            <mat-checkbox [name]="'isCheckTask-'+t.id" color="primary" class="m-checkbox" *ngIf="
                                                 t.isUserInProject && t.status
                                               " [checked]="t.checked" (change)="
                                                 onTimesheetCheckedChange(
@@ -492,7 +492,7 @@
                     {{ convertMinuteToHour(ut.totalUserWorkingTime) }}
                   </span>
                   <span class="checkbox-descr">{{ ut.selectedCount }}/{{ ut.totalCount }}</span>
-                  <mat-checkbox color="primary" [checked]="
+                  <mat-checkbox [name]="'isCheckUserTask-'+ut.userId" color="primary" [checked]="
                       ut.checkStatus == APP_CONSTANT.CHECK_STATUS.CHECKED_ALL
                     " [indeterminate]="
                       ut.checkStatus == APP_CONSTANT.CHECK_STATUS.CHECKED_SOME
@@ -527,7 +527,7 @@
                             {{ convertMinuteToHour(dt.totalWorkingTime) }}
                           </span>
                           <span class="checkbox-descr">{{ dt.selectedCount }}/{{ dt.totalCount }}</span>
-                          <mat-checkbox color="primary" [checked]="
+                          <mat-checkbox [name]="'isCheckDayTask-'+(dt.dateAt | date:'dd-MM-yyyy')" color="primary" [checked]="
                               dt.checkStatus ==
                               APP_CONSTANT.CHECK_STATUS.CHECKED_ALL
                             " [indeterminate]="
@@ -589,7 +589,7 @@
                                     <i matTooltip="Đã được unlock bởi user" class="fa fa-check text-success" style="font-size: 2.3rem;" *ngIf="t.isUnlockedByEmployee"></i>
                                   </td>
                                   <td>
-                                    <mat-checkbox color="primary" *ngIf="t.isUserInProject && t.status" class="m-checkbox"
+                                    <mat-checkbox [name]="'isCheckTask-'+t.id" color="primary" *ngIf="t.isUserInProject && t.status" class="m-checkbox"
                                       [checked]="t.checked" (change)="
                                         onTimesheetCheckedChange(
                                           $event,
@@ -636,16 +636,16 @@
         <form action=""></form>
         <mat-form-field appearance="fill">
           <mat-label>Choose a date</mat-label>
-          <input matInput [matDatepicker]="picker" [(ngModel)]="valueSelectedDay" required />
+          <input name="valueSelectedDay" matInput [matDatepicker]="picker" [(ngModel)]="valueSelectedDay" required />
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-success" (click)="getAlltTimeSheetOrRemote()">
+        <button name="exportBtn" type="button" class="btn btn-success" (click)="getAlltTimeSheetOrRemote()">
           Export
         </button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+        <button name="cancelBtn" type="button" class="btn btn-secondary" data-dismiss="modal">
           Cancel
         </button>
       </div>

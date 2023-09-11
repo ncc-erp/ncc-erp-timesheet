@@ -47,14 +47,14 @@
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button class="btn btn-default" mat-raised-button mat-dialog-close [disabled]="saving">
+    <button name="cancelBtn" class="btn btn-default" mat-raised-button mat-dialog-close [disabled]="saving">
       {{ l("Cancel") }}
     </button>
-    <button mat-raised-button color="primary" (click)="saveCapability(false)" cdkFocusInitial
+    <button name="saveBtn" mat-raised-button color="primary" (click)="saveCapability(false)" cdkFocusInitial
       [disabled]="!capabilityForm.form.valid || saving">
       {{ l("Save") }}
     </button>
-    <button mat-raised-button color="primary" (click)="saveCapability(true)" cdkFocusInitial
+    <button name="saveAndCloseBtn" mat-raised-button color="primary" (click)="saveCapability(true)" cdkFocusInitial
       [disabled]="!capabilityForm.form.valid || saving">
       {{ l("Save & Close") }}
     </button>

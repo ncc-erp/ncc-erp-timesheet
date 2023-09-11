@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>{{l("Upload Avatar")}}</h1>
 <mat-dialog-content>
-  <file-upload [page]="'profile'" [isLoading]='isLoading' [fileType]="'image'" (change)="fileChangeEvent($event)">
+  <file-upload [page]="'profile'" name="selectImageBtn" [isLoading]='isLoading' [fileType]="'image'" (change)="fileChangeEvent($event)">
   </file-upload>
 
   <br><br>
@@ -33,6 +33,6 @@
 <!-- </div> -->
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-raised-button mat-dialog-close>Cancel</button>
-  <button mat-raised-button color='primary' [disabled]='croppedImage == null' [mat-dialog-close]="file">Save</button>
+  <button mat-raised-button mat-dialog-close name="cancelBtn">Cancel</button>
+  <button mat-raised-button color='primary' name="saveBtn" [disabled]='croppedImage == null' [mat-dialog-close]="file">Save</button>
 </mat-dialog-actions>

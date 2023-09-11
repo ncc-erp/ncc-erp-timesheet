@@ -5,11 +5,11 @@
         <h2>{{ "User working times" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu123="matMenu">
-              <button mat-menu-item (click)='refresh()'>
+              <button name="refreshBtn" mat-menu-item (click)='refresh()'>
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -30,6 +30,7 @@
           <app-multiple-select 
             classCustom="col-lg-4 col-md-4 col-sm-4 col-xs-12"
             labelName="Project"
+            name="listProject"
             [listOption]="listProject"
             (onChange)="onChangeListProjectIdSelected($event)"
             [defaultValue]="listProjectSelected"
@@ -39,10 +40,10 @@
           <mat-form-field class="col-lg-5 col-md-5 col-sm-5 col-xs-12" appearance="outline">
             <mat-icon style="color: #9E9E9E" matPrefix>search</mat-icon>
             <mat-label>Search by name</mat-label>
-            <input matInput [(ngModel)]="userName" (keyup.enter)="refresh()">
+            <input name="userName" matInput [(ngModel)]="userName" (keyup.enter)="refresh()">
           </mat-form-field>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12">
-            <button style="height:51px;margin-top:3px" mat-flat-button (click)="onFilter()" color="primary">
+            <button name="filterBtn" style="height:51px;margin-top:3px" mat-flat-button (click)="onFilter()" color="primary">
               Filter
             </button>
           </div>
@@ -126,17 +127,17 @@
                     </ng-container>
                   </td>
                   <td class="table-content">
-                    <button *ngIf="permission.isGranted(APPROVAL_WORKING_TIME)" class="action-button" mat-icon-button
+                    <button [name]="'actionMenuBtn-'+u.id" *ngIf="permission.isGranted(APPROVAL_WORKING_TIME)" class="action-button" mat-icon-button
                       [matMenuTriggerFor]="actionsMenu">
                       <mat-icon>menu</mat-icon>
                     </button>
                     <mat-menu #actionsMenu="matMenu">
-                      <button mat-menu-item [ngClass]="checkStatusApprove(u.status)?'display-none':'display-block'"
+                      <button [name]="'approveBtn-'+u.id" mat-menu-item [ngClass]="checkStatusApprove(u.status)?'display-none':'display-block'"
                         (click)="approveWorkingTime(u)">
                         <mat-icon style="color: rgb(38, 71, 38);">check</mat-icon>
                         <span>{{ "Approve" | localize }}</span>
                       </button>
-                      <button [ngClass]="checkStatusReject(u.status)?'display-none':'display-block'" mat-menu-item
+                      <button [name]="'rejectBtn-'+u.id" [ngClass]="checkStatusReject(u.status)?'display-none':'display-block'" mat-menu-item
                         (click)="rejectWorkingTime(u)">
                         <mat-icon style="color: red;">close</mat-icon>
                         <span>{{ "Reject" | localize }}</span>

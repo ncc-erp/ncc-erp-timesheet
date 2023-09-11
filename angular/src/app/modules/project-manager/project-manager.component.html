@@ -5,28 +5,28 @@
         <h2>{{ "Manage Projects" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
-              <button mat-menu-item (click)="getProjects()">
+              <button name="refreshBtn" mat-menu-item (click)="getProjects()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
             </mat-menu>
           </li>
         </ul>
-      </div>
+      </div> 
       <div class="body table-responsive">
         <div class="row clearfix">
           <div class="col-lg-3 col-md-3 col-sm-3 col-sx-3" *ngIf="isAdmin">
-            <button *ngIf="permission.isGranted(ADD_PROJECT)" mat-raised-button color="primary" class="btn--add" (click)="createProject()">
+            <button name="createBtn" *ngIf="permission.isGranted(ADD_PROJECT)" mat-raised-button color="primary" class="btn--add" (click)="createProject()">
               <mat-icon>add</mat-icon>New Project
             </button>
           </div>
           <div class="col-lg-3 col-md-3 col-sm-3 col-sx-3">
             <mat-form-field appearance="outline" class="select--status">
-              <mat-select [(value)]="status" (selectionChange)=getProjects()>
+              <mat-select [(value)]="status" name="Project Status" (selectionChange)=getProjects()>
                 <mat-option *ngFor="let pStatus of APP_CONFIG.EnumProjectStatus" [value]="pStatus.value">
                   {{ pStatus.name }} Projects
                   ({{(pStatus.value == 0 ? activeCount : (pStatus.value == 1 ? deactiveCount : (activeCount + deactiveCount)))}})
@@ -37,7 +37,7 @@
           <div class="col-lg-6 col-md-6 col-sm-6 col-sx-6">
             <mat-form-field appearance="outline" class="search--box">
               <mat-label>Search by client or project name</mat-label>
-              <input matInput [(ngModel)]="searchKey" (keyup.enter)="getProjects()" type="text" maxlength="128">
+              <input matInput [(ngModel)]="searchKey" name="searchKey" (keyup.enter)="getProjects()" type="text" maxlength="128">
               <i class="icon-32 material-icons" style="padding-right: 5px;" matPrefix>search</i>
             </mat-form-field>
           </div>
@@ -80,27 +80,27 @@
                     </div>
                     <button *ngIf="!isAdmin && permission.isGranted(VIEW_DETAIL_PROJECT)" mat-raised-button class="btn-primary"
                       (click)="showProjectDetailDialog(project)">View</button>
-                    <button *ngIf="isAdmin" mat-raised-button [matMenuTriggerFor]="actionsMenu">Actions
+                    <button [name]="'actionMenuBtn-'+project.id" *ngIf="isAdmin" mat-raised-button [matMenuTriggerFor]="actionsMenu">Actions
                       <i class="icon-32 material-icons">arrow_drop_down</i>
                     </button>
                     <mat-menu #actionsMenu="matMenu">
-                      <button *ngIf="permission.isGranted(EDIT_PROJECT)" mat-menu-item (click)="editProject(project)">
+                      <button [name]="'editBtn-'+project.id" *ngIf="permission.isGranted(EDIT_PROJECT)" mat-menu-item (click)="editProject(project)">
                         <mat-icon>edit</mat-icon>
                         <span>{{ "Edit" | localize }}</span>
                       </button>
-                      <button *ngIf="permission.isGranted(VIEW_DETAIL_PROJECT)" color="primary" mat-menu-item (click)="showProjectDetailDialog(project)">
+                      <button [name]="'viewBtn-'+project.id" *ngIf="permission.isGranted(VIEW_DETAIL_PROJECT)" color="primary" mat-menu-item (click)="showProjectDetailDialog(project)">
                         <mat-icon>remove_red_eye</mat-icon>
                         <span>{{ "View" | localize }}</span>
                       </button>
-                      <button mat-menu-item *ngIf="project.status == '0' && permission.isGranted(CHANGE_STATUS_PROJECT)" (click)="deactiveProject(project)">
+                      <button [name]="'deactiveBtn-'+project.id" mat-menu-item *ngIf="project.status == '0' && permission.isGranted(CHANGE_STATUS_PROJECT)" (click)="deactiveProject(project)">
                         <mat-icon>clear</mat-icon>
                         <span>{{ "Deactive" | localize }}</span>
                       </button>
-                      <button mat-menu-item *ngIf="project.status == '1' && permission.isGranted(CHANGE_STATUS_PROJECT)" (click)="activeProject(project)">
+                      <button [name]="'activeBtn-'+project.id" mat-menu-item *ngIf="project.status == '1' && permission.isGranted(CHANGE_STATUS_PROJECT)" (click)="activeProject(project)">
                         <mat-icon>done</mat-icon>
                         <span>{{ "Active" | localize }}</span>
                       </button>
-                      <button *ngIf="permission.isGranted(DELETE_PROJECT)" class="text-danger" mat-menu-item (click)="deleteProject(project)">
+                      <button [name]="'deleteBtn-'+project.id" *ngIf="permission.isGranted(DELETE_PROJECT)" class="text-danger" mat-menu-item (click)="deleteProject(project)">
                         <mat-icon>delete</mat-icon>
                         <span>{{ "Delete" | localize }}</span>
                       </button>

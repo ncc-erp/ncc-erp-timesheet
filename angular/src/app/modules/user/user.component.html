@@ -6,11 +6,11 @@
                 <ul class="header-dropdown m-r--5">
                     <li>
                         <button mat-icon-button [matMenuTriggerFor]="headerMenu123"
-                            class="header-dropdown-mat-icon-button">
+                            class="header-dropdown-mat-icon-button" name="menuBtn">
                             <mat-icon>more_vert</mat-icon>
                         </button>
                         <mat-menu #headerMenu123="matMenu">
-                            <button mat-menu-item (click)='refresh()'>
+                            <button mat-menu-item (click)='refresh()' name="refreshBtn">
                                 <mat-icon>refresh</mat-icon>
                                 <span>{{ "Refresh" | localize }}</span>
                             </button>
@@ -22,12 +22,12 @@
                 <div class="col-sm-5ths" style="display: flex; justify-content: space-between;">
                     <div class="col-md-6" style="padding:5px 15px 10px 0">
                         <button *ngIf="permission.isGranted(ADD_USER)" class="col-sm-4" large mat-raised-button
-                            color="primary" style="width: 123px;" (click)='createOrEdit()'>
+                            color="primary" style="width: 123px;" (click)='createOrEdit()' name="createBtn">
                             <mat-icon>add</mat-icon> New User
                         </button>
                     </div>
                     <div *ngIf="permission.isGranted(UploadWorkingTime)" class="col-md-6" style="padding:5px 15px 10px 15px">
-                        <button large mat-raised-button color="primary" style="width: 123px;" (click)='importExcel()'>
+                        <button large mat-raised-button color="primary" style="width: 123px;" (click)='importExcel()' name="importBtn">
                             <mat-icon>local_printshop</mat-icon> Import
                         </button>
                     </div>
@@ -318,7 +318,7 @@
                                                 permission.isGranted(RESET_PASSWORD) ||
                                                 permission.isGranted(UPLOAD_AVATAR) ||
                                                 permission.isGranted(CHANGE_STATUS_USER)    " class="action-button"
-                                        mat-icon-button [matMenuTriggerFor]="actionsMenu">
+                                        mat-icon-button [matMenuTriggerFor]="actionsMenu" [name]="'actionMenuBtn-'+user.id">
                                         <mat-icon>menu</mat-icon>
                                     </button>
                                     <div style="visibility: hidden; position: fixed"
@@ -327,41 +327,41 @@
                                     </div>
                                     <mat-menu #actionsMenu="matMenu">
                                         <button *ngIf="permission.isGranted(EDIT_USER)" mat-menu-item
-                                            (click)="editUser(user)">
+                                            (click)="editUser(user)" [name]="'editUserBtn-'+user.id">
                                             <mat-icon>edit</mat-icon>
                                             <span>{{ "Edit User" | localize }}</span>
                                         </button>
 
                                         <button *ngIf="permission.isGranted(EDIT_USER_ROLE)" mat-menu-item
-                                            (click)="editRole(user)">
+                                            (click)="editRole(user)" [name]="'editRolesBtn-'+user.id">
                                             <mat-icon>edit_note</mat-icon>
                                             <span>{{ "Edit Roles" | localize }}</span>
                                         </button>
 
                                         <button *ngIf="permission.isGranted(DELETE_USER)" color="primary" mat-menu-item
-                                            (click)="delete(user)">
+                                            (click)="delete(user)" [name]="'deleteBtn-'+user.id">
                                             <mat-icon>delete</mat-icon>
                                             <span>{{ "Delete" | localize }}</span>
                                         </button>
                                         <button *ngIf="permission.isGranted(RESET_PASSWORD)" mat-menu-item
-                                            (click)="showResetPasswordUserDialog(user)">
+                                            (click)="showResetPasswordUserDialog(user)" [name]="'resetPasswordBtn-'+user.id">
                                             <mat-icon>lock</mat-icon>
                                             <span>{{ "Reset Password" | localize }}</span>
                                         </button>
                                         <button *ngIf="permission.isGranted(UPLOAD_AVATAR)" mat-menu-item
-                                            (click)="upLoadAvatar(user)">
+                                            (click)="upLoadAvatar(user)" [name]="'uploadAvatarBtn-'+user.id">
                                             <mat-icon>cloud_upload</mat-icon>
                                             <span>{{ "Upload Avatar" | localize }}</span>
                                         </button>
                                         <button mat-menu-item
                                             *ngIf="user.isActive && permission.isGranted(CHANGE_STATUS_USER)"
-                                            (click)="deactivateUser(user.id)">
+                                            (click)="deactivateUser(user.id)" [name]="'deactivateBtn-'+user.id">
                                             <mat-icon>block</mat-icon>
                                             <span>{{ "Deactivate" | localize }}</span>
                                         </button>
                                         <button mat-menu-item
                                             *ngIf="!user.isActive && permission.isGranted(CHANGE_STATUS_USER)"
-                                            (click)="activateUser(user.id)">
+                                            (click)="activateUser(user.id)" [name]="'activateBtn-'+user.id">
                                             <mat-icon>done_outline</mat-icon>
                                             <span>{{ "Activate" | localize }}</span>
                                         </button>

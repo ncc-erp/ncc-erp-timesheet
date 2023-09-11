@@ -5,11 +5,11 @@
         <h2>{{ "My requests" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu123="matMenu">
-              <button mat-menu-item (click)="refreshData()">
+              <button name="refreshBtn" mat-menu-item (click)="refreshData()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -21,17 +21,17 @@
         <div class="group">
           <div class="group-btn">
             <div *ngIf="isGranted(SEND_REQUEST)" class="item">
-              <button mat-raised-button class="btn btn-danger" (click)="requestOff()">
+              <button name="requestOffBtn" mat-raised-button class="btn btn-danger" (click)="requestOff()">
                 Request Off
               </button>
             </div>
             <div *ngIf="isGranted(SEND_REQUEST)" class="item">
-              <button mat-raised-button class="btn remote" (click)="requestRemote()">
+              <button name="requestRemoteBtn" mat-raised-button class="btn remote" (click)="requestRemote()">
                 Request Remote
               </button>
             </div>
             <div *ngIf="isGranted(SEND_REQUEST)" class="item">
-              <button mat-raised-button class="btn onsite" (click)="requestOnsite()">
+              <button name="requestOnsiteBtn" mat-raised-button class="btn onsite" (click)="requestOnsite()">
                 Request Onsite
               </button>
             </div>
@@ -45,7 +45,7 @@
             <div class="item">
               <mat-form-field appearance="outline">
                 <mat-label>Request Type</mat-label>
-                <mat-select [(ngModel)]="absentDayType" (selectionChange)="selectionChange(true)">
+                <mat-select name="absentDayType" [(ngModel)]="absentDayType" (selectionChange)="selectionChange(true)">
                   <mat-option [value]="-1">All</mat-option>
                   <mat-option *ngFor="let item of dayAbsentTypeList" [value]='APP_CONSTANT.DayAbsenceType[item]'>
                     {{item}}
@@ -56,7 +56,7 @@
             <div class="item" *ngIf="absentDayType === 0">
               <mat-form-field appearance="outline">
                 <mat-label>Type Of Request Type</mat-label>
-                <mat-select [(ngModel)]="dayType" (selectionChange)="selectionChange()">
+                <mat-select name="dayType" [(ngModel)]="dayType" (selectionChange)="selectionChange()">
                   <mat-option [value]="-1">All</mat-option>
                   <mat-option *ngFor="let item of dayTypeList" [value]='APP_CONSTANT.AbsenceType[item]'>
                     {{ item | dayType }}
@@ -68,7 +68,7 @@
             <div class="item">
               <mat-form-field appearance="outline">
                 <mat-label>Year</mat-label>
-                <mat-select [(value)]="year" (selectionChange)="selectionChange($event)">
+                <mat-select name="yearSelect" [(value)]="year" (selectionChange)="selectionChange($event)">
                   <mat-option *ngFor="let item of years" [value]='item'>
                     {{item}}
                   </mat-option>
@@ -78,7 +78,7 @@
             <div class="item" style="margin-right: 0;">
               <mat-form-field appearance="outline">
                 <mat-label>Month</mat-label>
-                <mat-select [(value)]="month" (selectionChange)="selectionChange($event)">
+                <mat-select name="monthSelect" [(value)]="month" (selectionChange)="selectionChange($event)">
                   <mat-option *ngFor="let item of months" [value]='item'>
                     {{item + 1}}
                   </mat-option>
@@ -103,7 +103,7 @@
   </div>
 </div>
 <ng-template #customCellTemplate let-day="day" let-locale="locale">
-  <div class="cal-cell-top position-relative">
+  <div class="cal-cell-top position-relative" [attr.name]="'daySelectBtn-'+(day.date | date:'dd-MM-yyyy')">
     <div style="height: 100%;" class="back-red" *ngIf="day.badgeTotal > 0">
       <span class="cal-day-badge">Off</span>
     </div>
@@ -140,7 +140,7 @@
     <span class="cal-day-number" [class.cal-day-out]="day.isOut">{{ day.date | calendarDate:'monthViewDayNumber':locale
       }}
     </span>
-    <span (mwlClick)="handleViewDetail(day.date)" *ngIf="(day.events.length!=0 && day.cssClass!='back-red' && !day.isNew) || (day.events.length!=1 && day.isNew)"
+    <span [attr.name]="'viewDetail-'+(day.date | date:'dd-MM-yyyy')" (mwlClick)="handleViewDetail(day.date)" *ngIf="(day.events.length!=0 && day.cssClass!='back-red' && !day.isNew) || (day.events.length!=1 && day.isNew)"
       class="view-detail">
       <mat-icon>more_horiz</mat-icon>
     </span>

@@ -5,11 +5,11 @@
         <h2>{{ "Request history" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
-              <button mat-menu-item (click)="refresh()">
+              <button name="refreshBtn" mat-menu-item (click)="refresh()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -30,7 +30,7 @@
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Month</mat-label>
-                <mat-select (selectionChange)="handleFilterMonth($event)" [(ngModel)]="month">
+                <mat-select name="month" (selectionChange)="handleFilterMonth($event)" [(ngModel)]="month">
                   <mat-option [value]="-1">All</mat-option>
                   <ng-container *ngFor="let m of listMonth">
                     <mat-option [value]="m">
@@ -45,7 +45,7 @@
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Year</mat-label>
-                <mat-select (selectionChange)="handleFilterYear($event)" [(value)]="year">
+                <mat-select name="year" (selectionChange)="handleFilterYear($event)" [(value)]="year">
                   <ng-container *ngFor="let y of listYear">
                     <mat-option [value]="y">
                       {{ y }}
@@ -59,7 +59,7 @@
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Status</mat-label>
-                <mat-select (selectionChange)="handleFilterStatus($event)" [(value)]="status">
+                <mat-select name="status" (selectionChange)="handleFilterStatus($event)" [(value)]="status">
                   <ng-container *ngFor="let status of listStatus">
                     <mat-option [value]="status.value">
                       {{ status.title }}
@@ -156,32 +156,32 @@
                   </button>
                   <mat-menu #actionsMenu="matMenu">
                     <ng-container >
-                      <button mat-menu-item (click)="handleAction('disburse', item)"
+                      <button [name]="'disburseBtn-'+item.id" mat-menu-item (click)="handleAction('disburse', item)"
                       *ngIf="permission.isGranted(TeamBuilding_DisburseRequest) && ![1,2,3].includes(item.status)">
                         <mat-icon>attach_money</mat-icon>
                         <span>{{ "Disburse" | localize }}</span>
                       </button>
-                      <button mat-menu-item (click)="handleAction('edit', item)"
+                      <button [name]="'editBtn-'+item.id" mat-menu-item (click)="handleAction('edit', item)"
                       *ngIf="permission.isGranted(TeamBuilding_EditRequest) && ![1,2,3].includes(item.status)">
                         <mat-icon>edit</mat-icon>
                         <span>{{ "Edit" | localize }}</span>
                       </button>
-                      <button mat-menu-item (click)="handleAction('view detail', item)"
+                      <button [name]="'detailBtn-'+item.id" mat-menu-item (click)="handleAction('view detail', item)"
                       *ngIf="permission.isGranted(TeamBuilding_ViewDetailRequest) && ![2,3].includes(item.status)">
                         <mat-icon>remove_red_eye</mat-icon>
                         <span>{{ "View detail" | localize }}</span>
                       </button>
-                      <button mat-menu-item (click)="handleAction('re-open', item)"
+                      <button [name]="'reOpenBtn-'+item.id" mat-menu-item (click)="handleAction('re-open', item)"
                       *ngIf="permission.isGranted(TeamBuilding_ReOpenRequest) && ![0,2,3].includes(item.status)">
                         <mat-icon>replay</mat-icon>
                         <span>{{ "Re-open" | localize }}</span>
                       </button>
-                      <button mat-menu-item (click)="handleAction('reject', item)"
+                      <button [name]="'rejectBtn-'+item.id" mat-menu-item (click)="handleAction('reject', item)"
                       *ngIf="permission.isGranted(TeamBuilding_RejectRequest) && ![1,2,3].includes(item.status)">
                         <mat-icon>close</mat-icon>
                         <span>{{ "Reject" | localize }}</span>
                       </button>
-                      <button mat-menu-item (click)="handleAction('cancel', item)"
+                      <button [name]="'cancelBtn-'+item.id" mat-menu-item (click)="handleAction('cancel', item)"
                       *ngIf="permission.isGranted(TeamBuilding_CancelRequest) && ![1,2,3].includes(item.status)">
                         <mat-icon>close</mat-icon>
                         <span>{{ "Cancel" | localize }}</span>

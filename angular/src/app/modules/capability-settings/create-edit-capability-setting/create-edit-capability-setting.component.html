@@ -4,11 +4,11 @@
       <h2>{{ "Capability name " | localize }}</h2>
       <ul class="header-dropdown m-r--5">
         <li>
-          <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+          <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #headerMenu="matMenu">
-            <button mat-menu-item (click)="refresh()">
+            <button name="refreshBtn" mat-menu-item (click)="refresh()">
               <mat-icon>refresh</mat-icon>
               <span>{{ "Refresh" | localize }}</span>
             </button>
@@ -43,10 +43,10 @@
           </div>
         </div>
         <div class="col-lg-4 text-right action-row">
-          <button class="btn btn-danger m-r-10" mat-raised-button (click)="onClone()">
+          <button name="cloneBtn" class="btn btn-danger m-r-10" mat-raised-button (click)="onClone()">
             Clone
           </button>
-          <a [routerLink]="['/app/main/capability-settings']" class="btn btn-primary" mat-raised-button>
+          <a name="backBtn" [routerLink]="['/app/main/capability-settings']" class="btn btn-primary" mat-raised-button>
             Back
           </a>
         </div>
@@ -97,9 +97,9 @@
                   <div class="max-line-content-1" resizeCell [maxLine]="1" [innerHtml]="item.guildeLine | safeHtml">
                   </div>
                   <div style="display: flex;">
-                    <button type="button" mat-icon-button (click)="onEditCapabilitySetting(item)"><i
+                    <button [name]="'editBtn-'+item.capabilityId" type="button" mat-icon-button (click)="onEditCapabilitySetting(item)"><i
                         class="fa-solid fa-edit" style="font-size: 20px;"></i></button>
-                    <button (click)="deleteCapabilitySettingForUserTypePosition(item)" type="button" mat-icon-button>
+                    <button [name]="'removeBtn-'+item.capabilityId" (click)="deleteCapabilitySettingForUserTypePosition(item)" type="button" mat-icon-button>
                       <i class="fa-solid fa-angle-right" style="font-size: 20px;"></i>
                     </button>
                   </div>
@@ -134,7 +134,7 @@
                 [cdkDropListConnectedTo]="[selectedList]" id="remainList" class="drop-area"
                 (cdkDropListDropped)="drop($event)">
                 <div class="picklist-item" *ngFor="let item of tempRemainCapabilities" cdkDrag>
-                  <button (click)="createNewCapabilitySettingForUserTypePosition(item)" type="button" mat-icon-button>
+                  <button [name]="'addBtn-'+item.capabilityId" (click)="createNewCapabilitySettingForUserTypePosition(item)" type="button" mat-icon-button>
                     <i class="fa-solid fa-angle-left" style="font-size: 20px;"></i>
                   </button>
                   {{item.capabilityName}}

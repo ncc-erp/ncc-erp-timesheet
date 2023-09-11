@@ -32,7 +32,7 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <div class="col-md-4 col-sm-4 col-md-4 col-lg-4" style="margin-top: 5px">
+            <div name="createBtn" class="col-md-4 col-sm-4 col-md-4 col-lg-4" style="margin-top: 5px">
               <button mat-flat-button color="primary" (click)="createCustomer()">
                 <mat-icon>add</mat-icon>
                 New Client
@@ -218,7 +218,7 @@
                   </mat-form-field>
                 </div>
                 <div class="col-md-2 c-12 pl-0 show-member">
-                  <button mat-raised-button color="primary" type="button"
+                  <button name="isShowMember" mat-raised-button color="primary" type="button"
                     (click)="showTeamMember(); $event.stopPropagation()">
                     {{isShowTeamMember ? "Exit add" : "Add users"}}
                   </button>
@@ -229,7 +229,7 @@
                 <table class="table table-hover table-striped list-user">
                   <tr *ngFor="let member of displayProjectMembers; let i = index">
                     <td style="display: flex; width: 100%;">
-                      <button type="button" (click)="removeMemberFromProject(member, i)" mat-icon-button>
+                      <button type="button" [name]="'leftRemoveBtn-'+member.userId" (click)="removeMemberFromProject(member, i)" mat-icon-button>
                         <mat-icon>clear</mat-icon>
                       </button>
                       <div class="user-infor" style="display: flex;">
@@ -269,7 +269,7 @@
                     </td>
                     <td class="w-30vw">
                       <mat-form-field style="width: 90px;margin-right: 10px;">
-                        <mat-select matInput name="type" [(ngModel)]="member.ptype"
+                        <mat-select [name]="'userTypeBtn-'+member.userId" matInput [(ngModel)]="member.ptype"
                           [ngModelOptions]="{standalone: true}" required>
                           <mat-option *ngFor="let member of APP_CONFIG.EnumUserType" [value]="member.value">
                             {{ member.name }}
@@ -289,7 +289,7 @@
                       </mat-form-field>
                     </td>
                     <td>
-                      <button (click)="removeMemberFromProject(member, i)" type="button" mat-icon-button>
+                      <button [name]="'rightRemoveBtn-'+member.userId" (click)="removeMemberFromProject(member, i)" type="button" mat-icon-button>
                         <i class="fa-solid fa-angle-right" style="font-size: 20px;"></i>
                       </button>
                     </td>
@@ -328,7 +328,7 @@
                 <div class="col-md-3">
                   <mat-form-field>
                     <mat-label>Type</mat-label>
-                    <mat-select [(value)]='userTypeForFilter' (selectionChange)="searchMember()">
+                    <mat-select name="type" [(value)]='userTypeForFilter' (selectionChange)="searchMember()">
                       <mat-option [value]="-1">All</mat-option>
                       <mat-option *ngFor="let item of userTypes" [value]="item.value">
                         {{item.label}}
@@ -348,7 +348,7 @@
                 <table class="table table-hover table-striped list-user">
                   <tr *ngFor="let mem of displayActiveMembers; let i = index">
                     <td (click)="selectTeam(mem, i)" style="display: flex;">
-                      <button type="button" mat-icon-button>
+                      <button [name]="'addBtn-'+mem.id" type="button" mat-icon-button>
                         <i class="fa-solid fa-angle-left" style="font-size: 20px;"></i>
                       </button>
                       <div class="user-infor" style="display: flex;">
@@ -397,20 +397,20 @@
               <th>Tasks</th>
               <th>Billable
                 <p>
-                  <mat-checkbox (change)="checkAllTask($event)" [checked]="checkAllTaskStatus == 1"
+                  <mat-checkbox name="isCheckAllStatus" (change)="checkAllTask($event)" [checked]="checkAllTaskStatus == 1"
                     [indeterminate]="checkAllTaskStatus == 2" class="m-l-11i"></mat-checkbox>
                 </p>
               </th>
             </tr>
             <tr *ngFor="let task of projectTasks; index as i">
               <td>
-                <button type="button" (click)="removeTask(task, i)" mat-icon-button>
+                <button [name]="'removeTaskBtn-'+task.taskId" type="button" (click)="removeTask(task, i)" mat-icon-button>
                   <mat-icon>clear</mat-icon>
                 </button>
                 {{task.name}}
               </td>
               <td>
-                <mat-checkbox [(ngModel)]="task.billable" (change)="updateCheckAllStatus()"
+                <mat-checkbox [name]="'checkStatus-'+task.taskId" [(ngModel)]="task.billable" (change)="updateCheckAllStatus()"
                   [ngModelOptions]="{standalone: true}" style="padding-left: 8px;" class="m-l-11i"></mat-checkbox>
               </td>
             </tr>
@@ -424,7 +424,7 @@
             <table class="table table-hover table-striped">
               <tr *ngFor="let task of availableTask; index as i">
                 <td (click)="selectTask(task, i)">
-                  <button type="button" mat-icon-button>
+                  <button [name]="'addTaskBtn-'+task.id" type="button" mat-icon-button>
                     <i class="material-icons">
                       add_circle_outline
                     </i>
@@ -453,7 +453,7 @@
             </tr>
             <tr *ngFor="let targetUser of projectTargetUsers; let i = index">
               <td class="d-flex">
-                <button type="button" (click)="removeFromTargetUsers(targetUser, i)" mat-icon-button>
+                <button [name]="'removeBtn-'+targetUser.userId" type="button" (click)="removeFromTargetUsers(targetUser, i)" mat-icon-button>
                   <mat-icon>clear</mat-icon>
                 </button>
                 <div>
@@ -467,7 +467,7 @@
               </td>
               <td class="w-40vw">
                 <mat-form-field class="example-full-width">
-                  <input matInput placeholder="Role name" [(ngModel)]="targetUser.roleName"
+                  <input [name]="'roleName-'+targetUser.userId" matInput placeholder="Role name" [(ngModel)]="targetUser.roleName"
                     [ngModelOptions]="{standalone: true}">
                 </mat-form-field>
               </td>
@@ -484,7 +484,7 @@
               <div class="col-md-3">
                 <mat-form-field>
                   <mat-label>Status</mat-label>
-                  <mat-select [(value)]='statusForFilter' (selectionChange)="searchMemberTarget()">
+                  <mat-select name="status" [(value)]='statusForFilter' (selectionChange)="searchMemberTarget()">
                     <mat-option *ngFor="let item of status" [value]="item.value">
                       {{item.label}}
                     </mat-option>
@@ -551,10 +551,10 @@
     </mat-tab-group>
   </mat-dialog-content>
   <div mat-dialog-actions align="end">
-    <button class="btn btn-default" mat-raised-button type="button" (click)="close(0)">
+    <button class="btn btn-default" name="cancelBtn" mat-raised-button type="button" (click)="close(0)">
       Cancel
     </button>
-    <button mat-raised-button color="primary" [disabled]="!createUserModal.valid || isSaving" type="submit" flex="15"
+    <button mat-raised-button name="saveBtn" color="primary" [disabled]="!createUserModal.valid || isSaving" type="submit" flex="15"
       (click)="save()" type="button">
       Save
     </button>

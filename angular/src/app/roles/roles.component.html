@@ -5,11 +5,11 @@
         <h2>{{ "Roles" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button" name="menuBtn ">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
-              <button mat-menu-item (click)="refresh()">
+              <button mat-menu-item (click)="refresh()" name="refreshBtn">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -25,7 +25,7 @@
               <input matInput placeholder="search by name" [(ngModel)]="keyword" name="keyword">
             </mat-form-field>
 
-            <button mat-raised-button color="primary" (click)="getDataPage(1)">{{ 'Search' | localize }}</button>
+            <button mat-raised-button color="primary" (click)="getDataPage(1)" name="searchText">{{ 'Search' | localize }}</button>
 
           </form>
         </div>
@@ -54,21 +54,21 @@
               <td>
                 <button
                   *ngIf="permission.isGranted(VIEW_DETAIL_ROLE) || permission.isGranted(EDIT_ROLE) || permission.isGranted(DELETE_ROLE)"
-                  class="action-button" mat-icon-button [matMenuTriggerFor]="actionsMenu">
+                  class="action-button" mat-icon-button [matMenuTriggerFor]="actionsMenu" [name]="'actionMenuBtn-'+role.id">
                   <mat-icon>menu</mat-icon>
                 </button>
                 <mat-menu #actionsMenu="matMenu">
                   <a *ngIf="permission.isGranted(VIEW_DETAIL_ROLE)" style="text-decoration: none; color:#000000DE;"
-                    mat-menu-item [routerLink]="['view-detail/', role.id]">
+                    mat-menu-item [routerLink]="['view-detail/', role.id]" [name]="'viewDetailBtn-'+role.id">
                     <mat-icon>remove_red_eye</mat-icon>
                     <span>{{ "View detail" | localize }}</span>
                   </a>
                   <a *ngIf="permission.isGranted(EDIT_ROLE)" style="text-decoration: none; color:#000000DE;"
-                    mat-menu-item [routerLink]="['edit/', role.id]">
+                    mat-menu-item [routerLink]="['edit/', role.id]" [name]="'editBtn-'+role.id">
                     <mat-icon>edit</mat-icon>
                     <span>{{ "Edit" | localize }}</span>
                   </a>
-                  <button *ngIf="permission.isGranted(DELETE_ROLE)" mat-menu-item (click)="delete(role)">
+                  <button *ngIf="permission.isGranted(DELETE_ROLE)" mat-menu-item (click)="delete(role)" [name]="'deleteBtn-'+role.id">
                     <mat-icon>delete</mat-icon>
                     <span>{{ "Delete" | localize }}</span>
                   </button>
@@ -83,7 +83,7 @@
           </abp-pagination-controls>
         </div>
         <button *ngIf="permission.isGranted(ADD_ROLE)" mat-mini-fab color="primary" class="pull-right"
-          (click)="createRole()">
+          (click)="createRole()" name="createBtn">
           <mat-icon>add</mat-icon>
         </button>
       </div>

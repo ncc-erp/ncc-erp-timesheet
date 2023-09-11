@@ -27,7 +27,7 @@
           <td>
             <div style="display: flex; justify-content: flex-start; align-items: center; width: 250px;">
               <div>
-                <button class="btn-route" mat-dialog-close
+                <button class="btn-route" [name]="'viewByAvatarBtn-'+item.userId" mat-dialog-close
                   [routerLink]="['app/main/view-leave-day-of-user/', item.userId]">
                   <img style="max-width: 40px;min-width: 40px; height: 40px; border-radius: 50%;"
                     [src]='getAvatar(item)' alt="avatar">
@@ -36,7 +36,7 @@
               <div style="margin-left: 3px;">
                 <div>
                   <span>
-                    <button class="btn-route" mat-dialog-close
+                    <button class="btn-route" [name]="'viewByUserBtn-'+item.userId" mat-dialog-close
                       [routerLink]="['app/main/view-leave-day-of-user/', item.userId]">{{item.fullName}} </button>
                   </span>
                   <span class="label status-label day-off-state-pending" *ngIf="item.status === 1">

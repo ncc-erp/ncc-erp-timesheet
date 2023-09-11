@@ -11,16 +11,16 @@
       </div>
       <div class="col-md-8 col-sm-8 col-md-8 col-lg-8 col-xl-8">
         <mat-radio-group aria-label="Select an option" class="example-radio-group">
-          <mat-radio-button (change)="radioChange($event.value)" class="example-radio-button"
+          <mat-radio-button name="lateComing" (change)="radioChange($event.value)" class="example-radio-button"
             [value]="APP_CONSTANT.OnDayType.BeginOfDay" *ngIf="this.data.absenceTime == 1" checked>Đi muộn
           </mat-radio-button>
-          <mat-radio-button (change)="radioChange($event.value)" class="example-radio-button"
+          <mat-radio-button name="earlyLeaving" (change)="radioChange($event.value)" class="example-radio-button"
             [value]="APP_CONSTANT.OnDayType.EndOfDay" *ngIf="this.data.absenceTime == 3" checked>Về sớm
           </mat-radio-button>
-          <mat-radio-button (change)="radioChange($event.value)" class="example-radio-button" checked
+          <mat-radio-button name="lateComing" (change)="radioChange($event.value)" class="example-radio-button" checked
             [value]="APP_CONSTANT.OnDayType.BeginOfDay" *ngIf="this.data.absenceTime == 10">Đi muộn
           </mat-radio-button>
-          <mat-radio-button (change)="radioChange($event.value)" class="example-radio-button"
+          <mat-radio-button name="earlyLeaving" (change)="radioChange($event.value)" class="example-radio-button"
             [value]="APP_CONSTANT.OnDayType.EndOfDay" *ngIf="this.data.absenceTime == 10">Về sớm
           </mat-radio-button>
         </mat-radio-group>
@@ -62,8 +62,8 @@
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button mat-raised-button mat-dialog-close>Cancel</button>
-    <button mat-raised-button color="primary" [disabled]="!createForm.form.valid || !saving" (click)="submitReq()">
+    <button name="cancelBtn" mat-raised-button mat-dialog-close>Cancel</button>
+    <button name-="saveBtn" mat-raised-button color="primary" [disabled]="!createForm.form.valid || !saving" (click)="submitReq()">
       Send request
     </button>
   </mat-dialog-actions>

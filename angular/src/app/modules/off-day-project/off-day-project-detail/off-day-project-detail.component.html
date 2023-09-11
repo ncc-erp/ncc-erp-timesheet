@@ -29,14 +29,14 @@
           <td>
             <div style="display: flex; justify-content: flex-start; align-items: center; width: 250px;">
               <div>
-                <button class="btn-route" mat-dialog-close [routerLink]="['app/main/leave-day-of-user/', item.userId]">
+                <button [name]="'viewByAvatarBtn-'+item.userId" class="btn-route" mat-dialog-close [routerLink]="['app/main/leave-day-of-user/', item.userId]">
                   <img style="max-width: 40px;min-width: 40px; height: 40px; border-radius: 50%;"
                     [src]='getAvatar(item)' alt="avatar">
                 </button>
               </div>
               <div style="margin-left: 3px;">
                 <div>
-                  <span><button class="btn-route" mat-dialog-close
+                  <span><button [name]="'viewByUserBtn-'+item.userId" class="btn-route" mat-dialog-close
                       [routerLink]="['app/main/leave-day-of-user/', item.userId]">{{item.fullName}} </button></span>
                   <span class="label status-label day-off-state-pending" *ngIf="item.status === 1">
                     Pending
@@ -91,9 +91,9 @@
           </td>
           <td *ngIf="permission.isGranted(APPROVAL_ABSENCE_DAY_PROJECT)"
             style="min-width: 194px; width: 194px; text-align: right;">
-            <button class="approve-button" *ngIf="item.status !== 2" (click)="onApproveAbsence(item)"
+            <button class="approve-button" [name]="'approveBtn-'+item.id" *ngIf="item.status !== 2" (click)="onApproveAbsence(item)"
               mat-raised-button>Approve</button>
-            <button class="reject-button" *ngIf="item.status !== 3" (click)="onRejectAbsence(item)"
+            <button class="reject-button" [name]="'rejectBtn-'+item.id" *ngIf="item.status !== 3" (click)="onRejectAbsence(item)"
               mat-raised-button>Reject</button>
           </td>
         </tr>

@@ -19,10 +19,10 @@
     </div>
   </mat-dialog-content>
   <div mat-dialog-actions align="end">
-    <button mat-button type="button" [disabled]="saving" (click)="close(false)">
+    <button mat-button type="button" name="cancelBtn" [disabled]="saving" (click)="close(false)">
       {{ "Cancel" | localize }}
     </button>
-    <button mat-flat-button type="submit" flex="15" color="primary" [disabled]="!createRoleForm.form.valid || saving">
+    <button mat-flat-button type="submit" name="saveBtn" flex="15" color="primary" [disabled]="!createRoleForm.form.valid || saving">
       {{ "Save" | localize }}
     </button>
   </div>

@@ -19,7 +19,7 @@
     <div class="col-md-4" *ngIf="isShowSelectorMember()">
       <mat-form-field appearance="outline">
         <mat-label>Project</mat-label>
-        <mat-select formControlName="projectId" (openedChange)="handleOpenSelectProject()" (selectionChange)="projectChange($event)">
+        <mat-select name="projectId" formControlName="projectId" (openedChange)="handleOpenSelectProject()" (selectionChange)="projectChange($event)">
           <div class="p-2 input-wrapper hang-on">
             <input
               type="text"
@@ -49,7 +49,7 @@
       <div class="col-md-5">
         <mat-form-field appearance="outline">
           <mat-label>PM</mat-label>
-          <mat-select formControlName="pmId" (openedChange)="handleOpenSelectPm()" #select="matSelect" (selectionChange)="pmChange($event)">
+          <mat-select name="pmId" formControlName="pmId" (openedChange)="handleOpenSelectPm()" #select="matSelect" (selectionChange)="pmChange($event)">
             <div class="p-2 input-wrapper hang-on">
               <input
                 type="text"
@@ -79,7 +79,7 @@
       <div class="col-md-10">
         <mat-form-field appearance="outline">
           <mat-label>User</mat-label>
-          <mat-select formControlName="userId" (openedChange)="handleOpenSelectMember()" #select="matSelect" (selectionChange)="memberChange($event)">
+          <mat-select name="userId" formControlName="userId" (openedChange)="handleOpenSelectMember()" #select="matSelect" (selectionChange)="memberChange($event)">
             <div class="p-2 input-wrapper hang-on">
               <input
                 type="text"
@@ -125,7 +125,7 @@
       <div class="col-md-4">
         <mat-form-field appearance="outline">
           <mat-label>Branch</mat-label>
-          <mat-select formControlName="branchId">
+          <mat-select name="branchId" formControlName="branchId">
             <ng-container *ngFor="let item of listBranch">
               <mat-option [value]="item.id">
                 {{ item.displayName }}
@@ -142,7 +142,7 @@
       <div class="col-md-4">
         <mat-form-field appearance="outline">
           <mat-label>Type</mat-label>
-          <mat-select formControlName="userType">
+          <mat-select name="userType" formControlName="userType">
             <ng-container *ngFor="let item of listUserType">
               <mat-option [value]="item.id">
                 {{ item.name }}
@@ -160,7 +160,7 @@
       <div class="col-md-4">
         <mat-form-field appearance="outline">
           <mat-label>Position</mat-label>
-          <mat-select formControlName="positionId">
+          <mat-select name="positionId" formControlName="positionId">
             <ng-container *ngFor="let item of listPosition">
               <mat-option [value]="item.id">
                 {{ item.name }}
@@ -177,7 +177,7 @@
       <div class="col-md-4">
         <mat-form-field appearance="outline">
           <mat-label>Level</mat-label>
-          <mat-select formControlName="userLevel">
+          <mat-select name="userLevel" formControlName="userLevel">
             <ng-container *ngFor="let item of listLevel">
               <mat-option [value]="item.id">
                 {{ item.name }}
@@ -196,7 +196,7 @@
       <div class="col-md-10">
         <mat-form-field appearance="outline">
           <mat-label>Position</mat-label>
-          <mat-select formControlName="positionId">
+          <mat-select name="positionId" formControlName="positionId">
             <ng-container *ngFor="let item of listPosition">
               <mat-option [value]="item.id">
                 {{ item.name }}
@@ -214,6 +214,7 @@
     <div class="col-md-10">
       <mat-form-field appearance="outline">
         <input
+          name="point"
           type="number"
           matInput
           max="5"
@@ -233,6 +234,7 @@
     <div class="col-md-10">
       <mat-form-field appearance="outline">
         <textarea
+          name="note"
           matInput
           placeholder="{{ l('Note') }}"
           rows="8"
@@ -244,6 +246,7 @@
 
   <mat-dialog-actions align="end">
     <button
+      name="cancelBtn"
       class="btn btn-default"
       mat-raised-button
       type="button"
@@ -252,6 +255,7 @@
       {{ l("Cancel") }}
     </button>
     <button
+      name="saveBtn"
       mat-raised-button
       color="primary"
       [disabled]="!formData.valid"

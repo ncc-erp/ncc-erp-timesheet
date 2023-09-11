@@ -110,10 +110,10 @@
                         <mat-form-field class="col-lg-3 col-md-6 col-sm-6 col-xs-12" appearance="outline">
                             <mat-label>Search by User Name</mat-label>
                             <mat-icon style="color: #9e9e9e" matPrefix="matPrefix">search</mat-icon>
-                            <input matInput="matInput" [(ngModel)]="searchText" (keyup.enter)="refreshDataFilter()" />
+                            <input matInput="matInput" name="searchText" [(ngModel)]="searchText" (keyup.enter)="refreshDataFilter()" />
                         </mat-form-field>
                         <div class="box-menu-right col-lg-8 col-md-12 col-sm-12 col-xs-12">
-                            <button *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AddNew)" type="button"
+                            <button name="createBtn" *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AddNew)" type="button"
                                 class="btn-create btn btn-danger" (click)="createReviewDetail()">
                                 <mat-icon>add</mat-icon>
                                 Add New
@@ -121,7 +121,7 @@
 
                             <button *ngIf="
                   permission.isGranted(ReviewIntern_ApproveAll)
-                " type="button" matTooltip="Approve cho tất cả các tts đã được review theo filter (có trạng thái là reviewed) và pm tương ứng"
+                " type="button" name="approveAllBtn" matTooltip="Approve cho tất cả các tts đã được review theo filter (có trạng thái là reviewed) và pm tương ứng"
                                 class="btn-approve-all btn btn-warning mr-2" (click)="approveAllUser()">
                                 <mat-icon>check</mat-icon>
                                 Approve All
@@ -131,7 +131,7 @@
                   permission.isGranted(ReviewIntern_ReviewDetail_SendAllEmailsIntern)
                 " type="button" matTooltip="Gửi mail kết quả review cho tất cả các tts đã
                                                                                                                                                     được review (có trạng thái là reviewed) và pm tương ứng"
-                                class="btn-email-all btn btn-success mr-2" (click)="sendAllEmailsIntern()">
+                                name="sendEmailInternBtn" class="btn-email-all btn btn-success mr-2" (click)="sendAllEmailsIntern()">
                                 <mat-icon>email</mat-icon>
                                 Send Email Intern
                             </button>
@@ -139,7 +139,7 @@
                   permission.isGranted(ReviewIntern_ReviewDetail_SendAllEmailsOffical)
                 " type="button" matTooltip="Gửi mail kết quả review cho tất cả các tts đã
                                                                                                                                                     được review (có trạng thái là reviewed) và pm tương ứng"
-                                class="btn-email-all btn btn-success mr-2" (click)="sendAllEmailsOffical()">
+                                class="btn-email-all btn btn-success mr-2" (click)="sendAllEmailsOffical()" name="sendEmailOfficialBtn">
                                 <mat-icon>email</mat-icon>
                                 Send Email Official
                             </button>
@@ -148,7 +148,7 @@
                 ReviewIntern_ReviewDetail_SendAllToHRM
               )
             " type="button" matTooltip="Update level bên HRM cho tất cả các tts
-            đã được gửi mail (có trạng thái là Sent Email)" class="btn-mail-hrm btn"
+            đã được gửi mail (có trạng thái là Sent Email)" class="btn-mail-hrm btn" name="sendToHRMBtn"
                                 (click)="UpdateLevelHRMv2ForAll()">
                                 <mat-icon class="mat-1">upgrade</mat-icon>
                                 <span class="text-center">Send To HRM</span>
@@ -156,7 +156,7 @@
                             <button type="button" *ngIf="
               permission.isGranted(
                 ReviewIntern_ReviewDetail_UpdateStarToProject
-              )" class="btn-mail-project btn" (click)="updateToProject()">
+              )" class="btn-mail-project btn" name="updateToProjectBtn" (click)="updateToProject()">
                                 <mat-icon>update</mat-icon>
                                 <span>Update To Project</span>
                             </button>
@@ -203,19 +203,19 @@
                             </td>
                             <!-- button -->
                             <td class="action btn-menu">
-                                <button class="menu" mat-stroked-button="mat-stroked-button" [matMenuTriggerFor]="menu">
+                                <button [name]="'actionMenuBtn-'+item.id"  class="menu" mat-stroked-button="mat-stroked-button" [matMenuTriggerFor]="menu">
                                     <mat-icon>menu</mat-icon>
                                 </button>
                                 <mat-menu #menu="matMenu">
                                     <button *ngIf="
                                     isShowBtnEdit(item)
-                    " class="choices" mat-menu-item="mat-menu-item" (click)="updateReview(item)">
+                    " class="choices" mat-menu-item="mat-menu-item" [name]="'editBtn-'+item.id"  (click)="updateReview(item)">
                                         <mat-icon class="mat-18">edit</mat-icon>
                                         Edit
                                     </button>
                                     <button *ngIf="
                                     isShowBtnChangeReviewer(item)
-                    " class="choices" mat-menu-item="mat-menu-item" (click)="updateReviewer(item)">
+                    " class="choices" mat-menu-item="mat-menu-item" [name]="'changeReviewBtn-'+item.id"  (click)="updateReviewer(item)">
                                         <mat-icon class="mat-18">supervisor_account</mat-icon>
                                         Change Reviewer
                                     </button>
@@ -228,41 +228,41 @@
                                     </button> -->
                                     <button *ngIf="
                                     isShowBtnReviewByCapability(item)
-                    " class="choices" mat-menu-item="mat-menu-item" (click)="newReviewInternship(item)">
+                    " class="choices" mat-menu-item="mat-menu-item" [name]="'reviewBtn-'+item.id" (click)="newReviewInternship(item)">
                                         <mat-icon class="mat-18">rate_review</mat-icon>
                                         Review
                                     </button>
                                     <button *ngIf="
                                     isShowBtnApprove(item)
-                    " class="choices approve" mat-menu-item="mat-menu-item" (click)="approveReview(item)">
+                    " class="choices approve" mat-menu-item="mat-menu-item" [name]="'approveBtn-'+item.id"  (click)="approveReview(item)">
                                         <mat-icon class="mat-18" style="color: green">fact_check</mat-icon>
                                         Approve
                                     </button>
 
                                     <button *ngIf="
                   isShowBtnChotLuong(item)
-                    " class="choices" mat-menu-item="mat-menu-item" (click)="confirmSalaryInternship(item)">
+                    " class="choices" mat-menu-item="mat-menu-item" [name]="'confirmSalaryInternshipBtn-'+item.id"  (click)="confirmSalaryInternship(item)">
                                         <mat-icon class="mat-18" style="color: #2196f3">monetization_on</mat-icon>
                                         Chốt Lương
                                     </button>
                                     <button *ngIf="isShowBtnReject(item)
-                    " class="choices reject" mat-menu-item="mat-menu-item" (click)="rejectReview(item)">
+                    " class="choices reject" mat-menu-item="mat-menu-item" [name]="'rejectBtn-'+item.id"  (click)="rejectReview(item)">
                                         <mat-icon class="mat-18" style="color: red">thumb_down_off_alt</mat-icon>
                                         Reject
                                     </button>
                                     <button *ngIf="isShowBtnRejectSentEmail(item)
-                    " class="choices reject" mat-menu-item="mat-menu-item" (click)="rejectSentMail(item)">
+                    " class="choices reject" mat-menu-item="mat-menu-item" [name]="'rejectSentEMailBtn-'+item.id"  (click)="rejectSentMail(item)">
                                         <mat-icon class="mat-18" style="color: red">thumb_down_off_alt</mat-icon>
                                         Reject sent email
                                     </button>
                                     <button *ngIf="checkStatus(item.status, 'print')
-                    " class="choices" mat-menu-item="mat-menu-item" (click)="printReview(item)">
+                    " class="choices" mat-menu-item="mat-menu-item" [name]="'printBtn-'+item.id"  (click)="printReview(item)">
                                         <mat-icon class="mat-18">print</mat-icon>
                                         Print
                                     </button>
                                     <button *ngIf="
                                     isShowSendEmail(item)
-                    " class="choices" mat-menu-item="mat-menu-item" (click)="sendEmail(item)">
+                    " class="choices" mat-menu-item="mat-menu-item" [name]="'sendEmailBtn-'+item.id"  (click)="sendEmail(item)">
                                         <mat-icon class="mat-18">email</mat-icon>
                                         Send Email
                                     </button>
@@ -270,14 +270,14 @@
                       permission.isGranted(
                         ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern
                       ) && checkStatus(item.status, 'update to HRM')
-                    " class="choices btn-email" mat-menu-item="mat-menu-item"
+                    " class="choices btn-email" mat-menu-item="mat-menu-item" [name]="'sendToHRMBtn-'+item.id"
                                         (click)="UpdateLevelHRMv2ForOne(item.id)">
                                         <mat-icon class="mat-18" style="color: green">upload</mat-icon>
                                         Send To HRM
                                     </button>
                                     <button *ngIf="
                       permission.isGranted(ReviewIntern_ReviewDetail_Delete)
-                      " class="choices btn-delete" mat-menu-item="mat-menu-item"
+                      " class="choices btn-delete" mat-menu-item="mat-menu-item" [name]="'deleteBtn-'+item.id"
                                         (click)="deleteReviewDetailInternCapability(item.id)">
                                         <mat-icon class="mat-18" style="color: red">delete</mat-icon>
                                         Delete

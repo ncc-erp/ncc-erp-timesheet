@@ -4,11 +4,11 @@
       <h2>{{"My working time"}}</h2>
       <ul class="header-dropdown m-r--5">
         <li>
-          <button mat-icon-button [matMenuTriggerFor]="headerMenu2" class="header-dropdown-mat-icon-button">
+          <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu2" class="header-dropdown-mat-icon-button">
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #headerMenu2="matMenu">
-            <button mat-menu-item (click)="refresh()">
+            <button name="refreshBtn" mat-menu-item (click)="refresh()">
               <mat-icon>refresh</mat-icon>
               <span>{{ "Refresh" | localize }}</span>
             </button>
@@ -65,7 +65,7 @@
             </div>
             <div class="edit-save">
               <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                <button *ngIf="permission.isGranted(REGISTRATION_MY_WORKING_TIME)" (click)="createTime()" large mat-raised-button color="primary">
+                <button name="createNew" *ngIf="permission.isGranted(REGISTRATION_MY_WORKING_TIME)" (click)="createTime()" large mat-raised-button color="primary">
                   <mat-icon>edit</mat-icon>Register new working time
                 </button>
               </div>
@@ -100,16 +100,16 @@
             </td>
             <td>{{listStatus[infor.status]['name']}}</td>
             <td style="display: flex; justify-content: center;" *ngIf="infor.status == 1">
-              <button class="action-button" mat-icon-button [matMenuTriggerFor]="actionsMenu">
+              <button [name]="'actionMenuBtn-'+infor.id" class="action-button" mat-icon-button [matMenuTriggerFor]="actionsMenu">
                   <mat-icon>menu</mat-icon>
               </button>
               <mat-menu #actionsMenu="matMenu">
-                <a *ngIf="permission.isGranted(EDIT_MY_WORKING_TIME)" style="text-decoration: none; color:#000000DE;"
+                <a [name]="'editBtn-'+infor.id" *ngIf="permission.isGranted(EDIT_MY_WORKING_TIME)" style="text-decoration: none; color:#000000DE;"
                   mat-menu-item (click)="editRegister(infor)">
                   <mat-icon>edit</mat-icon>
                   <span>{{ "Edit" | localize }}</span>
                 </a>
-                <button *ngIf="permission.isGranted(DELETE_MY_WORKING_TIME)"  mat-menu-item (click)="deleteRegisterInfor(infor)">
+                <button [name]="'deleteBtn-'+infor.id" *ngIf="permission.isGranted(DELETE_MY_WORKING_TIME)"  mat-menu-item (click)="deleteRegisterInfor(infor)">
                   <mat-icon>delete</mat-icon>
                   <span>{{ "Delete" | localize }}</span>
                 </button>

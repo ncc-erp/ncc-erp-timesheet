@@ -3,16 +3,16 @@
         <div class="card main-content">
             <div class="header">
                 <h2>{{ title | localize }} : <b>{{role.name}}</b></h2>
-                <button mat-icon-button class="btn-back" (click)="onBack()">
+                <button mat-icon-button class="btn-back" name="backBtn" (click)="onBack()">
           <mat-icon>arrow_back</mat-icon>
         </button>
                 <ul class="header-dropdown m-r--5">
                     <li>
-                        <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+                        <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button" name="menuBtn">
               <mat-icon>more_vert</mat-icon>
             </button>
                         <mat-menu #headerMenu="matMenu">
-                            <button mat-menu-item>
+                            <button mat-menu-item name="refreshBtn">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -23,41 +23,41 @@
             <div class="body">
                 <mat-tab-group>
                     <!-- TAB DETAILS -->
-                    <mat-tab [label]="'Details' | localize">
+                    <mat-tab [label]="'Details' | localize" name="detailsLabel">
                         <br />
                         <div class="row-fluid">
                             <div class="col-md-12">
                                 <mat-form-field>
-                                    <input [readonly]="path === 'view-detail'" matInput name="Name" [placeholder]="'Name' | localize" [(ngModel)]="role.name" required minlength="2" maxlength="32" />
+                                    <input [readonly]="path === 'view-detail'" matInput name="name" [placeholder]="'Name' | localize" [(ngModel)]="role.name" required minlength="2" maxlength="32" />
                                 </mat-form-field>
                                 <mat-form-field>
-                                    <input [readonly]="path === 'view-detail'" matInput name="DisplayName" [placeholder]="'DisplayName' | localize" [(ngModel)]="role.displayName" required minlength="2" maxlength="32" />
+                                    <input [readonly]="path === 'view-detail'" matInput name="displayName" [placeholder]="'DisplayName' | localize" [(ngModel)]="role.displayName" required minlength="2" maxlength="32" />
                                 </mat-form-field>
                                 <mat-form-field>
-                                    <textarea [readonly]="path === 'view-detail'" matInput name="Description" [placeholder]="'RoleDescription' | localize" [(ngModel)]="role.description"></textarea>
+                                    <textarea [readonly]="path === 'view-detail'" matInput name="description" [placeholder]="'RoleDescription' | localize" [(ngModel)]="role.description"></textarea>
                                 </mat-form-field>
                             </div>
                         </div>
                         <div style="text-align: center;">
-                            <button *ngIf="path === 'edit'" mat-flat-button type="submit" color="primary" (click)="onSave()">
+                            <button *ngIf="path === 'edit'" mat-flat-button type="submit" name="saveBtn" color="primary" (click)="onSave()">
                 {{ "Save" | localize }}
               </button>
                         </div>
                     </mat-tab>
 
                     <!-- TAB PERMISSIONS -->
-                    <mat-tab [label]="'Permissions' | localize">
+                    <mat-tab [label]="'permissions' | localize" name="PermissionsLabel">
                         <br />
                         <div class="row-fluid">
                             <div class="col-md-12">
                                 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
-                                    <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
+                                    <mat-tree-node *matTreeNodeDef="let node;" matTreeNodeToggle>
                                         <li class="mat-tree-node">
                                             <button mat-icon-button disabled></button>
                                             <div class="spinner" *ngIf="node.isLoading">
                                                 <mat-spinner [diameter]="16" style="margin-right: 8px;"></mat-spinner>{{node.displayName}}
                                             </div>
-                                            <mat-checkbox *ngIf="!node.isLoading" [disabled]="isStatic || isLoading || path === 'view-detail'" [checked]="isSelected(node)" (change)="todoLeafItemSelectionToggle(node)">
+                                            <mat-checkbox [name]="'checkboxTreeNode-'+node.name" *ngIf="!node.isLoading" [disabled]="isStatic || isLoading || path === 'view-detail'" [checked]="isSelected(node)" (change)="todoLeafItemSelectionToggle(node)">
                                                 {{node.displayName}}</mat-checkbox>
                                         </li>
                                     </mat-tree-node>
@@ -72,7 +72,7 @@
                                                 <div class="spinner" *ngIf="node.isLoading">
                                                     <mat-spinner [diameter]="16" style="margin-right: 8px;"></mat-spinner>{{node.displayName}}
                                                 </div>
-                                                <mat-checkbox *ngIf="!node.isLoading" [disabled]="isStatic || isLoading || path === 'view-detail'" [checked]="descendantsAllSelected(node)" [indeterminate]="descendantsPartiallySelected(node)" (change)="todoItemSelectionToggle(node)">
+                                                <mat-checkbox [name]="'checkboxNestedTreeNode'+node.name" *ngIf="!node.isLoading" [disabled]="isStatic || isLoading || path === 'view-detail'" [checked]="descendantsAllSelected(node)" [indeterminate]="descendantsPartiallySelected(node)" (change)="todoItemSelectionToggle(node)">
                                                     {{node.displayName}}</mat-checkbox>
                                             </div>
                                             <ul [class.example-tree-invisible]="treeControl.isExpanded(node)">
@@ -86,7 +86,7 @@
                     </mat-tab>
 
                     <!-- TAB USERS -->
-                    <mat-tab [label]="'Users' | localize">
+                    <mat-tab [label]="'Users' | localize" name="usersLabel">
                         <br />
                         <div class="body table-responsive team">
                             <div class="user-table">
@@ -97,7 +97,7 @@
                                     <table class="table table-hover table-striped">
                                         <tr *ngFor="let member of selectedMembers; let i = index">
                                             <td>
-                                                <button *ngIf="path === 'edit'" type="button" (click)="removeMemberFromProject(member, i)" mat-icon-button>
+                                                <button *ngIf="path === 'edit'" type="button" [name]="'removeBtn-'+member.id" (click)="removeMemberFromProject(member, i)" mat-icon-button>
                           <mat-icon>clear</mat-icon>
                         </button>
                                                 <img [src]="getAvatar(member)" class="avatar" alt="Member" style="border-radius: 50%;" /> {{member.name}}
@@ -128,7 +128,7 @@
                                         <div class="col-md-2">
                                             <mat-form-field>
                                                 <mat-label>Branch</mat-label>
-                                                <mat-select name="userBranchForFilter" [(value)]="userBranchForFilter" (selectionChange)="searchMember()">
+                                                <mat-select name="userBranchForFilter" [(value)]="userBranchForFilter" (selectionChange)="searchMember()" name="Select Branch">
                                                     <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
                                                         {{branch.displayName}}
                                                     </mat-option>
@@ -138,7 +138,7 @@
                                         <div class="col-md-2">
                                             <mat-form-field>
                                                 <mat-label>Type</mat-label>
-                                                <mat-select [(value)]='userTypeForFilter' (selectionChange)="searchMember()">
+                                                <mat-select [(value)]='userTypeForFilter' (selectionChange)="searchMember()" name="typeSelect">
                                                     <mat-option [value]="-1">All</mat-option>
                                                     <mat-option *ngFor="let item of userTypes" [value]="item.value">
                                                         {{item.label}}
@@ -149,7 +149,7 @@
                                         <div class="col-md-2">
                                             <mat-form-field>
                                                 <mat-label>Level</mat-label>
-                                                <mat-select [(value)]='userLevelForFilter' (selectionChange)="searchMember()">
+                                                <mat-select [(value)]='userLevelForFilter' (selectionChange)="searchMember()" name="levelSelect">
                                                     <mat-option [value]="-1">All</mat-option>
                                                     <mat-option *ngFor="let item of userLevels" [value]="item.value">
                                                         {{item.name}}
@@ -168,7 +168,7 @@
                                     <table class="table table-hover table-striped">
                                         <tr *ngFor="let mem of displayActiveMembers; let i = index">
                                             <td (click)="selectTeam(mem, i)">
-                                                <button type="button" mat-icon-button>
+                                                <button [name]="'addBtn-'+mem.id" type="button" mat-icon-button>
                           <i class="material-icons">
                             add_circle_outline
                           </i>

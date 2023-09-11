@@ -2,7 +2,7 @@
   <h1 style="cursor: grab" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>
     {{ "PM Edit Request" | localize }} :
   </h1>
-  <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0; cursor: pointer">close</mat-icon>
+  <mat-icon name="closeBtn" (click)="close(0)" style="position: absolute; top: 0; right: 0; cursor: pointer">close</mat-icon>
   <hr />
   <div class="row">
       <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
@@ -55,7 +55,7 @@
         <div>
           <mat-form-field appearance="outline">
             <mat-label>Month</mat-label>
-            <mat-select (selectionChange)="getAllRequest()" [(value)]="month">
+            <mat-select name="month" (selectionChange)="getAllRequest()" [(value)]="month">
               <mat-option value="">All</mat-option>
               <ng-container *ngFor="let m of listMonth">
                 <mat-option [value]="m">
@@ -67,7 +67,7 @@
         </div>
       </div>
       <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
-        <button style="margin-top: 11px;" *ngIf="!isShowBtnAddUser" mat-raised-button color="primary" type="button" (click)="toggleShowAddUserDialog(); $event.stopPropagation()">
+        <button name="addUserBtn" style="margin-top: 11px;" *ngIf="!isShowBtnAddUser" mat-raised-button color="primary" type="button" (click)="toggleShowAddUserDialog(); $event.stopPropagation()">
           Add users
         </button>
       </div>
@@ -121,7 +121,7 @@
           <tbody>
             <tr *ngFor="let request of requestInfo; let i = index">
               <td class="text-center">
-                <mat-checkbox  name="selected" [checked]="getIsSelected(request)"
+                <mat-checkbox [name]="'checkUser-'+request.employeeId"  name="selected" [checked]="getIsSelected(request)"
                   [color]="'primary'" (change)="handleSelectRequestInfoItem(i, $event)">
                 </mat-checkbox>
               </td>
@@ -190,10 +190,10 @@
     </div>
   </div>
   <mat-dialog-actions align="end">
-    <button class="btn btn-default" mat-raised-button mat-dialog-close>
+    <button name="cancelBtn" class="btn btn-default" mat-raised-button mat-dialog-close>
       {{ l("Cancel") }}
     </button>
-    <button type="button" mat-raised-button color="primary" (click)="onSaveAndClose()" [disabled]="
+    <button name="submitBtn" type="button" mat-raised-button color="primary" (click)="onSaveAndClose()" [disabled]="
         saving
       " cdkFocusInitial>
       {{ l("Submit") }}

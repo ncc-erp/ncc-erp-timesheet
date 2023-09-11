@@ -5,11 +5,11 @@
         <h2>{{"Manage Retro" | localize}} </h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
-              <button mat-menu-item (click)="refresh()">
+              <button name="refreshBtn" mat-menu-item (click)="refresh()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -22,7 +22,7 @@
       <div class="body responsive">
         <div class="row clearfix">
           <div class="col-lg-3 col-md-2 col-sm-2 col-xs-2">
-            <button mat-raised-button color="primary" class="pull-left" (click)="create()"
+            <button name="createBtn" mat-raised-button color="primary" class="pull-left" (click)="create()"
               *ngIf="permission.isGranted(ADD)">
               <mat-icon>add</mat-icon>New Retro
             </button>
@@ -34,7 +34,7 @@
                 <div>
                   <mat-form-field appearance="outline">
                     <mat-label>Status</mat-label>
-                    <mat-select (selectionChange)="handleChangeStatus($event)" [(value)]="status">
+                    <mat-select name="statusSelect" (selectionChange)="handleChangeStatus($event)" [(value)]="status">
                       <ng-container *ngFor="let status of listStatus">
                         <mat-option [value]="status.value">
                           {{status.title}}
@@ -48,7 +48,7 @@
               <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 pull-right">
                 <mat-form-field appearance="outline">
                   <mat-label>Search by name</mat-label>
-                  <input matInput [(ngModel)]="searchText" placeholder="Search by name" (keyup.enter)="searchOrFilter()"
+                  <input name="searchText" matInput [(ngModel)]="searchText" placeholder="Search by name" (keyup.enter)="searchOrFilter()"
                     type="text" maxlength="128">
                   <i class="icon-32 material-icons" matPrefix>search</i>
                 </mat-form-field>
@@ -83,7 +83,7 @@
               <ng-container *ngIf="statusTime === 'All'">
                 <td style="text-align: center;">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
                 <td>
-                  <a class="btn-route" *ngIf="handleShowLinkRetroDetail()" [routerLink]="['/app/main/retro-detail']"
+                  <a class="btn-route" [name]="'retroDetailBtn-'+retro.id" *ngIf="handleShowLinkRetroDetail()" [routerLink]="['/app/main/retro-detail']"
                     [queryParams]="{retroId: retro.id, name: retro.name, status: retro.status}">
                     {{retro.name}}
                   </a>
@@ -106,21 +106,21 @@
                   </span>
                 </td>
                 <td style="text-align:right" *ngIf="handleShowAction()">
-                  <button mat-icon-button [matMenuTriggerFor]="actionsMenu">
+                  <button [name]="'actionMenuBtn-'+retro.id" mat-icon-button [matMenuTriggerFor]="actionsMenu">
                     <mat-icon>menu</mat-icon>
                   </button>
                   <mat-menu #actionsMenu="matMenu">
                     <ng-container *ngIf="retro.status === 0">
-                      <button mat-menu-item (click)="handleAction('edit', retro)" *ngIf="permission.isGranted(EDIT)">
+                      <button [name]="'editBtn-'+retro.id" mat-menu-item (click)="handleAction('edit', retro)" *ngIf="permission.isGranted(EDIT)">
                         <mat-icon>edit</mat-icon>
                         <span>{{ "Edit" | localize }}</span>
                       </button>
-                      <button mat-menu-item (click)="handleAction('close', retro)"
+                      <button [name]="'deactiveBtn-'+retro.id" mat-menu-item (click)="handleAction('close', retro)"
                         *ngIf="permission.isGranted(CHANGESTATUS)">
                         <mat-icon>close</mat-icon>
                         <span>{{ "Deactive" | localize }}</span>
                       </button>
-                      <button mat-menu-item (click)="handleAction('delete', retro)"
+                      <button [name]="'deleteBtn-'+retro.id" mat-menu-item (click)="handleAction('delete', retro)"
                         *ngIf="permission.isGranted(DELETE)">
                         <mat-icon>delete</mat-icon>
                         <span>{{ "Delete" | localize }}</span>
@@ -129,7 +129,7 @@
 
 
                     <ng-container *ngIf="retro.status === 1">
-                      <button mat-menu-item (click)="handleAction('check', retro)"
+                      <button [name]="'activeBtn-'+retro.id" mat-menu-item (click)="handleAction('check', retro)"
                         *ngIf="permission.isGranted(CHANGESTATUS)">
                         <mat-icon>check</mat-icon>
                         <span>{{ "Active" | localize }}</span>

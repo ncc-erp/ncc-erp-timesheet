@@ -39,8 +39,8 @@
     </mat-checkbox>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button class="btn btn-default waves-effect" mat-button mat-dialog-close>{{l('Cancel')}}</button>
-    <button class="btn btn-primary waves-effect" mat-button (click)="save()" cdkFocusInitial
+    <button name="cancelBtn" class="btn btn-default waves-effect" mat-button mat-dialog-close>{{l('Cancel')}}</button>
+    <button name="saveBtn" class="btn btn-primary waves-effect" mat-button (click)="save()" cdkFocusInitial
       [disabled]="!createTimesheetByWeekForm.valid">OK</button>
   </mat-dialog-actions>
 </form>

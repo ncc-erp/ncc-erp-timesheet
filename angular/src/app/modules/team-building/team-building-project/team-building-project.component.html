@@ -3,17 +3,17 @@
     <div class="card">
       <div class="header">
         <h2>{{ "Select project team building" | localize }}</h2>
-        <button *ngIf="permission.isGranted(TeamBuilding_Project_SelectProjectTeamBuilding)" style="position: absolute;right: 50px;top: 7px;margin: 0px;" mat-raised-button color="primary"
+        <button name="saveBtn" *ngIf="permission.isGranted(TeamBuilding_Project_SelectProjectTeamBuilding)" style="position: absolute;right: 50px;top: 7px;margin: 0px;" mat-raised-button color="primary"
           class="btn btn-border btn-add" (click)="onClickBtnSave()" [disabled]="!(listItemChange?.length > 0)">
           <mat-icon style="margin-right: 8px">save</mat-icon>Save change
         </button>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
-              <button mat-menu-item (click)="refresh()">
+              <button name="refreshBtn" mat-menu-item (click)="refresh()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -56,7 +56,7 @@
                 </th>
                 <th style="max-width: 50px" class="text-center">
                   IsAllowTeamBuilding
-                  <mat-checkbox name="selectAll" (change)="setAll($event.checked)" matTooltip="Select/DeSelect all"
+                  <mat-checkbox name="selectAllBtn" (change)="setAll($event.checked)" matTooltip="Select/DeSelect all"
                     [checked]="allComplete" [indeterminate]="someComplete()" [color]="'primary'"
                     style="display: flex; justify-content: center">
                   </mat-checkbox>
@@ -86,7 +86,7 @@
                   </span>
                 </td>
                 <td class="text-center">
-                  <mat-checkbox name="isAllowTeamBuilding" [checked]="getIsAllowTeamBuilding(item)" [color]="'primary'"
+                  <mat-checkbox [name]="'isAllowTeamBuilding-'+item.id" [checked]="getIsAllowTeamBuilding(item)" [color]="'primary'"
                     (change)="handleSelectRequestInfoItem(i, $event)">
                   </mat-checkbox>
                 </td>

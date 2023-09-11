@@ -87,7 +87,7 @@
         <div class="row row-fluid">
           <div class="col-md-12">
 
-            <button *ngIf="!userId && enableNormalLogin" mat-raised-button color="primary" (click)="randomPassword()"
+            <button *ngIf="!userId && enableNormalLogin" mat-raised-button color="primary" (click)="randomPassword()" name="randomPassword" 
               style="
                   padding: 0 10px;
                   min-width: 45px;
@@ -141,7 +141,7 @@
           <div class="col-md-6">
             <mat-form-field>
               <mat-label>Basic Tranner</mat-label>
-              <mat-select [(value)]='user.managerId'>
+              <mat-select [(value)]='user.managerId' name="managerId">
                 <mat-option>
                   <ngx-mat-select-search [formControl]="managerSearch" placeholderLabel="Search by Name"
                   noEntriesFoundLabel= "No matching found">
@@ -160,7 +160,7 @@
           <div class="col-md-6">
             <mat-form-field>
               <mat-label>Type</mat-label>
-              <mat-select [(value)]='user.type' (selectionChange)="onUserTypeChange()">
+              <mat-select [(value)]='user.type' (selectionChange)="onUserTypeChange()" name="type">
                 <mat-option [value]='null'>None</mat-option>
                 <mat-option [value]='0'>Staff</mat-option>
                 <mat-option [value]='1'>Internship</mat-option>
@@ -171,7 +171,7 @@
           <div class="col-md-6">
             <mat-form-field>
               <mat-label>Level</mat-label>
-              <mat-select [(value)]='user.level' (selectionChange)="onLevelChange()">
+              <mat-select [(value)]='user.level' (selectionChange)="onLevelChange()" name="level">
                 <mat-option [value]='null'>None</mat-option>
                 <mat-option *ngFor="let item of listLevelFiltered" [value]='item.value'>
                   {{item.name}}
@@ -249,7 +249,7 @@
           <div class="col-md-6">
              <mat-form-field>
                <mat-label>Begin Level</mat-label>
-               <mat-select [(value)]='user.beginLevel'>
+               <mat-select [(value)]='user.beginLevel' name="beginLevel">
                  <mat-option [value]='null'>None</mat-option>
                  <mat-option *ngFor="let item of listLevel" [value]='item.value'>
                    {{item.name}}
@@ -274,7 +274,7 @@
         <div class="row row-fluid">
           <div style="padding:15px">
             <mat-label class="col-form-label" required>Register working time</mat-label>
-            <mat-checkbox *ngIf="permission.isGranted(UPDATE_USER_WORKING_TIME)" name="IsActive" style="margin-left: 50px;" (change)='changeValue($event)'
+            <mat-checkbox *ngIf="permission.isGranted(UPDATE_USER_WORKING_TIME)" name="isDefault" style="margin-left: 50px;" (change)='changeValue($event)'
               [(checked)]="isDefault">
               {{ "Default" | localize }}
             </mat-checkbox>
@@ -327,7 +327,7 @@
     
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button class="btn btn-default" mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
-    <button mat-raised-button color="primary" [disabled]="!createUserModal.form.valid || isSaving" (keyup.enter)="save()" (click)='save()'>{{l('Save')}}</button>
+    <button class="btn btn-default" name="cancelBtn" mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
+    <button mat-raised-button color="primary" name="saveBtn" [disabled]="!createUserModal.form.valid || isSaving" (keyup.enter)="save()" (click)='save()'>{{l('Save')}}</button>
   </mat-dialog-actions>
 </form>

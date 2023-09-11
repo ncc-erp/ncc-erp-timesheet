@@ -147,7 +147,7 @@
                 <tbody>
                   <tr *ngFor="let request of requestInfo; let i = index">
                     <td class="text-center">
-                      <mat-checkbox *ngIf="request.status == 0" [name]="'selected' + request.employeeId" [checked]="getIsSelected(request)"
+                      <mat-checkbox *ngIf="request.status == 0" [name]="'selected-' + request.employeeId" [checked]="getIsSelected(request)"
                         [color]="'primary'" (change)="handleSelectRequestInfoItem(i, $event)">
                       </mat-checkbox>
                     </td>
@@ -234,17 +234,17 @@
                   <tbody>
                     <tr>
                       <td style="flex-direction: column;">
-                        <mat-radio-group aria-label="Select an option" formControlName="isChoosingFile" [name]="'isChoosingFileInput' + (i + 1)" (change)="switchInvoiceTypeResource(i)">
-                          <mat-radio-button [value]="true" [name]="'isChoosingFileButton' + (i + 1)">Invoice File</mat-radio-button>
+                        <mat-radio-group aria-label="Select an option" formControlName="isChoosingFile" [name]="'isChoosingFileInputBtn-' + (i + 1)" (change)="switchInvoiceTypeResource(i)">
+                          <mat-radio-button [value]="true" [name]="'isChoosingFileBtn-' + (i + 1)">Invoice File</mat-radio-button>
                           <br>
                           <br>
-                          <mat-radio-button [value]="false" [name]="'isChoosingUrlButton' + (i + 1)">Invoice Url</mat-radio-button>
+                          <mat-radio-button [value]="false" [name]="'isChoosingUrlBtn-' + (i + 1)">Invoice Url</mat-radio-button>
                         </mat-radio-group>
                       </td>
                       <td>
-                        <input class="form-control" type="file" (change)="onFileChange($event, i)" formControlName="invoiceFileName" [name]="'invoiceFileNameInput' + (i + 1)">
+                        <input class="form-control" type="file" (change)="onFileChange($event, i)" formControlName="invoiceFileName" [name]="'invoiceFileNameInput-' + (i + 1)">
                         <br>
-                        <input class="form-control" type="url" formControlName="invoiceUrl" [name]="'invoiceUrlInput' + (i + 1)">
+                        <input class="form-control" type="url" formControlName="invoiceUrl" [name]="'invoiceUrlInput-' + (i + 1)">
                       </td>
                       <td>
                         <label>Amount</label>
@@ -253,9 +253,9 @@
                         <label>Has VAT</label>
                       </td>
                       <td>
-                        <input class="form-control" type="number" formControlName="amount" [name]="'amountInput' + (i + 1)" (change)="calculateTotalInvoiceAmount()">
+                        <input class="form-control" type="number" formControlName="amount" [name]="'amountInput-' + (i + 1)" (change)="calculateTotalInvoiceAmount()">
                         <br>
-                        <input style="position: static; opacity: 1; height: 24px;" type="checkbox" formControlName="isVat" [name]="'isVatInput' + (i + 1)">
+                        <input style="position: static; opacity: 1; height: 24px;" type="checkbox" formControlName="isVat" [name]="'isVatInput-' + (i + 1)">
                       </td>
                       <td style="align-items: center; text-align: center">
                         <mat-icon *ngIf="invoiceFormGroup.get('invoiceFormArray').controls.length > 1" class="material-icons-outlined" style="cursor: pointer;" name="deleteInvoiceFormButton" (click)="deleteInvoiceForm(i)">

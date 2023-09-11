@@ -5,11 +5,11 @@
         <h2>{{ "Overtime" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu123="matMenu">
-              <button mat-menu-item (click)="refresh()">
+              <button name="refreshBtn" mat-menu-item (click)="refresh()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -57,7 +57,7 @@
           <mat-form-field appearance="outline">
             <mat-label>Search by Name</mat-label>
             <mat-icon style="color:#9E9E9E" matPrefix>search</mat-icon>
-            <input matInput [(ngModel)]='searchText' (keyup.enter)="refresh()">
+            <input name="searchText" matInput [(ngModel)]='searchText' (keyup.enter)="refresh()">
           </mat-form-field>
         </div>
       </div>

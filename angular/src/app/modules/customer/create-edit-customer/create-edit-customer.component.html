@@ -15,10 +15,10 @@
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button class="btn btn-default" mat-raised-button type="button" (click)="close(0)">
+    <button name="cancelBtn" class="btn btn-default" mat-raised-button type="button" (click)="close(0)">
       {{l('Cancel')}}
     </button>
-    <button mat-raised-button color="primary" [disabled]="!createForm.form.valid || isSaving" type="submit" flex="15"
+    <button name="saveBtn" mat-raised-button color="primary" [disabled]="!createForm.form.valid || isSaving" type="submit" flex="15"
       (click)="save()">
       {{l('Save')}}
     </button>

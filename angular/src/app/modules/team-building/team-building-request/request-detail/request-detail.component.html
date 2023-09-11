@@ -60,7 +60,7 @@
            <div style="max-width: 850px; overflow-x: auto; margin-top: 10px;" *ngIf="file.length > 0" class="d-flex">
             <label style="margin-right: 10px;">Invoice Image/URL:</label>
             <span *ngFor="let files of file">
-              <button style="margin-right: 10px;" (click)="openUrl(files.url)">{{ files.fileName }}</button>
+              <button style="margin-right: 10px;" [name]="'imgBtn-'+file.id" (click)="openUrl(files.url)">{{ files.fileName }}</button>
             </span>
            </div>
   </div>

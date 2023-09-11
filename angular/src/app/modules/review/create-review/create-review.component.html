@@ -6,17 +6,17 @@
       <mat-label>Month and Year</mat-label>
       <input #input matInput readonly [matDatepicker]="dp" [formControl]="date">
       <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
-      <mat-datepicker #dp
+      <mat-datepicker name="monthPicker" #dp
                       startView="multi-year"
                       (yearSelected)="chosenYearHandler($event)"
                       (monthSelected)="chosenMonthHandler($event, dp)"
                       panelClass="example-month-picker">
       </mat-datepicker>
     </mat-form-field>
-    <mat-checkbox style="padding-left: 10px;" [checked]="review.isActive" (change)="review.isActive = !review.isActive">Is Active?</mat-checkbox>
+    <mat-checkbox name="isActive" style="padding-left: 10px;" [checked]="review.isActive" (change)="review.isActive = !review.isActive">Is Active?</mat-checkbox>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button class="btn btn-default " mat-raised-button mat-dialog-close (click)="clearInput()" [disabled]="saving">{{l('Cancel')}}</button>
-    <button  mat-raised-button color="primary" [mat-dialog-close]="review" (click)="clearInput()" [disabled]="!reviewForm.form.valid || saving">{{l('Submit')}}</button>
+    <button name="cancelBtn" class="btn btn-default " mat-raised-button mat-dialog-close (click)="clearInput()" [disabled]="saving">{{l('Cancel')}}</button>
+    <button name="saveBtn" mat-raised-button color="primary" [mat-dialog-close]="review" (click)="clearInput()" [disabled]="!reviewForm.form.valid || saving">{{l('Submit')}}</button>
   </mat-dialog-actions>
 </form>

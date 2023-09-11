@@ -1,6 +1,6 @@
 <div style="display: flex;justify-content:  space-between;">
   <h4 style="white-space: nowrap; display: inline;">REPORT REVIEW INTERN {{year}}</h4>
-  <mat-icon style="cursor: pointer;" (click)="_dialogRef.close()">close</mat-icon>
+  <mat-icon style="cursor: pointer;" name="closeBtn" (click)="_dialogRef.close()">close</mat-icon>
 
 </div>
 <div class="report">
@@ -8,13 +8,13 @@
   <div class="col  row report-left"> 
     <mat-form-field appearance="outline" class="item dropdown">  
       <mat-label>year</mat-label>
-      <mat-select [(ngModel)]="year" (selectionChange)="onYearChange()">
+      <mat-select name="year" [(ngModel)]="year" (selectionChange)="onYearChange()">
         <mat-option *ngFor="let item of listYear" [value]="item">{{item}}</mat-option>
       </mat-select>
     </mat-form-field>
     <mat-form-field appearance="outline" class="item dropdown">
       <mat-label>Month</mat-label>
-      <mat-select [(ngModel)]="month" (selectionChange)="onMonthChange()">
+      <mat-select name="month" [(ngModel)]="month" (selectionChange)="onMonthChange()">
         <mat-option *ngFor="let item of monthList" [value]='item'>
           {{item}}
         </mat-option>
@@ -23,7 +23,7 @@
 
     <mat-form-field appearance="outline" class="item dropdown">
       <mat-label>Level</mat-label>
-      <mat-select [(value)]="level" (selectionChange)="onStatusChange()">
+      <mat-select name="level" [(value)]="level" (selectionChange)="onStatusChange()">
         <mat-option *ngFor="let item of levelChangeStatus  | keyvalue" [value]='item.key'>
           {{item.value}}
         </mat-option>
@@ -32,17 +32,17 @@
 
     <mat-form-field appearance="outline" class="item">
       <mat-label>Search Intern</mat-label>
-      <input matInput type="text" [(ngModel)]="searchText" (keyup.enter)="searchIntern()" placeholder="intern email">
+      <input name="searchText" matInput type="text" [(ngModel)]="searchText" (keyup.enter)="searchIntern()" placeholder="intern email">
     </mat-form-field>
 
-    <mat-checkbox appearance="outline" class="example-margin item" [checked]="isCurrentInternOnly" (change)="onChangeCurrentInternOnly($event)">
+    <mat-checkbox name="isCurrentInternOnly" appearance="outline" class="example-margin item" [checked]="isCurrentInternOnly" (change)="onChangeCurrentInternOnly($event)">
       Current Intern Only
     </mat-checkbox>
 
     
   </div>
   <div class="col  row report-right">
-    <button [disabled]="isDisabled" *ngIf="permission.isGranted(ReviewIntern_ExportReport)" 
+    <button name="exportBtn" [disabled]="isDisabled" *ngIf="permission.isGranted(ReviewIntern_ExportReport)" 
       class="control-btn export-btn" mat-flat-button
       color="primary" (click)="exportReport()">Export Excel
     </button>

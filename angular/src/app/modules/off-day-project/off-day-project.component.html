@@ -8,6 +8,7 @@
             <mat-form-field appearance="outline">
               <mat-label>Year</mat-label>
               <mat-select
+                name="yearSelect"
                 [(value)]="year"
                 (selectionChange)="onDayOffTypeChange()"
               >
@@ -21,6 +22,7 @@
             <mat-form-field appearance="outline">
               <mat-label>Month</mat-label>
               <mat-select
+                name="monthSelect"
                 [(value)]="month"
                 (selectionChange)="onDayOffTypeChange()"
               >
@@ -36,6 +38,7 @@
             <div class="btn-group m-5">
               <div
                 class="btn btn-primary"
+                name="previousBtn"
                 mwlCalendarPreviousView
                 [view]="view"
                 [(viewDate)]="viewDate"
@@ -45,6 +48,7 @@
               </div>
               <div
                 class="btn btn-outline-secondary"
+                name="currentDateBtn"
                 mwlCalendarToday
                 [(viewDate)]="viewDate"
                 (viewDateChange)="closeOpenMonthViewDay()"
@@ -53,6 +57,7 @@
               </div>
               <div
                 class="btn btn-primary"
+                name="nextBtn"
                 mwlCalendarNextView
                 [view]="view"
                 [(viewDate)]="viewDate"
@@ -64,6 +69,7 @@
           </div>
           <div class="center-flex">
             <button
+              name="menuBtn"
               mat-icon-button
               [matMenuTriggerFor]="headerMenu123"
               class="header-dropdown-mat-icon-button"
@@ -71,7 +77,7 @@
               <mat-icon style="margin-top: 20px">more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu123="matMenu">
-              <button mat-menu-item (click)="refreshData()">
+              <button name="refreshBtn" mat-menu-item (click)="refreshData()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -85,6 +91,7 @@
             <mat-form-field appearance="outline">
               <mat-label>Search by email</mat-label>
               <input
+                name="searchText"
                 matInput
                 [(ngModel)]="searchText"
                 (keyup.enter)="refreshData()"
@@ -98,6 +105,7 @@
               <mat-form-field appearance="outline">
                 <mat-label>Status</mat-label>
                 <mat-select
+                  name="dayAbsentStatus"
                   [(value)]="dayAbsentStatus"
                   (selectionChange)="onLeaveDayTypeChange()"
                 >
@@ -111,19 +119,21 @@
               </mat-form-field>
             </div>
             <div class="col-md-2">
-              <app-multiple-select-new
+              <app-multiple-select
+                name="listProject"
                 labelName="Project"
                 [listOption]="listProject"
                 (onChange)="onChangeListProjectIdSelected($event)"
                 [defaultValue]="listProjectSelected"
                 [disabled]="isLoading"
               >
-              </app-multiple-select-new>
+              </app-multiple-select>
             </div>
             <div class="col-md-2">
               <mat-form-field appearance="outline">
                 <mat-label>Request Type</mat-label>
                 <mat-select
+                  name="absentDayType"
                   [(value)]="absentDayType"
                   (selectionChange)="onLeaveDayTypeChange()"
                 >
@@ -141,6 +151,7 @@
               <mat-form-field appearance="outline" *ngIf="absentDayType === 0">
                 <mat-label>Type Of Request Type</mat-label>
                 <mat-select
+                  name="dayType"
                   [(value)]="dayType"
                   (selectionChange)="onDayTypeChange()"
                 >
@@ -158,6 +169,7 @@
               <mat-form-field appearance="outline" *ngIf="absentDayType === 0">
                 <mat-label>Off Type</mat-label>
                 <mat-select
+                  name="dayOffType"
                   id="dayOffType"
                   [(value)]="dayOffType"
                   (selectionChange)="onDayOffTypeChange()"
@@ -173,6 +185,7 @@
             </div>
             <div class="col-md-1">
               <button
+                name="filterBtn"
                 style="height: 44px; margin-top: 4px"
                 mat-flat-button
                 (click)="onFilter()"
@@ -206,7 +219,7 @@
 </div>
 
 <ng-template #customCellTemplate let-day="day" let-locale="locale">
-  <div class="cal-cell-top position-relative" style="overflow: hidden">
+  <div class="cal-cell-top position-relative" [attr.name]="'daySelectBtn-'+(day.date | date:'dd-MM-yyyy')" style="overflow: hidden">
     <span class="cal-day-badge" *ngIf="day.cssClass == 'back-red'">Off</span>
     <!-- <span class="cal-day-badge" *ngIf="day.badgeTotal > 0 && day.cssClass != 'back-red'">{{day.badgeTotal}}</span> -->
     <span class="cal-day-number">{{

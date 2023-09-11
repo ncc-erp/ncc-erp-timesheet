@@ -21,16 +21,16 @@
             </mat-select>
           </mat-form-field>
         </h2>
-        <button mat-icon-button class="btn-back" (click)="onBack()">
+        <button name="backBtn" mat-icon-button class="btn-back" (click)="onBack()">
           <mat-icon>arrow_back</mat-icon>
         </button>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu123="matMenu">
-              <button mat-menu-item (click)="getData()">
+              <button name="refreshBtn" mat-menu-item (click)="getData()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -60,7 +60,7 @@
         <div class="col-sm-2 col-md-2">
           <mat-form-field appearance="outline">
             <mat-label>Day</mat-label>
-            <mat-select [(value)]="selectedDay" (selectionChange)="onDateChange()">
+            <mat-select name="selectedDay" [(value)]="selectedDay" (selectionChange)="onDateChange()">
               <mat-option [value]="-1">All</mat-option>
               <mat-option *ngFor="let item of dayList" [value]='item'>
                 {{item}}
@@ -144,7 +144,7 @@
         <div class="col-sm-2 col-md-2">
           <mat-form-field appearance="outline">
             <mat-label>Complain</mat-label>
-            <mat-select [(value)]="isComplain" (selectionChange)="onComplainChange()">
+            <mat-select name="selectedComplain" [(value)]="isComplain" (selectionChange)="onComplainChange()">
               <mat-option [value]='-1'>All</mat-option>
               <mat-option [value]=true>Complain</mat-option>
               <mat-option [value]=false>Not Complain</mat-option>
@@ -269,20 +269,20 @@
                     </div>
                   </td>
                   <td class="text-center" style="white-space: nowrap;">
-                    <button *ngIf="!item.isEditing && permission.isGranted(EDIT_TARDINESS_LEAVE_EARLY)"
+                    <button [name]="'editBtn-'+item.strTimekeepingId" *ngIf="!item.isEditing && permission.isGranted(EDIT_TARDINESS_LEAVE_EARLY)"
                       class="btn btn-default" style="margin-right: 10px;" (click)="item.isEditing=true">
                       Edit
                     </button>
-                    <button *ngIf="!item.isEditing && permission.isGranted(Timekeeping_ReplyUserNote)"
+                    <button [name]="'replyBtn-'+item.strTimekeepingId" *ngIf="!item.isEditing && permission.isGranted(Timekeeping_ReplyUserNote)"
                       class="btn btn-default" (click)="replyComplain(item)">
                       Reply
                     </button>
                     <div *ngIf=" item.isEditing">
-                      <button mat-mini-fab class="btn-success button24" style="margin-right: 10px;"
+                      <button [name]="'saveEditBtn-'+item.strTimekeepingId" mat-mini-fab class="btn-success button24" style="margin-right: 10px;"
                         (click)="onSave(item)">
                         <mat-icon class="icon24">done</mat-icon>
                       </button>
-                      <button mat-mini-fab class="btn-danger button24" (click)="onCancel(item)">
+                      <button [name]="'cancelEditBtn-'+item.strTimekeepingId" mat-mini-fab class="btn-danger button24" (click)="onCancel(item)">
                         <mat-icon class="icon24">close</mat-icon>
                       </button>
                     </div>
@@ -291,28 +291,28 @@
                   <td style="text-align: center;">
                     <span *ngIf="!item.isEditing">{{item.registrationTimeStart}}</span>
                     <mat-form-field *ngIf="item.isEditing" class="time">
-                      <input [textMask]="{mask: maskTime, guide: false}" matInput
+                      <input [name]="'registrationTimeStartInput-'+item.strTimekeepingId" [textMask]="{mask: maskTime, guide: false}" matInput
                         [(ngModel)]="item.registrationTimeStart" autocomplete="off">
                     </mat-form-field>
                   </td>
                   <td style="text-align: center;">
                     <span *ngIf="!item.isEditing">{{item.registrationTimeEnd}}</span>
                     <mat-form-field *ngIf="item.isEditing" class="time">
-                      <input [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.registrationTimeEnd"
+                      <input [name]="'registrationTimeEndInput-'+item.strTimekeepingId" [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.registrationTimeEnd"
                         autocomplete="off">
                     </mat-form-field>
                   </td>
                   <td style="text-align: center;">
                     <span *ngIf="!item.isEditing">{{item.checkIn}}</span>
                     <mat-form-field *ngIf="item.isEditing" class="time">
-                      <input [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.checkIn"
+                      <input [name]="'checkInInput-'+item.strTimekeepingId" [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.checkIn"
                         autocomplete="off">
                     </mat-form-field>
                   </td>
                   <td style="text-align: center;">
                     <span *ngIf="!item.isEditing">{{item.checkOut}}</span>
                     <mat-form-field *ngIf="item.isEditing" class="time">
-                      <input [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.checkOut"
+                      <input [name]="'checkOutInput-'+item.strTimekeepingId" [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.checkOut"
                         autocomplete="off">
                     </mat-form-field>
                   </td>
@@ -323,7 +323,7 @@
                   <td style="text-align: center;">
                     <span *ngIf="!item.isEditing">{{trackerTimeFormat(item.trackerTime)}}</span>
                     <mat-form-field *ngIf="item.isEditing" class="time">
-                      <input [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.trackerTime"
+                      <input [name]="'trackerTimeInput-'+item.strTimekeepingId" [textMask]="{mask: maskTime, guide: false}" matInput [(ngModel)]="item.trackerTime"
                         autocomplete="off">
                     </mat-form-field>
                   </td>

@@ -5,15 +5,15 @@
   <br>
   <mat-form-field appearance="outline">
     <mat-label>Note</mat-label>
-    <input matInput [(ngModel)]="event.title">
+    <input name="note" matInput [(ngModel)]="event.title">
   </mat-form-field>
   <br>
   <mat-form-field appearance="outline">
     <mat-label>Coefficient OT</mat-label>
-    <input type="number" matInput [(ngModel)]="coefficient" required>
+    <input name="coefficient" type="number" matInput [(ngModel)]="coefficient" required>
   </mat-form-field>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-raised-button mat-dialog-close>Cancel</button>
-  <button mat-raised-button color="primary" [disabled]="coefficient <= 0" (click)="save()">Save</button>
+  <button name="cancelBtn" mat-raised-button mat-dialog-close>Cancel</button>
+  <button name="saveBtn" mat-raised-button color="primary" [disabled]="coefficient <= 0" (click)="save()">Save</button>
 </mat-dialog-actions>

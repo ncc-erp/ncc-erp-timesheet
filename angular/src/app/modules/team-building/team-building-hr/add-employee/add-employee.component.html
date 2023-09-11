@@ -44,7 +44,7 @@
       </label>
         <mat-form-field class="row-item-rest col-xl-9 col-lg-9 col-md-9  col-xs-9" appearance="outline" data-toggle="tooltip" data-placement="right" title="Bấm vào lịch để chọn ngày!">
         <mat-label>Month and Year</mat-label>
-        <input #input matInput readonly [matDatepicker]="dp" [formControl]="date">
+        <input name="datePicker" #input matInput readonly [matDatepicker]="dp" [formControl]="date">
         <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
         <mat-datepicker #dp
                         startView="multi-year"
@@ -56,8 +56,8 @@
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button class="btn btn-default" mat-raised-button mat-dialog-close >{{l('Cancel')}}</button>
-    <button mat-raised-button color="primary" (click)="onSaveAndClose()" cdkFocusInitial
+    <button class="btn btn-default" name="cancelBtn" mat-raised-button mat-dialog-close >{{l('Cancel')}}</button>
+    <button mat-raised-button color="primary" name="saveBtn" (click)="onSaveAndClose()" cdkFocusInitial
       [disabled]="saving ||!createForm.valid">{{l('Submit')}}</button>
   </mat-dialog-actions>
 </form>

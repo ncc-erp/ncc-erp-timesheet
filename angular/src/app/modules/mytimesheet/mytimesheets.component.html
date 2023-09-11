@@ -8,16 +8,16 @@
             <h3 *ngIf="typeOfView == APP_CONSTANT.MyTimesheetView.Week"></h3>
           </div>
           <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12 text-right">
-            <button style="height:49px" mat-flat-button (click)="refreshData()" color="primary">
+            <button name="refreshTimesheetsBtn" style="height:49px" mat-flat-button (click)="refreshData()" color="primary">
               Refresh
             </button>
             &nbsp;
-            <button style="height:49px" mat-flat-button (click)="today()" class="btn bg-green">
+            <button name="currentDayBtn" style="height:49px" mat-flat-button (click)="today()" class="btn bg-green">
               Today
             </button>
             &nbsp;
             <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
-              <mat-button-toggle matTooltip="Previous" matTooltipPosition="above" (click)="back()">
+              <mat-button-toggle name="previousBtn" matTooltip="Previous" matTooltipPosition="above" (click)="back()">
                 <mat-icon>keyboard_arrow_left</mat-icon>
               </mat-button-toggle>
               <mat-button-toggle matTooltip="Today" matTooltipPosition="above">
@@ -27,15 +27,15 @@
                 </mat-form-field>
 
               </mat-button-toggle>
-              <mat-button-toggle matTooltip="Next" matTooltipPosition="above" (click)="next()">
+              <mat-button-toggle name="nextBtn" matTooltip="Next" matTooltipPosition="above" (click)="next()">
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </mat-button-toggle>
             </mat-button-toggle-group>
-            <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+            <mat-datepicker-toggle name="datePicker" matSuffix [for]="picker1"></mat-datepicker-toggle>
             <mat-datepicker #picker1></mat-datepicker>
             <mat-button-toggle-group name="fontStyle" aria-label="Font Style" #group="matButtonToggleGroup" value="day">
-              <mat-button-toggle value="day" (click)="viewBy(APP_CONSTANT.MyTimesheetView.Day)">Day</mat-button-toggle>
-              <mat-button-toggle value="week" (click)="viewBy(APP_CONSTANT.MyTimesheetView.Week)">Week
+              <mat-button-toggle name="dayBtnToggle" value="day" (click)="viewBy(APP_CONSTANT.MyTimesheetView.Day)">Day</mat-button-toggle>
+              <mat-button-toggle name="weekBtnToggle" value="week" (click)="viewBy(APP_CONSTANT.MyTimesheetView.Week)">Week
               </mat-button-toggle>
             </mat-button-toggle-group>
           </div>
@@ -88,12 +88,12 @@
                     <td style="width: 115px">
                       <button style="width:50px;float: right"
                         *ngIf="item.status != APP_CONSTANT.TimesheetStatus.Approve && permission.isGranted(DELETE_MY_TIMESHEET)"
-                        (click)="delete(item)" mat-icon-button color="primary">
+                        [name]="'deleteBtn-'+item.id" (click)="delete(item)" mat-icon-button color="primary">
                         <mat-icon>delete</mat-icon>
                       </button>
                       <button style="float: right"
                         *ngIf="item.status != APP_CONSTANT.TimesheetStatus.Approve && permission.isGranted(EDIT_MY_TIMESHEET)"
-                        (click)="editTimesheetItem(item)" mat-icon-button color="primary">
+                        [name]="'editBtn-'+item.id" (click)="editTimesheetItem(item)" mat-icon-button color="primary">
                         <mat-icon>edit</mat-icon>
                       </button>
                     </td>
@@ -102,11 +102,11 @@
               </table>
               <div style="display: flex; justify-content: space-between;">
                 <button
-                  *ngIf="activeDay != 7 && typeOfView == APP_CONSTANT.MyTimesheetView.Day && permission.isGranted(ADD_MY_TIMESHEET)"
+                  name="addByDay" *ngIf="activeDay != 7 && typeOfView == APP_CONSTANT.MyTimesheetView.Day && permission.isGranted(ADD_MY_TIMESHEET)"
                   mat-flat-button color="primary" (click)="createTimesheetItem()">
                   <mat-icon>add</mat-icon>
                 </button>
-                <button *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
+                <button name="submit" *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
                   (click)="submitTimesheet()" mat-flat-button color="primary">
                   Submit Week for Approval
                 </button>
@@ -171,25 +171,25 @@
                     [(ngModel)]="item.sunWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
 
 
-                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.monWorkingTime"
+                <td *ngIf="item.isEditing"><input name="monWorkingTime" style="width: 50px;" [(ngModel)]="item.monWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.tueWorkingTime"
+                <td *ngIf="item.isEditing"><input name="tueWorkingTime" style="width: 50px;" [(ngModel)]="item.tueWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.wedWorkingTime"
+                <td *ngIf="item.isEditing"><input name="wedWorkingTime" style="width: 50px;" [(ngModel)]="item.wedWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.thuWorkingTime"
+                <td *ngIf="item.isEditing"><input name="thuWorkingTime" style="width: 50px;" [(ngModel)]="item.thuWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.friWorkingTime"
+                <td *ngIf="item.isEditing"><input name="friWorkingTime" style="width: 50px;" [(ngModel)]="item.friWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.satWorkingTime"
+                <td *ngIf="item.isEditing"><input name="satWorkingTime" style="width: 50px;" [(ngModel)]="item.satWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input style="width: 50px;" [(ngModel)]="item.sunWorkingTime"
+                <td *ngIf="item.isEditing"><input name="sunWorkingTime" style="width: 50px;" [(ngModel)]="item.sunWorkingTime"
                     [textMask]="mask2"></td>
 
                 <td>{{ convertMinuteToHour(item.totalTime) }}</td>
 
                 <td>
-                  <button mat-flat-button *ngIf="item.isAddNew" (click)="SaveList(item)" color="primary" [disabled]="isSaving">
+                  <button name="saveWeek" mat-flat-button *ngIf="item.isAddNew" (click)="SaveList(item)" color="primary" [disabled]="isSaving">
                     <mat-icon>done</mat-icon>
                   </button>
                   <!-- <button mat-flat-button *ngIf="item.isEditable && item.isEditing " (click)="SaveList(item)" color="primary">
@@ -203,11 +203,11 @@
             </tbody>
           </table>
           <button
-            *ngIf="activeDay != 7 && typeOfView == APP_CONSTANT.MyTimesheetView.Week && permission.isGranted(ADD_MY_TIMESHEET)"
+          name="addByWeek" *ngIf="activeDay != 7 && typeOfView == APP_CONSTANT.MyTimesheetView.Week && permission.isGranted(ADD_MY_TIMESHEET)"
             mat-flat-button color="primary" (click)="createTimesheet()">
             <mat-icon>add</mat-icon>
           </button>
-          <button style="float:right" *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
+          <button name="submit" style="float:right" *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
             (click)="submitTimesheet()" mat-flat-button color="primary">
             Submit Week for Approval
           </button>

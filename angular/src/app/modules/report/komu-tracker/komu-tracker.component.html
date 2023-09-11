@@ -5,11 +5,11 @@
         <h2>{{ "Komu Tracker" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu123="matMenu">
-              <button mat-menu-item (click)="refresh()">
+              <button name="refreshBtn" mat-menu-item (click)="refresh()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -47,7 +47,7 @@
         <div class="col-sm-4" style="padding:5px 15px 10px 15px">
           <mat-form-field appearance='outline'>
             <mat-label>Email</mat-label>
-            <mat-select  [(value)]="emailAddress" (selectionChange)="refresh()">
+            <mat-select name="email" [(value)]="emailAddress" (selectionChange)="refresh()">
               <mat-option>
                 <ngx-mat-select-search [formControl]="userSearch" placeholderLabel="Search by email"
                 noEntriesFoundLabel= "No matching found">
@@ -63,7 +63,7 @@
         <div class="col-sm-4" style="padding:5px 15px 10px 15px">
           <mat-form-field  appearance="outline">
             <mat-label>Search by email</mat-label>
-            <input matInput [(ngModel)]="searchText" placeholder="{{l('Search by email')}}"
+            <input name="searchText" matInput [(ngModel)]="searchText" placeholder="{{l('Search by email')}}"
                 (keyup.enter)="searchOrFilter()" type="text" maxlength="128">
               <i class="icon-32 material-icons" matPrefix>search</i>
           </mat-form-field>

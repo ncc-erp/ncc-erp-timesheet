@@ -3,7 +3,7 @@
   <mat-dialog-content style="width: 400px">
     <mat-form-field appearance="outline" *ngIf="data.type == 0 && data.absenceTime == 0">
       <mat-label>Absence Type</mat-label>
-      <mat-select [(value)]="absenceDayReq.dayOffTypeId">
+      <mat-select name="absenceType" [(value)]="absenceDayReq.dayOffTypeId">
         <mat-option *ngFor="let type of dayOffTypes" [value]="type.id">{{type.name}}</mat-option>
       </mat-select>
     </mat-form-field>
@@ -31,8 +31,8 @@
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button mat-raised-button mat-dialog-close>Cancel</button>
-    <button mat-raised-button color="primary" [disabled]="!createForm.form.valid || isSaving" (click)="submitReq()">
+    <button name="cancelBtn" mat-raised-button mat-dialog-close>Cancel</button>
+    <button name="saveBtn" mat-raised-button color="primary" [disabled]="!createForm.form.valid || isSaving" (click)="submitReq()">
       Save
     </button>
   </mat-dialog-actions>

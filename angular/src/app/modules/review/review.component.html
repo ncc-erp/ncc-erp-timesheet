@@ -4,11 +4,11 @@
       <h2>{{ "Review Intern" | localize }}</h2>
       <ul class="header-dropdown m-r--5">
         <li>
-          <button mat-icon-button [matMenuTriggerFor]="headerMenu2" class="header-dropdown-mat-icon-button">
+          <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu2" class="header-dropdown-mat-icon-button">
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #headerMenu2="matMenu">
-            <button mat-menu-item (click)="refresh()">
+            <button name="refreshBtn" mat-menu-item (click)="refresh()">
               <mat-icon>refresh</mat-icon>
               <span>{{ "Refresh" | localize }}</span>
             </button>
@@ -18,14 +18,14 @@
     </div>
     <div class="body row">
       <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <button *ngIf="permission.isGranted(ReviewIntern_AddNewReviewByCapability)" type="button"
+        <button name="createBtn" *ngIf="permission.isGranted(ReviewIntern_AddNewReviewByCapability)" type="button"
           class="btn-format btn-add btn btn-danger btn-size" data-toggle="tooltip"
           title="Review Intern theo các tiêu chí" (click)="newReviewInternCapability()">
           <mat-icon>add</mat-icon>
           New Review
         </button>
         <button  *ngIf="permission.isGranted(ReviewIntern_ViewAllReport)"
-        type="button" class="btn-format btn-add btn btn-success btn-size" (click)="viewReport()">
+        type="button" name="viewBtn" class="btn-format btn-add btn btn-success btn-size" (click)="viewReport()">
           <mat-icon>event_note</mat-icon>
           View Report
         </button>
@@ -54,7 +54,7 @@
               </td>
               <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
                 <div class="actions">
-                  <button class="btn-actions" *ngIf="
+                  <button [name]="'deactivateBtn-'+item.id" class="btn-actions" *ngIf="
                       permission.isGranted(ReviewIntern_DeActive) &&
                       item.isActive == true
                     " mat-raised-button (click)="changeDeActive(item.id)">
@@ -63,7 +63,7 @@
                     </i>
                     DeActivate
                   </button>
-                  <button class="btn-actions" *ngIf="
+                  <button [name]="'activateBtn-'+item.id" class="btn-actions" *ngIf="
                       permission.isGranted(ReviewIntern_Active) &&
                       item.isActive == false
                     " mat-raised-button (click)="changeActive(item.id)">
@@ -72,7 +72,7 @@
                     </i>
                     Activate
                   </button>
-                  <button class="devide-item" *ngIf="permission.isGranted(ReviewIntern_Delete)" mat-raised-button
+                  <button [name]="'deleteBtn-'+item.id" class="devide-item" *ngIf="permission.isGranted(ReviewIntern_Delete)" mat-raised-button
                     (click)="deleteListReviewInternCapability(item.id)">
                     <mat-icon class="mat-18">delete</mat-icon> Delete
                   </button>

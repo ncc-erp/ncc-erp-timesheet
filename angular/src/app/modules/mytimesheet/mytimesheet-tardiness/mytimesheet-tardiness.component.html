@@ -7,7 +7,7 @@
           <div class="item">
             <label>Year: </label>
             <mat-form-field appearance="outline">
-              <mat-select [(value)]="year" (selectionChange)="onDateChange()">
+              <mat-select name="yearTardinessSelect" [(value)]="year" (selectionChange)="onDateChange()">
                 <mat-option *ngFor="let item of years" [value]='item'>
                   {{item}}
                 </mat-option>
@@ -17,7 +17,7 @@
           <div class="item">
             <label>Month: </label>
             <mat-form-field appearance="outline">
-              <mat-select [(value)]="month" (selectionChange)="onDateChange()">
+              <mat-select name="monthTardinessSelect" [(value)]="month" (selectionChange)="onDateChange()">
                 <mat-option *ngFor="let item of months" [value]='item'>
                   {{item +1}}
                 </mat-option>
@@ -37,11 +37,11 @@
         </div>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+            <button name="menuTardinessBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu123="matMenu">
-              <button mat-menu-item (click)="getData()">
+              <button name="refreshTardinessBtn" mat-menu-item (click)="getData()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -141,7 +141,7 @@
                   <mat-form-field class="example-full-width mt-2 bg-white " appearance="outline"
                     *ngIf=" item.isComplain">
                     <mat-label>Leave a comment</mat-label>
-                    <textarea style="color: black;" matInput #textArea1 [(ngModel)]="item.userNote"></textarea>
+                    <textarea name="comment" style="color: black;" matInput #textArea1 [(ngModel)]="item.userNote"></textarea>
                   </mat-form-field>
                 </td>
                 <td class="text-center">
@@ -150,15 +150,15 @@
                 <td class="text-center">
 
                   <button *ngIf=" !item.isComplain && permission.isGranted(Timekeeping_UserNote)"
-                    class="btn btn-default" (click)="item.isComplain=true;">
+                  [name]="'complainBtn-'+item.timekeepingId" class="btn btn-default" (click)="item.isComplain=true;">
                     Complain
                   </button>
                   <div *ngIf=" item.isComplain">
-                    <button mat-mini-fab class="btn-success button24" style="margin-right: 10px;"
+                    <button [name]="'saveBtn-'+item.timekeepingId" mat-mini-fab class="btn-success button24" style="margin-right: 10px;"
                       (click)="onSave(item)">
                       <mat-icon class="icon24">done</mat-icon>
                     </button>
-                    <button mat-mini-fab class="btn-danger button24" (click)="onCancel(item)">
+                    <button [name]="'closeBtn-'+item.timekeepingId" mat-mini-fab class="btn-danger button24" (click)="onCancel(item)">
                       <mat-icon class="icon24">close</mat-icon>
                     </button>
                   </div>

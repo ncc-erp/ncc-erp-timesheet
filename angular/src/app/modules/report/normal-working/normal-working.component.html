@@ -34,7 +34,7 @@
                       </mat-form-field>
                     </div>
                 </div>
-                <mat-checkbox appearance="outline" [disabled]="disabledCheckbox" class="show-than-default item" [checked]="isThanDefaultWorking" (change)="onChangeThanDefaultWorking($event)">
+                <mat-checkbox name="isThanDefaultWorking" appearance="outline" [disabled]="disabledCheckbox" class="show-than-default item" [checked]="isThanDefaultWorking" (change)="onChangeThanDefaultWorking($event)">
                     TS log > default working time
                 </mat-checkbox>
                 <!-- <mat-checkbox appearance="outline" [disabled]="disabledCheckbox" class="show-than-default item" [checked]="isNoOffAndNoCheckIn" (change)="onChangeNoOffAndNoCheckIn($event)">
@@ -42,16 +42,16 @@
                 </mat-checkbox> -->
                 <ul class="header-dropdown m-r--5">
                     <li>
-                        <mat-slide-toggle (change)="onResize()">{{show ? "View Normal" : "View Full"}}
+                        <mat-slide-toggle name="isViewFullBtn" (change)="onResize()">{{show ? "View Normal" : "View Full"}}
                         </mat-slide-toggle>
                     </li>
                     <li>
-                        <button mat-icon-button [matMenuTriggerFor]="headerMenu123"
+                        <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123"
                             class="header-dropdown-mat-icon-button">
                             <mat-icon>more_vert</mat-icon>
                         </button>
                         <mat-menu #headerMenu123="matMenu">
-                            <button mat-menu-item (click)='refresh()'>
+                            <button name="refreshBtn" mat-menu-item (click)='refresh()'>
                                 <mat-icon>refresh</mat-icon>
                                 <span>{{ "Refresh" | localize }}</span>
                             </button>
@@ -116,11 +116,11 @@
                     <mat-form-field class="col-sm-6 col-lg-3" appearance="outline">
                         <mat-icon style="color: #9E9E9E" matPrefix>search</mat-icon>
                         <mat-label>Search by name, surname, email, username</mat-label>
-                        <input matInput [(ngModel)]="searchText" (keyup.enter)="searchOrFilter()">
+                        <input name="searchText" matInput [(ngModel)]="searchText" (keyup.enter)="searchOrFilter()">
                     </mat-form-field>
                     <div *ngIf="permission.isGranted(EXPORT_EXCEL_NORMAL_WORKING)" class="col-sm-1 col-lg-1"
                         style="height: 55px; display: flex;align-items: center;">
-                        <button (click)="exportExcel()" mat-flat-button color="primary" [disabled]="isDisabled">Export</button>
+                        <button name="exportBtn" (click)="exportExcel()" mat-flat-button color="primary" [disabled]="isDisabled">Export</button>
                     </div>
                 </div>
                 <div id="table-detail" *ngIf="workingReports">
@@ -166,13 +166,13 @@
                                                         {{item.branchDisplayName}}
                                                     </span>
                                                     <div *ngIf="permission.isGranted(LOCK_UNLOCK_TIMESHEET)" class="icon">
-                                                        <button style="margin-left: auto;"
+                                                        <button [name]="'lockTimesheetBtn-'+item.userId" style="margin-left: auto;"
                                                             matTooltip="Unlock, user CAN log, submit timesheet. Click to lock"
                                                             matTooltipPosition="after" mat-mini-fab color="primary"
                                                             *ngIf="item.isUnlock" (click)="onLock(item,0)" class="lock-button">
                                                             <mat-icon>lock_open</mat-icon>
                                                         </button>
-                                                        <button style="margin-left: auto;"
+                                                        <button [name]="'unlockTimesheetBtn-'+item.userId" style="margin-left: auto;"
                                                             matTooltip="LOCKED, user can’t log/submit timesheet. Click to unlock"
                                                             matTooltipPosition="after" mat-mini-fab color="primary"
                                                             *ngIf="!item.isUnlock" (click)="onUnlock(item,0)"
@@ -180,14 +180,14 @@
                                                             <mat-icon>lock</mat-icon>
                                                         </button>
         
-                                                        <button mat-icon-button color="primary" class="lock-button"
+                                                        <button [name]="'lockPMTimesheetBtn-'+item.userId" mat-icon-button color="primary" class="lock-button"
                                                             style="margin-left: auto"
                                                             matTooltip="Unlock, PM can approve/reject timesheet. Click to lock"
                                                             matTooltipPosition="after" *ngIf="item.isPM && item.isUnlockPM"
                                                             (click)="onLock(item,1)">
                                                             <mat-icon>lock_open</mat-icon>
                                                         </button>
-                                                        <button mat-icon-button color="primary" class="lock-button"
+                                                        <button [name]="'unlockPMTimesheetBtn-'+item.userId" mat-icon-button color="primary" class="lock-button"
                                                             style="margin-left: auto"
                                                             matTooltip="Locked, PM can't approve/reject timesheet. Click to unlock"
                                                             matTooltipPosition="after" *ngIf="item.isPM && !item.isUnlockPM"

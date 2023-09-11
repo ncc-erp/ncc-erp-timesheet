@@ -7,7 +7,7 @@
             <div class="item">
               <label class="mt-20">Year: </label>
               <mat-form-field appearance="outline">
-                <mat-select [(value)]="year" (selectionChange)="onDateChange()">
+                <mat-select name="yearSummarySelect" [(value)]="year" (selectionChange)="onDateChange()">
                   <mat-option *ngFor="let item of years" [value]='item'>
                     {{item}}
                   </mat-option>
@@ -17,7 +17,7 @@
             <div class="item">
               <label class="mt-20">Month: </label>
               <mat-form-field appearance="outline">
-                <mat-select [(value)]="month" (selectionChange)="onDateChange()">
+                <mat-select name="monthSummarySelect" [(value)]="month" (selectionChange)="onDateChange()">
                   <mat-option *ngFor="let item of months" [value]='item'>
                     {{item +1}}
                   </mat-option>
@@ -27,7 +27,7 @@
             <div class="item" >
               <label class="mt-20">Status: </label>
               <mat-form-field appearance="outline" style="width: 170px;">
-                <mat-select [(value)]="myTimesheetStatus" (selectionChange)="onDateChange()" style="width: 150px;">
+                <mat-select name="statusSummarySelect" [(value)]="myTimesheetStatus" (selectionChange)="onDateChange()" style="width: 150px;">
                   <mat-option *ngFor="let item of myTimesheetStatusList" [value]='APP_CONSTANT.MyTimesheetStatusFilter[item]'>
                     {{item}}
                   </mat-option>
@@ -37,11 +37,11 @@
           </div>
           <ul class="header-dropdown m-r--5">
             <li>
-              <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+              <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #headerMenu123="matMenu">
-                <button mat-menu-item (click)="getData()">
+                <button name="refreshSummaryBtn" mat-menu-item (click)="getData()">
                   <mat-icon>refresh</mat-icon>
                   <span>{{ "Refresh" | localize }}</span>
                 </button>

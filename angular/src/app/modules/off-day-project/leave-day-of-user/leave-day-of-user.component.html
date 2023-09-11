@@ -3,16 +3,16 @@
     <div class="card main-content">
       <div class="header">
         <h2>{{ "Leave days / onsite of user : " | localize }}<b>{{userName}}</b></h2>
-        <button mat-icon-button class="btn-back" (click)="onBack()">
+        <button name="backBtn" mat-icon-button class="btn-back" (click)="onBack()">
           <mat-icon>arrow_back</mat-icon>
         </button>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu123="matMenu">
-              <button mat-menu-item (click)="refreshData()">
+              <button name="refreshBtn" mat-menu-item (click)="refreshData()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -23,15 +23,15 @@
       <div class="row text-center flex" style="padding: 15px;">
         <div class="col-md-3">
           <div class="btn-group">
-            <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
+            <div name="previousBtn" class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
               (viewDateChange)="closeOpenMonthViewDay()">
               Previous
             </div>
-            <div class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate"
+            <div name="currentDateBtn" class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate"
               (viewDateChange)="closeOpenMonthViewDay()">
               Today
             </div>
-            <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate"
+            <div name="nextBtn" class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate"
               (viewDateChange)="closeOpenMonthViewDay()">
               Next
             </div>
@@ -50,6 +50,7 @@
             <mat-form-field appearance="outline">
               <mat-label>Request Type</mat-label>
               <mat-select
+                name="absentDayType"
                 [(value)]="absentDayType"
                 (selectionChange)="selectionChange(true)"
               >
@@ -67,6 +68,7 @@
             <mat-form-field appearance="outline"> 
               <mat-label>Type Of Request Type</mat-label>
               <mat-select
+                name="dayType"
                 [(value)]="dayType"
                 (selectionChange)="selectionChange()"
               >
@@ -83,7 +85,7 @@
           <div class="col-md-3">
             <mat-form-field appearance="outline">
               <mat-label>Year</mat-label>
-              <mat-select [(value)]="year" (selectionChange)="selectionChange($event)">
+              <mat-select name="yearSelect" [(value)]="year" (selectionChange)="selectionChange($event)">
                 <mat-option *ngFor="let item of years" [value]='item'>
                   {{item}}
                 </mat-option>
@@ -93,7 +95,7 @@
           <div class="col-md-3">
             <mat-form-field appearance="outline">
               <mat-label>Month</mat-label>
-              <mat-select [(value)]="month" (selectionChange)="selectionChange($event)">
+              <mat-select name="monthSelect" [(value)]="month" (selectionChange)="selectionChange($event)">
                 <mat-option *ngFor="let item of months" [value]='item'>
                   {{item + 1}}
                 </mat-option>
@@ -116,7 +118,7 @@
 </div>
 
 <ng-template #customCellTemplate let-day="day" let-locale="locale">
-  <div class="cal-cell-top position-relative">
+  <div class="cal-cell-top position-relative" [attr.name]="'daySelectBtn-'+(day.date | date:'dd-MM-yyyy')">
     <div style="height: 100%;" class="back-red" *ngIf="day.badgeTotal > 0">
       <span class="cal-day-badge">Off</span>
     </div>

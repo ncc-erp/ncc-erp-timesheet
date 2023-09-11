@@ -5,11 +5,11 @@
         <h2>{{ "Tardiness / Leave Early" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu123="matMenu">
-              <button mat-menu-item (click)="refresh()">
+              <button name="refreshBtn" mat-menu-item (click)="refresh()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -59,7 +59,7 @@
         <div class="col-sm-3" style="padding:5px 15px 10px 15px">
           <mat-form-field appearance='outline'>
             <mat-label>User Email</mat-label>
-            <mat-select [disabled]="permission.isGranted(VIEW_ONLY_ME_TARDINESS_LEAVE_EARLY) && !permission.isGranted(VIEW_TARDINESS_LEAVE_EARLY)" [formControl]='userControl' [(value)]="userId" (selectionChange)="refresh()">
+            <mat-select name="userEmail" [disabled]="permission.isGranted(VIEW_ONLY_ME_TARDINESS_LEAVE_EARLY) && !permission.isGranted(VIEW_TARDINESS_LEAVE_EARLY)" [formControl]='userControl' [(value)]="userId" (selectionChange)="refresh()">
               <mat-option>
                 <ngx-mat-select-search [formControl]="userSearch" placeholderLabel="Search by Email"
                 noEntriesFoundLabel= "No matching found">
@@ -79,8 +79,8 @@
         </div> -->
 
         <div class="col-sm-3">
-          <button class="control-btn" *ngIf="permission.isGranted(GET_DATA_TARDINESS_LEAVE_EARLY)" mat-flat-button color="primary" (click)="getDataCheckInInternal()" style="margin-right: 10px;">Get data</button>
-          <button class="control-btn" *ngIf="permission.isGranted(EXPORT_EXCEL)" mat-flat-button color="primary" (click)="exportExcel()">Export Excel</button>
+          <button name="getDataBtn" class="control-btn" *ngIf="permission.isGranted(GET_DATA_TARDINESS_LEAVE_EARLY)" mat-flat-button color="primary" (click)="getDataCheckInInternal()" style="margin-right: 10px;">Get data</button>
+          <button name="exportExcelBtn" class="control-btn" *ngIf="permission.isGranted(EXPORT_EXCEL)" mat-flat-button color="primary" (click)="exportExcel()">Export Excel</button>
         </div>
       </div>
 
@@ -128,7 +128,7 @@
                     <div style="margin-left: 3px;">
                       <div>
                         <div>
-                          <button class="btn-route"
+                          <button class="btn-route" [name]="'detailBtn-'+item.userId"
                           (click)="viewDetail(item.userId)">{{item.userName}}
                           </button>
                         </div>

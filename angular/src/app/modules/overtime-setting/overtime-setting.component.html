@@ -5,11 +5,11 @@
         <h2>{{ "Manage Project OT setting" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
-              <button mat-menu-item (click)="refresh()">
+              <button name="refreshBtn" mat-menu-item (click)="refresh()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -20,7 +20,7 @@
       <div class="body table-responsive">
         <div class="row clearfix">
           <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-            <button *ngIf="permission.isGranted(ADD)" mat-raised-button color="primary" class="pull-left"
+            <button name="createBtn" *ngIf="permission.isGranted(ADD)" mat-raised-button color="primary" class="pull-left"
               (click)="create()">
               <mat-icon>add</mat-icon>New
             </button>
@@ -28,7 +28,7 @@
           <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
             <mat-form-field appearance="outline">
               <mat-label>Date At</mat-label>
-              <input matInput name="Date At" [placeholder]="'Date At' | localize" 
+              <input matInput name="dateAt" [placeholder]="'Date At' | localize" 
                 [matDatepicker]="pickerDateAt" (dateInput)="changeDate()" [(ngModel)]="dateAt"/>
               <mat-datepicker-toggle matSuffix [for]="pickerDateAt"></mat-datepicker-toggle>
               <mat-datepicker #pickerDateAt></mat-datepicker>
@@ -51,7 +51,7 @@
           <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
             <mat-form-field appearance="outline">
               <mat-label>Search by name project</mat-label>
-              <input matInput [(ngModel)]="searchText" placeholder="{{l('Search by name project')}}"
+              <input name="searchText" matInput [(ngModel)]="searchText" placeholder="{{l('Search by name project')}}"
                 (keyup.enter)="searchOrFilter()" type="text" maxlength="128">
               <i class="icon-32 material-icons" matPrefix>search</i>
             </mat-form-field>
@@ -76,9 +76,9 @@
               <td class="text-center">{{ overtimeSetting.coefficient }}</td>
               <td>{{ overtimeSetting.note }}</td>
               <td>
-                <button *ngIf="permission.isGranted(DELETE)" mat-raised-button (click)="delete(overtimeSetting)"
+                <button [name]="'deleteBtn-'+overtimeSetting.id" *ngIf="permission.isGranted(DELETE)" mat-raised-button (click)="delete(overtimeSetting)"
                   class="btn btn-danger waves-effect pull-right">Delete</button>
-                <button *ngIf="permission.isGranted(EDIT)" mat-raised-button (click)="edit(overtimeSetting)"
+                <button [name]="'editBtn-'+overtimeSetting.id" *ngIf="permission.isGranted(EDIT)" mat-raised-button (click)="edit(overtimeSetting)"
                   class="btn btn-primary waves-effect pull-right" style="margin-right: 12px;">Edit</button>
               </td>
             </tr>

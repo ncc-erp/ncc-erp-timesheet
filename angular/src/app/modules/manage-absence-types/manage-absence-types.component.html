@@ -5,11 +5,11 @@
         <h2>Absence Types</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button class="header-dropdown-mat-icon-button" [matMenuTriggerFor]="headerMenu">
+            <button name="menuBtn" mat-icon-button class="header-dropdown-mat-icon-button" [matMenuTriggerFor]="headerMenu">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
-              <button mat-menu-item (click)="refresh()">
+              <button name="refreshBtn" mat-menu-item (click)="refresh()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -20,7 +20,7 @@
       <div class="body table-responsive">
         <div>
           <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="padding: 0">
-            <button *ngIf="permission.isGranted(ADD_LEAVE_TYPE)" mat-raised-button color="primary" class="pull-left" (click)="createAbsence()"
+            <button name="createBtn" *ngIf="permission.isGranted(ADD_LEAVE_TYPE)" mat-raised-button color="primary" class="pull-left" (click)="createAbsence()"
               style="margin-top: 4px; margin-left: 10px;">
               <mat-icon>add</mat-icon>New
             </button>
@@ -61,15 +61,15 @@
               </td>
               <td>
                 <div *ngIf="permission.isGranted(EDIT_LEAVE_TYPE) || permission.isGranted(EDIT_LEAVE_TYPE)" class="pull-right" id="btnAction">
-                  <button  mat-raised-button [matMenuTriggerFor]="actionsMenu">Actions
+                  <button [name]="'actionMenuBtn-'+absence.id" mat-raised-button [matMenuTriggerFor]="actionsMenu">Actions
                     <i class="icon-32 material-icons">arrow_drop_down</i>
                   </button>
                   <mat-menu #actionsMenu="matMenu">
-                    <button *ngIf="permission.isGranted(EDIT_LEAVE_TYPE)" mat-menu-item (click)="editTask(absence)">
+                    <button [name]="'editBtn-'+absence.id" *ngIf="permission.isGranted(EDIT_LEAVE_TYPE)" mat-menu-item (click)="editTask(absence)">
                       <mat-icon>edit</mat-icon>
                       <span>{{ "Edit" | localize }}</span>
                   </button>
-                    <button *ngIf="permission.isGranted(DELETE_LEAVE_TYPE)" class="text-danger" mat-menu-item (click)="deleteTask(absence)">  
+                    <button [name]="'deleteBtn-'+absence.id" *ngIf="permission.isGranted(DELETE_LEAVE_TYPE)" class="text-danger" mat-menu-item (click)="deleteTask(absence)">  
                       <mat-icon>delete</mat-icon>
                       <span>{{ "Delete" | localize }}</span></button>
                   </mat-menu>

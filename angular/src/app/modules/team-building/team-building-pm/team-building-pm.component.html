@@ -5,11 +5,11 @@
         <h2>{{ "PM request" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
-              <button mat-menu-item (click)="refresh()">
+              <button name="refreshBtn" mat-menu-item (click)="refresh()">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -28,7 +28,7 @@
           </div>
           <div class="col-lg-2" style="justify-content: center; display: flex;">
             <div class="gr-btn-action">
-              <button *ngIf="permission.isGranted(TeamBuilding_DetailPM_CreateRequest)" style="margin-top: 10px" mat-raised-button color="primary" class="btn btn-border btn-add" (click) = "pmSendReQuest()" >
+              <button name="createBtn" *ngIf="permission.isGranted(TeamBuilding_DetailPM_CreateRequest)" style="margin-top: 10px" mat-raised-button color="primary" class="btn btn-border btn-add" (click) = "pmSendReQuest()" >
                 <div>
                   <i class="fa-solid fa-square-plus" style="margin-right: 8px"></i>
                   New Request
@@ -88,7 +88,7 @@
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Month</mat-label>
-                <mat-select (selectionChange)="handleFilterMonth($event)" [(value)]="month">
+                <mat-select name="month" (selectionChange)="handleFilterMonth($event)" [(value)]="month">
                   <mat-option [value]="-1">All</mat-option>
                   <ng-container *ngFor="let m of listMonth">
                     <mat-option [value]="m">
@@ -103,7 +103,7 @@
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Year</mat-label>
-                <mat-select (selectionChange)="handleFilterYear($event)" [(value)]="year">
+                <mat-select name="year" (selectionChange)="handleFilterYear($event)" [(value)]="year">
                   <ng-container *ngFor="let y of listYear">
                     <mat-option [value]="y">
                       {{y}}
@@ -117,7 +117,7 @@
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Status</mat-label>
-                <mat-select (selectionChange)="handleFilterStatus($event)" [(value)]="status">
+                <mat-select name="status" (selectionChange)="handleFilterStatus($event)" [(value)]="status">
                   <ng-container *ngFor="let status of listStatus">
                     <mat-option [value]="status.value">
                       {{status.title}}
