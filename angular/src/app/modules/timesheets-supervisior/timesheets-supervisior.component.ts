@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, Injector, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { MomentDateAdapter } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -43,6 +44,16 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   isLoading: boolean;
   rawData: TimeSheetDto[] = [];
   filteredTimesheets: TimeSheetDto[] = [];
+  
+  projectSearch: FormControl = new FormControl("");
+  projectFilter = []
+  projectId = this.APP_CONSTANT.FILTER_DEFAULT.All;
+  projects = []
+
+  userSearch: FormControl = new FormControl("");
+  userFilter = [];
+  userId = this.APP_CONSTANT.FILTER_DEFAULT.All;
+  users = [];
 
   Timesheet_TypeOfWorks = [
     {
@@ -96,10 +107,19 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     private timesheetSupervisiorService: TimesheetsSupervisiorService,
     private changeDetector: ChangeDetectorRef,
   ) {
-    super(injector);
+    super(injector)
+    this.projectSearch.valueChanges.subscribe(() => {
+      this.filterProject();
+    });
+    this.userSearch.valueChanges.subscribe(() => {
+      this.filterUser();
+    })
   }
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.getProjects();
+    this.getUsers();
+  }
 
   ngAfterViewChecked() {
     this.changeDetector.detectChanges();
@@ -107,7 +127,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
 
   getData() {
     this.isLoading = true;
-    this.timesheetSupervisiorService.getAll(this.fromDate, this.toDate, this.filterStatus).subscribe(obj => {
+    this.timesheetSupervisiorService.getAll(this.fromDate, this.toDate, this.filterStatus, Number(this.projectId), Number(this.userId)).subscribe(obj => {
       // After the supervisior choose another date, status or view.
       this.rawData = obj.result;
       // this.convertData(obj.result);
@@ -215,6 +235,51 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     }
     return this.domSanitizer.bypassSecurityTrustHtml(html);
   }
+
+  getProjects(){
+    this.timesheetSupervisiorService.GetAllActiveProject().subscribe(data => {
+      this.projectFilter = data.result
+      this.projects = this.projectFilter
+      this.projects.unshift({
+        id: -1,
+        name: "All",
+        code: ""
+      })
+    })
+  }
+
+  getUsers() {
+    this.timesheetSupervisiorService.GetAllActiveUser().subscribe(data => {
+      this.userFilter = data.result
+      this.users = this.userFilter
+      this.users.unshift({
+        id: -1,
+        fullName: "",
+        emailAddress: "All",
+      })
+    })
+  }
+
+  filterProject(): void {
+    if (this.projectSearch.value) {
+      const temp: string = this.projectSearch.value.toLowerCase().trim();
+      this.projects = this.projectFilter.filter(data =>
+        data.name.toLowerCase().includes(temp) || data.code.toLowerCase().includes(temp));
+    } else {
+      this.projects = this.projectFilter.slice();
+    }
+  }
+
+  filterUser(): void {
+    if (this.userSearch.value) {
+      const temp: string = this.userSearch.value.toLowerCase().trim();
+      this.users = this.userFilter.filter(data =>
+        data.fullName.toLowerCase().includes(temp) || data.emailAddress.toLowerCase().includes(temp));
+    } else {
+      this.users = this.userFilter.slice();
+    }
+  }
+
 }
 
 export class TimesheetGroupByDayDto {

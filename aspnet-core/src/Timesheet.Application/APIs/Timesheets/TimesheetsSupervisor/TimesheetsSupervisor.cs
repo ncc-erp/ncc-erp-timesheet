@@ -14,6 +14,7 @@ using Abp.Linq.Extensions;
 using Ncc.Entities;
 using Ncc.Authorization.Users;
 using Ncc.IoC;
+using Timesheet.Timesheets.Projects.Dto;
 
 namespace Timesheet.Timesheets.TimesheetsSupervisor
 {
@@ -27,7 +28,7 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
 
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.TimesheetSupervision_View)]
-        public async Task<List<MyTimeSheetDto>> GetAll(DateTime? startDate, DateTime? endDate, TimesheetStatus? status)
+        public async Task<List<MyTimeSheetDto>> GetAll(DateTime? startDate, DateTime? endDate, TimesheetStatus? status, long? ProjectId, long? UserId)
         {
             var qUsers = WorkScope.GetAll<User>()
              .Select(x => new
@@ -72,6 +73,8 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                            .WhereIf(status.HasValue && status >= 0, s => s.Status == status)
                            .WhereIf(startDate != null, s => s.DateAt >= startDate)
                            .WhereIf(endDate != null, s => s.DateAt.Date <= endDate)
+                           .WhereIf(ProjectId != null, s => s.ProjectId == ProjectId)
+                           .WhereIf(UserId != null, s => s.UserId == UserId)
                            .ToListAsync();
         }
         [HttpGet]
@@ -145,6 +148,61 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                     await WorkScope.GetRepo<UnlockTimesheet, long>().DeleteAsync(pmu);
                 }
             }
+        }
+
+        [HttpGet]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.TimesheetSupervision_View)]
+        public async Task<List<GetProjectDto>> GetAllActiveProject()
+        {
+
+            var projects = await WorkScope.GetAll<Project>()
+                                    .Select(s => new
+                                    {
+                                        CustomerName = s.Customer.Name.ToLower(),
+                                        s.Id,
+                                        s.Name,
+                                        s.Code,
+                                        s.Status,
+                                        s.ProjectType,
+                                        s.TimeStart,
+                                        s.TimeEnd
+                                    })
+                                    .Where(s => s.Status == ProjectStatus.Active).ToListAsync();
+
+
+            var results = (from p in projects
+                           select new GetProjectDto
+                           {
+                               CustomerName = p.CustomerName,
+                               Id = p.Id,
+                               Name = p.Name,
+                               Code = p.Code,
+                               Status = p.Status,
+                               ProjectType = p.ProjectType,
+                               TimeStart = p.TimeStart,
+                               TimeEnd = p.TimeEnd
+                           }).ToList();
+            return results;
+        }
+
+        [HttpGet]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.TimesheetSupervision_View)]
+        public async Task<Object> GetAllActiveUser()
+        {
+            var users = await WorkScope.GetAll<User>()
+                .Where(s => s.IsActive)
+                .Where(s => !s.IsStopWork)
+               .Select(s => new
+               {
+                   s.Id,
+                   s.EmailAddress,
+                   s.FullName,
+                   s.Sex,
+                   s.BranchId
+               })
+               .ToListAsync();
+
+            return users;
         }
     }
 }

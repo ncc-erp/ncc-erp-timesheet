@@ -16,11 +16,23 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     return 'TimesheetsSupervisor';
   }
 
-  getAll(startDate: string, endDate: string, status: number): Observable<any> {
-    // return this.http.get(this.rootUrl + '/GetAll?startDate=' + startDate + '&endDate=' + endDate + '&status=' + status);
-    return this.http.get(this.getUrl(`GetAll?startDate=${startDate}&endDate=${endDate}&status=${status}`));
+  getAll(startDate: string, endDate: string, status: number, projectId: number, userId: number): Observable<any> {
+    return this.http.get(this.getUrl(`GetAll?startDate=${startDate}&endDate=${endDate}&status=${status}&projectID=${this.getPara(projectId)}&userId=${this.getPara(userId)}`));
   }
+  private getPara(value){
+    if(value <=0) return '';
+    return value
+  }
+
   GetQuantityTimesheetSupervisorStatus(startDate: string, endDate: string){
     return this.http.get(this.getUrl(`GetQuantityTimesheetSupervisorStatus?startDate=${startDate}&endDate=${endDate}`));
+  }
+
+  GetAllActiveProject(): Observable<any> {
+    return this.http.get(this.getUrl(`GetAllActiveProject`));
+  }
+
+  GetAllActiveUser(): Observable<any> {
+    return this.http.get(this.getUrl(`GetAllActiveUser`))
   }
 }

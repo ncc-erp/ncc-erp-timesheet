@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { TimesheetsSupervisiorComponent } from './timesheets-supervisior.component';
 import { TimesheetsSupervisiorRoutingModule } from './timesheets-supervisior-routing.module';
 import { SharedModule } from '@shared/shared.module';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+
 
 @NgModule({
   declarations: [TimesheetsSupervisiorComponent],
@@ -12,6 +14,7 @@ import { SharedModule } from '@shared/shared.module';
     SharedModule,
     FormsModule,
     TimesheetsSupervisiorRoutingModule,
+    NgxMatSelectSearchModule,
   ],
   entryComponents: []
 })
