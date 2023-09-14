@@ -137,7 +137,6 @@ export class TardinessLeaveEarlyComponent
       .subscribe((res) => {
         if (typeof res.event !== "undefined") {
           if(res.event === "connectedSuccess") {
-
             if(res.data !== null) {
               res.data.forEach((item) => {
                 this.listProcessingDaysWithStatusAsyncDatasource.data.push(new DayProcessListWithStatusDto(item, "processing"));
@@ -145,7 +144,7 @@ export class TardinessLeaveEarlyComponent
               this.countProcessingDate = res.data.length;
             }
           } else if (res.event === "requestsuccess") {
-            if(!this.listProcessingDaysWithStatusAsyncDatasource.data.some(item => item.date === res.data)) {
+            if(!this.listProcessingDaysWithStatusAsyncDatasource.data.some(item => item.date === res.data && item.status === "processing")) {
               let newData = this.listProcessingDaysWithStatusAsyncDatasource.data;
               newData.push(new DayProcessListWithStatusDto(res.data, "processing"));
               this.listProcessingDaysWithStatusAsyncDatasource.data = newData;
