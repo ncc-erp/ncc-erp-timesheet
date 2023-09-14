@@ -47,6 +47,7 @@ using Timesheet.Services.HRM;
 using Timesheet.Constants;
 using Timesheet.Services.HRMv2;
 using Timesheet.APIs.RetroDetails.Dto;
+using System.Net.Mail;
 
 namespace Ncc.Users
 {
@@ -745,6 +746,23 @@ namespace Ncc.Users
                 })
                 .FirstOrDefault();
             return userAvatarPath;
+        }
+
+        [HttpGet]
+        public async Task<List<UserFilterDto>> GetAllActiveUser()
+        {
+            var users = await _ws.GetAll<User>()
+                .Where(s => s.IsActive)
+                .Where(s => !s.IsStopWork)
+               .Select(s => new UserFilterDto
+               {
+                   Id = s.Id,
+                   EmailAddress = s.EmailAddress,
+                   FullName = s.FullName
+               })
+               .ToListAsync();
+
+            return users;
         }
     }
 }

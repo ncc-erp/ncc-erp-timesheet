@@ -823,6 +823,27 @@ namespace Timesheet.Timesheets.Projects
 
             return tempPUs;
         }
+
+        [HttpGet]
+        public async Task<List<GetProjectDto>> GetAllActiveProjects()
+        {
+            var projects = await WorkScope.GetAll<Project>()
+                .Where(s => s.Status == ProjectStatus.Active)
+                .Select(s => new GetProjectDto
+                {
+                    CustomerName = s.Customer.Name.ToLower(),
+                    Id = s.Id,
+                    Name = s.Name,
+                    Code = s.Code,
+                    Status = s.Status,
+                    ProjectType = s.ProjectType,
+                    TimeStart = s.TimeStart,
+                    TimeEnd = s.TimeEnd
+                })
+                .ToListAsync();
+
+            return projects;
+        }
     }
 
     public class StartEndDate

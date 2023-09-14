@@ -141,4 +141,7 @@ export class UserService extends BaseApiService {
     public getUserAvatarById(id: number): Observable<any> {
         return this.http.get(this.rootUrl + `/GetUserAvatarById?id=${id}`)
     }
+    GetAllActiveUser(): Observable<any> {
+        return this.http.get(this.getUrl(`GetAllActiveUser`))
+      }
 }

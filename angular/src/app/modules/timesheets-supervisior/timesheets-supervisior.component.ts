@@ -4,7 +4,9 @@ import { MomentDateAdapter } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { TimeSheetDto } from '@app/service/api/model/timesheet-Dto';
+import { ProjectManagerService } from '@app/service/api/project-manager.service';
 import { TimesheetsSupervisiorService } from '@app/service/api/timesheets-supervisior.service';
+import { UserService } from '@app/service/api/user.service';
 import { AppComponentBase } from '@shared/app-component-base';
 import * as _ from 'lodash';
 
@@ -106,6 +108,8 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     private domSanitizer: DomSanitizer,
     private timesheetSupervisiorService: TimesheetsSupervisiorService,
     private changeDetector: ChangeDetectorRef,
+    private projectManagerService: ProjectManagerService,
+    private userService:UserService,
   ) {
     super(injector)
     this.projectSearch.valueChanges.subscribe(() => {
@@ -237,7 +241,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   }
 
   getProjects(){
-    this.timesheetSupervisiorService.GetAllActiveProject().subscribe(data => {
+    this.projectManagerService.GetAllActiveProject().subscribe(data => {
       this.projectFilter = data.result
       this.projects = this.projectFilter
       this.projects.unshift({
@@ -249,7 +253,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   }
 
   getUsers() {
-    this.timesheetSupervisiorService.GetAllActiveUser().subscribe(data => {
+    this.userService.GetAllActiveUser().subscribe(data => {
       this.userFilter = data.result
       this.users = this.userFilter
       this.users.unshift({

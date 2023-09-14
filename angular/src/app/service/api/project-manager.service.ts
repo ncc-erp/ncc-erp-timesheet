@@ -83,4 +83,8 @@ export class ProjectManagerService extends BaseApiService {
   clearDefaultProjectTask(): Observable<any>{
     return this.http.post(this.rootUrl + `/ClearDefaultProjectTask`, null);
   } 
+
+  GetAllActiveProject(): Observable<any> {
+    return this.http.get(this.getUrl(`GetAllActiveProjects`));
+  }
 }

@@ -28,11 +28,4 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     return this.http.get(this.getUrl(`GetQuantityTimesheetSupervisorStatus?startDate=${startDate}&endDate=${endDate}`));
   }
 
-  GetAllActiveProject(): Observable<any> {
-    return this.http.get(this.getUrl(`GetAllActiveProject`));
-  }
-
-  GetAllActiveUser(): Observable<any> {
-    return this.http.get(this.getUrl(`GetAllActiveUser`))
-  }
 }
