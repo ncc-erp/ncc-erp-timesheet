@@ -749,6 +749,7 @@ namespace Ncc.Users
         }
 
         [HttpGet]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.TimesheetSupervision_View)]
         public async Task<List<UserFilterDto>> GetAllActiveUser()
         {
             var users = await _ws.GetAll<User>()

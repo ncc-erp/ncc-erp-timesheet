@@ -825,6 +825,7 @@ namespace Timesheet.Timesheets.Projects
         }
 
         [HttpGet]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.TimesheetSupervision_View)]
         public async Task<List<GetProjectDto>> GetAllActiveProjects()
         {
             var projects = await WorkScope.GetAll<Project>()
