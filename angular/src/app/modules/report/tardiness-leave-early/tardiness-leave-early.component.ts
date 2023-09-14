@@ -151,7 +151,7 @@ export class TardinessLeaveEarlyComponent
               this.countProcessingDate++;
             }
           } else if (res.event === "syncDataSuccess" || res.event === "syncDataFailed") {
-            let successSyncDate = this.listProcessingDaysWithStatusAsyncDatasource.data.find((item) => item.date === res.data);
+            let successSyncDate = this.listProcessingDaysWithStatusAsyncDatasource.data.find((item) => item.date === res.data && item.status === "processing");
             if(successSyncDate !== null && successSyncDate !== undefined) {
               successSyncDate.status = res.event === "syncDataSuccess" ? "done" : "failed";
             }
