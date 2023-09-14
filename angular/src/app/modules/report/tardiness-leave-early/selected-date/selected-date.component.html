@@ -5,10 +5,10 @@
       <mat-form-field appearance="outline" [busy]="isSaving">
         <mat-label style="font-weight: normal;">Choose a date</mat-label>
         <input (dateChange)="onDateValueChange()" matInput [matDatepicker]="picker" [(ngModel)]="dateValue" required 
-        name="transactionDate">
+          name="transactionDate">
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker ></mat-datepicker>
-        </mat-form-field>
+      </mat-form-field>
     </div>
     <div [innerHTML]="resultMessage"></div> 
   </mat-dialog-content>

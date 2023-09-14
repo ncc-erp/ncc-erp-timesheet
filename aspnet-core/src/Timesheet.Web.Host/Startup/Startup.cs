@@ -31,6 +31,7 @@ using Timesheet.Services.FaceIdService;
 using Timesheet.Services.HRMv2;
 using Timesheet.Services.FaceId;
 using Timesheet.Services.Tracker;
+using Timesheet.Hubs;
 
 namespace Ncc.Web.Host.Startup
 {
@@ -58,8 +59,11 @@ namespace Ncc.Web.Host.Startup
             IdentityRegistrar.Register(services);
             AuthConfigurer.Configure(services, _appConfiguration);
 
-            services.AddSignalR();
-   
+            services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true;
+            });
+
 
 
             // Configure CORS for angular2 UI
@@ -83,7 +87,7 @@ namespace Ncc.Web.Host.Startup
                 )
             );
             //
-            
+
             // Swagger - Enable this line and the related lines in Configure method to enable swagger UI
             services.AddSwaggerGen(options =>
             {
@@ -106,6 +110,7 @@ namespace Ncc.Web.Host.Startup
             services.AddHttpClient<ProjectService>();
             services.AddHttpClient<HRMService>();
             services.AddHttpClient<HRMv2Service>();
+            //services.AddTransient<TimekeepingHub>();
 
 
             RegisterFileService(services);
@@ -133,9 +138,13 @@ namespace Ncc.Web.Host.Startup
 
             app.UseAbpRequestLocalization();
 
-            app.UseSignalR(routes =>
+            app.UseSignalR(endpoints =>
             {
-                routes.MapHub<AbpCommonHub>("/signalr");
+                endpoints.MapHub<AbpCommonHub>("/signalr");
+                endpoints.MapHub<TimekeepingHub>("/signalr-timekeepingHub", options =>
+                {
+                    //options.LongPolling.PollTimeout = TimeSpan.FromSeconds(1000 * 60 * 5);
+                });
             });
 
             app.UseMvc(routes =>
@@ -184,7 +193,7 @@ namespace Ncc.Web.Host.Startup
             ConstantAmazonS3.BucketName = _appConfiguration.GetValue<string>("AWS:BucketName");
             ConstantAmazonS3.Prefix = _appConfiguration.GetValue<string>("AWS:Prefix");
             ConstantAmazonS3.CloudFront = _appConfiguration.GetValue<string>("AWS:CloudFront");
-            
+
 
             ConstantUploadFile.AvatarFolder = _appConfiguration.GetValue<string>("UploadFile:AvatarFolder");
 
@@ -197,7 +206,7 @@ namespace Ncc.Web.Host.Startup
         {
             var strAllowFileType = _appConfiguration.GetValue<string>("UploadTeamBuildingFile:AllowFileTypes");
             ConstantTeamBuildingFile.AllowFileTypes = strAllowFileType.Split(",");
-            ConstantTeamBuildingFile.ParentFolder= _appConfiguration.GetValue<string>("UploadTeamBuildingFile:ParentFolder");
+            ConstantTeamBuildingFile.ParentFolder = _appConfiguration.GetValue<string>("UploadTeamBuildingFile:ParentFolder");
             ConstantTeamBuildingFile.FileFolder = _appConfiguration.GetValue<string>("UploadTeamBuildingFile:FileFolder"); ;
         }
 

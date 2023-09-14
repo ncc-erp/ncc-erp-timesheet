@@ -150,3 +150,12 @@ export class GetNormalWorkingHourByUserLoginDto {
   totalOpenTalk: number;
   listWorkingHour: WorkingHourDto[];
 }
+
+export class DayProcessListWithStatusDto {
+  date : string;
+  status : string;
+  constructor(date : string, status : string) {
+    this.date = date;
+    this.status = status;
+  }
+}

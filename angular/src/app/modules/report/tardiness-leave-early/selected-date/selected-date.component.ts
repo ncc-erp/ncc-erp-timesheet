@@ -1,5 +1,6 @@
-import { Component, Inject, Injector, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, Inject, Injector, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { TimekeepingSignalRService } from '@app/service/api/timekeeping-signalR.service';
 import { TimekeepingService } from '@app/service/api/timekeeping.service';
 import { AppComponentBase } from '@shared/app-component-base';
 import * as moment from 'moment';
@@ -10,13 +11,26 @@ import * as moment from 'moment';
   styleUrls: ['./selected-date.component.css']
 })
 export class SelectedDateComponent implements OnInit {
+  
   dateValue: any;
   isSaving: boolean;
   resultMessage:string;
-  constructor(public dialogref: MatDialogRef<SelectedDateComponent>, private service: TimekeepingService) {
+
+  constructor(public dialogref: MatDialogRef<SelectedDateComponent>,
+     private service: TimekeepingService,
+     private timekeepSignalRService: TimekeepingSignalRService,
+    @Inject(MAT_DIALOG_DATA) public data: {useSignalr: boolean},
+     ) {
   }
   ngOnInit() {
+    this.timekeepSignalRService.timekeepingProcess.asObservable()
+    .subscribe((response) => {
+      if(response.event === "requestsuccess") {
+        this.isSaving = false;
+      }
+    });
   }
+
   onDateValueChange(){
     this.resultMessage = '' ;
   }
@@ -26,17 +40,33 @@ export class SelectedDateComponent implements OnInit {
       "",
       (result: boolean) => {
         if (result) {
-          this.isSaving=true
+          this.isSaving=true;
           const date = moment(this.dateValue).format("YYYY-MM-DD");
-          this.service.getAddTimeByDay(date).subscribe(res => {
-            this.isSaving=false
-            this.resultMessage = `<font color='green'>Successful on ${moment(this.dateValue).format("DD/MM/YYYY")}</font>` 
-          },()=>{
-            this.resultMessage= `<font color='red'>failed on ${moment(this.dateValue).format("DD/MM/YYYY")}</font>` 
-            this.isSaving=false
-          })
+          if(!this.data.useSignalr) {
+            this.service.getAddTimeByDay(date).subscribe(res => {
+              this.isSaving=false
+              this.resultMessage = `<font color='green'>Successful on ${moment(this.dateValue).format("DD/MM/YYYY")}</font>`
+            },
+            (error)=>{
+              this.resultMessage= `<font color='red'>failed on ${moment(this.dateValue).format("DD/MM/YYYY")}</font>`
+              this.isSaving=false
+            })
+          } else {
+            this.isSaving = true;
+
+            this.timekeepSignalRService.invokeSyncData(date)
+              .catch((error) => {
+                this.resultMessage= `<font color='red'>failed on ${moment(this.dateValue).format("DD/MM/YYYY")}</font>`
+                this.isSaving=false
+              });
+
+          }
         }
       },
     true);
+  }
+
+  close() {
+    this.dialogref.close();
   }
 }

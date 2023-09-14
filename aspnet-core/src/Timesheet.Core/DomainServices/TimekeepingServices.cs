@@ -1,14 +1,10 @@
-﻿using Abp;
-using Abp.Collections.Extensions;
+﻿using Abp.Collections.Extensions;
 using Abp.Configuration;
 using Abp.Dependency;
+using Abp.Domain.Uow;
 using Abp.Extensions;
 using Abp.UI;
-using Amazon.S3.Model;
-using Amazon.S3.Model.Internal.MarshallTransformations;
-using Amazon.Util.Internal.PlatformServices;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Office.Interop.Word;
 using Ncc.Authorization.Users;
 using Ncc.Configuration;
 using Ncc.IoC;
@@ -16,9 +12,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
@@ -26,10 +19,8 @@ using Timesheet.Extension;
 using Timesheet.Services.FaceIdService;
 using Timesheet.Services.Komu;
 using Timesheet.Services.Tracker;
-using Timesheet.Services.Tracker.Dto;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
-using static Sieve.Extensions.MethodInfoExtended;
 
 namespace Timesheet.DomainServices
 {
@@ -39,13 +30,15 @@ namespace Timesheet.DomainServices
         private readonly KomuService _komuService;
         private readonly TrackerService _trackerService;
         private readonly FaceIdService _faceIdService;
-     
+
         public TimekeepingServices(KomuService komuService, TrackerService trackerService, IWorkScope workScope, FaceIdService faceIdService) : base(workScope)
         {
             _komuService = komuService;
             _trackerService = trackerService;
             _faceIdService = faceIdService;
         }
+
+        [UnitOfWork]
         public async Task<List<Timekeeping>> AddTimekeepingByDay(DateTime selectedDate)
         {
             Logger.Info("AddTimekeepingByDay() selectedDate = " + selectedDate.ToString());
@@ -60,34 +53,46 @@ namespace Timesheet.DomainServices
                 throw new UserFriendlyException($"{selectedDate.ToString("MM/dd/yyyy HH:mm:ss")} is Off Date => stop");
             }
 
-            var users = (from u in WorkScope.GetAll<User>()
-                         .Where(s => s.IsActive)
-                         select new TimesheetUserDto
-                         {
-                             UserId = u.Id,
-                             IsStopWork = u.IsStopWork,
-                             StopWorkingDate = u.EndDateAt,
-                             EmailAddress = u.EmailAddress,
-                             MorningStartAt = u.MorningStartAt,
-                             MorningEndAt = u.MorningEndAt,
-                             MorningWorking = u.MorningWorking,
-                             AfternoonStartAt = u.AfternoonStartAt,
-                             AfternoonEndAt = u.AfternoonEndAt,
-                             AfternoonWorking = u.AfternoonWorking,
-                         }).ToList();
+            var users = WorkScope.GetAll<User>()
+                .Where(u => u.IsActive)
+                .Where(u => u.StartDateAt <= selectedDate)
+                .Select(u => new TimesheetUserDto
+                {
+                    UserId = u.Id,
+                    IsStopWork = u.IsStopWork,
+                    StopWorkingDate = u.EndDateAt,
+                    EmailAddress = u.EmailAddress,
+                    MorningStartAt = u.MorningStartAt,
+                    MorningEndAt = u.MorningEndAt,
+                    MorningWorking = u.MorningWorking,
+                    AfternoonStartAt = u.AfternoonStartAt,
+                    AfternoonEndAt = u.AfternoonEndAt,
+                    AfternoonWorking = u.AfternoonWorking,
+                }).ToList();
 
             if (users.Count < 1)
             {
                 throw new UserFriendlyException("The day " + selectedDate + " is not a working day for any branch.");
             }
 
-            WorkScope.GetAll<Timekeeping>()
+            var listTimekeepingOldBySelectedDate = WorkScope.GetAll<Timekeeping>()
                 .Where(s => s.DateAt.Date == selectedDate.Date)
-                .ToList().ForEach(s =>
+                .ToList();
+
+            var listDicUserIdToNote = listTimekeepingOldBySelectedDate
+                .GroupBy(s => s.UserId != null ? s.UserId : 0)
+                .ToDictionary(s => s.Key,
+                s => s.Select(x => new
                 {
-                    s.IsDeleted = true;
-                    s.DeletionTime = DateTimeUtils.GetNow();
-                });
+                    x.NoteReply,
+                    x.UserNote
+                })).ToList();
+
+            listTimekeepingOldBySelectedDate.ForEach(s =>
+            {
+                s.IsDeleted = true;
+                s.DeletionTime = DateTimeUtils.GetNow();
+            });
             CurrentUnitOfWork.SaveChanges();
 
             var mapAbsenceUsers = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request)
@@ -112,12 +117,12 @@ namespace Timesheet.DomainServices
             var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
 
             var checkInUsers = _faceIdService.GetEmployeeCheckInOutMini(selectedDate);
-            if(checkInUsers == null)
+            if (checkInUsers == null)
             {
                 Logger.Info("AddTimekeepingByDay() checkInUsers null or empty");
                 return default;
             }
-           
+
             var mapCheckInUsers = checkInUsers.ToDictionary(s => s.Email, s => s);
             var listUserName = users.Select(x => x.UserName).Distinct().ToList();
             var userTrackerTimes = _trackerService.GetTimeTrackerToDay(selectedDate, listUserName);
@@ -147,13 +152,22 @@ namespace Timesheet.DomainServices
                     else
                     {
                         ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
-                    }        
+                    }
                 }
-                
+
+                listDicUserIdToNote.ForEach(item =>
+                {
+                    if (user.UserId == item.Key)
+                    {
+                        t.NoteReply = item.Value.Select(s => s.NoteReply).FirstOrDefault();
+                        t.UserNote = item.Value.Select(s => s.UserNote).FirstOrDefault();
+                    }
+                });
+
                 t.UserEmail = user.EmailAddress;
                 t.DateAt = selectedDate;
                 t.UserId = user.UserId;
-                
+
                 //Check punish by checkin/checkout times
                 CheckIsPunished(t, LimitedMinute);
 
@@ -213,13 +227,13 @@ namespace Timesheet.DomainServices
                     DateAt = selectedDate,
                     NoteReply = "Email not match",
                     TrackerTime = dicUserNameToTrackerTime.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTrackerTime[checkIn.Email.Split("@")[0]].active_time : "0",
-                };             
+                };
                 ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
                 t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
                 rs.Add(t);
             }
 
-            Logger.Info("AddTimekeepingByDay() finish update " + rs.Count() +" rows!");
+            Logger.Info("AddTimekeepingByDay() finish update " + rs.Count() + " rows!");
 
             return rs;
         }
@@ -256,14 +270,14 @@ namespace Timesheet.DomainServices
                             t.CheckOut = t.CheckIn;
                             t.CheckIn = "";
                         }
-                    }                   
-                }                
+                    }
+                }
             }
             catch (Exception ex)
             {
                 Logger.Error(string.Format("Excute function ChangeCheckInCheckOutTimeIfCheckOutIsEmpty error: ", ex.Message));
             }
-            
+
         }
         public void ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(Timekeeping t)
         {
@@ -280,26 +294,26 @@ namespace Timesheet.DomainServices
                     int timeStartChangingCheckInToCheckOutCaseOffAfternoonMinutes = DateTimeUtils.ConvertHHmmssToMinutes(SettingManager.GetSettingValue(AppSettingNames.TimeStartChangingCheckinToCheckoutCaseOffAfternoon));
                     if (checkInMinutes >= timeStartChangingCheckInToCheckOutCaseOffAfternoonMinutes)
                     {
-                        if (!string.IsNullOrEmpty(t.RegisterCheckIn) )
+                        if (!string.IsNullOrEmpty(t.RegisterCheckIn))
                         {
                             int registerCheckInTime = DateTimeUtils.ConvertHHmmssToMinutes(t.RegisterCheckIn);
                             int registerCheckOutTime = DateTimeUtils.ConvertHHmmssToMinutes(t.RegisterCheckOut);
                             int regiterCheckInTimeOffAfternoon = DateTimeUtils.ConvertHHmmssToMinutes("12:00");
-                            if (registerCheckInTime > 0 
-                                && checkInMinutes > registerCheckInTime 
+                            if (registerCheckInTime > 0
+                                && checkInMinutes > registerCheckInTime
                                 && registerCheckOutTime <= regiterCheckInTimeOffAfternoon)
                             {
                                 if (t.CheckOut == default || t.CheckOut.IsNullOrEmpty())
                                     t.CheckOut = t.CheckIn;
 
                                 t.CheckIn = "";
-                            }                           
+                            }
                         }
-                         else if (t.CheckOut == default || t.CheckOut.IsNullOrEmpty())
+                        else if (t.CheckOut == default || t.CheckOut.IsNullOrEmpty())
                         {
                             t.CheckOut = t.CheckIn;
                             t.CheckIn = "";
-                        }               
+                        }
                     }
                 }
             }

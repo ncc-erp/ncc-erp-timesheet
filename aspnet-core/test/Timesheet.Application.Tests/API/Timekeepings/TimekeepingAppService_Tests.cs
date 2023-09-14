@@ -66,7 +66,7 @@ namespace Timesheet.Application.Tests.API.Timekeepings
             configuration.GetValue<string>("KomuService:SecurityCode").Returns("secretCode");
             configuration.GetValue<string>("KomuService:DevModeChannelId").Returns("_channelIdDevMode");
             configuration.GetValue<string>("KomuService:EnableKomuNotification").Returns("_isNotifyToKomu");
-            
+
             var settingManager = Substitute.For<ISettingManager>();
             _workScope = Resolve<IWorkScope>();
             var loggerFaceIdService = Resolve<ILogger<FaceIdService>>();
@@ -96,9 +96,9 @@ namespace Timesheet.Application.Tests.API.Timekeepings
             List<GetSUerAndActiveTimeTrackerDto> SUerAndActiveTimeTrackerDtos = new List<GetSUerAndActiveTimeTrackerDto>();
             string path2 = Path.Combine(Directory.GetCurrentDirectory().Replace("\\bin\\Debug\\netcoreapp3.1", ""), "JsonData", "TimekeepingsAppService_Tests", "get_time_tracker_today_result.json").Replace("/bin/Debug/netcoreapp3.1", "");
             string getTimeTrackerTodayResultStringJson = System.IO.File.ReadAllText(path2);
-            SUerAndActiveTimeTrackerDtos= JsonConvert.DeserializeObject<List<GetSUerAndActiveTimeTrackerDto>>(getTimeTrackerTodayResultStringJson);
+            SUerAndActiveTimeTrackerDtos = JsonConvert.DeserializeObject<List<GetSUerAndActiveTimeTrackerDto>>(getTimeTrackerTodayResultStringJson);
             trackerService.GetTimeTrackerToDay(Arg.Any<DateTime>(), Arg.Any<List<string>>()).Returns(SUerAndActiveTimeTrackerDtos);
-            
+
 
             // _timekeepingServices = Substitute.For<TimekeepingServices>(komuService, trackerService, _workScope, faceIdService);
             _timekeepingServices = new TimekeepingServices(komuService, trackerService, _workScope, faceIdService);
@@ -449,7 +449,7 @@ namespace Timesheet.Application.Tests.API.Timekeepings
         {
             var date = "2022/12/1";
             var expectId = 298;
-            var expectTotalCount = 247;
+            var expectTotalCount = 245;
 
             await WithUnitOfWorkAsync(async () =>
             {
@@ -462,13 +462,13 @@ namespace Timesheet.Application.Tests.API.Timekeepings
                 var addedTimekeeping = await _workScope.GetAsync<Timekeeping>(expectId);
 
                 addedTimekeeping.Id.ShouldBe(expectId);
-                addedTimekeeping.UserId.ShouldBe(1);
-                addedTimekeeping.UserEmail.ShouldBe("admin@aspnetboilerplate.com");
+                addedTimekeeping.UserId.ShouldBe(3);
+                addedTimekeeping.UserEmail.ShouldBe("tien.nguyenhuu@ncc.asia");
                 addedTimekeeping.RegisterCheckIn.ShouldBe("08:30");
                 addedTimekeeping.RegisterCheckOut.ShouldBe("17:30");
                 addedTimekeeping.DateAt.Date.ShouldBe(new DateTime(2022, 12, 1).Date);
                 addedTimekeeping.IsPunishedCheckIn.ShouldBe(true);
-                addedTimekeeping.IsPunishedCheckOut.ShouldBe(true);
+                addedTimekeeping.IsPunishedCheckOut.ShouldBe(false);
                 addedTimekeeping.IsLocked.ShouldBe(false);
                 addedTimekeeping.IsDeleted.ShouldBe(false);
             });

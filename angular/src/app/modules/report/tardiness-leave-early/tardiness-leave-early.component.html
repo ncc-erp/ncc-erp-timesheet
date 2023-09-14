@@ -152,9 +152,43 @@
           <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
             (pageChange)="getDataPage($event)" id="server1">
           </abp-pagination-controls>
-        </div>
 
+        </div>
       </div>
     </div>
   </div>
+</div>
+<div *ngIf="this.listProcessingDaysWithStatusAsyncDatasource.data.length > 0" class="notification-progress-bar">
+  <mat-accordion>
+    <mat-expansion-panel (opened)="true"
+                        (closed)="true"
+                        [expanded]="true">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Sync Data ({{this.countProcessingDate}})
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <table mat-table [dataSource]="this.listProcessingDaysWithStatusAsyncDatasource" class="mat-elevation-z8" style="width: 100%;">
+      
+        <!-- Day Column -->
+        <ng-container matColumnDef="day">
+          <th mat-header-cell *matHeaderCellDef> Day </th>
+          <td mat-cell *matCellDef="let element"> {{element.date}} </td>
+        </ng-container>
+      
+        <!-- Stages Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Stages </th>
+          <td mat-cell *matCellDef="let element">
+            <mat-spinner [diameter]="20" *ngIf="element.status === 'processing'"></mat-spinner>
+            <mat-icon *ngIf="element.status === 'done'" style="color:green;">check_circle icon</mat-icon>
+            <mat-icon *ngIf="element.status === 'failed'" style="color: red;">error icon</mat-icon> 
+          </td>
+        </ng-container>
+      
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-expansion-panel>
+  </mat-accordion>
 </div>

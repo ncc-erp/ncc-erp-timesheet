@@ -1,33 +1,44 @@
-import { Component, Injector, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
-import { APP_CONSTANT } from '@app/constant/api.constants';
-import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
-import { userDTO } from '@app/modules/user/user.component';
-import { BranchService } from '@app/service/api/branch.service';
-import { TardinessDto, TimekeepingDto } from '@app/service/api/model/report-timesheet-Dto';
-import { TimekeepingService } from '@app/service/api/timekeeping.service';
-import { UserService } from '@app/service/api/user.service';
-import { ExportService } from '@app/service/export.service';
-import { AppConsts } from '@shared/AppConsts';
-import { PagedListingComponentBase, PagedRequestDto } from '@shared/paged-listing-component-base';
-import { BranchDto } from '@shared/service-proxies/service-proxies';
-import * as moment from 'moment';
-import { finalize } from 'rxjs/operators';
-import { SelectedDateComponent } from './selected-date/selected-date.component';
+import { Component, Injector, OnInit } from "@angular/core";
+import { FormControl } from "@angular/forms";
+import { MatDialog, MatSnackBar, MatSnackBarRef, MatTableDataSource } from "@angular/material";
+import { ActivatedRoute, Router } from "@angular/router";
+import { APP_CONSTANT } from "@app/constant/api.constants";
+import { PERMISSIONS_CONSTANT } from "@app/constant/permission.constant";
+import { userDTO } from "@app/modules/user/user.component";
+import { BranchService } from "@app/service/api/branch.service";
+import {
+  DayProcessListWithStatusDto,
+  TardinessDto,
+  TimekeepingDto,
+} from "@app/service/api/model/report-timesheet-Dto";
+import { TimekeepingService } from "@app/service/api/timekeeping.service";
+import { UserService } from "@app/service/api/user.service";
+import { ExportService } from "@app/service/export.service";
+import {
+  PagedListingComponentBase,
+  PagedRequestDto,
+} from "@shared/paged-listing-component-base";
+import { BranchDto } from "@shared/service-proxies/service-proxies";
+import { finalize } from "rxjs/operators";
+import { SelectedDateComponent } from "./selected-date/selected-date.component";
+import {
+  TimekeepingSignalRService,
+} from "@app/service/api/timekeeping-signalR.service";
 
 @Component({
-  selector: 'app-tardiness-leave-early',
-  templateUrl: './tardiness-leave-early.component.html',
-  styleUrls: ['./tardiness-leave-early.component.css']
+  selector: "app-tardiness-leave-early",
+  templateUrl: "./tardiness-leave-early.component.html",
+  styleUrls: ["./tardiness-leave-early.component.css"],
 })
-export class TardinessLeaveEarlyComponent extends PagedListingComponentBase<TimekeepingDto> implements OnInit {
+export class TardinessLeaveEarlyComponent
+  extends PagedListingComponentBase<TimekeepingDto>
+  implements OnInit
+{
   VIEW_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.ViewTardinessLeaveEarly;
   GET_DATA_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.GetDataFromFaceId;
   EXPORT_EXCEL = PERMISSIONS_CONSTANT.ExportExcelTardinessLeaveEarly;
-  VIEW_ONLY_ME_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.ViewOnlyMeTardinessLeaveEarly;
-
+  VIEW_ONLY_ME_TARDINESS_LEAVE_EARLY =
+    PERMISSIONS_CONSTANT.ViewOnlyMeTardinessLeaveEarly;
 
   listMonth = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
   listYear = APP_CONSTANT.ListYear;
@@ -47,8 +58,16 @@ export class TardinessLeaveEarlyComponent extends PagedListingComponentBase<Time
   userId = 0;
 
   listBranch: BranchDto[] = [];
-  branchSearch: FormControl = new FormControl("")
-  listBranchFilter : BranchDto[];
+  branchSearch: FormControl = new FormControl("");
+  listBranchFilter: BranchDto[];
+
+  public listProcessingDaysWithStatusAsyncDatasource: MatTableDataSource<DayProcessListWithStatusDto> = new MatTableDataSource<DayProcessListWithStatusDto>();
+
+  public isConnectedSignalr: boolean = false;
+
+  public countProcessingDate: number = 0;
+
+  displayedColumns: string[] = ['day', 'status'];
 
   constructor(
     private userService: UserService,
@@ -57,15 +76,19 @@ export class TardinessLeaveEarlyComponent extends PagedListingComponentBase<Time
     private exportService: ExportService,
     private branchService: BranchService,
     injector: Injector,
-    private router:Router,
-    private dialog: MatDialog
+    private router: Router,
+    private dialog: MatDialog,
+    private timekeepSignalRService: TimekeepingSignalRService,
+    private snackBar: MatSnackBar
   ) {
     super(injector);
     var d = new Date();
     let now = d.toLocaleDateString();
     console.log(now);
     d.setMonth(d.getMonth());
-    const month = Number.parseInt(this.activatedRoute.snapshot.queryParamMap.get("month"));
+    const month = Number.parseInt(
+      this.activatedRoute.snapshot.queryParamMap.get("month")
+    );
     this.month = month ? month - 1 : d.getMonth();
     this.year = d.getFullYear();
     this.branchId = 0;
@@ -74,35 +97,77 @@ export class TardinessLeaveEarlyComponent extends PagedListingComponentBase<Time
     });
   }
 
-  protected list(request: PagedRequestDto, pageNumber: number, finishedCallback: Function): void {
+  protected list(
+    request: PagedRequestDto,
+    pageNumber: number,
+    finishedCallback: Function
+  ): void {
     request.filterItems = [];
 
-    // if (this.branchId !== 0) {
-    //   request.filterItems.push({
-    //     comparison: 0,
-    //     propertyName: 'branchId',
-    //     value: this.branchId,
-    //   });
-    // }
-    this.timekeepingService.getAllPagging(request, Number(this.year), Number(this.month) + 1, Number(this.branchId), Number(this.userId))
-      .pipe(finalize(() => {
-        finishedCallback();
-      }))
-      .subscribe(resp => {
+    this.timekeepingService
+      .getAllPagging(
+        request,
+        Number(this.year),
+        Number(this.month) + 1,
+        Number(this.branchId),
+        Number(this.userId)
+      )
+      .pipe(
+        finalize(() => {
+          finishedCallback();
+        })
+      )
+      .subscribe((resp) => {
         this.listUser = resp.result.items;
         this.showPaging(resp.result, pageNumber);
       });
   }
   protected delete(entity: TimekeepingDto): void {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 
   ngOnInit() {
-      this.getData();
-      this.getListBranch();
+    this.getData();
+    this.getListBranch();
+    this.timekeepSignalRService.initSignalR(() => {
+      this.isConnectedSignalr = true;
+    });
+    this.timekeepSignalRService.timekeepingProcess
+      .asObservable()
+      .subscribe((res) => {
+        if (typeof res.event !== "undefined") {
+          if(res.event === "connectedSuccess") {
+
+            if(res.data !== null) {
+              res.data.forEach((item) => {
+                this.listProcessingDaysWithStatusAsyncDatasource.data.push(new DayProcessListWithStatusDto(item, "processing"));
+              });
+              this.countProcessingDate = res.data.length;
+            }
+          } else if (res.event === "requestsuccess") {
+            if(!this.listProcessingDaysWithStatusAsyncDatasource.data.some(item => item.date === res.data)) {
+              let newData = this.listProcessingDaysWithStatusAsyncDatasource.data;
+              newData.push(new DayProcessListWithStatusDto(res.data, "processing"));
+              this.listProcessingDaysWithStatusAsyncDatasource.data = newData;
+              this.countProcessingDate++;
+            }
+          } else if (res.event === "syncDataSuccess" || res.event === "syncDataFailed") {
+            let successSyncDate = this.listProcessingDaysWithStatusAsyncDatasource.data.find((item) => item.date === res.data);
+            if(successSyncDate !== null && successSyncDate !== undefined) {
+              successSyncDate.status = res.event === "syncDataSuccess" ? "done" : "failed";
+            }
+          } else {
+            if(res.event === "errorOccured") {
+              abp.message.error("Error occured from Server!", "Error");
+            }
+          }
+        }
+      });
+
   }
+
   getListBranch() {
-    this.branchService.getAllBranchFilter(true).subscribe(res => {
+    this.branchService.getAllBranchFilter(true).subscribe((res) => {
       this.listBranch = res.result;
       this.listBranchFilter = this.listBranch;
     });
@@ -110,37 +175,43 @@ export class TardinessLeaveEarlyComponent extends PagedListingComponentBase<Time
 
   filterBranch(): void {
     if (this.branchSearch.value) {
-      this.listBranch = this.listBranchFilter.filter(data => data.displayName.toLowerCase().includes(this.branchSearch.value.toLowerCase().trim()));
+      this.listBranch = this.listBranchFilter.filter((data) =>
+        data.displayName
+          .toLowerCase()
+          .includes(this.branchSearch.value.toLowerCase().trim())
+      );
     } else {
       this.listBranch = this.listBranchFilter.slice();
     }
   }
 
   getData() {
-
-      this.refresh();
-      if(this.permission.isGranted( this.VIEW_TARDINESS_LEAVE_EARLY)){
-      this.userService.getAllNotPagging().subscribe(result => {
+    this.refresh();
+    if (this.permission.isGranted(this.VIEW_TARDINESS_LEAVE_EARLY)) {
+      this.userService.getAllNotPagging().subscribe((result) => {
         this.listUserBase = result.result;
         this.listUserBase.unshift({
           id: -1,
           emailAddress: "All",
-        })
+        });
         this.init();
       });
-
     }
-
   }
 
   exportExcel() {
-    let fileName = "Report Tardiness " + "Month " + (this.month + 1) + " - Year " + this.year;
+    let fileName =
+      "Report Tardiness " +
+      "Month " +
+      (this.month + 1) +
+      " - Year " +
+      this.year;
     this.exportService.exportReportTardiness(this.listUser, fileName);
   }
 
-  getCss(value){
+  getCss(value) {
     value = Number.parseInt(value);
-    if(value > 0) return "red";
+    if (value > 0) return "red";
     return "normal";
   }
 
@@ -149,79 +220,88 @@ export class TardinessLeaveEarlyComponent extends PagedListingComponentBase<Time
   }
 
   convertTime(time: string) {
-    if (time.includes('.')) {
-      const t = time.split('.');
-      const h = ('0' + t[0]).slice(-2);
-      const m = ('0' + Number.parseInt(t[1]) * 6).slice(-2);
+    if (time.includes(".")) {
+      const t = time.split(".");
+      const h = ("0" + t[0]).slice(-2);
+      const m = ("0" + Number.parseInt(t[1]) * 6).slice(-2);
       return h + ":" + m;
     } else {
-      const h = ('0' + time).slice(-2);
-      const m = '00';
+      const h = ("0" + time).slice(-2);
+      const m = "00";
       return h + ":" + m;
     }
   }
 
   init(): void {
-    this.listUserFiltered = this.listUserBase.filter(item => item.branchId == this.branchId || !this.branchId);
+    this.listUserFiltered = this.listUserBase.filter(
+      (item) => item.branchId == this.branchId || !this.branchId
+    );
   }
 
   search(): void {
     var temp = this.userSearch.value.trim().toLowerCase();
-    this.listUserFiltered = this.listUserBase.filter(data =>
+    this.listUserFiltered = this.listUserBase.filter((data) =>
       data.emailAddress.toLowerCase().includes(temp)
     );
   }
 
   getDataCheckInInternal(): void {
     const dialogRef = this.dialog.open(SelectedDateComponent, {
-      disableClose: true
+      disableClose: true,
+      data: {useSignalr: this.isConnectedSignalr}
     });
-
   }
 
   upLoadTimekeeping(file: File) {
-    if (!file.name.toLowerCase().endsWith('xlsx')) {
+    if (!file.name.toLowerCase().endsWith("xlsx")) {
       this.isFileSupported = false;
       return;
     }
     this.isLoadingFileUpload = true;
     this.fileSCROM = file;
 
-    this.timekeepingService.ImportTimekeepingFromFile(file).subscribe(data => {
-      this.isLoadingFileUpload = false;
-      let result = data.body.result;
-      if (result.failedList.length > 0) {
-        let info = '<b>Success: ' + result.successList.length + '. Failed: ' + result.failedList.length + '</b><ul>';
-        result.failedList.forEach(elem => {
-          info += `<li>${elem}</li>`;
-        });
-        info += '<ul>'
-        abp.message.info(info, 'Upload result', true);
-        this.refresh();
+    this.timekeepingService.ImportTimekeepingFromFile(file).subscribe(
+      (data) => {
+        this.isLoadingFileUpload = false;
+        let result = data.body.result;
+        if (result.failedList.length > 0) {
+          let info =
+            "<b>Success: " +
+            result.successList.length +
+            ". Failed: " +
+            result.failedList.length +
+            "</b><ul>";
+          result.failedList.forEach((elem) => {
+            info += `<li>${elem}</li>`;
+          });
+          info += "<ul>";
+          abp.message.info(info, "Upload result", true);
+          this.refresh();
+        } else {
+          abp.message.success("Success", "Upload result");
+          this.refresh();
+        }
+      },
+      () => {
+        this.isLoadingFileUpload = false;
+        abp.notify.error(this.l("The file is not supported!"));
       }
-      else {
-        abp.message.success('Success', 'Upload result');
-        this.refresh();
-      }
-    }, () => {
-      this.isLoadingFileUpload = false;
-      abp.notify.error(this.l("The file is not supported!"));
-    });
+    );
   }
 
-  viewDetail(userId:number){
+  viewDetail(userId: number) {
     this.router.navigate(["/app/main/tardiness-leave-early-detail"], {
       queryParams: {
         id: userId,
-        month: this.month + 1
-      }
-    })
+        month: this.month + 1,
+      },
+    });
   }
-  changeRouter(){
+  changeRouter() {
     this.router.navigate(["/app/main/tardiness-leave-early"], {
       queryParams: {
-        month: this.month + 1
-      }
-    })
+        month: this.month + 1,
+      },
+    });
   }
 }

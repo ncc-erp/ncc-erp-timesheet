@@ -24,6 +24,7 @@
     <Compile Remove="Entities\ReportTardiness.cs" />
   </ItemGroup>
   <ItemGroup>
+	 <PackageReference Include="Abp.AspNetCore.SignalR" Version="4.2.0" />
 	 <PackageReference Include="AWSSDK.Core" Version="3.7.11.12" />
 	 <PackageReference Include="AWSSDK.S3" Version="3.7.9.12" />
     <PackageReference Include="Abp.AutoMapper" Version="4.2.0" />

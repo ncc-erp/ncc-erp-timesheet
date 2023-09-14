@@ -49,3 +49,10 @@
     color: green;
     font-weight: bold;
 }
+
+.notification-progress-bar {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+}
