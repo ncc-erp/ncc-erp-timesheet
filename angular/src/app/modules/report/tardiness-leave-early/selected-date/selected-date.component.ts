@@ -1,9 +1,9 @@
-import { Component, Inject, Injector, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { Component, Inject, Injector, OnInit, Output, EventEmitter, Input, OnDestroy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { TimekeepingSignalRService } from '@app/service/api/timekeeping-signalR.service';
 import { TimekeepingService } from '@app/service/api/timekeeping.service';
-import { AppComponentBase } from '@shared/app-component-base';
 import * as moment from 'moment';
+import { SubscriptionLike } from 'rxjs';
 
 @Component({
   selector: 'app-selected-date',
@@ -16,19 +16,26 @@ export class SelectedDateComponent implements OnInit {
   isSaving: boolean;
   resultMessage:string;
 
+  public subscriptionsProcessingDate: SubscriptionLike;
+
   constructor(public dialogref: MatDialogRef<SelectedDateComponent>,
      private service: TimekeepingService,
      private timekeepSignalRService: TimekeepingSignalRService,
     @Inject(MAT_DIALOG_DATA) public data: {useSignalr: boolean},
      ) {
   }
+
   ngOnInit() {
-    this.timekeepSignalRService.timekeepingProcess.asObservable()
+    this.subscriptionsProcessingDate = this.timekeepSignalRService.timekeepingProcess.asObservable()
     .subscribe((response) => {
       if(response.event === "requestsuccess") {
         this.isSaving = false;
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.subscriptionsProcessingDate.unsubscribe();
   }
 
   onDateValueChange(){

@@ -1,6 +1,6 @@
-import { Component, Injector, OnInit } from "@angular/core";
+import { Component, Injector, OnInit, OnDestroy } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { MatDialog, MatSnackBar, MatSnackBarRef, MatTableDataSource } from "@angular/material";
+import { MatDialog, MatTableDataSource } from "@angular/material";
 import { ActivatedRoute, Router } from "@angular/router";
 import { APP_CONSTANT } from "@app/constant/api.constants";
 import { PERMISSIONS_CONSTANT } from "@app/constant/permission.constant";
@@ -24,6 +24,7 @@ import { SelectedDateComponent } from "./selected-date/selected-date.component";
 import {
   TimekeepingSignalRService,
 } from "@app/service/api/timekeeping-signalR.service";
+import { SubscriptionLike } from "rxjs";
 
 @Component({
   selector: "app-tardiness-leave-early",
@@ -32,7 +33,7 @@ import {
 })
 export class TardinessLeaveEarlyComponent
   extends PagedListingComponentBase<TimekeepingDto>
-  implements OnInit
+  implements OnInit, OnDestroy
 {
   VIEW_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.ViewTardinessLeaveEarly;
   GET_DATA_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.GetDataFromFaceId;
@@ -65,9 +66,9 @@ export class TardinessLeaveEarlyComponent
 
   public isConnectedSignalr: boolean = false;
 
-  public countProcessingDate: number = 0;
-
   displayedColumns: string[] = ['day', 'status'];
+
+  private subscriptionsProcessingDate: SubscriptionLike;
 
   constructor(
     private userService: UserService,
@@ -79,7 +80,6 @@ export class TardinessLeaveEarlyComponent
     private router: Router,
     private dialog: MatDialog,
     private timekeepSignalRService: TimekeepingSignalRService,
-    private snackBar: MatSnackBar
   ) {
     super(injector);
     var d = new Date();
@@ -132,7 +132,7 @@ export class TardinessLeaveEarlyComponent
     this.timekeepSignalRService.initSignalR(() => {
       this.isConnectedSignalr = true;
     });
-    this.timekeepSignalRService.timekeepingProcess
+    this.subscriptionsProcessingDate = this.timekeepSignalRService.timekeepingProcess
       .asObservable()
       .subscribe((res) => {
         if (typeof res.event !== "undefined") {
@@ -141,14 +141,12 @@ export class TardinessLeaveEarlyComponent
               res.data.forEach((item) => {
                 this.listProcessingDaysWithStatusAsyncDatasource.data.push(new DayProcessListWithStatusDto(item, "processing"));
               });
-              this.countProcessingDate = res.data.length;
             }
           } else if (res.event === "requestsuccess") {
             if(!this.listProcessingDaysWithStatusAsyncDatasource.data.some(item => item.date === res.data && item.status === "processing")) {
               let newData = this.listProcessingDaysWithStatusAsyncDatasource.data;
               newData.push(new DayProcessListWithStatusDto(res.data, "processing"));
               this.listProcessingDaysWithStatusAsyncDatasource.data = newData;
-              this.countProcessingDate++;
             }
           } else if (res.event === "syncDataSuccess" || res.event === "syncDataFailed") {
             let successSyncDate = this.listProcessingDaysWithStatusAsyncDatasource.data.find((item) => item.date === res.data && item.status === "processing");
@@ -162,7 +160,10 @@ export class TardinessLeaveEarlyComponent
           }
         }
       });
+  }
 
+  ngOnDestroy() {
+    this.subscriptionsProcessingDate.unsubscribe();
   }
 
   getListBranch() {
