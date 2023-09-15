@@ -53,7 +53,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.TimesheetsSupervisor
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheetsSupervisor.GetAll(DateTime.Parse("2022/12/01"), DateTime.Parse("2022/12/31"), TimesheetStatus.Approve);
+                var result = await _timesheetsSupervisor.GetAll(DateTime.Parse("2022/12/01"), DateTime.Parse("2022/12/31"), TimesheetStatus.Approve, null, null);
                 Assert.Equal(expectTotalCount, result.Count);
 
                 var myTimeSheet = result.Last();
@@ -87,7 +87,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.TimesheetsSupervisor
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheetsSupervisor.GetAll(DateTime.Parse("2022/10/01"), DateTime.Parse("2022/10/30"), TimesheetStatus.Pending);
+                var result = await _timesheetsSupervisor.GetAll(DateTime.Parse("2022/10/01"), DateTime.Parse("2022/10/30"), TimesheetStatus.Pending, null, null);
                 Assert.Equal(expectTotalCount, result.Count);
             });
         }
