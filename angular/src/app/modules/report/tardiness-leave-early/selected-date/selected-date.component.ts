@@ -16,7 +16,7 @@ export class SelectedDateComponent implements OnInit {
   isSaving: boolean;
   resultMessage:string;
 
-  public subscriptionsProcessingDate: SubscriptionLike;
+  public subscriptionsProcessingDate: SubscriptionLike = null;
 
   constructor(public dialogref: MatDialogRef<SelectedDateComponent>,
      private service: TimekeepingService,
@@ -26,16 +26,20 @@ export class SelectedDateComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.subscriptionsProcessingDate = this.timekeepSignalRService.timekeepingProcess.asObservable()
-    .subscribe((response) => {
-      if(response.event === "requestsuccess") {
-        this.isSaving = false;
-      }
-    });
+    if(!this.data.useSignalr) {
+      this.subscriptionsProcessingDate = this.timekeepSignalRService.timekeepingProcess.asObservable()
+      .subscribe((response) => {
+        if(response.event === "requestsuccess") {
+          this.isSaving = false;
+        }
+      });
+    }
   }
 
   ngOnDestroy() {
-    this.subscriptionsProcessingDate.unsubscribe();
+    if(this.subscriptionsProcessingDate !== null) {
+      this.subscriptionsProcessingDate.unsubscribe();
+    }
   }
 
   onDateValueChange(){

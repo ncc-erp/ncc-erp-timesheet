@@ -68,7 +68,7 @@ export class TardinessLeaveEarlyComponent
 
   displayedColumns: string[] = ['day', 'status'];
 
-  private subscriptionsProcessingDate: SubscriptionLike;
+  private subscriptionsProcessingDate: SubscriptionLike = null;
 
   constructor(
     private userService: UserService,
