@@ -449,7 +449,7 @@ namespace Timesheet.Application.Tests.API.Timekeepings
         {
             var date = "2022/12/1";
             var expectId = 298;
-            var expectTotalCount = 245;
+            var expectTotalCount = 246;
 
             await WithUnitOfWorkAsync(async () =>
             {
@@ -462,13 +462,13 @@ namespace Timesheet.Application.Tests.API.Timekeepings
                 var addedTimekeeping = await _workScope.GetAsync<Timekeeping>(expectId);
 
                 addedTimekeeping.Id.ShouldBe(expectId);
-                addedTimekeeping.UserId.ShouldBe(3);
-                addedTimekeeping.UserEmail.ShouldBe("tien.nguyenhuu@ncc.asia");
+                addedTimekeeping.UserId.ShouldBe(1);
+                addedTimekeeping.UserEmail.ShouldBe("admin@aspnetboilerplate.com");
                 addedTimekeeping.RegisterCheckIn.ShouldBe("08:30");
                 addedTimekeeping.RegisterCheckOut.ShouldBe("17:30");
                 addedTimekeeping.DateAt.Date.ShouldBe(new DateTime(2022, 12, 1).Date);
                 addedTimekeeping.IsPunishedCheckIn.ShouldBe(true);
-                addedTimekeeping.IsPunishedCheckOut.ShouldBe(false);
+                addedTimekeeping.IsPunishedCheckOut.ShouldBe(true);
                 addedTimekeeping.IsLocked.ShouldBe(false);
                 addedTimekeeping.IsDeleted.ShouldBe(false);
             });

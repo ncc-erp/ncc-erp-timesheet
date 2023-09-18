@@ -10,7 +10,7 @@ import { SubscriptionLike } from 'rxjs';
   templateUrl: './selected-date.component.html',
   styleUrls: ['./selected-date.component.css']
 })
-export class SelectedDateComponent implements OnInit {
+export class SelectedDateComponent implements OnInit, OnDestroy {
   
   dateValue: any;
   isSaving: boolean;
@@ -26,7 +26,7 @@ export class SelectedDateComponent implements OnInit {
   }
 
   ngOnInit() {
-    if(!this.data.useSignalr) {
+    if(this.data.useSignalr) {
       this.subscriptionsProcessingDate = this.timekeepSignalRService.timekeepingProcess.asObservable()
       .subscribe((response) => {
         if(response.event === "requestsuccess") {
