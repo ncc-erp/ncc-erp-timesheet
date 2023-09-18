@@ -134,7 +134,7 @@ export class ExportDataComponent extends AppComponentBase implements OnInit {
   const listProjectSelected = this.listProjectSelected;
   const branchId = this.branchId;
   const dayOffTypeId =-1;
-
+    
     this.absenceService.ExportTeamWorkingCalender(startDate,endDate,listProjectSelected,this.absentDayType,dayAbsentStatus,branchId,dayOffTypeId).subscribe((rs) => {
       const file = new Blob([this.convertFile(atob(rs.result.base64))], {
         type: "application/vnd.ms-excel;charset=utf-8",
