@@ -314,10 +314,10 @@
                             <!-- Review Content -->
                             <td>
                                 <div (click)="changeStatusNote(item)">
-                                    <textarea rows="10" cols="20" disabled="disabled"
-                                        [ngClass]="item.hideNote == false ? 'preReview' : 'review'"
-                                        data-placement="right" title="Cuộn chuột hoặc Click để mở rộng nội dung"
-                                        disabled="disabled" name="reviewContent" [(ngModel)]="item.note"></textarea>
+                                    <p [ngClass]="item.hideNote == false ? 'preReview' : 'review'"
+                                        title="Cuộn chuột hoặc Click để mở rộng nội dung"
+                                        name="reviewContent" [innerHTML]="replaceItemNode(item.note)">
+                                     </p>
                                 </div>
                             </td>
                             <!-- Reviewer -->

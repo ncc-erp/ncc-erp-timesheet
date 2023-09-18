@@ -752,6 +752,11 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   refreshDataFilter(){
     this.getDataPage(1);
   }
+
+  replaceItemNode(content){
+    return content.replaceAll('\n', '<br>');
+  }
+
 }
 
 export enum InitParam{
