@@ -1,5 +1,5 @@
 <form [formGroup]="FormExport">
-  <div class="row">
+  <div class="row" style="position: relative; margin-bottom: 10px;">
     <div class="col-sm-6">
       <mat-form-field>
         <input matInput [matDatepicker]="picker" placeholder="Start Date" formControlName="fromDateCustomTime">
@@ -14,6 +14,7 @@
         <mat-datepicker #picker1></mat-datepicker>
       </mat-form-field>
     </div>
+    <small style="position: absolute;bottom: 3px;left: 15px;font-size: 10px;color: red;" *ngIf="FormExport.hasError('notValid')">The start date cannot be greater than the end date</small>
   </div>
   <div class="row">
     

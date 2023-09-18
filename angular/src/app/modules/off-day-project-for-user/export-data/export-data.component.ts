@@ -56,12 +56,26 @@ export class ExportDataComponent extends AppComponentBase implements OnInit {
     this.getListBranch();
     this.FormExport = this.formBuilder.group({
       fromDateCustomTime: ['', Validators.required],
-      toDateCustomTime: ['', Validators.required]
-    })
+      toDateCustomTime: ['', Validators.required],
+    }, {validator: this.checkDates})
+
     this.FormExport.statusChanges.subscribe((status: string) => {
       this.isDisabled = status !== 'VALID';
     });
-   
+
+    this.FormExport.setValue({
+      fromDateCustomTime: this.FormExport.get('fromDateCustomTime').value,
+      toDateCustomTime: this.FormExport.get('toDateCustomTime').value,
+    })
+  }
+
+  checkDates(form: FormGroup) {
+    const fromDate = form.get('fromDateCustomTime').value;
+    const toDate = form.get('toDateCustomTime').value;
+    if (fromDate && toDate && fromDate > toDate) {
+      return { notValid: true };
+    }
+    return null;
   }
 
   getListBranch() {
@@ -112,14 +126,14 @@ export class ExportDataComponent extends AppComponentBase implements OnInit {
     }
 
   exportExcelTeamWorkingCalender() {
-  this.isDisabled = true;
-  const formData = this.FormExport.value; 
-  const startDate = formData.fromDateCustomTime;
-  const endDate = formData.toDateCustomTime;
-  const dayAbsentStatus = this.dayAbsentStatus;
-  const listProjectSelected = this.listProjectSelected;
-  const branchId = this.branchId;
-  const dayOffTypeId =-1;
+    this.isDisabled = true;
+    const formData = this.FormExport.value; 
+    const startDate = formData.fromDateCustomTime;
+    const endDate = formData.toDateCustomTime;
+    const dayAbsentStatus = this.dayAbsentStatus;
+    const listProjectSelected = this.listProjectSelected;
+    const branchId = this.branchId;
+    const dayOffTypeId =-1;
   
     this.absenceService.ExportTeamWorkingCalender(startDate,endDate,listProjectSelected,this.absentDayType,dayAbsentStatus,branchId,dayOffTypeId).subscribe((rs) => {
       const file = new Blob([this.convertFile(atob(rs.result.base64))], {
