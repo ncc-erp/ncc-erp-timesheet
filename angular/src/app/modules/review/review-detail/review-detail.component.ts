@@ -332,7 +332,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     item.more = !item.more;
   }
 
-  changeStatusNote(item){
+  toggleHideNote(item){
     item.hideNote = !item.hideNote;
   }
 
@@ -753,7 +753,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     this.getDataPage(1);
   }
 
-  replaceItemNode(content){
+  formatNoteContent(content){
     return content.replaceAll('\n', '<br>');
   }
 
