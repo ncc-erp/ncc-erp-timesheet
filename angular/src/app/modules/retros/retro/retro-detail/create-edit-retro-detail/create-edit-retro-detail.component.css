@@ -1,0 +1,25 @@
+
+.body-retro-detail {
+    margin-top: 24px;
+}
+
+.search-input {
+    padding: 10px 16px;
+}
+.hang-on{
+    position: sticky !important;
+    top: 0;
+    z-index: 100;
+    background: white;
+}
+
+.input-wrapper {
+    border: 1px solid #ccc;
+    margin: 6px 16px;
+}
+
+.label-wrapper {
+    display: flex;
+    align-items: center;
+    height: 56px;
+}

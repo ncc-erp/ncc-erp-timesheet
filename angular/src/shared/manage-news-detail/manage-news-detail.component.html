@@ -1,0 +1,112 @@
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card main-content">
+            <div class="body table-responsive">
+                <table class="table table-hover table-striped">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <h2>
+                                    <Strong style="color:blue"> {{news.title}}</Strong>
+                                    <h4><small>{{news.creationTime | date: "yyyy-MM-dd HH:mm:ss"}}</small></h4>
+                                </h2>
+                                <br>
+                                <div [innerHtml]="news.content">
+                                    {{news.content}}</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                   
+                </table>
+                <h4> Comment </h4>
+                <!--nhập comment mới---->
+                <div *ngIf="news.isAllowComment" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <mat-form-field>
+                        <textarea matInput name="content" [(ngModel)]="content"
+                            placeholder="New comment "></textarea>
+                    </mat-form-field>
+                    <button mat-raised-button color="primary" (click)="onCreate(content)">comment</button>
+                </div> 
+                <!----list các comment và rely-->
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="list-comment" *ngFor="let item of comment , let i = index">
+                        <span><strong>{{item.userName}}</strong></span>
+                        <span><small>{{item.creationTime | date: "yyyy-MM-dd HH:mm" }}</small></span>
+                        <a class="button-rely" *ngIf="news.isAllowComment" (click)="reLy(item)">Reply</a>
+                        <!---edit or delete comment cha-->
+                        <div class="icon-more_vert" *ngIf="news.isAllowComment && item.creatorUserId == sessionService.user.id">
+                            <a [matMenuTriggerFor]="actions">
+                                <i class="icon-32 material-icons ">more_vert</i>
+                            </a>
+                            <mat-menu #actions="matMenu">
+                                <button mat-menu-item (click)="editComment(item)">Edit</button>
+                                <button class="text-danger" mat-menu-item
+                                    (click)="onDelete(item)">Delete</button>
+                            </mat-menu>
+                        </div>
+                        <textarea matInput [readonly]="!item.isEditing"
+                            *ngIf="!item.isEditing">{{item.content}}</textarea>
+                        <mat-form-field *ngIf="item.isEditing">
+                            <textarea matInput name="content" [(ngModel)]="item.content"></textarea>
+                        </mat-form-field>
+                        <p class="action-rely"> 
+                            <button *ngIf="item.isEditing" (click)="cancel()" mat-raised-button
+                                color="primary">cancel</button>
+                            <button *ngIf="item.isEditing" mat-raised-button color="primary"
+                                (click)="onEdit(item)">save</button>                            
+                        </p>
+
+                        <a (click)="showRely(item)" *ngIf="!item.isComment && item.reply.length > 0">See
+                            {{item.reply.length}} answers</a>
+                        <a (click)="showRely(item)" *ngIf="item.isComment">Hide answers</a>
+                        <!---show rely comment-->
+                        <ng-container *ngIf="item.isComment">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <div *ngFor="let reply of item.reply , let i = index">
+                                    <span><strong>{{reply.userName}}</strong></span>
+                                    <span><small><i>{{reply.creationTime | date: "yyyy-MM-dd HH:mm" }}</i></small></span>
+                                    <textarea matInput [readonly]="!reply.isEditingReply"
+                                        *ngIf="!reply.isEditingReply">{{reply.content}}</textarea>
+                                    <!---edit cho comment con-->
+                                    <mat-form-field *ngIf="reply.isEditingReply">
+                                        <textarea matInput name="content" [(ngModel)]="reply.content"></textarea>
+                                    </mat-form-field>
+                                    <div class="action-rely" *ngIf="reply.isEditingReply">
+                                        <button mat-raised-button color="primary" (click)="cancel()">cancel</button>
+                                        <button mat-raised-button color="primary"
+                                            (click)="onEdit(reply)">save</button>
+                                    </div>
+                                    <div *ngIf="news.isAllowComment &&  reply.creatorUserId  == sessionService._user.id && !reply.ismenu">
+                                    <a  [matMenuTriggerFor]="actions">
+                                        <i class="icon-32 material-icons ">more_horiz</i>
+                                    </a>
+                                    <mat-menu #actions="matMenu">
+                                        <button mat-menu-item (click)="editCommentRely(reply)">Edit</button>
+                                        <button class="text-danger" mat-menu-item
+                                            (click)="onDelete(reply, item)">Delete</button>
+                                    </mat-menu>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                        <div *ngIf="item.isAnswer">
+                            <mat-form-field>
+                                <textarea  matInput name="contentReply" [(ngModel)]="contentReply"
+                                    placeholder="new reply"></textarea>
+                            </mat-form-field>
+                            <div class="action-rely">
+                                <button mat-raised-button color="primary" (click)="cancel()"> cancel</button>
+                                <button mat-raised-button color="primary"
+                                    [disabled]="contentReply == null || contentReply ==''"
+                                    (click)="onCreate(contentReply, item.id)"> save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button mat-raised-button color="primary" (click)="goBack()">
+                    <mat-icon>keyboard_backspace</mat-icon>Goback
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

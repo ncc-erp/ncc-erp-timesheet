@@ -1,0 +1,25 @@
+  <ng-container >
+    <span class="{{custom != null ? custom: 'col-md-12 btn-customs btn btn-danger outline btn-file'}}">
+      <i *ngIf="isLoading" class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+      <i *ngIf="!isLoading" class="material-icons">cloud_upload</i>
+      {{title ? title : 'Select image'}}
+      <input #file type="file" accept="{{getFileType()}}" multiple (input)="onFileSelected($event)" />
+    </span>
+    <span style="font-weight:bold;color:green;" *ngIf="progress > 0 && progress < 100">
+      {{progress}}%
+    </span>
+  
+    <span style="font-weight:bold;color:green;" *ngIf="message">
+      {{message}}
+    </span>
+  </ng-container>
+  
+  <!-- <ng-container >
+    <div class="image-upload">
+      <label for="upload" class="image-upload__label">
+        <i class="fa fa-pencil"></i>
+      </label>
+      <input id="upload" class="image-upload__input" #file accept="{{getFileType()}}" multiple
+        (change)="onFileSelected($event)" type="file" name="image-upload">
+    </div>
+  </ng-container> -->

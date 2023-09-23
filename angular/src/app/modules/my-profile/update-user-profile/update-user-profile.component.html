@@ -1,0 +1,149 @@
+<form #updateForm="ngForm" autocomplete="off" id="frm_update_user_info" novalidate>
+  <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>Request change info
+    <span class="badge bg-warning" *ngIf="userProfile?.requestStatusName">
+    {{userProfile?.requestStatusName}}
+  </span>
+  </h2>
+  <mat-dialog-content class="mat-typography" style="min-width: 500px">
+    <div class="example-container">
+      <div class="form-group d-flex">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mt-2 align-middle">
+          Phone:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 col-xs-12 px-0">
+          <mat-form-field appearance="outline" class="common-input">
+            <input matInput name="phone" [(ngModel)]="userProfile.phone" cdkFocusInitial>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="form-group d-flex">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mt-2 align-middle">
+          DOB:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field appearance="outline">
+            <mat-label>Choose date</mat-label>
+            <input matInput name="dob" [(ngModel)]="userProfile.birthday" #dob="ngModel" [matDatepicker]="picker" >
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="form-group d-flex ">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12  mt-2 align-middle">Bank:</label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field class="" appearance="outline">
+            <mat-label>
+              Bank
+            </mat-label>
+            <mat-select name="bank" [(value)]='userProfile.bankId' (selectionChange)="onChangeBank($event.value)">
+              <mat-option *ngFor="let item of listBanks" [value]='item.id'>
+                {{item.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="form-group d-flex ">
+        <label matTooltip="Số tài khoản ngân hàng" class="col-lg-3 col-md-3 col-sm-3 col-xs-12  mt-2 col-form-label">
+          Bank account number:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field appearance="outline" class="common-input">
+            <input matInput name="bankAccountNumber" [(ngModel)]="userProfile.bankAccountNumber" cdkFocusInitial #bankAccountNumberEl>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="form-group d-flex ">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mt-2 col-form-label"
+        matTooltip="Mã số thuế">
+          Tax code:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field appearance="outline" class="common-input">
+            <input matInput name="taxCode" [(ngModel)]="userProfile.taxCode" cdkFocusInitial #taxCodeEl >
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="form-group d-flex">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12  mt-2 col-form-label"
+        matTooltip="Số CCCD/CMT">
+          Identity:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field appearance="outline" class="common-input">
+            <input matInput name="identify" [(ngModel)]="userProfile.idCard" cdkFocusInitial #IdentifyEl >
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="form-group d-flex ">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mt-2 col-form-label"
+        matTooltip="Quê quán">
+          Place of origin:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field appearance="outline" class="common-input">
+            <input matInput name="placeOfOrigin" rows="1" [(ngModel)]="userProfile.placeOfPermanent" cdkFocusInitial #placeOfOriginEl >
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="form-group d-flex ">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mt-2 col-form-label"
+        matTooltip="Nơi thường trú">
+          Place of residence:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field appearance="outline" class="common-input">
+            <input matInput name="placeOfResidence" rows="1" [(ngModel)]="userProfile.address" cdkFocusInitial #placeOfResidenceEl >
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="form-group d-flex">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mt-2 align-middle"
+        matTooltip="Nơi cấp">
+          Date of issued:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field  appearance="outline">
+            <mat-label>Choose a date</mat-label>
+            <input matInput name="issuedOn" [(ngModel)]="userProfile.issuedOn" #issuedOn="ngModel" [matDatepicker]="pickerIssuedOn" >
+            <mat-datepicker-toggle matSuffix [for]="pickerIssuedOn"></mat-datepicker-toggle>
+            <mat-datepicker #pickerIssuedOn></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="form-group d-flex ">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mt-2 col-form-label issuedby"
+        matTooltip="Cấp bởi">
+          Issued By:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field appearance="outline" class="common-input">
+            <input matInput name="issuedBy" rows="1" [(ngModel)]="userProfile.issuedBy" cdkFocusInitial #issuedByEl >
+          </mat-form-field>
+        </div>
+      </div>
+      <div  class="form-group">
+        <div *ngFor="let item of listIssuedBys" class="listIssuedBys">
+          <div class="d-flex mt-2">
+            <div class="col-lg-7 col-md-7 col-sm-8 col-xs-12 px-0 align-middle">
+              <span>{{item}}</span>
+            </div>
+            <div class="col-lg-5 col-md-5 col-sm-4 col-xs-12  px-0">
+              <button class="btn btn-primary" (click)="onPickIssuedBy(item)">Select</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button class="btn btn-default" mat-raised-button type="button" (click)="dialogRef.close()">
+      {{l('Cancel')}}
+    </button>
+    <button mat-raised-button color="primary" [disabled]="!updateForm.form.valid || isLoading" type="submit" flex="15"
+      (click)="onSubmit()">
+      {{l('Submit')}}
+    </button>
+  </mat-dialog-actions>
+</form>

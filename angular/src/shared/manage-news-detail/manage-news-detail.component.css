@@ -1,0 +1,22 @@
+.list-comment{
+    margin-bottom: 25px;
+}
+.action-rely{
+    margin-bottom: 20px;;
+}
+.action-rely button{
+    margin-inline-start: 15px;
+}
+.icon-more_vert {
+    position:absolute;
+    margin-left: 200px;
+}
+#rely{
+    margin-left: 20px;
+}
+small{
+    margin-left: 10px;
+}
+.button-rely{
+    margin-left: 10px;
+}

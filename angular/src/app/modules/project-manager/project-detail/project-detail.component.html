@@ -1,0 +1,235 @@
+<div class=" main-content  ">
+  <div class="body">
+    <div class="row">
+      <div class="col-md-7 col-sm-7 col-xs-12">
+        <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+          <mat-button-toggle (click)="nextOrPre('pre')">
+            <mat-icon>chevron_left</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle (click)="nextOrPre('next')">
+            <mat-icon>chevron_right</mat-icon>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+        <span class="title-date" style="margin-left:9px"
+          ><b style="font-size: 20px">{{ distanceFromAndToDate }}</b></span
+        >
+      </div>
+
+      <div class="col-md-3 col-sm-3 col-xs-12" style="margin-top: 13px">
+        <mat-form-field appearance="outline" style="margin-top: -20px;">
+          <mat-select
+            [formControl]="viewChange"
+            (selectionChange)="changeView(true)"
+          >
+            <mat-option
+              *ngFor="let item of APP_CONFIG.TypeViewHomePage"
+              [value]="item.value"
+            >
+              <p *ngIf="item.value != APP_CONSTANT.TypeViewHomePage.CustomTime">
+                {{ item.name }}
+              </p>
+              <p
+                *ngIf="item.value == APP_CONSTANT.TypeViewHomePage.CustomTime"
+                (click)="showPopup()"
+              >
+                {{ item.name }}
+              </p>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <!-- <button
+          class="text-danger"
+          mat-menu-item
+          (click)="exportProject(project)"
+        >
+          Export
+        </button> -->
+      </div>
+      <div
+        class="col-md-2 col-sm-2 col-xs-12"
+        style="margin-top: 3px; margin-bottom: 6px"
+      >
+        <button *ngIf="permission.isGranted(EXPORT_EXCEL_PROJECT)"
+          mat-raised-button
+          color="primary"
+          class="pull-left"
+          (click)="exportProject()"
+        >
+          Export
+        </button>
+      </div>
+    </div>
+    <div
+      class="row"
+      style="border-top:groove 0.1px rgb(255, 255, 255);padding-top:15px;max-height: 650px; width: 100%;"
+    >
+      <div class="tabs">
+        <div class="head row">
+          <div class="col-md-6 col-sm-12 col-xs-12">
+            <ul class="nav nav-tabs" style="display:inline-block">
+              <li class="active">
+                <a data-toggle="tab" href="#home"><b>Tasks</b></a>
+              </li>
+              <li>
+                <a data-toggle="tab" href="#menu1"><b>Team</b></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- task  -->
+        <div class="tab-content" style="background:white; padding:20px;">
+          <div id="home" class="tab-pane fade in active ">
+            <div class="table-responsive" style="height: 450px">
+              <table
+                class="table table-trip "
+                *ngFor="let item of mapTasks; index as i"
+                [busy]="isTableLoading"
+              >
+                <thead>
+                  <tr>
+                    <th style="width: 200px">{{ item.name }}</th>
+                    <th>HOURS</th>
+
+                    <th style="width:150px"></th>
+                    <th *ngIf="item.billable">Billable Hours</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngIf="item.billable">
+                    <th>Total</th>
+                    <td>
+                      <strong>{{ totalBillTaskHour }}</strong>
+                    </td>
+                    <td style="min-width: 100px">
+                      <div class="progress" style="height:15px ">
+                        <div
+                          class="progress-bar bg-green"
+                          role="progressbar"
+                          aria-valuenow="62"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          [style.width.%]="percentTask"
+                        ></div>
+                      </div>
+                    </td>
+                    <td>
+                      <strong
+                        >{{ totalBillTaskBillHour }} ({{
+                          percentTask
+                        }}%)</strong
+                      >
+                    </td>
+                  </tr>
+                  <tr *ngIf="!item.billable">
+                    <th>Total</th>
+                    <td>
+                      <strong>{{ totalHourNonBillaleTask }} </strong>
+                    </td>
+                  </tr>
+                  <tr *ngFor="let task of item.tasks">
+                    <td>{{ task.taskName }}</td>
+                    <td>{{ convertMinuteToHour(task.totalWorkingTime) }}</td>
+
+                    <td *ngIf="item.billable" style="min-width: 100px">
+                      <div class="progress" style="height:15px ">
+                        <div
+                          class="progress-bar bg-green"
+                          role="progressbar"
+                          aria-valuenow="62"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          [style.width.%]="task.percent"
+                        ></div>
+                      </div>
+                    </td>
+                    <td *ngIf="item.billable">
+                      {{ convertMinuteToHour(task.billableWorkingTime) }} ({{
+                        task.percent
+                      }}%)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- team -->
+          <div id="menu1" class="tab-pane fade">
+            <div class="table-responsive" style="height: 450px">
+              <table class="table table-trip">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+
+                    <th>Hour</th>
+                    <th></th>
+                    <th>Billable Hour</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th style="width: 150px">Total</th>
+                    <td>
+                      <strong>{{convertMinuteToHour(totalWorkingTime)}}</strong>
+                    </td>
+                    <td style="min-width: 100px">
+                      <div class="progress" style="height:15px ">
+                        <div
+                          style="width: 150px"
+                          class="progress-bar bg-green"
+                          role="progressbar"
+                          aria-valuenow="62"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          [style.width.%]="percentTeam"
+                        ></div>
+                      </div>
+                    </td>
+                    <td>
+                      <strong>{{ totalBillTime }} ({{ percentTeam }}%)</strong>
+                    </td>
+                  </tr>
+                  <tr *ngFor="let user of detailTeam; index as i">
+                    <td>
+                      {{ user.userName }}
+                      <span
+                        *ngIf="
+                          user.projectUserType ==
+                          APP_CONSTANT.EnumUserType.ProjectAdmin
+                        "
+                        style="margin-right: 5px;    margin-left: 15px;"
+                        class="label status-label bg-red"
+                        >PM</span
+                      >
+                    </td>
+
+                    <td>{{ convertMinuteToHour(user.totalWorkingTime) }}</td>
+                    <td style="min-width: 100px">
+                      <div class="progress" style="height:10px ">
+                        <div
+                          style="width: 150px"
+                          class="progress-bar bg-green"
+                          role="progressbar"
+                          aria-valuenow="62"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          [style.width.%]="user.percent"
+                        ></div>
+                      </div>
+                    </td>
+                    <td>
+                      {{ convertMinuteToHour(user.billableWorkingTime) }} ({{
+                        user.percent
+                      }}%)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

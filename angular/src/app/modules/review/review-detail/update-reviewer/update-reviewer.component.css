@@ -1,0 +1,37 @@
+.format-col{
+    display: flex;
+    align-items: center;
+}
+.format-col .name-col{
+    padding-right: 20px;
+}
+.edit-form{
+    margin-top: 10px;
+}
+/* ::ng-deep .mat-form-field-flex{
+    line-height: 13px;
+    height: 51px;
+} */
+.row-item-rest{
+    width: 430px;
+    margin-left: -15px;
+}
+.form-group{
+    margin-bottom: 0px;
+}
+::ng-deep .mat-form-field-wrapper{
+    padding-bottom: 0px;
+}
+.col-form-label{
+    margin-top: 25px;
+}
+.form-group.required .col-form-label:after {
+    color: #D00;
+    content: "*";
+    position: absolute;
+    margin-left: 3px;
+}
+.form-group.required .col-form-label-note:after {
+    position: absolute;
+    margin-left: 3px;
+}

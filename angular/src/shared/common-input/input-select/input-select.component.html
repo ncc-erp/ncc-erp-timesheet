@@ -1,0 +1,22 @@
+<mat-form-field *ngIf="!multiple" [floatLabel]="label">
+  <mat-label *ngIf="labelTop">{{labelTop}}</mat-label>
+  <mat-select [placeholder]="placeholder" [formControl]="formControlInput">
+      <mat-option>-- None --</mat-option>
+      <mat-option *ngFor="let item of options" [value]="item.value">
+          {{item.name}}
+      </mat-option>
+  </mat-select>
+</mat-form-field>
+
+<mat-form-field *ngIf="multiple" [floatLabel]="label">
+  <mat-label *ngIf="labelTop">{{labelTop}}</mat-label>
+  <mat-select [placeholder]="placeholder" [formControl]="formControlInput" multiple>
+      <mat-select-trigger>
+          {{formControlInput.value ? formControlInput.value[0] : ''}}
+          <span *ngIf="formControlInput.value?.length > 1" class="additional-selection">
+              (+{{formControlInput.value.length - 1}} {{formControlInput.value?.length === 2 ? 'other' : 'others'}})
+          </span>
+      </mat-select-trigger>
+      <mat-option *ngFor="let item of options" [value]="item">{{item}}</mat-option>
+  </mat-select>
+</mat-form-field>

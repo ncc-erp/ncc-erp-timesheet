@@ -1,0 +1,70 @@
+﻿<div class="card" [@routerTransition]>
+  <div class="body">
+    <form *ngIf="enableNormalLogin" novalidate autocomplete="off" #loginForm="ngForm" (ngSubmit)="login()">
+      <h4 class="text-center">{{ "LogIn" | localize }}</h4>
+      <div class="row clearfix">
+        <div class="col-xs-12">
+          <div class="input-group">
+            <span class="input-group-addon">
+              <i class="material-icons">person</i>
+            </span>
+            <div>
+              <mat-form-field>
+                <input matInput name="userNameOrEmailAddress" [(ngModel)]="
+                    loginService.authenticateModel.userNameOrEmailAddress
+                  "
+                  [placeholder]="'UserNameOrEmail' | localize" autocomplete="off" required maxlength="255" />
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">
+              <i class="material-icons">lock</i>
+            </span>
+            <div>
+              <mat-form-field>
+                <input matInput type="password" name="password" [(ngModel)]="loginService.authenticateModel.password"
+                  [placeholder]="'Password' | localize" required maxlength="32" />
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-8 p-t-5">
+          <mat-checkbox name="rememberMe" [(ngModel)]="loginService.rememberMe">
+            {{ "RememberMe" | localize }}
+          </mat-checkbox>
+        </div>
+        <div class="col-xs-4">
+          <button mat-flat-button type="submit" flex="15" color="accent" [disabled]="!loginForm.form.valid || submitting">
+            {{ "LogIn" | localize }}
+          </button>
+        </div>
+        
+
+      </div>
+      <div class="row m-t-15 m-b--20" *ngIf="isSelfRegistrationAllowed">
+        <div class="col-xs-12">
+          <a [routerLink]="['../register']">{{ "Register" | localize }}</a>
+        </div>
+      </div>
+    </form>
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center">
+        <button mat-flat-button type="button" (click)="signInWithGoogle()" color="primary" style="width: 100%">
+          {{ "Log In With Google" | localize }}
+        </button>
+      </div>
+    </div>
+    <!-- <div style="position: relative">
+      <mat-form-field>
+        <input matInput name="password" placeholder="Security Code" [(ngModel)]="nccCode" type="{{  isShowPassword ? 'password' : 'text' }}" />
+        <mat-icon *ngIf=" isShowPassword" (click)="checkShowpass()" matSuffix class="m-r-20">visibility_on </mat-icon>
+        <mat-icon *ngIf="!isShowPassword" (click)="checkShowpass()" matSuffix class="m-r-20"> visibility_off</mat-icon>
+      </mat-form-field>
+      <span title="please enter security code if your email is not @ncc.asia"><i class="material-icons"
+          style="position: absolute; right: -8px; top: 8px">help_outline</i></span>
+    </div> -->
+  </div>
+</div>

@@ -1,0 +1,17 @@
+<h1 mat-dialog-title style="text-align: center;cursor: grab;">
+    {{label.titleLabel}}
+</h1>
+<mat-dialog-content>
+    <p>{{label.statusLabel}} <span style="font-weight: bold"
+            [class]="(data.status == 1 ? 'text-warning' : (data.status == 2 ? 'text-success': 'text-danger'))">
+      {{data.status === 1 ? 'Pending' : (data.status === 2 ? 'Approved' : 'Rejected')}}
+    </span></p>
+    <p>{{label.absenceTypeLabel}}</p>
+    <p>{{label.reasonLabel}}</p>
+    <p>{{label.leaveDayLabel}}</p>
+    <p><span>{{data.detail.dateAt}} ({{getLeaveDayByDateType(data.detail)}}<span *ngIf="data.detail.dateType===4">{{data.detail.hour}}h</span></span>)</p>
+</mat-dialog-content>
+<mat-dialog-actions style="display: flex; justify-content: center; align-items: center">
+    <button mat-raised-button mat-dialog-close [disabled]="isLoading">Close</button>
+    <button *ngIf="data.detail.dateAt > currentDate" mat-raised-button [disabled]="isLoading" class="reject"  (click)="cancelRequest(data.id)">Cancel</button>
+</mat-dialog-actions>

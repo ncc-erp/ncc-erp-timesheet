@@ -1,0 +1,324 @@
+::ng-deep .container-fluid {
+    padding-left: 0px !important;
+}
+::ng-deep .mat-form-field-wrapper {
+    padding-bottom: 0px;
+}
+::ng-deep .swal-modal{
+    width: 550px;
+}
+body{
+    padding-bottom: 0px !important;
+}
+.main-content{
+    position: relative;
+}
+.aboard-review-detail{
+    margin-bottom: 0px !important;
+}
+.head-table{
+    position: sticky;
+    background-color: #ffff;
+}
+.head-table tr th{
+    white-space: nowrap;
+    vertical-align: middle;
+    text-align: center;
+}
+.block-format{
+    text-align: center;
+    vertical-align: middle;
+}
+.delete-item{
+    text-align: center;
+    vertical-align: middle;
+}
+.select-record{
+    width: 25px;
+}
+
+.btn-cancel{
+    margin-left: 10px;
+}
+.remove-margin{
+    margin-bottom: 0px !important;
+}
+.btn-email-all{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 140px;
+    margin: 8px auto 0px;
+    height: 35px;
+    text-align: right;
+}
+.approve{
+    color: green;
+}
+.reject{
+    color: red;
+}
+.btn-approve-all{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 120px;
+    margin: 8px auto 0px;
+    height: 35px;
+    text-align: right;
+}
+
+.button-group{
+    display: flex;
+    padding-top: 5px;
+    justify-content: space-around;
+}
+.btn-create{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100px;
+    margin: 8px auto 0px;
+    height: 35px;
+    text-align: right;
+    padding-right: 20px;
+}
+.preHistory{
+    padding: 10px;
+    min-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 25px;
+    -webkit-line-clamp: 3;
+    height: 78px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+}
+.box-menu-right{
+    display: flex;
+    padding: 3px 0px;
+}
+.square{
+    border-radius: 0px !important;
+}
+.preReview{
+    padding: 10px;
+    width: 100%;
+    min-width: 250px;
+    border: none;
+    resize: none;
+    cursor: pointer;
+    overflow-y: scroll;
+    background-color: transparent;
+    text-overflow: ellipsis;
+    line-height: 25px;
+    word-wrap: break-word;
+    -webkit-line-clamp: 3;
+    height: 82px;
+    -webkit-box-orient: vertical;
+}
+
+.history::-webkit-scrollbar {
+    display: none;
+}
+.history{
+    padding: 10px 10px 0px 10px;
+    width: 100%;
+    min-width: 250px;
+    border: none;
+    resize: none;
+    overflow-y: scroll;
+    background-color: transparent;
+    text-overflow: ellipsis;
+    line-height: 25px;
+    word-wrap: break-word;
+}
+
+.review{
+    padding: 10px 10px 0px 10px;
+    width: 100%;
+    min-width: 250px;
+    border: none;
+    cursor: pointer;
+    resize: none;
+    background-color: transparent;
+    text-overflow: ellipsis;
+    line-height: 25px;
+    word-wrap: break-word;
+}
+
+.preReview::-webkit-scrollbar
+{
+	width: 7px;
+	background-color: #F5F5F5;
+}
+
+.preReview::-webkit-scrollbar-thumb
+{
+	background-color: #cecece;
+	border: 2px solid #cecece;
+}
+
+.review::-webkit-scrollbar
+{
+	width: 7px;
+	background-color: #F5F5F5;
+}
+
+.review::-webkit-scrollbar-thumb
+{
+	background-color: #cecece;
+	border: 2px solid #cecece;
+}
+
+.btn-email{
+    color: green;
+}
+
+.btn-mail-hrm{
+    display: flex;
+    align-items: center;
+    width: 136px;
+    margin: 8px auto 0px;
+    height: 35px;
+    text-align: right;
+    padding-right: 20px;
+    color : #ffff;
+    background-color: #0c51a0!important;
+}
+
+.btn-mail-project{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 160px;
+    margin: 8px auto 0px;
+    height: 35px;
+    text-align: right;
+    padding-right: 20px;
+    color : #ffff;
+    background-color: #2196f3!important;
+}
+
+.avatar{
+    padding: 0px;
+    margin-left: 10px;
+    width: 60px;
+    border-radius: 50%;
+}
+.full-name{
+    font-weight: 800;
+}
+.btn-menu{
+    padding: 0px;
+}
+.content-box{
+    cursor: grab;
+}
+.info-intern{
+    display: flex;
+    align-items: center;
+    max-width: 400px;
+    overflow: hidden;
+}
+.info-undated-info{
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+.info-intern-box{
+    margin: 5px 10px 0px 12px;
+}
+.menu{
+    border: none;
+}
+.review-detail{
+    font-size: 14px;
+}
+.status{
+    padding: 2px 5px;
+    line-height: 15px;
+    margin-left: 5px;
+    font-size: 12px;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+}
+.pending{
+    background: rgb(78, 151, 137);
+}
+.approved{
+    background: green;
+}
+.rejected{
+    background: gray;
+}
+.action{
+    margin: 0 auto;
+}
+.choices{
+    font-size: 14px;
+}
+.choices .mat-18{
+    margin-right: 5px;
+}
+.btn-hide{
+    display: flex;
+    flex-direction: column;
+    border: 0px;
+    color: darkblue;
+}
+.edit-form{
+    width: 120px;
+    height: 60px;
+    padding-bottom: 0px;
+}
+.btn-delete{
+    color: red;
+}
+.search-box{
+    padding-left: 15px;
+    padding-right: 0px;
+    width: 265px;
+}
+.new-level{
+    padding-right: 0px;
+    width: 265px;
+}
+.cancel{
+    margin-top: 5px;
+}
+.reviewer{
+    text-align: center;
+    white-space: nowrap;
+    padding : 0px;
+}
+.grey {
+    color: grey;
+}
+.yellow {
+    color: yellow;
+}
+.orange {
+    color: orange;
+}
+
+th{
+    font-size: 14px;
+    text-align: center;
+}
+/* respondsive */
+@media only screen and (max-width: 1200px) {
+    .new-level{
+        margin: 20px 0px;
+    }
+}
+@media only screen and (max-width: 600px) {
+    .box-menu-right{
+        display: block;
+    }
+    .new-level{
+        margin: 20px 0px;
+    }
+}

@@ -1,0 +1,57 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - dev
+      - stg
+
+  paths:
+    include:
+      - aspnet-core
+      - azure-pipelines-be.yml
+
+pool:
+  name: 'ERP_DEV'
+
+jobs:
+  - job: DotnetBuild
+    steps: 
+    - script: |
+        export PATH=$PATH:/opt/dotnet3/
+        cd aspnet-core/src/Timesheet.Migrator
+        dotnet3 publish -c Release
+      displayName: 'Dotnet Publish Migrator'
+
+    - script: |
+        cd aspnet-core/src/Timesheet.Migrator/bin/Release/netcoreapp2.1/publish/
+        zip -r backend_migrator.zip *
+      displayName: 'Compress Publish Migrator'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'aspnet-core/src/Timesheet.Migrator/bin/Release/netcoreapp2.1/publish/backend_migrator.zip'
+        ArtifactName: 'dotnet-migrator-timesheet'
+        publishLocation: 'Container'
+      displayName: 'Publish Artifacts Migrator'
+
+    - script: |
+        export PATH=$PATH:/opt/dotnet3/
+        cd aspnet-core
+        dotnet3 publish -c Release
+      displayName: 'Dotnet Release Host'
+    
+    - script: |
+        cd aspnet-core/src/Timesheet.Web.Host/bin/Release/netcoreapp2.1/publish/
+        zip -r backend_publish.zip *
+      displayName: 'Compress Release Host'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'aspnet-core/src/Timesheet.Web.Host/bin/Release/netcoreapp2.1/publish/backend_publish.zip'
+        ArtifactName: 'dotnet-host-timesheet'
+        publishLocation: 'Container'
+      displayName: 'Publish Artifacts Host'

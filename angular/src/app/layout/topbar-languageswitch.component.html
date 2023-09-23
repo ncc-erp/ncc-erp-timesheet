@@ -1,0 +1,23 @@
+<div style="display: flex;">
+  <div>
+    <a title="Release Note" target="blank" class="link-release-note" href="https://docs.google.com/document/d/13kP2JNm9BhWx0-BW7Hb0RJmukF4r6G9JjZb6tIpcEUU/edit">
+      <i class="fas fa-file-arrow-up" style="color: #ffffff; font-size: 20px; margin-right: 10px;"></i></a>
+    </div>
+  <div>
+    <a title="User guide" target="_blank" class="link-user-guide" href="https://docs.google.com/document/d/1-h4z6oW1ouqXPP05SkVJss3JzkyEA-8Y/edit">
+      <i class="fas fa-file-alt" style="color: #ffffff; font-size: 20px; margin-right: 10px;"></i></a>
+  </div>
+  <li class="dropdown">
+    <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button">
+      <i class="{{currentLanguage.icon}}" title="{{currentLanguage.displayName}}"></i>
+      {{currentLanguage.displayName}}
+      <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+      <li *ngFor="let language of languages">
+        <a *ngIf="language.name != currentLanguage.name" (click)="changeLanguage(language.name)"><i
+            class="{{language.icon}}"></i> {{language.displayName}}</a>
+      </li>
+    </ul>
+  </li>
+</div>

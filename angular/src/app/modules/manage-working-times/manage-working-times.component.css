@@ -1,0 +1,45 @@
+.table-content {
+    text-align: center;
+}
+.button-delete{
+    border: none;
+    background-color: red;
+    color: white;
+    border-radius: 4px;
+}
+.customTable > thead > tr > th{
+    padding: 4px 4px !important;
+    min-width: 50px;
+    text-align: center;
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+}
+
+.customTable > tbody > tr > td{
+    padding: 10px 4px !important;
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+}
+
+.customTable {
+    border-collapse: collapse !important;
+}
+.status {
+    padding: 3px 5px;
+    margin-left: 5px;
+    font-size: 12px;
+    border-radius: 10px;
+    background: #f89c26;
+    color: #fff;
+    font-weight: 600;
+}
+.display-none {
+    display: none;
+}
+.display-block {
+    display: block;
+}
+
+::ng-deep .mat-pseudo-checkbox-checked::after {
+    width: 11px !important;
+    height: 5px !important;
+    left: 0.5px !important;
+}

@@ -1,0 +1,38 @@
+.flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flex-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 20px;
+}
+
+.rela {
+    position: static;
+}
+
+@media screen and (min-width: 600px) {
+    .rela {
+        position: relative;
+    }
+
+    .flex {
+        position: absolute;
+        top: 10px;
+        width: 100px;
+        left: 20px;
+    }
+
+    .flex-right {
+        position: absolute;
+        top: 10px;
+        width: 110px;
+        right: 20px;
+        float: right;
+        padding-top: 15px;
+    }
+}

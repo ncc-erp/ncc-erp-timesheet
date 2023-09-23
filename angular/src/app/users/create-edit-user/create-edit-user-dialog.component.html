@@ -1,0 +1,122 @@
+﻿<form autocomplete="off" #createUserModal="ngForm">
+  <h1 mat-dialog-title>{{l(title)}}</h1>
+  <mat-dialog-content style="width:700px;height:auto">
+    <mat-tab-group>
+      <mat-tab [label]="'UserDetails' | localize">
+        <br/>
+        <div class="row-fluid">
+          <div class="col-md-6">
+            <mat-form-field >
+              <input [disabled]="user.id !== undefined" matInput name="UserName" [placeholder]="'UserName' | localize" [(ngModel)]="user.userName" required
+                maxlength="32" />
+                <mat-icon style="color:#9E9E9E" matSuffix>account_circle</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field>
+              <input matInput name="EmailAddress" [placeholder]="'EmailAddress' | localize"
+                [(ngModel)]="user.emailAddress" type="email" required maxlength="255"
+                pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" email="true" />
+                <mat-icon style="color:#9E9E9E" matSuffix>contact_mail</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row-fluid">
+          <div class="col-md-6">
+            <mat-form-field>
+              <input matInput name="First Name" [placeholder]="'Name' | localize" [(ngModel)]="user.name"
+                maxlength="32" />
+              <mat-icon style="color:#9E9E9E" matSuffix>border_color</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field>
+              <input matInput name="Surname" [placeholder]="'Surname' | localize" [(ngModel)]="user.surname"
+                maxlength="32" required />
+              <mat-icon style="color:#9E9E9E" matSuffix>border_color</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row-fluid">
+              <div class="col-md-12">
+               
+                  <button *ngIf="user.id === undefined" mat-raised-button color="primary"  [disabled]="activeRandom" (click)="randomPassword()" style="
+                  padding: 0 10px;
+                  min-width: 45px;
+                  color: white;
+                  height: 33px;
+                  font-size: 12px;">Random PassWord</button>
+            
+              </div>
+        </div>
+        <div class="row-fluid" *ngIf="user.id === undefined">
+          
+          <div class="col-md-6">
+            <mat-form-field>
+              <input matInput #password="ngModel" [placeholder]="'Password' | localize" [(ngModel)]="user.password"
+                [type]="shPassword ? 'text' : 'password' " name="password" id="password" validateEqual="confirmPassword" reverse="true" required
+                maxlength="32" minlength="8" (focus)="activeRandom = false" (ngModelChange)="backField($event)" />
+                <mat-icon (mousedown)="shPassword = true" (mouseup)="shPassword = false" (onmouseout)="shPassword = false" matSuffix>{{shPassword ? 'visibility' : 'visibility_off'}}</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field>
+              <input matInput [placeholder]="'ConfirmPassword' | localize"  [(ngModel)]="user.confirmPassword" [type]="shConfirmPassword ? 'text' : 'password' "
+                name="confirmPassword" id="confirmPassword" validateEqual="password" reverse="false" required  [value]="confirmPassword" [disabled]="confirmDisale"
+                maxlength="32" />
+                <mat-icon (mousedown)="shConfirmPassword = true" (mouseup)="shConfirmPassword = false" (onmouseout)="shConfirmPassword = false" matSuffix>{{shConfirmPassword ? 'visibility' : 'visibility_off'}}</mat-icon>
+               
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row-fluid">
+          <div class="col-md-6">
+            <mat-form-field>
+              <input matInput name="Address" [placeholder]="'Address' | localize" [(ngModel)]="user.address" />
+              <mat-icon style="color:#9E9E9E" matSuffix>place</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field>
+              <input matInput name="Phone" [(ngModel)]="user.phoneNumber" [placeholder]="'Phone' | localize"
+                pattern="^\w+[0-9]+$" maxlength="14" minlength="10" />
+              <mat-icon style="color:#9E9E9E" matSuffix>local_phone</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row-fluid">
+          <div class="col-md-12">
+            <div class="checkbox-wrapper">
+              <mat-checkbox name="IsActive" [(ngModel)]="user.isActive">
+                {{ "IsActive" | localize }}
+              </mat-checkbox>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab [label]="'UserRoles' | localize">
+        <br />
+        <div class="row-fluid">
+          <ng-template ngFor let-role [ngForOf]="roles">
+            <div class="col-sm-12 col-md-12"  >
+              <div class="checkbox-wrapper">
+                <mat-checkbox [checked]="isRoleChecked(role.normalizedName)" (change)="onRoleChange(role, $event)"  >
+                  {{ role.name }}
+                </mat-checkbox>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end"
+  >
+    <button class="btn btn-default" mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
+    <button mat-raised-button color="primary"   [disabled]="!createUserModal.form.valid  || ischeck " [mat-dialog-close]="user"
+      >{{l('Save')}}</button>
+  </mat-dialog-actions>
+</form>

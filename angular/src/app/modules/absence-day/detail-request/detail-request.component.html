@@ -1,0 +1,57 @@
+<div class="header" cdkDragHandle cdkDrag cdkDragRootElement=".cdk-overlay-pane" [busy]="isLoading">
+  <h4 class="pin">
+    List all request on
+    <span style="background-color: green; margin-bottom: 2px;">{{date | date: "dd-MM-yyyy"}}</span>
+  </h4>
+  <button (click)="close(0)" style="width: 40px;">
+    <i class="material-icons">close</i>
+  </button>
+</div>
+<mat-dialog-content class="mat-typography">
+  <div class="table-responsive" style="border: 0;">
+    <table class="table table-hover table-striped styleUser">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Request</th>
+          <th style="width: 210px; min-width: 210px;">Off Type</th>
+          <th style="width: 270px; min-width: 270px;">Note</th>
+          <th style="min-width: 140px;">Status</th>
+          <th style="width: 100px; min-width: 100px;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of listRequestOfUser, index as i">
+          <td style="text-align: center;">{{i + 1}}</td>
+          <td class="pin" style="text-align: center;">
+            <span [ngClass]="getListTypeClasses(item)">{{getLeaveTypeText(item)}}</span>
+            <span [ngClass]="getListClasses(item)" style="margin-left: 5px;">{{getLeaveText(item)}}</span>
+          </td>
+          <td class="type" style="text-align: center;">
+            <span *ngIf="item.leavedayType == 0  && !item.absenceTime">{{item.dayOffName}}</span>
+          </td>
+          <td class="note">
+            {{item.reason}}
+          </td>
+          <td style="text-align: center;">
+            <div>
+              <span class="label status-label day-off-state-pending" *ngIf="item.status === 1">
+                Pending
+              </span>
+              <span class="label status-label day-off-state-approved" *ngIf="item.status === 2">
+                Approved
+              </span>
+              <span class="label status-label day-off-state-reject" *ngIf="item.status === 3">
+                Rejected
+              </span>
+            </div>
+          </td>
+          <td>
+            <button class="cancel-button" *ngIf="item.isFuture"
+              (click)="cancelAbsenceRequest(item.id)" mat-raised-button>Cancel</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</mat-dialog-content>

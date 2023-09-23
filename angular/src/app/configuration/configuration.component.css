@@ -1,0 +1,104 @@
+.header{
+    font-size: 15px;
+    display: flex;
+}
+ 
+.head{
+    margin-bottom: 30px;
+    margin-top: 5px;
+    padding-bottom: 2rem;
+}
+
+.body{
+    padding: 0px;
+}
+
+.edit-save{
+    margin-left: 10px;
+    margin-top: 6px;
+}
+
+.edit-save button{
+    margin-right: 10px;
+    margin-top: 20px;
+}
+
+.pass{
+    position: relative;
+}
+.icon-pass{
+    position: absolute;
+    left: 357px; 
+    top : -7px;
+
+}
+.autoSubmit{
+    padding: 0.1em 0.5em;
+    margin-top: 0.84375em;
+}
+
+.label2{
+    font-weight: 700;
+    line-height: 24px;
+    text-align: center;
+}
+.mt-0{
+    margin-top: 0px !important;
+}
+.title{
+    line-height: 50px;
+    font-size: 18px;
+    font-weight: normal;
+    color: #111;
+    margin-bottom: 0px;
+}
+
+button{
+    margin-top: 0px !important;
+}
+.table-title {
+    font-size: 24px;
+    color: #424242;
+    line-height: 40px;
+    margin-bottom: 0px;
+}
+ul {
+    list-style-type: none;
+    margin-top: 10px;
+    margin-bottom: 0px;
+}
+.panel-header{
+    margin: 10px 0px;
+    padding-left: 12px !important;
+    padding-right: 8px;
+}
+::ng-deep .mat-expanded .mat-expansion-indicator{
+    display: none;
+}
+::ng-deep  .mat-expansion-indicator{
+    margin-right: 12px;
+}
+.messageCheckConnect{
+    line-height: 50px;
+    font-size: 18px;
+    font-weight: normal;
+    color: #111;
+    margin-bottom: 0px;
+}
+.special-label {
+    color: rgba(0, 0, 0, .54);
+    font-size: 12px;
+    line-height: 24px;
+}
+
+.special-icon {
+    display: inline-block;
+    touch-action: none;
+    user-select: none;
+    position: relative;
+    top: 5px;
+    margin-left: 5px;
+}
+::ng-deep .mat-tooltip {
+    font-size: 12px !important;
+}

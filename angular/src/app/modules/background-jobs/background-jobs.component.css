@@ -1,0 +1,49 @@
+.job-type div{
+    max-width: 220px;
+    word-wrap: break-word; 
+    white-space: pre-line;
+}
+.agrs{
+    padding: 10px;
+    width: 100%;
+    min-width: 250px;
+    border: none;
+    resize: none;
+    cursor: pointer;
+    overflow-y: scroll;
+    background-color: transparent;
+    text-overflow: ellipsis;
+    line-height: 25px;
+    word-wrap: break-word;
+    -webkit-line-clamp: 3;
+    height: 82px;
+    -webkit-box-orient: vertical;
+}
+
+.col-date{
+    min-width: 100px;
+}
+.col-description div{
+    max-width: 220px;
+    word-wrap: break-word; 
+    white-space: pre-line;
+}
+.line-camp::-webkit-scrollbar
+{
+	width: 7px;
+	background-color: #f2f2f2;
+}
+.agrs::-webkit-scrollbar
+{
+	width: 7px;
+	background-color: #F5F5F5;
+}
+
+.agrs::-webkit-scrollbar-thumb
+{
+	background-color: #cecece;
+	border: 2px solid #cecece;
+}
+table th{
+    text-align: center;
+}

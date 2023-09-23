@@ -1,0 +1,24 @@
+<div style="display:flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap">
+  <div style="display:flex; align-items: center; flex-wrap: wrap">
+
+    <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+      <mat-button-toggle (click)="nextOrPre('pre')">
+        <mat-icon>chevron_left</mat-icon>
+      </mat-button-toggle>
+      <mat-button-toggle (click)="nextOrPre('next')">
+        <mat-icon>chevron_right</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+    <h2 style="padding: 0 20px">{{ distanceFromAndToDate }}</h2>
+  </div>
+  <div>
+    <mat-form-field appearance="outline">
+      <mat-select [formControl]="viewChange" (selectionChange)="changeView(true)">
+        <mat-option *ngFor="let item of APP_CONFIG.TypeViewHomePage" [value]="item.value">
+          <p *ngIf="item.value != APP_CONSTANT.TypeViewHomePage.CustomTime">{{ item.name }}</p>
+          <p *ngIf="item.value == APP_CONSTANT.TypeViewHomePage.CustomTime" (click)="showPopup()">{{ item.name }}</p>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>

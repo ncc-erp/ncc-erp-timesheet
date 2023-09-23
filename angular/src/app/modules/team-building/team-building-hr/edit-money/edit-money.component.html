@@ -1,0 +1,50 @@
+<form
+  #createForm="ngForm"
+  autocomplete="off"
+  id="edit-money-team-building-detail"
+  (ngSubmit)="doUpdate()"
+>
+  <h2 style="cursor: grab" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>Edit Money</h2>
+
+  <div class="align-item format-col form-group row required">
+    <label class="col-md-4 col-form-label" for="connectionString">
+      {{ "Money:" | localize }}
+    </label>
+    <mat-form-field
+      class="col-xl-8 col-lg-8 col-md-8 col-xs-8"
+      appearance="outline"
+    >
+      <input
+        currencyMask
+        [options]="{
+          prefix: '',
+          align: 'left',
+          thousands: ',',
+          precision: '0'
+        }"
+        matInput="matInput"
+        [(ngModel)]="teamBuildingDetail.money"
+        name="money"
+        required
+      />
+    </mat-form-field>
+  </div>
+  <mat-dialog-actions align="end">
+    <button
+      class="btn btn-default"
+      mat-raised-button
+      type="button"
+      (click)="close(false)"
+    >
+      {{ l("Cancel") }}
+    </button>
+    <button
+      mat-raised-button
+      class="btn btn-danger"
+      [disabled]="!createForm.form.valid || isSaving || !teamBuildingDetail.money"
+      type="submit"
+    >
+      {{ l("Save") }}
+    </button>
+  </mat-dialog-actions>
+</form>

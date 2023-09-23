@@ -1,0 +1,7 @@
+<div class="mat-radio">
+  <mat-radio-group [ngClass]="{'radio-column': !inline}" [formControl]="formControlInput">
+      <mat-radio-button [ngClass]="{'radio-inline': inline}" *ngFor="let item of options; index as i" [value]="item" (click)="onClick(item)">
+          {{item}}
+      </mat-radio-button>
+  </mat-radio-group>
+</div>

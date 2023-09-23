@@ -1,0 +1,39 @@
+.example-radio-group {}
+
+.example-radio-button {
+    margin-right: 5rem;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.mt-10 {
+    margin-top: 20px;
+}
+
+.pin span {
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    border-radius: 10px;
+    color: #fff;
+}
+
+::ng-deep #frm_create_group .mat-icon {
+    position: absolute;
+    top: -20px;
+    right: 0;
+    cursor: pointer;
+    height: 50px;
+    width: 50px;
+    text-align: center;
+    align-items: center;
+    line-height: 50px;
+}

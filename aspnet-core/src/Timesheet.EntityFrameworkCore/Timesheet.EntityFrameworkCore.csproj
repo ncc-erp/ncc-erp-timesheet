@@ -1,0 +1,197 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+    <RootNamespace>Timesheet</RootNamespace>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Migrations\20170424115119_Initial_Migrations.cs" />
+    <Compile Remove="Migrations\20170424115119_Initial_Migrations.Designer.cs" />
+    <Compile Remove="Migrations\20170608053244_Upgraded_To_Abp_2_1_0.cs" />
+    <Compile Remove="Migrations\20170608053244_Upgraded_To_Abp_2_1_0.Designer.cs" />
+    <Compile Remove="Migrations\20170621153937_Added_Description_And_IsActive_To_Role.cs" />
+    <Compile Remove="Migrations\20170621153937_Added_Description_And_IsActive_To_Role.Designer.cs" />
+    <Compile Remove="Migrations\20170703134115_Remove_IsActive_From_Role.cs" />
+    <Compile Remove="Migrations\20170703134115_Remove_IsActive_From_Role.Designer.cs" />
+    <Compile Remove="Migrations\20170804083601_Upgraded_To_Abp_v2.2.2.cs" />
+    <Compile Remove="Migrations\20170804083601_Upgraded_To_Abp_v2.2.2.Designer.cs" />
+    <Compile Remove="Migrations\20180201051646_Upgraded_To_Abp_v3.4.0.cs" />
+    <Compile Remove="Migrations\20180201051646_Upgraded_To_Abp_v3.4.0.Designer.cs" />
+    <Compile Remove="Migrations\20180320131229_Upgraded_To_Abp_v3_5_0.cs" />
+    <Compile Remove="Migrations\20180320131229_Upgraded_To_Abp_v3_5_0.Designer.cs" />
+    <Compile Remove="Migrations\20180509121141_Upgraded_To_Abp_v3_6_1.cs" />
+    <Compile Remove="Migrations\20180509121141_Upgraded_To_Abp_v3_6_1.Designer.cs" />
+    <Compile Remove="Migrations\20180726102624_Upgrade_ABP_380.cs" />
+    <Compile Remove="Migrations\20180726102703_Upgrade_ABP_3.8.0.cs" />
+    <Compile Remove="Migrations\20180726102703_Upgrade_ABP_3.8.0.Designer.cs" />
+    <Compile Remove="Migrations\20180731132139_Upgrade_ABP_3.8.1.cs" />
+    <Compile Remove="Migrations\20180731132139_Upgrade_ABP_3.8.1.Designer.cs" />
+    <Compile Remove="Migrations\20180927062408_test.cs" />
+    <Compile Remove="Migrations\20180927062608_Upgrade_ABP_3.8.3.cs" />
+    <Compile Remove="Migrations\20180927062608_Upgrade_ABP_3.8.3.Designer.cs" />
+    <Compile Remove="Migrations\20181013103914_Upgraded_To_Abp_v3_9_0.cs" />
+    <Compile Remove="Migrations\20181013103914_Upgraded_To_Abp_v3_9_0.Designer.cs" />
+    <Compile Remove="Migrations\20190111071724_Upgraded_To_Abp_v4_1_0.cs" />
+    <Compile Remove="Migrations\20190208051931_Upgrade_ABP_4_2_0.cs" />
+    <Compile Remove="Migrations\20190208051931_Upgrade_ABP_4_2_0.Designer.cs" />
+    <Compile Remove="Migrations\20190216083356_init_timesheet_db.cs" />
+    <Compile Remove="Migrations\20190216090346_init_timesheet_db.cs" />
+    <Compile Remove="Migrations\20190216090802_init_timesheet_db.cs" />
+    <Compile Remove="Migrations\20190228154549_add-billable-project-task-relation-member-user.cs" />
+    <Compile Remove="Migrations\20190228155239_add_billable_project_task_relation_member_user.cs" />
+    <Compile Remove="Migrations\20190307145053_add-id-member-ref-to-user.cs" />
+    <Compile Remove="Migrations\20190307150858_init_new_db.cs" />
+    <Compile Remove="Migrations\20190311041403_TimehseetDb.cs" />
+    <Compile Remove="Migrations\20190311041403_TimehseetDb.Designer.cs" />
+    <Compile Remove="Migrations\20190322110745_AddArchiveInTask.cs" />
+    <Compile Remove="Migrations\20190322110745_AddArchiveInTask.Designer.cs" />
+    <Compile Remove="Migrations\20190328063237_AddDateAtInTimeSheetItem.cs" />
+    <Compile Remove="Migrations\20190328063237_AddDateAtInTimeSheetItem.Designer.cs" />
+    <Compile Remove="Migrations\20190328064855_UpdateIsDeleteInDb.cs" />
+    <Compile Remove="Migrations\20190328064855_UpdateIsDeleteInDb.Designer.cs" />
+    <Compile Remove="Migrations\20190408064724_UpdateDbTableCustomer.cs" />
+    <Compile Remove="Migrations\20190408064724_UpdateDbTableCustomer.Designer.cs" />
+    <Compile Remove="Migrations\20190411045004_UpdatetableTask.cs" />
+    <Compile Remove="Migrations\20190411045004_UpdatetableTask.Designer.cs" />
+    <Compile Remove="Migrations\20190426025856_UpdateTaskInDb.cs" />
+    <Compile Remove="Migrations\20190426025856_UpdateTaskInDb.Designer.cs" />
+    <Compile Remove="Migrations\20190513081237_Init_TimesheetDb.cs" />
+    <Compile Remove="Migrations\20190513081237_Init_TimesheetDb.Designer.cs" />
+    <Compile Remove="Migrations\20190513082456_Init_new_TimesheetDb.cs" />
+    <Compile Remove="Migrations\20190513082456_Init_new_TimesheetDb.Designer.cs" />
+    <Compile Remove="Migrations\20200313040214_add_table_DayOffSettings_change_table_AbpUsers_add_more_columns.cs" />
+    <Compile Remove="Migrations\20201221070205_add_table_Timekeeping.cs" />
+    <Compile Remove="Migrations\20201221070205_add_table_Timekeeping.Designer.cs" />
+    <Compile Remove="Migrations\20201221070655_add_table_Timekeeping.cs" />
+    <Compile Remove="Migrations\20201221070655_add_table_Timekeeping.Designer.cs" />
+    <Compile Remove="Migrations\20210106035545_change_table_AbpUsers.cs" />
+    <Compile Remove="Migrations\20210106035545_change_table_AbpUsers.Designer.cs" />
+    <Compile Remove="Migrations\20210106041638_change_table_AbpUsers_2.cs" />
+    <Compile Remove="Migrations\20210106041638_change_table_AbpUsers_2.Designer.cs" />
+    <Compile Remove="Migrations\20210107021705_add_table_ReportTardinesses.cs" />
+    <Compile Remove="Migrations\20210107021705_add_table_ReportTardinesses.Designer.cs" />
+    <Compile Remove="Migrations\20210222032714_change_Timekeeping.cs" />
+    <Compile Remove="Migrations\20210222032714_change_Timekeeping.Designer.cs" />
+    <Compile Remove="Migrations\20210223030346_add_table_HistoryWorkingTime.cs" />
+    <Compile Remove="Migrations\20210223030346_add_table_HistoryWorkingTime.Designer.cs" />
+    <Compile Remove="Migrations\20210223041558_change_table_HistoryWorkingTime.cs" />
+    <Compile Remove="Migrations\20210223041558_change_table_HistoryWorkingTime.Designer.cs" />
+    <Compile Remove="Migrations\20210311044756_update-table-timekeeping.cs" />
+    <Compile Remove="Migrations\20210311044756_update-table-timekeeping.Designer.cs" />
+    <Compile Remove="Migrations\20210311045234_update-table-timekeeping2.cs" />
+    <Compile Remove="Migrations\20210311045234_update-table-timekeeping2.Designer.cs" />
+    <Compile Remove="Migrations\20210311064641_update_table_TimeKeepings.cs" />
+    <Compile Remove="Migrations\20210311064641_update_table_TimeKeepings.Designer.cs" />
+    <Compile Remove="Migrations\20210420021359_add_migration_to_branch_customtime.cs" />
+    <Compile Remove="Migrations\20210420021359_add_migration_to_branch_customtime.Designer.cs" />
+    <Compile Remove="Migrations\20210420022314_add_migration_to_branch_customtime.cs" />
+    <Compile Remove="Migrations\20210420022314_add_migration_to_branch_customtime.Designer.cs" />
+    <Compile Remove="Migrations\20210420024002_add_migration_to_branch_customtime.cs" />
+    <Compile Remove="Migrations\20210420024002_add_migration_to_branch_customtime.Designer.cs" />
+    <Compile Remove="Migrations\20210614101720_Create_table_ReviewInterns_and_ReviewDetails.cs" />
+    <Compile Remove="Migrations\20210614101720_Create_table_ReviewInterns_and_ReviewDetails.Designer.cs" />
+    <Compile Remove="Migrations\20210615024844_change_type_Month_Year_from_DateTime_to_string.cs" />
+    <Compile Remove="Migrations\20210615024844_change_type_Month_Year_from_DateTime_to_string.Designer.cs" />
+    <Compile Remove="Migrations\20210615025007_change_type_Month_Year_from_DateTime_to_string.cs" />
+    <Compile Remove="Migrations\20210615025007_change_type_Month_Year_from_DateTime_to_string.Designer.cs" />
+    <Compile Remove="Migrations\20210615034025_change_name_Intership_in_ReviewTable_Internship.cs" />
+    <Compile Remove="Migrations\20210615034025_change_name_Intership_in_ReviewTable_Internship.Designer.cs" />
+    <Compile Remove="Migrations\20210616041454_Add_Field_ReviewContent_into_ReviewDetails_Table.cs" />
+    <Compile Remove="Migrations\20210616041454_Add_Field_ReviewContent_into_ReviewDetails_Table.Designer.cs" />
+    <Compile Remove="Migrations\20210629025819_changname_table_ReviewIntern_and_ReviewDetail__changename_ReviewContent_to_Note.cs" />
+    <Compile Remove="Migrations\20210629025819_changname_table_ReviewIntern_and_ReviewDetail__changename_ReviewContent_to_Note.Designer.cs" />
+    <Compile Remove="Migrations\20210629030133_changname_table_ReviewIntern_and_ReviewDetail__changename_ReviewContent_to_Note.cs" />
+    <Compile Remove="Migrations\20210629030133_changname_table_ReviewIntern_and_ReviewDetail__changename_ReviewContent_to_Note.Designer.cs" />
+    <Compile Remove="Migrations\20210629030300_changname_table_ReviewIntern_and_ReviewDetail__changename_ReviewContent_to_Note.cs" />
+    <Compile Remove="Migrations\20210629030300_changname_table_ReviewIntern_and_ReviewDetail__changename_ReviewContent_to_Note.Designer.cs" />
+    <Compile Remove="Migrations\20210629034519_chagnam.cs" />
+    <Compile Remove="Migrations\20210629034519_chagnam.Designer.cs" />
+    <Compile Remove="Migrations\20210629034556_changename.cs" />
+    <Compile Remove="Migrations\20210629034556_changename.Designer.cs" />
+    <Compile Remove="Migrations\20210629035443_update_DB.cs" />
+    <Compile Remove="Migrations\20210629035443_update_DB.Designer.cs" />
+    <Compile Remove="Migrations\20210629035526_update_DB.cs" />
+    <Compile Remove="Migrations\20210629035526_update_DB.Designer.cs" />
+    <Compile Remove="Migrations\20210629044026_delete_Table_ReviewIntern_ReviewinternDetail.cs" />
+    <Compile Remove="Migrations\20210629044026_delete_Table_ReviewIntern_ReviewinternDetail.Designer.cs" />
+    <Compile Remove="Migrations\20210629044358_delete_Table.cs" />
+    <Compile Remove="Migrations\20210629044358_delete_Table.Designer.cs" />
+    <Compile Remove="Migrations\20210629044526_delete_Table.cs" />
+    <Compile Remove="Migrations\20210629044526_delete_Table.Designer.cs" />
+    <Compile Remove="Migrations\20210629044907_add_new_table_ReviewIntern_ReviewDetail.cs" />
+    <Compile Remove="Migrations\20210629044907_add_new_table_ReviewIntern_ReviewDetail.Designer.cs" />
+    <Compile Remove="Migrations\20210713083835_update_default_value_IsActive_is_true_in_reviewIntern_table.cs" />
+    <Compile Remove="Migrations\20210713083835_update_default_value_IsActive_is_true_in_reviewIntern_table.Designer.cs" />
+    <Compile Remove="Migrations\20210713083943_update_default_value_IsActive_is_true_in_reviewIntern_table.cs" />
+    <Compile Remove="Migrations\20210713083943_update_default_value_IsActive_is_true_in_reviewIntern_table.Designer.cs" />
+    <Compile Remove="Migrations\20210713084404_update_default_value_IsActive_is_true_in_reviewIntern_table.cs" />
+    <Compile Remove="Migrations\20210713084404_update_default_value_IsActive_is_true_in_reviewIntern_table.Designer.cs" />
+    <Compile Remove="Migrations\20210713084633_set_IsActive_default_true_in_ReviewIntern.cs" />
+    <Compile Remove="Migrations\20210713084633_set_IsActive_default_true_in_ReviewIntern.Designer.cs" />
+    <Compile Remove="Migrations\20210723085825_edit_table_ReviewDetail.cs" />
+    <Compile Remove="Migrations\20210723085825_edit_table_ReviewDetail.Designer.cs" />
+	<Compile Remove="Migrations\20220914090117_AddSomeDataCheckSendKomuNotifysInProjectTable.cs" />
+	<Compile Remove="Migrations\20220914090117_AddSomeDataCheckSendKomuNotifysInProjectTable.Designer.cs" />
+	<Compile Remove="Migrations\20220915083642_AddSomeDataCheckSendKomuNotifysInProjectTable.cs" />
+	<Compile Remove="Migrations\20220915083642_AddSomeDataCheckSendKomuNotifysInProjectTable.Designer.cs" />
+	<Compile Remove="Migrations\20220915084218_AddSomeDataCheckSendKomuNotifysInProjectTable.cs" />
+	<Compile Remove="Migrations\20220915084218_AddSomeDataCheckSendKomuNotifysInProjectTable.Designer.cs" />
+	<Compile Remove="Migrations\20220915084615_AddSomeDataCheckSendKomuNotifiesInProjectTable.cs" />
+	<Compile Remove="Migrations\20220915084615_AddSomeDataCheckSendKomuNotifiesInProjectTable.Designer.cs" />
+	<Compile Remove="Migrations\20220915085228_AddSomeDataCheckSendKomuNotifiesInProjectTable.cs" />
+	<Compile Remove="Migrations\20220915085228_AddSomeDataCheckSendKomuNotifiesInProjectTable.Designer.cs" />
+	<Compile Remove="Migrations\20220915085500_AddSomeDataCheckSendKomuNotifiesInProjectTable.cs" />
+	<Compile Remove="Migrations\20220915085500_AddSomeDataCheckSendKomuNotifiesInProjectTable.Designer.cs" />
+	<Compile Remove="Migrations\20220915112237_AddSomeDataCheckSendKomuNoticesInProjectTable.cs" />
+	<Compile Remove="Migrations\20220915112237_AddSomeDataCheckSendKomuNoticesInProjectTable.Designer.cs" />
+	<Compile Remove="Migrations\20220916100345_AddSomeDataCheckNoticeKMInProjects.cs" />
+	<Compile Remove="Migrations\20220916100345_AddSomeDataCheckNoticeKMInProjects.Designer.cs" />
+	<Compile Remove="Migrations\20220919022948_AddSomeDataInProjects.cs" />
+	<Compile Remove="Migrations\20220919022948_AddSomeDataInProjects.Designer.cs" />
+    <Compile Remove="Migrations\20220922081403_Add_EndDateAt_And_BeginLevel_Table_AbpUser.cs" />
+    <Compile Remove="Migrations\20220922081403_Add_EndDateAt_And_BeginLevel_Table_AbpUser.Designer.cs" />
+    <Compile Remove="Migrations\20220922093138_Add_EndDateAt_And_BeginLevel_Table_AbpUser.cs" />
+    <Compile Remove="Migrations\20220922093138_Add_EndDateAt_And_BeginLevel_Table_AbpUser.Designer.cs" />
+    <Compile Remove="Migrations\20230217034821_add_table_TeamBuildingDetail_and_table_TeamBuildingRequestHistory_and_add_column_IsTeamBuilding_in_table_Project.cs" />
+    <Compile Remove="Migrations\20230217034821_add_table_TeamBuildingDetail_and_table_TeamBuildingRequestHistory_and_add_column_IsTeamBuilding_in_table_Project.Designer.cs" />
+    <Compile Remove="Migrations\20230217091729_add_column_DisbursedMoney_in_TeamBuildingRequestHistory.cs" />
+    <Compile Remove="Migrations\20230217091729_add_column_DisbursedMoney_in_TeamBuildingRequestHistory.Designer.cs" />
+    <Compile Remove="Migrations\20230221024232_delete_column_ceatedtime_in_table_TeamBuildingDetail_and_TeamBuildingRequestHistory.cs" />
+    <Compile Remove="Migrations\20230221024232_delete_column_ceatedtime_in_table_TeamBuildingDetail_and_TeamBuildingRequestHistory.Designer.cs" />
+    <Compile Remove="Migrations\20230221082004_add_defaultValue_true_column_IsTeamBuilding.cs" />
+    <Compile Remove="Migrations\20230221082004_add_defaultValue_true_column_IsTeamBuilding.Designer.cs" />
+    <Compile Remove="Migrations\20230221085519_add_UserId_in_table_TeamBuildingRequestHistory.cs" />
+    <Compile Remove="Migrations\20230221085519_add_UserId_in_table_TeamBuildingRequestHistory.Designer.cs" />
+    <Compile Remove="Migrations\20230221090059_add_table_TeamBuildingDetail_and_TeamBuildingRequestHistory.cs" />
+    <Compile Remove="Migrations\20230221090059_add_table_TeamBuildingDetail_and_TeamBuildingRequestHistory.Designer.cs" />
+    <Compile Remove="Migrations\20230221090420_add_table_TeamBuildingDetail_and_TeamBuildingRequestHistory.cs" />
+    <Compile Remove="Migrations\20230221090420_add_table_TeamBuildingDetail_and_TeamBuildingRequestHistory.Designer.cs" />
+    <Compile Remove="Migrations\20230614073235_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.cs" />
+    <Compile Remove="Migrations\20230614073235_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.Designer.cs" />
+    <Compile Remove="Migrations\20230614081727_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.cs" />
+    <Compile Remove="Migrations\20230614081727_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.Designer.cs" />
+    <Compile Remove="Migrations\20230614082202_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.cs" />
+    <Compile Remove="Migrations\20230614082202_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.Designer.cs" />
+    <Compile Remove="Migrations\20230614083035_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.cs" />
+    <Compile Remove="Migrations\20230614083035_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.Designer.cs" />
+    <Compile Remove="Migrations\20230614084135_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.cs" />
+    <Compile Remove="Migrations\20230614084135_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.Designer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Migrations\20190911035341_Add_DayOff.Designer.cs~Updated upstream" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Timesheet.Core\Timesheet.Core.csproj" />
+  </ItemGroup>
+</Project>

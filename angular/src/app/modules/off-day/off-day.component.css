@@ -1,0 +1,62 @@
+h3 {
+    margin: 0 0 10px;
+}
+
+pre {
+    background-color: #f5f5f5;
+    padding: 15px;
+}
+.flex-between{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.overflow-x {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 30px;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-wrapper {
+    margin: 0;
+}
+
+.mat-form-field-wrapper{
+    padding: 0;
+}
+.btn-group{
+    display: inline-flex;
+}
+
+.m-5{
+    margin: 5px;
+}
+.header{
+    display: flex;;
+}
+
+.header .filter-date{
+    display: flex;
+}
+
+.header .filter-date .item{
+    margin-left: 20px;
+    width: 80px;
+}
+
+.header .title{
+    line-height: 46px;
+}
+
+::ng-deep li .mat-icon {
+    margin-top: 15px !important;
+}
+
+@media screen and (max-width: 768px) {
+    .flex div {
+        margin-top: 15px;
+    }
+}

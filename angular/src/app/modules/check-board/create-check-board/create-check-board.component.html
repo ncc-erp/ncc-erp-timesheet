@@ -1,0 +1,36 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<mat-dialog-content>
+  <mat-form-field appearance='outline'>
+    <mat-label>User name</mat-label>
+    <mat-select [formControl]='userControl' (selectionChange)="checkUserCode()">
+      <mat-option>
+        <ngx-mat-select-search [formControl]="userSearch" placeholderLabel="Search by Name" 
+        noEntriesFoundLabel= "No matching found"></ngx-mat-select-search>
+      </mat-option>
+      <mat-option *ngFor="let item of listUserFiltered" [value]='item.userCode'>
+        {{item.name}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance='outline'>
+    <mat-label>Working Hours</mat-label>
+    <input matInput [(ngModel)]='checkBoardTransfer.workingHour' required>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Date</mat-label>
+    <input matInput [formControl]='dateControl' [matDatepicker]='start' required [readonly]='isEdit'>
+    <mat-datepicker-toggle matSuffix [for]="start" [disabled]='isEdit'></mat-datepicker-toggle>
+    <mat-datepicker [startAt]='dateControl' #start></mat-datepicker>
+  </mat-form-field>
+  <mat-form-field appearance='outline'>
+    <mat-label>Note</mat-label>
+    <input matInput [(ngModel)]='checkBoardTransfer.note'>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align='end'>
+  <button mat-raised-button (click)='onNoClick()'>Cancel</button>
+  <button mat-raised-button color='primary' cdkFocusInitial (click)='save()'
+    [disabled]='!(checkBoardTransfer.workingHour) || dateControl.hasError("required") || userControl.hasError("required")'>
+    Save
+  </button>
+</mat-dialog-actions>

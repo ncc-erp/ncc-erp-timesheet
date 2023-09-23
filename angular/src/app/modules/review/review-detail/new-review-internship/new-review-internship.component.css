@@ -1,0 +1,96 @@
+.format-col {
+  display: flex;
+  align-items: center;
+}
+.format-col .name-col {
+  padding-right: 20px;
+}
+.edit-form {
+  margin-top: 10px;
+}
+.select-form {
+  display: flex;
+  align-items: baseline;
+}
+.row-item-first {
+  width: 400px;
+  margin-top: 20px;
+}
+.row-item-rest {
+  margin-left: -15px;
+}
+.form-group {
+  margin-bottom: 0px;
+}
+::ng-deep .mat-form-field-wrapper {
+  padding-bottom: 0px;
+}
+.col-form-label {
+  margin-top: 25px;
+}
+.form-group.required .col-form-label:after {
+  color: #d00;
+  content: "*";
+  position: absolute;
+  margin-left: 3px;
+}
+.form-group.required .col-form-label-note:after {
+  color: #d00;
+  content: "*";
+  position: absolute;
+  margin-left: 3px;
+}
+::ng-deep .mat-tooltip {
+  white-space: pre-line;
+  font-size: 14px;
+  line-height: 20px;
+}
+::ng-deep .newLevel .mat-select-disabled span {
+  color: black;
+}
+::ng-deep .zero-star {
+  display: none !important;
+}
+.rating-row {
+  display: grid;
+  grid-template-columns: 1fr minmax(100px, 0.25fr) 0.25fr;
+  padding: 10px 20px;
+  background-color: #eee9e9;
+}
+.rating-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.rating-row div {
+  display: flex;
+  align-items: center;
+}
+.rating-row div:nth-child(2) {
+  justify-content: center;
+}
+.rating-row div:last-child {
+  justify-content: end;
+}
+.rating-name:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+::ng-deep .rating-row .ng-star-inserted {
+  display: flex;
+  align-items: center;
+}
+::ng-deep .rating-row .star {
+  width: 28px !important;
+  height: 26px !important;
+}
+.grey {
+  color: grey;
+}
+.yellow {
+  color: yellow;
+}
+.orange {
+  color: orange;
+}

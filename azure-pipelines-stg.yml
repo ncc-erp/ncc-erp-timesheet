@@ -1,0 +1,84 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+
+
+trigger:
+  - stg
+
+pool:
+  name: 'ERP_DEV'
+
+stages:
+  - stage: backend
+    jobs:
+      - job: DotnetBuild
+        steps: 
+
+        - script: |
+            PATH=~/.dotnet:$PATH
+            cd aspnet-core/src/Timesheet.Migrator
+            dotnet build
+            dotnet publish
+            cd bin/Debug/netcoreapp2.1/publish/
+            zip -r backend_migrator.zip *
+          displayName: 'Dotnet Build Migrator'
+        
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: 'aspnet-core/src/Timesheet.Migrator/bin/Debug/netcoreapp2.1/publish/backend_migrator.zip'
+            ArtifactName: 'stg-dotnet-migrator-timesheet'
+            publishLocation: 'Container'
+          displayName: 'Publish Artifacts Migrator'
+
+        - script: |
+            PATH=~/.dotnet:$PATH
+            cd aspnet-core
+            dotnet build
+            dotnet publish
+            cd src/Timesheet.Web.Host/bin/Debug/netcoreapp2.1/publish/
+            zip -r backend_publish.zip *
+          displayName: 'Dotnet Build Host'
+
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: 'aspnet-core/src/Timesheet.Web.Host/bin/Debug/netcoreapp2.1/publish/backend_publish.zip'
+            ArtifactName: 'stg-dotnet-host-timesheet'
+            publishLocation: 'Container'
+          displayName: 'Publish Artifacts Host'
+
+  - stage: frontend
+    jobs:
+      - job: AngularBuild
+        steps: 
+          - script: |
+              cd angular 
+              export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+              [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+              nvm use 14.15         
+              node -v
+              echo "Copy node-modules"
+              unzip -qo ~/soft/check_node/timesheet/node_modules.zip
+              cp ~/soft/check_node/timesheet/check.sh ./check.sh
+              echo "===Check package.json==="
+              bash check.sh
+              
+              echo "===ReBuild node-sass==="
+              npm rebuild node-sass
+
+              echo "===Build node==="
+              ng build --prod
+              cd dist
+              zip -r frontend_publish.zip *
+            displayName: 'Build Frontend'
+          
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: 'angular/dist/frontend_publish.zip'
+              ArtifactName: 'stg-fe-timesheet'
+              publishLocation: 'Container'
+            displayName: 'Publish Artifacts Frontend'
+            

@@ -1,0 +1,39 @@
+table tr td {
+  vertical-align: middle !important;
+}
+
+.info-name {
+  display: flex;
+  align-items: center;
+}
+.selected-file {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+.list-file {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.input-upload-url {
+  width: 280px;
+  margin-right: 35px;
+  margin-left: 10px;
+  border-radius: 5px;
+}
+
+.show-member {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.input-amount {
+  border: none;
+  outline: none;
+  font: inherit;
+  background: 0 0;
+  color: inherit;
+}

@@ -1,0 +1,111 @@
+tr,
+th,
+td {
+  border: 1px solid rgba(204, 204, 204, 0.35);
+}
+.fixTableHead {
+  overflow-y: auto;
+  overflow-x: auto;
+  max-height: 68vh;
+}
+
+.fixTableHead thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+table tbody:nth-of-type(1) tr:nth-of-type(1) td {
+  border-top: none !important;
+}
+table thead th {
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: inset 0 0.4px 0 rgba(204, 204, 204, 0.35),
+    inset 0 -0.4px 0 rgba(204, 204, 204, 0.35);
+}
+.styleUser > thead > tr > th {
+  padding: 4px 4px;
+  min-width: 50px;
+  text-align: center;
+  border: 0.2px solid rgba(204, 204, 204, 0.35);
+  background: white;
+}
+.not-start {
+  background-color: #e7e3e5;
+}
+/* .full-width-dialog .mat-dialog-container {
+  max-width: 100vw !important;
+} */
+/* ::ng-deep .mat-dialog-container{
+  width: 100vw;
+} */
+.warning-level {
+  background-color: #ffc760;
+  overflow: hidden;
+}
+.fire {
+  background-color: #dc3545;
+  color: white;
+  overflow: hidden;
+}
+.staff {
+  background-color: #2b982b;
+  color: white;
+  overflow: hidden;
+}
+.export-btn {
+  height: 47px;
+  margin: 5px 0px 20px 0;
+}
+::ng-deep .mat-tooltip {
+  font-size: 14px;
+}
+.row {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.col-6 {
+  width: 50%;
+}
+.selecMonth {
+  border: 2px red solid !important;
+}
+.clear-btn {
+  margin-left: 15px;
+  height: fit-content;
+  margin-top: 15px;
+}
+.report {
+  padding: 0px 15px;
+  display: flex;
+  justify-content: space-between;
+}
+.report .item{
+  width: calc(25% - 25px);
+  margin-right: 20px;
+}
+.report .item.dropdown{
+  width: calc(15% - 15px);
+}
+
+.report .report-left{
+  justify-content: left; 
+  width: 90%;
+}
+
+.report .report-right{
+  justify-content: end; 
+  width: 10%;
+}
+
+.month-level{
+  border-bottom:1px solid rgba(204, 204, 204, 0.35);
+}
+
+.example-margin.item{
+  margin-top: 15px;
+}
+.styleUser .label{
+  padding: .3em .6em .2em .6em;
+}

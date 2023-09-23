@@ -1,0 +1,79 @@
+
+.styleUser > thead > tr > th{
+    padding: 4px 4px !important;
+    min-width: 50px;
+    text-align: center;
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+}
+
+.styleUser > tbody > tr > td{
+    padding: 4px 4px !important;
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+}
+
+.styleUser {
+    border-collapse: collapse !important;
+}
+
+.table-responsive th{
+    vertical-align: middle;
+}
+
+.btn-route{
+    border: none;
+    background-color: transparent;
+    font-weight: bold;
+    padding: 0px;
+    color:#001fff;
+}
+
+.btn-route:hover{
+    text-decoration: underline;
+}
+
+.btn{
+    cursor: pointer;
+}
+
+.red{
+    color: red;
+    font-weight: bold;
+}
+
+.green{
+    color: green;
+    font-weight: bold;
+}
+
+
+.btn-back{
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    z-index: 1;
+}
+
+.time{
+    max-width: 40px;
+    margin: auto;
+}
+
+.button24 {
+    width: 24px;
+    height: 24px;
+}
+
+.icon24 {
+    font-size: 16px;
+    margin-top: -8px;
+}
+
+::ng-deep #mytimesheettardiness .mat-form-field-wrapper{
+    padding-bottom: 0;
+}
+
+.text-note-complain{
+    color: blue;
+    text-align: left;
+    margin: 0;
+}

@@ -1,0 +1,105 @@
+th{
+    text-align: center;
+    font-size: 25px;
+    font-weight: 900;
+}
+td{
+    text-align: center;
+    font-size: 20px;
+    font-weight: 500;
+}
+.label{
+    border-radius: 0px;
+}
+::ng-deep .mat-button-wrapper{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.devide-item{
+    margin-left: 13px;
+    padding-left: 10px;
+    width: 102px;
+}
+
+.devide-item i{
+    padding-right: 5px;
+}
+
+.devide-item::before{
+    height: 25px;
+    top: 5px;
+    width: 1px;
+    left: -7px;
+    content: ' ';
+    background-color: #bebebe;
+    position: absolute;
+}
+.btn-add{
+    padding: 10px 20px;
+    margin-bottom: 40px;
+}
+.btn-format{
+    display: inline-flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 145px;
+    margin-top: 8px;
+    margin-right: 10px;
+    height: 50px;
+}
+.btn-size{
+    max-width: 120px;
+    max-height: 40px;
+}
+.create-review{
+    width: 20%;
+}
+.time{
+    text-align: center;
+    cursor: pointer;
+}
+.actions{
+    display: flex;
+    justify-content: center;
+    margin: auto !important;
+    position: relative;
+    color: darkblue;
+    border: none;
+}
+.actions > button{
+    border: none;
+}
+#showTableReport thead tr th,
+#showTableReport tbody tr td {
+    font-size: 15px;
+}
+#showReportIntern .modal-dialog{
+    width: auto;
+}
+.body-config{
+    height: 700px;
+    overflow: auto;
+}
+.bg-red{
+    background-color: red;
+}
+#showTableReport tbody {
+    display: block;
+    max-height: 600px;
+    overflow-y: scroll;
+  }
+  #showTableReport tbody::-webkit-scrollbar {
+    width: 0px;
+  }
+  
+ 
+#showTableReport thead, #showTableReport tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+.btn-actions{
+    width: 110px;
+}

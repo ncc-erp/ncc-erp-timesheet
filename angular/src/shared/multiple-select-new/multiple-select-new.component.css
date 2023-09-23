@@ -1,0 +1,62 @@
+.select-all {
+    font-size: inherit;
+    line-height: 3em;
+    height: 3em;
+}
+
+::ng-deep .all-select {
+    display: block !important;
+    padding: 0 16px;
+}
+
+::ng-deep .all-select .mat-checkbox-layout {
+    display: block !important;
+}
+
+::ng-deep .all-select:hover {
+    background: rgba(0, 0, 0, .04);
+}
+
+::ng-deep .search-input {       
+    padding: 10px 16px;
+}
+
+::ng-deep .mat-pseudo-checkbox-checked::after {
+    top: 3.4px !important;
+    width: 10px !important;
+}
+
+::ng-deep .mat-primary .mat-pseudo-checkbox-checked {
+    background: #2b982b;
+}
+
+::ng-deep .mat-primary .mat-option.mat-selected:not(.mat-option-disabled) {
+    color: rgba(0, 0, 0, .87);
+}
+
+.input-wrapper {
+    border: 1px solid #ccc;
+    margin: 6px 16px;
+}
+
+.action-select {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 16px;
+}
+
+.list-action-left {
+    display: flex;
+    cursor: pointer;
+    gap: 6px;
+}
+
+
+.mr-10{
+    margin-right: 10px;
+}
+
+.option-wrapper {
+    max-height: 150px;
+    overflow: auto;
+}

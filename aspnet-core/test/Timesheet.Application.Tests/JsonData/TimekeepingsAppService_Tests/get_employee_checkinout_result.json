@@ -1,0 +1,134 @@
+[
+  {
+    "email": "admin@aspnetboilerplate.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "09:01",
+    "verifyEndTimeStr": "21:17"
+  },
+  {
+    "email": "admin@defaulttenant.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "08:43",
+    "verifyEndTimeStr": "18:06"
+  },
+  {
+    "email": "testemail3@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "08:50",
+    "verifyEndTimeStr": "17:55"
+  },
+  {
+    "email": "testemail4@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "08:38",
+    "verifyEndTimeStr": "18:15"
+  },
+  {
+    "email": "testemail5@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "08:46",
+    "verifyEndTimeStr": "17:39"
+  },
+  {
+    "email": "testemail6@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "09:02",
+    "verifyEndTimeStr": "19:23"
+  },
+  {
+    "email": "testemail7@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "09:29",
+    "verifyEndTimeStr": "17:58"
+  },
+  {
+    "email": "testemail8@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "08:19",
+    "verifyEndTimeStr": ""
+  },
+  {
+    "email": "testemail9@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "10:06",
+    "verifyEndTimeStr": "18:59"
+  },
+  {
+    "email": "testemail10@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "08:13",
+    "verifyEndTimeStr": "18:49"
+  },
+  {
+    "email": "testemail11@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "09:31",
+    "verifyEndTimeStr": "18:45"
+  },
+  {
+    "email": "testemail12@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "09:00",
+    "verifyEndTimeStr": "18:38"
+  },
+  {
+    "email": "testemail13@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "09:49",
+    "verifyEndTimeStr": "19:20"
+  },
+  {
+    "email": "testemail14@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "09:49",
+    "verifyEndTimeStr": ""
+  },
+  {
+    "email": "testemail15@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "08:33",
+    "verifyEndTimeStr": "18:35"
+  },
+  {
+    "email": "testemail16@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "09:17",
+    "verifyEndTimeStr": "18:46"
+  },
+  {
+    "email": "testemail17@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "07:56",
+    "verifyEndTimeStr": "21:24"
+  },
+  {
+    "email": "testemail18@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "09:26",
+    "verifyEndTimeStr": "16:41"
+  },
+  {
+    "email": "testemail19@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "08:31",
+    "verifyEndTimeStr": "18:06"
+  },
+  {
+    "email": "testemail20@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "07:21",
+    "verifyEndTimeStr": "18:04"
+  },
+  {
+    "email": "testemail21@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "09:26",
+    "verifyEndTimeStr": "20:37"
+  },
+  {
+    "email": "testemail22@gmail.com",
+    "dateTime": "2022-12-01",
+    "verifyStartTimeStr": "09:26",
+    "verifyEndTimeStr": "20:37"
+  }
+]

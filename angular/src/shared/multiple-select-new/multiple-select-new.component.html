@@ -1,0 +1,30 @@
+<mat-form-field [ngClass]="classCustom" appearance="outline">
+  <mat-label>{{labelName}}</mat-label>
+  <mat-select multiple #matSelect [value]="listSelectedId" (selectionChange)="handleChangeValue($event)" disableOptionCentering="true">
+    <div class="p-2 input-wrapper">
+      <input type="text" matInput class="search-input" placeholder="Search Text" [value]="textSearch"
+        (keydown)="$event.stopPropagation()" (input)="handleSearch($event.target.value)" />
+    </div>
+    <div class="action-select">
+        <div class="list-action-left">
+          <button class="btn btn-primary mr-10" (click)="handleSelectAll()">
+            Select all
+          </button>
+          <button class="btn btn-default" (click)="handleClear()">
+            Clear
+          </button>
+        </div>
+
+        <div class="list-action-right">
+          <button class="btn btn-primary" (click)="onOkSelect()">
+            Done
+          </button>
+        </div>
+    </div>
+    <div class="option-wrapper">
+      <mat-option *ngFor="let item of listOptionBySearch" [value]='item.id' [disabled]="disabled">
+        {{item.name}}
+      </mat-option>
+    </div>
+  </mat-select>
+</mat-form-field>

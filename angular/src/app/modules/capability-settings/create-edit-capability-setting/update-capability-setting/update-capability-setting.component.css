@@ -1,0 +1,26 @@
+:host ::ng-deep #guideline .angular-editor-toolbar {
+  font: 100 1.2rem/15px Roboto, Arial, sans-serif;
+  background-color: #f5f5f5;
+  padding: 0.2rem;
+  border: 1px solid #ddd;
+}
+.y-center {
+  display: flex;
+  align-items: center;
+}
+.primary-color {
+  color: #014c6e;
+}
+.radioPoint {
+  border-radius: 50%;
+  background-color: #014c6e;
+  width: 10px;
+  height: 10px;
+  margin-right: 10px;
+}
+.ml-5 {
+  margin-left: 0.5rem;
+}
+.m-b-0 {
+  margin-bottom: 0 !important;
+}

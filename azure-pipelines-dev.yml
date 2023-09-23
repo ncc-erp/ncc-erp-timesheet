@@ -1,0 +1,122 @@
+
+trigger:
+  - dev
+
+pool:
+  name: 'ERP_DEV'
+  
+jobs:
+  - job: check_file
+    displayName: Check changed files
+    steps:
+      - task: ChangedFiles@1
+        name: CheckChangesBE
+        inputs:
+          rules: aspnet-core/**
+          variable: HasChangedBE
+  
+      - task: ChangedFiles@1
+        name: CheckChangesFE
+        inputs:
+          rules: angular/**
+          variable: HasChangedFE
+
+      - task: ChangedFiles@1
+        name: CheckChangesPJ
+        inputs:
+          rules: angular/package.json
+          variable: HasChangedPJ
+    
+  - job: DotnetBuild
+    dependsOn: check_file
+    condition: eq(dependencies.check_file.outputs['CheckChangesBE.HasChangedBE'], 'true')
+    steps: 
+    - script: |
+        export PATH=$PATH:/home/nccsoft/.dotnet/
+        cd aspnet-core/src/Timesheet.Migrator
+        dotnet publish -c Release
+      displayName: 'Dotnet Publish Migrator'
+    
+    - script: |
+        cd aspnet-core/src/Timesheet.Migrator/bin/Release/netcoreapp2.1/publish/
+        zip -r backend_migrator.zip *
+      displayName: 'Compress Publish Migrator'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'aspnet-core/src/Timesheet.Migrator/bin/Release/netcoreapp2.1/publish/backend_migrator.zip'
+        ArtifactName: 'dev-dotnet-migrator-timesheet'
+        publishLocation: 'Container'
+      displayName: 'Publish Artifacts Migrator'
+
+    - script: |
+        export PATH=$PATH:/home/nccsoft/.dotnet/
+        cd aspnet-core
+        dotnet publish -c Release
+      displayName: 'Dotnet Release Host'
+
+    - script: |
+        cd aspnet-core/src/Timesheet.Web.Host/bin/Release/netcoreapp2.1/publish/
+        zip -r backend_publish.zip *
+      displayName: 'Compress Release Host'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'aspnet-core/src/Timesheet.Web.Host/bin/Release/netcoreapp2.1/publish/backend_publish.zip'
+        ArtifactName: 'dev-dotnet-host-timesheet'
+        publishLocation: 'Container'
+      displayName: 'Publish Artifacts Host'
+
+  - job: AngularBuild
+    dependsOn: check_file
+    condition: eq(dependencies.check_file.outputs['CheckChangesFE.HasChangedFE'], 'true')
+    variables:
+      check_pj: $[eq(dependencies.check_file.outputs['CheckChangesPJ.HasChangedPJ'], 'true')]
+      
+    steps:
+      - script: |
+          cd angular
+          unzip -qo ~/soft/check_node/timesheet/node_modules.zip
+        displayName: 'Copy node modules'
+        continueOnError: true
+      
+      - script: |
+          cd angular/
+          export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+          nvm use 14.15
+          node -v
+          echo "=== INSTALL PACKAGE ==="
+          npm install
+          echo "=== COPY NEW PACKAGE ==="
+          rm -rf ~/soft/check_node/timesheet/node_modules.zip
+          zip -r ~/soft/check_node/timesheet/node_modules.zip node_modules/
+          
+        condition: and(succeeded(), eq(variables['check_pj'], 'true'))
+        displayName: 'Install Package'
+
+      - script: |
+          cd angular/
+          export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+          nvm use 14.15          
+          echo "=== ReBuild node-sass ==="
+          npm rebuild node-sass
+          ng build --prod
+        displayName: 'Build Frontend'
+
+      - script: |
+          cd angular/dist
+          zip -r frontend_publish.zip *
+        displayName: 'Compress Build FE'
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: 'angular/dist/frontend_publish.zip'
+          ArtifactName: 'dev-fe-timesheet'
+          publishLocation: 'Container'
+        displayName: 'Publish Artifacts Frontend'
+            
+          

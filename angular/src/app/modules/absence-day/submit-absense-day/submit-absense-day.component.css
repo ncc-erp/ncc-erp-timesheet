@@ -1,0 +1,26 @@
+.day-chip-full-day {
+    color: #bf0404 !important;
+    box-shadow: none;
+    background: #fff;
+    border: 1px solid #ebebeb;
+}
+
+.day-chip-morning {
+    color: #5979d9 !important;
+    box-shadow: none;
+    background: #fff;
+    border: 1px solid #ebebeb;
+}
+
+.day-chip-afternoon {
+    color:#B08DBC !important;
+    box-shadow: none;
+    background: #fff;
+    border: 1px solid #ebebeb;
+}
+.day-chip-custom {
+    color:#e88597 !important;
+    box-shadow: none;
+    background: #fff;
+    border: 1px solid #ebebeb;
+}

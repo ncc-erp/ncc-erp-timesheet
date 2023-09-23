@@ -1,0 +1,21 @@
+ span.date {
+     display: inline-block;
+     min-width: 10px;
+     padding: 3px 7px;
+     font-size: 12px;
+     font-weight: 700;
+     line-height: 1;
+     text-align: center;
+     white-space: nowrap;
+     vertical-align: middle;
+     border-radius: 10px;
+     color: white;
+     background-color: green;
+     margin-bottom: 2px;
+ }
+ .text-success{
+    color: #28a745!important;
+ }
+ .ts-warning .mat-dialog-title{
+    cursor: move
+ }

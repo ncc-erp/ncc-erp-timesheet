@@ -1,0 +1,13 @@
+<div style="position: relative;">
+  <h1 mat-dialog-title cdkDragHandle cdkDrag cdkDragRootElement=".cdk-overlay-pane" style="cursor: grab;"
+    style="margin: 0;font-weight: bold; color: #014C6E;">{{title |
+    localize}}{{content.capabilityName}}</h1>
+  <mat-icon style="position: absolute; top: 0; right: 0;
+  cursor: pointer;" (click)="_dialogRef.close()">close</mat-icon>
+  <hr>
+  <mat-dialog-content class="mat-typography">
+    <div [innerHTML]="content.guideLine" style="font-size: 16px">
+    </div>
+    <h4 class="text-center" *ngIf="content.guideLine === null"> No data!</h4>
+  </mat-dialog-content>
+</div>

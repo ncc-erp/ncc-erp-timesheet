@@ -1,0 +1,31 @@
+.title-date{
+  display: inline-block;
+  margin-left: 20px;
+}
+
+.dashboard-donut-chart {
+    height: 100px;
+}
+.color{
+	width: 10px;
+	height: 10px;
+	display: inline-block;
+	background: rebeccapurple;
+	margin-right: 5px;
+}
+.square{
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	margin-right: 5px;
+}
+.blue{
+	background: #00bcd4;
+}
+.lightblue{
+	background: #b9f0f7
+}
+.violin{
+	background: #641ec8;
+}
+

@@ -1,0 +1,8 @@
+.fixed-bottom-button {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin-bottom: 144px;
+    margin-right: 35px;
+    z-index: 1;
+}

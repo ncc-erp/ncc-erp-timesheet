@@ -1,0 +1,52 @@
+.d-flex{
+    display: flex;
+}
+.px-0{
+    padding-left: 0px;
+    padding-right: 0px;;
+}
+.align-middle{
+    display:flex;
+    align-items:center;
+}
+::ng-deep #frm_update_user_info .mat-form-field-wrapper{
+    margin: 0px;
+    padding-bottom: 0px;
+}
+::ng-deep #frm_update_user_info .mat-typography.mat-dialog-content{
+    max-height: 78vh;
+}
+::ng-deep #frm_update_user_info .mat-form-field-infix{
+    padding: 8px 0px;
+}
+label{
+    padding: 0px;
+    display:flex;
+    align-items:center;
+}
+.mt-2{
+    margin-top: 15px;
+}
+.badge.bg-warning{
+    background-color: #e08b29;
+}
+@media (max-width: 767px){
+    .d-flex{
+        display: block;
+    }
+    .d-flex label{
+        margin-top: 12px;
+        margin-bottom: 8px;
+    }
+    .listIssuedBys span {
+        margin-top: 10px;
+    }
+    .listIssuedBys button {
+        margin-top: 5px;
+    }
+
+    
+}
+::ng-deep .mat-tooltip {
+    font-size: 13px;
+}

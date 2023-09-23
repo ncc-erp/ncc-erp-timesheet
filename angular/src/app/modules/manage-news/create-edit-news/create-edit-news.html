@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>{{title}}</h2>
+<mat-dialog-content class="mat-typography" style="min-width: 400px">
+    <div class="example-container">
+        <mat-form-field>
+            <input matInput name="Title" [placeholder]="'Title' | localize" [(ngModel)]="newNews.title" required maxlength="100" />
+        </mat-form-field>
+    </div>
+    <angular-editor [config]="config" [placeholder]="'Enter text here...'" [(ngModel)]="newNews.content"></angular-editor>
+    <mat-checkbox name="isAllowComment" [(ngModel)]="newNews.isAllowComment">
+        Comment
+    </mat-checkbox>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button class="btn btn-default" mat-raised-button mat-dialog-close>{{l('Cancel')}}</button>
+    <button mat-raised-button color="primary" mat-button [mat-dialog-close]="newNews">{{l('Save')}}</button>
+</mat-dialog-actions>

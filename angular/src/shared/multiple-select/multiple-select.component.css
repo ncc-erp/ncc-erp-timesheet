@@ -1,0 +1,39 @@
+.select-all {
+    font-size: inherit;
+    line-height: 3em;
+    height: 3em;
+}
+
+::ng-deep .all-select {
+    display: block !important;
+    padding: 0 16px;
+}
+
+::ng-deep .all-select .mat-checkbox-layout {
+    display: block !important;
+}
+
+::ng-deep .all-select:hover {
+    background: rgba(0, 0, 0, .04);
+}
+
+::ng-deep .search-input {
+    padding: 10px 16px;
+}
+
+.action-select-all-delete {
+    display: flex;
+    padding: 10px 16px;
+    cursor: pointer;
+    justify-content: space-between;
+}
+
+.mr-10{
+    margin-right: 10px;
+}
+::ng-deep .no-option .mat-option-text{
+    text-align: center;
+}
+::ng-deep .no-option .mat-option-pseudo-checkbox {
+    display: none;
+}

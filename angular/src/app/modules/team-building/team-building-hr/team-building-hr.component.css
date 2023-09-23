@@ -1,0 +1,28 @@
+.updated-at {
+    min-width: 154px;
+    max-width: 154px;
+}
+.btn-border{
+    border-radius: 10px;
+}
+.margin-btn{
+    margin-top: 12px
+}
+.flex-btn{
+    display: flex;
+    justify-content: space-around;
+}
+
+.info-name{
+    display: flex;
+    align-items: center;
+    max-width: 400px;
+    overflow: hidden;
+}
+
+.info-name-box{
+    margin: 5px 10px 0px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}

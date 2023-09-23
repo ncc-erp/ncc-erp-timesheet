@@ -1,0 +1,23 @@
+
+.list-news {
+    border: solid 1px;
+    border-color:#ddd;
+    width:auto;
+	height: 142px;
+    margin: 10px 10px 20px 10px;
+    background: #eee;  
+    padding-left: 10px; 
+}
+.text-content{
+    display: inline-block;
+    width: 100%;
+	height: 45px;
+    overflow: hidden;
+    text-overflow: ellipsis;   
+    font-size: 15px;
+}
+.text-content img {
+    height:calc(100% - 15px) ;
+}
+
+

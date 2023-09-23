@@ -1,0 +1,149 @@
+.styleUser > thead > tr > th {
+  padding: 4px 4px;
+  min-width: 50px;
+  text-align: center;
+  border: 0.2px solid rgba(204, 204, 204, 0.35);
+  background: white;
+}
+
+.styleUser > tbody > tr > td {
+  padding: 4px 4px;
+  border: 0.2px solid rgba(204, 204, 204, 0.35);
+}
+
+.complain{
+  margin-top: 17px;
+  padding-right: 35px;
+}
+/* ::ng-deep .mat-form-field-flex{
+  padding-left: 5px;
+} */
+
+::ng-deep .one-line .mat-form-field-underline {
+  display: none;
+}
+::ng-deep .one-line .mat-form-field-infix{
+  padding: 0px;
+  border-top: 0px;
+}
+::ng-deep .one-line .mat-form-field-appearance-legacy{
+  padding: 0px;
+}
+
+.time-header{
+  height: 10px;
+  padding-left: 10px;
+  font-weight: 900;
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+}
+
+.month{
+  width: 40px;
+  margin-bottom: 11px !important;
+}
+
+.year{
+  width: 70px;
+  margin-bottom: 9px !important;
+}
+
+.one-line{
+  display: flex;
+  align-items: center;
+}
+
+.styleUser {
+  border-collapse: collapse ;
+}
+
+.table-responsive th {
+  vertical-align: middle;
+}
+
+.btn-route {
+  border: none;
+  background-color: transparent;
+  font-weight: bold;
+  padding: 0px;
+  color: #001fff;
+}
+
+.btn-route:hover {
+  text-decoration: underline;
+}
+
+.btn {
+  cursor: pointer;
+}
+
+.red {
+  color: red;
+  font-weight: bold;
+}
+
+.green {
+  color: green;
+  font-weight: bold;
+}
+
+.btn-back {
+  position: absolute;
+  top: 10px;
+  right: 50px;
+  z-index: 1;
+}
+
+.time {
+  max-width: 40px;
+  margin: auto;
+}
+
+.button24 {
+  width: 24px;
+  height: 24px;
+}
+
+.icon24 {
+  font-size: 16px;
+  margin-top: -8px;
+}
+
+::ng-deep .mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+.fixTableHead {
+  overflow-y: auto;
+  max-height: 66vh;
+}
+
+.fixTableHead thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+table tbody:nth-of-type(1) tr:nth-of-type(1) td {
+    border-top: none !important;
+}
+table thead th {
+    border-top: none !important;
+    border-bottom: none !important;
+    box-shadow: inset 0 0.4px 0 rgba(204, 204, 204, 0.35),
+                inset 0 -0.4px 0 rgba(204, 204, 204, 0.35);
+}
+::ng-deep .ngx-pagination .ellipsis::after{
+  display: none;
+}
+.main-header{
+  display: flex;
+}
+::ng-deep .title .mat-form-field .mat-form-field-wrapper{
+  padding: 0;
+}
+.title .mat-form-field{
+  margin-bottom: 0 !important;
+}
+.font-size-13{
+  font-size: 13px;
+}

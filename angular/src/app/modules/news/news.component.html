@@ -1,0 +1,22 @@
+<div class="row clearfix">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{"News"}}</h2>
+      </div>
+      <div class="container-fluid" [busy]="isLoading">
+           <div class="row" infiniteScroll [infiniteScrollDistance]="2" [infiniteScrollThrottle]="50" (scrolled)="onScroll()" >
+             <div class="list-news" *ngFor="let item of news">
+               
+               <a class="router" (click)="detailNews(item.id)"><h4>{{item.title}}</h4></a>
+               <h6><i>{{item.creationTime | date: "yyyy-MM-dd"}}</i></h6>
+              <div class="text-content">
+                <span  [innerHtml]="item.content">{{item.content}}</span>
+              </div>                     
+            </div>
+           </div>
+       </div>
+    </div>
+  </div>
+</div>
+

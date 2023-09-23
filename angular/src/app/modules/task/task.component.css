@@ -1,0 +1,13 @@
+.table tbody tr td {
+    padding: 10px 5px;
+    margin: 0 5px;
+}
+.header .mat-raised-button {
+    margin: 10px 0 0;
+}
+.mat-raised-button {
+   margin: 0 5px;
+}
+.white-color{
+    color: #fff;
+}

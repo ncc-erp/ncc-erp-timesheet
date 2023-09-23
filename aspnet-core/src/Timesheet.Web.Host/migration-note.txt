@@ -1,0 +1,54 @@
+Deploy chú ý: sửa trong web.conf:
+	<add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" />		  
+==>
+	<add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModule" resourceType="Unspecified" />
+
+
+/****** Script for SelectTopNRows command from SSMS  ******/
+SELECT TOP (1000) [MigrationId]
+      ,[ProductVersion]
+  FROM [Timesheet].[dbo].[__EFMigrationsHistory]
+
+MigrationId	ProductVersion
+20190513083517_Init_new_TimesheetDb	2.2.1-servicing-10028
+20190812080435_Add_Table_Posts_Comments	2.2.1-servicing-10028
+20190822091545_Add_Table_ProjectTargetUsers	2.2.1-servicing-10028
+20190823034704_Change_table_Mytimesheet_add_column_TargetUserWorkingTime	2.2.1-servicing-10028
+20200313041310_add_table_DayOffSettings_change_table_AbpUsers_add_more_columns	2.2.1-servicing-10028
+20200318051225_Change_table_Projects_change_column_EndDate	2.2.1-servicing-10028
+20200320023316_add_isAllUserBelongTo	2.2.1-servicing-10028
+20200320025415_change_table_DayOffSettings_add_column_Branch	2.2.1-servicing-10028
+20200505080407_add_table_AbsenceDayRequests_AbsenceDayDetails_DayOffTypes_ReportMonths	2.2.1-servicing-10028
+20200515042445_add_table_ReportMonths_add_table_UserSalaries_table_UserSalaryMonths_UserSalaryMonthDetails	2.2.1-servicing-10028
+20200521042617_change_table_UserSalaries_add_column_Type	2.2.1-servicing-10028
+20200602083214_delete_table_ReportMonths	2.2.1-servicing-10028
+20200622084320_change_table_AbsenceDayDetails_add_column_Hour	2.2.1-servicing-10028
+20200810084311_add_table_AbsencedayRequest_add_column_Type	2.2.1-servicing-10028
+20200811075210_add_table_UnlockTimesheets	2.2.1-servicing-10028
+20210311090016_add_many_table	2.2.1-servicing-10028
+20210420102102_updateTable_HistoryWorkingTime_AbpUsers	2.2.1-servicing-10028
+20210504072157_changeTableTimeKeepings	2.2.1-servicing-10028
+
+
+
+muốn db quay về ở thời điểm 20210311090016_add_many_table	2.2.1-servicing-10028 thì chạy lệnh các lệnh sau ở Package Manager Console, default project: Timesheet.EntityFrameworkCore:
+
+update-database 20210311090016_add_many_table
+xóa  2 migration sau  20210311090016_add_many_table:
+Remove-Migration
+Remove-Migration
+
+===>
+PM> update-database 20210311090016_add_many_table
+Reverting migration '20210504072157_changeTableTimeKeepings'.
+Reverting migration '20210420102102_updateTable_HistoryWorkingTime_AbpUsers'.
+Done.
+PM> Remove-Migration
+Removing migration '20210504072157_changeTableTimeKeepings'.
+Reverting model snapshot.
+Done.
+PM> Remove-Migration
+Removing migration '20210420102102_updateTable_HistoryWorkingTime_AbpUsers'.
+Reverting model snapshot.
+Done.
+PM> 

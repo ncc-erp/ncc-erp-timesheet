@@ -1,0 +1,9 @@
+<div *ngIf="display" class="form-group row" [ngClass]="{ 'form-group-readonly': readOnly}">
+  <label *ngIf="!fullWidth" for="" class="col-form-label {{ labelClass }} {{ labelAlign }}">{{ label }}
+      <span *ngIf="label && checkRequired()" class="text-danger">*</span>
+  </label>
+  <div class="{{ fullWidth ? 'col-sm-12' : inputClass }}">
+      <template #inputElement></template>
+      <mat-error *ngIf="checkError()">{{errorMsg}}</mat-error>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+.styleUser > thead > tr > th{
+    padding: 4px 4px !important;
+    min-width: 50px;
+    text-align: center;
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+}
+
+.styleUser > tbody > tr > td{
+    padding: 4px 4px !important;
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+}
+
+.styleUser {
+    border-collapse: collapse !important;
+}
+
+.table-responsive th{
+    vertical-align: middle;
+}

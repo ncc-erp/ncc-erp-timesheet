@@ -1,0 +1,41 @@
+<div class="row select-row">
+    <div class="">
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label>{{ label }}</mat-label>
+        <mat-select
+          class="selectpicker remove-example"
+          (selectionChange)="changeOptions(true)"
+          [(ngModel)]="defaultDateType"
+        >
+          <mat-option *ngFor="let item of dateTimeOptions" [value]="item">
+            <p *ngIf="item != DateSelectorEnum.CUSTOM">
+              {{ item }}
+            </p>
+            <p *ngIf="item == DateSelectorEnum.CUSTOM" (click)="showPopup()">
+              {{ item }}
+            </p>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div
+      class="select-datepicker--action"
+      style="white-space: nowrap;"
+    >
+      <button
+        class="h-inherit btn btn-danger btn-sl-date"
+        (click)="nextOrPre('pre')"
+        style="margin-left: 15px;"
+      >
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <span class="select-datepicker--label text-center">{{ dateText }}</span>
+      <button
+        class="h-inherit btn btn-danger btn-sl-date"
+        (click)="nextOrPre('next')"
+      >
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+  

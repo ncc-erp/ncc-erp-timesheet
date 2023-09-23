@@ -1,0 +1,203 @@
+th {
+  text-align: center;
+}
+
+.color-red {
+  color: red;
+}
+
+.day-chip-morning {
+  background-color: #0c51a0 !important;
+}
+
+.day-chip-afternoon {
+  background-color: #d000db;
+}
+
+.day-chip-full-day {
+  background-color: #db0000;
+}
+
+.onsite {
+  background-color: #009688 !important;
+}
+
+.onsite,
+.remote,
+.absence {
+  color: #fff;
+  display: inline-block;
+  padding: 2px;
+  font-size: 9px;
+
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  border-radius: 5px;
+}
+
+.absence {
+  background-color: #db0000 !important;
+}
+
+.remote {
+  background-color: #0c51a0 !important;
+}
+
+.day-chip-custom {
+  background-color: #f27024 !important;
+}
+
+$stt-col-width: 0;
+$name-col-width: 0;
+
+#table-detail {
+  max-height: 600px;
+  position: relative;
+  width: 100%;
+  z-index: 1;
+  margin: auto;
+  overflow: auto;
+
+  &:focus {
+    outline: none;
+  }
+
+  table {
+    border-collapse: separate;
+  }
+
+  th,
+  td {
+    border: 1px solid #ebebeb;
+    padding: 1px 9px;
+  }
+
+  td:nth-child(2) {
+    left: 51px;
+    width: $name-col-width;
+    max-width: $name-col-width;
+  }
+
+  thead th {
+    background: #a5cde0;
+    vertical-align: middle;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    &.sticky-left {
+      z-index: 5;
+
+      &:nth-child(2) {
+        left: 51px;
+      }
+    }
+  }
+}
+
+.sticky-left {
+  text-align: center;
+  width: 60px;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #a5cde0;
+  padding: 5px;
+}
+
+.sticky-left-day {
+  text-align: center;
+  width: 23px;
+  height: 80px;
+  position: relative;
+}
+
+.table .table-responsive {
+  margin: 0 !important;
+}
+
+.total,
+.total-column.sticky-left {
+  left: ($stt-col-width + $name-col-width);
+}
+
+.tbody td:nth-child(2) {
+  left: ($stt-col-width + $name-col-width + 51px) !important;
+}
+
+#totalCol {
+  height: 60px;
+}
+
+.dayOff {
+  text-align: center;
+  background-color: #9E9E9E9E;
+}
+
+.dayLocked {
+  text-align: center;
+  background-color: rgba(252, 239, 120, 0.5);
+}
+
+.dayWarning {
+  text-align: center;
+  background-color: rgba(252, 120, 120, 0.5);
+}
+
+.defaultDay {
+  text-align: center;
+}
+
+.icon {
+  margin: -6px 0px;
+}
+
+.show-than-default {
+  margin-left: 15px;
+  margin-top: 16px;
+}
+
+.f-size-11 {
+  font-size: 11px;
+  line-height: 11px;
+}
+
+.g-checkin {
+  position: absolute;
+  bottom: 0;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+}
+
+.sticky-left .employee .g-action {
+  display: flex;
+  margin-top: 10px;
+}
+
+.sticky-left .employee .employee-info .status-label {
+  height: 14px;
+  margin-top: 8px;
+  margin-right: 5px;
+}
+
+.g-absence {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+}
+
+::ng-deep .custom-tooltip {
+  background: #858282;
+  color: #fff;
+  white-space: pre-line;
+  width: 135px;
+  font-size: 12px;
+}
+
+#normal-working table{
+  margin-bottom: 0;
+}
