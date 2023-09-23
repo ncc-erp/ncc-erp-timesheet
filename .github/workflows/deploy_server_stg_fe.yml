@@ -1,0 +1,60 @@
+name: Deploy Timesheet_FE STG
+on:
+  push:
+    branches:
+      - stg
+    paths:
+      - 'angular/**'
+      - '.github/workflows/deploy_server_stg_fe.yml'
+jobs:
+  build:
+    runs-on: stg
+    name: Build Timesheet_FE STG
+    environment: stg
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Cache Node Module
+      uses: actions/cache@v2
+      with:
+        path: |
+          **/node_modules
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json,**/package-lock.json') }}
+        restore-keys: |
+            ${{ runner.os }}-build-
+    
+    - name: Angular Build
+      run: |
+        cd angular/
+        export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+        nvm use 14.15
+        node -v
+        echo "=== INSTALL PACKAGE ==="
+        npm install
+        npm rebuild node-sass
+        ng build --prod
+
+    - name: Remove appconfig
+      run: |
+        cd angular/dist/assets
+        rm -rf appconfig.production.json
+        rm -rf /var/www/app_git/timesheet/stg-fe-timesheet/*
+        
+    - name: Copy AngularBuild
+      run: |
+        cd angular/dist/
+        cp -r . /var/www/app_git/timesheet/stg-fe-timesheet/
+        
+    - name: Update Env-Config
+      run: |
+        cd angular/
+        echo '${{ secrets.APP_CONFIG_STG }}' > appconfig.production.json
+      
+    - name: Restart Nginx
+      run: |
+        cd angular/
+        cp appconfig.production.json /var/www/app_git/timesheet/stg-fe-timesheet/assets/
+        sudo service nginx reload

@@ -1,0 +1,90 @@
+name: Deploy Timesheet_BE PROD
+on:
+  push:
+    branches:
+      - prod
+    paths:
+    - 'aspnet-core/**'
+    - '.github/workflows/deploy_server_prod_be.yml'
+
+jobs:
+  build:
+    runs-on: prod
+    name: Build Timesheet_BE PROD
+    environment: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Migrator
+        run: |
+          PATH=~/.dotnet:$PATH
+          cd aspnet-core/src/Timesheet.Migrator
+          dotnet build
+          dotnet publish
+
+      - name: Copy New Migrator
+        run: |
+          cd aspnet-core/src/Timesheet.Migrator/bin/Debug/netcoreapp2.1/publish/
+          rm -rf appsettings.json
+          cp -r * /var/www/migrator_git/timesheet/dotnet-migrator-timesheet/
+
+      - name: Build Host
+        run: |
+          PATH=~/.dotnet:$PATH
+          cd aspnet-core/src/Timesheet.Web.Host
+          dotnet build
+          dotnet publish
+
+      - name: Backup Log
+        run: |
+          cp -r /var/www/app_git/timesheet/dotnet-host-timesheet/App_Data/Logs/* /home/erp/data_git/timesheet/Logs/
+          cp -r /var/www/app_git/timesheet/dotnet-host-timesheet/wwwroot/* /home/erp/data_git/timesheet/
+          chown -R erp:erp /home/erp/data_git/timesheet/
+          rm -rf /home/erp/data_git/timesheet/swagger
+          rm -rf /var/www/app_git/timesheet/dotnet-host-timesheet-bk/*
+          cp -r /var/www/app_git/timesheet/dotnet-host-timesheet/* /var/www/app_git/timesheet/dotnet-host-timesheet-bk/
+
+      - name: Copy New Host
+        run: |
+          cd aspnet-core/src/Timesheet.Web.Host/bin/Debug/netcoreapp2.1/publish/
+          rm -rf appsettings.json
+          cp -r * /var/www/app_git/timesheet/dotnet-host-timesheet/
+          cd /var/www/app_git/timesheet/dotnet-host-timesheet/
+          mkdir -p /var/www/app_git/timesheet/dotnet-host-timesheet/App_Data/Logs/
+          cp -r /home/erp/data_git/timesheet/Logs/* /var/www/app_git/timesheet/dotnet-host-timesheet/App_Data/Logs/
+          cp -r /home/erp/data_git/timesheet/* /var/www/app_git/timesheet/dotnet-host-timesheet/wwwroot/
+          chmod 777 -R App_Data/
+          chmod 777 -R wwwroot/
+  
+  
+  deploy:
+    runs-on: prod
+    name: Deploy Timesheet_BE PROD
+    environment: prod
+    needs:
+      - build
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: Create appsettings.json
+      run: |
+        cd aspnet-core/
+        echo '${{ secrets.APP_SETTING_PROD }}' > appsettings.json       
+        
+    - name: Migrate Database
+      run: |
+        sudo service erp-timesheet-git stop
+        PATH=~/.dotnet:$PATH
+        cd aspnet-core/
+        cp appsettings.json /var/www/migrator_git/timesheet/dotnet-migrator-timesheet/
+        cd /var/www/migrator_git/timesheet/dotnet-migrator-timesheet/
+        dotnet Timesheet.Migrator.dll -q
+        
+    - name: Restart Server
+      run: |
+        cd aspnet-core/
+        cp appsettings.json /var/www/app_git/timesheet/dotnet-host-timesheet/
+        sudo service erp-timesheet-git restart
+        sudo service erp-timesheet-git status

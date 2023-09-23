@@ -1,0 +1,83 @@
+name: Deploy Timesheet_BE STG
+on:
+  push:
+    branches:
+      - stg
+    paths:
+    - 'aspnet-core/**'
+    - '.github/workflows/deploy_server_stg_be.yml'
+
+jobs:
+  build:
+    runs-on: stg
+    name: Build Timesheet_BE STG
+    environment: stg
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Migrator
+        run: |
+          PATH=~/.dotnet:$PATH
+          cd aspnet-core/src/Timesheet.Migrator
+          dotnet build
+          dotnet publish
+
+      - name: Copy New Migrator
+        run: |
+          cd aspnet-core/src/Timesheet.Migrator/bin/Debug/netcoreapp2.1/publish/
+          rm -rf appsettings.json
+          cp -r * /var/www/migrator_git/timesheet/dotnet-migrator-timesheet/
+
+      - name: Build Host
+        run: |
+          PATH=~/.dotnet:$PATH
+          cd aspnet-core/src/Timesheet.Web.Host
+          dotnet build
+          dotnet publish
+
+      - name: Backup Log
+        run: |
+          cp -r /var/www/app_git/timesheet/stg-dotnet-host-timesheet/App_Data/Logs/* /home/nccsoft/data_git/timesheet/Logs/
+
+      - name: Copy New Host
+        run: |
+          cd aspnet-core/src/Timesheet.Web.Host/bin/Debug/netcoreapp2.1/publish/
+          rm -rf appsettings.json
+          cp -r * /var/www/app_git/timesheet/stg-dotnet-host-timesheet/
+          cd /var/www/app_git/timesheet/stg-dotnet-host-timesheet/
+          mkdir -p /var/www/app_git/timesheet/stg-dotnet-host-timesheet/App_Data/Logs/
+          cp -r /home/nccsoft/data_git/timesheet/Logs/* /var/www/app_git/timesheet/stg-dotnet-host-timesheet/App_Data/Logs/
+          chmod 777 -R App_Data/
+  
+  
+  deploy:
+    runs-on: stg
+    name: Deploy Timesheet_BE STG
+    environment: stg
+    needs:
+      - build
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: Create appsettings.json
+      run: |
+        cd aspnet-core/
+        echo '${{ secrets.APP_SETTING_STG }}' > appsettings.json       
+        
+    - name: Migrate Database
+      run: |
+        sudo service erp-timesheet-git stop
+        PATH=~/.dotnet:$PATH
+        cd aspnet-core/
+        cp appsettings.json /var/www/migrator_git/timesheet/dotnet-migrator-timesheet/
+        cd /var/www/migrator_git/timesheet/dotnet-migrator-timesheet/
+        dotnet Timesheet.Migrator.dll -q
+        
+    - name: Restart Server
+      run: |
+        cd aspnet-core/
+        cp appsettings.json /var/www/app_git/timesheet/stg-dotnet-host-timesheet/
+        sudo service erp-timesheet-git restart
+        sudo service erp-timesheet-git status

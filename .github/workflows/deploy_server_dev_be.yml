@@ -1,0 +1,85 @@
+name: Deploy Timesheet_BE Dev
+on:
+  push:
+    branches:
+      - dev
+    paths:
+    - 'aspnet-core/**'
+    - '.github/workflows/deploy_server_dev_be.yml'
+
+jobs:
+  build:
+    runs-on: dev
+    name: Build Timesheet_BE Dev
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Migrator
+        run: |
+          export PATH=$PATH:/opt/dotnet3/
+          cd aspnet-core/src/Timesheet.Migrator
+          dotnet3 publish -c Release
+
+      - name: Copy New Migrator
+        run: |
+          cd aspnet-core/src/Timesheet.Migrator/bin/Release/netcoreapp2.1/publish/
+          rm -rf appsettings.json
+          cp -r * /var/www/migrator_git/timesheet/dev-dotnet-migrator-timesheet/
+
+      - name: Build Host
+        run: |
+          export PATH=$PATH:/opt/dotnet3/
+          cd aspnet-core
+          dotnet3 publish -c Release
+      
+      - name: Backup Log
+        run: |
+          cp -r /var/www/app_git/timesheet/dev-dotnet-host-timesheet/App_Data/Logs/* /home/nccsoft/data_git/timesheet/Logs/
+          cp -r /var/www/app_git/timesheet/dev-dotnet-host-timesheet/wwwroot/* /home/nccsoft/data_git/timesheet/
+          rm -rf /home/nccsoft/data_git/timesheet/swagger
+
+      - name: Copy New Host
+        run: |
+          cd aspnet-core/src/Timesheet.Web.Host/bin/Release/netcoreapp2.1/publish/
+          rm -rf appsettings.json
+          cp -r * /var/www/app_git/timesheet/dev-dotnet-host-timesheet/
+          cd /var/www/app_git/timesheet/dev-dotnet-host-timesheet/
+          mkdir -p /var/www/app_git/timesheet/dev-dotnet-host-timesheet/App_Data/Logs/
+          cp -r /home/nccsoft/data_git/timesheet/Logs/* /var/www/app_git/timesheet/dev-dotnet-host-timesheet/App_Data/Logs/
+          cp -r /home/nccsoft/data_git/timesheet/* /var/www/app_git/timesheet/dev-dotnet-host-timesheet/wwwroot/
+          chmod 777 -R App_Data/
+          chmod 777 -R wwwroot/
+
+  deploy:
+    runs-on: dev
+    name: Deploy Timesheet_BE Dev
+    environment: dev
+    needs:
+      - build
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: Create appsettings.json
+      run: |
+        cd aspnet-core/
+        echo '${{ secrets.APP_SETTING_DEV }}' > appsettings.json       
+        
+    - name: Migrate Database
+      run: |
+        sudo service erp-timesheet-git stop
+        export PATH=$PATH:/opt/dotnet2/
+        cd aspnet-core/
+        cp appsettings.json /var/www/migrator_git/timesheet/dev-dotnet-migrator-timesheet/
+        cd /var/www/migrator_git/timesheet/dev-dotnet-migrator-timesheet/
+        dotnet2 Timesheet.Migrator.dll -q
+        
+    - name: Restart Server
+      run: |
+        cd aspnet-core/
+        cp appsettings.json /var/www/app_git/timesheet/dev-dotnet-host-timesheet/
+        sudo service erp-timesheet-git restart
+        sudo service erp-timesheet-git status
+    

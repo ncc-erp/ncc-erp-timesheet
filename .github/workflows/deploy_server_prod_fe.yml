@@ -1,0 +1,69 @@
+name: Deploy Timesheet_FE PROD
+on:
+  push:
+    branches:
+      - prod
+    paths:
+      - 'angular/**'
+      - '.github/workflows/deploy_server_prod_fe.yml'
+jobs:
+  build:
+    runs-on: prod
+    name: Build Timesheet_FE PROD
+    environment: prod
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Cache Node Module
+      uses: actions/cache@v2
+      with:
+        path: |
+          **/node_modules
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json,**/package-lock.json') }}
+        restore-keys: |
+            ${{ runner.os }}-build-
+    
+    - name: Npm Build
+      run: |
+        cd angular/
+        export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+        nvm use 14.15
+        node -v
+        echo "=== INSTALL PACKAGE ==="
+        npm install
+
+    - name: Angular Build
+      run: |
+        export NODE_OPTIONS="--max-old-space-size=3072"
+        cd angular/
+        export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+        nvm use 14.15
+        npm rebuild node-sass
+        ng build --prod
+
+    - name: Remove appconfig
+      run: |
+        cd angular/dist/assets
+        rm -rf appconfig.production.json
+        rm -rf /var/www/app_git/timesheet/timesheet-fe/*
+        
+    - name: Copy AngularBuild
+      run: |
+        cd angular/dist/
+        cp -r . /var/www/app_git/timesheet/timesheet-fe/
+        
+    - name: Update Env-Config
+      run: |
+        cd angular/
+        echo '${{ secrets.APP_CONFIG_PROD }}' > appconfig.production.json
+      
+    - name: Restart Nginx
+      run: |
+        cd angular/
+        cp appconfig.production.json /var/www/app_git/timesheet/timesheet-fe/
+        sudo service nginx reload
