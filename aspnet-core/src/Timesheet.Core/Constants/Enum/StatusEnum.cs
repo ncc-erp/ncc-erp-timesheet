@@ -190,7 +190,10 @@ namespace Ncc.Entities.Enum
             Reviewed = 1,
             Approved = 2,
             SentEmail = 3,
-            Rejected = -1
+            Rejected = -1,
+            PmReviewed = 4,
+            HrApproved = 5,
+            ReOpen = 6
         }
 
         public enum EnumRequest
