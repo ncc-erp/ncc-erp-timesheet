@@ -1338,7 +1338,7 @@ namespace Timesheet.APIs.ReviewDetails
                 }
                 else
                 {
-                    throw new UserFriendlyException("Review này chưa được HR Approve hoặc đã được approve");
+                    throw new UserFriendlyException("Review này chưa được HR Approve");
                 }
             }
             else

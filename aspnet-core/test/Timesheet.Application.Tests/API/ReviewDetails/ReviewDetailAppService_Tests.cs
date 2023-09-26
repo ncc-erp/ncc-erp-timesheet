@@ -22,6 +22,8 @@ using Abp.Application.Services.Dto;
 using Abp.Configuration;
 using Abp.Runtime.Session;
 using Timesheet.APIs.ReviewInternCapabilities.Dto;
+using static Ncc.Entities.Enum.StatusEnum;
+using System;
 
 namespace Timesheet.Application.Tests.API.ReviewDetails
 {
@@ -169,7 +171,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
             {
                 var expectReviewDetail = new ReviewDetail
                 {
-                    Id = 18,
+                    Id = 22,
                     ReviewId = 3,
                     InternshipId = 16,
                     CurrentLevel = StatusEnum.UserLevel.Intern_1,
@@ -179,11 +181,11 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
                     ReviewerId = 3,
                 };
 
-                var reviewDetail = await _workScope.GetAsync<ReviewDetail>(18);
+                var reviewDetail = await _workScope.GetAsync<ReviewDetail>(22);
                 var allReviewDetail = _workScope.GetAll<ReviewDetail>();
 
-                allReviewDetail.ToList().Count.ShouldBe(18);
-                allReviewDetail.ToList().Find(item => item.Id == 18).ShouldNotBeNull();
+                allReviewDetail.ToList().Count.ShouldBe(22);
+                allReviewDetail.ToList().Find(item => item.Id == 22).ShouldNotBeNull();
                 reviewDetail.Id.ShouldBe(expectReviewDetail.Id);
                 reviewDetail.ReviewId.ShouldBe(expectReviewDetail.ReviewId);
                 reviewDetail.ReviewerId.ShouldBe(expectReviewDetail.ReviewerId);
@@ -773,14 +775,14 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var insertedReviewId = 18;
+                var insertedReviewId = 22;
                 var reviewDetail = await _workScope.GetAsync<ReviewDetail>(insertedReviewId);
                 var allReviewInternCapability = _workScope.GetAll<ReviewInternCapability>();
 
 
                 reviewDetail.ReviewId.ShouldBe(expectReviewDetail.ReviewId);
                 reviewDetail.InternshipId.ShouldBe(expectReviewDetail.InternshipId);
-                allReviewInternCapability.ShouldContain(item => item.ReviewDetailId == 18);
+                allReviewInternCapability.ShouldContain(item => item.ReviewDetailId == 22);
             });
         }
 
@@ -827,7 +829,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
         {
             var expectPMReviewDetail = new PMReviewDetailDto
             {
-                Id = 18,
+                Id = 22,
                 NewLevel = StatusEnum.UserLevel.Intern_3,
                 Note = "Note test",
                 Type = StatusEnum.Usertype.Internship,
@@ -877,7 +879,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
         {
             var expectPMReviewDetail = new PMReviewDetailDto
             {
-                Id = 18,
+                Id = 22,
                 NewLevel = StatusEnum.UserLevel.FresherMinus,
                 SubLevel = 2,
                 Note = "Note test",
@@ -1015,7 +1017,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
             {
                 var input = new PMReviewDetailDto
                 {
-                    Id = 18,
+                    Id = 22,
                     NewLevel = StatusEnum.UserLevel.Intern_3,
                     Note = "Note test",
                     Type = StatusEnum.Usertype.Internship,
@@ -1036,7 +1038,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
         {
             var expectPMReviewDetail = new ReviewDetailDto
             {
-                Id = 18,
+                Id = 22,
                 Note = "Note test",
                 Type = StatusEnum.Usertype.Collaborators,
                 NewLevel = StatusEnum.UserLevel.FresherMinus,
@@ -1370,7 +1372,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
             {
                 var input = new NewPMReviewDetailDto
                 {
-                    Id = 18,
+                    Id = 22,
                     NewLevel = StatusEnum.UserLevel.Intern_3,
                 };
 
@@ -1381,6 +1383,179 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
 
                 exception.Message.ShouldBe("Bạn không thể sửa vì kết quả review cho tts này đã được gửi mail");
             });
+        }
+
+        [Fact]
+        public async Task Should_HrVerify_Approve_Success()
+        {
+            var hrApprove = new CreatePrivateNoteDto
+            {
+                ReviewDetailId = 18,
+                Status = ReviewInternStatus.HrApproved,
+                PrivateNote = "Ok"
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _reviewDetailAppService.HrVerify(hrApprove);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var reviewDetailResponse = await _workScope.GetAsync<ReviewDetail>(hrApprove.ReviewDetailId);
+
+                reviewDetailResponse.Id.ShouldBe(hrApprove.ReviewDetailId);
+                reviewDetailResponse.Status.ShouldBe(hrApprove.Status);
+
+                var reviewCommentResponse = await _workScope.GetAsync<ReviewInternComment>(10);
+
+                reviewCommentResponse.PrivateNote.ShouldBe(hrApprove.PrivateNote);
+            });
+        }
+
+        [Fact]
+        public async Task Should_HrVerify_ReOpen_Success()
+        {
+            var hrReOpen = new CreatePrivateNoteDto
+            {
+                ReviewDetailId = 18,
+                Status = ReviewInternStatus.ReOpen,
+                PrivateNote = "ReOpen"
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _reviewDetailAppService.HrVerify(hrReOpen);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var reviewDetailResponse = await _workScope.GetAsync<ReviewDetail>(hrReOpen.ReviewDetailId);
+
+                reviewDetailResponse.Id.ShouldBe(hrReOpen.ReviewDetailId);
+                reviewDetailResponse.Status.ShouldBe(hrReOpen.Status);
+
+                var reviewCommentResponse = await _workScope.GetAsync<ReviewInternComment>(10);
+
+                reviewCommentResponse.PrivateNote.ShouldBe(hrReOpen.PrivateNote);
+            });
+        }
+
+        [Fact]
+        public async Task Should_Throw_Exception_When_HrVerify_Input_Status_Is_Not_HrApprovedOrReOpen()
+        {
+            var hrApprove = new CreatePrivateNoteDto
+            {
+                ReviewDetailId = 18,
+                Status = ReviewInternStatus.Reviewed,
+                PrivateNote = "ReOpen"
+            };
+
+            var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+            {
+                await _reviewDetailAppService.HrVerify(hrApprove);
+            });
+
+            exception.Message.ShouldBe("Trạng thái chỉ được là HR Approved hoặc Reopen.");
+        }
+
+        [Fact]
+        public async Task Should_Throw_Exception_When_HrVerify_ReviewDetailStatus_Is_Not_PmReviewed()
+        {
+            var hrApprove = new CreatePrivateNoteDto
+            {
+                ReviewDetailId = 17,
+                Status = ReviewInternStatus.HrApproved,
+                PrivateNote = "ReOpen"
+            };
+
+            var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+            {
+                await _reviewDetailAppService.HrVerify(hrApprove);
+            });
+
+            exception.Message.ShouldBe("Review này chưa được PM review hoặc đã review xong");
+        }
+
+
+        [Fact]
+        public async Task Should_HeadPmVerify_Approve_Success()
+        {
+            var headPmVerify = new HeadPmVerifyDto
+            {
+                ReviewDetailId = 19,
+                Status = ReviewInternStatus.Reviewed,
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _reviewDetailAppService.HeadPmVerify(headPmVerify);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var reviewDetailResponse = await _workScope.GetAsync<ReviewDetail>(headPmVerify.ReviewDetailId);
+
+                reviewDetailResponse.Id.ShouldBe(headPmVerify.ReviewDetailId);
+                reviewDetailResponse.Status.ShouldBe(headPmVerify.Status);
+            });
+        }
+
+        [Fact]
+        public async Task Should_HeadPmVerify_Reject_Success()
+        {
+            var headPmVerify = new HeadPmVerifyDto
+            {
+                ReviewDetailId = 19,
+                Status = ReviewInternStatus.Rejected,
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _reviewDetailAppService.HeadPmVerify(headPmVerify);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var reviewDetailResponse = await _workScope.GetAsync<ReviewDetail>(headPmVerify.ReviewDetailId);
+
+                reviewDetailResponse.Id.ShouldBe(headPmVerify.ReviewDetailId);
+                reviewDetailResponse.Status.ShouldBe(headPmVerify.Status);
+            });
+        }
+
+        [Fact]
+        public async Task Should_Throw_Exception_When_HeadPMVerify_Input_Status_Is_Not_ReviewedOrReject()
+        {
+            var headPmVerify = new HeadPmVerifyDto
+            {
+                ReviewDetailId = 19,
+                Status = ReviewInternStatus.HrApproved,
+            };
+
+            var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+            {
+                await _reviewDetailAppService.HeadPmVerify(headPmVerify);
+            });
+
+            exception.Message.ShouldBe("Trạng thái chỉ được là Reviewed hoặc Rejected.");
+        }
+
+        [Fact]
+        public async Task Should_Throw_Exception_When_HeadPMVerify_ReviewDetailStatus_Is_Not_HrApproved()
+        {
+            var headPmVerify = new HeadPmVerifyDto
+            {
+                ReviewDetailId = 18,
+                Status = ReviewInternStatus.Reviewed,
+            };
+
+            var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+            {
+                await _reviewDetailAppService.HeadPmVerify(headPmVerify);
+            });
+
+            exception.Message.ShouldBe("Review này chưa được HR Approve");
         }
     }
 }
