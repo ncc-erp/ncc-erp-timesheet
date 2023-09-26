@@ -46,6 +46,9 @@ export function appInitializerFactory(injector: Injector,
                             const angularLocale = convertAbpLocaleToAngularLocale(abp.localization.currentLanguage.name);
                             import(`@angular/common/locales/${angularLocale}.js`)
                                 .then(module => {
+                                    console.log("CHECK THE PAGE CANNOT BE ACCESSED!");
+                                    console.log("angularLocale: ", angularLocale);
+                                    console.log("module.default: ", module.default);
                                     registerLocaleData(module.default);
                                     resolve(result);
                                 }, reject);
@@ -72,6 +75,9 @@ export function convertAbpLocaleToAngularLocale(locale: string): string {
     if (localeMapings && localeMapings.length) {
         return localeMapings[0]['to'];
     }
+
+    console.log("localeMapings: ", localeMapings);
+    console.log("locale: ", locale);
 
     return locale;
 }
