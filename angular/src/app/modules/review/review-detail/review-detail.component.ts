@@ -19,6 +19,7 @@ import { BranchService } from '@app/service/api/branch.service';
 import { ConfirmSalaryInternshipComponent } from './confirm-salary-internship/confirm-salary-internship.component';
 import { NewReviewInternshipComponent } from './new-review-internship/new-review-internship.component';
 import { UpdateReviewerComponent } from './update-reviewer/update-reviewer.component';
+import { NewHrVerifyInternshipComponent } from './new-hr-verify-internship/new-hr-verify-internship.component';
 
 @Component({
   selector: 'app-review-detail',
@@ -37,6 +38,8 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   ReviewIntern_ReviewDetail_SendEmailForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_SendEmailForOneIntern
   ReviewIntern_ReviewDetail_Update = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_Update
   ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern
+  ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern
+  ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern
 
   ReviewIntern_ReviewDetail_UpdateDetailSubLevel = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_UpdateDetailSubLevel
   ReviewIntern_ReviewDetail_ApproveForOneIntern =PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_ApproveForOneIntern
@@ -183,6 +186,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
           this.listReviewIntern.forEach(item => {
             item.history = false;
             item.hideNote = false;
+            item.hidePrivateNote = false;
             item.more = false;
           })
         }
@@ -214,6 +218,24 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       return this.isGranted(
         PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_ReviewByCapabilityForOneIntern
       ) && this.checkStatus(item.status, 'review')
+    }
+
+    isShowBtnPmReview(item: ReviewDetailDto){
+      return this.isGranted(
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_ReviewByCapabilityForOneIntern
+      ) && this.checkStatus(item.status, 'pmReview')
+    }
+
+    isShowBtnHrVerify(item: ReviewDetailDto){
+      return this.isGranted(
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern
+      ) && this.checkStatus(item.status, 'hrVerify')
+    }
+
+    isShowBtnHeadPmApprove(item: ReviewDetailDto){
+      return this.isGranted(
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern
+      ) && this.checkStatus(item.status, 'headPmApprove')
     }
 
     isShowBtnApprove(item: ReviewDetailDto){
@@ -332,8 +354,12 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     item.more = !item.more;
   }
 
-  changeStatusNote(item){
+  toggleHideNote(item){
     item.hideNote = !item.hideNote;
+  }
+
+  togglePrivateNote(item){
+    item.hidePrivateNote = !item.hidePrivateNote;
   }
 
   backToReviewList(){
@@ -706,11 +732,14 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   }
   checkStatus(status:number, action:string):boolean{
     switch(status){
-      case 0: return action=="edit"|| action=="delete" || action == "review" ? true :false
+      case 0: return action=="edit"|| action=="delete" || action == "pmReview" ? true :false
       case 1: return action=="edit"|| action=="review" || action == "approve" || action == "reject" ? true : false
       case 2: return action=="sendEmail" || action=="reject" || action == "print" ? true : false
       case -1: return action=="edit"|| action=="review" || action == "approve" ? true : false
       case 3: return action=="update to HRM"|| action=="rejectSentMail" || action=="print" ? true : false
+      case 4: return action=="edit"|| action=="hrVerify" || action == "reject" ? true : false
+      case 5: return action=="headPmApprove" || action == "reject" ? true : false
+      case 6: return action=="edit"|| action=="pmReview" ? true : false
       default: return false
 
     }
@@ -757,11 +786,36 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     return content.replaceAll('\n', '<br>');
   }
 
+  createHrNote(item: ReviewDetailDto): void{
+    const dialogRef = this._dialog.open(NewHrVerifyInternshipComponent, {
+      disableClose : true,
+      width : "750px",
+      data: item,
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        abp.notify.success('HR Verify Complete');
+        this.refresh()
+      }
+    });
+  }
+
+  headPmApprove (item: ReviewDetailDto): void{
+    const headPmApprove = {
+      reviewDetailId: item.id,
+      status: 1,
+    }
+    this.reviewDetailService.headPmApproveIntern(headPmApprove).subscribe(res => {
+      this.notify.success(this.l('PM Approve Successfully'));
+      this.refresh()
+    });
+  }
+
 }
 
 export enum InitParam{
   ALL = -1,
-  ALLSTATUS = 4,
+  ALLSTATUS = -3,
   NOREVIEWER = -2,
 }
 export class ReviewDetailDto {
@@ -792,6 +846,15 @@ export class ReviewDetailDto {
   history : boolean;
   listHistory : string;
   hideNote : boolean;
+  hidePrivateNote: boolean;
+  reviewInternCommentDto: reviewInternCommentDto[];
+  id?: number
+}
+
+export class reviewInternCommentDto{
+  reviewDetailId?: number;
+  commentUserId?: number;
+  privateNote?: string;
   id?: number
 }
 
