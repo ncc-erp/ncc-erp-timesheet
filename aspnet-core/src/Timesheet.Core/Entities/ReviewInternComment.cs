@@ -8,17 +8,17 @@ using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.Entities
 {
-    public class ReviewInternComment : FullAuditedEntity<long>
+    public class ReviewInternPrivateNote : FullAuditedEntity<long>
     {
         public long ReviewDetailId { get; set; }
 
         [ForeignKey(nameof(ReviewDetailId))]
         public ReviewDetail Review { get; set; }
       
-        public long? CommentUserId { get; set; }
+        public long NoteByUserId { get; set; }
 
-        [ForeignKey(nameof(CommentUserId))]        
-        public User CommentUser { get; set; }
+        [ForeignKey(nameof(NoteByUserId))]        
+        public User NoteByUser { get; set; }
 
         public string PrivateNote { get; set; }
 

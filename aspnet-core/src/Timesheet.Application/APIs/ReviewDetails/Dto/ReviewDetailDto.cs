@@ -53,6 +53,6 @@ namespace Timesheet.APIs.ReviewDetails.Dto
         public float? Average { get; set; }
         public float? PreviousAverage { get; set; }
 
-        public IEnumerable<ReviewInternCommentDto> ReviewInternCommentDto { get; set; }
+        public IEnumerable<ReviewInternPrivateNoteDto> ReviewInternPrivateNoteDtos { get; set; }
     }
 }

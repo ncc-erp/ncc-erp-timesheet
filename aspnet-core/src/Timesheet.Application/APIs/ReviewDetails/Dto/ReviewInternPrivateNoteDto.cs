@@ -11,16 +11,18 @@ using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.ReviewDetails.Dto
 {
-    [AutoMapTo(typeof(ReviewInternComment))]
-    public class ReviewInternCommentDto : EntityDto<long>
+    [AutoMapTo(typeof(ReviewInternPrivateNote))]
+    public class ReviewInternPrivateNoteDto : EntityDto<long>
     {
 
-        public long? ReviewDetailId { get; set; }
+        public long ReviewDetailId { get; set; }
 
-        public long? CommentUserId { get; set; }
-        public string CommentUserName { get; set; }
+        public long NoteByUserId { get; set; }
+        public string NoteByUserName { get; set; }
 
         public string PrivateNote { get; set; }
+
+        public DateTime Created { get; set; }
 
     }
 

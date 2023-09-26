@@ -2095,13 +2095,11 @@ namespace Timesheet.Migrations
                     b.ToTable("ReviewInternCapabilities");
                 });
 
-            modelBuilder.Entity("Timesheet.Entities.ReviewInternComment", b =>
+            modelBuilder.Entity("Timesheet.Entities.ReviewInternPrivateNote", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long?>("CommentUserId");
 
                     b.Property<DateTime>("CreationTime");
 
@@ -2117,17 +2115,19 @@ namespace Timesheet.Migrations
 
                     b.Property<long?>("LastModifierUserId");
 
+                    b.Property<long>("NoteByUserId");
+
                     b.Property<string>("PrivateNote");
 
                     b.Property<long>("ReviewDetailId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CommentUserId");
+                    b.HasIndex("NoteByUserId");
 
                     b.HasIndex("ReviewDetailId");
 
-                    b.ToTable("ReviewInternComments");
+                    b.ToTable("ReviewInternPrivateNotes");
                 });
 
             modelBuilder.Entity("Timesheet.Entities.TeamBuildingDetail", b =>
@@ -2739,11 +2739,12 @@ namespace Timesheet.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Timesheet.Entities.ReviewInternComment", b =>
+            modelBuilder.Entity("Timesheet.Entities.ReviewInternPrivateNote", b =>
                 {
-                    b.HasOne("Ncc.Authorization.Users.User", "CommentUser")
+                    b.HasOne("Ncc.Authorization.Users.User", "NoteByUser")
                         .WithMany()
-                        .HasForeignKey("CommentUserId");
+                        .HasForeignKey("NoteByUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Timesheet.Entities.ReviewDetail", "Review")
                         .WithMany()

@@ -328,12 +328,11 @@ namespace Timesheet.Tests.Seeders
              TeamBuildingRequestHistoryFiles = MapFK(TeamBuildingRequestHistoryFiles, TeamBuildingRequestHistories, "TeamBuildingRequestHistory", "TeamBuildingRequestHistoryId");
             context.TeamBuildingRequestHistoryFiles.AddRange(TeamBuildingRequestHistoryFiles);
 
-            //ReviewInternComments
-            var ReviewInternComments = Create<ReviewInternComment, long>("dbo.ReviewInternComments.xlsx");
-            ReviewInternComments = MapFK(ReviewInternComments, ReviewDetails, "Review", "ReviewDetailId");
-            ReviewInternComments = MapFK(ReviewInternComments, Users, "CommentUser", "CommentUserId");
-
-            context.ReviewInternComments.AddRange(ReviewInternComments);
+            //ReviewInternPrivateNotes
+            var ReviewInternPrivateNotes = Create<ReviewInternPrivateNote, long>("dbo.ReviewInternPrivateNotes.xlsx");
+            ReviewInternPrivateNotes = MapFK(ReviewInternPrivateNotes, ReviewDetails, "Review", "ReviewDetailId");
+            ReviewInternPrivateNotes = MapFK(ReviewInternPrivateNotes, Users, "NoteByUser", "NoteByUserId");
+            context.ReviewInternPrivateNotes.AddRange(ReviewInternPrivateNotes);
 
             context.SaveChanges();
         }

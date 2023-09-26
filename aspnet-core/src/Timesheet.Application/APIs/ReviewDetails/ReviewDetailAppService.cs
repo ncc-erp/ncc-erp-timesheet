@@ -82,16 +82,17 @@ namespace Timesheet.APIs.ReviewDetails
                                                 .Select(x => new { x.InternshipId, x.RateStar })
                                                 .ToListAsync();
 
-            var qcomment = from c in WorkScope.GetAll<ReviewInternComment>()
+            var qcomment = from c in WorkScope.GetAll<ReviewInternPrivateNote>()
                            join r in WorkScope.GetAll<ReviewDetail>() on c.ReviewDetailId equals r.Id
-                           join u in WorkScope.GetAll<User>() on c.CommentUserId equals u.Id
+                           join u in WorkScope.GetAll<User>() on c.NoteByUserId equals u.Id
                            select new
                            {
                                c.Id,
                                c.ReviewDetailId,
-                               c.CommentUserId,
+                               c.NoteByUserId,
                                u.FullName,
-                               c.PrivateNote
+                               c.PrivateNote,
+                               c.CreationTime
                            };
             var reviewDetails = from rv in WorkScope.GetAll<ReviewDetail>()
                                         .Where(s => !branchId.HasValue || s.InterShip.BranchId == branchId)
@@ -135,13 +136,14 @@ namespace Timesheet.APIs.ReviewDetails
                                     PositionColor = rv.InterShip.Position.Color,
                                     Average = rv.RateStar,
                                     PreviousAverage = previousReview.Where(x => x.InternshipId == rv.InternshipId).Select(x => x.RateStar).FirstOrDefault(),
-                                    ReviewInternCommentDto = cmt.Select(s => new ReviewInternCommentDto
+                                    ReviewInternPrivateNoteDtos = cmt.Select(s => new ReviewInternPrivateNoteDto
                                     {
                                         Id = s.Id,
                                         ReviewDetailId = s.ReviewDetailId,
-                                        CommentUserId = s.CommentUserId,
-                                        CommentUserName = s.FullName,
-                                        PrivateNote = s.PrivateNote
+                                        NoteByUserId = s.NoteByUserId,
+                                        NoteByUserName = s.FullName,
+                                        PrivateNote = s.PrivateNote,
+                                        Created = s.CreationTime
                                     }).ToList(),
                                 };
             var result = await reviewDetails.OrderBy(x => x.InternshipId).GetGridResult(reviewDetails, input);
@@ -1191,10 +1193,10 @@ namespace Timesheet.APIs.ReviewDetails
 
             //add PM comment
             if (input.PrivateNote != null){
-                var reviewInternComment = new ReviewInternComment
+                var reviewInternComment = new ReviewInternPrivateNote
                 {
                     ReviewDetailId = input.Id,
-                    CommentUserId = AbpSession.UserId,
+                    NoteByUserId = AbpSession.UserId.Value,
                     PrivateNote = input.PrivateNote.Trim()
                 };
                 await WorkScope.InsertAsync(reviewInternComment);
@@ -1303,10 +1305,10 @@ namespace Timesheet.APIs.ReviewDetails
                     detail.Status = input.Status;
                     if (input.PrivateNote != null)
                     {
-                        var reviewInternComment = new ReviewInternComment
+                        var reviewInternComment = new ReviewInternPrivateNote
                         {
                             ReviewDetailId = input.ReviewDetailId,
-                            CommentUserId = AbpSession.UserId,
+                            NoteByUserId = AbpSession.UserId.Value,
                             PrivateNote = input.PrivateNote.Trim()
                         };
                         await WorkScope.InsertAsync(reviewInternComment);

@@ -1407,7 +1407,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
                 reviewDetailResponse.Id.ShouldBe(hrApprove.ReviewDetailId);
                 reviewDetailResponse.Status.ShouldBe(hrApprove.Status);
 
-                var reviewCommentResponse = await _workScope.GetAsync<ReviewInternComment>(10);
+                var reviewCommentResponse = await _workScope.GetAsync<ReviewInternPrivateNote>(10);
 
                 reviewCommentResponse.PrivateNote.ShouldBe(hrApprove.PrivateNote);
             });
@@ -1435,7 +1435,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
                 reviewDetailResponse.Id.ShouldBe(hrReOpen.ReviewDetailId);
                 reviewDetailResponse.Status.ShouldBe(hrReOpen.Status);
 
-                var reviewCommentResponse = await _workScope.GetAsync<ReviewInternComment>(10);
+                var reviewCommentResponse = await _workScope.GetAsync<ReviewInternPrivateNote>(10);
 
                 reviewCommentResponse.PrivateNote.ShouldBe(hrReOpen.PrivateNote);
             });

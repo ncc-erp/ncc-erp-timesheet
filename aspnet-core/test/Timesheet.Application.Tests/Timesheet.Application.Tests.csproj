@@ -19,8 +19,4 @@
     <ProjectReference Include="..\Timesheet.Tests\Timesheet.Tests.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Tables\" />
-  </ItemGroup>
-
 </Project>
