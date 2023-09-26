@@ -49,7 +49,7 @@
                         <mat-form-field class="col-lg-3 col-md-6 col-sm-6 col-xs-12" appearance="outline">
                             <mat-label> {{ "Status" | localize }}</mat-label>
                             <mat-select [(value)]="selectedStatus" (selectionChange)="refreshDataFilter()" name="Status">
-                                <mat-option [value]="4">All</mat-option>
+                                <mat-option [value]="-3">All</mat-option>
                                 <mat-option *ngFor="let status of listStatus"
                                     [value]="APP_CONSTANT.ReviewStatus[status]">
                                     {{ status }}
@@ -182,6 +182,7 @@
                             <th>{{ "Level" | localize }}</th>
                             <th>{{ "New Level" | localize }}</th>
                             <th>{{ "Status" | localize }}</th>
+                            <th>{{ "Note" | localize }}</th>
                             <th>{{ "Updated Info" | localize }}</th>
                         </tr>
                     </thead>
@@ -231,6 +232,18 @@
                     " class="choices" mat-menu-item="mat-menu-item" [name]="'reviewBtn-'+item.id" (click)="newReviewInternship(item)">
                                         <mat-icon class="mat-18">rate_review</mat-icon>
                                         Review
+                                    </button>
+                                    <button *ngIf="isShowBtnPmReview(item)" mat-menu-item="mat-menu-item" class="choices" name="pmReviewIntern" (click)="newReviewInternship(item)">
+                                        <mat-icon class="mat-18">rate_review</mat-icon>
+                                        PM Review
+                                    </button>
+                                    <button *ngIf="isShowBtnHrVerify(item)" mat-menu-item="mat-menu-item" class="choices" name="hrVerifyIntern" (click)="createHrNote(item)">
+                                        <mat-icon class="mat-18">verified_user</mat-icon>
+                                        HR Verify  
+                                    </button>
+                                    <button *ngIf="isShowBtnHeadPmApprove(item)" mat-menu-item="mat-menu-item" class="choices" name="headPmVerifyIntern" (click)="headPmApprove(item)">
+                                        <mat-icon class="mat-18" style="color: green">rate_review</mat-icon>
+                                        Head PM Verify 
                                     </button>
                                     <button *ngIf="
                                     isShowBtnApprove(item)
@@ -313,7 +326,7 @@
                             </td>
                             <!-- Review Content -->
                             <td>
-                                <div (click)="changeStatusNote(item)">
+                                <div (click)="toggleHideNote(item)">
                                     <p [ngClass]="item.hideNote == false ? 'preReview' : 'review'"
                                         title="Cuộn chuột hoặc Click để mở rộng nội dung"
                                         name="reviewContent" [innerHTML]="formatNoteContent(item.note)">
@@ -425,9 +438,25 @@
                       ? 'label-primary '
                       : item.status == 3
                       ? 'label-info'
+                      : item.status == 4 
+                      ? 'label-warning'
+                      : item.status == 5
+                      ? 'label-purple'
                       : 'label-danger'
                   ">
                                     {{ getStatusById(item.status) }}
+                                </div>
+                            </td>
+                            <!-- note -->
+                            <td>
+                                <div (click)="togglePrivateNote(item)">
+                                    <p [ngClass]="item.hidePrivateNote == false ? 'preReview' : 'review'"
+                                    title="Cuộn chuột hoặc Click để mở rộng nội dung" name="pmNote">
+                                        <ng-container *ngFor="let note of item.reviewInternCommentDto.slice().reverse()">
+                                            <b class="">{{note.commentUserName}}:</b>
+                                            {{note.privateNote}} <br>
+                                        </ng-container>
+                                    </p>
                                 </div>
                             </td>
                             <!-- Updated At -->
