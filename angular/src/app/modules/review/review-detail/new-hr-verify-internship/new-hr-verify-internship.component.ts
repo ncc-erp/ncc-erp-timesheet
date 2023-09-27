@@ -12,6 +12,8 @@ export class NewHrVerifyInternshipComponent implements OnInit {
   public active = true;
   public saving = false;
   public noteHrVerify = ''; 
+  public hrApproveStatus: number = EnumHrVerifyStatus.HRApproved
+  public hrReopenStatus: number = EnumHrVerifyStatus.ReOpen
   constructor(
     public dialogRef: MatDialogRef<NewHrVerifyInternshipComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -37,4 +39,9 @@ export class NewHrVerifyInternshipComponent implements OnInit {
   ngOnInit() {
   }
 
+}
+
+export enum EnumHrVerifyStatus {
+  HRApproved = 5,
+  ReOpen  = 6,
 }

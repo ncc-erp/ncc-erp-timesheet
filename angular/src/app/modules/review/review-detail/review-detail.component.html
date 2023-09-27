@@ -241,9 +241,13 @@
                                         <mat-icon class="mat-18">verified_user</mat-icon>
                                         HR Verify  
                                     </button>
-                                    <button *ngIf="isShowBtnHeadPmApprove(item)" mat-menu-item="mat-menu-item" class="choices" name="headPmVerifyIntern" (click)="headPmApprove(item)">
+                                    <button *ngIf="isShowBtnHeadPm(item)" mat-menu-item="mat-menu-item" class="choices" style="color: green" name="headPmVerifyIntern" (click)="headPmApproveOrReject(item, headPmVerifyStatus)">
                                         <mat-icon class="mat-18" style="color: green">rate_review</mat-icon>
                                         Head PM Verify 
+                                    </button>
+                                    <button *ngIf="isShowBtnHeadPm(item)" mat-menu-item="mat-menu-item" class="choices" style="color: red" name="headPmRejectIntern" (click)="headPmApproveOrReject(item, headPmRejectStatus)">
+                                        <mat-icon class="mat-18" style="color: red">thumb_down_off_alt</mat-icon>
+                                        Head PM Reject
                                     </button>
                                     <button *ngIf="
                                     isShowBtnApprove(item)
@@ -452,9 +456,10 @@
                                 <div (click)="togglePrivateNote(item)">
                                     <p [ngClass]="item.hidePrivateNote == false ? 'preReview' : 'review'"
                                     title="Cuộn chuột hoặc Click để mở rộng nội dung" name="pmNote">
-                                        <ng-container *ngFor="let note of item.reviewInternCommentDto.slice().reverse()">
-                                            <b class="">{{note.commentUserName}}:</b>
+                                        <ng-container *ngFor="let note of item.reviewInternPrivateNoteDtos">
+                                            <b class="">{{note.noteByUserName}}:</b>
                                             {{note.privateNote}} <br>
+                                            <i>{{ note.created | date: "dd/MM/yyyy" }} {{ note.created | date: "hh:mm:ss" }}</i> <br>
                                         </ng-container>
                                     </p>
                                 </div>

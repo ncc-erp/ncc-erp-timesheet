@@ -78,6 +78,8 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   public listHistory : HistoryDto[] = [];
   public internshipSearch: FormControl = new FormControl("")
   public reviewerSearch: FormControl = new FormControl("")
+  public headPmVerifyStatus: number = EnumReviewStatus.Reviewed
+  public headPmRejectStatus: number = EnumReviewStatus.Rejected
   listBranch: BranchDto[] = [];
   branchSearch: FormControl = new FormControl("")
   listBranchFilter : BranchDto[];
@@ -177,6 +179,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       //   this.listReviewIntern = result.result.items;
       //   this.showPaging(result.result, pageNumber);
       .subscribe((rs: any) => {
+        this.totalItems = rs.result.totalCount
         if (rs.result == null || rs.result.items.length == 0) {
           this.listReviewIntern = []
         }
@@ -232,10 +235,10 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       ) && this.checkStatus(item.status, 'hrVerify')
     }
 
-    isShowBtnHeadPmApprove(item: ReviewDetailDto){
+    isShowBtnHeadPm(item: ReviewDetailDto){
       return this.isGranted(
         PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern
-      ) && this.checkStatus(item.status, 'headPmApprove')
+      ) && this.checkStatus(item.status, 'headPm')
     }
 
     isShowBtnApprove(item: ReviewDetailDto){
@@ -738,7 +741,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       case -1: return action=="edit"|| action=="review" || action == "approve" ? true : false
       case 3: return action=="update to HRM"|| action=="rejectSentMail" || action=="print" ? true : false
       case 4: return action=="edit"|| action=="hrVerify" || action == "reject" ? true : false
-      case 5: return action=="headPmApprove" || action == "reject" ? true : false
+      case 5: return action=="headPm" ? true : false
       case 6: return action=="edit"|| action=="pmReview" ? true : false
       default: return false
 
@@ -800,17 +803,29 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     });
   }
 
-  headPmApprove (item: ReviewDetailDto): void{
+  headPmApproveOrReject (item: ReviewDetailDto, status: number): void{
     const headPmApprove = {
       reviewDetailId: item.id,
-      status: 1,
+      status: status,
     }
+    const messageSuccessfully: string = (headPmApprove.status == 1) ? "PM Approve Successfully" : "PM Reject Successfully" ;
     this.reviewDetailService.headPmApproveIntern(headPmApprove).subscribe(res => {
-      this.notify.success(this.l('PM Approve Successfully'));
+      this.notify.success(this.l(messageSuccessfully));
       this.refresh()
     });
   }
 
+}
+
+export enum EnumReviewStatus {
+  Draft = 0,
+  Reviewed = 1,
+  Approved = 2,
+  SentEmail = 3,
+  Rejected =-1,
+  PMReviewed = 4,
+  HRApproved = 5,
+  ReOpen  = 6,
 }
 
 export enum InitParam{

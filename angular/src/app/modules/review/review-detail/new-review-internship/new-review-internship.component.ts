@@ -59,8 +59,8 @@ export class NewReviewInternshipComponent extends AppComponentBase implements On
     if (this.data.rateStar == 5) {
       this.is5Star = true;
     }
-    if (this.data.reviewInternCommentDto .length > 0) {
-      this.privateNote = this.data.reviewInternCommentDto[0].privateNote;
+    if (this.data.reviewInternPrivateNoteDtos.length > 0) {
+      this.privateNote = this.data.reviewInternPrivateNoteDtos[0].privateNote;
     }
   }
   onRatingSet(rating: number, capability :reviewInterCapabilityDto): void {

@@ -11,7 +11,7 @@
     </label>
     <mat-form-field class="example-full-width row-item-rest col-xl-9
         col-lg-9 col-md-9 col-xs-9" appearance="outline">
-      <mat-label>Note</mat-label>
+      <mat-label>Private Note</mat-label>
       <textarea matInput rows="4" name="noteHrVerify" [(ngModel)]="noteHrVerify" required></textarea>
     </mat-form-field>
   </mat-dialog-content>
@@ -19,9 +19,9 @@
   <mat-dialog-actions align="end">
     <button mat-raised-button mat-dialog-close>Cancel</button>
     <button mat-raised-button color="warn" name="reopen" [disabled]="verifyForm.invalid"
-     (click)="saveHrVerifyIntern(6)">Reopen</button>
+     (click)="saveHrVerifyIntern(hrReopenStatus)">Reopen</button>
     <button mat-raised-button color="primary" name="saveBtn" [disabled]="verifyForm.invalid" 
-    (click)="saveHrVerifyIntern(5)">Approve</button>
+    (click)="saveHrVerifyIntern(hrApproveStatus)">Approve</button>
   </mat-dialog-actions>
 
 </form>
