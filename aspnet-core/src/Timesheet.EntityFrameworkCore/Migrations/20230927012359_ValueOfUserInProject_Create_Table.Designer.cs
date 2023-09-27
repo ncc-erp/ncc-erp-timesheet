@@ -10,7 +10,7 @@ using Ncc.EntityFrameworkCore;
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    [Migration("20230926093454_ValueOfUserInProject_Create_Table")]
+    [Migration("20230927012359_ValueOfUserInProject_Create_Table")]
     partial class ValueOfUserInProject_Create_Table
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

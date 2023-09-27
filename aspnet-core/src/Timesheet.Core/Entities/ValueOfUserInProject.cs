@@ -10,15 +10,20 @@ namespace Timesheet.Entities
 {
     public class ValueOfUserInProject : FullAuditedEntity<long>
     {
-        [ForeignKey(nameof(UserId))]
-        public User User { get; set; }
         public long UserId { get; set; }
-
-        [ForeignKey(nameof(ProjectId))]
-        public Project Project { get; set; }
         public long ProjectId { get; set; }
         public ValueOfUserType Type { get; set; }
         public float ShadowPercentage { get; set; }
+
+        #region Foreign Keys
+
+        [ForeignKey(nameof(UserId))]
+        public User User { get; set; }
+
+        [ForeignKey(nameof(ProjectId))]
+        public Project Project { get; set; }
+
+        #endregion
     }
 
     public enum ValueOfUserType
