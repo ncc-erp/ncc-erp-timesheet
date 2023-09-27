@@ -815,6 +815,24 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     });
   }
 
+  getStatusCssClass(status: number){
+    switch(status){
+      case 0:
+        return 'label-default';
+      case 1:
+        return 'label-success';
+      case 2:
+        return 'label-primary';
+      case 3:
+        return 'label-info';
+      case 4:
+        return 'label-warning';
+      case 5:
+        return 'label-purple';
+      default:
+        return 'label-danger'
+    }
+  }
 }
 
 export enum EnumReviewStatus {

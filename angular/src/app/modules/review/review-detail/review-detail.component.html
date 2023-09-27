@@ -433,21 +433,7 @@
                             </td>
                             <!-- Trạng thái -->
                             <td style="text-align: center">
-                                <div class="label status-label ng-star-inserted" [ngClass]="
-                    item.status == 0
-                      ? 'label-default'
-                      : item.status == 1
-                      ? 'label-success '
-                      : item.status == 2
-                      ? 'label-primary '
-                      : item.status == 3
-                      ? 'label-info'
-                      : item.status == 4 
-                      ? 'label-warning'
-                      : item.status == 5
-                      ? 'label-purple'
-                      : 'label-danger'
-                  ">
+                                <div class="label status-label ng-star-inserted" [ngClass]="getStatusCssClass(item.status)">
                                     {{ getStatusById(item.status) }}
                                 </div>
                             </td>

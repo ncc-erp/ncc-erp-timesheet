@@ -12,15 +12,15 @@ namespace Timesheet.Entities
     {
         public long ReviewDetailId { get; set; }
 
-        [ForeignKey(nameof(ReviewDetailId))]
-        public ReviewDetail Review { get; set; }
-      
         public long NoteByUserId { get; set; }
 
-        [ForeignKey(nameof(NoteByUserId))]        
-        public User NoteByUser { get; set; }
-
         public string PrivateNote { get; set; }
+
+        [ForeignKey(nameof(ReviewDetailId))]
+        public ReviewDetail Review { get; set; }
+
+        [ForeignKey(nameof(NoteByUserId))]
+        public User NoteByUser { get; set; }
 
     }
 }
