@@ -37,6 +37,7 @@ export class NewReviewInternshipComponent extends AppComponentBase implements On
   -  TTS pass phỏng vấn english với khách hàng được đặc cách lên chính thức: chọn 5 star và chọn new level tương ứng`
   public is5Star: boolean = false
   public average: Number = 0;
+  public privateNote: string = '';
   constructor(
     injector: Injector,
     public _dialog: MatDialog,
@@ -130,7 +131,6 @@ export class NewReviewInternshipComponent extends AppComponentBase implements On
         this.getNewSubLevel(review.newLevel);
       }
     }
-    console.log(this.form)
   }
   getNewSubLevel(level: number) {
     this.listSubLevel = this.listSubLevels.filter(sub => sub.id == level)
@@ -190,9 +190,14 @@ export class NewReviewInternshipComponent extends AppComponentBase implements On
       type: this.review.type,
       subLevel: this.review.subLevel,
       isFullSalary: this.review.isFullSalary ? this.review.isFullSalary : false,
+      privateNote: this.privateNote,
       id: this.reviewId,
       reviewInternCapabilities: this.review.reviewInternCapabilities
     } as ReviewInternshipDto; 
+    if(this.privateNote === ""){
+      this.notify.error(this.l("Bạn phải nhập ghi chú cho thực thập sinh"));
+      return
+    }
     if (this.review.newLevel == null) {
       this.notify.error(this.l("Bạn phải nhập New Level cho thực thập sinh"));
       return
@@ -258,6 +263,7 @@ export class ReviewInternshipDto {
   isFullSalary: boolean;
   isUpOfficial: boolean;
   subLevel?: number;
+  privateNote: string;
   id?: number;
   reviewInternCapabilities: reviewInterCapabilityDto[];
 }
