@@ -815,33 +815,24 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     });
   }
 
-  getStatusCssClass(status: Status){
+  getStatusCssClass(status: EnumReviewStatus){
     switch(status){
-      case Status.Default:
+      case EnumReviewStatus.Draft:
         return 'label-default';
-      case Status.Success:
+      case EnumReviewStatus.Reviewed:
         return 'label-success';
-      case Status.Primary:
+      case EnumReviewStatus.Approved:
         return 'label-primary';
-      case Status.Info:
+      case EnumReviewStatus.SentEmail:
         return 'label-info';
-      case Status.Warning:
+      case EnumReviewStatus.PMReviewed:
         return 'label-warning';
-      case Status.Purple:
+      case EnumReviewStatus.HRApproved:
         return 'label-purple';
       default:
         return 'label-danger'
     }
   }
-}
-
-export enum Status {
-  Default = 0,
-  Success = 1,
-  Primary = 2,
-  Info = 3,
-  Warning = 4,
-  Purple = 5,
 }
 
 export enum EnumReviewStatus {
