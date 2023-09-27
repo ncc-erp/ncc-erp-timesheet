@@ -27,13 +27,13 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
         {
             var listProject = WorkScope.GetAll<ValueOfUserInProject>()
                          .Where(s => s.UserId == userId)
-                         .Select(s => new
+                         .Select(s => new GetAllValueOfUserInProjectByUserIdDto
                          {
-                             s.ProjectId,
-                             s.Project.Name,
-                             s.Project.Code,
-                             s.Type,
-                             s.ShadowPercentage
+                             ProjectId = s.ProjectId,
+                             ProjectName = s.Project.Name,
+                             ProjectCode = s.Project.Code,
+                             ValueOfUserType = s.Type,
+                             ShadowPercentage = s.ShadowPercentage
                          })
                          .ToList();
 
@@ -45,13 +45,13 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
                 .Where(ts => ts.Status == TimesheetStatus.Approve)
                 .Where(ts => ts.DateAt.Year == dateTimeNow.Year && ts.DateAt.Month == dateTimeNow.Month)
                 .Where(ts => ts.TypeOfWork == TypeOfWork.NormalWorkingHours)
-                .Select(s => new
+                .Select(s => new SumWorkingTimeByProjectDto
                 {
                     DateAt = s.DateAt.Date,
-                    s.TypeOfWork,
-                    s.Status,
+                    TypeOfWork = s.TypeOfWork,
+                    Status = s.Status,
                     ProjectId = s.ProjectTask.ProjectId,
-                    s.WorkingTime,
+                    WorkingTime = s.WorkingTime,
                 })
                 .GroupBy(s => s.ProjectId)
                 .Select(x => new
@@ -66,10 +66,10 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
                          select new GetAllValueOfUserInProjectByUserIdDto
                          {
                              ProjectId = lp.ProjectId,
-                             ProjectName = lp.Name,
-                             ProjectCode = lp.Code,
+                             ProjectName = lp.ProjectName,
+                             ProjectCode = lp.ProjectCode,
                              ShadowPercentage = lp.ShadowPercentage,
-                             ValueOfUserType = lp.Type,
+                             ValueOfUserType = lp.ValueOfUserType,
                              WorkingHours = ew.SumWorkingTime
                          };
 
