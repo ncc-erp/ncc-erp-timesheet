@@ -82,25 +82,26 @@ namespace Timesheet.APIs.ReviewDetails
                                                 .Select(x => new { x.InternshipId, x.RateStar })
                                                 .ToListAsync();
 
-            var qcomment = from c in WorkScope.GetAll<ReviewInternPrivateNote>()
+            var qnote = from c in WorkScope.GetAll<ReviewInternPrivateNote>()
                            join r in WorkScope.GetAll<ReviewDetail>() on c.ReviewDetailId equals r.Id
                            join u in WorkScope.GetAll<User>() on c.NoteByUserId equals u.Id
-                           select new
+                           select new ReviewInternPrivateNoteDto
                            {
-                               c.Id,
-                               c.ReviewDetailId,
-                               c.NoteByUserId,
-                               u.FullName,
-                               c.PrivateNote,
-                               c.CreationTime
+                               Id = c.Id,
+                               ReviewDetailId = c.ReviewDetailId,
+                               NoteByUserId = c.NoteByUserId,
+                               NoteByUserName = u.Name,
+                               PrivateNote = c.PrivateNote,
+                               Created = c.CreationTime
                            };
+            var listNote = qnote.ToList();
             var reviewDetails = from rv in WorkScope.GetAll<ReviewDetail>()
                                         .Where(s => !branchId.HasValue || s.InterShip.BranchId == branchId)
                                      .Where(x => x.ReviewId == reviewId
                                      && (levelChange != null && valueLevelChange > -1 ? (valueLevelChange == 2 ? x.NewLevel == x.CurrentLevel : x.NewLevel != x.CurrentLevel) : true))
                                     //join u in WorkScope.GetAll<User>()
                                 join u in WorkScope.GetAll<User>() on rv.LastModifierUserId equals u.Id into uu
-                                join c in qcomment on rv.Id equals c.ReviewDetailId into cmt
+                                join c in listNote on rv.Id equals c.ReviewDetailId into cmt
                                 //on rv.InternshipId equals u.Id
                                 select new ReviewDetailDto
                                 {
@@ -141,10 +142,10 @@ namespace Timesheet.APIs.ReviewDetails
                                         Id = s.Id,
                                         ReviewDetailId = s.ReviewDetailId,
                                         NoteByUserId = s.NoteByUserId,
-                                        NoteByUserName = s.FullName,
+                                        NoteByUserName = s.NoteByUserName,
                                         PrivateNote = s.PrivateNote,
-                                        Created = s.CreationTime
-                                    }).ToList(),
+                                        Created = s.Created
+                                    }).OrderByDescending(s => s.Created).ToList(),
                                 };
             var result = await reviewDetails.OrderBy(x => x.InternshipId).GetGridResult(reviewDetails, input);
             //return await Result.ToListAsync();
