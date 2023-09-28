@@ -98,7 +98,7 @@ namespace Timesheet.DomainServices
             var mapAbsenceUsers = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request)
                 .Where(s => s.DateAt.Date == selectedDate.Date
                 && s.Request.Status == RequestStatus.Approved
-                && s.Request.Type == RequestType.Off)
+                && s.Request.Type == RequestType.Off || s.Request.Type == RequestType.Onsite)
                 .GroupBy(s => s.Request.UserId)
                 .ToDictionary(s => s.Key, s => s.Select(x => new MapAbsenceUserDto
                 {
