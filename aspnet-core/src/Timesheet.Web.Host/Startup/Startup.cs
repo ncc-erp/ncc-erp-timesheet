@@ -32,6 +32,10 @@ using Timesheet.Services.HRMv2;
 using Timesheet.Services.FaceId;
 using Timesheet.Services.Tracker;
 using Timesheet.Hubs;
+using Sentry;
+using Microsoft.AspNetCore.Http;
+using Abp.Runtime.Security;
+using System.Collections.Generic;
 
 namespace Ncc.Web.Host.Startup
 {
@@ -125,9 +129,48 @@ namespace Ncc.Web.Host.Startup
                 )
             );
         }
-
+        
+        public Dictionary<string, string> ConvertHeaderToJsonString(IHeaderDictionary headerRaw)
+        {
+            var headers = new Dictionary<string, string>();
+            foreach (var header in headerRaw)
+            {
+                headers[header.Key] = header.Value.ToString();
+            }
+            return headers;
+        }
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.Use(async (context, next) =>
+            {
+                SentrySdk.Init(options =>
+                {
+                    string dsn = _appConfiguration.GetValue<string>("Sentry:Dsn");
+                    options.Dsn = new Dsn(dsn);
+                    options.Debug = true;
+                    options.BeforeSend = (@event) =>
+                    {
+
+                        @event.User = new Sentry.Protocol.User
+                        {
+                            Id = context.User.Identity.GetUserId().ToString(),
+                            Username = context.User.Identity.Name,
+                            IpAddress = context.Connection.LocalIpAddress.MapToIPv4().ToString(),
+                        };
+
+                        @event.SetExtra("MethodName", context.Request.Method);
+                        @event.SetExtra("Path", context.Request.Path);
+                        @event.SetExtra("Scheme", context.Request.Scheme);
+                        @event.SetExtra("Host", context.Request.Host.Value);
+                        @event.SetExtra("Params", context.Request.QueryString);
+                        @event.SetExtra("Request Headers", ConvertHeaderToJsonString(context.Request.Headers));
+                        @event.SetExtra("Response Headers", ConvertHeaderToJsonString(context.Response.Headers));
+                        return @event;
+                    };
+                });
+                await next.Invoke();
+            });
+
             app.UseAbp(options => { options.UseAbpRequestLocalization = false; }); // Initializes ABP framework.
 
             app.UseCors(_defaultCorsPolicyName); // Enable CORS!
@@ -193,7 +236,7 @@ namespace Ncc.Web.Host.Startup
             ConstantAmazonS3.BucketName = _appConfiguration.GetValue<string>("AWS:BucketName");
             ConstantAmazonS3.Prefix = _appConfiguration.GetValue<string>("AWS:Prefix");
             ConstantAmazonS3.CloudFront = _appConfiguration.GetValue<string>("AWS:CloudFront");
-            
+
 
             ConstantUploadFile.AvatarFolder = _appConfiguration.GetValue<string>("UploadFile:AvatarFolder");
 
