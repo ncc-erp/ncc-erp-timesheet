@@ -1,0 +1,173 @@
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Manage Employee for Branch Manager" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item (click)='refresh()' name="refreshBtn">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+
+      <div class="body">
+        <div class="group"> 
+          <div class="col-lg-10">
+            <div class="row">
+              <div class="col-lg-5 mb-0">
+                <mat-form-field class="example-full-width" appearance="outline">
+                  <mat-label>Search by Email</mat-label>
+                  <mat-icon matSuffix>search</mat-icon>
+                  <input matInput="matInput" [(ngModel)]="keyword" name="keyword" (keyup.enter)="searchOrFilter()">
+                </mat-form-field>
+              </div>
+              <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-0">
+                <mat-form-field class="w-100" appearance="outline">
+                  <mat-label> {{ "Position" | localize }}</mat-label>
+                  <mat-select name="positionId" [(value)]="positionId" (selectionChange)="searchOrFilter()">
+                    <mat-option>
+                        <ngx-mat-select-search placeholderLabel="Search" [formControl]="positionSearch"
+                          noEntriesFoundLabel="No matching found">
+                        </ngx-mat-select-search>
+                    </mat-option>
+                    <mat-option [value]="-1">All</mat-option>
+                    <mat-option *ngFor="let position of listPosition" [value]='position.id'>
+                      {{position.name}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-0">
+                <ng-container *ngIf="isShowSelectBranch()">
+                  <mat-form-field class="w-100" appearance="outline">
+                    <mat-label> {{ "Branch" | localize }}</mat-label>
+                    <mat-select name="branchId" [(value)]="branchId" (selectionChange)="searchOrFilter()">
+                      <mat-option>
+                          <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
+                            noEntriesFoundLabel="No matching found">
+                          </ngx-mat-select-search>
+                      </mat-option>
+                      <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
+                        {{branch.displayName}}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </ng-container>
+                
+              </div>
+              
+            </div>
+          </div>
+          <div class="col-lg-2">
+            <div class="row row-btn">
+              <button class="body-btn" mat-raised-button name="clearSearchAndFilter" (click)="clearSearchAndFilter()">Clear</button>
+              <button class="body-btn" mat-raised-button color="primary" [disabled]="!keyword" (click)="searchOrFilter()">Search</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-responsive" [busy]="isTableLoading">
+          <table class="table customTable">
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 20px;">No</th>
+                <th class="text-center col-lg-3">Users</th>
+                <th class="text-center col-lg-2">Position</th>
+                <!-- <th class="text-center col-lg-3">PM</th> -->
+                <th class="text-center col-lg-1">Number of Project</th>
+                <th class="text-center col-lg-4">Projects</th>
+
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of (users | paginate :{
+                id: 'Branch_Manager',
+                itemsPerPage: pageSize,
+                currentPage: pageNumber,
+                totalItems: totalItems
+
+               }), index as i">
+                <!-- No -->
+                <td class="text-center" style="width: 20px;">
+                  {{ (pageNumber - 1) * pageSize + i + 1 }}
+                </td>
+                <!-- User -->
+                <td class="col-lg-3">
+                  <div class="user_information">
+                    <div>
+                      <ng-container *ngIf="user.avatarFullPath; then avatarTemplate; else defaultAvatarTemplate"></ng-container>
+                      <ng-template #avatarTemplate>
+                        <img style="width: 60px; height: 60px; border-radius: 50%;"
+                          [src]='user.avatarFullPath' alt="avatar">
+                      </ng-template>
+                      <ng-template #defaultAvatarTemplate>
+                        <img style="width: 60px; height: 60px; border-radius: 50%;" src="assets/images/undefine.png" alt="avatar">
+                      </ng-template>
+                    </div>
+                    <div style="margin-left: 12px;">
+                      <div class="user_name">
+                        <b>{{user.fullName}}</b>
+                      </div>
+                      <div class="user_branch">
+                        <span class="label bg-red">{{user.branchDisplayName}}</span>
+                        <!-- type -->
+                        <span *ngIf="user.type != null" class="label" [ngClass]="getUserTypeCssClass(user.type)">
+                          {{userTypes[user.type].label}}
+                        </span>
+                        <!-- level -->
+                        <span class="label" [ngStyle]="userLevels[user.level]?.style">{{userLevels[user.level]?.name}}</span>
+                      </div>
+                      <div class="user_email">{{user.emailAddress}}</div>
+                    </div>
+                  </div>
+                </td>
+                <!-- position -->
+                <td class="text-center col-lg-2">{{user.positionName}}</td>
+                <!-- <td class="text-center col-lg-3">
+                  <div>
+                    <ng-container *ngIf="user.managerAvatarFullPath; then managerAvatarTemplate; else defaultManagerAvatarTemplate"></ng-container>
+                    <ng-template #managerAvatarTemplate>
+                      <img style="width: 60px; height: 60px; border-radius: 50%;" alt=""
+                      [src]='user.managerAvatarFullPath'>
+                    </ng-template>
+                    <ng-template #defaultManagerAvatarTemplate>
+                      <img style="width: 60px; height: 60px; border-radius: 50%;" src="assets/images/undefine.png" alt="avatar">
+                    </ng-template>
+                  </div>
+                  <p class="name_pm mb-0" style="margin-top: 10px;">{{user.managerName}}</p>
+                </td> -->
+                <td class="text-center col-lg-1">
+                  <ng-container *ngIf="user.projectUsers.length > 0">
+                    {{user.projectUsers.length}}
+                  </ng-container>
+                </td>
+                <td class="col-lg-5" style="padding: 0;" (click)="togglePrivateNote(user)">
+                  <div class="project_list mb-0" [ngClass]="user.hideProjectName === false ? 'preReview' : 'review'"
+                  title="Cuộn chuột hoặc Click để mở rộng nội dung">
+                    <div class="project_item" *ngFor="let project of user.projectUsers">
+                      <b>{{project.projectName}}</b>
+                      <span class="label bg-blue" *ngFor="let pms of project.pms">
+                        {{pms}}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="abp-pagination-controls-wrapper">
+          <abp-pagination-controls [totalNumber]="totalItems" id="Branch_Manager"
+          (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)"></abp-pagination-controls>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
