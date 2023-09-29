@@ -25,15 +25,14 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
         [HttpGet]
         public List<GetAllValueOfUserInProjectByUserIdDto> GetAllValueOfUserInProjectByUserId(long userId)
         {
-            var listProject = WorkScope.GetAll<ValueOfUserInProject>()
+            var listProjectByUserId = WorkScope.GetAll<ProjectUser>()
                          .Where(s => s.UserId == userId)
+                         .Where(s => s.Project.Status == ProjectStatus.Active)
                          .Select(s => new GetAllValueOfUserInProjectByUserIdDto
                          {
                              ProjectId = s.ProjectId,
                              ProjectName = s.Project.Name,
                              ProjectCode = s.Project.Code,
-                             ValueOfUserType = s.Type,
-                             ShadowPercentage = s.ShadowPercentage
                          })
                          .ToList();
 
@@ -61,22 +60,26 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
                 })
                 .ToList();
 
-            var qresult = from ew in employeeWorking
-                         join lp in listProject on ew.ProjectId equals lp.ProjectId
-                         select new GetAllValueOfUserInProjectByUserIdDto
-                         {
-                             ProjectId = lp.ProjectId,
-                             ProjectName = lp.ProjectName,
-                             ProjectCode = lp.ProjectCode,
-                             ShadowPercentage = lp.ShadowPercentage,
-                             ValueOfUserType = lp.ValueOfUserType,
-                             WorkingHours = ew.SumWorkingTime
-                         };
+            var qresult = from lpbu in listProjectByUserId 
+                          join emp in employeeWorking on lpbu.ProjectId equals emp.ProjectId into empGroup
+                          join vouip in WorkScope.GetAll<ValueOfUserInProject>() on lpbu.ProjectId equals vouip.ProjectId into vouipGroup
+                          from emp in empGroup.DefaultIfEmpty()
+                          from vouip in vouipGroup.DefaultIfEmpty()
+                          select new GetAllValueOfUserInProjectByUserIdDto
+                          {
+                              ProjectId = lpbu.ProjectId,
+                              ProjectName = lpbu.ProjectName,
+                              ProjectCode = lpbu.ProjectCode,
+                              ShadowPercentage = vouip != null ? vouip.ShadowPercentage : 0,
+                              ValueOfUserType = vouip != null ? vouip.Type : 0,
+                              WorkingHours = emp != null ? emp.SumWorkingTime : 0
+                          };
+
 
             return qresult.ToList();
         }
-        
-        [HttpPost]    
+
+        [HttpPost]
         public async Task<CreateValueOfUserDto> CreateValueOfUser(CreateValueOfUserDto input)
         {
             var valueOfUser = ObjectMapper.Map<ValueOfUserInProject>(input);
