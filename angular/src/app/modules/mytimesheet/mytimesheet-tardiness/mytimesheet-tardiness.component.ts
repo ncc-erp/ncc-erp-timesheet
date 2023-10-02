@@ -98,6 +98,14 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     return "green";
   }
 
+  getCss2(value) {
+    value = Number.parseInt(value);
+    if(value > 0) {
+      return "red";
+    }
+    return "green";
+  }
+
   onDateChange() {
     this.viewDate = new Date(this.year, this.month, this.selectedDay);
     this.getDayByMonthAndYear(this.month, this.year)

@@ -30,6 +30,7 @@ using Timesheet.Entities;
 using Timesheet.Paging;
 using Timesheet.Services.FaceIdService;
 using Timesheet.Services.Komu;
+using Timesheet.Services.Komu.Dto;
 using Timesheet.Services.Tracker;
 using Timesheet.Services.Tracker.Dto;
 using Xunit;
@@ -99,6 +100,11 @@ namespace Timesheet.Application.Tests.API.Timekeepings
             SUerAndActiveTimeTrackerDtos = JsonConvert.DeserializeObject<List<GetSUerAndActiveTimeTrackerDto>>(getTimeTrackerTodayResultStringJson);
             trackerService.GetTimeTrackerToDay(Arg.Any<DateTime>(), Arg.Any<List<string>>()).Returns(SUerAndActiveTimeTrackerDtos);
 
+            GetDailyReportDto dailyReport = new GetDailyReportDto();
+            string path3 = Path.Combine(Directory.GetCurrentDirectory().Replace("\\bin\\Debug\\netcoreapp3.1", ""), "JsonData", "TimekeepingsAppService_Tests", "get_daily_report_result.json").Replace("/bin/Debug/netcoreapp3.1", "");
+            string getDailyReportResultStringJson = File.ReadAllText(path3);
+            dailyReport = JsonConvert.DeserializeObject<GetDailyReportDto>(getDailyReportResultStringJson);
+            komuService.GetDailyReport(Arg.Any<DateTime>()).Returns(dailyReport);
 
             // _timekeepingServices = Substitute.For<TimekeepingServices>(komuService, trackerService, _workScope, faceIdService);
             _timekeepingServices = new TimekeepingServices(komuService, trackerService, _workScope, faceIdService);

@@ -77,6 +77,8 @@
                 <th rowspan="2" style="min-width: 50px; width: 100px;">
                   {{ "Edited by" | localize }}
                 </th>
+                <th rowspan="2"  matTooltip="Daily late or forget daily">{{ "Daily punish" | localize}}</th>
+                <th rowspan="2"  matTooltip="Punish for mentioning but not replying">{{ "Mention punish" | localize}}</th>
                 <th style="width: 80px;" rowspan="2">
                   {{ "Punishment Money" | localize }}
                 </th>
@@ -129,6 +131,8 @@
                 <td style="text-align: center;" [class]="getCss1(item.resultCheckIn)">{{item.resultCheckIn}}</td>
                 <td style="text-align: center;" [class]="getCss1(item.resultCheckOut)">{{item.resultCheckOut}}</td>
                 <td class="text-center"><span class="pm" *ngIf="item.editByUserName">{{item.editByUserName}}</span></td>
+                <td style="text-align: center;" [class]="getCss2(item.dailyPunish)">{{item.dailyPunish}}</td>
+                <td style="text-align: center;" [class]="getCss2(item.mentionPunish)">{{item.mentionPunish}}</td>
                 <td style="text-align: center;">
                   <span class="label bg-red" [matTooltip]="item.statusPunish | punishName">{{item.moneyPunish | formatDisplayNumberToK}}</span>
                   <span *ngIf="item.status && !item.statusPunish > 0" class="label bg-red" matTooltip = "Punish">20K</span>

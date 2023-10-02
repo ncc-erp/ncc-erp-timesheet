@@ -67,6 +67,8 @@ export class TimekeepingDto {
   noteReplyToString: string;
   moneyPunishtmp: number;
   strTimekeepingId: string;
+  dailyPunish: number;
+  mentionPunish: number;
 }
 
 export class UpdateTimekeepingDto{
