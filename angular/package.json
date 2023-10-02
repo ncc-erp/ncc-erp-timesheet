@@ -5,7 +5,7 @@
   "angular-cli": {},
   "scripts": {
     "ng": "ng",
-    "start": "ng serve -o --host 172.16.220.88 --port 4200 --poll=1000",
+    "start": "ng serve -o --host 0.0.0.0 --port 4200 --poll=1000",
     "hmr": "ng serve --host 0.0.0.0 --port 4200 --hmr",
     "test": "ng test",
     "pree2e": "webdriver-manager update --standalone false --gecko false",
