@@ -8,20 +8,20 @@ using Timesheet.Uitls;
 using Timesheet.Users.Dto;
 using Abp.Application.Services.Dto;
 
-namespace Timesheet.APIs.BranchManager.Dto
+namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranch.Dto
 {
     public class UserProjectsDto : EntityDto<long>
     {
-        [ApplySearchAttribute]
+        [ApplySearch]
         public string UserName { get; set; }
 
-        [ApplySearchAttribute]
+        [ApplySearch]
         public string Name { get; set; }
 
-        [ApplySearchAttribute]
+        [ApplySearch]
         public string Surname { get; set; }
 
-        [ApplySearchAttribute]
+        [ApplySearch]
         public string EmailAddress { get; set; }
 
         public string PhoneNumber { get; set; }
@@ -33,7 +33,8 @@ namespace Timesheet.APIs.BranchManager.Dto
         public string FullName { get; set; }
         public IEnumerable<PUDto> ProjectUsers { get; set; }
         public Usertype? Type { get; set; }
-        [ApplySearchAttribute]
+        public UserLevel? Level { get; set; }
+        [ApplySearch]
         public string UserCode { get; set; }
         public string AvatarPath { get; set; }
         public string AvatarFullPath => FileUtils.FullFilePath(AvatarPath);
