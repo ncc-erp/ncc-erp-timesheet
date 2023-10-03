@@ -1708,7 +1708,7 @@
                     <input type="text" matInput name="timeStartCheckOutCaseOffAfternoon" [(ngModel)]="TimeStartChangingCheckinToCheckoutSetting.timeStartCheckOutCaseOffAfternoon" required
                       [disabled]="!isEditTimeStartChangingCheckinToCheckoutSetting" />
                   </mat-form-field>
-                </div> 
+                </div>
               </div>
             </form>
           </div>
@@ -1835,6 +1835,14 @@
                 <mat-form-field>
                   <span class="special-label">Notify at hour *</span> <mat-icon class="special-icon" matTooltip="ex: 9,17 mean worker will run at 9h and 17h o'clock">help</mat-icon>
                   <input type="text" matInput name="notifyAtHour" [(ngModel)]="ApproveRequestOffNotifyConfig.approveRequestOffNotifyAtHour" required
+                    [disabled]="!isEditApproveRequestOffNotifyConfig" />
+                </mat-form-field>
+              </div>
+              <div class="col-md-12" style="max-width: 880px;">
+                <mat-form-field>
+                  <span class="special-label">
+                    Start sending messages to users when they are due at hour *</span> <mat-icon class="special-icon" matTooltip="ex: 9,17 mean worker will run at 9h and 17h o'clock">help</mat-icon>
+                  <input type="text" matInput name="notifyAtHour" [(ngModel)]="ApproveRequestOffNotifyConfig.approveRequestOffSendUserAtHour" required
                     [disabled]="!isEditApproveRequestOffNotifyConfig" />
                 </mat-form-field>
               </div>
