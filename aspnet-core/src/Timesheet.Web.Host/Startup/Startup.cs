@@ -133,14 +133,9 @@ namespace Ncc.Web.Host.Startup
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            string dsn = _appConfiguration.GetValue<string>("Sentry:Dsn");
-            if (!dsn.IsNullOrEmpty())
-            {
-                app.Use(async (context, next) =>
-                {
-                    await InitSentry(context, next, dsn);
-                });
-            }
+
+            InitSentry(app);
+
             app.UseAbp(options => { options.UseAbpRequestLocalization = false; }); // Initializes ABP framework.
 
             app.UseCors(_defaultCorsPolicyName); // Enable CORS!
@@ -258,35 +253,40 @@ namespace Ncc.Web.Host.Startup
             return headers;
         }
 
-        private async System.Threading.Tasks.Task InitSentry(HttpContext context, Func<System.Threading.Tasks.Task> next, string dsn)
+        private async System.Threading.Tasks.Task InitSentry(IApplicationBuilder app)
         {
-
-            SentrySdk.Init(options =>
+            string dsn = _appConfiguration.GetValue<string>("Sentry:Dsn");
+            if (!dsn.IsNullOrEmpty())
             {
-                options.Dsn = new Dsn(dsn);
-                options.Debug = true;
-                options.BeforeSend = (@event) =>
+                app.Use(async (context, next) =>
                 {
-
-                    @event.User = new Sentry.Protocol.User
+                    SentrySdk.Init(options =>
                     {
-                        Id = context.User.Identity.GetUserId().ToString(),
-                        Username = context.User.Identity.Name,
-                        IpAddress = context.Connection.LocalIpAddress.MapToIPv4().ToString(),
-                    };
+                        options.Dsn = new Dsn(dsn);
+                        options.Debug = true;
+                        options.BeforeSend = (@event) =>
+                        {
 
-                    @event.SetExtra("MethodName", context.Request.Method);
-                    @event.SetExtra("Path", context.Request.Path);
-                    @event.SetExtra("Scheme", context.Request.Scheme);
-                    @event.SetExtra("Host", context.Request.Host.Value);
-                    @event.SetExtra("Params", context.Request.QueryString);
-                    @event.SetExtra("Request Headers", ConvertHeaderToDictionary(context.Request.Headers));
-                    @event.SetExtra("Response Headers", ConvertHeaderToDictionary(context.Response.Headers));
-                    return @event;
-                };
-            });
+                            @event.User = new Sentry.Protocol.User
+                            {
+                                Id = context.User.Identity.GetUserId().ToString(),
+                                Username = context.User.Identity.Name,
+                                IpAddress = context.Connection.LocalIpAddress.MapToIPv4().ToString(),
+                            };
 
-            await next.Invoke();
+                            @event.SetExtra("MethodName", context.Request.Method);
+                            @event.SetExtra("Path", context.Request.Path);
+                            @event.SetExtra("Scheme", context.Request.Scheme);
+                            @event.SetExtra("Host", context.Request.Host.Value);
+                            @event.SetExtra("Params", context.Request.QueryString);
+                            @event.SetExtra("Request Headers", ConvertHeaderToDictionary(context.Request.Headers));
+                            @event.SetExtra("Response Headers", ConvertHeaderToDictionary(context.Response.Headers));
+                            return @event;
+                        };
+                    });
+                    await next.Invoke();
+                });
+            }
         }
     }
 }
