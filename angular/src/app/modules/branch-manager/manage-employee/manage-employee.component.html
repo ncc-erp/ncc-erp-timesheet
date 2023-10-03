@@ -101,7 +101,7 @@
                 <!-- User -->
                 <td class="col-lg-3">
                   <div class="user_information">
-                    <div>
+                    <div (click)="showProjectDetailDialog(user)" style="cursor: pointer;">
                       <ng-container *ngIf="user.avatarFullPath; then avatarTemplate; else defaultAvatarTemplate"></ng-container>
                       <ng-template #avatarTemplate>
                         <img style="width: 60px; height: 60px; border-radius: 50%;"
@@ -112,7 +112,7 @@
                       </ng-template>
                     </div>
                     <div style="margin-left: 12px;">
-                      <div class="user_name">
+                      <div class="user_name" (click)="showProjectDetailDialog(user)" style="cursor: pointer; width: fit-content;">
                         <b>{{user.fullName}}</b>
                       </div>
                       <div class="user_branch">

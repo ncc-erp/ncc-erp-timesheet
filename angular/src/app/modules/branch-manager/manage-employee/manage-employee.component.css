@@ -39,8 +39,8 @@
 }
 
 .project_item span{
-    margin-left: 5px;
-    margin-bottom: 3px;
+    margin-left: 5px !important;
+    margin-bottom: 3px !important;
     padding: 5px;
 }
 
@@ -96,4 +96,8 @@
 {
 	background-color: #cecece;
 	border: 2px solid #cecece;
+}
+
+.user_name:hover{
+    color: #2196F3;
 }

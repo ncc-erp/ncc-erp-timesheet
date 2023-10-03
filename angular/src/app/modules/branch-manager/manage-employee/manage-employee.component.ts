@@ -1,5 +1,6 @@
 import { Component, Injector, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { BranchService } from '@app/service/api/branch.service';
 import { ManageUserForBranchService } from '@app/service/api/manage-user-for-branch.service';
@@ -8,6 +9,7 @@ import { PositionService } from '@app/service/api/position.service';
 import { FilterDto, PagedListingComponentBase, PagedRequestDto } from '@shared/paged-listing-component-base';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { finalize } from 'rxjs/operators';
+import { DetailParticipatingProjectsComponent } from './detail-participating-projects/detail-participating-projects.component';
 
 @Component({
   selector: 'app-manage-employee',
@@ -32,6 +34,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     private positionService: PositionService,
     private branchService: BranchService,
     private manageUserForBranchService:ManageUserForBranchService ,
+    private _dialog: MatDialog,
   ) {
     super(injector);
     this.branchId = 0;
@@ -161,6 +164,17 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
 
   protected delete(entity: userDTO): void {
     throw new Error('Method not implemented.');
+  }
+
+  showProjectDetailDialog(user): void{
+    let dialogRef = this._dialog.open(DetailParticipatingProjectsComponent, {
+      minWidth: '450px',
+      width: '800px',
+      data: user,
+    })
+    dialogRef.afterClosed().subscribe(() => {
+      
+    })
   }
 }
 

@@ -41,7 +41,7 @@ export class SideBarNavComponent extends AppComponentBase {
             new MenuItem(this.l('Manage timesheet'), 'Timesheet', 'date_range', '/app/main/timesheets'),
             new MenuItem(this.l("Manage request off/remote/onsite"), "AbsenceDayByProject", 'rule', '/app/main/off-day-project'),
             new MenuItem(this.l('Manage working times'), 'ManageWorkingTime', 'access_time', '/app/main/manage-working-times'),
-            new MenuItem(this.l('Branch Manager'), '', 'description', '/app/main/branch-manager'),
+            new MenuItem(this.l('Branch Manager'), 'ProjectManagementBranchDirectors', 'description', '/app/main/branch-manager'),
             new MenuItem(this.l("Team working calendar"), "AbsenceDayOfTeam", 'groups', '/app/main/off-day-project-for-user'),
             new MenuItem(this.l('Timesheets monitoring'), 'TimesheetSupervision', 'supervised_user_circle', '/app/main/timesheets-supervisior'),
             //new MenuItem(this.l('Leave days'), 'AbsenceDay', 'done_all', '/app/main/absence-request'),
