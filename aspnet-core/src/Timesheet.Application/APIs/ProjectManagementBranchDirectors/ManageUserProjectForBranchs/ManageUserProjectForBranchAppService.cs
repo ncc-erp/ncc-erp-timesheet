@@ -29,28 +29,25 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
         public ManageUserProjectForBranchAppService(IWorkScope workScope) : base(workScope) { }
 
         [HttpGet]
-        public List<GetAllValueOfUserInProjectByUserIdDto> GetAllValueOfUserInProjectByUserId(long userId, DateTime? startDate, DateTime? endDate)
+        public WorkTimeByProjectDto GetAllValueOfUserInProjectByUserId(long userId, DateTime? startDate, DateTime? endDate)
         {
             var listProjectByUserId = WorkScope.GetAll<ProjectUser>()
                          .Where(s => s.UserId == userId)
-                         .Where(s => s.Project.Status == ProjectStatus.Active)
                          .Select(s => new GetAllValueOfUserInProjectByUserIdDto
                          {
                              ProjectId = s.ProjectId,
                              ProjectName = s.Project.Name,
                              ProjectCode = s.Project.Code,
+                             Status = s.Project.Status,
+                             ProjectUserType = s.Type
                          })
                          .ToList();
 
-            var dateTimeNow = DateTime.Now;
-
-            // Tính thời gian user đóng góp cho dự án theo log timesheet đã được approve và trong tháng hiện tại(DateTime.Now)
             var employeeWorking = WorkScope.GetAll<MyTimesheet>()
                 .Where(s => s.UserId == userId)
                 .Where(ts => ts.Status == TimesheetStatus.Approve)
                 .WhereIf((startDate.HasValue && endDate.HasValue), s => (s.DateAt.Date >= startDate) && (s.DateAt.Date <= endDate))
-                //.WhereIf((!startDate.HasValue || !endDate.HasValue), s => (s.DateAt.Year == dateTimeNow.Year && s.DateAt.Month == dateTimeNow.Month))
-                .Where(ts => ts.TypeOfWork == TypeOfWork.NormalWorkingHours)
+                //.Where(ts => ts.TypeOfWork == TypeOfWork.NormalWorkingHours)
                 .Select(s => new SumWorkingTimeByProjectDto
                 {
                     DateAt = s.DateAt.Date,
@@ -72,7 +69,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
                                             group v by v.ProjectId into grouped
                                             select grouped.OrderByDescending(v => v.CreationTime).First();
 
-            var qresult = from lpbu in listProjectByUserId 
+            var qresult = from lpbu in listProjectByUserId
                           join emp in employeeWorking on lpbu.ProjectId equals emp.ProjectId into empGroup
                           join vouip in qLastValueOfUserInProject on lpbu.ProjectId equals vouip.ProjectId into vouipGroup
                           from emp in empGroup.DefaultIfEmpty()
@@ -82,13 +79,19 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
                               ProjectId = lpbu.ProjectId,
                               ProjectName = lpbu.ProjectName,
                               ProjectCode = lpbu.ProjectCode,
+                              Status = lpbu.Status,
+                              ProjectUserType = lpbu.ProjectUserType,
                               ShadowPercentage = vouip != null ? vouip.ShadowPercentage : 0,
                               ValueOfUserType = vouip != null ? vouip.Type : 0,
                               WorkingHours = emp != null ? emp.SumWorkingTime : 0
                           };
 
-
-            return qresult.ToList();
+            var workTimeByProjectDto = new WorkTimeByProjectDto
+            {
+                GetAllValueOfUserInProjectByUserIdDtos = qresult.ToList(),
+                TotalWorkingHours = employeeWorking.Sum(item => item.SumWorkingTime)
+            };
+            return workTimeByProjectDto;
         }
 
         [HttpPost]

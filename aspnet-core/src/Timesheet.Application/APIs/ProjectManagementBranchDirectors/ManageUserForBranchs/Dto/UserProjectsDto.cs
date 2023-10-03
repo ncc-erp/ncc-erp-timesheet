@@ -9,6 +9,7 @@ using Timesheet.Users.Dto;
 using Abp.Application.Services.Dto;
 using Ncc.Entities;
 using Timesheet.Entities;
+using Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.Dto;
 
 namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranch.Dto
 {
@@ -55,11 +56,9 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranch.Dt
 
     public class UserValueProjectDto
     {
-        public long ProjectId { get; set; }
+        public long Id { get; set; }
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
-        public long ProjectUserId { get; set; }
-        public ProjectUserType UserType { get; set; }
-        public ValueOfUserType ValueType { get; set; }
+        public List<UserValueDto> Users { get; set; }
     }
 }

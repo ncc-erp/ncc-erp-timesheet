@@ -2,6 +2,7 @@
 using Abp.Authorization;
 using Abp.Linq.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Office.Interop.Word;
 using Ncc;
 using Ncc.Authorization.Users;
@@ -127,7 +128,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
 
         [HttpPost]
         [AbpAuthorize]
-        //[AbpAuthorize(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch)]
         public async Task<PagedResultDto<UserStatisticInProjectDto>> GetStatisticNumOfUsersInProject(GridParam input, long? branchId)
         {
             var isViewAll = await IsGrantedAsync(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs);
@@ -135,76 +136,123 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
                                     .Where(s => s.Id == AbpSession.UserId)
                                     .Select(s => s.BranchId).FirstOrDefault();
 
-            var qprojectUsers = from pu in WorkScope.GetAll<ProjectUser>().Where(s => s.User.IsActive == true)
-                                join p in WorkScope.GetAll<Project>().Where(s => s.Status == ProjectStatus.Active) on pu.ProjectId equals p.Id
-                                //where pu.Type != ProjectUserType.DeActive
+            var qprojectUsers = from p in WorkScope.GetAll<Project>().Where(s => s.Status == ProjectStatus.Active)
+                                join pu in WorkScope.GetAll<ProjectUser>().Where(s => s.User.IsActive == true) on p.Id equals pu.ProjectId into ppu
                                 select new UserValueProjectDto
                                 {
-                                    ProjectId = pu.ProjectId,
+                                    Id = p.Id,
                                     ProjectCode = p.Code,
                                     ProjectName = p.Name,
-                                    ProjectUserId = pu.UserId,
-                                    UserType = pu.Type,
+                                    Users = ppu.Select(s => new UserValueDto
+                                    {
+                                        UserId = s.UserId,
+                                        BranchId = s.User.BranchId,
+                                        Name = s.User.Name,
+                                    }).ToList(),
                                 };
-            
-            var qvalueUserProject = from qpu in qprojectUsers 
-                                    join v in WorkScope.GetAll<ValueOfUserInProject>() on qpu.ProjectUserId equals v.UserId
-                                    group v by v.UserId into grouped
+
+            var qvalueUserProject = from v in WorkScope.GetAll<ValueOfUserInProject>()
+                                    group v by new { v.UserId, v.ProjectId } into grouped
                                     select grouped.OrderByDescending(v => v.CreationTime).First();
 
-            var qprojectUsersWithLastValue = from pu in qprojectUsers
-                                             join qvup in qvalueUserProject on pu.ProjectUserId equals qvup.UserId into qvupGroup
-                                             from qvup in qvupGroup.DefaultIfEmpty()
-                                             select new UserValueProjectDto
-                                             {
-                                                 ProjectId = pu.ProjectId,
-                                                 ProjectCode = pu.ProjectCode,
-                                                 ProjectName = pu.ProjectName,
-                                                 ProjectUserId = pu.ProjectUserId,
-                                                 UserType = pu.UserType,
-                                                 ValueType = qvup != null? qvup.Type : ValueOfUserType.Member,
-                                             };
+            IQueryable<UserValueProjectDto> userValueProjectList;
+            var predicate = PredicateBuilder.New<ValueOfUserInProject>();
+            if (isViewAll)
+            {
+                userValueProjectList = qprojectUsers.WhereIf(branchId != null, s => s.Users.Any(u => u.BranchId == branchId));
+            }
+            else
+            {
+                userValueProjectList = qprojectUsers.Where(s => s.Users.Any(u => u.BranchId == currentUserBranch));
+            }
 
-            //var qvalueUserProject = from qpu in qprojectUsers
-            //                        join v in WorkScope.GetAll<ValueOfUserInProject>()
-            //                        on qpu.ProjectUserId equals v.UserId
-            //                        into userProjects
-            //                        from v in userProjects
-            //                        where qpu.ProjectId == v.ProjectId  // Add the additional condition here
-            //                        group v by new { v.UserId, v.ProjectId } into grouped
-            //                        select grouped.OrderByDescending(v => v.CreationTime).First();
+            var valueUserProjectList = await qvalueUserProject.ToListAsync();
 
-            //var qprojectUsersWithLastValue = from pu in qprojectUsers
-            //                                 join qvup in qvalueUserProject
-            //                                 on pu.ProjectUserId equals qvup.UserId
-            //                                 into qvupGroup
-            //                                 from qvup in qvupGroup.DefaultIfEmpty()
-            //                                 where pu.ProjectId == qvup.ProjectId
-            //                                 select new UserValueProjectDto
-            //                                 {
-            //                                     ProjectId = pu.ProjectId,
-            //                                     ProjectCode = pu.ProjectCode,
-            //                                     ProjectName = pu.ProjectName,
-            //                                     ProjectUserId = pu.ProjectUserId,
-            //                                     UserType = pu.UserType,
-            //                                     ValueType = qvup != null ? qvup.Type : ValueOfUserType.Member,
-            //                                 };
-            var qprojectUsersWithLastValueList = qprojectUsersWithLastValue.ToList();
-            var query = from p in WorkScope.GetAll<Project>().Where(s => s.Status == ProjectStatus.Active)
-                        join qpu in qprojectUsersWithLastValueList on p.Id equals qpu.ProjectId into qppu
+            foreach (var userValueProject in userValueProjectList)
+            {
+                foreach (var userValue in userValueProject.Users)
+                {
+                    var matchingValue = valueUserProjectList.FirstOrDefault(v =>
+                        v.UserId == userValue.UserId && v.ProjectId == userValueProject.Id);
+
+                    if (matchingValue != null)
+                    {
+                        userValue.ValueType = matchingValue.Type;
+                    }
+                    else
+                    {
+                        userValue.ValueType = ValueOfUserType.Member;
+                    }
+                }
+            }
+
+            var query = from p in userValueProjectList
                         select new UserStatisticInProjectDto
                         {
                             ProjectId = p.Id,
-                            ProjectName = p.Name,
-                            TotalUser = qppu.Count(),
-                            MemberCount = qppu.Count(s => s.ValueType == ValueOfUserType.Member),
-                            ExposeCount = qppu.Count(s => s.ValueType == ValueOfUserType.Expose),
-                            ShadowCount = qppu.Count(s => s.ValueType == ValueOfUserType.Shadow)
+                            ProjectCode = p.ProjectCode,
+                            ProjectName = p.ProjectName,
+                            TotalUser = p.Users.Count(),
+                            MemberCount = p.Users.Count(s => s.ValueType == ValueOfUserType.Member),
+                            ExposeCount = p.Users.Count(s => s.ValueType == ValueOfUserType.Expose),
+                            ShadowCount = p.Users.Count(s => s.ValueType == ValueOfUserType.Shadow)
                         };
 
             var temp = await query.GetGridResult(query, input);
 
             return new PagedResultDto<UserStatisticInProjectDto>(temp.TotalCount, temp.Items);
         }
+
+        //[HttpPost]
+        //[AbpAuthorize]
+        //[AbpAuthorize(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch)]
+        //public async Task<PagedResultDto<UserStatisticInProjectDto>> GetStatisticNumOfUsersInProject(GridParam input, long? branchId)
+        //{
+        //    var isViewAll = await IsGrantedAsync(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs);
+        //    var currentUserBranch = WorkScope.GetAll<User>()
+        //                            .Where(s => s.Id == AbpSession.UserId)
+        //                            .Select(s => s.BranchId).FirstOrDefault();
+
+        //    var dicUser = WorkScope.GetAll<ValueOfUserInProject>().ToDictionary(s => s.UserId, s => s.Type);
+
+        //    var listprojectUsers = WorkScope.GetAll<ValueOfUserInProject>()
+        //        .Where(s => s.Project.Status == ProjectStatus.Active)
+        //        .Where(s => s.User.IsActive == true)
+        //        .Select(s => new
+        //        {
+        //            s.ProjectId,
+        //            s.UserId,
+        //            s.Project.Code,
+        //            s.Project.Name,
+        //            s.Type
+        //        }).GroupBy(s => s.ProjectId)
+        //        .ToDictionary(s => s.Key,
+        //        s => s.Select(x => new
+        //        {
+        //            x.UserId,
+        //            x.Type
+        //        })
+        //        .ToList());
+
+
+
+        //    IQueryable<UserValueProjectDto> userValueProjectList;
+        //    var predicate = PredicateBuilder.New<ValueOfUserInProject>();
+        //    if (isViewAll)
+        //    {
+        //        //userValueProjectList = qprojectUsers.WhereIf(branchId != null, s => s.Users.Any(u => u.BranchId == branchId));
+        //        //predicate.And(s => );
+        //    }
+        //    else
+        //    {
+        //        //userValueProjectList = qprojectUsers.Where(s => s.Users.Any(u => u.BranchId == currentUserBranch));
+        //        //predicate.And(s => s.)
+        //    }
+
+        //    //var temp = await query.GetGridResult(query, input);
+
+        //    //return new PagedResultDto<UserStatisticInProjectDto>(temp.TotalCount, temp.Items);
+        //    return null;
+        //}
     }
 }
