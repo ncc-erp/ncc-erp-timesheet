@@ -112,6 +112,8 @@ namespace Timesheet.APIs.Timekeepings
                          TrackerTime = t.TrackerTime,
                          StatusPunish = t.StatusPunish,
                          MoneyPunish = t.MoneyPunish,
+                         DailyPunish = t.CountPunishDaily,
+                         MentionPunish = t.CountPunishMention,
                      });
 
             if (isComplain.HasValue && isComplain.Value)
@@ -154,6 +156,8 @@ namespace Timesheet.APIs.Timekeepings
                               StatusPunish = t.StatusPunish,
                               MoneyPunish = t.MoneyPunish,
                               TrackerTime = t.TrackerTime,
+                              DailyPunish = t.CountPunishDaily,
+                              MentionPunish = t.CountPunishMention
                           }).OrderByDescending(t => t.Date).ToListAsync();
         }
 
