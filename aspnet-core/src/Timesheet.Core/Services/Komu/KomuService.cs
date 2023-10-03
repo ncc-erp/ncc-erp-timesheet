@@ -249,21 +249,20 @@ namespace Timesheet.Services.Komu
         public async Task<T> GetAsync<T>(string url)
         {
             var fullUrl = $"{this.httpClient.BaseAddress}{url}";
+
             try
             {
-                HttpResponseMessage response = new HttpResponseMessage();
-                response = await httpClient.GetAsync(url);
+                var response = await httpClient.GetAsync(url);
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
                     logger.LogInformation($"Get: {fullUrl} => Response: {responseContent}");
-                    JObject responseJObj = JObject.Parse(responseContent);
+
                     var result = JsonConvert.DeserializeObject<T>(responseContent);
-                    if (result == null)
-                    {
-                        result = JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(responseJObj));
-                    }
-                    return result;
+
+                    return result != null ? result : JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(JObject.Parse(responseContent)));
+
                 }
                 else
                 {

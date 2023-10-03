@@ -36,7 +36,7 @@ namespace Timesheet.APIs.Timekeepings.Dto
         public string TrackerTime { get; set; }
         public string StrTimekeepingId => TimekeepingId.ToString();
 
-        public int DailyPunish { get; set; }
-        public int MentionPunish { get; set; }
+        public int? DailyPunish { get; set; }
+        public int? MentionPunish { get; set; }
     }
 }
