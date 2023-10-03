@@ -131,8 +131,8 @@
                 <td style="text-align: center;" [class]="getCss1(item.resultCheckIn)">{{item.resultCheckIn}}</td>
                 <td style="text-align: center;" [class]="getCss1(item.resultCheckOut)">{{item.resultCheckOut}}</td>
                 <td class="text-center"><span class="pm" *ngIf="item.editByUserName">{{item.editByUserName}}</span></td>
-                <td style="text-align: center;" [class]="changeColorByValue(item.dailyPunish)">{{item.dailyPunish}}</td>
-                <td style="text-align: center;" [class]="changeColorByValue(item.mentionPunish)">{{item.mentionPunish}}</td>
+                <td style="text-align: center;" [class]="getCssClassByPunish(item.dailyPunish)">{{item.dailyPunish}}</td>
+                <td style="text-align: center;" [class]="getCssClassByPunish(item.mentionPunish)">{{item.mentionPunish}}</td>
                 <td style="text-align: center;">
                   <span class="label bg-red" [matTooltip]="item.statusPunish | punishName">{{item.moneyPunish | formatDisplayNumberToK}}</span>
                   <span *ngIf="item.status && !item.statusPunish > 0" class="label bg-red" matTooltip = "Punish">20K</span>
