@@ -7,10 +7,11 @@ import { ManageEmployeeComponent } from './manage-employee/manage-employee.compo
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { FormsModule } from '@angular/forms';
+import { ProjectManagementComponent } from './project-management/project-management.component';
 
 
 @NgModule({
-  declarations: [BranchManagerComponent, ManageEmployeeComponent],
+  declarations: [BranchManagerComponent, ManageEmployeeComponent, ProjectManagementComponent],
   imports: [
     CommonModule,
     SharedModule,
