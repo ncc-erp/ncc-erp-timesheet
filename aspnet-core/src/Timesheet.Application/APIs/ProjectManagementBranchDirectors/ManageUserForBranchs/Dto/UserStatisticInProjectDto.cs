@@ -1,4 +1,5 @@
-﻿using Abp.Domain.Entities;
+﻿using Abp.Application.Services.Dto;
+using Abp.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,11 +9,8 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
 {
     public class UserStatisticInProjectDto
     {
-        [ApplySearch]
         public long ProjectId { get; set; }
-        [ApplySearch]
         public string ProjectCode { get; set; }
-        [ApplySearch]
         public string ProjectName { get; set; }
         public int TotalUser { get; set; }
         public int MemberCount { get; set; }

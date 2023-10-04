@@ -65,7 +65,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
                 .ToList();
 
             var qLastValueOfUserInProject = from l in listProjectByUserId
-                                            join v in WorkScope.GetAll<ValueOfUserInProject>() on l.ProjectId equals v.ProjectId
+                                            join v in WorkScope.GetAll<ValueOfUserInProject>().Where(s => s.UserId == userId) on l.ProjectId equals v.ProjectId
                                             group v by v.ProjectId into grouped
                                             select grouped.OrderByDescending(v => v.CreationTime).First();
 
