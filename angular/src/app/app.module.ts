@@ -1,5 +1,5 @@
 import { UploadAvatarComponent } from './modules/user/upload-avatar/upload-avatar.component';
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { JsonpModule } from '@angular/http';
@@ -66,6 +66,24 @@ let config = new AuthServiceConfig([
 export function provideConfig() {
   return config;
 }
+
+declare global {
+  interface Window {
+    postSentryLog: Function;
+  }
+}
+
+export class SentryErrorHandler implements ErrorHandler {
+  constructor(@Inject('postSentryLog') private postSentryLog: Function) {}
+
+  handleError(error: any): void {
+    if (typeof this.postSentryLog === 'function') {
+      this.postSentryLog(error);
+      throw error;
+    }
+  }
+}
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -119,6 +137,14 @@ export function provideConfig() {
     {
       provide: AuthServiceConfig,
       useFactory: provideConfig
+    },
+    {
+      provide: 'postSentryLog',
+      useValue: window['postSentryLog'],
+    },
+    {
+      provide: ErrorHandler,
+      useClass: SentryErrorHandler,
     }
   ],
   entryComponents: [
