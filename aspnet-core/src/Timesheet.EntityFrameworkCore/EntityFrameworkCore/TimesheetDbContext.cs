@@ -45,8 +45,8 @@ namespace Ncc.EntityFrameworkCore
         public DbSet<TeamBuildingDetail> TeamBuildingDetails { get; set; }
         public DbSet<TeamBuildingRequestHistory> TeamBuildingRequestHistories { get; set; }
         public DbSet<TeamBuildingRequestHistoryFile> TeamBuildingRequestHistoryFiles { get; set; }
-        public DbSet<ValueOfUserInProject> ValueOfUserInProjects { get; set; }
         public DbSet<ReviewInternPrivateNote> ReviewInternPrivateNotes { get; set; }
+        public DbSet<ValueOfUserInProject> ValueOfUserInProjects { get; set; }
         public TimesheetDbContext(DbContextOptions<TimesheetDbContext> options)
             : base(options)
         {
