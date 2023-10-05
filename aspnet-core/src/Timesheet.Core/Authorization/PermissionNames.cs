@@ -285,6 +285,9 @@ namespace Ncc.Authorization
         public const string ReviewIntern_ReviewDetail_UpdateDetailFullSalary = "ReviewIntern.ReviewDetail.UpdateDetailFullSalary";
         public const string ReviewIntern_ReviewDetail_ReviewByCapabilityForOneIntern = "ReviewIntern.ReviewDetail.ReviewByCapabilityForOneIntern";
 
+        public const string ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern = "ReviewIntern.ReviewDetail.VerifyPmReviewedForOneIntern";
+        public const string ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern = "ReviewIntern.ReviewDetail.AcceptHrRequestForOneIntern";
+
         public const string OverTimeSetting = "OverTimeSetting";
         public const string OverTimeSetting_View = "OverTimeSetting.View";
         public const string OverTimeSetting_AddNew = "OverTimeSetting.AddNew";
@@ -599,6 +602,8 @@ namespace Ncc.Authorization
                     PermissionNames.ReviewIntern_ReviewDetail_UpdateDetailFullSalary,
 
                     PermissionNames.ReviewIntern_ReviewDetail_ReviewByCapabilityForOneIntern,
+                    PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern,
+                    PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern,
 
                     PermissionNames.Timekeeping_UserNote,
                     PermissionNames.ManageWorkingTime_ViewAll,
@@ -806,6 +811,7 @@ namespace Ncc.Authorization
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs,
+                    PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern,
                 }
             },
         };
@@ -1079,6 +1085,9 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_ViewFullSalary, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Full Lương"},
             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_UpdateDetailSubLevel, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Sublevel"},
             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_UpdateDetailFullSalary, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Full Lương"},
+            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern,MultiTenancySides = MultiTenancySides.Host, DisplayName = "Verify PmReviewed For One Intern" },
+            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Accept HrRequest For One Intern" },
+
             new SystemPermission{ Name =  PermissionNames.OverTimeSetting, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Setting overtime" },
             new SystemPermission{ Name =  PermissionNames.OverTimeSetting_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View overtime settings" },
             new SystemPermission{ Name =  PermissionNames.OverTimeSetting_AddNew, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add new overtime setting" },
@@ -1646,6 +1655,8 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_ViewFullSalary, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Full Salary" },
                             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_UpdateDetailSubLevel, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Sublevel"},
                             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_UpdateDetailFullSalary, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Full Lương"},
+                            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern,MultiTenancySides = MultiTenancySides.Host, DisplayName = "Verify PmReviewed For One Intern" },
+                            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Accept HrRequest For One Intern" },
                         }},
                 },
              },

@@ -40,7 +40,7 @@ namespace Timesheet.DomainServices
 
             var allRequestOff = _absenceDayDetailRepository.GetAll()
                 .Where(s => s.Request.Status == RequestStatus.Pending)
-                .Where(s => s.DateAt >= startDate.Date && s.DateAt.Date <= dateNow)
+                .Where(s => s.DateAt >= startDate.Date) // thay đổi business: lấy tất cả request đang pending
                 .Select(s => new RequestAddDto
                 {
                     DateAt = s.DateAt,

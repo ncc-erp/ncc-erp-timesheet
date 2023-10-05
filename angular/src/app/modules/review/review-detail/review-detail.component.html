@@ -49,7 +49,7 @@
                         <mat-form-field class="col-lg-3 col-md-6 col-sm-6 col-xs-12" appearance="outline">
                             <mat-label> {{ "Status" | localize }}</mat-label>
                             <mat-select [(value)]="selectedStatus" (selectionChange)="refreshDataFilter()" name="Status">
-                                <mat-option [value]="4">All</mat-option>
+                                <mat-option [value]="-3">All</mat-option>
                                 <mat-option *ngFor="let status of listStatus"
                                     [value]="APP_CONSTANT.ReviewStatus[status]">
                                     {{ status }}
@@ -182,6 +182,7 @@
                             <th>{{ "Level" | localize }}</th>
                             <th>{{ "New Level" | localize }}</th>
                             <th>{{ "Status" | localize }}</th>
+                            <th>{{ "Note" | localize }}</th>
                             <th>{{ "Updated Info" | localize }}</th>
                         </tr>
                     </thead>
@@ -231,6 +232,22 @@
                     " class="choices" mat-menu-item="mat-menu-item" [name]="'reviewBtn-'+item.id" (click)="newReviewInternship(item)">
                                         <mat-icon class="mat-18">rate_review</mat-icon>
                                         Review
+                                    </button>
+                                    <button *ngIf="isShowBtnPmReview(item)" mat-menu-item="mat-menu-item" class="choices" name="pmReviewIntern" (click)="newReviewInternship(item)">
+                                        <mat-icon class="mat-18">rate_review</mat-icon>
+                                        PM Review
+                                    </button>
+                                    <button *ngIf="isShowBtnHrVerify(item)" mat-menu-item="mat-menu-item" class="choices" name="hrVerifyIntern" (click)="createHrNote(item)">
+                                        <mat-icon class="mat-18">verified_user</mat-icon>
+                                        HR Verify  
+                                    </button>
+                                    <button *ngIf="isShowBtnHeadPm(item)" mat-menu-item="mat-menu-item" class="choices" style="color: green" name="headPmVerifyIntern" (click)="headPmApproveOrReject(item, headPmVerifyStatus)">
+                                        <mat-icon class="mat-18" style="color: green">rate_review</mat-icon>
+                                        Head PM Verify 
+                                    </button>
+                                    <button *ngIf="isShowBtnHeadPm(item)" mat-menu-item="mat-menu-item" class="choices" style="color: red" name="headPmRejectIntern" (click)="headPmApproveOrReject(item, headPmRejectStatus)">
+                                        <mat-icon class="mat-18" style="color: red">thumb_down_off_alt</mat-icon>
+                                        Head PM Reject
                                     </button>
                                     <button *ngIf="
                                     isShowBtnApprove(item)
@@ -313,7 +330,7 @@
                             </td>
                             <!-- Review Content -->
                             <td>
-                                <div (click)="changeStatusNote(item)">
+                                <div (click)="toggleHideNote(item)">
                                     <p [ngClass]="item.hideNote == false ? 'preReview' : 'review'"
                                         title="Cuộn chuột hoặc Click để mở rộng nội dung"
                                         name="reviewContent" [innerHTML]="formatNoteContent(item.note)">
@@ -416,18 +433,21 @@
                             </td>
                             <!-- Trạng thái -->
                             <td style="text-align: center">
-                                <div class="label status-label ng-star-inserted" [ngClass]="
-                    item.status == 0
-                      ? 'label-default'
-                      : item.status == 1
-                      ? 'label-success '
-                      : item.status == 2
-                      ? 'label-primary '
-                      : item.status == 3
-                      ? 'label-info'
-                      : 'label-danger'
-                  ">
+                                <div class="label status-label ng-star-inserted" [ngClass]="getStatusCssClass(item.status)">
                                     {{ getStatusById(item.status) }}
+                                </div>
+                            </td>
+                            <!-- note -->
+                            <td>
+                                <div (click)="togglePrivateNote(item)">
+                                    <p [ngClass]="item.hidePrivateNote == false ? 'preReview' : 'review'"
+                                    title="Cuộn chuột hoặc Click để mở rộng nội dung" name="pmNote">
+                                        <ng-container *ngFor="let note of item.reviewInternPrivateNoteDtos">
+                                            <b class="">{{note.noteByUserName}}:</b>
+                                            {{note.privateNote}} <br>
+                                            <i>{{ note.created | date: "dd/MM/yyyy" }} {{ note.created | date: "hh:mm:ss" }}</i> <br>
+                                        </ng-container>
+                                    </p>
                                 </div>
                             </td>
                             <!-- Updated At -->

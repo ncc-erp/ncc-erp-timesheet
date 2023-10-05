@@ -108,6 +108,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.ApproveTimesheetNotifyTimePeriodWithPendingRequest, "-30", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ApproveRequestOffNotifyEnableWorker,"false",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ApproveRequestOffNotifyAtHour, "10", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.ApproveRequestOffSendUserAtHour, "10", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ApproveRequestOffNotifyTimePeriodWithPendingRequest, "-30", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendMessageRequestPendingTeamBuildingToHREnableWorker,"false",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendMessageRequestPendingTeamBuildingToHRAtHour, "10", scopes: SettingScopes.Application|SettingScopes.Tenant),
