@@ -776,10 +776,11 @@
         <form>
           <div class="row">
             <div class="col-md-12" style="display: flex;">
-              <mat-checkbox class="autoSubmit" (checked)="autoSubmitTimesheet.autoSubmitTimesheet == 'true'"
-                [(ngModel)]="autoSubmitTimesheet.autoSubmitTimesheet" name="autoSubmitTimesheet"
-                [disabled]="!isEditAutoSubmitTimesheet">
-                Auto submit timesheet on</mat-checkbox>
+              <mat-checkbox style="padding: 0; margin-right: 20px;" class="autoSubmit"
+                [checked]="autoSubmitTimesheet.autoSubmitTimesheet == 'true'?true:false" name="autoSubmitTimesheet"
+                (change)="onAutoSubmitTimesheetEnableWorker($event)" [disabled]="!isEditAutoSubmitTimesheet">
+                Auto submit timesheet on
+              </mat-checkbox>
               <mat-form-field>
                 <mat-select [(ngModel)]="autoSubmitTimesheet.autoSubmitAt" name="autoSubmitAt"
                   [disabled]="!isEditAutoSubmitTimesheet">
