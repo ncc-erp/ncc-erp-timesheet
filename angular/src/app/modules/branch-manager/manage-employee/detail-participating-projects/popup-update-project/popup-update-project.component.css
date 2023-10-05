@@ -1,0 +1,9 @@
+.header h2{
+    font-size: 18px;
+    margin: unset;
+}
+
+.body .input{
+    display: flex;
+    justify-content: space-between;
+}

@@ -9,7 +9,7 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
-              <button mat-menu-item>
+              <button mat-menu-item (click)='refresh()' name="refreshBtn">
                 <mat-icon>refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
@@ -22,37 +22,49 @@
         <div class="group">
           <div class="col-lg-10">
             <div class="row">
-              <div class="col-lg-7 mb-0">
+              <div class="col-lg-5 mb-0">
                 <mat-form-field class="example-full-width" appearance="outline">
                   <mat-label>Search by Email</mat-label>
                   <mat-icon matSuffix>search</mat-icon>
-                  <input type="search" matInput>
+                  <input matInput="matInput" [(ngModel)]="keyword" name="keyword" (keyup.enter)="searchOrFilter()">
                 </mat-form-field>
               </div>
-              <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-0">
-                <mat-form-field class="w-100" appearance="outline">
-                  <mat-label> {{ "Position" | localize }}</mat-label>
-                  <mat-select>
-                    <mat-option>All</mat-option>
-                  </mat-select>
-                </mat-form-field>
+
+              <div class="col-lg-4 col-md-8 col-sm-6 col-xs-12 mb-0">
+                <ng-container>
+                  <mat-form-field class="w-100" appearance="outline">
+                    <mat-label> {{ "Branch" | localize }}</mat-label>
+                    <mat-select name="branchId" [(value)]="branchId" (selectionChange)="searchOrFilter()">
+                      <mat-option>
+                          <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
+                            noEntriesFoundLabel="No matching found">
+                          </ngx-mat-select-search>
+                      </mat-option>
+                      <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
+                        {{branch.name}}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </ng-container>
               </div>
+
             </div>
           </div>
           <div class="col-lg-2">
             <div class="row row-btn">
-              <button class="body-btn" mat-raised-button>Clear</button>
-              <button class="body-btn" mat-raised-button color="primary">Search</button>
+              <button class="body-btn" mat-raised-button name="clearSearchAndFilter" (click)="clearSearchAndFilter()">Clear</button>
+              <button class="body-btn" mat-raised-button color="primary" [disabled]="!keyword" (click)="searchOrFilter()">Search</button>
             </div>
           </div>
         </div>
 
-        <div class="chart">
+        <div class="chart" [busy]="isTableLoading">
           <canvas id="myChart"></canvas>
         </div>
 
         <div class="abp-pagination-controls-wrapper">
-          <abp-pagination-controls id="server"></abp-pagination-controls>
+          <abp-pagination-controls [totalNumber]="totalItems" id="server" 
+          (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)"></abp-pagination-controls>
         </div>
         
       </div>

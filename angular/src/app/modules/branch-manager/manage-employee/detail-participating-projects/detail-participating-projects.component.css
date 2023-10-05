@@ -1,0 +1,30 @@
+.checkBoxDto mat-checkbox{
+    margin: 0 10px;
+}
+.action{
+    margin: 0 auto;
+}
+.menu{
+    border: none;
+}
+
+button.mat-menu-item{
+    width: 100%;
+    background: transparent;
+}
+button.mat-menu-item .mat-18{
+    margin-right: 5px;
+}
+
+td .nameProject{
+    margin-bottom: unset;
+    width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.row div{
+    padding: 0 24px 10px;
+}
+.row div h3, .row div p{
+    margin: 0;
+}

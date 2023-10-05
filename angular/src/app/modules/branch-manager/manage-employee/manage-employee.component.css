@@ -21,7 +21,7 @@
 
 .table>tbody>tr>td{
     padding: 12px 6px;
-    height: 115px;
+    height: 80px;
 }
 
 .project_list{
@@ -39,8 +39,8 @@
 }
 
 .project_item span{
-    margin-left: 5px;
-    margin-bottom: 3px;
+    margin-left: 5px !important;
+    margin-bottom: 3px !important;
     padding: 5px;
 }
 
@@ -57,7 +57,7 @@
     line-height: 25px;
     word-wrap: break-word;
     -webkit-line-clamp: 3;
-    height: 115px;
+    height: 80px;
     -webkit-box-orient: vertical;
 }
 
@@ -96,4 +96,16 @@
 {
 	background-color: #cecece;
 	border: 2px solid #cecece;
+}
+
+.user_name:hover{
+    color: #2196F3;
+}
+
+.figMargin .divFigMargin{
+    margin-bottom: 0px;
+}
+
+.figMargin .divFigMargin .mat-form-field-wrapper{
+    padding-bottom: 0px !important;
 }
