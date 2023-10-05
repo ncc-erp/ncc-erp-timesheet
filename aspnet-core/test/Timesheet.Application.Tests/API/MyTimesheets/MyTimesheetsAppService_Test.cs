@@ -1063,14 +1063,15 @@ namespace Timesheet.Application.Tests.API.MyTimesheets
                 .Where(s => s.DateAt >= input.StartDate.Date && s.DateAt.Date <= input.EndDate)
                 .Where(s => s.Status == TimesheetStatus.None)
                 .ToListAsync();
-                var expectedResult = "Submit success " + mytimesheets.Count + " timesheets";
-                var result = await _myTimesheet.SubmitToPending(input);
-                Assert.Equal(expectedResult, result);
-            });
-            await WithUnitOfWorkAsync(async () =>
-            {
-                var myTimesheet = await _work.GetAsync<MyTimesheet>(110);
-                Assert.Equal(TimesheetStatus.Pending, myTimesheet.Status);
+                
+                var firstDateCanUnlock = _myTimesheet.GetFirstDateToLockTS(1, true).Result;
+                var expectedResult = "Timesheet was locked! You can submit timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd");
+                    
+                var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+                {
+                    await _myTimesheet.SubmitToPending(input);
+                });
+                Assert.Equal(expectedResult, exception.Message);
             });
         }
 
