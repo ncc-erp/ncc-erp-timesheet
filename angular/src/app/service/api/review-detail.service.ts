@@ -92,4 +92,10 @@ export class ReviewDetailService extends BaseApiService{
   changeReviewerOfDetail(data: object): Observable<any> {
     return this.http.post(this.rootUrl + '/UpdateReviewer', data);
   }
+  saveHrVerifyIntern(data: object): Observable<any>{
+    return this.http.post(this.rootUrl + '/HrVerify', data);
+  }
+  headPmApproveIntern(data: object): Observable<any>{
+    return this.http.post(this.rootUrl + '/HeadPmVerify', data);
+  }
 }

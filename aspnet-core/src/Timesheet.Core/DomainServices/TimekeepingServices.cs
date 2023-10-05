@@ -98,7 +98,7 @@ namespace Timesheet.DomainServices
             var mapAbsenceUsers = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request)
                 .Where(s => s.DateAt.Date == selectedDate.Date
                 && s.Request.Status == RequestStatus.Approved
-                && s.Request.Type == RequestType.Off)
+                && s.Request.Type == RequestType.Off || s.Request.Type == RequestType.Onsite)
                 .GroupBy(s => s.Request.UserId)
                 .ToDictionary(s => s.Key, s => s.Select(x => new MapAbsenceUserDto
                 {
@@ -122,8 +122,24 @@ namespace Timesheet.DomainServices
                 Logger.Info("AddTimekeepingByDay() checkInUsers null or empty");
                 return default;
             }
-           
+
+            var dailyAndMentionPunishs = _komuService.GetDailyReport(selectedDate);
+            if (dailyAndMentionPunishs == null)
+            {
+                Logger.Info("AddTimekeepingByDay() dailyAndMentionPunishs null or empty");
+                return default;
+            }
+
+            var listDaily = dailyAndMentionPunishs.daily.ToList();
+
+            var listMention = dailyAndMentionPunishs.mention.ToList();
+
             var mapCheckInUsers = checkInUsers.ToDictionary(s => s.Email, s => s);
+
+            var mapDailyUsers = listDaily.ToDictionary(s => s.email, s => s.count);
+
+            var mapMentionUsers = listMention.ToDictionary(s => s.email, s => s.count);
+
             var listUserName = users.Select(x => x.UserName).Distinct().ToList();
             var userTrackerTimes = _trackerService.GetTimeTrackerToDay(selectedDate, listUserName);
             var dicUserNameToTrackerTime = userTrackerTimes.ToDictionary(s => s.email, s => new { s.ActiveMinute, s.active_time });
@@ -153,6 +169,20 @@ namespace Timesheet.DomainServices
                     {
                         ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
                     }        
+                }
+
+                if(mapDailyUsers.ContainsKey(user.UserName))
+                {
+                    var dailyUser = mapDailyUsers[user.UserName];
+
+                    t.CountPunishDaily = dailyUser;
+                }
+
+                if (mapMentionUsers.ContainsKey(user.UserName))
+                {
+                    var mentionUser = mapMentionUsers[user.UserName];
+
+                    t.CountPunishMention = mentionUser;
                 }
 
                 listDicUserIdToNote.ForEach(item =>

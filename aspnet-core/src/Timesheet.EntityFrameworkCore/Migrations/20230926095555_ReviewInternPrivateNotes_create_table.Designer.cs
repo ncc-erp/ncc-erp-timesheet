@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ncc.EntityFrameworkCore;
 
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    partial class TimesheetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230926095555_ReviewInternPrivateNotes_create_table")]
+    partial class ReviewInternPrivateNotes_create_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2267,10 +2269,6 @@ namespace Timesheet.Migrations
                     b.Property<string>("CheckOut")
                         .HasMaxLength(5);
 
-                    b.Property<int>("CountPunishDaily");
-
-                    b.Property<int>("CountPunishMention");
-
                     b.Property<DateTime>("CreationTime");
 
                     b.Property<long?>("CreatorUserId");
@@ -2386,43 +2384,6 @@ namespace Timesheet.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserUnlockIms");
-                });
-
-            modelBuilder.Entity("Timesheet.Entities.ValueOfUserInProject", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreationTime");
-
-                    b.Property<long?>("CreatorUserId");
-
-                    b.Property<long?>("DeleterUserId");
-
-                    b.Property<DateTime?>("DeletionTime");
-
-                    b.Property<bool>("IsDeleted");
-
-                    b.Property<DateTime?>("LastModificationTime");
-
-                    b.Property<long?>("LastModifierUserId");
-
-                    b.Property<long>("ProjectId");
-
-                    b.Property<float>("ShadowPercentage");
-
-                    b.Property<int>("Type");
-
-                    b.Property<long>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ValueOfUserInProjects");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>
@@ -2843,19 +2804,6 @@ namespace Timesheet.Migrations
 
             modelBuilder.Entity("Timesheet.Entities.UserUnlockIms", b =>
                 {
-                    b.HasOne("Ncc.Authorization.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Timesheet.Entities.ValueOfUserInProject", b =>
-                {
-                    b.HasOne("Ncc.Entities.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("Ncc.Authorization.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")

@@ -123,6 +123,9 @@ export const APP_CONSTANT = {
     'Approved': 2,
     'Sent Email': 3,
     'Rejected':-1,
+    'PM Reviewed': 4,
+    'HR Approved': 5,
+    'ReOpen' : 6,
   },
   AbsenceType: {
     FullDay: 1,

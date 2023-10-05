@@ -1,0 +1,174 @@
+{
+  "daily": [
+    {
+      "email": "testemail3@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "admin",
+      "count": 1
+    },
+    {
+      "email": "testemail4@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail5@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail6@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail7@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail8@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail9@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail10@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail11@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail12@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail13@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail14@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail15@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail16@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail17@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail18@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail19@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail20@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail21@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail22@gmail.com",
+      "count": 1
+    }
+  ],
+  "mention": [
+    {
+      "email": "testemail3@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "admin",
+      "count": 1
+    },
+    {
+      "email": "testemail4@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail5@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail6@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail7@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail8@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail9@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail10@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail11@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail12@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail13@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail14@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail15@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail16@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail17@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail18@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail19@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail20@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail21@gmail.com",
+      "count": 1
+    },
+    {
+      "email": "testemail22@gmail.com",
+      "count": 1
+    }
+  ]
+}

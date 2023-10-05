@@ -436,7 +436,7 @@ namespace Timesheet.APIs.ProjectManagement
                         StartDate = new DateTime(s.Year, s.Month, 1),
                         Point = s.RateStar,
                         isRetro = false,
-                        Note = s.Note.Replace("<strong>","").Replace("</strong>", ""),
+                        Note = s.Note != null ? s.Note.Replace("<strong>", "").Replace("</strong>", "") : null,
                         ProjectName = "Basic Training"
                     })
                     .ToList()
