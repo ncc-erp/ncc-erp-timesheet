@@ -510,11 +510,11 @@ namespace Timesheet.DomainServices
                 {
                     var note = string.IsNullOrEmpty(t.Note) ? "" : t.Note;
                     t.Note = note == "" ? "" : t.Note + "\n";
-                    if (absenceUser.DateType == DayType.Fullday && absenceUser.Type == RequestType.Off)
+                    if (absenceUser.DateType == DayType.Fullday)
                     {
                         t.CheckIn = "";
                         t.CheckOut = "";
-                        t.Note += "Off fullday";
+                        t.Note += absenceUser.Type == RequestType.Off ? "Off fullday" : "Onsite fullday";
                         t.AbsenceDayType = DayType.Fullday;
                     }
                     else if (absenceUser.DateType == DayType.Morning)
@@ -543,13 +543,6 @@ namespace Timesheet.DomainServices
                             t.Note += "Xin về sớm " + absenceUser.Hour + " h";
                             t.AbsenceDayType = DayType.Custom;
                         }
-                    }
-                    else if (absenceUser.DateType == DayType.Fullday && absenceUser.Type == RequestType.Onsite)
-                    {
-                        t.CheckIn = "";
-                        t.CheckOut = "";
-                        t.Note += "Onsite fullday";
-                        t.AbsenceDayType = DayType.Fullday;
                     }
                 }
             }
