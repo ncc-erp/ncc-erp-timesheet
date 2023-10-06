@@ -495,6 +495,15 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   editAutoSubmitTimesheet() {
     this.isEditAutoSubmitTimesheet = true;
   }
+  onAutoSubmitTimesheetEnableWorker(e) {
+    if (e.checked == true) {
+      this.autoSubmitTimesheet.autoSubmitTimesheet = "true"
+    }
+    else {
+      this.autoSubmitTimesheet.autoSubmitTimesheet = "false"
+    }
+  }
+
   editGetDataFromFaceID() {
     this.isEditGetDataFromFaceID = true;
   }
