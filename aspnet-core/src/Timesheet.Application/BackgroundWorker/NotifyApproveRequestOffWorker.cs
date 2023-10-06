@@ -26,18 +26,29 @@ namespace Timesheet.BackgroundWorker
         [UnitOfWork]
         protected override void DoWork()
         {
-            try
+            if(!_isRunning)
             {
-                if (!_isRunning)
+                _isRunning = true;
+
+                try
                 {
-                    _isRunning = true;
                     NotifyApproveRequestOff();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("NotifyApproveRequestOff() error: " + e.Message);
                     _isRunning = false;
                 }
-            }
-            catch (Exception e)
-            {
-                Logger.Error("NotifyApproveRequestOff() error: " + e.Message);
+                try
+                {
+                    SendMessageToUserDueDate();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("SendMessageToUserDueDate() error: " + e.Message);
+                    _isRunning = false;
+                }
+
                 _isRunning = false;
             }
         }
@@ -120,6 +131,31 @@ namespace Timesheet.BackgroundWorker
             _approveRequestOffServices.NotifyRequestOffPending(listRequestOff, notifyToChannels);
 
             _approveRequestOffServices.SendMessageToUserRequestOffPending(listRequestOff);
+        }
+
+        private void SendMessageToUserDueDate()
+        {
+            var dateNow = DateTimeUtils.GetNow();
+            string notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.ApproveRequestOffSendUserAtHour);
+            if (dateNow.Hour >= int.Parse(notifyAtHourConfig))
+            {
+                var listRequestOff = _approveRequestOffServices.GetListPmNotApproveRequestOff();
+                var listRequestOffDueDate = listRequestOff.Where(s => s.DateAt.Date == dateNow.Date).ToList();
+                if (listRequestOffDueDate.Count > 0)
+                {
+                    _approveRequestOffServices.SendMessageToUserRequestOffPending(listRequestOffDueDate);
+                }
+                else
+                {
+                    Logger.Info("SendMessageToUserDueDate() stop: notifyAtHourConfig=" + notifyAtHourConfig + " date run=" + dateNow.ToString("dd/MM/yyyy HH:mm:ss") + " next run=" + dateNow.AddMinutes(_intervalMinutes).ToString("dd/MM/yyyy HH:mm:ss"));
+                    return;
+                }
+            }
+            else
+            {
+                Logger.Info("SendMessageToUserDueDate() stop: notifyAtHourConfig=" + notifyAtHourConfig + " date run=" + dateNow.ToString("dd/MM/yyyy HH:mm:ss") + " next run=" + dateNow.AddMinutes(_intervalMinutes).ToString("dd/MM/yyyy HH:mm:ss"));
+                return;
+            }
         }
     }
 }

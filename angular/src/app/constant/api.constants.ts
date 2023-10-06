@@ -123,6 +123,9 @@ export const APP_CONSTANT = {
     'Approved': 2,
     'Sent Email': 3,
     'Rejected':-1,
+    'PM Reviewed': 4,
+    'HR Approved': 5,
+    'ReOpen' : 6,
   },
   AbsenceType: {
     FullDay: 1,
@@ -216,5 +219,10 @@ export const APP_CONSTANT = {
     { "name": "Không CheckOut", "value": 3 },
     { "name": "Đi muộn và Không CheckOut", "value": 4 },
     { "name": "Không CheckIn và không CheckOut", "value": 5 }
-  ]
+  ],
+  valueOfUserType: {
+    Member: 0,
+    Expose: 1,
+    Shadow: 2
+  },
 };

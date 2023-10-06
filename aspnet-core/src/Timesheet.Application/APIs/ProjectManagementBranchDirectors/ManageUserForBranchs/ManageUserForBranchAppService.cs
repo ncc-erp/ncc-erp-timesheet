@@ -206,7 +206,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
             //search
             if (!string.IsNullOrEmpty(input.SearchText))
             {
-                query = query.Where(item => item.ProjectName.Contains(input.SearchText));
+                query = query.Where(item => item.ProjectName.Trim().ToLowerInvariant().Contains(input.SearchText.Trim().ToLowerInvariant()));
             }
             //sort
             if (!string.IsNullOrEmpty(input.Sort))

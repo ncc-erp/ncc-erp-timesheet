@@ -119,6 +119,7 @@
         public const string ApproveTimesheetNotifyTimePeriodWithPendingRequest = "App.ApproveTimesheetNotifyTimePeriodWithPendingRequest";
         public const string ApproveRequestOffNotifyEnableWorker = "App.ApproveRequestOffNotifyEnableWorker";
         public const string ApproveRequestOffNotifyAtHour = "App.ApproveRequestOffNotifyAtHour";
+        public const string ApproveRequestOffSendUserAtHour = "App.ApproveRequestOffSendUserAtHour";
         public const string ApproveRequestOffNotifyToChannels = "App.ApproveRequestOffNotifyToChannels";
         public const string ApproveRequestOffNotifyTimePeriodWithPendingRequest = "App.ApproveRequestOffNotifyTimePeriodWithPendingRequest";
         public const string SendMessageRequestPendingTeamBuildingToHREnableWorker = "App.SendMessageRequestPendingTeamBuildingToHREnableWorker";

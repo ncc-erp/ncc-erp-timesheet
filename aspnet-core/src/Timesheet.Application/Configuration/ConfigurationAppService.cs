@@ -562,6 +562,7 @@ namespace Ncc.Configuration
             {
                 ApproveRequestOffNotifyEnableWorker = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ApproveRequestOffNotifyEnableWorker),
                 ApproveRequestOffNotifyAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ApproveRequestOffNotifyAtHour),
+                ApproveRequestOffSendUserAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ApproveRequestOffSendUserAtHour),
                 ApproveRequestOffNotifyToChannels = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ApproveRequestOffNotifyToChannels),
                 ApproveRequestOffNotifyTimePeriodWithPendingRequest = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ApproveRequestOffNotifyTimePeriodWithPendingRequest),
             };
@@ -572,6 +573,7 @@ namespace Ncc.Configuration
         {
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ApproveRequestOffNotifyEnableWorker, input.ApproveRequestOffNotifyEnableWorker);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ApproveRequestOffNotifyAtHour, input.ApproveRequestOffNotifyAtHour);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ApproveRequestOffSendUserAtHour, input.ApproveRequestOffSendUserAtHour);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ApproveRequestOffNotifyToChannels, input.ApproveRequestOffNotifyToChannels);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ApproveRequestOffNotifyTimePeriodWithPendingRequest, input.ApproveRequestOffNotifyTimePeriodWithPendingRequest);
             return input;

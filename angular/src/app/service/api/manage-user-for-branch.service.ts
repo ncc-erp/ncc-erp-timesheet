@@ -20,8 +20,8 @@ export class ManageUserForBranchService extends BaseApiService {
     return this.http.post(this.rootUrl + "/GetAllUserPagging", page);
   }
 
-  getAllValueOfUserInProjectByUserId(page: PagedRequestDto): Observable<any> {
-    return this.http.post(this.rootUrl + "/GetStatisticNumOfUsersInProject", page);
+  getAllValueOfUserInProjectByUserId(page: PagedRequestDto, branchId: number): Observable<any> {
+    return this.http.post(this.rootUrl + `/GetStatisticNumOfUsersInProject?branchId=${branchId}`, page);
   }
 }
  

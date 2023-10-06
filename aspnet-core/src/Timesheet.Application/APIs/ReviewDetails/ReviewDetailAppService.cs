@@ -81,12 +81,27 @@ namespace Timesheet.APIs.ReviewDetails
                                                 .OrderByDescending(x => x.Review.Year).OrderByDescending(x => x.Review.Month)
                                                 .Select(x => new { x.InternshipId, x.RateStar })
                                                 .ToListAsync();
+
+            var qnote = from c in WorkScope.GetAll<ReviewInternPrivateNote>()
+                           join r in WorkScope.GetAll<ReviewDetail>() on c.ReviewDetailId equals r.Id
+                           join u in WorkScope.GetAll<User>() on c.NoteByUserId equals u.Id
+                           select new ReviewInternPrivateNoteDto
+                           {
+                               Id = c.Id,
+                               ReviewDetailId = c.ReviewDetailId,
+                               NoteByUserId = c.NoteByUserId,
+                               NoteByUserName = u.Name,
+                               PrivateNote = c.PrivateNote,
+                               Created = c.CreationTime
+                           };
+            var listNote = qnote.ToList();
             var reviewDetails = from rv in WorkScope.GetAll<ReviewDetail>()
                                         .Where(s => !branchId.HasValue || s.InterShip.BranchId == branchId)
                                      .Where(x => x.ReviewId == reviewId
                                      && (levelChange != null && valueLevelChange > -1 ? (valueLevelChange == 2 ? x.NewLevel == x.CurrentLevel : x.NewLevel != x.CurrentLevel) : true))
                                     //join u in WorkScope.GetAll<User>()
                                 join u in WorkScope.GetAll<User>() on rv.LastModifierUserId equals u.Id into uu
+                                join c in listNote on rv.Id equals c.ReviewDetailId into cmt
                                 //on rv.InternshipId equals u.Id
                                 select new ReviewDetailDto
                                 {
@@ -122,6 +137,15 @@ namespace Timesheet.APIs.ReviewDetails
                                     PositionColor = rv.InterShip.Position.Color,
                                     Average = rv.RateStar,
                                     PreviousAverage = previousReview.Where(x => x.InternshipId == rv.InternshipId).Select(x => x.RateStar).FirstOrDefault(),
+                                    ReviewInternPrivateNoteDtos = cmt.Select(s => new ReviewInternPrivateNoteDto
+                                    {
+                                        Id = s.Id,
+                                        ReviewDetailId = s.ReviewDetailId,
+                                        NoteByUserId = s.NoteByUserId,
+                                        NoteByUserName = s.NoteByUserName,
+                                        PrivateNote = s.PrivateNote,
+                                        Created = s.Created
+                                    }).OrderByDescending(s => s.Created).ToList(),
                                 };
             var result = await reviewDetails.OrderBy(x => x.InternshipId).GetGridResult(reviewDetails, input);
             //return await Result.ToListAsync();
@@ -1072,13 +1096,13 @@ namespace Timesheet.APIs.ReviewDetails
             {
                 throw new UserFriendlyException("Bạn không thể review TTS của PM khác");
             }
-            if (detail.Status >= ReviewInternStatus.Approved)
+            if (detail.Status >= ReviewInternStatus.Approved && detail.Status != ReviewInternStatus.ReOpen)
             {
                 throw new UserFriendlyException("Bạn không thể sửa vì kết quả review cho tts này đã được gửi mail");
             }
             detail.NewLevel = input.NewLevel;
             //detail.Note = input.Note;
-            detail.Status = ReviewInternStatus.Reviewed;
+            detail.Status = ReviewInternStatus.PmReviewed;
             if (input.NewLevel >= UserLevel.FresherMinus)
             {
                 var levelSettings = await GetLevelSetting();
@@ -1167,6 +1191,17 @@ namespace Timesheet.APIs.ReviewDetails
             detail.RateStar = (float)Math.Round((totalPoint / totalCoefficient), 2);
             sbNote.Replace("{{Điểm trung bình}}", detail.RateStar.ToString());
             detail.Note = sbNote.ToString();
+
+            //add PM comment
+            if (input.PrivateNote != null){
+                var reviewInternComment = new ReviewInternPrivateNote
+                {
+                    ReviewDetailId = input.Id,
+                    NoteByUserId = AbpSession.UserId.Value,
+                    PrivateNote = input.PrivateNote.Trim()
+                };
+                await WorkScope.InsertAsync(reviewInternComment);
+            }
             await WorkScope.UpdateAsync(detail);
             return input;
         }
@@ -1257,6 +1292,62 @@ namespace Timesheet.APIs.ReviewDetails
             reviewDetail.ReviewerId = input.ReviewerId;
 
             await WorkScope.UpdateAsync(reviewDetail);
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern)]
+        [HttpPost]
+        public async Task HrVerify(CreatePrivateNoteDto input)
+        {
+            if (input.Status == ReviewInternStatus.HrApproved || input.Status == ReviewInternStatus.ReOpen)
+            {
+                var detail = await WorkScope.GetAsync<ReviewDetail>(input.ReviewDetailId);
+                if (detail.Status == ReviewInternStatus.PmReviewed)
+                {
+                    detail.Status = input.Status;
+                    if (input.PrivateNote != null)
+                    {
+                        var reviewInternComment = new ReviewInternPrivateNote
+                        {
+                            ReviewDetailId = input.ReviewDetailId,
+                            NoteByUserId = AbpSession.UserId.Value,
+                            PrivateNote = input.PrivateNote.Trim()
+                        };
+                        await WorkScope.InsertAsync(reviewInternComment);
+                    }
+                    await WorkScope.UpdateAsync(detail);
+                }
+                else
+                {
+                    throw new UserFriendlyException("Review này chưa được PM review hoặc đã review xong");
+                }
+            }
+            else
+            {
+                throw new UserFriendlyException("Trạng thái chỉ được là HR Approved hoặc Reopen.");
+            }
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern)]
+        [HttpPost]
+        public async Task HeadPmVerify(HeadPmVerifyDto input)
+        {
+            if (input.Status == ReviewInternStatus.Reviewed || input.Status == ReviewInternStatus.Rejected)
+            {
+                var detail = await WorkScope.GetAsync<ReviewDetail>(input.ReviewDetailId);
+                if (detail.Status == ReviewInternStatus.HrApproved)
+                {
+                    detail.Status = input.Status;
+                    await WorkScope.UpdateAsync(detail);
+                }
+                else
+                {
+                    throw new UserFriendlyException("Review này chưa được HR Approve");
+                }
+            }
+            else
+            {
+                throw new UserFriendlyException("Trạng thái chỉ được là Reviewed hoặc Rejected.");
+            }
         }
     }
 }

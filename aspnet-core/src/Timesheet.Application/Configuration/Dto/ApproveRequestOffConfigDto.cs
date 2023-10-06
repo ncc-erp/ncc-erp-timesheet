@@ -8,6 +8,7 @@ namespace Timesheet.Configuration.Dto
     {
         public string ApproveRequestOffNotifyEnableWorker { get; set; }
         public string ApproveRequestOffNotifyAtHour { get; set; }
+        public string ApproveRequestOffSendUserAtHour { get; set; }
         public string ApproveRequestOffNotifyToChannels { get; set; }
         public string ApproveRequestOffNotifyTimePeriodWithPendingRequest { get; set; }
     }

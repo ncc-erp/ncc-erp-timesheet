@@ -5826,6 +5826,10 @@ section.content {
   background-color: #fb483a;
 }
 
+.label-purple {
+  background-color: purple;
+}
+
 /* Collapse ==================================== */
 
 .collapse .well, .collapse.in .well, .collapsing .well {

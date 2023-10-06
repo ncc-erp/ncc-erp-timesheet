@@ -25,8 +25,8 @@ namespace Timesheet.Services.Tracker
             this.logger = logger;
             this.httpClient = httpClient;
 
-            var baseAddress = configuration.GetValue<string>("TrackerService:BaseAddress", "http://tracker.komu.vn:5600");
-            var securityCode = configuration.GetValue<string>("TrackerService:SecurityCode" , "1BCD4F3799EE95C4");
+            var baseAddress = configuration.GetValue<string>("TrackerService:BaseAddress");
+            var securityCode = configuration.GetValue<string>("TrackerService:SecurityCode");
 
             httpClient.BaseAddress = new Uri(baseAddress);
             httpClient.DefaultRequestHeaders.Add("X-Secret-Key", securityCode);

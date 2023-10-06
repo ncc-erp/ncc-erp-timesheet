@@ -52,5 +52,7 @@ namespace Timesheet.APIs.ReviewDetails.Dto
         public string PositionColor { get; set; }
         public float? Average { get; set; }
         public float? PreviousAverage { get; set; }
+
+        public IEnumerable<ReviewInternPrivateNoteDto> ReviewInternPrivateNoteDtos { get; set; }
     }
 }

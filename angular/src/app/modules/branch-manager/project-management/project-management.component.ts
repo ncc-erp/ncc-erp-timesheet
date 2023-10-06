@@ -1,6 +1,9 @@
-import { Component, Injector, OnInit } from '@angular/core';
+import { Component, Injector, Input, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { ManageUserForBranchService } from '@app/service/api/manage-user-for-branch.service';
 import { FilterDto, PagedListingComponentBase, PagedRequestDto } from '@shared/paged-listing-component-base';
+import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { Chart } from 'chart.js'
 import { finalize } from 'rxjs/operators';
 
@@ -11,53 +14,78 @@ import { finalize } from 'rxjs/operators';
   styleUrls: ['./project-management.component.css']
 })
 export class ProjectManagementComponent extends PagedListingComponentBase<any> implements OnInit {
+  ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs = PERMISSIONS_CONSTANT.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs
+  @Input() listBranch: BranchDto[];
+  @Input() listBranchFilter: BranchDto[];
+  public branchSearch: FormControl = new FormControl("")
+  branchId;
+
   public filterItems: FilterDto[] = [];
   public projects: projectDTO[];
+  private projectNames: string[] = [];
+
+  private memberCount: number[] = [];
+  private exposeCount: number[] = [];
+  private shadowCount: number[] = [];
+  private parametersIdBranch: number = 0;
   constructor(
     injector: Injector,
     private manageUserForBranchService:ManageUserForBranchService ,
   ) {
     super(injector);
+    this.branchSearch.valueChanges.subscribe(() => {
+      this.filterBranch();
+    })
+    this.branchId = 0;
   }
 
   ngOnInit() {
+    this.refresh();
+  }
+
+  filterBranch(): void{
+    if (this.branchSearch.value) {
+      this.listBranch = this.listBranchFilter.filter(data => data.displayName.toLowerCase().includes(this.branchSearch.value.toLowerCase().trim()));
+    }else{
+      this.listBranch = this.listBranchFilter.slice();
+    }
+  }
+
+  showChart(){
     new Chart( 
       document.getElementById('myChart'),{
         type: 'horizontalBar',
-        tooltips: {
-          enabled: true
-        },
-        legend: {
-          display: false
-        },
+        tooltips: {enabled: true},
+        legend: {display: false},
         responsive: true,
         options: {
+          scales: {
+            xAxes: [{
+              barPercentage: 0.5,
+            }],
+          }
         },
         data: {
-          labels: ["2015", "2014", "2013", "2012", "2011"],
+          labels: this.projectNames,
           datasets: [{
             label: 'Shadow',
-            data: [727, 589, 537, 543, 574],
+            data: this.shadowCount,
             backgroundColor: "rgb(0,143,251)",
-            hoverBackgroundColor: "rgb(0,143,251)",
             stack: 'total'
           },{
             label: 'Expose',
-            data: [238, 553, 746, 884, 903],
+            data: this.exposeCount,
             backgroundColor: "rgb(0,227,150)",
-            hoverBackgroundColor: "rgb(0,227,150)",
             stack: 'total'
           },{
             label: 'Member',
-            data: [1238, 553, 746, 884, 903],
+            data: this.memberCount,
             backgroundColor: "rgb(254,176,25)",
-            hoverBackgroundColor: "rgb(254,176,25)",
             stack: 'total'
           }]
         }
       }
     );
-    this.refresh();
   }
 
   protected list(
@@ -65,15 +93,62 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
     pageNumber: number,
     finishedCallback: Function
   ): void {
+    this.removeFilterItem();
+    if (this.branchId != 0) {
+      this.branchId = this.branchId
+    } else {
+      this.branchId = ''
+    }
     request.filterItems = this.filterItems;
-    this.manageUserForBranchService.getAllValueOfUserInProjectByUserId(request)
+    this.manageUserForBranchService.getAllValueOfUserInProjectByUserId(request, this.branchId)
     .pipe(
       finalize(() => {
         finishedCallback()
       })
     ).subscribe((rs: any) => {
+      this.resetDataChart()
       this.totalItems = rs.result.totalCount;
+      if (rs.result == null || rs.result.items.length == 0) {
+        this.projects = []
+      }else{
+        this.projects = rs.result.items
+        this.showPaging(rs.result, pageNumber);
+        this.projects.forEach(project => {
+          this.projectNames.push(project.projectName);
+          this.memberCount.push(project.memberCount);
+          this.exposeCount.push(project.exposeCount);
+          this.shadowCount.push(project.shadowCount);
+        })
+        this.showChart()
+      }
     })
+  }
+
+  resetDataChart(){
+    this.projectNames = [];
+    this.memberCount = [];
+    this.exposeCount = [];
+    this.shadowCount = [];
+  }
+  
+  searchOrFilter(): void{
+    this.refresh();
+  }
+
+  clearSearchAndFilter(){
+    this.resetDataChart()
+    this.branchId = 0;
+    this.refresh();
+  }
+
+  removeFilterItem(): void {
+    this.filterItems = [];
+  }
+
+  isShowSelectBranch(){
+    return this.isGranted(
+      PERMISSIONS_CONSTANT.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs
+    )
   }
 
   protected delete(entity: any): void {

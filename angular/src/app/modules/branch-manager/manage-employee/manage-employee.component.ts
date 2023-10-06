@@ -1,5 +1,6 @@
-import { Component, Injector, OnInit } from '@angular/core';
+import { Component, Injector, Input, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { BranchService } from '@app/service/api/branch.service';
 import { ManageUserForBranchService } from '@app/service/api/manage-user-for-branch.service';
@@ -8,6 +9,7 @@ import { PositionService } from '@app/service/api/position.service';
 import { FilterDto, PagedListingComponentBase, PagedRequestDto } from '@shared/paged-listing-component-base';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { finalize } from 'rxjs/operators';
+import { DetailParticipatingProjectsComponent } from './detail-participating-projects/detail-participating-projects.component';
 
 @Component({
   selector: 'app-manage-employee',
@@ -16,12 +18,12 @@ import { finalize } from 'rxjs/operators';
 })
 export class ManageEmployeeComponent extends PagedListingComponentBase<any> implements OnInit {
   ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs = PERMISSIONS_CONSTANT.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs
-  public listBranch: BranchDto[] = [];
-  public listBranchFilter : BranchDto[];
+  @Input() listBranch: BranchDto[];
+  @Input() listBranchFilter: BranchDto[];
   public branchSearch: FormControl = new FormControl("")
   branchId;
-  public listPosition: PositionDto[] = [];
-  public listPositionFilter: PositionDto[];
+  @Input() listPosition: BranchDto[];
+  @Input() listPositionFilter: BranchDto[];
   public positionSearch: FormControl = new FormControl("")
   public positionId = -1;
   public filterItems: FilterDto[] = [];
@@ -32,6 +34,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     private positionService: PositionService,
     private branchService: BranchService,
     private manageUserForBranchService:ManageUserForBranchService ,
+    private _dialog: MatDialog,
   ) {
     super(injector);
     this.branchId = 0;
@@ -50,17 +53,9 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   ];
 
   ngOnInit() {
-    this.getListBranch();
-    this.getListPosition();
     this.refresh();
   } 
 
-  getListPosition() {
-    this.positionService.getAll().subscribe(res => {
-      this.listPosition = res.result;
-      this.listPositionFilter = this.listPosition;
-    });
-  }
   filterPosition(): void{
     if(this.positionSearch.value){
       this.listPosition = this.listPositionFilter.filter(data => data.name.toLowerCase().includes(this.positionSearch.value.toLowerCase().trim()));
@@ -68,12 +63,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       this.listPosition = this.listPositionFilter.slice();
     }
   }
-  getListBranch() {
-    this.branchService.getAllBranchFilter(true).subscribe(res => {
-      this.listBranch = res.result;
-      this.listBranchFilter = this.listBranch;
-    });
-  }
+
   filterBranch(): void{
     if(this.branchSearch.value){
       this.listBranch = this.listBranchFilter.filter(data => data.displayName.toLowerCase().includes(this.branchSearch.value.toLowerCase().trim()));
@@ -90,7 +80,6 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     if (this.keyword) {
       request.searchText = this.keyword.trim();
     }
-    // request.searchText = this.searchText
     this.removeFilterItem();
     if (this.branchId != 0) {
       this.addFilterItem('branchId', this.toNumber(this.branchId));
@@ -161,6 +150,25 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
 
   protected delete(entity: userDTO): void {
     throw new Error('Method not implemented.');
+  }
+
+  showProjectDetailDialog(user): void{
+    let dialogRef = this._dialog.open(DetailParticipatingProjectsComponent, {
+      minWidth: '450px',
+      width: '800px',
+      data: user,
+    })
+    dialogRef.afterClosed().subscribe(() => {
+      
+    })
+  }
+
+  imageSex(sex: number){
+    switch (sex) {
+      case 0: return "assets/images/men.png";
+      case 1: return "assets/images/women.png";
+      default: return "assets/images/undefine.png";
+    }
   }
 }
 
