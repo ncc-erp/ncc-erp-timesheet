@@ -140,7 +140,7 @@ pre {
 .pr-10{
     padding-right: 10px;
 }
-.header{
+.header_content{
 display: flex;
 }
 
@@ -152,7 +152,7 @@ display: flex;
 }
 .header .filter-date .item{
     margin-left: 20px;
-    width: 80px;
+    width: auto;
 }
 
 ::ng-deep .filter-date .item .mat-form-field-appearance-outline .mat-form-field-wrapper{
