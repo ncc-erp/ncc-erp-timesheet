@@ -27,7 +27,6 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
   private memberCount: number[] = [];
   private exposeCount: number[] = [];
   private shadowCount: number[] = [];
-  keyword;
   private parametersIdBranch: number = 0;
   constructor(
     injector: Injector,
@@ -94,13 +93,8 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
     pageNumber: number,
     finishedCallback: Function
   ): void {
-    if (this.keyword) {
-      request.searchText = this.keyword.trim();
-    }
-
     this.removeFilterItem();
     if (this.branchId != 0) {
-      // this.addFilterItem('branchId', this.toNumber(this.branchId));
       this.branchId = this.branchId
     } else {
       this.branchId = ''
@@ -143,7 +137,6 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
 
   clearSearchAndFilter(){
     this.resetDataChart()
-    this.keyword = '';
     this.branchId = 0;
     this.refresh();
   }
