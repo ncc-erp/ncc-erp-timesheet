@@ -56,7 +56,23 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
                                     pu.Type
                                 };
 
-            var query = from u in WorkScope.GetAll<User>()
+            var qUserFilterBranch = WorkScope.GetAll<User>()
+                    .WhereIf(positionId != null, s => s.PositionId == positionId);
+
+            if (!isViewAll)
+            {
+                qUserFilterBranch = qUserFilterBranch
+                    .Where(s => s.BranchId == currentUserBranch)
+                    .OrderByDescending(s => s.CreationTime);
+            }
+            else
+            {
+                qUserFilterBranch = qUserFilterBranch
+                    .WhereIf(branchId != null, s => s.BranchId == branchId)
+                    .OrderByDescending(s => s.CreationTime);
+            }
+
+            var query = from u in qUserFilterBranch
                         join pu in qprojectUsers on u.Id equals pu.UserId into pusers
                         join mu in WorkScope.GetAll<User>() on u.ManagerId equals mu.Id into muu
                         select new UserProjectsDto
@@ -92,18 +108,6 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
                             PositionName = u.Position.Name,
                             ProjectCount = pusers.Count(),
                         };
-            if (!isViewAll)
-            {
-                query = query.WhereIf(positionId != null, s => s.PositionId == positionId)
-                             .Where(s => s.BranchId == currentUserBranch)
-                             .OrderByDescending(s => s.CreationTime);
-            }
-            else
-            {
-                query = query.WhereIf(positionId != null, s => s.PositionId == positionId)
-                             .WhereIf(branchId != null, s => s.BranchId == branchId)
-                             .OrderByDescending(s => s.CreationTime);
-            }
             var temp = await query.GetGridResult(query, input);
 
             var projectIds = new HashSet<long>();
