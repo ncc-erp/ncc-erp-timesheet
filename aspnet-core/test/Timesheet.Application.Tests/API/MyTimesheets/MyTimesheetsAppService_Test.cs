@@ -1035,7 +1035,7 @@ namespace Timesheet.Application.Tests.API.MyTimesheets
         //}
 
         [Fact]
-        public async Task Should_Allow_Submit_To_Pending()
+        public async Task Should_Not_Allow_Submit_To_Pending()
         {
             var input = new StartEndDateDto
             {
@@ -1072,6 +1072,62 @@ namespace Timesheet.Application.Tests.API.MyTimesheets
                     await _myTimesheet.SubmitToPending(input);
                 });
                 Assert.Equal(expectedResult, exception.Message);
+            });
+        }
+
+        [Fact]
+        public async Task Should_Allow_Submit_To_Pending()
+        {
+            var now = DateTimeUtils.GetNow();
+            var input = new StartEndDateDto
+            {
+                StartDate = new DateTime(now.Year, now.Month, now.Day),
+                EndDate = new DateTime(now.Year, now.Month, now.Day)
+            };
+            var unlockTimesheet = new UnlockTimesheet
+            {
+                Id = 10,
+                UserId = 1,
+                Type = LockUnlockTimesheetType.MyTimesheet
+            };
+
+            var myTimesheet = new MyTimesheet
+            {
+                Id = 88,
+                UserId = 1,
+                DateAt = new DateTime(now.Year, now.Month, now.Day),
+                WorkingTime = 480,
+                Note = "Test 1",
+                TypeOfWork = 0,
+                Status = TimesheetStatus.None,
+                ProjectTaskId = 1,
+                ProjectTargetUserId = 1,
+                TargetUserWorkingTime = 1,
+            };
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _work.InsertAsync(unlockTimesheet);
+                await _work.InsertAsync(myTimesheet);
+            });
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var unLockTimesheetExists = _work.GetAll<UnlockTimesheet>()
+                .Where(x => x.UserId == 1)
+                .ToList();
+                Assert.Single(unLockTimesheetExists);
+                var mytimesheets = await _work.GetAll<MyTimesheet>()
+                .Where(s => s.UserId == AbpSession.UserId.Value)
+                .Where(s => s.DateAt >= input.StartDate.Date && s.DateAt.Date <= input.EndDate)
+                .Where(s => s.Status == TimesheetStatus.None)
+                .ToListAsync();
+                var expectedResult = "Submit success " + mytimesheets.Count + " timesheets";
+                var result = await _myTimesheet.SubmitToPending(input);
+                Assert.Equal(expectedResult, result);
+            });
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var myTimesheet = await _work.GetAsync<MyTimesheet>(88);
+                Assert.Equal(TimesheetStatus.Pending, myTimesheet.Status);
             });
         }
 
