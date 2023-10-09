@@ -20,41 +20,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"
         integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://browser.sentry-cdn.com/5.5.0/bundle.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body class="theme-red">
     <app-root></app-root>
 </body>
-<script type="text/javascript">
-  var dsn = window['env'].sentryDsn
-  
-  if (typeof Sentry != "undefined" && dsn !== null) {
-    Sentry.init({
-        dsn: dsn,
-        tracesSampleRate: 1.0
-    });
-  }
-
-  function postSentryLog(){ 
-    if(arguments.length >0 && typeof Sentry != "undefined"){
-      let errorMessage = arguments[0];
-      let extraData = null;
-      if(arguments.length > 1){
-        extraData = {};
-        for(var i = 1;i<arguments.length;i++){
-          extraData["arg"+i] = arguments[i];
-        }
-      }
-
-      if(errorMessage){
-        if (typeof errorMessage == "string" && typeof Sentry.captureMessage == "function") {
-            Sentry.captureMessage(errorMessage,{extra: extraData});
-        } else if (typeof Sentry.captureException == "function") {
-            Sentry.captureException(errorMessage,{extra: extraData});
-        }
-      }
-    }
- }
-</script>
 </html>

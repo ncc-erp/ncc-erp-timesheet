@@ -7,6 +7,8 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import * as Sentry from "@sentry/browser";
+
 export class HttpErrorInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -22,14 +24,17 @@ export class HttpErrorInterceptor implements HttpInterceptor {
           //   window.location.href = '/app/no-permission' ;
           //   return;
           // }
+          Sentry.setExtra("Request", request)
+          Sentry.setExtra("Response", response)
           const error = response.error;
           let errMsg = '';
           if (error instanceof ErrorEvent) {
             errMsg = `Error: ${error.message}`;
-          } else {
+                      } else {
             errMsg = error ? `${error.error.message || response.message}` : response.message;
-            abp.notify.error(errMsg);
+                        abp.notify.error(errMsg);
           }
+          Sentry.captureMessage(errMsg)
           return throwError(errMsg);
         })
       );

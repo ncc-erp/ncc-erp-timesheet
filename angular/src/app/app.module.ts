@@ -1,5 +1,5 @@
 import { UploadAvatarComponent } from './modules/user/upload-avatar/upload-avatar.component';
-import { NgModule, ErrorHandler, Inject } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { JsonpModule } from '@angular/http';
@@ -55,6 +55,8 @@ import { EditSidebarComponent } from './layout/edit-sidebar/edit-sidebar.compone
 import { EditRoleComponent } from './roles/edit-role/edit-role.component';
 import { CreateRoleDialogComponent } from './roles/create-role/create-role-dialog.component';
 import { UpdatePunishMoneyComponent } from './configuration/update-punish-money/update-punish-money.component';
+import { environment } from '../environments/environment';
+import * as Sentry from "@sentry/browser";
 
 let config = new AuthServiceConfig([
   {
@@ -67,22 +69,9 @@ export function provideConfig() {
   return config;
 }
 
-declare global {
-  interface Window {
-    postSentryLog: Function;
-  }
-}
-
-export class SentryErrorHandler implements ErrorHandler {
-  constructor(@Inject('postSentryLog') private postSentryLog: Function) {}
-
-  handleError(error: any): void {
-    if (typeof this.postSentryLog === 'function') {
-      this.postSentryLog(error);
-      throw error;
-    }
-  }
-}
+Sentry.init({
+  dsn: environment.sentryDsn,
+})
 
 @NgModule({
   declarations: [
@@ -137,14 +126,6 @@ export class SentryErrorHandler implements ErrorHandler {
     {
       provide: AuthServiceConfig,
       useFactory: provideConfig
-    },
-    {
-      provide: 'postSentryLog',
-      useValue: window['postSentryLog'],
-    },
-    {
-      provide: ErrorHandler,
-      useClass: SentryErrorHandler,
     }
   ],
   entryComponents: [

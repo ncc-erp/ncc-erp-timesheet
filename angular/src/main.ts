@@ -15,7 +15,6 @@ if (environment.production) {
 }
 
 const bootstrap = () => {
-    window['env'] = environment;
     return platformBrowserDynamic().bootstrapModule(RootModule);
 };
 
