@@ -7,7 +7,7 @@ using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBranchs.Dto
 {
-    public class GetAllValueOfUserInProjectByUserIdDto
+    public class ValueOfUserInProjectByUserIdDto
     {
         public long ProjectId { get; set; }
         public string ProjectName { get; set; }
@@ -30,7 +30,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
 
     public class WorkTimeByProjectDto
     {
-        public List<GetAllValueOfUserInProjectByUserIdDto> GetAllValueOfUserInProjectByUserIdDtos { get; set; }
+        public List<ValueOfUserInProjectByUserIdDto> GetAllValueOfUserInProjectByUserIdDtos { get; set; }
         public float TotalWorkingHours { get; set; }
     }
 }

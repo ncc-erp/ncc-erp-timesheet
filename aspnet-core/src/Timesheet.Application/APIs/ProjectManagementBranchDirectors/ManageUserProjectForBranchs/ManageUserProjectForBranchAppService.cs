@@ -28,7 +28,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
         {
             var listProjectByUserId = WorkScope.GetAll<ProjectUser>()
                          .Where(s => s.UserId == userId)
-                         .Select(s => new GetAllValueOfUserInProjectByUserIdDto
+                         .Select(s => new ValueOfUserInProjectByUserIdDto
                          {
                              ProjectId = s.ProjectId,
                              ProjectName = s.Project.Name,
@@ -69,7 +69,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
                           join vouip in qLastValueOfUserInProject on lpbu.ProjectId equals vouip.ProjectId into vouipGroup
                           from emp in empGroup.DefaultIfEmpty()
                           from vouip in vouipGroup.DefaultIfEmpty()
-                          select new GetAllValueOfUserInProjectByUserIdDto
+                          select new ValueOfUserInProjectByUserIdDto
                           {
                               ProjectId = lpbu.ProjectId,
                               ProjectName = lpbu.ProjectName,
