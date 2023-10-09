@@ -20,6 +20,6 @@ namespace Timesheet.APIs.ReviewDetails.Dto
         public byte? SubLevel { get; set; }
         public int? RateStar { get; set; }
         public int? Salary { get; set; }
-
+        public string PrivateNote { get; set; }
     }
 }

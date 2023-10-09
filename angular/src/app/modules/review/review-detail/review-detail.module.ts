@@ -14,10 +14,11 @@ import { NgxCurrencyModule } from 'ngx-currency';
 import { NewReviewInternshipComponent } from './new-review-internship/new-review-internship.component';
 import { ViewGuidelineDialogComponent } from './new-review-internship/view-guideline-dialog/view-guideline-dialog.component';
 import { UpdateReviewerComponent } from './update-reviewer/update-reviewer.component';
+import { NewHrVerifyInternshipComponent } from './new-hr-verify-internship/new-hr-verify-internship.component';
 
 
 @NgModule({
-  declarations: [ReviewDetailComponent, CreateReviewDetailComponent, ReviewInternshipComponent, ConfirmSalaryInternshipComponent,NewReviewInternshipComponent, ViewGuidelineDialogComponent, UpdateReviewerComponent ],
+  declarations: [ReviewDetailComponent, CreateReviewDetailComponent, ReviewInternshipComponent, ConfirmSalaryInternshipComponent,NewReviewInternshipComponent, ViewGuidelineDialogComponent, UpdateReviewerComponent, NewHrVerifyInternshipComponent ],
   imports: [
     CommonModule,
     SharedModule,
@@ -35,7 +36,8 @@ import { UpdateReviewerComponent } from './update-reviewer/update-reviewer.compo
     ConfirmSalaryInternshipComponent,
     NewReviewInternshipComponent,
     ViewGuidelineDialogComponent,
-    UpdateReviewerComponent
+    UpdateReviewerComponent,
+    NewHrVerifyInternshipComponent
   ]
 })
 export class ReviewDetailModule { }

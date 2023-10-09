@@ -245,5 +245,43 @@ namespace Timesheet.Services.Komu
                 Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageToUserDto { message = messageToSend, username = userNameToSend });
             }
         }
+
+        public async Task<T> GetAsync<T>(string url)
+        {
+            var fullUrl = $"{this.httpClient.BaseAddress}{url}";
+
+            try
+            {
+                var response = await httpClient.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    logger.LogInformation($"Get: {fullUrl} => Response: {responseContent}");
+
+                    var result = JsonConvert.DeserializeObject<T>(responseContent);
+
+                    return result != null ? result : JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(JObject.Parse(responseContent)));
+
+                }
+                else
+                {
+                    return default;
+                }
+            }
+            catch (Exception e)
+            {
+                logger.LogError($"Get: {fullUrl} => Exception: {e}");
+                return default;
+            }
+        }
+
+        public virtual GetDailyReportDto GetDailyReport(DateTime date)
+        {
+            var url = $"getDailyReport?date={date.ToString("dd/MM/yyyy")}";
+
+            var result = GetAsync<GetDailyReportDto>(url).Result;
+            return result;
+        }
     }
 }

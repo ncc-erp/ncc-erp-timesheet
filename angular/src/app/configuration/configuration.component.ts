@@ -1195,6 +1195,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Notify to channels required!")
       return;
     }
+    if (_.isEmpty(this.ApproveRequestOffNotifyConfig.approveRequestOffSendUserAtHour)) {
+      abp.message.error("At hour day required!")
+      return;
+    }
     if (_.isEmpty(this.ApproveRequestOffNotifyConfig.approveRequestOffNotifyTimePeriodWithPendingRequest)) {
       abp.message.error("Time period with pending request required!")
       return;
@@ -1586,6 +1590,7 @@ export class ApproveTimesheetNotifyConfigDto {
 export class ApproveRequestOffNotifyConfigDto {
   approveRequestOffNotifyEnableWorker: string;
   approveRequestOffNotifyAtHour: string;
+  approveRequestOffSendUserAtHour: string;
   approveRequestOffNotifyToChannels: string;
   approveRequestOffNotifyTimePeriodWithPendingRequest: string;
 }
