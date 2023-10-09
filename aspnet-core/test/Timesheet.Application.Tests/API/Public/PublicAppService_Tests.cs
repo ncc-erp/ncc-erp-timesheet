@@ -224,7 +224,7 @@ namespace Timesheet.Application.Tests.API.Public
                     .SumAsync(s => s.Hour);
 
                 var missMinute = 40 * 60 - totalOffWeekHour * 60 - totalLoggedWeekMinute;
-                Assert.Equal(string.Format("This week is OK! Off: ```{0}``` Logged normal working time: ```{1}```",
+                Assert.Equal(string.Format("This week is NOT OK! Off:```{0}```Logged normal working time:```{1}```Miss hour:```40h```",
                   CommonUtils.ConvertHourToHHmm((int)(totalOffWeekHour * 60)),
                   CommonUtils.ConvertHourToHHmm(totalLoggedWeekMinute),
                   CommonUtils.ConvertHourToHHmm((int)missMinute)
@@ -248,7 +248,7 @@ namespace Timesheet.Application.Tests.API.Public
         [Fact]
         public async Task GetListUserLogTimesheetThisWeekNotOk_Test1()
         {
-            var expectTotalCount = 20;
+            var expectTotalCount = 21;
 
             await WithUnitOfWorkAsync(async () =>
             {

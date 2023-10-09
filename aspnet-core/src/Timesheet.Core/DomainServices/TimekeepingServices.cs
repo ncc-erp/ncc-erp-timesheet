@@ -30,7 +30,7 @@ namespace Timesheet.DomainServices
         private readonly KomuService _komuService;
         private readonly TrackerService _trackerService;
         private readonly FaceIdService _faceIdService;
-     
+
         public TimekeepingServices(KomuService komuService, TrackerService trackerService, IWorkScope workScope, FaceIdService faceIdService) : base(workScope)
         {
             _komuService = komuService;
@@ -98,14 +98,15 @@ namespace Timesheet.DomainServices
             var mapAbsenceUsers = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request)
                 .Where(s => s.DateAt.Date == selectedDate.Date
                 && s.Request.Status == RequestStatus.Approved
-                && s.Request.Type == RequestType.Off || s.Request.Type == RequestType.Onsite)
+                && (s.Request.Type == RequestType.Off || s.Request.Type == RequestType.Onsite))
                 .GroupBy(s => s.Request.UserId)
                 .ToDictionary(s => s.Key, s => s.Select(x => new MapAbsenceUserDto
                 {
                     UserId = x.Request.UserId,
                     DateType = x.DateType,//morning, afternoon, fullday, custom
                     AbsenceTime = x.AbsenceTime,//dau. giua, cuoi
-                    Hour = x.Hour
+                    Hour = x.Hour,
+                    Type = x.Request.Type,
                 })
                                 .OrderBy(x => x.AbsenceTime)
                                 .ToList());
@@ -117,7 +118,7 @@ namespace Timesheet.DomainServices
             var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
 
             var checkInUsers = _faceIdService.GetEmployeeCheckInOutMini(selectedDate);
-            if(checkInUsers == null)
+            if (checkInUsers == null)
             {
                 Logger.Info("AddTimekeepingByDay() checkInUsers null or empty");
                 return default;
@@ -168,7 +169,7 @@ namespace Timesheet.DomainServices
                     else
                     {
                         ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
-                    }        
+                    }
                 }
 
                 if(mapDailyUsers.ContainsKey(user.UserName))
@@ -197,7 +198,7 @@ namespace Timesheet.DomainServices
                 t.UserEmail = user.EmailAddress;
                 t.DateAt = selectedDate;
                 t.UserId = user.UserId;
-                
+
                 //Check punish by checkin/checkout times
                 CheckIsPunished(t, LimitedMinute);
 
@@ -257,7 +258,7 @@ namespace Timesheet.DomainServices
                     DateAt = selectedDate,
                     NoteReply = "Email not match",
                     TrackerTime = dicUserNameToTrackerTime.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTrackerTime[checkIn.Email.Split("@")[0]].active_time : "0",
-                };             
+                };
                 ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
                 t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
                 rs.Add(t);
@@ -300,14 +301,14 @@ namespace Timesheet.DomainServices
                             t.CheckOut = t.CheckIn;
                             t.CheckIn = "";
                         }
-                    }                   
-                }                
+                    }
+                }
             }
             catch (Exception ex)
             {
                 Logger.Error(string.Format("Excute function ChangeCheckInCheckOutTimeIfCheckOutIsEmpty error: ", ex.Message));
             }
-            
+
         }
         public void ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(Timekeeping t)
         {
@@ -329,21 +330,21 @@ namespace Timesheet.DomainServices
                             int registerCheckInTime = DateTimeUtils.ConvertHHmmssToMinutes(t.RegisterCheckIn);
                             int registerCheckOutTime = DateTimeUtils.ConvertHHmmssToMinutes(t.RegisterCheckOut);
                             int regiterCheckInTimeOffAfternoon = DateTimeUtils.ConvertHHmmssToMinutes("12:00");
-                            if (registerCheckInTime > 0 
-                                && checkInMinutes > registerCheckInTime 
+                            if (registerCheckInTime > 0
+                                && checkInMinutes > registerCheckInTime
                                 && registerCheckOutTime <= regiterCheckInTimeOffAfternoon)
                             {
                                 if (t.CheckOut == default || t.CheckOut.IsNullOrEmpty())
                                     t.CheckOut = t.CheckIn;
 
                                 t.CheckIn = "";
-                            }                           
+                            }
                         }
-                         else if (t.CheckOut == default || t.CheckOut.IsNullOrEmpty())
+                        else if (t.CheckOut == default || t.CheckOut.IsNullOrEmpty())
                         {
                             t.CheckOut = t.CheckIn;
                             t.CheckIn = "";
-                        }               
+                        }
                     }
                 }
             }
@@ -513,7 +514,7 @@ namespace Timesheet.DomainServices
                     {
                         t.CheckIn = "";
                         t.CheckOut = "";
-                        t.Note += "Off fullday";
+                        t.Note += absenceUser.Type == RequestType.Off ? "Off fullday" : "Onsite fullday";
                         t.AbsenceDayType = DayType.Fullday;
                     }
                     else if (absenceUser.DateType == DayType.Morning)

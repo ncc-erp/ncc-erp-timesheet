@@ -292,7 +292,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             }
            
         }
-        private async Task<DateTime> GetFirstDateToLockTS(long userId, bool isUnlocked)
+        public async Task<DateTime> GetFirstDateToLockTS(long userId, bool isUnlocked)
         {
             var weeksCanUnlockBefor = int.Parse(SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.WeeksCanUnlockBefor).Result);
             var now = DateTimeUtils.GetNow();
@@ -607,6 +607,12 @@ namespace Timesheet.Timesheets.MyTimesheets
             if (!isUnLocked && mytimesheets.Any(s => s.DateAt.Date < lockDate))
             {
                 throw new UserFriendlyException("Go to ims.nccsoft.vn > Unlock timesheet");
+            }
+
+            var firstDateCanUnlock = GetFirstDateToLockTS(AbpSession.UserId.Value, isUnLocked).Result;
+            if (input.EndDate.Date < firstDateCanUnlock)
+            {
+                throw new UserFriendlyException("Timesheet was locked! You can submit timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
             }
 
             foreach (var item in mytimesheets)
