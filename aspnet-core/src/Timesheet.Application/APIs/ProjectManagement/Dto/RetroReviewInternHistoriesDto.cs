@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,5 +20,14 @@ namespace Timesheet.APIs.ProjectManagement.Dto
         public DateTime StartDate { get; set; }
         public string Note { get; set; }
         public string ProjectName { get; set; }
+    }
+
+    public class RetroReviewInternStarHistoriesDto
+    {
+        public string Email { get; set; }
+        [JsonIgnore]
+        public List<PointDto> PointHistories { get; set; }
+        private float? _AveragePoint => PointHistories.Average(s => s.Point);
+        public float? AveragePoint => _AveragePoint.HasValue ? MathF.Round(_AveragePoint.Value, 2) : float.NaN;
     }
 }
