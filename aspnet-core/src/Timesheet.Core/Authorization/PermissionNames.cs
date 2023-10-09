@@ -334,6 +334,12 @@ namespace Ncc.Authorization
         public const string TeamBuilding_Project = "TeamBuilding.Project";
         public const string TeamBuilding_Project_SelectProjectTeamBuilding = "TeamBuilding.Project.SelectProjectTeamBuilding";
 
+        public const string ProjectManagementBranchDirectors = "ProjectManagementBranchDirectors";
+        public const string ProjectManagementBranchDirectors_ManageUserForBranchs = "ProjectManagementBranchDirectors.ManageUserForBranchs";
+        public const string ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs = "ProjectManagementBranchDirectors.ManageUserForBranchs.ViewAllBranchs";
+        public const string ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch = "ProjectManagementBranchDirectors.ManageUserForBranchs.ViewMyBranch";
+        public const string ProjectManagementBranchDirectors_ManageUserProjectForBranchs = "ProjectManagementBranchDirectors.ManageUserProjectForBranchs";
+
     }
 
     public class GrantPermissionRoles
@@ -647,6 +653,12 @@ namespace Ncc.Authorization
                     PermissionNames.TeamBuilding_Request_ViewDetailRequest,
                     PermissionNames.TeamBuilding_Project,
                     PermissionNames.TeamBuilding_Project_SelectProjectTeamBuilding,
+
+                    PermissionNames.ProjectManagementBranchDirectors,
+                    PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs,
+                    PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs,
+                    PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch,
+                    PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs,
                 }
             },
 
@@ -798,6 +810,11 @@ namespace Ncc.Authorization
                     PermissionNames.ManageWorkingTime_ViewDetail,
                     PermissionNames.ManageWorkingTime_Approval,
                     PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern,
+
+                    PermissionNames.ProjectManagementBranchDirectors,
+                    PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs,
+                    PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch,
+                    PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs,
                 }
             },
         };
@@ -1119,6 +1136,12 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.TeamBuilding_Request_ViewDetailRequest, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View detail request"},
             new SystemPermission{ Name =  PermissionNames.TeamBuilding_Project, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Team building project"},
             new SystemPermission{ Name =  PermissionNames.TeamBuilding_Project_SelectProjectTeamBuilding, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Select project team building"},
+
+            new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Project Management For Branch Directors"},
+            new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage User For Branchs"},
+            new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View User from all branchs"},
+            new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View User from my branch"},
+            new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage User Project For Branchs"},
         };
 
         public static List<SystemPermission> TreePermissions = new List<SystemPermission>()
@@ -1719,6 +1742,19 @@ namespace Ncc.Authorization
                         }
                     },
                 }
+             },
+             new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Project Management For Branch Directors",
+                 Childrens = new List<SystemPermission>()
+                 {
+                     new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage User For Branchs",
+                         Childrens = new List<SystemPermission>()
+                        {
+                         new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View User from all branchs"},
+                         new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View User from my branch"},
+                        }
+                     },
+                     new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage User Project For Branchs" },
+                 }
              }
         };
     }
