@@ -64,6 +64,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                     FullName = s.Select(x => x.User.FullName).FirstOrDefault(),
                     Type = s.Select(x => x.User.Type).FirstOrDefault(),
                     Level = s.Select(x => x.User.Level).FirstOrDefault(),
+                    Sex = s.Select(x => x.User.Sex).FirstOrDefault(),
                     EmailAddress = s.Select(x => x.User.EmailAddress).FirstOrDefault(),
                     ProjectUsers = s.Select(x => new PUDto
                     {

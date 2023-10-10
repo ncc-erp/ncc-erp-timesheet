@@ -10578,3 +10578,27 @@ html.ie11 .bs-searchbox .form-control {
 thead{
   background: #fff;
 }
+
+.preReview::-webkit-scrollbar
+{
+	width: 7px;
+	background-color: #F5F5F5;
+}
+
+.preReview::-webkit-scrollbar-thumb
+{
+	background-color: #cecece;
+	border: 2px solid #cecece;
+}
+
+.review::-webkit-scrollbar
+{
+	width: 7px;
+	background-color: #F5F5F5;
+}
+
+.review::-webkit-scrollbar-thumb
+{
+	background-color: #cecece;
+	border: 2px solid #cecece;
+}

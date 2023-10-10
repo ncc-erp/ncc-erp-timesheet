@@ -983,7 +983,7 @@ const routes: Routes = [
           path: '',
           loadChildren: "../modules/branch-manager/branch-manager.module#BranchManagerModule",
           data: {
-            permission: "",
+            permission: "ProjectManagementBranchDirectors",
             preload: true,
           },
           canActivate: [AppRouteGuard],

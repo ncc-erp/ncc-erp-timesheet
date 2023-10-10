@@ -8,6 +8,7 @@ import { PositionService } from '@app/service/api/position.service';
 import { FilterDto, PagedListingComponentBase, PagedRequestDto } from '@shared/paged-listing-component-base';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { finalize } from 'rxjs/operators';
+import { manageUserDto } from '../const/const';
 
 @Component({
   selector: 'app-manage-employee',
@@ -20,12 +21,12 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   @Input() listBranchFilter: BranchDto[];
   public branchSearch: FormControl = new FormControl("")
   branchId;
-  @Input() listPosition: BranchDto[];
-  @Input() listPositionFilter: BranchDto[];
+  @Input() listPosition: PositionDto[];
+  @Input() listPositionFilter: PositionDto[];
   public positionSearch: FormControl = new FormControl("")
   public positionId = -1;
   public filterItems: FilterDto[] = [];
-  public users: userDTO[];
+  public users: manageUserDto[];
   keyword;
   constructor(
     injector: Injector,
@@ -143,7 +144,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   togglePrivateNote(user){
     user.hideProjectName = !user.hideProjectName;
   }
-  protected delete(entity: userDTO): void {
+  protected delete(entity: manageUserDto): void {
     throw new Error('Method not implemented.');
   }
 
@@ -154,50 +155,4 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       default: return "assets/images/undefine.png";
     }
   }
-}
-
-export class userDTO {
-  userName: string;
-  name: string;
-  surname: string;
-  emailAddress: string;
-  phoneNumber: string;
-  address: string;
-  isActive: true;
-  fullName: string;
-  lastLoginTime: string;
-  creationTime: string;
-  roleNames: string[];
-  projectUsers: ProjectUser[];
-  type: number;
-  salary: any;
-  salaryAt: string;
-  startDateAt: string;
-  allowedLeaveDay: number;
-  userCode: string;
-  jobTitle: string;
-  level: number;
-  avatarFullPath: any;
-  managerId: number;
-  managerAvatarFullPath: string;
-  managerName: string;
-  branch: string;
-  position: string;
-  sex: number;
-  expandProject = false;
-  expandRole = false;
-  expandUser = false;
-  expandMgName = false;
-  id: number;
-  isLevelUp: boolean;
-  workStartHour: number;
-  workStartMinute: number;
-  hideProjectName: boolean;
-}
-
-export class ProjectUser {
-  projectId: number;
-  projectCode: string;
-  projectName: string;
-  projectUserType: number;
 }

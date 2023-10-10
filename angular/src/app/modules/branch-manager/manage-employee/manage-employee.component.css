@@ -61,18 +61,6 @@
     -webkit-box-orient: vertical;
 }
 
-.preReview::-webkit-scrollbar
-{
-	width: 7px;
-	background-color: #F5F5F5;
-}
-
-.preReview::-webkit-scrollbar-thumb
-{
-	background-color: #cecece;
-	border: 2px solid #cecece;
-}
-
 .review{
     padding: 10px;
     width: 100%;
@@ -84,16 +72,4 @@
     text-overflow: ellipsis;
     line-height: 25px;
     word-wrap: break-word;
-}
-
-.review::-webkit-scrollbar
-{
-	width: 7px;
-	background-color: #F5F5F5;
-}
-
-.review::-webkit-scrollbar-thumb
-{
-	background-color: #cecece;
-	border: 2px solid #cecece;
 }
