@@ -128,13 +128,9 @@
                 </td>
                 <!-- position -->
                 <td class="text-center col-lg-2">{{user.positionName}}</td>
-                <td class="text-center col-lg-1">
-                  <ng-container *ngIf="user.projectUsers.length > 0">
-                    {{user.projectUsers.length}}
-                  </ng-container>
-                </td>
+                <td class="text-center col-lg-1">{{user.projectCount}}</td>
                 <td class="col-lg-5" style="padding: 0;" (click)="togglePrivateNote(user)">
-                  <div class="project_list mb-0" [ngClass]="user.hideProjectName === false ? 'preReview' : 'review'"
+                  <div class="project_list mb-0 custom-scrollbar" [ngClass]="user.hideProjectName === false ? 'preReview' : 'review'"
                   title="Cuộn chuột hoặc Click để mở rộng nội dung">
                     <div class="project_item" *ngFor="let project of user.projectUsers">
                       <b>{{project.projectName}}</b>

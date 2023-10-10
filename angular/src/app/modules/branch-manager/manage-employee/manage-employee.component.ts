@@ -3,12 +3,12 @@ import { FormControl } from '@angular/forms';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { BranchService } from '@app/service/api/branch.service';
 import { ManageUserForBranchService } from '@app/service/api/manage-user-for-branch.service';
+import { manageUserDto } from '@app/service/api/model/branch-manage-dto';
 import { PositionDto } from '@app/service/api/model/position-dto';
 import { PositionService } from '@app/service/api/position.service';
 import { FilterDto, PagedListingComponentBase, PagedRequestDto } from '@shared/paged-listing-component-base';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { finalize } from 'rxjs/operators';
-import { manageUserDto } from '../const/const';
 
 @Component({
   selector: 'app-manage-employee',
