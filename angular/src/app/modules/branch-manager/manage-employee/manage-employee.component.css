@@ -73,12 +73,3 @@
     line-height: 25px;
     word-wrap: break-word;
 }
-
-.custom-scrollbar::-webkit-scrollbar {
-    width: 7px;
-      background-color: #F5F5F5;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #cecece;
-      border: 2px solid #cecece;
-  }
