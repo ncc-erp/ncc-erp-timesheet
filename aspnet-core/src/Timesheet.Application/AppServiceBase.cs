@@ -117,5 +117,13 @@ namespace Ncc
                 .FirstOrDefault();
         }
 
+        public long? GetBranchByCurrentUser()
+        {
+            var currentUserBranch = WorkScope.GetAll<User>()
+                                    .Where(s => s.Id == AbpSession.UserId)
+                                    .Select(s => s.BranchId).FirstOrDefault();
+
+            return currentUserBranch != null ? currentUserBranch : default;
+        }
     }
 }
