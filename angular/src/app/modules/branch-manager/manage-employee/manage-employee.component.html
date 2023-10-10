@@ -80,10 +80,8 @@
                 <th class="text-center" style="width: 20px;">No</th>
                 <th class="text-center col-lg-3">Users</th>
                 <th class="text-center col-lg-2">Position</th>
-                <!-- <th class="text-center col-lg-3">PM</th> -->
                 <th class="text-center col-lg-1">Number of Project</th>
                 <th class="text-center col-lg-4">Projects</th>
-
               </tr>
             </thead>
             <tbody>
@@ -108,7 +106,7 @@
                           [src]='user.avatarFullPath' alt="avatar">
                       </ng-template>
                       <ng-template #defaultAvatarTemplate>
-                        <img style="width: 60px; height: 60px; border-radius: 50%;" src="assets/images/undefine.png" alt="avatar">
+                        <img style="width: 60px; height: 60px; border-radius: 50%;" [src]="defaullUserImage(user.sex)" alt="avatar">
                       </ng-template>
                     </div>
                     <div style="margin-left: 12px;">
@@ -130,19 +128,6 @@
                 </td>
                 <!-- position -->
                 <td class="text-center col-lg-2">{{user.positionName}}</td>
-                <!-- <td class="text-center col-lg-3">
-                  <div>
-                    <ng-container *ngIf="user.managerAvatarFullPath; then managerAvatarTemplate; else defaultManagerAvatarTemplate"></ng-container>
-                    <ng-template #managerAvatarTemplate>
-                      <img style="width: 60px; height: 60px; border-radius: 50%;" alt=""
-                      [src]='user.managerAvatarFullPath'>
-                    </ng-template>
-                    <ng-template #defaultManagerAvatarTemplate>
-                      <img style="width: 60px; height: 60px; border-radius: 50%;" src="assets/images/undefine.png" alt="avatar">
-                    </ng-template>
-                  </div>
-                  <p class="name_pm mb-0" style="margin-top: 10px;">{{user.managerName}}</p>
-                </td> -->
                 <td class="text-center col-lg-1">
                   <ng-container *ngIf="user.projectUsers.length > 0">
                     {{user.projectUsers.length}}

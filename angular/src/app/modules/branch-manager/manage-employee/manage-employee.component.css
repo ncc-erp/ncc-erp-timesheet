@@ -21,7 +21,7 @@
 
 .table>tbody>tr>td{
     padding: 12px 6px;
-    height: 115px;
+    height: 60px;
 }
 
 .project_list{
@@ -57,7 +57,7 @@
     line-height: 25px;
     word-wrap: break-word;
     -webkit-line-clamp: 3;
-    height: 115px;
+    height: 60px;
     -webkit-box-orient: vertical;
 }
 
