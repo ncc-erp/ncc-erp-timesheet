@@ -32,9 +32,8 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="item">
+          <div class="item" *ngIf="permission.isGranted('AbsenceDayByProject.ViewByBranch')">
             <button
-              *ngIf="permission.isGranted('AbsenceDayByProject.ViewByBranch')"
               name="filterBranchDirectorBtn"
               style="height: 44px"
               mat-flat-button
