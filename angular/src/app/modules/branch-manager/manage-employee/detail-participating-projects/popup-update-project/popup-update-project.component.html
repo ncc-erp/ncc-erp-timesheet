@@ -1,0 +1,35 @@
+<div class="header" >
+  <h2>Edit Project: {{data.project.projectName}}</h2>
+</div>
+<hr>
+<div class="body">
+  <form (ngSubmit)="submit()" #editForm="ngForm">
+    <div class="input">
+      <mat-form-field style="width: 48%;">
+        <mat-label>Value Type</mat-label>
+        <mat-select matInput [(ngModel)]="project.valueOfUserType" name="valueOfUserType">
+          <mat-option *ngFor="let item of APP_CONFIG.EnumValueOfUserType" [value]="item.value">
+            {{item.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field style="width: 48%;">
+        <mat-label>Shadow Percentage</mat-label>
+        <input 
+          matInput 
+          name="shadowPercentage" 
+          [(ngModel)]="project.shadowPercentage" 
+          required
+          type="number"
+          inputmode="numeric"
+          [max]="100"
+        >
+      </mat-form-field>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button mat-raised-button type="button" mat-dialog-close>Cancel</button>
+      <button mat-raised-button type="submit" color="primary" [disabled]="!editForm.form.valid">Save</button> 
+    </div>
+  </form>
+</div>

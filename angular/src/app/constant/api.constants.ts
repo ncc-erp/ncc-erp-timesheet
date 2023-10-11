@@ -219,5 +219,10 @@ export const APP_CONSTANT = {
     { "name": "Không CheckOut", "value": 3 },
     { "name": "Đi muộn và Không CheckOut", "value": 4 },
     { "name": "Không CheckIn và không CheckOut", "value": 5 }
-  ]
+  ],
+  valueOfUserType: {
+    Member: 0,
+    Expose: 1,
+    Shadow: 2
+  },
 };

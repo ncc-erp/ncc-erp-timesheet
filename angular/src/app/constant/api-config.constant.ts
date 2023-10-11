@@ -165,4 +165,19 @@ export const APP_CONFIG = {
             name: 'Offical'
         }
     ],
+
+    EnumValueOfUserType: [
+        {
+            value: APP_CONSTANT.valueOfUserType.Member,
+            name: 'Member'
+        },
+        {
+            value: APP_CONSTANT.valueOfUserType.Expose,
+            name: 'Expose'
+        },
+        {
+            value: APP_CONSTANT.valueOfUserType.Shadow,
+            name: 'Shadow'
+        }
+    ]
 }

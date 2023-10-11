@@ -1,0 +1,93 @@
+<div class="main-content">
+  <div class="head">
+    <div class="row">
+      <div style="display: flex;align-items: center;">
+        <h3 style="margin-right: 10px;">{{data.fullName}}</h3>
+        <p>({{data.emailAddress}})</p>
+      </div>
+      <div class="col-md-8 col-sm-7 col-xs-12">
+        <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+          <mat-button-toggle (click)="nextOrPre('pre')">
+            <mat-icon>chevron_left</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle (click)="nextOrPre('next')">
+            <mat-icon>chevron_right</mat-icon>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+        <span class="title-date" style="margin-left:9px">
+          <b style="font-size: 20px">{{ distanceFromAndToDate }}</b>
+        </span>
+      </div>
+
+      <div class="col-md-4 col-sm-3 col-xs-12" style="margin-top: 13px">
+        <mat-form-field appearance="outline" style="margin-top: -20px;">
+          <mat-select [formControl]="viewChange" (selectionChange)="changeView(true)">
+            <mat-option *ngFor="let item of APP_CONFIG.TypeViewHomePage" [value]="item.value">
+              <p *ngIf="item.value != APP_CONSTANT.TypeViewHomePage.CustomTime">
+                {{ item.name }}
+              </p>
+              <p
+                *ngIf="item.value == APP_CONSTANT.TypeViewHomePage.CustomTime" (click)="showPopup()">
+                {{ item.name }}
+              </p>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="checkBoxDto">
+    <mat-checkbox class="example-margin" [(ngModel)]="showInactiveProject">Show InActive Project</mat-checkbox>
+  </div>
+
+  <div class="body">
+    <div class="table-responsive" style="height: 450px">
+      <table class="table customTable">
+        <thead>
+          <tr>
+            <th class="col-lg-4">Project</th>
+            <th class="text-center col-lg-2">Value Type</th>
+            <th class="text-center col-lg-2">Hours Working</th>
+            <th class="text-center col-lg-2">Shadow Percentage</th>
+            <th class="text-center col-lg-1">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of projectList | showProjectInActive: showInactiveProject">
+            <!-- project name -->
+            <td class="col-lg-4">
+              <p class="nameProject">{{item.projectName}}</p>
+            </td>
+            <!-- position project -->
+            <td class="text-center col-lg-2">{{valueOfUserType[item.valueOfUserType].label}}</td>
+            <!-- project Hours Working -->
+            <td class="text-center col-lg-2">{{convertMinuteToHour(item.workingHours)}}</td>
+            <!-- % project -->
+            <td class="text-center col-lg-2">{{item.shadowPercentage}}%</td>
+            <td class="text-center action btn-menu col-lg-1">
+              <button name="actionProject"  class="menu" mat-stroked-button="mat-stroked-button" [matMenuTriggerFor]="menu">
+                <span class="mat-button-wrapper">
+                  <mat-icon>menu</mat-icon>
+                </span>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button class="menu mat-menu-item" name="actionEditProject" (click)="updateShadowPercentage(item)">
+                  <mat-icon class="mat-18">edit</mat-icon>
+                  Edit
+                </button>
+              </mat-menu>
+            </td>
+          </tr>
+          <tr>
+            <th>Total</th>
+            <td></td>
+            <td class="text-center col-lg-2">{{totalWorkingHours}}</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
