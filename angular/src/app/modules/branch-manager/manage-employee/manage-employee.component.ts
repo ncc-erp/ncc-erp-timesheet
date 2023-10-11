@@ -8,7 +8,7 @@ import { PositionService } from '@app/service/api/position.service';
 import { FilterDto, PagedListingComponentBase, PagedRequestDto } from '@shared/paged-listing-component-base';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { finalize } from 'rxjs/operators';
-import { manageUserDto } from '../Dto/branch-manage-dto';
+import { ManageUserDto } from '../Dto/branch-manage-dto';
 import { DetailParticipatingProjectsComponent } from './detail-participating-projects/detail-participating-projects.component';
 import { MatDialog } from '@angular/material';
 
@@ -28,7 +28,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   public positionSearch: FormControl = new FormControl("")
   public positionId = -1;
   public filterItems: FilterDto[] = [];
-  public users: manageUserDto[];
+  public users: ManageUserDto[];
   keyword;
   constructor(
     injector: Injector,
@@ -147,7 +147,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   togglePrivateNote(user){
     user.hideProjectName = !user.hideProjectName;
   }
-  protected delete(entity: manageUserDto): void {
+  protected delete(entity: ManageUserDto): void {
     throw new Error('Method not implemented.');
   }
 

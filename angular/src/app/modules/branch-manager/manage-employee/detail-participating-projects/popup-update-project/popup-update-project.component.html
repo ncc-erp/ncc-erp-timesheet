@@ -1,10 +1,10 @@
 <div class="header" >
-  <h2>Edit Project: {{data.project.projectName}}</h2>
+  <h2 class="fs-18 my-0">Edit Project: {{data.project.projectName}}</h2>
 </div>
 <hr>
 <div class="body">
   <form (ngSubmit)="submit()" #editForm="ngForm">
-    <div class="input">
+    <div class="input d-flex justify-content-between">
       <mat-form-field style="width: 48%;">
         <mat-label>Value Type</mat-label>
         <mat-select matInput [(ngModel)]="project.valueOfUserType" name="valueOfUserType">

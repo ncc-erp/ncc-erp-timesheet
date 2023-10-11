@@ -1,8 +1,8 @@
-export class manageUserDto {
+export class ManageUserDto {
     userName: string;
     emailAddress: string;
     fullName: string;
-    projectUsers: manageProjectUsersDto[];
+    projectUsers: ManageProjectUsersDto[];
     type: number;
     level: number;
     avatarPath: any;
@@ -17,7 +17,7 @@ export class manageUserDto {
     hideProjectName: boolean;
 }
   
-export class manageProjectUsersDto {
+export class ManageProjectUsersDto {
     projectId: number;
     projectCode: string;
     projectName: string;

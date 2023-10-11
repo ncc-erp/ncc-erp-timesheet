@@ -1,9 +1,9 @@
-<div class="main-content">
+<div class="main-content detailParticipatingProject">
   <div class="head">
     <div class="row">
       <div style="display: flex;align-items: center;">
-        <h3 style="margin-right: 10px;">{{data.fullName}}</h3>
-        <p>({{data.emailAddress}})</p>
+        <h3 style="margin: 0 10px 10px 0">{{data.fullName}}</h3>
+        <p class="m-0">({{data.emailAddress}})</p>
       </div>
       <div class="col-md-8 col-sm-7 col-xs-12">
         <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
@@ -38,13 +38,13 @@
     </div>
   </div>
 
-  <div class="checkBoxDto">
+  <div class="mx-2">
     <mat-checkbox class="example-margin" [(ngModel)]="showInactiveProject">Show InActive Project</mat-checkbox>
   </div>
 
   <div class="body">
     <div class="table-responsive" style="height: 450px">
-      <table class="table customTable">
+      <table class="table customTable participatingProject">
         <thead>
           <tr>
             <th class="col-lg-4">Project</th>
@@ -66,15 +66,15 @@
             <td class="text-center col-lg-2">{{convertMinuteToHour(item.workingHours)}}</td>
             <!-- % project -->
             <td class="text-center col-lg-2">{{item.shadowPercentage}}%</td>
-            <td class="text-center action btn-menu col-lg-1">
-              <button name="actionProject"  class="menu" mat-stroked-button="mat-stroked-button" [matMenuTriggerFor]="menu">
+            <td class="text-center mx-auto btn-menu col-lg-1">
+              <button name="actionProject" class="border-0" mat-stroked-button="mat-stroked-button" [matMenuTriggerFor]="menu">
                 <span class="mat-button-wrapper">
                   <mat-icon>menu</mat-icon>
                 </span>
               </button>
               <mat-menu #menu="matMenu">
-                <button class="menu mat-menu-item" name="actionEditProject" (click)="updateShadowPercentage(item)">
-                  <mat-icon class="mat-18">edit</mat-icon>
+                <button class="menu mat-menu-item w-100 bg-transparent" name="actionEditProject" (click)="updateShadowPercentage(item)">
+                  <mat-icon class="mat-18 mr-1">edit</mat-icon>
                   Edit
                 </button>
               </mat-menu>
