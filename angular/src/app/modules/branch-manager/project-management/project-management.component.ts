@@ -128,8 +128,8 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
           this.exposeCount.push(project.exposeCount);
           this.shadowCount.push(project.shadowCount);
         })
-        this.showChart()
       }
+      this.showChart()
     })
   }
 
