@@ -34,13 +34,14 @@
           </div>
           <div class="item">
             <button
+              *ngIf="permission.isGranted('AbsenceDayByProject.ViewByBranch')"
               name="filterBranchDirectorBtn"
               style="height: 44px"
               mat-flat-button
               (click)="onFilterBranchDirector()"
               color="primary"
             >
-              Filter GDVP
+              Filter by Branch
             </button>
           </div>
         </div>
