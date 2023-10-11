@@ -173,6 +173,10 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     this.getDayOff();
   }
 
+  onFilterBranchDirector() {
+    this.listProjectSelected = [];
+    this.getDayOff();
+  }
 
   updateDay(): void {
     this.day = this.viewDate.getDate();
