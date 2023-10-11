@@ -21,6 +21,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
         public IEnumerable<PUDto> ProjectUsers { get; set; }
         public Usertype? Type { get; set; }
         public UserLevel? Level { get; set; }
+        public Sex? Sex { get; set; }
         [ApplySearch]
         public string AvatarPath { get; set; }
         public string AvatarFullPath => FileUtils.FullFilePath(AvatarPath);
