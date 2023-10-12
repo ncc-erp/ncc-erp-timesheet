@@ -73,3 +73,7 @@
     line-height: 25px;
     word-wrap: break-word;
 }
+
+.user_name:hover{
+    color: #2196F3;
+}

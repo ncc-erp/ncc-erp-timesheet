@@ -1,0 +1,9 @@
+.participatingProject tbody td .nameProject{
+    margin-bottom: unset;
+    width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.detailParticipatingProject .row div{
+    padding: 0 24px 10px;
+}
