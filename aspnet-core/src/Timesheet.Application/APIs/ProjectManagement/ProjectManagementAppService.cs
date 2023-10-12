@@ -414,8 +414,7 @@ namespace Timesheet.APIs.ProjectManagement
                     .ToList()
                 })
                 .ToList();
-
-            var userPointHistoryInReviewIntern = WorkScope.GetAll<ReviewDetail>()
+            var userPointHistoryInReviewIntern = WorkScope.GetAll<ReviewDetail>()   
                 .Select(s => new
                 {
                     s.InterShip.EmailAddress,
@@ -437,7 +436,14 @@ namespace Timesheet.APIs.ProjectManagement
                         Point = s.RateStar,
                         isRetro = false,
                         Note = s.Note != null ? s.Note.Replace("<strong>", "").Replace("</strong>", "") : null,
-                        ProjectName = "Basic Training"
+                        ProjectName = WorkScope.GetRepo<MyTimesheet>()
+                              .GetAllIncluding(t => t.User)
+                              .Where(t => t.User.EmailAddress == s.EmailAddress && t.DateAt.Year == s.Year && t.DateAt.Month == s.Month)
+                              .GroupBy(t => t.ProjectTask.Project.Name)
+                              .Select(g => new { ProjectName = g.Key, WorkingTime = g.Sum(t => t.WorkingTime) })
+                              .OrderByDescending(g => g.WorkingTime)
+                              .Select(g => g.ProjectName)
+                              .FirstOrDefault()
                     })
                     .ToList()
                 })
@@ -521,3 +527,4 @@ namespace Timesheet.APIs.ProjectManagement
         }
     }
 }
+
