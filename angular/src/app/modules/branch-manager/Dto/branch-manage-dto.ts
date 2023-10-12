@@ -24,7 +24,17 @@ export class ManageProjectUsersDto {
     projectUserType: number;
 }
 
-export class projectListManagement {
+export class ProjectDto {
+    projectId: number;
+    projectCode: string;
+    projectName: string;
+    totalUser: number;
+    memberCount: number;
+    exposeCount: number;
+    shadowCount: number;
+}
+
+export class ProjectListManagement {
     projectId: number;
     projectName: string;
     projectCode: string;
