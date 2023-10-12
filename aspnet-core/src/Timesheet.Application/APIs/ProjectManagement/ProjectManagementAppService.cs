@@ -464,25 +464,6 @@ namespace Timesheet.APIs.ProjectManagement
                 })
                 .ToList();
         }
-
-        [HttpGet]
-        public string GetNameProject(string email)
-        {
-            int currentYeaur = DateTime.Now.Year;
-            int currentMont = DateTime.Now.Month;
-            DateTime fromDate = new DateTime(2021, 3, 1);
-            DateTime toDate = fromDate.AddMonths(1).AddDays(-1);
-
-            var getName = WorkScope.GetRepo<MyTimesheet>()
-                .GetAllIncluding(t => t.User)
-                .Where(t => t.User.EmailAddress == email && t.DateAt >= fromDate && t.DateAt <= toDate)
-                .GroupBy(t => t.ProjectTask.Project.Name)
-                .OrderByDescending(g => g.Count())
-                .Select(g => g.Key)
-                .FirstOrDefault();
-
-            return getName;
-        }
     }
 }
 
