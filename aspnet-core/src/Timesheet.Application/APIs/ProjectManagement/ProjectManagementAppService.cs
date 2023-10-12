@@ -24,6 +24,11 @@ using Abp.Authorization.Users;
 using Timesheet.Extension;
 using Ncc.IoC;
 using Timesheet.NCCAuthen;
+using Timesheet.Uitls;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Bibliography;
+using Microsoft.Office.Interop.Word;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace Timesheet.APIs.ProjectManagement
 {
@@ -414,8 +419,7 @@ namespace Timesheet.APIs.ProjectManagement
                     .ToList()
                 })
                 .ToList();
-
-            var userPointHistoryInReviewIntern = WorkScope.GetAll<ReviewDetail>()
+            var userPointHistoryInReviewIntern = WorkScope.GetAll<ReviewDetail>()   
                 .Select(s => new
                 {
                     s.InterShip.EmailAddress,
@@ -436,8 +440,15 @@ namespace Timesheet.APIs.ProjectManagement
                         StartDate = new DateTime(s.Year, s.Month, 1),
                         Point = s.RateStar,
                         isRetro = false,
-                        Note = s.Note != null ? s.Note.Replace("<strong>", "").Replace("</strong>", "") : null,
-                        ProjectName = "Basic Training"
+                        Note = s.Note.Replace("<strong>","").Replace("</strong>", ""),
+                        ProjectName = WorkScope.GetRepo<MyTimesheet>()
+                              .GetAllIncluding(t => t.User)
+                              .Where(t => t.User.EmailAddress == s.EmailAddress && t.DateAt.Year == s.Year && t.DateAt.Month == s.Month)
+                              .GroupBy(t => t.ProjectTask.Project.Name)
+                              .Select(g => new { ProjectName = g.Key, WorkingTime = g.Sum(t => t.WorkingTime) })
+                              .OrderByDescending(g => g.WorkingTime)
+                              .Select(g => g.ProjectName)
+                              .FirstOrDefault()
                     })
                     .ToList()
                 })
@@ -454,70 +465,24 @@ namespace Timesheet.APIs.ProjectManagement
                 .ToList();
         }
 
-        [HttpPost]
-        [NccAuthentication]
-        public async Task<List<RetroReviewInternStarHistoriesDto>> GetRetroReviewInternStarHistories(InputRetroReviewInternHistoriesDto input)
+        [HttpGet]
+        public string GetNameProject(string email)
         {
-            var userPointHistoryInRetro = WorkScope.GetAll<RetroResult>()
-                .Select(s => new
-                {
-                    s.User.EmailAddress,
-                    s.UserType,
-                    s.Point,
-                    s.Retro.StartDate,
-                })
-                .Where(x => x.UserType != Usertype.Internship)
-                .Where(x => input.Emails.Contains(x.EmailAddress))
-                .AsEnumerable()
-                .GroupBy(s => s.EmailAddress)
-                .Select(x => new RetroReviewInternStarHistoriesDto
-                {
-                    Email = x.Key,
-                    PointHistories = x.OrderByDescending(s => s.StartDate)
-                    .Select(s => new PointDto
-                    {
-                        StartDate = s.StartDate,
-                        Point = s.Point,
-                        isRetro = true,
-                    })
-                    .ToList()
-                })
-                .ToList();
+            int currentYeaur = DateTime.Now.Year;
+            int currentMont = DateTime.Now.Month;
+            DateTime fromDate = new DateTime(2021, 3, 1);
+            DateTime toDate = fromDate.AddMonths(1).AddDays(-1);
 
-            var userPointHistoryInReviewIntern = WorkScope.GetAll<ReviewDetail>()
-                .Select(s => new
-                {
-                    s.InterShip.EmailAddress,
-                    s.RateStar,
-                    s.Review.Month,
-                    s.Review.Year,
-                })
-                .Where(x => input.Emails.Contains(x.EmailAddress))
-                .AsEnumerable()
-                .GroupBy(s => s.EmailAddress)
-                .Select(x => new RetroReviewInternStarHistoriesDto
-                {
-                    Email = x.Key,
-                    PointHistories = x.OrderByDescending(s => new DateTime(s.Year, s.Month, 1))
-                    .Select(s => new PointDto
-                    {
-                        StartDate = new DateTime(s.Year, s.Month, 1),
-                        Point = s.RateStar,
-                        isRetro = false,
-                    })
-                    .ToList()
-                })
-                .ToList();
+            var getName = WorkScope.GetRepo<MyTimesheet>()
+                .GetAllIncluding(t => t.User)
+                .Where(t => t.User.EmailAddress == email && t.DateAt >= fromDate && t.DateAt <= toDate)
+                .GroupBy(t => t.ProjectTask.Project.Name)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault();
 
-            return userPointHistoryInRetro
-                .Concat(userPointHistoryInReviewIntern)
-                .GroupBy(s => s.Email)
-                .Select(x => new RetroReviewInternStarHistoriesDto
-                {
-                    Email = x.Key,
-                    PointHistories = x.SelectMany(q => q.PointHistories).Take(input.MaxCountHistory).ToList(),
-                })
-                .ToList();
+            return getName;
         }
     }
 }
+
