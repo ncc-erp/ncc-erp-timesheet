@@ -24,11 +24,6 @@ using Abp.Authorization.Users;
 using Timesheet.Extension;
 using Ncc.IoC;
 using Timesheet.NCCAuthen;
-using Timesheet.Uitls;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.Bibliography;
-using Microsoft.Office.Interop.Word;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace Timesheet.APIs.ProjectManagement
 {
@@ -440,7 +435,7 @@ namespace Timesheet.APIs.ProjectManagement
                         StartDate = new DateTime(s.Year, s.Month, 1),
                         Point = s.RateStar,
                         isRetro = false,
-                        Note = s.Note.Replace("<strong>","").Replace("</strong>", ""),
+                        Note = s.Note != null ? s.Note.Replace("<strong>", "").Replace("</strong>", "") : null,
                         ProjectName = WorkScope.GetRepo<MyTimesheet>()
                               .GetAllIncluding(t => t.User)
                               .Where(t => t.User.EmailAddress == s.EmailAddress && t.DateAt.Year == s.Year && t.DateAt.Month == s.Month)
@@ -464,7 +459,6 @@ namespace Timesheet.APIs.ProjectManagement
                 })
                 .ToList();
         }
-
 
         [HttpPost]
         [NccAuthentication]
