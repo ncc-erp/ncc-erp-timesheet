@@ -7,11 +7,13 @@ import { ManageEmployeeComponent } from './manage-employee/manage-employee.compo
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { FormsModule } from '@angular/forms';
+import { DetailParticipatingProjectsComponent } from './manage-employee/detail-participating-projects/detail-participating-projects.component';
+import { PopupCustomeTimeComponent } from './manage-employee/detail-participating-projects/popup-custome-time/popup-custome-time.component';
+import { PopupUpdateProjectComponent } from './manage-employee/detail-participating-projects/popup-update-project/popup-update-project.component';
 import { ProjectManagementComponent } from './project-management/project-management.component';
 
-
 @NgModule({
-  declarations: [BranchManagerComponent, ManageEmployeeComponent, ProjectManagementComponent],
+  declarations: [BranchManagerComponent, ManageEmployeeComponent, DetailParticipatingProjectsComponent, PopupCustomeTimeComponent, PopupUpdateProjectComponent, ProjectManagementComponent],
   imports: [
     CommonModule,
     SharedModule,
@@ -19,6 +21,11 @@ import { ProjectManagementComponent } from './project-management/project-managem
     NgxMatSelectSearchModule,
     NgxPaginationModule,
     FormsModule,
+  ],
+  entryComponents: [
+    DetailParticipatingProjectsComponent,
+    PopupCustomeTimeComponent,
+    PopupUpdateProjectComponent,
   ]
 })
 export class BranchManagerModule { }

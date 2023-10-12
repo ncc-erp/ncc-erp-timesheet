@@ -165,4 +165,19 @@ export const APP_CONFIG = {
             name: 'Offical'
         }
     ],
+
+    EnumValueOfUserType: [
+        {
+            value: APP_CONSTANT.ProjectMemberType.Member,
+            name: 'Member'
+        },
+        {
+            value: APP_CONSTANT.ProjectMemberType.Expose,
+            name: 'Expose'
+        },
+        {
+            value: APP_CONSTANT.ProjectMemberType.Shadow,
+            name: 'Shadow'
+        }
+    ]
 }

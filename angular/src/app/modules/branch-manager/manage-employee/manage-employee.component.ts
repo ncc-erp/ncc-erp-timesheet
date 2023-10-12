@@ -8,7 +8,9 @@ import { PositionService } from '@app/service/api/position.service';
 import { FilterDto, PagedListingComponentBase, PagedRequestDto } from '@shared/paged-listing-component-base';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { finalize } from 'rxjs/operators';
-import { manageUserDto } from '../Dto/branch-manage-dto';
+import { ManageUserDto } from '../Dto/branch-manage-dto';
+import { DetailParticipatingProjectsComponent } from './detail-participating-projects/detail-participating-projects.component';
+import { MatDialog } from '@angular/material';
 
 @Component({
   selector: 'app-manage-employee',
@@ -26,13 +28,14 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   public positionSearch: FormControl = new FormControl("")
   public positionId = -1;
   public filterItems: FilterDto[] = [];
-  public users: manageUserDto[];
+  public users: ManageUserDto[];
   keyword;
   constructor(
     injector: Injector,
     private positionService: PositionService,
     private branchService: BranchService,
     private manageUserForBranchService:ManageUserForBranchService ,
+    private _dialog: MatDialog,
   ) {
     super(injector);
     this.branchId = 0;
@@ -144,7 +147,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   togglePrivateNote(user){
     user.hideProjectName = !user.hideProjectName;
   }
-  protected delete(entity: manageUserDto): void {
+  protected delete(entity: ManageUserDto): void {
     throw new Error('Method not implemented.');
   }
 
@@ -154,5 +157,16 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       case 1: return "assets/images/women.png";
       default: return "assets/images/undefine.png";
     }
+  }
+
+  showProjectDetailDialog(user): void{
+    let dialogRef = this._dialog.open(DetailParticipatingProjectsComponent, {
+      minWidth: '450px',
+      width: '800px',
+      data: user,
+    })
+    dialogRef.afterClosed().subscribe(() => {
+      
+    })
   }
 }
