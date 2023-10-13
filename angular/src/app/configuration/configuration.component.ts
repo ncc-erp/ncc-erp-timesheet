@@ -495,6 +495,15 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   editAutoSubmitTimesheet() {
     this.isEditAutoSubmitTimesheet = true;
   }
+  onAutoSubmitTimesheetEnableWorker(e) {
+    if (e.checked == true) {
+      this.autoSubmitTimesheet.autoSubmitTimesheet = "true"
+    }
+    else {
+      this.autoSubmitTimesheet.autoSubmitTimesheet = "false"
+    }
+  }
+
   editGetDataFromFaceID() {
     this.isEditGetDataFromFaceID = true;
   }
@@ -1195,6 +1204,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Notify to channels required!")
       return;
     }
+    if (_.isEmpty(this.ApproveRequestOffNotifyConfig.approveRequestOffSendUserAtHour)) {
+      abp.message.error("At hour day required!")
+      return;
+    }
     if (_.isEmpty(this.ApproveRequestOffNotifyConfig.approveRequestOffNotifyTimePeriodWithPendingRequest)) {
       abp.message.error("Time period with pending request required!")
       return;
@@ -1586,6 +1599,7 @@ export class ApproveTimesheetNotifyConfigDto {
 export class ApproveRequestOffNotifyConfigDto {
   approveRequestOffNotifyEnableWorker: string;
   approveRequestOffNotifyAtHour: string;
+  approveRequestOffSendUserAtHour: string;
   approveRequestOffNotifyToChannels: string;
   approveRequestOffNotifyTimePeriodWithPendingRequest: string;
 }

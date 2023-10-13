@@ -414,8 +414,7 @@ namespace Timesheet.APIs.ProjectManagement
                     .ToList()
                 })
                 .ToList();
-
-            var userPointHistoryInReviewIntern = WorkScope.GetAll<ReviewDetail>()
+            var userPointHistoryInReviewIntern = WorkScope.GetAll<ReviewDetail>()   
                 .Select(s => new
                 {
                     s.InterShip.EmailAddress,
@@ -436,8 +435,15 @@ namespace Timesheet.APIs.ProjectManagement
                         StartDate = new DateTime(s.Year, s.Month, 1),
                         Point = s.RateStar,
                         isRetro = false,
-                        Note = s.Note.Replace("<strong>","").Replace("</strong>", ""),
-                        ProjectName = "Basic Training"
+                        Note = s.Note != null ? s.Note.Replace("<strong>", "").Replace("</strong>", "") : null,
+                        ProjectName = WorkScope.GetRepo<MyTimesheet>()
+                              .GetAllIncluding(t => t.User)
+                              .Where(t => t.User.EmailAddress == s.EmailAddress && t.DateAt.Year == s.Year && t.DateAt.Month == s.Month)
+                              .GroupBy(t => t.ProjectTask.Project.Name)
+                              .Select(g => new { ProjectName = g.Key, WorkingTime = g.Sum(t => t.WorkingTime) })
+                              .OrderByDescending(g => g.WorkingTime)
+                              .Select(g => g.ProjectName)
+                              .FirstOrDefault()
                     })
                     .ToList()
                 })
@@ -453,5 +459,72 @@ namespace Timesheet.APIs.ProjectManagement
                 })
                 .ToList();
         }
+
+        [HttpPost]
+        [NccAuthentication]
+        public async Task<List<RetroReviewInternStarHistoriesDto>> GetRetroReviewInternStarHistories(InputRetroReviewInternHistoriesDto input)
+        {
+            var userPointHistoryInRetro = WorkScope.GetAll<RetroResult>()
+                .Select(s => new
+                {
+                    s.User.EmailAddress,
+                    s.UserType,
+                    s.Point,
+                    s.Retro.StartDate,
+                })
+                .Where(x => x.UserType != Usertype.Internship)
+                .Where(x => input.Emails.Contains(x.EmailAddress))
+                .AsEnumerable()
+                .GroupBy(s => s.EmailAddress)
+                .Select(x => new RetroReviewInternStarHistoriesDto
+                {
+                    Email = x.Key,
+                    PointHistories = x.OrderByDescending(s => s.StartDate)
+                    .Select(s => new PointDto
+                    {
+                        StartDate = s.StartDate,
+                        Point = s.Point,
+                        isRetro = true,
+                    })
+                    .ToList()
+                })
+                .ToList();
+
+            var userPointHistoryInReviewIntern = WorkScope.GetAll<ReviewDetail>()
+                .Select(s => new
+                {
+                    s.InterShip.EmailAddress,
+                    s.RateStar,
+                    s.Review.Month,
+                    s.Review.Year,
+                })
+                .Where(x => input.Emails.Contains(x.EmailAddress))
+                .AsEnumerable()
+                .GroupBy(s => s.EmailAddress)
+                .Select(x => new RetroReviewInternStarHistoriesDto
+                {
+                    Email = x.Key,
+                    PointHistories = x.OrderByDescending(s => new DateTime(s.Year, s.Month, 1))
+                    .Select(s => new PointDto
+                    {
+                        StartDate = new DateTime(s.Year, s.Month, 1),
+                        Point = s.RateStar,
+                        isRetro = false,
+                    })
+                    .ToList()
+                })
+                .ToList();
+
+            return userPointHistoryInRetro
+                .Concat(userPointHistoryInReviewIntern)
+                .GroupBy(s => s.Email)
+                .Select(x => new RetroReviewInternStarHistoriesDto
+                {
+                    Email = x.Key,
+                    PointHistories = x.SelectMany(q => q.PointHistories).Take(input.MaxCountHistory).ToList(),
+                })
+                .ToList();
+        }
     }
 }
+

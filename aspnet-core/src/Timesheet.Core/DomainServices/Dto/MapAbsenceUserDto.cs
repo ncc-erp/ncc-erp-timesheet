@@ -11,5 +11,6 @@ namespace Timesheet.DomainServices.Dto
         public DayType DateType { get; set; }//morning, afternoon, fullday, custom
         public OnDayType? AbsenceTime { get; set; }//dau. giua, cuoi
         public double Hour { get; set; }
+        public RequestType Type { get; set; }
     }
 }

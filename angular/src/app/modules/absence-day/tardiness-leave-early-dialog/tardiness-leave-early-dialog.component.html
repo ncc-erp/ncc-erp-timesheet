@@ -39,7 +39,7 @@
         <mat-form-field appearance="outline">
           <mat-label>Số giờ</mat-label>
           <input type="text" matInput name="time" (ngModelChange)="onchange($event)" [textMask]="mask"
-            [(ngModel)]="customTime.hour" required cdkFocusInitial #customTimeHour="ngModel" />
+            [(ngModel)]="customTime.hour" required #customTimeHour="ngModel" />
         </mat-form-field>
       </div>
     </div>

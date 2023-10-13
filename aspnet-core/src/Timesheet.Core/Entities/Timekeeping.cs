@@ -33,5 +33,7 @@ namespace Timesheet.Entities
         public CheckInCheckOutPunishmentType StatusPunish { get; set; }
         public int MoneyPunish { get; set; }
         public string TrackerTime { get; set; }
+        public int CountPunishDaily { get; set; }
+        public int CountPunishMention { get; set; }
     }
 }

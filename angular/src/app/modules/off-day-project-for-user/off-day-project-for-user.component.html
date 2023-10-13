@@ -1,5 +1,5 @@
 <div class="row clearfix">
-  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">Projects
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12"> 
     <div class="card main-content" [busy]="isLoading">
       <div class="header">
         <h2 class="title">{{ "Team working calendar" | localize }}</h2>
@@ -26,7 +26,19 @@
           </div>
         </div>
         <div class="header-dropdown m-r--5 d-flex">
-          <div>
+          <div class="col-sm-1" style="width: auto;">
+            <button *ngIf="shouldShowNotifyPmButton()" (click)="notifyApproveRequestOffToPM()"
+              style="height:44px;" mat-flat-button color="primary">
+              Notify PM
+            </button>
+          </div>
+          <div *ngIf="permission.isGranted(Export_Team_Working_Calender)" class="col-sm-1" style="width: auto;">
+            <button name="exportBtn" style="height:44px;" mat-flat-button (click)="onExport()"
+              color="primary" [disabled]="isDisabled">
+              Export
+            </button>
+          </div>
+          <!-- <div>
             <div class="btn-group m-5">
               <div class="btn btn-primary" name="previousBtn" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
                 (viewDateChange)="closeOpenMonthViewDay()">
@@ -41,7 +53,7 @@
                 Next
               </div>
             </div>
-          </div>
+          </div> -->
           <div>
             <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
               <mat-icon style="margin-top: 20px">more_vert</mat-icon>
@@ -96,8 +108,8 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <div class="col-sm-2">
-              <mat-form-field appearance="outline" *ngIf="absentDayType === 0">
+            <div class="col-sm-2"  *ngIf="absentDayType === 0">
+              <mat-form-field appearance="outline">
                 <mat-label>Type Of Request Type</mat-label>
                 <mat-select name="dayType" [(value)]="dayType" (selectionChange)="onDayTypeChange()">
                   <mat-option [value]="-1">All</mat-option>
@@ -107,8 +119,8 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <div class="col-sm-2">
-              <mat-form-field appearance="outline" *ngIf="absentDayType === 0">
+            <div class="col-sm-2"  *ngIf="absentDayType === 0">
+              <mat-form-field appearance="outline">
                 <mat-label>Absence Type</mat-label>
                 <mat-select name="dayOffType" [(value)]="dayOffType" (selectionChange)="onDayOffTypeChange()">
                   <mat-option [value]="-1">All</mat-option>
@@ -116,26 +128,14 @@
                 </mat-select>
               </mat-form-field>
             </div>
+
             <div class="col-sm-1">
-              <button *ngIf="shouldShowNotifyPmButton()" (click)="notifyApproveRequestOffToPM()"
-                style="height:44px;margin-top:4px" mat-flat-button color="primary">
-                Notify PM
+              <button name="filterBtn" style="height:44px;width: 40px;margin-top:4px" mat-flat-button (click)="onFilter()"
+                color="primary">
+                Filter
               </button>
             </div>
-            <div class="col-sm-1">
-              <div *ngIf="permission.isGranted(Export_Team_Working_Calender)" >
-                <button name="exportBtn" style="height:44px;width: 40px;margin-top:4px" mat-flat-button (click)="onExport()"
-                  color="primary" [disabled]="isDisabled">
-                  Export
-                </button>
-              </div>
-              <div>
-                <button name="filterBtn" style="height:44px;width: 40px;margin-top:4px" mat-flat-button (click)="onFilter()"
-                  color="primary">
-                  Filter
-                </button>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>

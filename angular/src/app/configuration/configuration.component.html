@@ -539,47 +539,47 @@
               </div>
             </mat-panel-title>
 
-            <ul class="header-dropdown m-r--5" *ngIf="isShowAutoSubmitTS">
-              <li>
-                <button mat-icon-button [matMenuTriggerFor]="headerMenu3" (click)="$event.stopPropagation()"
-                  class="header-dropdown-mat-icon-button">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #headerMenu3="matMenu">
-                  <button mat-menu-item (click)="refreshAutoSubmitTimesheet();$event.stopPropagation()">
-                    <mat-icon>refresh</mat-icon>
-                    <span>{{ "Refresh" | localize }}</span>
-                  </button>
-                </mat-menu>
-              </li>
-            </ul>
-          </mat-expansion-panel-header>
-          <div class="body">
-            <form>
-              <div class="row">
-                <div class="col-md-12" style="display: flex;">
-                  <mat-checkbox class="autoSubmit" (checked)="autoSubmitTimesheet.autoSubmitTimesheet == 'true'"
-                    [(ngModel)]="autoSubmitTimesheet.autoSubmitTimesheet" name="autoSubmitTimesheet"
-                    [disabled]="!isEditAutoSubmitTimesheet">
-                    Auto submit timesheet on</mat-checkbox>
-                  <mat-form-field>
-                    <mat-select [(ngModel)]="autoSubmitTimesheet.autoSubmitAt" name="autoSubmitAt"
-                      [disabled]="!isEditAutoSubmitTimesheet">
-                      <mat-option value="Monday">Monday</mat-option>
-                      <mat-option value="Tuesday">Tuesday</mat-option>
-                      <mat-option value="Wednesday">Wednesday</mat-option>
-                      <mat-option value="Thursday">Thursday</mat-option>
-                      <mat-option value="Friday">Friday</mat-option>
-                      <mat-option value="Saturday">Saturday</mat-option>
-                      <mat-option value="Sunday">Sunday</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                </div>
-              </div>
-            </form>
+        <ul class="header-dropdown m-r--5" *ngIf="isShowAutoSubmitTS">
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu3" (click)="$event.stopPropagation()" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu3="matMenu">
+              <button mat-menu-item (click)="refreshAutoSubmitTimesheet();$event.stopPropagation()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </mat-expansion-panel-header>
+      <div class="body">
+        <form>
+          <div class="row">
+            <div class="col-md-12" style="display: flex;">
+              <mat-checkbox style="padding: 0; margin-right: 20px;" class="autoSubmit"
+                [checked]="autoSubmitTimesheet.autoSubmitTimesheet == 'true'?true:false" name="autoSubmitTimesheet"
+                (change)="onAutoSubmitTimesheetEnableWorker($event)" [disabled]="!isEditAutoSubmitTimesheet">
+                Auto submit timesheet on
+              </mat-checkbox>
+              <mat-form-field>
+                <mat-select [(ngModel)]="autoSubmitTimesheet.autoSubmitAt" name="autoSubmitAt"
+                  [disabled]="!isEditAutoSubmitTimesheet">
+                  <mat-option value="Monday">Monday</mat-option>
+                  <mat-option value="Tuesday">Tuesday</mat-option>
+                  <mat-option value="Wednesday">Wednesday</mat-option>
+                  <mat-option value="Thursday">Thursday</mat-option>
+                  <mat-option value="Friday">Friday</mat-option>
+                  <mat-option value="Saturday">Saturday</mat-option>
+                  <mat-option value="Sunday">Sunday</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
-        </mat-expansion-panel>
+        </form>
       </div>
+    </mat-expansion-panel>
+  </div>
 
       <!--WFH Setting-->
       <div *ngIf="permission.isGranted(VIEW_WFH_SETTING)" class="card main-content" id="WFHSetting">
