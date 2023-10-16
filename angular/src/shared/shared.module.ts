@@ -76,6 +76,7 @@ import { SortableHeaderComponent } from './sortable-header/sortable-header.compo
 import { PunishNamePipe } from './pipes/punishName.pipe';
 import { DayTypePipe } from './pipes/dateType.pipe';
 import { AddUserOtherProjectComponent } from './add-user-other-project/add-user-other-project.component';
+import { ShowProjectInActivePipe } from './pipes/show-project-in-active.pipe';
 @NgModule({
   imports: [
     FormsModule,
@@ -146,6 +147,7 @@ import { AddUserOtherProjectComponent } from './add-user-other-project/add-user-
     PunishNamePipe,
     DayTypePipe,
     AddUserOtherProjectComponent,
+    ShowProjectInActivePipe,
   ],
   exports: [
     AbpPaginationControlsComponent,
@@ -211,6 +213,7 @@ import { AddUserOtherProjectComponent } from './add-user-other-project/add-user-
     PunishNamePipe,
     DayTypePipe,
     AddUserOtherProjectComponent,
+    ShowProjectInActivePipe,
   ],
   entryComponents: [
     PopupComponent,

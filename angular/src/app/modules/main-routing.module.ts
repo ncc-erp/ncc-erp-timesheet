@@ -970,6 +970,28 @@ const routes: Routes = [
     },
   ],
 },
+
+{
+  path: 'branch-manager',
+  component: MainComponent,
+  canActivate: [AppRouteGuard],
+  children: [
+    {
+      path: '',
+      children: [
+        {
+          path: '',
+          loadChildren: "../modules/branch-manager/branch-manager.module#BranchManagerModule",
+          data: {
+            permission: "ProjectManagementBranchDirectors",
+            preload: true,
+          },
+          canActivate: [AppRouteGuard],
+        }
+      ],
+    }
+  ],
+},
 ];
 
 @NgModule({
