@@ -6,6 +6,5 @@
 export const environment = {
     production: false,
     hmr: false,
-    appConfig: 'appconfig.json',
-    sentryDsn: "http://8a866748ea9b44efa0116e591c92b71c@localhost:9000/15"
+    appConfig: 'appconfig.json'
 };

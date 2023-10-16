@@ -55,8 +55,6 @@ import { EditSidebarComponent } from './layout/edit-sidebar/edit-sidebar.compone
 import { EditRoleComponent } from './roles/edit-role/edit-role.component';
 import { CreateRoleDialogComponent } from './roles/create-role/create-role-dialog.component';
 import { UpdatePunishMoneyComponent } from './configuration/update-punish-money/update-punish-money.component';
-import { environment } from '../environments/environment';
-import * as Sentry from "@sentry/browser";
 
 let config = new AuthServiceConfig([
   {
@@ -68,11 +66,6 @@ let config = new AuthServiceConfig([
 export function provideConfig() {
   return config;
 }
-
-Sentry.init({
-  dsn: environment.sentryDsn,
-})
-
 @NgModule({
   declarations: [
     AppComponent,
