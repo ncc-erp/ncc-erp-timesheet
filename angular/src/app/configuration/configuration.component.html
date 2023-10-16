@@ -1,6 +1,6 @@
 <mat-tab-group>
   <mat-tab label="Configuration Tool">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 scrollable-div">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 configuration-tab-content">
 
       <!-- Working time settings -->
       <div class="card main-content">
@@ -1791,7 +1791,7 @@
   </mat-tab>
 
   <mat-tab label="Configuration Of Internal Tools">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 scrollable-div">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 configuration-tab-content">
       <!-- Komu Setting -->
       <div *ngIf="permission.isGranted(VIEW_KOMU_CONFIG)" class="card">
         <mat-expansion-panel [expanded]="isShowKomuSetting">
@@ -2070,7 +2070,7 @@
   </mat-tab>
 
   <mat-tab label="Configuration Of External Services">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 scrollable-div">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 configuration-tab-content">
       <!-- Email Setting -->
       <div *ngIf="permission.isGranted(VIEW_EMAIL_SETTING)" class="card main-content">
         <mat-expansion-panel [expanded]="isShowEmailSetting">

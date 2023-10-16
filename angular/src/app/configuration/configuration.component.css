@@ -103,7 +103,7 @@ ul {
     font-size: 12px !important;
 }
 
-.scrollable-div {
+.configuration-tab-content {
     width: 100%;
     height: calc(100vh - 150px);
     overflow: auto;
