@@ -1,13 +1,13 @@
 import { Component, Inject, Injector, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { AppComponentBase } from '@shared/app-component-base';
-import { projectListManagement } from '../../Dto/branch-manage-dto';
 import { ManageUserProjectForBranchService } from '@app/service/api/manage-user-project-for-branch.service';
 import { convertMinuteToHour } from '@shared/common-time';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material';
 import * as moment from 'moment';
 import { PopupCustomeTimeComponent } from './popup-custome-time/popup-custome-time.component';
 import { PopupUpdateProjectComponent } from './popup-update-project/popup-update-project.component';
+import { ProjectListManagement } from '../../Dto/branch-manage-dto';
 
 @Component({
   selector: 'app-detail-participating-projects',
@@ -16,7 +16,7 @@ import { PopupUpdateProjectComponent } from './popup-update-project/popup-update
 })
 export class DetailParticipatingProjectsComponent extends AppComponentBase implements OnInit {
   public viewChange = new FormControl(this.APP_CONSTANT.TypeViewHomePage.Week);
-  public projectList: projectListManagement[] = [];
+  public projectList: ProjectListManagement[] = [];
   private activeView: number = 0;
   distanceFromAndToDate = '';
   typeDate: any;
