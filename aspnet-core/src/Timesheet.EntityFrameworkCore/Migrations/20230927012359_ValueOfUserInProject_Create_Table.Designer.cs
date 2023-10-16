@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ncc.EntityFrameworkCore;
 
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    partial class TimesheetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230927012359_ValueOfUserInProject_Create_Table")]
+    partial class ValueOfUserInProject_Create_Table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2095,41 +2097,6 @@ namespace Timesheet.Migrations
                     b.ToTable("ReviewInternCapabilities");
                 });
 
-            modelBuilder.Entity("Timesheet.Entities.ReviewInternPrivateNote", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreationTime");
-
-                    b.Property<long?>("CreatorUserId");
-
-                    b.Property<long?>("DeleterUserId");
-
-                    b.Property<DateTime?>("DeletionTime");
-
-                    b.Property<bool>("IsDeleted");
-
-                    b.Property<DateTime?>("LastModificationTime");
-
-                    b.Property<long?>("LastModifierUserId");
-
-                    b.Property<long>("NoteByUserId");
-
-                    b.Property<string>("PrivateNote");
-
-                    b.Property<long>("ReviewDetailId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NoteByUserId");
-
-                    b.HasIndex("ReviewDetailId");
-
-                    b.ToTable("ReviewInternPrivateNotes");
-                });
-
             modelBuilder.Entity("Timesheet.Entities.TeamBuildingDetail", b =>
                 {
                     b.Property<long>("Id")
@@ -2266,10 +2233,6 @@ namespace Timesheet.Migrations
 
                     b.Property<string>("CheckOut")
                         .HasMaxLength(5);
-
-                    b.Property<int>("CountPunishDaily");
-
-                    b.Property<int>("CountPunishMention");
 
                     b.Property<DateTime>("CreationTime");
 
@@ -2775,19 +2738,6 @@ namespace Timesheet.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Timesheet.Entities.ReviewDetail", "ReviewDetail")
-                        .WithMany()
-                        .HasForeignKey("ReviewDetailId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Timesheet.Entities.ReviewInternPrivateNote", b =>
-                {
-                    b.HasOne("Ncc.Authorization.Users.User", "NoteByUser")
-                        .WithMany()
-                        .HasForeignKey("NoteByUserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Timesheet.Entities.ReviewDetail", "Review")
                         .WithMany()
                         .HasForeignKey("ReviewDetailId")
                         .OnDelete(DeleteBehavior.Cascade);

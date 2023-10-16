@@ -1,0 +1,42 @@
+﻿using Abp.Application.Services.Dto;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using static Ncc.Entities.Enum.StatusEnum;
+using Timesheet.Anotations;
+using Timesheet.Uitls;
+using Timesheet.Users.Dto;
+
+namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.Dto
+{
+    public class UserProjectsDto : EntityDto<long>
+    {
+        [ApplySearch]
+        public string UserName { get; set; }
+
+        [ApplySearch]
+        public string EmailAddress { get; set; }
+
+        public string FullName { get; set; }
+        public IEnumerable<PUDto> ProjectUsers { get; set; }
+        public Usertype? Type { get; set; }
+        public UserLevel? Level { get; set; }
+        public Sex? Sex { get; set; }
+        [ApplySearch]
+        public string AvatarPath { get; set; }
+        public string AvatarFullPath => FileUtils.FullFilePath(AvatarPath);
+        public long? BranchId { get; set; }
+        public string BranchDisplayName { get; set; }
+        public long? PositionId { get; set; }
+        public string PositionName { get; set; }
+        public long? ProjectCount { get; set; }
+    }
+
+    public class UserValueProjectDto
+    {
+        public long Id { get; set; }
+        public string ProjectCode { get; set; }
+        public string ProjectName { get; set; }
+        public List<UserValueDto> Users { get; set; }
+    }
+}

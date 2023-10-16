@@ -326,4 +326,7 @@ export const PERMISSIONS_CONSTANT = {
     TeamBuilding_Project : "TeamBuilding.Project",
     TeamBuilding_Project_SelectProjectTeamBuilding : "TeamBuilding.Project.SelectProjectTeamBuilding",
 
+
+    // Branch Manager
+    ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs: "ProjectManagementBranchDirectors.ManageUserForBranchs.ViewAllBranchs",
 }

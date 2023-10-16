@@ -179,6 +179,8 @@
     <Compile Remove="Migrations\20230614083035_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.Designer.cs" />
     <Compile Remove="Migrations\20230614084135_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.cs" />
     <Compile Remove="Migrations\20230614084135_TeamBuildingRequestHistory_Add_Column_InvoiceAmount.Designer.cs" />
+    <Compile Remove="Migrations\20230926093454_ValueOfUserInProject_Create_Table.cs" />
+    <Compile Remove="Migrations\20230926093454_ValueOfUserInProject_Create_Table.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Migrations\20190911035341_Add_DayOff.Designer.cs~Updated upstream" />

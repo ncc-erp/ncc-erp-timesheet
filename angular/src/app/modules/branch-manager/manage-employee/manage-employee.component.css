@@ -1,0 +1,79 @@
+.group{display: flex;align-items: flex-start;justify-content: space-between;}
+.row-btn{text-align: right;}
+.body-btn{margin: 0 4px;}
+.customTable thead tr th{
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+    vertical-align: inherit
+}
+.customTable tbody tr td{
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+}
+
+.customTable tbody tr:nth-child(odd){
+    background: #EEEEEE;
+}
+
+.mb-0{margin-bottom: 0;}
+.user_information{
+    display: flex;
+    align-items: center;
+}
+
+.table>tbody>tr>td{
+    padding: 12px 6px;
+    height: 60px;
+}
+
+.project_list{
+    display: flex;
+    flex-direction: column;
+}
+.project_item{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.project_item span:first-child{
+    margin-left: unset;
+}
+
+.project_item span{
+    margin-left: 5px;
+    margin-bottom: 3px;
+    padding: 5px;
+}
+
+.preReview{
+    padding: 10px;
+    width: 100%;
+    min-width: 250px;
+    border: none;
+    resize: none;
+    cursor: pointer;
+    overflow-y: scroll;
+    background-color: transparent;
+    text-overflow: ellipsis;
+    line-height: 25px;
+    word-wrap: break-word;
+    -webkit-line-clamp: 3;
+    height: 60px;
+    -webkit-box-orient: vertical;
+}
+
+.review{
+    padding: 10px;
+    width: 100%;
+    min-width: 250px;
+    border: none;
+    cursor: pointer;
+    resize: none;
+    background-color: transparent;
+    text-overflow: ellipsis;
+    line-height: 25px;
+    word-wrap: break-word;
+}
+
+.user_name:hover{
+    color: #2196F3;
+}
