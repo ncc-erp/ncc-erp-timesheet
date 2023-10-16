@@ -1,4 +1,5 @@
 
 export class CustomError extends Error {
-  errorType?: string
+  errorType?: string;
+  isCustomError: boolean = true;
 }

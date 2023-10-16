@@ -36,7 +36,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
           }
 
           //post log to sentry
-          if (AppConsts.sentryDsn) {
+          if (AppConsts.sentryDsn && typeof window["Sentry"] != "undefined") {
             Sentry.withScope((scope) => {
               scope.setExtras({
                 requestInfo: request,
