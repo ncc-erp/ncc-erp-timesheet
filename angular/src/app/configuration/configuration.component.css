@@ -2,7 +2,7 @@
     font-size: 15px;
     display: flex;
 }
- 
+
 .head{
     margin-bottom: 30px;
     margin-top: 5px;
@@ -28,7 +28,7 @@
 }
 .icon-pass{
     position: absolute;
-    left: 357px; 
+    left: 357px;
     top : -7px;
 
 }
@@ -101,4 +101,10 @@ ul {
 }
 ::ng-deep .mat-tooltip {
     font-size: 12px !important;
+}
+
+.configuration-tab-content {
+    width: 100%;
+    height: calc(100vh - 150px);
+    overflow: auto;
 }
