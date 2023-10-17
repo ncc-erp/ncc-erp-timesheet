@@ -4,8 +4,6 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { Type, CompilerOptions, NgModuleRef } from '@angular/core';
 import { environment } from './environments/environment';
 import abpsetting from 'abpsetting';
-import * as Sentry from "@sentry/browser";
-import { CustomError } from '@shared/interceptor-errors/custom-error';
 
 export class AppPreBootstrap {
     static run(appRootUrl: string, callback: () => void): void {
@@ -34,18 +32,6 @@ export class AppPreBootstrap {
             AppConsts.backendIsNotABP = result.backendIsNotABP;
             if(typeof result.sentryDsn != "undefined" && result.sentryDsn !== ""){
                 AppConsts.sentryDsn = result.sentryDsn;
-                Sentry.init({
-                    dsn: AppConsts.sentryDsn,
-                    environment: window.location.hostname,
-                    beforeSend(event, hint){
-                        const originEx = hint.originalException;
-                        if(typeof(originEx) === "object" && "isCustomError" in originEx && originEx["isCustomError"]){
-                            return null;
-
-                        }
-                        return event;
-                    },
-                });
             }
             callback();
         });

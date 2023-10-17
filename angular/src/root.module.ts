@@ -25,6 +25,7 @@ import { GestureConfig } from '@angular/material';
 
 import * as _ from 'lodash';
 import { HttpErrorInterceptor } from '@shared/interceptor-errors/http-error.interceptor';
+import { SentryService } from '@shared/sentry-service';
 
 export function appInitializerFactory(injector: Injector,
     platformLocation: PlatformLocation) {
@@ -38,6 +39,9 @@ export function appInitializerFactory(injector: Injector,
             AppPreBootstrap.run(appBaseUrl, () => {
                 abp.event.trigger('abp.dynamicScriptsInitialized');
                 const appSessionService: AppSessionService = injector.get(AppSessionService);
+                const sentryService: SentryService = injector.get(SentryService);
+                sentryService.init();
+
                 appSessionService.init().then(
                     (result) => {
                         abp.ui.clearBusy();
@@ -47,11 +51,13 @@ export function appInitializerFactory(injector: Injector,
                             import(`@angular/common/locales/${angularLocale}.js`)
                                 .then(module => {
                                     registerLocaleData(module.default);
-                                    resolve(result);
+                                    resolve(true);
                                 }, reject);
                         } else {
-                            resolve(result);
+                            resolve(true);
                         }
+                        sentryService.setUserInfo({"email": result.emailAddress, "username": result.userName, "id": result.id.toString()});
+                        
                     },
                     (err) => {
                         abp.ui.clearBusy();
@@ -99,7 +105,7 @@ export function getCurrentLanguage(): string {
         ServiceProxyModule,
         RootRoutingModule,
         HttpClientModule,
-        DummyPagesModule
+        DummyPagesModule,
     ],
     declarations: [
         RootComponent
