@@ -32,6 +32,7 @@ using Timesheet.Services.HRMv2;
 using Timesheet.Services.FaceId;
 using Timesheet.Services.Tracker;
 using Timesheet.Hubs;
+using Microsoft.AspNetCore.Http.Connections;
 
 namespace Ncc.Web.Host.Startup
 {
@@ -140,10 +141,11 @@ namespace Ncc.Web.Host.Startup
 
             app.UseSignalR(endpoints =>
             {
-                endpoints.MapHub<AbpCommonHub>("/signalr");
-                endpoints.MapHub<TimekeepingHub>("/signalr-timekeepingHub", options =>
-                {
-                    //options.LongPolling.PollTimeout = TimeSpan.FromSeconds(1000 * 60 * 5);
+                endpoints.MapHub<AbpCommonHub>("/signalr", options => {
+                    options.Transports = HttpTransportType.LongPolling | HttpTransportType.WebSockets;
+                });
+                endpoints.MapHub<TimekeepingHub>("/signalr-timekeepingHub", options => {
+                    options.Transports = HttpTransportType.LongPolling | HttpTransportType.WebSockets;
                 });
             });
 
