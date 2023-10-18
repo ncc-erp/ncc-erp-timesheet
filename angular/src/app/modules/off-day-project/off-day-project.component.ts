@@ -80,7 +80,9 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
   dayOffType = -1;
   dayOffTypes = [] as DayOffType[];
   dayAbsentStatus = APP_CONSTANT.AbsenceStatusFilter["Pending"];
-  dayAbsentStatusList = Object.keys(this.APP_CONSTANT.AbsenceStatusFilter)
+  dayAbsentStatusList = Object.keys(this.APP_CONSTANT.AbsenceStatusFilter);
+
+  public isRadiocheckfilterbyBranch: boolean;
 
   constructor(
     injector: Injector,
@@ -95,6 +97,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     this.updateDay();
     this.getListProject();
     this.branchId = this.appSession.user.branchId;
+    this.isRadiocheckfilterbyBranch = true;
   }
 
   ngOnInit() {
@@ -135,9 +138,9 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
       let data = localStorage.getItem("manageRequest_Off_Remote_Onsite_ListProjectIdSelected");
       this.listProject.forEach(item => {
         if (data == null || data == "") {
-          if(!this._permissionChecker.isGranted('AbsenceDayByProject.ViewByBranch')) {
+          //if(!this._permissionChecker.isGranted('AbsenceDayByProject.ViewByBranch')) {
             this.listProjectSelected.push(item.id);
-          }
+          //}
         }
         if (item.code) {
           item.name = item.code + " - " + item.name;
@@ -146,9 +149,9 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
       if (data !== null && data !== '') {
         data.split(",").forEach((value: string) => {
           if (this.listProject.some(project => project.id === Number.parseInt(value))) {
-            if(!this._permissionChecker.isGranted('AbsenceDayByProject.ViewByBranch')) {
+            //if(!this._permissionChecker.isGranted('AbsenceDayByProject.ViewByBranch')) {
               this.listProjectSelected.push(Number.parseInt(value));
-            }
+            //}
           }
         });
       }
@@ -297,6 +300,10 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
   onChangeShowRejected(event: any) {
     this.isShowRejected = event.checked;
     this.refreshData();
+  }
+
+  onChangeShowFilterByBranch() {
+    this.isRadiocheckfilterbyBranch = this.isRadiocheckfilterbyBranch == true ? false : true;
   }
 
 }
