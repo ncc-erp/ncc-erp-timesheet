@@ -76,6 +76,7 @@ import { SortableHeaderComponent } from './sortable-header/sortable-header.compo
 import { PunishNamePipe } from './pipes/punishName.pipe';
 import { DayTypePipe } from './pipes/dateType.pipe';
 import { AddUserOtherProjectComponent } from './add-user-other-project/add-user-other-project.component';
+import { SentryService } from './sentry-service';
 @NgModule({
   imports: [
     FormsModule,
@@ -122,6 +123,7 @@ import { AddUserOtherProjectComponent } from './add-user-other-project/add-user-
     TextMaskModule,
     InfiniteScrollModule,
     ReactiveFormsModule,
+
   ],
   declarations: [
     AbpPaginationControlsComponent,
@@ -225,6 +227,7 @@ export class SharedModule {
         AppUrlService,
         AppAuthService,
         AppRouteGuard,
+        SentryService
       ],
     };
   }
