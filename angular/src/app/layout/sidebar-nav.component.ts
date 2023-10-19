@@ -31,7 +31,7 @@ export class SideBarNavComponent extends AppComponentBase {
                 new MenuItem(this.l('Audit logs'), 'Admin.AuditLog', 'miscellaneous_services', '/app/main/auditlog'),
                 new MenuItem(this.l('Backgound Job'), 'Admin.BackgroundJob', 'update', '/app/main/background-jobs'),
             ]),
-            new MenuItem(this.l('Overview'), '', 'account_circle', '', [
+            new MenuItem(this.l('Personal timesheet'), '', 'account_circle', '', [
                 new MenuItem(this.l('My timesheet'), 'MyTimesheet', 'alarm', '/app/main/mytimesheets'),
                 new MenuItem(this.l('My off/remote/onsite requests'), 'MyAbsenceDay', 'event_busy', '/app/main/absence-day'),
                 new MenuItem(this.l("Team working calendar"), "AbsenceDayOfTeam", 'groups', '/app/main/off-day-project-for-user'),
@@ -43,7 +43,7 @@ export class SideBarNavComponent extends AppComponentBase {
                 new MenuItem(this.l('Timesheets monitoring'), 'TimesheetSupervision', 'supervised_user_circle', '/app/main/timesheets-supervisior'),
                 new MenuItem(this.l('Project management'), 'Project', 'assessment', '/app/main/projects'),
                 new MenuItem(this.l('Manage employee working times'), 'ManageWorkingTime', 'access_time', '/app/main/manage-working-times'),
-                new MenuItem(this.l('Branch Manager'), 'ProjectManagementBranchDirectors', 'description', '/app/main/branch-manager'),
+                new MenuItem(this.l('Branch Manager'), 'ProjectManagementBranchDirectors', 'location_city', '/app/main/branch-manager'),
                 new MenuItem(this.l('Retrospectives'), 'Retro', 'event_note', '/app/main/retro'),
                 new MenuItem(this.l('Review Interns'), 'ReviewIntern', 'rate_review', '/app/main/review'),
                 new MenuItem(this.l('Team building'), 'TeamBuilding', 'store', '', [
@@ -60,32 +60,6 @@ export class SideBarNavComponent extends AppComponentBase {
                     new MenuItem(this.l('Komu tracker'), 'Report.KomuTracker', 'addchart', '/app/main/komu-tracker'),
                 ]),
             ]),
-            // new MenuItem(this.l('Projects'), 'Project', 'assessment', '/app/main/projects'),
-            // new MenuItem(this.l('My timesheets'), 'MyTimesheet', 'alarm', '/app/main/mytimesheets'),
-            // new MenuItem(this.l('My request off/remote/onsite'), 'MyAbsenceDay', 'event_busy', '/app/main/absence-day'),
-            // new MenuItem(this.l('My working time'), 'MyWorkingTime', 'today', '/app/main/my-working-time'),
-            // new MenuItem(this.l('Manage timesheet'), 'Timesheet', 'date_range', '/app/main/timesheets'),
-            // new MenuItem(this.l("Manage request off/remote/onsite"), "AbsenceDayByProject", 'rule', '/app/main/off-day-project'),
-            // new MenuItem(this.l('Manage working times'), 'ManageWorkingTime', 'access_time', '/app/main/manage-working-times'),
-            // new MenuItem(this.l('Branch Manager'), 'ProjectManagementBranchDirectors', 'description', '/app/main/branch-manager'),
-            // new MenuItem(this.l("Team working calendar"), "AbsenceDayOfTeam", 'groups', '/app/main/off-day-project-for-user'),
-            // new MenuItem(this.l('Timesheets monitoring'), 'TimesheetSupervision', 'supervised_user_circle', '/app/main/timesheets-supervisior'),
-            // new MenuItem(this.l('Retro'), 'Retro', 'event_note', '/app/main/retro'),
-            // new MenuItem(this.l('Review Interns'), 'ReviewIntern', 'rate_review', '/app/main/review'),
-
-            // new MenuItem(this.l('Report'), 'Report', 'description', '', [
-            //     new MenuItem(this.l('Interns Info'), 'Report.InternsInfo', 'description', '/app/main/interns-info'),
-            //     new MenuItem(this.l('Normal working'), 'Report.NormalWorking', 'work_outline', '/app/main/normal-working'),
-            //     new MenuItem(this.l('Over time'), 'Report.OverTime', 'date_range', '/app/main/over-time'),
-            //     new MenuItem(this.l('Tardiness'), 'Report.TardinessLeaveEarly', 'wysiwyg', '/app/main/tardiness-leave-early'),
-            //     new MenuItem(this.l('Komu tracker'), 'Report.KomuTracker', 'addchart', '/app/main/komu-tracker'),
-            // ]),
-            // new MenuItem(this.l('Team building'), 'TeamBuilding', 'store', '', [
-            //     new MenuItem(this.l('Team building HR'), 'TeamBuilding.DetailHR', 'supervisor_account', '/app/main/team-building-hr'),
-            //     new MenuItem(this.l('PM request'), 'TeamBuilding.DetailPM', 'supervisor_account', '/app/main/team-building-pm'),
-            //     new MenuItem(this.l('Request history'), 'TeamBuilding.Request', 'speaker_notes', '/app/main/team-building-request'),
-            //     new MenuItem(this.l('Team building project'), 'TeamBuilding.Project', 'done_all', '/app/main/team-building-project'),
-            // ]),
         ];
     }
     ngOnInit(): void {
