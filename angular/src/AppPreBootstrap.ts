@@ -30,6 +30,9 @@ export class AppPreBootstrap {
             AppConsts.localeMappings = result.localeMappings;
             AppConsts.enableNormalLogin = result.enableNormalLogin;
             AppConsts.backendIsNotABP = result.backendIsNotABP;
+            if(typeof result.sentryDsn != "undefined" && result.sentryDsn !== ""){
+                AppConsts.sentryDsn = result.sentryDsn;
+            }
             callback();
         });
     }
@@ -49,7 +52,7 @@ export class AppPreBootstrap {
                 callback();
             });
         }
-        
+
     }
 
     private static getCurrentClockProvider(currentProviderName: string): abp.timing.IClockProvider {
@@ -67,7 +70,7 @@ export class AppPreBootstrap {
     public static getUserConfiguration(callback: () => void): JQueryPromise<any> {
         if (AppConsts.backendIsNotABP){
             $.extend(true, abp, abpsetting.result);
-            abp.clock.provider = abp.timing.utcClockProvider;    
+            abp.clock.provider = abp.timing.utcClockProvider;
             moment.locale('en');
             callback();
         }else{
@@ -79,18 +82,18 @@ export class AppPreBootstrap {
                     '.AspNetCore.Culture': abp.utils.getCookieValue('Abp.Localization.CultureName'),
                     'Abp.TenantId': abp.multiTenancy.getTenantIdCookie()
                 }
-            }).done(result => {            
-                
-                $.extend(true, abp, AppConsts.backendIsNotABP ? abpsetting.result : result);                  
-                
+            }).done(result => {
+
+                $.extend(true, abp, AppConsts.backendIsNotABP ? abpsetting.result : result);
+
                 abp.clock.provider = abp.timing.utcClockProvider;
-    
-                moment.locale('en');    
-               
+
+                moment.locale('en');
+
                 callback();
             });
         }
-        
+
     }
 
 }

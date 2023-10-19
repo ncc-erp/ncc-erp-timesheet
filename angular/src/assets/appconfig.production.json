@@ -16,5 +16,6 @@
       "from": "he-IL",
       "to": "he"
     }
-  ]
+  ],
+  "sentryDsn": ""
 }
