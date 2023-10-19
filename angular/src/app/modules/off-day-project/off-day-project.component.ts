@@ -304,6 +304,9 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
 
   onChangeShowFilterByBranch() {
     this.isRadiocheckfilterbyBranch = this.isRadiocheckfilterbyBranch == true ? false : true;
+    if(this.isRadiocheckfilterbyBranch == true) {
+      this.getListProject();
+    }
   }
 
 }

@@ -39,16 +39,7 @@
               <mat-radio-button
               [value]="true" checked="checked"
               (change)="onChangeShowFilterByBranch()">
-                <div>
-                  <app-multiple-select
-                  name="listProject"
-                  labelName="Project"
-                  [listOption]="listProject"
-                  (onChange)="onChangeListProjectIdSelected($event)"
-                  [defaultValue]="listProjectSelected"
-                  [disabled]="isLoading">
-                  </app-multiple-select>
-                </div>
+                <div [style.color]="!isRadiocheckfilterbyBranch ? 'gray' : 'red'">Filter by project</div>
               </mat-radio-button>
               <mat-radio-button
               (change)="onChangeShowFilterByBranch()"
@@ -147,9 +138,7 @@
               </mat-form-field>
             </div>
             <div class="col-md-2"
-            *ngIf="!(permission.isGranted('AbsenceDayByProject.View')
-            && permission.isGranted('AbsenceDayByProject.ViewByBranch')
-            || permission.isGranted('AbsenceDayByProject.ViewByBranch'))">
+            *ngIf="isRadiocheckfilterbyBranch">
               <app-multiple-select
                 name="listProject"
                 labelName="Project"
