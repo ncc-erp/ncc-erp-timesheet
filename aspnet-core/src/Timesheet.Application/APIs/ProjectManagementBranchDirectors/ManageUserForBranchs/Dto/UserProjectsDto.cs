@@ -22,7 +22,6 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
         public Usertype? Type { get; set; }
         public UserLevel? Level { get; set; }
         public Sex? Sex { get; set; }
-        [ApplySearch]
         public string AvatarPath { get; set; }
         public string AvatarFullPath => FileUtils.FullFilePath(AvatarPath);
         public long? BranchId { get; set; }
@@ -38,5 +37,14 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
         public List<UserValueDto> Users { get; set; }
+    }
+
+    public class ProjectUserInfoDto
+    {
+        public long ProjectId { get; set; }
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public long UserId { get; set; }
+        public long? BranchId { get; set; }
     }
 }
