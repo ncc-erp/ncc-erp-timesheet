@@ -32,16 +32,24 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="item" *ngIf="permission.isGranted('AbsenceDayByProject.ViewByBranch')">
-            <button
-              name="filterBranchDirectorBtn"
-              style="height: 44px"
-              mat-flat-button
-              (click)="onFilterBranchDirector()"
-              color="primary"
-            >
-              Filter by Branch
-            </button>
+          <div class="item text-center d-flex" style="align-items: center;">
+            <mat-radio-group
+            *ngIf="permission.isGranted('AbsenceDayByProject.ViewByBranch')"
+            aria-label="Select an option" class="d-flex" style="align-items: center;">
+              <mat-radio-button
+              [value]="true" checked="checked"
+              (change)="onChangeShowFilterByBranch()">
+                <div [style.color]="!isRadiocheckfilterbyBranch ? 'gray' : 'red'">Filter by project</div>
+              </mat-radio-button>
+              <mat-radio-button
+              (change)="onChangeShowFilterByBranch()"
+              style="margin-left: 15px;"
+              [value]="false"
+              *ngIf="permission.isGranted('AbsenceDayByProject.ViewByBranch')"
+              (click)="onFilterBranchDirector()">
+                <div [style.color]="isRadiocheckfilterbyBranch ? 'gray' : 'red'">Filter by branch</div>
+              </mat-radio-button>
+            </mat-radio-group>
           </div>
         </div>
         <div class="header-dropdown m-r--5 d-flex">
@@ -129,7 +137,8 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2"
+            *ngIf="isRadiocheckfilterbyBranch">
               <app-multiple-select
                 name="listProject"
                 labelName="Project"
@@ -194,10 +203,10 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <div class="col-md-1">
+            <div class="col-md-1" style="float: right;">
               <button
                 name="filterBtn"
-                style="height: 44px; margin-top: 4px"
+                style="height: 44px; margin-top: 4px;"
                 mat-flat-button
                 (click)="onFilter()"
                 color="primary"
