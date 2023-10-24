@@ -64,4 +64,8 @@ export class RetroDetailService extends BaseApiService {
   public getAllPms(retroId: number, projectId?: number): Observable<any> {
     return this.http.get(this.rootUrl + `/GetAllPms?retroId=${retroId}${projectId?('&projectId='+projectId):''}`);
   }
+
+  public generateDataRetroResult(data: object): Observable<any> {
+    return this.http.post(this.rootUrl + "/GenerateDataRetroResult", data);
+  }
 }

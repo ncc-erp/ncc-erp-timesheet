@@ -46,7 +46,10 @@
                 <i class="fa-solid fa-download"></i>
                 Export
               </button>
-
+              <button name="generateDataBtn" mat-raised-button color="primary" class="btn btn-border btn-generate" (click) = "generateData()">
+                <i class="fa fa-database" style="margin-left: -8px; top: 0px;"></i>
+                Generate Data
+              </button>
             </div>
           </div>
 
@@ -83,7 +86,7 @@
               </div>
               <div class="col-md-3 list-button">
                 <button name="clearBtn" mat-raised-button (click)="handleClear()">Clear</button>
-                <button name="searchBtn" mat-raised-button color="primary" (click)="onFilter()">Search</button>
+                <button name="searchBtn" mat-raised-button color="primary" (click)="onFilter()">Search</button>     
               </div>
             </div>
           </div>
