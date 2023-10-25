@@ -797,15 +797,14 @@ namespace Timesheet.APIs.RetroDetails
                     BranchId = s.User.BranchId,
                     PositionId = s.User.PositionId,
                     EmailAddress = s.User.EmailAddress,
-                    UserType = s.User.Type
+                    UserType = s.User.Type,
+                    ProjectTask = s.ProjectTask,
+                    WorkingTime = s.WorkingTime
                 })
-                .Distinct()
                 .ToListAsync();
 
-            var projectIds = await WorkScope.GetRepo<MyTimesheet>()
-                .GetAllIncluding(t => t.User)
-                .Where(t => listUser.Any(u => u.EmailAddress == t.User.EmailAddress) && t.DateAt.Year == input.Year && t.DateAt.Month == input.Month)
-                .GroupBy(t => t.User.EmailAddress)
+            var listProjectIdWithEmail = listUser
+                .GroupBy(t => t.EmailAddress)
                 .Select(g => new
                 {
                     EmailAddress = g.Key,
@@ -816,13 +815,13 @@ namespace Timesheet.APIs.RetroDetails
                                 .FirstOrDefault()
                 })
                 .Distinct()
-                .ToListAsync();
+                .ToList();
 
             var listUserInfo = listUser
-                .Join(projectIds,
+                .Join(listProjectIdWithEmail,
                     user => user.EmailAddress,
                     project => project.EmailAddress,
-                    (user, project) => new 
+                    (user, project) => new
                     {
                         UserId = user.UserId,
                         PositionId = user.PositionId,
@@ -832,6 +831,7 @@ namespace Timesheet.APIs.RetroDetails
                         RetroId = input.RetroId,
                         ProjectId = project.ProjectId
                     })
+                .Distinct()
                 .ToList();
 
             List<RetroResult> result = new List<RetroResult>();
