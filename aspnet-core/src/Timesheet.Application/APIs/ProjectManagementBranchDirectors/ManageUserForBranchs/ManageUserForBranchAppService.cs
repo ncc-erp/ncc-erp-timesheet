@@ -25,7 +25,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
     {
         public ManageUserForBranchAppService(IWorkScope workScope) : base(workScope) { }
 
-        private IQueryable<ProjectUser> QProjectUser(long? branchId)
+        private IQueryable<ProjectUserInfoDto> QProjectUser(long? branchId)
         {
             var isViewAll = IsGranted(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs);
 
@@ -42,10 +42,18 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
             }
 
             return WorkScope.GetAll<ProjectUser>()
-                .Where(s => s.Project.Status == ProjectStatus.Active && !s.Project.isAllUserBelongTo)
+                .Where(s => s.Project.Status == ProjectStatus.Active 
+                && !s.Project.isAllUserBelongTo)
                 .Where(s => s.User.IsActive)
                 .Where(predicate)
-                .AsQueryable();
+                .Select(s => new ProjectUserInfoDto
+                {
+                    ProjectId = s.ProjectId,
+                    Code = s.Project.Code,
+                    Name = s.Project.Name,
+                    UserId = s.UserId,
+                    BranchId = s.User.BranchId,
+                });
         }
 
         [HttpPost]
@@ -55,30 +63,30 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
         {
             var qProjectUser = QProjectUser(branchId);
 
-            var query = qProjectUser
-                .GroupBy(s => s.UserId)
-                .Select(s => new UserProjectsDto
-                {
-                    Id = s.Key,
-                    UserName = s.Select(x => x.User.Name).FirstOrDefault(),
-                    FullName = s.Select(x => x.User.FullName).FirstOrDefault(),
-                    Type = s.Select(x => x.User.Type).FirstOrDefault(),
-                    Level = s.Select(x => x.User.Level).FirstOrDefault(),
-                    Sex = s.Select(x => x.User.Sex).FirstOrDefault(),
-                    EmailAddress = s.Select(x => x.User.EmailAddress).FirstOrDefault(),
-                    ProjectUsers = s.Select(x => new PUDto
-                    {
-                        ProjectId = x.ProjectId,
-                        ProjectName = x.Project.Name,
-                        ProjectCode = x.Project.Code,
-                    }).ToList(),
-                    BranchDisplayName = s.Select(x => x.User.Branch.DisplayName).FirstOrDefault(),
-                    BranchId = s.Select(x => x.User.BranchId).FirstOrDefault(),
-                    AvatarPath = s.Select(x => x.User.AvatarPath).FirstOrDefault(),
-                    PositionId = s.Select(x => x.User.PositionId).FirstOrDefault(),
-                    PositionName = s.Select(x => x.User.Position.Name).FirstOrDefault(),
-                    ProjectCount = s.Select(x => x.ProjectId).Count(),
-                });
+            var query = from u in WorkScope.GetAll<User>().Where(s => s.IsActive)
+                        join pu in qProjectUser on u.Id equals pu.UserId into puu
+                        select new UserProjectsDto
+                        {
+                            Id = u.Id,
+                            UserName = u.UserName,
+                            FullName = u.FullName,
+                            Type = u.Type,
+                            Level = u.Level,
+                            Sex = u.Sex,
+                            EmailAddress = u.EmailAddress,
+                            AvatarPath = u.AvatarPath,
+                            BranchDisplayName = u.Branch.Name,
+                            BranchId = u.BranchId,
+                            PositionId = u.PositionId,
+                            PositionName = u.Position.Name,
+                            ProjectUsers = puu.Select(s => new PUDto
+                            {
+                                ProjectId = s.ProjectId,
+                                ProjectName = s.Name,
+                                ProjectCode = s.Code,
+                            }).ToList(),
+                            ProjectCount = puu.Count(),
+                        };
 
             var temp = await query.GetGridResult(query, input);
 
@@ -117,13 +125,12 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                 .Select(s => new UserValueProjectDto
                 {
                     Id = s.Key,
-                    ProjectCode = s.Select(x => x.Project.Code).FirstOrDefault(),
-                    ProjectName = s.Select(x => x.Project.Name).FirstOrDefault(),
+                    ProjectCode = s.Select(x => x.Code).FirstOrDefault(),
+                    ProjectName = s.Select(x => x.Name).FirstOrDefault(),
                     Users = s.Select(x => new UserValueDto
                     {
                         UserId = x.UserId,
-                        BranchId = x.User.BranchId,
-                        Name = x.User.Name,
+                        BranchId = x.BranchId,
                         ValueType = WorkScope.GetAll<ValueOfUserInProject>()
                             .Where(p => p.UserId == x.UserId && p.ProjectId == s.Key).Select(p => p.Type)
                             .FirstOrDefault(),
