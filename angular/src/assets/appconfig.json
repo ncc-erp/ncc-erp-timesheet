@@ -1,7 +1,7 @@
 {
   "remoteServiceBaseUrl": "http://localhost:21023",
   "appBaseUrl": "http://localhost:4200",
-  "enableNormalLogin": true,  
+  "enableNormalLogin": true,
   "backendIsNotABP": false,
   "localeMappings": [
     {
