@@ -10,12 +10,14 @@ import { NgxMatSelectSearchModule } from "ngx-mat-select-search";
 import { ImportRetroDetailComponent } from "./import-retro-detail/import-retro-detail.component";
 import { NgxSliderModule } from "@angular-slider/ngx-slider";
 import { CreateEditRetroDetailComponent } from "./create-edit-retro-detail/create-edit-retro-detail.component";
+import { GenerateDataComponent } from "./generate-data/generate-data.component";
 
 @NgModule({
   declarations: [
     RetroDetailComponent,
     ImportRetroDetailComponent,
     CreateEditRetroDetailComponent,
+    GenerateDataComponent
   ],
   imports: [
     CommonModule,
@@ -28,6 +30,6 @@ import { CreateEditRetroDetailComponent } from "./create-edit-retro-detail/creat
     NgxSliderModule,
     SharedModule,
   ],
-  entryComponents: [ImportRetroDetailComponent, CreateEditRetroDetailComponent],
+  entryComponents: [ImportRetroDetailComponent, CreateEditRetroDetailComponent, GenerateDataComponent],
 })
 export class RetroDetailModule {}

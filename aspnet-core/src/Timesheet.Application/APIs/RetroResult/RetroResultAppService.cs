@@ -28,6 +28,7 @@ using Timesheet.Services.Project;
 using Timesheet.APIs.Retros.Dto;
 using Abp.Domain.Uow;
 using Ncc.IoC;
+using Timesheet.DomainServices.Dto;
 
 namespace Timesheet.APIs.RetroDetails
 {
@@ -778,7 +779,82 @@ namespace Timesheet.APIs.RetroDetails
 
             return projectUserInfo;
         }
+
+        [HttpPost]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Retro_RetroDetail_GenerateData)]
+        public async Task<List<RetroResult>> GenerateDataRetroResult(InputGenerateDataRetroResultDto input)
+        {
+            var listUser = await WorkScope.GetAll<MyTimesheet>()
+                .Include(s => s.UserId)
+                .Where(s => s.User.IsActive)
+                .Where(s => s.DateAt.Year == input.Year && s.DateAt.Month == input.Month)
+                .Where(s => s.User.Level >= UserLevel.Intern_2)
+                .Where(s => s.User.PositionId != null)
+                .Select(s => new
+                {
+                    UserId = s.UserId,
+                    UserLevel = s.User.Level,
+                    BranchId = s.User.BranchId,
+                    PositionId = s.User.PositionId,
+                    EmailAddress = s.User.EmailAddress,
+                    UserType = s.User.Type,
+                    ProjectTask = s.ProjectTask,
+                    WorkingTime = s.WorkingTime
+                })
+                .ToListAsync();
+
+            var listProjectIdWithEmail = listUser
+                .GroupBy(t => t.EmailAddress)
+                .Select(g => new
+                {
+                    EmailAddress = g.Key,
+                    ProjectId = g.GroupBy(t => t.ProjectTask.ProjectId)
+                                .Select(t => new { ProjectId = t.Key, WorkingTime = t.Sum(wt => wt.WorkingTime) })
+                                .OrderByDescending(t => t.WorkingTime)
+                                .Select(p => p.ProjectId)
+                                .FirstOrDefault()
+                })
+                .Distinct()
+                .ToList();
+
+            var listUserInfo = listUser
+                .Join(listProjectIdWithEmail,
+                    user => user.EmailAddress,
+                    project => project.EmailAddress,
+                    (user, project) => new
+                    {
+                        UserId = user.UserId,
+                        PositionId = user.PositionId,
+                        UserLevel = user.UserLevel.Value,
+                        UserType = user.UserType.Value,
+                        BranchId = user.BranchId,
+                        RetroId = input.RetroId,
+                        ProjectId = project.ProjectId
+                    })
+                .Distinct()
+                .ToList();
+
+            List<RetroResult> result = new List<RetroResult>();
+
+            foreach (var i in listUserInfo)
+            {
+                var item = new RetroResult
+                {
+                    UserId = i.UserId,
+                    PositionId = i.PositionId ?? 0,
+                    UserLevel = i.UserLevel,
+                    UserType = i.UserType,
+                    BranchId = i.BranchId,
+                    RetroId = i.RetroId,
+                    ProjectId = i.ProjectId,
+                    Point = 0,
+                    Note = "",
+                    PmId = null
+                };
+                await WorkScope.InsertAndGetIdAsync(item);
+                result.Add(item);
+            }
+            return result;
+        }
     }
-
-
 }

@@ -35,6 +35,7 @@ import * as FileSaver from "file-saver";
 import { finalize } from "rxjs/operators";
 import { CreateEditRetroDetailComponent } from "./create-edit-retro-detail/create-edit-retro-detail.component";
 import { ImportRetroDetailComponent } from "./import-retro-detail/import-retro-detail.component";
+import { GenerateDataComponent } from "./generate-data/generate-data.component";
 
 @Component({
   selector: "app-retro-detail",
@@ -486,5 +487,52 @@ export class RetroDetailComponent
         });
         FileSaver.saveAs(file, "ExportRetro.xlsx");
       });
+    }
+
+  public generateData(): void {
+    const dialogRef = this.dialog.open(GenerateDataComponent, {
+      disableClose: true,
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        if (result.month) {
+          this.isTableLoading = true;
+          const data = {
+            year: result.year,
+            month: result.month,
+            retroId: this.retroId
+          };
+          this.retroDetailService
+            .generateDataRetroResult(data)
+            .subscribe(
+              (res) => {
+                abp.notify.success("Generated success");
+                this.refresh();
+                this.isTableLoading = false;
+              },
+              () => (this.isTableLoading = false)
+            );
+        } else {
+          var today = new Date();
+          var time = {
+            year: today.getFullYear(),
+            month: today.getMonth() + 1,
+            retroId: this.retroId
+          };
+          this.isTableLoading = true;
+          this.retroDetailService
+            .generateDataRetroResult(time)
+            .subscribe(
+              (res) => {
+                abp.notify.success("Generated success");
+                this.refresh();
+                this.isTableLoading = false;
+                
+              },
+              () => (this.isTableLoading = false)
+            );
+        }
+      }
+    });
   }
 }
