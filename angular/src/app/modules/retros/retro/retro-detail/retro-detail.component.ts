@@ -531,7 +531,6 @@ export class RetroDetailComponent
               },
               () => (this.isTableLoading = false)
             );
-          this.refresh();
         }
       }
     });
