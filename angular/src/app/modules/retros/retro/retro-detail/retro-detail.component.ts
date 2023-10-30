@@ -36,6 +36,7 @@ import { finalize } from "rxjs/operators";
 import { CreateEditRetroDetailComponent } from "./create-edit-retro-detail/create-edit-retro-detail.component";
 import { ImportRetroDetailComponent } from "./import-retro-detail/import-retro-detail.component";
 import { GenerateDataComponent } from "./generate-data/generate-data.component";
+import { AddMultiRetroDetailComponent } from "./add-multi-retro-detail/add-multi-retro-detail.component";
 
 @Component({
   selector: "app-retro-detail",
@@ -287,6 +288,12 @@ export class RetroDetailComponent
     this.showDialog(retroDetail, ActionDialog.EDIT);
   }
 
+  addMulti(): void {
+    let item = {} as RetroDetailCreateEditDto;
+    item.retroId = this.retroId;
+    this.showDialogMulti(item);
+  }
+
   actionChangeSelected() {
     this.handleFilter(this.requestExport);
     this.retroDetailService
@@ -444,6 +451,57 @@ export class RetroDetailComponent
       }
     });
   }
+
+  showDialogMulti(
+    retroDetail: RetroDetailCreateEditDto,
+  ): void {
+    const {
+      id,
+      userId,
+      projectId,
+      positionId,
+      point,
+      note,
+      retroId,
+      userName,
+      branchId,
+      userLevel,
+      userType,
+      projectName,
+      pmId
+    } = retroDetail;
+    let item = {
+      id,
+      userId,
+      projectId,
+      positionId,
+      point,
+      note,
+      retroId,
+      userName,
+      branchId,
+      userLevel,
+      userType,
+      projectName,
+      pmId
+    } as RetroDetailCreateEditDto;
+    const dialogRef = this.dialog.open(AddMultiRetroDetailComponent, {
+      data: {
+        item: item,
+      } as RetroDetailDialogData,
+      disableClose: true,
+      width: "1000px",
+    });
+    dialogRef.afterClosed().subscribe((res) => {
+      if (res) {
+        this.getProjectPMRetroResult();
+        const firstPage = 1;
+        const pageNumber = retroDetail.id == null ? firstPage : this.pageNumber;
+        this.getDataPage(pageNumber);
+      }
+    });
+  }
+
   public onImportFile() {
     this.dialog
       .open(ImportRetroDetailComponent, {

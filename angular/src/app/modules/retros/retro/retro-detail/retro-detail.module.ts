@@ -11,13 +11,17 @@ import { ImportRetroDetailComponent } from "./import-retro-detail/import-retro-d
 import { NgxSliderModule } from "@angular-slider/ngx-slider";
 import { CreateEditRetroDetailComponent } from "./create-edit-retro-detail/create-edit-retro-detail.component";
 import { GenerateDataComponent } from "./generate-data/generate-data.component";
+import { AddMultiRetroDetailComponent } from './add-multi-retro-detail/add-multi-retro-detail.component';
+import { AppAddUserOtherProjectRetroResultComponent } from './app-add-user-other-project-retro-result/app-add-user-other-project-retro-result.component';
 
 @NgModule({
   declarations: [
     RetroDetailComponent,
     ImportRetroDetailComponent,
     CreateEditRetroDetailComponent,
-    GenerateDataComponent
+    GenerateDataComponent,
+    AddMultiRetroDetailComponent,
+    AppAddUserOtherProjectRetroResultComponent,
   ],
   imports: [
     CommonModule,
@@ -30,6 +34,6 @@ import { GenerateDataComponent } from "./generate-data/generate-data.component";
     NgxSliderModule,
     SharedModule,
   ],
-  entryComponents: [ImportRetroDetailComponent, CreateEditRetroDetailComponent, GenerateDataComponent],
+  entryComponents: [ImportRetroDetailComponent, CreateEditRetroDetailComponent, GenerateDataComponent, AddMultiRetroDetailComponent],
 })
 export class RetroDetailModule {}

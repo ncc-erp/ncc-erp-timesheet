@@ -1,0 +1,89 @@
+<div class="row">
+  <div class="col-md-4 fixedHeader">
+      <div>
+        <mat-form-field appearance="outline">
+          <mat-label>Branch</mat-label>
+          <mat-select name="branch" [(value)]="branchIdUserOtherProject" (selectionChange)="getAllUser()">
+            <mat-form-field class="p-2 input-wrapper" style="
+                position: sticky;
+                top: 0;
+                z-index: 2;
+                background-color: white;
+                padding-left: 15px;
+              ">
+              <input type="text" matInput name="BranchUserOtherProject" class="search-input" placeholder="Search"
+                [(ngModel)]="this.branchSearchUserOtherProject" (keydown)="$event.stopPropagation()"
+                (ngModelChange)="handleSearchBranchUserOtherProject()" />
+            </mat-form-field>
+            <mat-option value="">All</mat-option>
+            <mat-option *ngFor="let item of listBranchUserOtherProject" [value]="item.id">
+              {{ item.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+  </div>
+  <div class="col-md-8">
+    <mat-form-field appearance="outline" style="margin-top: 0px; width: 100%;">
+      <mat-label>Search by UserName</mat-label>
+      <input type="search" [(ngModel)]="searchText" name="Search" (keyup.enter)="getAllUser()" matInput>
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+</div>
+
+<div class="row fixedHeader"  style=" max-height: calc(100vh - 590px);">
+  <table class="table table-striped table-hover" [busy]="isLoading">
+    <thead>
+      <tr>
+        <th>
+          <mat-checkbox name="selectAllUserOtherProject" (change)="setAllUserOtherProject($event.checked)" matTooltip="Select/DeSelect all"
+            [checked]="allCompleteUserOtherProject" [indeterminate]="someCompleteUserOtherProject()" [color]="'primary'"
+            style="display: flex; justify-content: center">
+          </mat-checkbox>
+        </th>
+        <th style="cursor: pointer">
+          <span>Employee </span>
+        </th>
+        <th style="cursor: pointer">
+          <span>Branch </span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of listUserNotInProject; let i = index">
+        <td class="text-center">
+          <mat-checkbox [name]="'selectedUserOtherProject' + user.id" [checked]="getIsSelectedUserOtherProject(user)"
+            [color]="'primary'" (change)="handleSelectRequestInfoItemUserOtherProject(i, $event)">
+          </mat-checkbox>
+        </td>
+        <td style="padding: 0px">
+          <div class="info-name">
+            <div class="info-name-box">
+              <div class="full-name">{{ user.fullName }}</div>
+              <div class="email">{{ user.emailAddress }}</div>
+            </div>
+          </div>
+        </td>
+        <td style="text-align: center">
+          <span class="branch label" *ngIf="user.branchId !== null"
+            [style.backgroundColor]="user.branchColor">
+            {{ user.branchName }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="row d-flex" style="margin-top: 10px; justify-content: flex-end;">
+  <button name="cancelButton" mat-raised-button type="button" (click)="handleCancel()">
+    Cancel
+  </button>
+  <button style="margin-left: 5px;" name="addButton"
+   mat-raised-button
+  type="button" color="primary"
+  (click)="handleAddUser()">
+    Add
+  </button>
+</div>
