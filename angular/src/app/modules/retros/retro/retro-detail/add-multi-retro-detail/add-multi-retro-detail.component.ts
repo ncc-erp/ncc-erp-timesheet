@@ -41,11 +41,11 @@ export class AddMultiRetroDetailComponent extends AppComponentBase implements On
   public iconSort: string = "";
   public listPosition: PositionDto[] = [];
   public isShowBtnAddUser = false;
-  public listSelectedItemUserOtherProjectId: number [] = [];
+  public listSelectedItemUserOtherProjectId: number[] = [];
   public listSelectedItemUserOtherProject: SelectUserOtherProjectDto[] = [];
   public saving: boolean;
 
-  public listAddRetroResult: RetroDetailCreateEditDto [] = [];
+  public listAddRetroResult: RetroDetailCreateEditDto[] = [];
   public retroResultFormGroup: FormGroup = new FormGroup({});
 
   constructor(
@@ -79,6 +79,12 @@ export class AddMultiRetroDetailComponent extends AppComponentBase implements On
   }
 
   createRetroResultForm(requestInfo: RetroDetailDto[]) {
+    const retroResultFormArray = this.retroResultFormGroup.get('retroResultFormArray') as FormArray;
+
+    while (retroResultFormArray.length !== 0) {
+      retroResultFormArray.removeAt(0);
+    }
+
     requestInfo.forEach((item) => {
       const retroFormGroup = this.formbuilder.group({
         userId: new FormControl(item.userId),
@@ -103,9 +109,10 @@ export class AddMultiRetroDetailComponent extends AppComponentBase implements On
     })
   }
 
-  deleteRetroResultForm(index : number) {
+  deleteRetroResultForm(index: number) {
     const formArray = this.retroResultFormGroup.get("retroResultFormArray") as FormArray;
     formArray.removeAt(index);
+    this.retroResultAdding.splice(index, 1);
   }
 
   getAllRequest(): void {
@@ -114,14 +121,29 @@ export class AddMultiRetroDetailComponent extends AppComponentBase implements On
       .getAllRetroResultByPM(this.retroId, this.selectedProjectId, this.branchId)
       .subscribe(
         (res) => {
-          const retroResultAdding = this.retroResultAdding.filter(
-            (item) =>
-              (!this.selectedProjectId || item.projectId === this.selectedProjectId) &&
-              (!this.branchId || item.branchId === this.branchId)
-          );
-           this.requestInfo = this.retroResultAdding = [...res.result, ...retroResultAdding];
-           this.createRetroResultForm(this.requestInfo);
-           this.originalList = [...res.result, ...retroResultAdding];
+          if (res.result.length == 0) {
+            this.createRetroResultForm([])
+          }
+          else {
+            const retroResultAdding = this.retroResultAdding.filter(
+              (item) =>
+                (!this.selectedProjectId || item.projectId === this.selectedProjectId) &&
+                (!this.branchId || item.branchId === this.branchId)
+            );
+            if (retroResultAdding.length > 0) {
+              const newRetroResult = retroResultAdding.filter(
+                (item) => !this.requestInfo.some((existingItem) => existingItem.id === item.id)
+              );
+              this.createRetroResultForm(retroResultAdding);
+              this.requestInfo.push(...newRetroResult);
+              this.originalList.push(...newRetroResult);
+            } else {
+              this.requestInfo = [...res.result, ...retroResultAdding];
+              this.createRetroResultForm(this.requestInfo);
+              this.retroResultAdding = [...res.result, ...retroResultAdding];
+              this.originalList = [...res.result, ...retroResultAdding];
+            }
+          }
           this.isLoading = false;
         },
         () => (this.isLoading = false)
@@ -131,7 +153,7 @@ export class AddMultiRetroDetailComponent extends AppComponentBase implements On
   onSaveAndClose() {
     this.saving = true;
     let formArray = this.retroResultFormGroup.controls["retroResultFormArray"] as FormArray;
-    let retroDtoList: RetroDetailCreateEditDto[] = []; // Khởi tạo mảng trống
+    let retroDtoList: RetroDetailCreateEditDto[] = [];
 
     for (let item of formArray.controls) {
       if (item instanceof FormGroup) {
@@ -169,24 +191,23 @@ export class AddMultiRetroDetailComponent extends AppComponentBase implements On
     );
   }
 
-
   getRetroResultInfoUser() {
     let retroResultInfoByUser: RetroDetailDto[] = [];
     this.retroResultService
-    .getRetroResultInfoUser(this.listSelectedItemUserOtherProjectId, this.retroId)
-    .subscribe((res) => {
-      retroResultInfoByUser = res.result.map((t) => {
-        return {
-          ...t,
-          isNotInProject: true,
-        };
-      });
-      this.retroResultAdding = [...this.retroResultAdding, ...retroResultInfoByUser];
-      this.listSelectedItemUserOtherProjectId = [];
-      this.listSelectedItemUserOtherProject = [];
-
-      this.getAllRequest();
-    })
+      .getRetroResultInfoUser(this.listSelectedItemUserOtherProjectId, this.retroId)
+      .subscribe((res) => {
+        retroResultInfoByUser = res.result.map((t) => {
+          return {
+            ...t,
+            isNotInProject: true,
+          };
+        });
+        this.retroResultAdding.push(...retroResultInfoByUser);
+        this.listSelectedItemUserOtherProjectId = [];
+        this.listSelectedItemUserOtherProject = [];
+        
+        this.getAllRequest();
+      })
   }
 
   getAllProject() {
@@ -278,16 +299,25 @@ export class AddMultiRetroDetailComponent extends AppComponentBase implements On
     this.dialogRef.close(d);
   }
 
-  getSelectedUserOtherProjectRetro(value: SelectUserOtherProjectDto[]){
-    this.listSelectedItemUserOtherProjectId = value.map( item => item.id);
+  getSelectedUserOtherProjectRetro(value: SelectUserOtherProjectDto[]) {
+    this.listSelectedItemUserOtherProjectId = value.map(item => item.id);
     this.getRetroResultInfoUser();
   }
 
-  toggleShowAddUserDialog(){
+  toggleShowAddUserDialog() {
     this.isShowBtnAddUser = !this.isShowBtnAddUser;
   }
 
   closePopup(value: boolean) {
     this.isShowBtnAddUser = value;
+  }
+
+  checkMatchingProjectId(projectId: number): boolean {
+    for (const item of this.project) {
+      if (projectId === item.projectId) {
+        return false;
+      }
+    }
+    return true;
   }
 }

@@ -100,13 +100,18 @@
                 [formGroup]="retroResultForm">
                   <td style="text-align: center">{{ i + 1 }}</td>
                   <td style="padding: 0px">
-                    <div class="info-name">
-                      <div class="info-name-box">
+                    <div class="info-name"style="display: flex;">
+                      <div class="info-name-box" >
                         <div class="full-name">{{ retroResultForm.controls["fullName"].value }}</div>
                         <div class="email">{{ retroResultForm.controls["emailAddress"].value }}</div>
                       </div>
-                      <mat-icon style="color: #ff9800; margin-left: 5px"
-                        matTooltip="This employee is not in your project!">warning</mat-icon>
+                      <div>
+                        <ng-container *ngIf="checkMatchingProjectId(retroResultForm.controls['projectId'].value)">
+                          <mat-icon style="color: #ff9800; margin-left: 5px; margin-top: 8px;"
+                            matTooltip="This employee is not in your project!"
+                          >warning</mat-icon>
+                        </ng-container>
+                      </div>
                     </div>
                   </td>
                   <td style="text-align: center">

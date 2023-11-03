@@ -32,6 +32,7 @@ using Timesheet.DomainServices.Dto;
 using Ncc.Entities.Enum;
 using Timesheet.APIs.TeamBuildingDetailsPM.dto;
 using Timesheet.APIs.TeamBuildingDetailsPM.Dto;
+using Timesheet.APIs.Positions.Dto;
 
 namespace Timesheet.APIs.RetroDetails
 {
@@ -877,9 +878,9 @@ namespace Timesheet.APIs.RetroDetails
                 .Include(s => s.Branch)
                 .Include(s => s.Project)
                 .Where(x => x.RetroId == retroId)
-                //.Where(x => !x.IsDeleted)
-                //.Where(x => x.Note == null)
-                //.Where(x => x.Point == null)
+                .Where(x => !x.IsDeleted)
+                .Where(x => x.Note == null)
+                .Where(x => x.Point == default)
                 .Where(s => myPMProjectIds.Contains(s.ProjectId))
                 .WhereIf(branchId.HasValue, s => s.User.BranchId == branchId || branchId == null)
                 .Select(s => new RetroResultDto
@@ -984,54 +985,37 @@ namespace Timesheet.APIs.RetroDetails
         [HttpPost]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Retro_RetroDetail_AddEmployeeAllTeam, Ncc.Authorization.PermissionNames.Retro_RetroDetail_AddEmployeeMyTeam)]
         public async Task<List<RetroResultCreateDto>> AddMultiUserRetroResult(List<RetroResultCreateDto> input)
-        {
-            //var isExistUserId = await WorkScope.GetAll<RetroResult>()
-            //   .Where(s => s.UserId == input.UserId)
-            //   .Where(s => s.RetroId == input.RetroId)
-            //   .Where(s => s.ProjectId == input.ProjectId)
-            //   .Where(s => s.PmId == input.PmId)
-            //   .Where(s => s.Id != input.Id).AnyAsync();
-            //if (isExistUserId)
-            //{
-            //    throw new UserFriendlyException(string
-            //        .Format("This UserId {0} in ProjectId {1} already in this Month", input.UserId, input.ProjectId));
-            //}
-            //if (input.Point < 0 || input.Point > 5)
-            //{
-            //    throw new UserFriendlyException(string
-            //        .Format("Point can not be less than 0 or greater than 5"));
-            //}
-            //if (input.Id <= 0)
-            //{
-                var listUserInfo = WorkScope.GetAll<User>()
-                    .Select(s => new
-                    {
-                        s.Type,
-                        s.Level,
-                        s.BranchId,
-                        s.Id
-                    })
-                    .Where(s => input.Select(x => x.UserId).Contains(s.Id))
-                    .ToList();
-
-                //Logger.Info($"UserInfo: Type - {userInfo.Type}, Level - {userInfo.Level}, BranchId - {userInfo.BranchId}");
-                //if (userInfo == default) throw new UserFriendlyException(string.Format("This User is Null"));
-                //if (userInfo.Type == default || userInfo.Level == default || userInfo.BranchId == default) throw new UserFriendlyException("Type or Level or Branch is null");
-
-            foreach(var item in listUserInfo)
-            {
-                foreach(var item2 in input)
+        {   
+            var listUserInfo = WorkScope.GetAll<User>()
+                .Select(s => new
                 {
-                    var item3 = ObjectMapper.Map<RetroResult>(item2);
-                    item3.UserLevel = item.Level.Value;
-                    item3.UserType = item.Type.Value;
-                    item3.BranchId = item.BranchId.Value;
-                    item3.PmId = AbpSession.UserId.Value;
+                    s.Type,
+                    s.Level,
+                    s.BranchId,
+                    UserId = s.Id
+                })
+                .Where(s => input.Select(x => x.UserId).Contains(s.UserId))
+                .ToList();
+                
+            foreach(var user in listUserInfo)
+            {
+                foreach(var retroResult in input)
+                {
+                    if(user.UserId == retroResult.UserId)
+                    {
+                        var item = await WorkScope.GetAsync<RetroResult>(retroResult.Id);
+                        item.UserLevel = user.Level.Value;
+                        item.UserType = user.Type.Value;
+                        item.BranchId = user.BranchId.Value;
+                        item.PmId = AbpSession.UserId.Value;
 
-                    await WorkScope.UpdateAsync(item3);
+                        ObjectMapper.Map<RetroResultCreateDto, RetroResult>(retroResult, item);
+
+                        await WorkScope.UpdateAsync(item);
+                    }
+                    
                 }
             }
-            
             return input;
         }
     }

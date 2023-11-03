@@ -34,7 +34,7 @@ export class AppAddUserOtherProjectRetroResultComponent implements OnInit {
     public retroResultService: RetroDetailService,
     public appBaseService: AppServiceBase
   ) { }
-
+  
   ngOnInit() {
     this.getListBranchUserOtherProject();
     this.getAllUser();
@@ -42,7 +42,6 @@ export class AppAddUserOtherProjectRetroResultComponent implements OnInit {
 
   getAllUser() {
     this.isLoading = true;
-    console.log("this.requestAdding: ", this.retroResultAdding);
     let listId = this.retroResultAdding.map((x) => x.userId);
     const input: InputGetUserOtherProjectDto = {
       ids: listId,
