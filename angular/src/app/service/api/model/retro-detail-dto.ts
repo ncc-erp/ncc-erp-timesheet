@@ -37,6 +37,8 @@ export interface RetroDetailDto {
   pmId: number;
   pmEmailAddress: string;
   pmFullName: string;
+
+  isNotInProject?: boolean;
 }
 
 export interface RetroDetailCreateEditDto {

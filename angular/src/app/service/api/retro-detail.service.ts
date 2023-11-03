@@ -3,6 +3,7 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { BaseApiService } from "./base-api.service";
 import { RetroDetailCreateEditDto } from "./model/retro-detail-dto";
+import { InputGetUserOtherProjectDto } from "@app/modules/team-building/const/const";
 @Injectable({
   providedIn: "root",
 })
@@ -67,5 +68,34 @@ export class RetroDetailService extends BaseApiService {
 
   public generateDataRetroResult(data: object): Observable<any> {
     return this.http.post(this.rootUrl + "/GenerateDataRetroResult", data);
+  }
+
+  public getAllRetroResultByPM(retroId: number, projectId?:number, branchId?: number): Observable<any> {
+    let url = this.rootUrl + `/GetAllRetroResultByPM?retroId=${retroId}&`;
+    let arr: string [] = [];
+
+    if(projectId) {
+      arr.push(`projectId=${projectId}`);
+    }
+    if(branchId) {
+      arr.push(`branchId=${branchId}`);
+    }
+    if(arr.length > 0){
+      url += arr.join('&');
+    }
+
+    return this.http.get(url);
+  }
+
+  public getRetroResultInfoUser(listEmpIds: number[], retroId: number): Observable<any> {
+    return this.http.post(this.rootUrl + `/GetRetroResultInfoUser?retroId=${retroId}`, listEmpIds);
+  }
+
+  public getAllUser(input: InputGetUserOtherProjectDto): Observable<any> {
+    return this.http.post(this.rootUrl + "/GetUserNotPaggingOtherProjectRetroResult", input);
+  }
+
+  public addMultiUserRetroResult(input: RetroDetailCreateEditDto[]): Observable<any> {
+    return this.http.post(this.rootUrl + "/AddMultiUserRetroResult", input);
   }
 }

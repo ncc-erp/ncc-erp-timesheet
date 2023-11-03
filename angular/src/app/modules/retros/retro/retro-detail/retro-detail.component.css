@@ -1,6 +1,6 @@
 .gr-btn-action{
     display: flex;
-    margin-top: 8px;
+    margin: 0px 15px 30px 15px;
     gap: 8px;
     flex: 1;
 }

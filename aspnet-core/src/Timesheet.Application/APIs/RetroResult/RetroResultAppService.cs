@@ -29,6 +29,10 @@ using Timesheet.APIs.Retros.Dto;
 using Abp.Domain.Uow;
 using Ncc.IoC;
 using Timesheet.DomainServices.Dto;
+using Ncc.Entities.Enum;
+using Timesheet.APIs.TeamBuildingDetailsPM.dto;
+using Timesheet.APIs.TeamBuildingDetailsPM.Dto;
+using Timesheet.APIs.Positions.Dto;
 
 namespace Timesheet.APIs.RetroDetails
 {
@@ -847,14 +851,172 @@ namespace Timesheet.APIs.RetroDetails
                     BranchId = i.BranchId,
                     RetroId = i.RetroId,
                     ProjectId = i.ProjectId,
-                    Point = 0,
-                    Note = "",
+                    Point = default,
+                    Note = null,
                     PmId = null
                 };
                 await WorkScope.InsertAndGetIdAsync(item);
                 result.Add(item);
             }
             return result;
+        }
+
+        [HttpGet]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Retro_RetroDetail_ViewAllTeam, Ncc.Authorization.PermissionNames.Retro_RetroDetail_AddEmployeeMyTeam)]
+        public async Task<List<RetroResultDto>> GetAllRetroResultByPM(long retroId, long? projectId = null, long? branchId = null)
+        {
+            var projectIdsByCurrentPM = GetAllProjectIdByCurrentPM();
+
+            var myPMProjectIds = projectIdsByCurrentPM
+                .Result
+                .Where(s => s.ProjectId == projectId || projectId == null)
+                .Select(x => x.ProjectId)
+                .ToList();
+
+            var qretroResult = await WorkScope.GetAll<RetroResult>()
+                .Include(s => s.User)
+                .Include(s => s.Branch)
+                .Include(s => s.Project)
+                .Where(x => x.RetroId == retroId)
+                .Where(x => !x.IsDeleted)
+                .Where(x => x.Note == null)
+                .Where(x => x.Point == default)
+                .Where(s => myPMProjectIds.Contains(s.ProjectId))
+                .WhereIf(branchId.HasValue, s => s.User.BranchId == branchId || branchId == null)
+                .Select(s => new RetroResultDto
+                {
+                    UserId = s.UserId,
+                    Id = s.Id,
+                    FullName = s.User.FullName,
+                    EmailAddress = s.User.EmailAddress,
+                    ProjectName = s.Project.Name,
+                    PositionName = s.Position != null ? s.Position.Name : "",
+                    BranchColor = s.Branch.Color,
+                    UserBranchColor = s.User.Branch.Color,
+                    BranchName = s.Branch.Name,
+                    UserBranchName = s.User != null && s.User.Branch != null ? s.User.Branch.Name : "",
+                    Level = s.UserLevel,
+                    UserLevel = s.User.Level,
+                    Type = s.UserType,
+                    UserType = s.User.Type,
+                    RetroName = s.Retro.Name,
+                    Point = s.Point,
+                    Note = s.Note,
+                    PositionId = s.PositionId,
+                    ProjectId = s.ProjectId,
+                    BranchId = s.BranchId,
+                }).ToListAsync();
+
+            return qretroResult;
+        }
+
+        [HttpPost]
+        public async Task<List<RetroResultDto>> GetRetroResultInfoUser(List<long> listEmpIds, long retroId)
+        {
+            var userId = AbpSession.UserId.Value;
+
+            var listProjectIdByUserId = await WorkScope.GetAll<ProjectUser>()
+               .Where(s => s.UserId == userId)
+               .Where(s => s.Type == ProjectUserType.PM)
+               .Select(s => s.ProjectId)
+               .ToListAsync();
+
+            return await WorkScope.GetAll<RetroResult>()
+                .Where(s => s.RetroId == retroId)
+                .Where(s => listEmpIds.Contains(s.UserId))
+                .Where(s => !listProjectIdByUserId.Contains(s.ProjectId))
+                .Where(x => x.Note == null)
+                .Where(x => x.Point == default)
+                .OrderBy(s => s.User.FullName)
+                .Select(s => new RetroResultDto
+                {
+                    UserId = s.UserId,
+                    Id = s.Id,
+                    FullName = s.User.FullName,
+                    EmailAddress = s.User.EmailAddress,
+                    ProjectName = s.Project.Name,
+                    PositionName = s.Position != null ? s.Position.Name : "",
+                    BranchColor = s.Branch.Color,
+                    UserBranchColor = s.User.Branch.Color,
+                    BranchName = s.Branch.Name,
+                    UserBranchName = s.User != null && s.User.Branch != null ? s.User.Branch.Name : "",
+                    Level = s.UserLevel,
+                    UserLevel = s.User.Level,
+                    Type = s.UserType,
+                    UserType = s.User.Type,
+                    RetroName = s.Retro.Name,
+                    Point = s.Point,
+                    Note = s.Note,
+                    PositionId = s.PositionId,
+                    ProjectId = s.ProjectId,
+                    BranchId = s.BranchId,
+                })
+                .OrderByDescending(x => x.FullName)
+                .ToListAsync();
+        }
+
+        [HttpPost]
+        public async Task<List<GetAllUserRequestMoneyDto>> GetUserNotPaggingOtherProjectRetroResult(InputGetUserOtherProjectDto input)
+        {
+            var listUserIdByRetroResult = await WorkScope.GetAll<RetroResult>()
+                .Where(x => !input.Ids.Contains(x.UserId))
+                .Where(x => x.User.IsActive)
+                .Where(x => x.Note == null)
+                .Where(x => x.Point == default)
+                .WhereIf(input.BranchId != null, x => x.User.BranchId == input.BranchId)
+                .WhereIf(input.SearchText != null, x => x.User.FullName.Contains(input.SearchText) || x.User.EmailAddress.Contains(input.SearchText))
+                .Select(x => x.UserId).Distinct().ToListAsync();
+
+            var listInfoUser = await WorkScope.GetAll<User>()
+                .Where(s => listUserIdByRetroResult.Contains(s.Id))
+                .Select(s => new GetAllUserRequestMoneyDto
+                {
+                    Id = s.Id,
+                    FullName = s.FullName,
+                    EmailAddress = s.EmailAddress,
+                    BranchId = s.BranchId,
+                    BranchName = s.Branch.Name,
+                    BranchColor = s.Branch.Color,
+                }).OrderBy(s => s.EmailAddress).Distinct().ToListAsync();
+
+            return listInfoUser;
+        }
+
+        [HttpPost]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Retro_RetroDetail_AddEmployeeAllTeam, Ncc.Authorization.PermissionNames.Retro_RetroDetail_AddEmployeeMyTeam)]
+        public async Task<List<RetroResultCreateDto>> AddMultiUserRetroResult(List<RetroResultCreateDto> input)
+        {   
+            var listUserInfo = WorkScope.GetAll<User>()
+                .Select(s => new
+                {
+                    s.Type,
+                    s.Level,
+                    s.BranchId,
+                    UserId = s.Id
+                })
+                .Where(s => input.Select(x => x.UserId).Contains(s.UserId))
+                .ToList();
+                
+            foreach(var user in listUserInfo)
+            {
+                foreach(var retroResult in input)
+                {
+                    if(user.UserId == retroResult.UserId)
+                    {
+                        var item = await WorkScope.GetAsync<RetroResult>(retroResult.Id);
+                        item.UserLevel = user.Level.Value;
+                        item.UserType = user.Type.Value;
+                        item.BranchId = user.BranchId.Value;
+                        item.PmId = AbpSession.UserId.Value;
+
+                        ObjectMapper.Map<RetroResultCreateDto, RetroResult>(retroResult, item);
+
+                        await WorkScope.UpdateAsync(item);
+                    }
+                    
+                }
+            }
+            return input;
         }
     }
 }

@@ -98,3 +98,8 @@ export class QuantityProjectDto {
     status : number;
     quantity : number;
 }
+
+export class ProjectByCurrentUserDto {
+    projectId: number;
+    projectName: string;
+}
