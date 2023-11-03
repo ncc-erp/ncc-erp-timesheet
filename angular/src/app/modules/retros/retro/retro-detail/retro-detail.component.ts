@@ -289,9 +289,7 @@ export class RetroDetailComponent
   }
 
   addMulti(): void {
-    let item = {} as RetroDetailCreateEditDto;
-    item.retroId = this.retroId;
-    this.showDialogMulti(item);
+    this.showDialogMulti({ retroId: this.retroId } as RetroDetailCreateEditDto);
   }
 
   actionChangeSelected() {
@@ -455,36 +453,7 @@ export class RetroDetailComponent
   showDialogMulti(
     retroDetail: RetroDetailCreateEditDto,
   ): void {
-    const {
-      id,
-      userId,
-      projectId,
-      positionId,
-      point,
-      note,
-      retroId,
-      userName,
-      branchId,
-      userLevel,
-      userType,
-      projectName,
-      pmId
-    } = retroDetail;
-    let item = {
-      id,
-      userId,
-      projectId,
-      positionId,
-      point,
-      note,
-      retroId,
-      userName,
-      branchId,
-      userLevel,
-      userType,
-      projectName,
-      pmId
-    } as RetroDetailCreateEditDto;
+    const item = Object.assign({}, retroDetail);
     const dialogRef = this.dialog.open(AddMultiRetroDetailComponent, {
       data: {
         item: item,

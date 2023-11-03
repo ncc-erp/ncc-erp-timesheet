@@ -4,13 +4,7 @@
         <mat-form-field appearance="outline">
           <mat-label>Branch</mat-label>
           <mat-select name="branch" [(value)]="branchIdUserOtherProject" (selectionChange)="getAllUser()">
-            <mat-form-field class="p-2 input-wrapper" style="
-                position: sticky;
-                top: 0;
-                z-index: 2;
-                background-color: white;
-                padding-left: 15px;
-              ">
+            <mat-form-field class="p-2 input-wrapper">
               <input type="text" matInput name="BranchUserOtherProject" class="search-input" placeholder="Search"
                 [(ngModel)]="this.branchSearchUserOtherProject" (keydown)="$event.stopPropagation()"
                 (ngModelChange)="handleSearchBranchUserOtherProject()" />

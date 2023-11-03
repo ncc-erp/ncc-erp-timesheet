@@ -12,13 +12,7 @@
           <mat-form-field appearance="outline">
             <mat-label>Projects</mat-label>
             <mat-select name="selectedProjectId" [(value)]="selectedProjectId" (selectionChange)="getAllRequest()">
-              <mat-form-field class="p-2 input-wrapper" style="
-                      position: sticky;
-                      top: 0;
-                      z-index: 2;
-                      background-color: white;
-                      padding-left: 15px;
-                    ">
+              <mat-form-field class="p-2 input-wrapper">
                 <input type="text" matInput name="projectNameSearchInput" class="search-input" placeholder="Search"
                   [(ngModel)]="this.projectSearch" (keydown)="$event.stopPropagation()"
                   [ngModelOptions]="{standalone: true}" (ngModelChange)="handleSearchProject()" />
@@ -36,13 +30,7 @@
           <mat-form-field appearance="outline">
             <mat-label>Branch</mat-label>
             <mat-select name="selectedBranchId" [(value)]="branchId" (selectionChange)="getAllRequest()">
-              <mat-form-field class="p-2 input-wrapper" style="
-                      position: sticky;
-                      top: 0;
-                      z-index: 2;
-                      background-color: white;
-                      padding-left: 15px;
-                    ">
+              <mat-form-field class="p-2 input-wrapper">
                 <input type="text" matInput name="branchNameSearchInput" class="search-input" placeholder="Search"
                   [(ngModel)]="this.branchSearch" (keydown)="$event.stopPropagation()"
                   [ngModelOptions]="{standalone: true}" (ngModelChange)="handleSearchBranch()" />
