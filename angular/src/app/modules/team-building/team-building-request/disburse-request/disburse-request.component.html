@@ -6,7 +6,7 @@
   <div>
     <div style="display: flex; justify-content: space-between;">
       <p mat-dialog-title>Requester : {{this.disburseTeambuildingRequestInfoDto.requesterName}}</p>
-      <p mat-dialog-title>Total Request Money : {{this.disburseTeambuildingRequestInfoDto.requestMoney | number : "1.0" : "en-US"}}&nbsp;VNĐ</p>
+      <p mat-dialog-title>Total Request Money : {{this.disburseTeambuildingRequestInfoDto.requestMoney | number : "1.0" : "en-US"}} VNĐ</p>
     </div>
     <p mat-dialog-title>Email : {{this.disburseTeambuildingRequestInfoDto.requesterEmail}}</p>
   </div>
@@ -43,7 +43,7 @@
                     <span>Invoice #{{i + 1}}</span>
                   </td>
                   <td>
-                    <span>{{invoice.invoiceMoney | number : "1.0" : "en-US"}}&nbsp;VNĐ</span>
+                    <span>{{invoice.invoiceMoney | number : "1.0" : "en-US"}} VNĐ</span>
                   </td>
                   <td>
                     <a target="_blank" href="{{invoice.invoiceResourceUrl}}">{{invoice.invoiceResourceName}}</a>
@@ -52,14 +52,15 @@
                     <mat-checkbox [name]="'invoiceVAT' + (i + 1)" [(ngModel)]="invoice.hasVAT"  [ngModelOptions]="{standalone: true}" (ngModelChange)="updateInvoiveStatusInDisburseInvoiceList(i, invoice.hasVAT)"></mat-checkbox>
                   </td>
                   <td>
-                    <p>{{calculateInvoiceAmountAfterTaxing(invoice.invoiceMoney, invoice.hasVAT) | number : "1.0" : "en-US"}}&nbsp;VNĐ</p>
+                    <p>{{calculateInvoiceAmountAfterTaxing(invoice.invoiceMoney, invoice.hasVAT) | number : "1.0" : "en-US"}} VNĐ</p>
                   </td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <td colspan="5">
-                    <p style="float: right;"><b>{{ "Suggest Disburse Money:" | localize }}</b> {{calculateTotalSuggestedDisburseMoney() | number : "1.0" : "en-US"}}&nbsp;VNĐ</p>
+                    <p style="float: right;"><b>{{ "Total Invoice Money:" | localize }}</b> {{calculateTotalSuggestedDisburseMoney() | number : "1.0" : "en-US"}} VNĐ</p>
+                    <b style="float: left; color: red; margin-top: 35px;" *ngIf="this.disburseTeambuildingRequestInfoDto.requestMoney < calculateTotalSuggestedDisburseMoney()">*The total requested amount is less than the total invoice amount, only {{this.disburseTeambuildingRequestInfoDto.requestMoney | number : "1.0" : "en-US"}} VNĐ can be disbursed</b>
                   </td>
                 </tr>
               </tfoot>

@@ -8,26 +8,27 @@
     <mat-tab-group>
       <mat-tab label="General">
         <div class="row">
-          <div class="format-col form-group row required"
-            style="display: flex; align-items: center; margin-bottom: 0px; padding-left: 16px;">
-      
-            <label class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-form-label" style="width: 77px">
+          <div class="format-col form-group row">
+            <div class="required col-md-6" style="display: flex; align-items: center; margin-bottom: 0px; padding-left: 16px;">
+              <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-form-label" style="width: 77px">
               {{ "Note:" | localize }}
             </label>
-            <mat-form-field class="edit-form row-item-rest select-form col-xl-4 col-lg-4 col-md-4 col-xs-4"
+            <mat-form-field class="edit-form row-item-rest select-form col-xl-9 col-lg-9 col-md-9 col-xs-9"
               appearance="outline">
               <input type="text" matInput="matInput" formControlName="note" name="noteInput" />
             </mat-form-field>
-      
-            <label class="col-xl-2 col-lg-2 col-md-2 col-sm-2 col-form-label" style="width: 142px; margin-left: 112px;">
+          </div>
+          <div class="col-md-6" style="display: flex; align-items: center; margin-bottom: 0px; padding-left: 16px;">
+            <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-form-label" style="width: 142px;">
               {{ "Invoice amount:" | localize }}
             </label>
-            <mat-form-field class="col-xl-4 col-lg-4 col-md-4 col-xs-4" appearance="outline" style="padding-right: 0px;">
+            <mat-form-field class="col-xl-9 col-lg-9 col-md-9 col-xs-9" appearance="outline" style="padding-right: 0px;">
               <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ'}" matInput="matInput"
                 formControlName="totalInvoiceAmount" name="totalInvoiceAmountInput" (change)="onInputInvoiceAmountChange()" />
             </mat-form-field>
           </div>
         </div>
+      </div>
         <div class="row">
           <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
             <div>
@@ -98,7 +99,24 @@
             </button>
           </div>
         </div>
-        <div *ngIf="requestInfo.length == 0">No data</div>
+        <div *ngIf="requestInfo.length == 0">
+          <div class="table-responsive d-flex">
+          <div class="fixedHeader" style="max-height: calc(100vh - 450px); text-align: center;" [ngClass]="isShowBtnAddUser ? 'table-team-selected' : 'full-width'">
+          No Data
+          </div>
+          <!-- Add Users -->
+          <div *ngIf="isShowBtnAddUser" class="table-team-select">
+          <mat-expansion-panel [expanded]="true">
+            <app-add-user-other-project *ngIf="isShowBtnAddUser"
+            [isCreateRequest]="true"
+            [requestAdding]="requestAdding"
+            (onAddUsers)="getSelectedUserOtherProject($event)"
+            (onCancel)="closePopup($event)">
+            </app-add-user-other-project>
+          </mat-expansion-panel>
+          </div>
+        </div>
+      </div>
         <div *ngIf="requestInfo.length > 0">
           <div class="table-responsive d-flex">
             <div class="fixedHeader" style="max-height: calc(100vh - 450px);" [ngClass]="isShowBtnAddUser ? 'table-team-selected' : 'full-width'">
@@ -295,8 +313,7 @@
       <button class="btn btn-default" mat-raised-button mat-dialog-close name="cancelButton">
         {{ l("Cancel") }}
       </button>
-      <button type="button" mat-raised-button color="primary" (click)="onSaveAndClose()" [disabled]="
-          saving || selectedCheckboxCount === 0 || !invoiceFormGroup.valid" cdkFocusInitial name="submitButton">
+      <button type="button" mat-raised-button color="primary" (click)="onSaveAndClose()" cdkFocusInitial name="submitButton">
         {{ l("Submit") }}
       </button>
     </div>

@@ -146,25 +146,14 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                 throw new UserFriendlyException("Please provide the invoice data!");
             }
 
-            var billPercentage = SettingManager.GetSettingValueForApplication(AppSettingNames.BillPercentage);
-
-            var actualRequestMoneyAfterTax = WorkScope.GetAll<TeamBuildingRequestHistoryFile>()
-                .Where(s => s.TeamBuildingRequestHistoryId == input.RequestId)
-                .Sum(s => s.IsVAT == true ? s.InvoiceAmount : s.InvoiceAmount * float.Parse(billPercentage) / 100);
-
-            var remainingMoney = WorkScope.GetAll<TeamBuildingRequestHistory>()
-                .Where(s => s.RequesterId == input.RequestId
-                         && s.RemainingMoneyStatus == RemainingMoneyStatus.Remaining 
-                         && s.RemainingMoney.HasValue)
-                .Select(s => s.RemainingMoney)
-                .FirstOrDefault();
-
-            var maximumDisburseMoney = remainingMoney.HasValue ? actualRequestMoneyAfterTax + remainingMoney : actualRequestMoneyAfterTax;
-
             var listRequestByRequesterId = WorkScope.GetAll<TeamBuildingRequestHistory>()
                 .Where(s => s.RequesterId == input.RequesterId).ToList();
 
             var listRequestByRequesterIdWithoutLast = listRequestByRequesterId.Take(listRequestByRequesterId.Count() - 1).ToList();
+
+            var sumAmount = WorkScope.GetAll<TeamBuildingRequestHistoryFile>()
+                .Where(s => s.TeamBuildingRequestHistoryId == input.RequestId)
+                .Sum(s => s.InvoiceAmount);
 
             if (request.Status == TeamBuildingRequestStatus.Cancelled)
             {
@@ -178,15 +167,15 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
             {
                 throw new UserFriendlyException(string.Format("This request {0} has been disbursed", input.RequestId));
             }
-            else if (maximumDisburseMoney < input.DisburseMoney)
+            else if (request.RequestMoney < input.DisburseMoney)
             {
-                throw new UserFriendlyException(string.Format("Disbursement money cannot be more than request money after taxing"));
+                throw new UserFriendlyException(string.Format("Disbursement money cannot be more than request money"));
             }
             else
             {
-                // RequestMoney = DisburseMoney
-                if (maximumDisburseMoney == input.DisburseMoney)
-                {
+                // RequestMoney = sumAmount 
+                if (request.RequestMoney == sumAmount) 
+                { 
                     if (listRequestByRequesterIdWithoutLast.IsNullOrEmpty())
                     {
                         request.DisbursedMoney = input.DisburseMoney;
@@ -214,13 +203,13 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                         await WorkScope.UpdateAsync(item);
                     }
                 }
-                // RequestMoney > DisburseMoney
-                else if (maximumDisburseMoney > input.DisburseMoney)
+                // RequestMoney > sumAmount
+                else if (request.RequestMoney > sumAmount)
                 {
                     if (listRequestByRequesterIdWithoutLast.IsNullOrEmpty())
                     {
                         request.DisbursedMoney = input.DisburseMoney;
-                        request.RemainingMoney = maximumDisburseMoney - input.DisburseMoney;
+                        request.RemainingMoney = request.RequestMoney - sumAmount;
                         request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
                         request.Status = TeamBuildingRequestStatus.Done;
                     }
@@ -230,19 +219,47 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                         if (item.RemainingMoneyStatus == RemainingMoneyStatus.Done)
                         {
                             request.DisbursedMoney = input.DisburseMoney;
-                            request.RemainingMoney = maximumDisburseMoney - input.DisburseMoney;
+                            request.RemainingMoney = request.RequestMoney - sumAmount;
                             request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
                             request.Status = TeamBuildingRequestStatus.Done;
                         }// co RemainingMoney
                         else if (item.RemainingMoneyStatus == RemainingMoneyStatus.Remaining)
                         {
                             request.DisbursedMoney = input.DisburseMoney;
-                            request.RemainingMoney = maximumDisburseMoney - input.DisburseMoney;
+                            request.RemainingMoney = request.RequestMoney - sumAmount;
                             item.RemainingMoneyStatus = RemainingMoneyStatus.Done;
                             request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
                             request.Status = TeamBuildingRequestStatus.Done;
                         }
 
+                        await WorkScope.UpdateAsync(item);
+                    }
+                }
+                // RequestMoney < sumAmount
+                else if (request.RequestMoney < sumAmount)
+                {
+                    if (listRequestByRequesterIdWithoutLast.IsNullOrEmpty())
+                    {
+                        request.DisbursedMoney = input.DisburseMoney;
+                        request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
+                        request.Status = TeamBuildingRequestStatus.Done;
+                    }
+                    foreach (var item in listRequestByRequesterIdWithoutLast)
+                    {
+                        // Khong co RemainingMoney
+                        if (item.RemainingMoneyStatus == RemainingMoneyStatus.Done)
+                        {
+                            request.DisbursedMoney = input.DisburseMoney;
+                            request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
+                            request.Status = TeamBuildingRequestStatus.Done;
+                        }// co RemainingMoney
+                        else if (item.RemainingMoneyStatus == RemainingMoneyStatus.Remaining)
+                        {
+                            request.DisbursedMoney = input.DisburseMoney;
+                            item.RemainingMoneyStatus = RemainingMoneyStatus.Done;
+                            request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
+                            request.Status = TeamBuildingRequestStatus.Done;
+                        }
                         await WorkScope.UpdateAsync(item);
                     }
                 }

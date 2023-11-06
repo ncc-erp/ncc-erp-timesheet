@@ -14,14 +14,14 @@ import {
 import { CreateEditRequestComponentBase } from "../../CreateEditRequest/CreateEditRequestComponentBase";
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 
-export function invoiceFormCustomValidator() : ValidatorFn {
-  return (form : FormGroup) : ValidationErrors | null => {
-    const invoiceFileName : any = form.get("invoiceFileName").value;
-    const invoiceUrl : any = form.get("invoiceUrl").value;
-    if(invoiceFileName || invoiceUrl) {
+export function invoiceFormCustomValidator(): ValidatorFn {
+  return (form: FormGroup): ValidationErrors | null => {
+    const invoiceFileName: any = form.get("invoiceFileName").value;
+    const invoiceUrl: any = form.get("invoiceUrl").value;
+    if (invoiceFileName || invoiceUrl) {
       return null;
     } else {
-      return { fileAndUrlIsAllNull : true };
+      return { fileAndUrlIsAllNull: true };
     }
   }
 }
@@ -33,14 +33,14 @@ export function invoiceFormCustomValidator() : ValidatorFn {
 })
 export class PmSendRequestComponent extends CreateEditRequestComponentBase implements OnInit {
 
-  public listSelectedItemUserOtherProjectId: number [] = [];
+  public listSelectedItemUserOtherProjectId: number[] = [];
   public invoiceFormGroup: FormGroup = new FormGroup({});
 
   constructor(
     injector: Injector,
     public teamBuildingPMService: TeamBuildingPMService,
     public dialogRef: MatDialogRef<PmSendRequestComponent>,
-    private formBuilder : FormBuilder,
+    private formBuilder: FormBuilder,
   ) {
     super(injector, teamBuildingPMService);
   }
@@ -58,20 +58,20 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
 
   initInvoiceFormArray() {
     this.invoiceFormGroup = this.formBuilder.group({
-      note : new FormControl(null, Validators.required),
-      totalInvoiceAmount : new FormControl({value : "", disabled : true}),
-      invoiceFormArray : this.formBuilder.array([this.createInvoiceForm()])
+      note: new FormControl(null, Validators.required),
+      totalInvoiceAmount: new FormControl({ value: "", disabled: true }),
+      invoiceFormArray: this.formBuilder.array([this.createInvoiceForm()])
     });
   }
 
   createInvoiceForm() {
     return this.formBuilder.group({
-      invoiceFileName : new FormControl({value : null, disabled: false}),
-      invoiceFile : new FormControl(null),
-      isChoosingFile : new FormControl(true),
-      invoiceUrl : new FormControl({value : null, disabled: true}),
-      amount : new FormControl(0, Validators.min(1000)),
-      isVat : new FormControl(false)
+      invoiceFileName: new FormControl({ value: null, disabled: false }),
+      invoiceFile: new FormControl(null),
+      isChoosingFile: new FormControl(true),
+      invoiceUrl: new FormControl({ value: null, disabled: true }),
+      amount: new FormControl(0, Validators.min(1000)),
+      isVat: new FormControl(false)
     }, {
       validators: [invoiceFormCustomValidator()]
     });
@@ -82,13 +82,13 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
     formArray.push(this.createInvoiceForm());
   }
 
-  deleteInvoiceForm(index : number) {
+  deleteInvoiceForm(index: number) {
     const formArray = this.invoiceFormGroup.get("invoiceFormArray") as FormArray;
     formArray.removeAt(index);
     this.calculateTotalInvoiceAmount();
   }
 
-  switchInvoiceTypeResource(index : number) {
+  switchInvoiceTypeResource(index: number) {
     const formArray = this.invoiceFormGroup.get("invoiceFormArray") as FormArray;
     const formGroup = formArray.at(index) as FormGroup;
     const isChoosingFileValue = formGroup.controls["isChoosingFile"].value;
@@ -107,7 +107,7 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
   onFileChange(event: any, index: number) {
     const selectedFile = event.target.files[0]; // Get the selected file
     const formArray = this.invoiceFormGroup.get("invoiceFormArray") as FormArray;
-    
+
     if (formArray.at(index)) {
       const invoiceForm = formArray.at(index) as FormGroup;
       invoiceForm.controls["invoiceFile"].setValue(selectedFile); // Update the FormControl's value with the selected file
@@ -118,8 +118,8 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
     let totalInvoiceAmount = this.invoiceFormGroup.get("totalInvoiceAmount") as FormControl;
     totalInvoiceAmount.setValue("0");
     const formArray = this.invoiceFormGroup.get("invoiceFormArray") as FormArray;
-    for(let control of formArray.controls) {
-      if(control instanceof FormGroup) {
+    for (let control of formArray.controls) {
+      if (control instanceof FormGroup) {
         const amountValue = control.controls["amount"].value as number;
         const totalMoney = parseFloat(totalInvoiceAmount.value) + amountValue;
         totalInvoiceAmount.setValue(totalMoney.toString());
@@ -216,62 +216,72 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
   }
 
   onSaveAndClose() {
+    if (this.selectedCheckboxCount === 0) {
+      abp.notify.error("Need to select at least one record");
+    }
+    else if (!this.invoiceFormGroup.controls["note"].valid) {
+      abp.notify.error("Need to enter note");
+    }
+    else if (!this.invoiceFormGroup.controls["invoiceFormArray"].valid) {
+      abp.notify.error("Need to enter amount and select file or url");
+    }
+    else {
+      this.saving = true;
+      let listIds = this.listSelectedItem.filter((x) => x.selected).map((x) => x.id);
 
-    this.saving = true;
-    let listIds = this.listSelectedItem.filter((x) => x.selected).map((x) => x.id);
+      // Get Invoice Request from FormArray, then push to InvoiceRequestDto
+      let invoiceRequestDtoList: InvoiceRequestDto[] = [];
+      let fileArray: Map<number, File> = new Map();
 
-    // Get Invoice Request from FormArray, then push to InvoiceRequestDto
-    let invoiceRequestDtoList : InvoiceRequestDto[] = [];
-    let fileArray : Map<number, File> = new Map();
+      const formArray = this.invoiceFormGroup.get("invoiceFormArray") as FormArray;
+      let count = 0;
+      for (let invoiceForm of formArray.controls) {
+        if (invoiceForm instanceof FormGroup) {
 
-    const formArray = this.invoiceFormGroup.get("invoiceFormArray") as FormArray;
-    let count = 0;
-    for(let invoiceForm of formArray.controls) {
-      if(invoiceForm instanceof FormGroup) {
+          let invoiceRequestDto: InvoiceRequestDto = new InvoiceRequestDto();
+          const isChoosingFile = invoiceForm.controls["isChoosingFile"].value;
 
-        let invoiceRequestDto : InvoiceRequestDto = new InvoiceRequestDto();
-        const isChoosingFile = invoiceForm.controls["isChoosingFile"].value;
+          if (isChoosingFile) {
+            fileArray.set(count, invoiceForm.controls["invoiceFile"].value);
+            invoiceRequestDto.invoiceImageName = count.toString() + "." + invoiceForm.controls["invoiceFileName"].value.split(".")[1];
+          }
 
-        if(isChoosingFile) {
-          fileArray.set(count, invoiceForm.controls["invoiceFile"].value);
-          invoiceRequestDto.invoiceImageName = count.toString() + "." + invoiceForm.controls["invoiceFileName"].value.split(".")[1];
+          invoiceRequestDto.invoiceUrl = invoiceForm.controls["invoiceUrl"].value;
+          invoiceRequestDto.amount = invoiceForm.controls["amount"].value;
+          invoiceRequestDto.hasVat = invoiceForm.controls["isVat"].value;
+          invoiceRequestDtoList.push(invoiceRequestDto);
+
+          count++;
+
         }
-
-        invoiceRequestDto.invoiceUrl = invoiceForm.controls["invoiceUrl"].value;
-        invoiceRequestDto.amount = invoiceForm.controls["amount"].value;
-        invoiceRequestDto.hasVat = invoiceForm.controls["isVat"].value;
-        invoiceRequestDtoList.push(invoiceRequestDto);
-
-        count++;
-
       }
-    } 
 
-    const noteControl = this.invoiceFormGroup.get("note") as FormControl;
-    const totalInvoiceAmount = this.invoiceFormGroup.get("totalInvoiceAmount") as FormControl;
+      const noteControl = this.invoiceFormGroup.get("note") as FormControl;
+      const totalInvoiceAmount = this.invoiceFormGroup.get("totalInvoiceAmount") as FormControl;
 
-    const request: PMRequestDto = {
-      titleRequest: "",
-      listDetailId: listIds,
-      
-      note: noteControl.value,
-      invoiceAmount: totalInvoiceAmount.value,
+      const request: PMRequestDto = {
+        titleRequest: "",
+        listDetailId: listIds,
 
-      listInvoiceRequestDto : invoiceRequestDtoList,
-      
-    };
-    this.requestAdding = [];
+        note: noteControl.value,
+        invoiceAmount: totalInvoiceAmount.value,
 
-    this.teamBuildingPMService.addDataToTeamBuildingDetail(request, fileArray).subscribe(
-      (response) => {
-        if (response) {
-          abp.notify.success("PM send request successful");
-          this.saving = false;
-          this.dialogRef.close(true);
-        }
-      },
-      () => (this.saving = false)
-    );
+        listInvoiceRequestDto: invoiceRequestDtoList,
+
+      };
+      this.requestAdding = [];
+
+      this.teamBuildingPMService.addDataToTeamBuildingDetail(request, fileArray).subscribe(
+        (response) => {
+          if (response) {
+            abp.notify.success("PM send request successful");
+            this.saving = false;
+            this.dialogRef.close(true);
+          }
+        },
+        () => (this.saving = false)
+      );
+    }
   }
 
   onInputInvoiceAmountChange(): void {
@@ -279,20 +289,21 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
     const numSelections = Math.floor(parseFloat(totalInvoiceAmount.value));
     const listIds = this.getListSuggestSelectedItemIds(this.requestInfo.filter(s => s.status == 0), numSelections);
 
-    for(let i = 0; i < this.requestInfo.length; i++) {
-      this.handleSelectRequestInfoItem(i, {checked: listIds.indexOf(this.requestInfo[i].id) != -1} );
+    for (let i = 0; i < this.requestInfo.length; i++) {
+      this.handleSelectRequestInfoItem(i, { checked: listIds.indexOf(this.requestInfo[i].id) != -1 });
     }
   }
 
   getListSuggestSelectedItemIds(objectList: RequestDto[], totalMoney): number[] {
-    // Sắp xếp danh sách object theo tiền (money) giảm dần
-    const sortedList = objectList.sort((a, b) => b.money - a.money);
+    // Sắp xếp danh sách object theo tiền (money) tăng dần
+    const sortedList = objectList.sort((a, b) => a.money - b.money);
     const selectedItems = [];
-    let currentTotal = 0;
+    const remainMoney = this.lastRemainMoney != null ? this.lastRemainMoney : 0;
+    let currentTotal = remainMoney;
 
     for (let i = 0; i < sortedList.length; i++) {
       const obj = sortedList[i];
-      if (currentTotal + obj.money <= totalMoney) {
+      if (currentTotal <= totalMoney) {
         selectedItems.push(obj);
         currentTotal += obj.money;
       }
@@ -300,8 +311,8 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
     return selectedItems.map(s => s.id);
   }
 
-  getSelectedUserOtherProject(value: SelectUserOtherProjectDto[]){
-    this.listSelectedItemUserOtherProjectId = value.map( item => item.id);
+  getSelectedUserOtherProject(value: SelectUserOtherProjectDto[]) {
+    this.listSelectedItemUserOtherProjectId = value.map(item => item.id);
     this.getRequestMoneyInfoUser();
   }
 
