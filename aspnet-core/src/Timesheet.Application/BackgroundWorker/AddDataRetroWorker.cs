@@ -58,9 +58,31 @@ namespace Timesheet.BackgroundWorker
 
         private void CreateNewRetro(DateTime now)
         {
+            string createNewRetroEnableWorker = SettingManager.GetSettingValueForApplication(AppSettingNames.CreateNewRetroEnableWorker);
+            string createNewRetroAtHour = SettingManager.GetSettingValueForApplication(AppSettingNames.CreateNewRetroAtHour);
+            string createNewRetroOnDate = SettingManager.GetSettingValueForApplication(AppSettingNames.CreateNewRetroOnDates);
+           
+            if(createNewRetroEnableWorker != "true")
+            {
+                Logger.Error("CreateNewRetro() stop: createNewRetroEnableWorker = " + createNewRetroEnableWorker);
+                return;
+            }
+
+            DateTime.TryParse(createNewRetroAtHour, out DateTime dataAt);
+            if(dataAt.Hour != now.Hour || dataAt.Minute != now.Minute)
+            {
+                Logger.Error("CreateNewRetro() stop: createNewRetroAtHour = " + createNewRetroAtHour);
+                return;
+            }
+
+            int.TryParse(createNewRetroOnDate, out int date);
+            if (date != now.Day)
+            {
+                Logger.Error("CreateNewRetro() stop: createNewRetroOnDate = " + createNewRetroOnDate);
+                return;
+            }
+
             DateTime time = now.AddMonths(-1);
-            string getDataAtHour = SettingManager.GetSettingValueForApplication(AppSettingNames.CreateNewRetroAtHour);
-            string getDataOnDate = SettingManager.GetSettingValueForApplication(AppSettingNames.CreateNewRetroOnDates);
             DateTime startDate = new DateTime(time.Year, time.Month, 1);
             DateTime endDate = startDate.AddMonths(1).AddDays(-1);
             DateTime deadline = startDate.AddMonths(1).AddDays(-1);
@@ -69,40 +91,53 @@ namespace Timesheet.BackgroundWorker
             var listRetroName = _workScope.GetAll<Retro>()
                             .Select(s => s.Name)
                             .ToList();
-            if (DateTime.TryParse(getDataAtHour, out DateTime dataAt))
+            if (!listRetroName.Contains(name))
             {
-                if (dataAt.Hour == now.Hour && dataAt.Minute == now.Minute 
-                    && int.TryParse(getDataOnDate, out int date) 
-                    && date == now.Day 
-                    && !listRetroName.Contains(name))
+                var data = new RetroCreateDto
                 {
-                    var data = new RetroCreateDto
-                    {
-                        Name = name,
-                        StartDate = startDate,
-                        EndDate = endDate,
-                        Deadline = deadline,
-                        Status = status
-                    };
-                    Logger.Info("CreateNewRetro.DoWork() getDataAt= " + getDataAtHour + ". now.Date= " + now.Date);
-                    var newRetro = _retroAppService.Create(data);
-                }
-                else
-                {
-                    Logger.Info($"CreateNewRetro() now.Day ({now.Day}) != GenerateDataOnDate => stop");
-                }
+                    Name = name,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Deadline = deadline,
+                    Status = status
+                };
+                Logger.Info("CreateNewRetro.DoWork() createNewRetroAt= " + createNewRetroAtHour + ". now.Date= " + now.Date);
+                var newRetro = _retroAppService.Create(data);
             }
             else
             {
-                Logger.Error("Invalid format for getDataAtHour");
+                Logger.Error("Retro has been created");
+                return;
             }
         }
 
         private void GenerateRetroResult(DateTime now)
         {
             DateTime time = now.AddMonths(-1);
+            string generateRetroResultEnableWorker = SettingManager.GetSettingValueForApplication(AppSettingNames.GenerateRetroResultEnableWorker);
             string getDataAtHour = SettingManager.GetSettingValueForApplication(AppSettingNames.GenerateRetroResultAtHour);
             string getDataOnDate = SettingManager.GetSettingValueForApplication(AppSettingNames.GenerateRetroResultOnDates);
+
+            if (generateRetroResultEnableWorker != "true")
+            {
+                Logger.Error("GenerateRetroResult() stop: generateRetroResultEnableWorker = " + generateRetroResultEnableWorker);
+                return;
+            }
+
+            DateTime.TryParse(getDataAtHour, out DateTime dataAt);
+            if (dataAt.Hour != now.Hour || dataAt.Minute != now.Minute)
+            {
+                Logger.Error("GenerateRetroResult() stop: generateRetroResultAtHour = " + getDataAtHour);
+                return;
+            }
+
+            int.TryParse(getDataOnDate, out int date);
+            if (date != now.Day)
+            {
+                Logger.Error("GenerateRetroResult() stop: generateRetroResultOnDate = " + getDataOnDate);
+                return;
+            }
+
             long lastRetroId = _workScope.GetAll<Retro>()
                         .Where(s => s.Status == RetroStatus.Public)
                         .OrderByDescending(s => s.Id)
@@ -110,47 +145,21 @@ namespace Timesheet.BackgroundWorker
             var listRetroResultInRetroId = _workScope.GetAll<RetroResult>()
                                             .Where(s => s.RetroId == lastRetroId)
                                             .ToList();
-            if (lastRetroId != -1)
+            if (listRetroResultInRetroId.Count > 0)
             {
-                if(listRetroResultInRetroId.Count > 0) {
-                    Logger.Info("retro result has been created");
-                    return;
-                }
-                else
-                {
-                    if (DateTime.TryParse(getDataAtHour, out DateTime dataAt))
-                    { 
-                        if (dataAt.Hour == now.Hour 
-                                && dataAt.Minute == now.Minute 
-                                && int.TryParse(getDataOnDate, out int date) 
-                                && date == now.Day)
-                        {
-                            var data = new InputGenerateDataRetroResultDto
-                            {
-                                Year = now.Year,
-                                Month = time.Month,
-                                RetroId = lastRetroId
-                            };
-                            Logger.Info("GenerateRetroResult.DoWork() getDataAt= " + ". now.Date= " + now.Date);
-                            _retroResultAppService.GenerateDataRetroResult(data);
-                        }
-                        else
-                        {
-                            Logger.Info("date or hour is incorrect");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        Logger.Error("Invalid format for getDataAtHour");
-                        return;
-                    }
-                }
+                Logger.Info("retro result has been created");
+                return;
             }
             else
             {
-                Logger.Info("lastRetroId inValid");
-                return;
+                var data = new InputGenerateDataRetroResultDto
+                {
+                    Year = now.Year,
+                    Month = time.Month,
+                    RetroId = lastRetroId
+                };
+                Logger.Info("GenerateRetroResult.DoWork() getDataAt= " + getDataAtHour + ". now.Date= " + now.Date);
+                _retroResultAppService.GenerateDataRetroResult(data);
             }
         }
     }

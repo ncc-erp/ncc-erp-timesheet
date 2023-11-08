@@ -1767,18 +1767,18 @@
                       <mat-form-field>
                     <div>
                       <div><span style="color: red;">*Retro creation time must be earlier than generate retro result </span></div>
-                      <div><span class="special-label">Add data at hour *</span>
+                      <div><span class="special-label">Create new retro at hour *</span>
                         <mat-icon class="special-icon"
                           matTooltip="ex: 14 mean at 14h o'clock">help</mat-icon></div>
                     </div>
-                      <input type="text" matInput name="addDataAtHour" [(ngModel)]="CreateNewRetroConfig.createNewRetroAtHour"
+                      <input type="text" matInput name="createNewRetroAtHour" [(ngModel)]="CreateNewRetroConfig.createNewRetroAtHour"
                         required [disabled]="!isEditCreateNewRetroConfig" />
                       </mat-form-field>
                     
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Add data on dates *</span> <mat-icon class="special-icon"
+                      <span class="special-label">Create new retro on date *</span> <mat-icon class="special-icon"
                         matTooltip="ex: 10,13,15 mean: 10th, 13th, 15th">help</mat-icon>
                       <input type="text" matInput name="createNewRetroOnDates"
                         [(ngModel)]="CreateNewRetroConfig.createNewRetroOnDates" required
@@ -1790,33 +1790,33 @@
             </div>
           </mat-expansion-panel>
           <!--Generate Retro Result Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_GENERATERETRORESULT_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowRetroResultSetting">
-            <mat-expansion-panel-header (click)="isShowRetroResultSetting =!isShowRetroResultSetting" class="panel-header">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_GENERATERETRORESULT_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowGenerateRetroResultSetting">
+            <mat-expansion-panel-header (click)="isShowGenerateRetroResultSetting =!isShowGenerateRetroResultSetting" class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Generate Data Retro Result Setting"}}</p>
-                <div *ngIf="isShowRetroResultSetting" class="edit-save">
-                  <button *ngIf="!isEditRetroResultConfig && permission.isGranted(EDIT_GENERATERETRORESULT_CONFIG)" large mat-raised-button color="primary"
-                    (click)="editRetroResultConfig();$event.stopPropagation()">
+                <div *ngIf="isShowGenerateRetroResultSetting" class="edit-save">
+                  <button *ngIf="!isEditGenerateRetroResult && permission.isGranted(EDIT_GENERATERETRORESULT_CONFIG)" large mat-raised-button color="primary"
+                    (click)="editGenerateRetroResultConfig();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
                   </button>
-                  <button *ngIf="isEditRetroResultConfig" large mat-raised-button color="primary"
-                    (click)="saveRetroResultConfig();$event.stopPropagation()">
+                  <button *ngIf="isEditGenerateRetroResult" large mat-raised-button color="primary"
+                    (click)="saveGenerateRetroResultConfig();$event.stopPropagation()">
                     <mat-icon>save</mat-icon>Save
                   </button>
-                  <button *ngIf="isEditRetroResultConfig" large mat-raised-button color="primary"
-                    (click)="refreshRetroResultConfig();$event.stopPropagation()">
+                  <button *ngIf="isEditGenerateRetroResult" large mat-raised-button color="primary"
+                    (click)="refreshGenerateRetroResultConfig();$event.stopPropagation()">
                     <mat-icon>cancel</mat-icon>Cancel
                   </button>
                 </div>
               </mat-panel-title>
-              <ul class="header-dropdown m-r--5" *ngIf="isShowRetroResultSetting">
+              <ul class="header-dropdown m-r--5" *ngIf="isShowGenerateRetroResultSetting">
                 <li>
                   <button mat-icon-button [matMenuTriggerFor]="headerMenu3" (click)="$event.stopPropagation()"
                     class="header-dropdown-mat-icon-button">
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #headerMenu3="matMenu">
-                    <button mat-menu-item (click)="refreshRetroResultConfig();$event.stopPropagation()">
+                    <button mat-menu-item (click)="refreshGenerateRetroResultConfig();$event.stopPropagation()">
                       <mat-icon>refresh</mat-icon>
                       <span>{{ "Refresh" | localize }}</span>
                     </button>
@@ -1829,24 +1829,24 @@
                 <div class="row">
                   <div class="col-md-12">
                     <mat-checkbox style="padding: 0;" class="autoSubmit"
-                      [checked]="RetroResultConfig.generateRetroResultEnableWorker == 'true'?true:false" name="createNewRetroEnableWorker"
-                      (change)="onRetroResultEnableWorker($event)" [disabled]="!isEditRetroResultConfig">
+                      [checked]="GenerateRetroResultConfig.generateRetroResultEnableWorker == 'true'?true:false" name="createNewRetroEnableWorker"
+                      (change)="onRetroResultEnableWorker($event)" [disabled]="!isEditGenerateRetroResult">
                       Enable worker</mat-checkbox>
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Add data at hour *</span> <mat-icon class="special-icon"
+                      <span class="special-label">Generate Data Retro Result at hour *</span> <mat-icon class="special-icon"
                         matTooltip="ex: 14 mean at 14h o'clock">help</mat-icon>
-                      <input type="text" matInput name="generateRetroResultAtHour" [(ngModel)]="RetroResultConfig.generateRetroResultAtHour"
-                        required [disabled]="!isEditRetroResultConfig" />
+                      <input type="text" matInput name="generateRetroResultAtHour" [(ngModel)]="GenerateRetroResultConfig.generateRetroResultAtHour"
+                        required [disabled]="!isEditGenerateRetroResult" />
                     </mat-form-field>
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Add data on dates *</span> <mat-icon class="special-icon"
+                      <span class="special-label">Generate Data Retro Result on date *</span> <mat-icon class="special-icon"
                         matTooltip="ex: 10,13,15 mean: 10th, 13th, 15th">help</mat-icon>
-                      <input type="text" matInput name="generateRetroResultOnDates" [(ngModel)]="RetroResultConfig.generateRetroResultOnDates"
-                        required [disabled]="!isEditRetroResultConfig" />
+                      <input type="text" matInput name="generateRetroResultOnDates" [(ngModel)]="GenerateRetroResultConfig.generateRetroResultOnDates"
+                        required [disabled]="!isEditGenerateRetroResult" />
                     </mat-form-field>
                   </div>
                 </div>
