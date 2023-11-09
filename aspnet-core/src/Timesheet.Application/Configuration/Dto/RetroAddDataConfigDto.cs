@@ -8,14 +8,14 @@ namespace Timesheet.Configuration.Dto
     {
         public string CreateNewRetroEnableWorker { get; set; }
         public string CreateNewRetroAtHour { get; set; }
-        public string CreateNewRetroOnDates { get; set; }
+        public string CreateNewRetroOnDate { get; set; }
 
     }
     public class GenerateRetroResultConfigDto
     {
         public string GenerateRetroResultEnableWorker { get; set; }
         public string GenerateRetroResultAtHour { get; set; }
-        public string GenerateRetroResultOnDates { get; set; }
+        public string GenerateRetroResultOnDate { get; set; }
 
     }
 }

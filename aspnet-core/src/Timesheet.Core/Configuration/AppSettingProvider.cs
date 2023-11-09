@@ -121,10 +121,10 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.SendMessageRequestPendingTeamBuildingToHRToChannels, "123456789", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.CreateNewRetroEnableWorker,"false",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.CreateNewRetroAtHour,"1", scopes: SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.CreateNewRetroOnDates,"1", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.CreateNewRetroOnDate,"1", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.GenerateRetroResultEnableWorker,"false",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.GenerateRetroResultAtHour,"2", scopes: SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.GenerateRetroResultOnDates,"1", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.GenerateRetroResultOnDate,"1", scopes: SettingScopes.Application|SettingScopes.Tenant),
 
                 new SettingDefinition(AppSettingNames.SecretRegisterCode, Configuration["DefaultSettings:SecretRegisterCode"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),

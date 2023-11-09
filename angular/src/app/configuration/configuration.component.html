@@ -1780,8 +1780,8 @@
                     <mat-form-field>
                       <span class="special-label">Create new retro on date *</span> <mat-icon class="special-icon"
                         matTooltip="ex: 10,13,15 mean: 10th, 13th, 15th">help</mat-icon>
-                      <input type="text" matInput name="createNewRetroOnDates"
-                        [(ngModel)]="CreateNewRetroConfig.createNewRetroOnDates" required
+                      <input type="text" matInput name="createNewRetroOnDate"
+                        [(ngModel)]="CreateNewRetroConfig.createNewRetroOnDate" required
                         [disabled]="!isEditCreateNewRetroConfig" />
                     </mat-form-field>
                   </div>  
@@ -1845,7 +1845,7 @@
                     <mat-form-field>
                       <span class="special-label">Generate Data Retro Result on date *</span> <mat-icon class="special-icon"
                         matTooltip="ex: 10,13,15 mean: 10th, 13th, 15th">help</mat-icon>
-                      <input type="text" matInput name="generateRetroResultOnDates" [(ngModel)]="GenerateRetroResultConfig.generateRetroResultOnDates"
+                      <input type="text" matInput name="generateRetroResultOnDate" [(ngModel)]="GenerateRetroResultConfig.generateRetroResultOnDate"
                         required [disabled]="!isEditGenerateRetroResult" />
                     </mat-form-field>
                   </div>

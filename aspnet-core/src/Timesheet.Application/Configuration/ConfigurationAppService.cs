@@ -678,7 +678,7 @@ namespace Ncc.Configuration
             {
                 CreateNewRetroEnableWorker = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.CreateNewRetroEnableWorker),
                 CreateNewRetroAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.CreateNewRetroAtHour),
-                CreateNewRetroOnDates = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.CreateNewRetroOnDates)
+                CreateNewRetroOnDate = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.CreateNewRetroOnDate)
             };
         }
 
@@ -687,7 +687,7 @@ namespace Ncc.Configuration
         {
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.CreateNewRetroEnableWorker, input.CreateNewRetroEnableWorker);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.CreateNewRetroAtHour, input.CreateNewRetroAtHour);
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.CreateNewRetroOnDates, input.CreateNewRetroOnDates);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.CreateNewRetroOnDate, input.CreateNewRetroOnDate);
             return input;
         }
 
@@ -698,7 +698,7 @@ namespace Ncc.Configuration
             {
                 GenerateRetroResultEnableWorker = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.GenerateRetroResultEnableWorker),
                 GenerateRetroResultAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.GenerateRetroResultAtHour),
-                GenerateRetroResultOnDates = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.GenerateRetroResultOnDates)
+                GenerateRetroResultOnDate = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.GenerateRetroResultOnDate)
             };
         }
 
@@ -707,7 +707,7 @@ namespace Ncc.Configuration
         {
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateRetroResultEnableWorker, input.GenerateRetroResultEnableWorker);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateRetroResultAtHour, input.GenerateRetroResultAtHour);
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateRetroResultOnDates, input.GenerateRetroResultOnDates);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateRetroResultOnDate, input.GenerateRetroResultOnDate);
             return input;
         }
     }

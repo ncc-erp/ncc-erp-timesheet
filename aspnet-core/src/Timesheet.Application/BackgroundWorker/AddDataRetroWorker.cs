@@ -60,16 +60,16 @@ namespace Timesheet.BackgroundWorker
         {
             string createNewRetroEnableWorker = SettingManager.GetSettingValueForApplication(AppSettingNames.CreateNewRetroEnableWorker);
             string createNewRetroAtHour = SettingManager.GetSettingValueForApplication(AppSettingNames.CreateNewRetroAtHour);
-            string createNewRetroOnDate = SettingManager.GetSettingValueForApplication(AppSettingNames.CreateNewRetroOnDates);
-           
-            if(createNewRetroEnableWorker != "true")
+            string createNewRetroOnDate = SettingManager.GetSettingValueForApplication(AppSettingNames.CreateNewRetroOnDate);
+
+            if (createNewRetroEnableWorker != "true")
             {
                 Logger.Error("CreateNewRetro() stop: createNewRetroEnableWorker = " + createNewRetroEnableWorker);
                 return;
             }
 
-            DateTime.TryParse(createNewRetroAtHour, out DateTime dataAt);
-            if(dataAt.Hour != now.Hour || dataAt.Minute != now.Minute)
+            int.TryParse(createNewRetroAtHour, out int hour);
+            if (hour != now.Hour)
             {
                 Logger.Error("CreateNewRetro() stop: createNewRetroAtHour = " + createNewRetroAtHour);
                 return;
@@ -89,8 +89,14 @@ namespace Timesheet.BackgroundWorker
             RetroStatus status = RetroStatus.Public;
             string name = "Retro tháng " + time.Month + " - " + time.Year;
             var listRetroName = _workScope.GetAll<Retro>()
-                            .Select(s => s.Name)
-                            .ToList();
+                .Select(s => new
+                {
+                    Name = s.Name,
+                    IsDeleted = s.IsDeleted
+                })
+                .Where(s => s.IsDeleted == false)
+                .Select(s => s.Name)
+                .ToList();
             if (!listRetroName.Contains(name))
             {
                 var data = new RetroCreateDto
@@ -102,7 +108,7 @@ namespace Timesheet.BackgroundWorker
                     Status = status
                 };
                 Logger.Info("CreateNewRetro.DoWork() createNewRetroAt= " + createNewRetroAtHour + ". now.Date= " + now.Date);
-                var newRetro = _retroAppService.Create(data);
+                _retroAppService.Create(data);
             }
             else
             {
@@ -116,7 +122,7 @@ namespace Timesheet.BackgroundWorker
             DateTime time = now.AddMonths(-1);
             string generateRetroResultEnableWorker = SettingManager.GetSettingValueForApplication(AppSettingNames.GenerateRetroResultEnableWorker);
             string getDataAtHour = SettingManager.GetSettingValueForApplication(AppSettingNames.GenerateRetroResultAtHour);
-            string getDataOnDate = SettingManager.GetSettingValueForApplication(AppSettingNames.GenerateRetroResultOnDates);
+            string getDataOnDate = SettingManager.GetSettingValueForApplication(AppSettingNames.GenerateRetroResultOnDate);
 
             if (generateRetroResultEnableWorker != "true")
             {
@@ -124,8 +130,8 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
 
-            DateTime.TryParse(getDataAtHour, out DateTime dataAt);
-            if (dataAt.Hour != now.Hour || dataAt.Minute != now.Minute)
+            int.TryParse(getDataAtHour, out int hour);
+            if (hour != now.Hour)
             {
                 Logger.Error("GenerateRetroResult() stop: generateRetroResultAtHour = " + getDataAtHour);
                 return;
@@ -139,13 +145,16 @@ namespace Timesheet.BackgroundWorker
             }
 
             long lastRetroId = _workScope.GetAll<Retro>()
-                        .Where(s => s.Status == RetroStatus.Public)
-                        .OrderByDescending(s => s.Id)
-                        .Select(s => s.Id).FirstOrDefault();
-            var listRetroResultInRetroId = _workScope.GetAll<RetroResult>()
-                                            .Where(s => s.RetroId == lastRetroId)
-                                            .ToList();
-            if (listRetroResultInRetroId.Count > 0)
+                .Where(s => s.Status == RetroStatus.Public)
+                .OrderByDescending(s => s.Id)
+                .Select(s => s.Id)
+                .FirstOrDefault();
+
+            var countRetroResultInRetroId = _workScope.GetAll<RetroResult>()
+                .Where(s => s.RetroId == lastRetroId)
+                .Count();
+
+            if (countRetroResultInRetroId > 0)
             {
                 Logger.Info("retro result has been created");
                 return;

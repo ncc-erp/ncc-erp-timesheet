@@ -1445,15 +1445,16 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("At hour day required!")
       return;
     }
-    if (_.isEmpty(this.CreateNewRetroConfig.createNewRetroOnDates)) {
+    if (_.isEmpty(this.CreateNewRetroConfig.createNewRetroOnDate)) {
       abp.message.error("Dates required!")
       return;
     }
-    if(this.CreateNewRetroConfig.createNewRetroAtHour > this.GenerateRetroResultConfig.generateRetroResultAtHour){
+    if(this.CreateNewRetroConfig.createNewRetroAtHour > this.GenerateRetroResultConfig.generateRetroResultAtHour 
+      || this.CreateNewRetroConfig.createNewRetroAtHour == this.GenerateRetroResultConfig.generateRetroResultAtHour){
       abp.message.error("The retro creation time must be less than the retro result creation time")
       return;
     }
-    if(this.CreateNewRetroConfig.createNewRetroOnDates > this.GenerateRetroResultConfig.generateRetroResultOnDates){
+    if(this.CreateNewRetroConfig.createNewRetroOnDate > this.GenerateRetroResultConfig.generateRetroResultOnDate){
       abp.message.error("The retro creation date must be less than the retro result creation date")
       return;
     }
@@ -1465,7 +1466,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     })
   }
 
-  //Retro result setting
+  //Generate Data Retro result setting
   refreshGenerateRetroResultConfig() {
     this.getGenerateRetroResultConfig();
     this.isEditGenerateRetroResult = false;
@@ -1497,15 +1498,16 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("At hour day required!")
       return;
     }
-    if (_.isEmpty(this.GenerateRetroResultConfig.generateRetroResultOnDates)) {
+    if (_.isEmpty(this.GenerateRetroResultConfig.generateRetroResultOnDate)) {
       abp.message.error("Dates required!")
       return;
     }
-    if( this.GenerateRetroResultConfig.generateRetroResultAtHour < this.CreateNewRetroConfig.createNewRetroAtHour){
+    if( this.GenerateRetroResultConfig.generateRetroResultAtHour < this.CreateNewRetroConfig.createNewRetroAtHour
+      ||this.GenerateRetroResultConfig.generateRetroResultAtHour ==this.CreateNewRetroConfig.createNewRetroAtHour){
       abp.message.error("The time to create the retro result must be greater than the time to create the retro")
       return;
     }
-    if( this.GenerateRetroResultConfig.generateRetroResultOnDates < this.CreateNewRetroConfig.createNewRetroOnDates){
+    if( this.GenerateRetroResultConfig.generateRetroResultOnDate < this.CreateNewRetroConfig.createNewRetroOnDate){
       abp.message.error("The retro result creation date must be greater than the retro result creation date")
       return;
     }
@@ -1747,11 +1749,11 @@ export type SendMessageToPunishUserConfigDto = {
 export class CreateNewRetroConfigDto {
   createNewRetroEnableWorker: string;
   createNewRetroAtHour: string;
-  createNewRetroOnDates: string;
+  createNewRetroOnDate: string;
 }
 
 export class GenerateRetroResultConfigDto {
   generateRetroResultEnableWorker: string;
   generateRetroResultAtHour: string;
-  generateRetroResultOnDates: string;
+  generateRetroResultOnDate: string;
 }

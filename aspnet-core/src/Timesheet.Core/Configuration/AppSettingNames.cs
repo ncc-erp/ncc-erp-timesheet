@@ -109,10 +109,10 @@
         public const string BillPercentage = "App.BillPercentage";
         public const string CreateNewRetroEnableWorker = "App.CreateNewRetroEnableWorker";
         public const string CreateNewRetroAtHour = "App.CreateNewRetroAtHour";
-        public const string CreateNewRetroOnDates = "App.CreateNewRetroOnDates";
+        public const string CreateNewRetroOnDate = "App.CreateNewRetroOnDate";
         public const string GenerateRetroResultEnableWorker = "App.GenerateRetroResultEnableWorker";
         public const string GenerateRetroResultAtHour = "App.GenerateRetroResultAtHour";
-        public const string GenerateRetroResultOnDates = "App.GenerateRetroResultOnDates";
+        public const string GenerateRetroResultOnDate = "App.GenerateRetroResultOnDate";
 
 
         public const string TimeStartChangingCheckinToCheckout = "App.TimeStartChangingCheckinToCheckout";
