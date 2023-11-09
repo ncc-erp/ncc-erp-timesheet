@@ -53,7 +53,7 @@ export class TeamBuildingPMService extends BaseApiService {
     formData.append("PMRequest", JSON.stringify(data));
 
     fileArray.forEach((value, key) => {
-      formData.append("listFile", value, key.toString() + "." + value.name.split(".")[1]);
+      formData.append("listFile", value, key.toString() + "." + value.name.split(".").pop());
     })
 
     const uploadReq = new HttpRequest(
