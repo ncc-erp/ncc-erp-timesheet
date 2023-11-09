@@ -180,6 +180,7 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
             var listUser = await WorkScope.GetAll<TeamBuildingDetail>()
                 .Include(s => s.Employee)
                 .Where(s => listProject.Contains(s.ProjectId))
+                .Where(s => s.Employee.IsActive)
                 .Where(s => s.Status == StatusEnum.TeamBuildingStatus.Open || s.Status == StatusEnum.TeamBuildingStatus.Requested)
                 .WhereIf(month.HasValue, s => s.ApplyMonth.Month == month)
                 .WhereIf(branchId.HasValue, s => s.Employee.BranchId == branchId)
