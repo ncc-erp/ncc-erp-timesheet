@@ -96,6 +96,12 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_TimesCanLateAndEarlyInMonthSetting = "Admin.Configuration.TimesCanLateAndEarlyInMonthSetting";
         public const string Admin_Configuration_TimesCanLateAndEarlyInMonthSetting_View = "Admin.Configuration.TimesCanLateAndEarlyInMonthSetting.ViewTimesCanLateAndEarlyInMonthSetting";
         public const string Admin_Configuration_TimesCanLateAndEarlyInMonthSetting_Update = "Admin.Configuration.TimesCanLateAndEarlyInMonthSetting.EditTimesCanLateAndEarlyInMonthSetting";
+        public const string Admin_Configuration_CreateNewRetroConfig = "Admin.Configuration.CreateNewRetroConfig";
+        public const string Admin_Configuration_CreateNewRetroConfig_View = "Admin.Configuration.CreateNewRetroConfig.ViewCreateNewRetroConfig";
+        public const string Admin_Configuration_CreateNewRetroConfig_Update = "Admin.Configuration.CreateNewRetroConfig.UpdateCreateNewRetroConfig";
+        public const string Admin_Configuration_GenerateRetroResultConfig = "Admin.Configuration.GenerateRetroResultConfig";
+        public const string Admin_Configuration_GenerateRetroResultConfig_View = "Admin.Configuration.GenerateRetroResultConfig.ViewGenerateRetroResultConfig";
+        public const string Admin_Configuration_GenerateRetroResultConfig_Update = "Admin.Configuration.GenerateRetroResultConfig.UpdateGenerateRetroResultConfig";
 
         public const string Admin_Configuration_TeamBuilding_View = "Admin.Configuration.TeamBuilding.ViewTeamBuildingConfig";
         public const string Admin_Configuration_TeamBuilding_Update = "Admin.Configuration.TeamBuilding.UpdateTeamBuildingConfig";
@@ -431,7 +437,14 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_Configuration_SettingWorkerNoticeKomuPunishmentUserNoCheckInOut_Update,
                     PermissionNames.Admin_Configuration_RetroNotifyConfig_View,
                     PermissionNames.Admin_Configuration_RetroNotifyConfig_Update,
-                    PermissionNames.Admin_Configuration_TeamBuilding_View,
+                    PermissionNames.Admin_Configuration_CreateNewRetroConfig,
+                    PermissionNames.Admin_Configuration_CreateNewRetroConfig_View,
+                    PermissionNames.Admin_Configuration_CreateNewRetroConfig_Update,
+                    PermissionNames.Admin_Configuration_GenerateRetroResultConfig,
+                    PermissionNames.Admin_Configuration_GenerateRetroResultConfig_View,
+                    PermissionNames.Admin_Configuration_GenerateRetroResultConfig_Update,
+
+        PermissionNames.Admin_Configuration_TeamBuilding_View,
                     PermissionNames.Admin_Configuration_TeamBuilding_Update,
                     PermissionNames.Admin_Configuration_TimesCanLateAndEarlyInMonthSetting,
                     PermissionNames.Admin_Configuration_TimesCanLateAndEarlyInMonthSetting_View,
@@ -910,6 +923,11 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_SettingWorkerNoticeKomuPunishmentUserNoCheckInOut_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Punished Check In Config" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_RetroNotifyConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Notify Retro Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_RetroNotifyConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notify Retro Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_CreateNewRetroConfig_View, MultiTenancySides =  MultiTenancySides.Host , DisplayName = "View Add Retro Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_CreateNewRetroConfig_Update, MultiTenancySides =  MultiTenancySides.Host , DisplayName = "Update Add Retro Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_GenerateRetroResultConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Retro Result Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_GenerateRetroResultConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Retro Result Setting" },
+
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_TeamBuilding_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Team Building Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_TeamBuilding_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Team Building Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_TimesCanLateAndEarlyInMonthSetting, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Times Can Late And Early In Month Setting" },
@@ -1326,6 +1344,20 @@ namespace Ncc.Authorization
                                  {
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_RetroNotifyConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View" },
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_RetroNotifyConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit" },
+                                 }
+                            },
+                            new SystemPermission { Name =  PermissionNames.Admin_Configuration_CreateNewRetroConfig, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add Retro Setting",
+                                 Childrens = new List<SystemPermission>()
+                                 {
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_CreateNewRetroConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View" },
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_CreateNewRetroConfig_Update, MultiTenancySides = MultiTenancySides.Host ,DisplayName = "Edit"},
+                                 }                            
+                            },
+                            new SystemPermission { Name = PermissionNames.Admin_Configuration_GenerateRetroResultConfig, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Retro result Setting",
+                                 Childrens = new List<SystemPermission>()
+                                 {
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_GenerateRetroResultConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View"},
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_GenerateRetroResultConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update"},
                                  }
                             },
                             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_TeamBuilding, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Team Building Setting",

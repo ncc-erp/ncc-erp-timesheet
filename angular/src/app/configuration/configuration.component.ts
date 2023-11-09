@@ -73,6 +73,11 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   UPDATE_PUNISHCHECKIN_CONFIG = PERMISSIONS_CONSTANT.UpdateSendKomuPunishedCheckIn;
   VIEW_RETRONOTIFY_CONFIG = PERMISSIONS_CONSTANT.ViewRetroNotifySetting;
   EDIT_RETRONOTIFY_CONFIG = PERMISSIONS_CONSTANT.EditRetroNotifySetting;
+  VIEW_CREATENEWRETRO_CONFIG = PERMISSIONS_CONSTANT.ViewCreateNewRetroSetting;
+  EDIT_CREATENEWRETRO_CONFIG = PERMISSIONS_CONSTANT.EditCreateNewRetroSetting;
+  VIEW_GENERATERETRORESULT_CONFIG = PERMISSIONS_CONSTANT.ViewGenerateRetroResultSetting;
+  EDIT_GENERATERETRORESULT_CONFIG = PERMISSIONS_CONSTANT.EditGenerateRetroResultSetting;
+
   VIEW_TEAMBUILDING_CONFIG = PERMISSIONS_CONSTANT.ViewTeamBuildingSetting;
   EDIT_TEAMBUILDING_CONFIG = PERMISSIONS_CONSTANT.EditTeamBuildingSetting;
   VIEW_APPROVETIMESHEETNOTIFY_CONFIG = PERMISSIONS_CONSTANT.ViewApproveTimesheetNotifySetting;
@@ -172,6 +177,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isShowRetroNotifySetting: boolean = false;
   isEditRetroNotifyConfig: boolean = false;
   RetroNotifyConfig = {} as RetroNotifyConfigDto;
+  isShowCreateNewRetroSetting: boolean = false;
+  isEditCreateNewRetroConfig: boolean = false;
+  CreateNewRetroConfig = {} as CreateNewRetroConfigDto;
+  isShowGenerateRetroResultSetting: boolean = false;
+  isEditGenerateRetroResult: boolean = false;
+  GenerateRetroResultConfig = {} as GenerateRetroResultConfigDto;
 
   isShowTeamBuildingSetting: boolean = false;
   isEditTeamBuildingConfig: boolean = false;
@@ -262,7 +273,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getSendMessageRequestPendingTeamBuildingToHRConfig();
     this.getNotifyHRTheEmployeeMayHaveLeftConfig();
     this.getMoneyPMUnlockTimeSheetConfig();
-
+    this.getCreateNewRetroConfig();
+    this.getGenerateRetroResultConfig();
+    
     this.getSendMessageToPunishUserConfig();
   }
   protected list(): void {
@@ -420,9 +433,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   getDataFromFaceID() {
     if (this.permission.isGranted(this.VIEW_CHECKIN_SETTING)) {
-    this.getDataFromFaceIdService.get().subscribe(res => {
-      this.getDataFaceID = res.result;
-    })
+      this.getDataFromFaceIdService.get().subscribe(res => {
+        this.getDataFaceID = res.result;
+      })
     }
   }
   getTimesCanLateAndEarlyInMonthSetting() {
@@ -817,7 +830,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.configurationService.SetNotificationSetting(this.notificationSetting).subscribe((res) => {
       this.isEditNotificationSetting = !this.isEditNotificationSetting;
       this.getNotificationSetting()
-        this.notify.success(this.l('Update Successfully!'));
+      this.notify.success(this.l('Update Successfully!'));
     })
   }
   onSendMailSubmitTimesheet(value) {
@@ -892,7 +905,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   saveChannelSendPunishCheckIn(): any{
     this.sendKomuPunishedCheckInService.changePunishedCheckInConfig(this.punishedCheckInSetting).subscribe((res: any) => {
       this.isEditNotifyPunishCheckIn = false;
-      if(res){
+      if (res) {
         this.notify.success(this.l('Update Successfully!'));
       }
     })
@@ -1083,7 +1096,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       }
     })
   }
-   //TimeStartChangingCheckinToCheckout setting
+  //TimeStartChangingCheckinToCheckout setting
   refreshTimeStartChangingCheckinToCheckoutSetting() {
     this.getTimeStartChangingCheckinToCheckoutSetting();
     this.isEditTimeStartChangingCheckinToCheckoutSetting=false;
@@ -1094,7 +1107,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
         this.TimeStartChangingCheckinToCheckoutSetting = data.result;
       })
     }
-    }
+  }
 
   editTimeStartChangingCheckinToCheckoutSetting() {
     this.isEditTimeStartChangingCheckinToCheckoutSetting = true;
@@ -1351,45 +1364,45 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     })
   }
 
-    //Send Message To Punish User Setting
-    refreshSendMessageToPunishUserConfig() {
-      this.getSendMessageToPunishUserConfig();
-      this.isEditSendMessageToPunishUserConfig = false;
-    }
+  //Send Message To Punish User Setting
+  refreshSendMessageToPunishUserConfig() {
+    this.getSendMessageToPunishUserConfig();
+    this.isEditSendMessageToPunishUserConfig = false;
+  }
 
-    getSendMessageToPunishUserConfig() {
-      if (this.permission.isGranted(this.VIEW_SENDMESSAGETOPUNISHUSER_CONFIG)) {
-        this.configurationService.getConfigSendMessageToPunishUser().subscribe(data => {
-          this.sendMessageToPunishUserConfig = data.result;
-        })
-      }
-    }
-
-    editSendMessageToPunishUserConfig() {
-      this.isEditSendMessageToPunishUserConfig = true;
-    }
-
-    onSendMessageToPunishUserEnableWorker(e) {
-      if (e.checked == true) {
-        this.sendMessageToPunishUserConfig.sendMessageToPunishUserEnableWorker = "true"
-      }
-      else {
-        this.sendMessageToPunishUserConfig.sendMessageToPunishUserEnableWorker = "false"
-      }
-    }
-
-    saveSendMessageToPunishUserConfig() {
-      if (_.isEmpty(this.sendMessageToPunishUserConfig.sendMessageToPunishUserAtHour)) {
-        abp.message.error("At hour day required!")
-        return;
-      }
-      this.configurationService.setConfigSendMessageToPunishUser(this.sendMessageToPunishUserConfig).subscribe((res:any) => {
-        this.isEditSendMessageToPunishUserConfig = !this.isEditSendMessageToPunishUserConfig;
-        if (res) {
-          this.notify.success(this.l('Update Successfully!'));
-        }
+  getSendMessageToPunishUserConfig() {
+    if (this.permission.isGranted(this.VIEW_SENDMESSAGETOPUNISHUSER_CONFIG)) {
+      this.configurationService.getConfigSendMessageToPunishUser().subscribe(data => {
+        this.sendMessageToPunishUserConfig = data.result;
       })
     }
+  }
+
+  editSendMessageToPunishUserConfig() {
+    this.isEditSendMessageToPunishUserConfig = true;
+  }
+
+  onSendMessageToPunishUserEnableWorker(e) {
+    if (e.checked == true) {
+      this.sendMessageToPunishUserConfig.sendMessageToPunishUserEnableWorker = "true"
+    }
+    else {
+      this.sendMessageToPunishUserConfig.sendMessageToPunishUserEnableWorker = "false"
+    }
+  }
+
+  saveSendMessageToPunishUserConfig() {
+    if (_.isEmpty(this.sendMessageToPunishUserConfig.sendMessageToPunishUserAtHour)) {
+      abp.message.error("At hour day required!")
+      return;
+    }
+      this.configurationService.setConfigSendMessageToPunishUser(this.sendMessageToPunishUserConfig).subscribe((res:any) => {
+      this.isEditSendMessageToPunishUserConfig = !this.isEditSendMessageToPunishUserConfig;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
 
   toggleEnableTimeStartChangingToCheckout(e) {
     if (e.checked == true) {
@@ -1398,6 +1411,112 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     else {
       this.TimeStartChangingCheckinToCheckoutSetting.enableTimeStartChangingToCheckout = "false"
     }
+  }
+
+  //Create New Retro setting
+  refreshCreateNewRetroConfig() {
+    this.getCreateNewRetroConfig();
+    this.isEditCreateNewRetroConfig = false;
+  }
+
+  getCreateNewRetroConfig() {
+    if (this.permission.isGranted(this.VIEW_CREATENEWRETRO_CONFIG)) {
+      this.configurationService.getConfigCreateNewRetro().subscribe(data => {
+        this.CreateNewRetroConfig = data.result;
+      })
+    }
+  }
+
+  editCreateNewRetroConfig() {
+    this.isEditCreateNewRetroConfig = true;
+  }
+
+  onCreateNewRetroEnableWorker(e) {
+    if (e.checked == true) {
+      this.CreateNewRetroConfig.createNewRetroEnableWorker = "true"
+    }
+    else {
+      this.CreateNewRetroConfig.createNewRetroEnableWorker = "false"
+    }
+  }
+
+  saveCreateNewRetroConfig() {
+    if (_.isEmpty(this.CreateNewRetroConfig.createNewRetroAtHour)) {
+      abp.message.error("At hour day required!")
+      return;
+    }
+    if (_.isEmpty(this.CreateNewRetroConfig.createNewRetroOnDate)) {
+      abp.message.error("Dates required!")
+      return;
+    }
+    if(this.CreateNewRetroConfig.createNewRetroAtHour > this.GenerateRetroResultConfig.generateRetroResultAtHour 
+      || this.CreateNewRetroConfig.createNewRetroAtHour == this.GenerateRetroResultConfig.generateRetroResultAtHour){
+      abp.message.error("The retro creation time must be less than the retro result creation time")
+      return;
+    }
+    if(this.CreateNewRetroConfig.createNewRetroOnDate > this.GenerateRetroResultConfig.generateRetroResultOnDate){
+      abp.message.error("The retro creation date must be less than the retro result creation date")
+      return;
+    }
+    this.configurationService.setConfigCreateNewRetro(this.CreateNewRetroConfig).subscribe((res: any) => {
+      this.isEditCreateNewRetroConfig = !this.isEditCreateNewRetroConfig;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
+
+  //Generate Data Retro result setting
+  refreshGenerateRetroResultConfig() {
+    this.getGenerateRetroResultConfig();
+    this.isEditGenerateRetroResult = false;
+  }
+
+  getGenerateRetroResultConfig() {
+    if (this.permission.isGranted(this.VIEW_GENERATERETRORESULT_CONFIG)) {
+      this.configurationService.getConfigGenerateRetroResult().subscribe(data => {
+        this.GenerateRetroResultConfig = data.result;
+      })
+    }
+  }
+
+  editGenerateRetroResultConfig() {
+    this.isEditGenerateRetroResult = true;
+  }
+
+  onRetroResultEnableWorker(e) {
+    if (e.checked == true) {
+      this.GenerateRetroResultConfig.generateRetroResultEnableWorker = "true"
+    }
+    else {
+      this.GenerateRetroResultConfig.generateRetroResultEnableWorker = "false"
+    }
+  }
+
+  saveGenerateRetroResultConfig() {
+    if (_.isEmpty(this.GenerateRetroResultConfig.generateRetroResultAtHour)) {
+      abp.message.error("At hour day required!")
+      return;
+    }
+    if (_.isEmpty(this.GenerateRetroResultConfig.generateRetroResultOnDate)) {
+      abp.message.error("Dates required!")
+      return;
+    }
+    if( this.GenerateRetroResultConfig.generateRetroResultAtHour < this.CreateNewRetroConfig.createNewRetroAtHour
+      ||this.GenerateRetroResultConfig.generateRetroResultAtHour ==this.CreateNewRetroConfig.createNewRetroAtHour){
+      abp.message.error("The time to create the retro result must be greater than the time to create the retro")
+      return;
+    }
+    if( this.GenerateRetroResultConfig.generateRetroResultOnDate < this.CreateNewRetroConfig.createNewRetroOnDate){
+      abp.message.error("The retro result creation date must be greater than the retro result creation date")
+      return;
+    }
+    this.configurationService.setConfigGenerateRetroResult(this.GenerateRetroResultConfig).subscribe((res: any) => {
+      this.isEditGenerateRetroResult = !this.isEditGenerateRetroResult;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
   }
 }
 
@@ -1625,4 +1744,16 @@ export type MoneyPMUnlockTimeSheetConfigDto = {
 export type SendMessageToPunishUserConfigDto = {
   sendMessageToPunishUserEnableWorker?: string;
   sendMessageToPunishUserAtHour?: string;
+}
+
+export class CreateNewRetroConfigDto {
+  createNewRetroEnableWorker: string;
+  createNewRetroAtHour: string;
+  createNewRetroOnDate: string;
+}
+
+export class GenerateRetroResultConfigDto {
+  generateRetroResultEnableWorker: string;
+  generateRetroResultAtHour: string;
+  generateRetroResultOnDate: string;
 }
