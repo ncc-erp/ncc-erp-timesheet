@@ -4,16 +4,20 @@ using Abp.Dependency;
 using Abp.IdentityFramework;
 using Abp.ObjectMapping;
 using Abp.Runtime.Session;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Ncc.Authorization.Users;
 using Ncc.Configuration;
+using Ncc.Entities;
 using Ncc.IoC;
 using Ncc.MultiTenancy;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Timesheet.APIs.Branchs.Dto;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.HRM;
@@ -124,6 +128,48 @@ namespace Ncc
                                     .Select(s => s.BranchId).FirstOrDefault();
 
             return currentUserBranch != null ? currentUserBranch : default;
+        }
+
+        public Task<List<ProjectByCurrentUserDto>> GetAllProjectByCurrentUser()
+        {
+            return WorkScope.GetAll<ProjectUser>()
+                .Where(s => s.UserId == AbpSession.UserId)
+                .Where(s => s.Project.Status == Entities.Enum.StatusEnum.ProjectStatus.Active)
+                .Select(s => new ProjectByCurrentUserDto
+                {
+                    ProjectId = s.ProjectId,
+                    ProjectName = s.Project.Name,
+                }).ToListAsync();
+        }
+
+        public async Task<List<BranchDto>> GetAllCurrentBranch()
+        {
+            var branchId = await WorkScope.GetAll<Branch>()
+                .Select(s => s.Id)
+                .FirstOrDefaultAsync();
+
+            var query = await WorkScope.GetAll<Branch>()
+                 .Select(s => new BranchDto
+                 {
+                     Id = s.Id,
+                     Name = s.Name,
+                     DisplayName = s.DisplayName
+                 }).ToListAsync();
+
+            return query.OrderBy(s => s.Id).ToList();
+        }
+
+        public async Task<List<ProjectByCurrentUserDto>> GetAllProjectIdByCurrentPM()
+        {
+            return await WorkScope.GetAll<ProjectUser>()
+                .Where(s => s.UserId == AbpSession.UserId)
+                .Where(s => s.Type == ProjectUserType.PM)
+                .Select(s => new ProjectByCurrentUserDto
+                {
+                    ProjectId = s.ProjectId,
+                    ProjectName = s.Project.Name,
+                })
+                .ToListAsync();
         }
     }
 }

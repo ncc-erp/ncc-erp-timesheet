@@ -36,6 +36,7 @@ import { finalize } from "rxjs/operators";
 import { CreateEditRetroDetailComponent } from "./create-edit-retro-detail/create-edit-retro-detail.component";
 import { ImportRetroDetailComponent } from "./import-retro-detail/import-retro-detail.component";
 import { GenerateDataComponent } from "./generate-data/generate-data.component";
+import { AddMultiRetroDetailComponent } from "./add-multi-retro-detail/add-multi-retro-detail.component";
 
 @Component({
   selector: "app-retro-detail",
@@ -287,6 +288,10 @@ export class RetroDetailComponent
     this.showDialog(retroDetail, ActionDialog.EDIT);
   }
 
+  addMulti(): void {
+    this.showDialogMulti({ retroId: this.retroId } as RetroDetailCreateEditDto);
+  }
+
   actionChangeSelected() {
     this.handleFilter(this.requestExport);
     this.retroDetailService
@@ -444,6 +449,28 @@ export class RetroDetailComponent
       }
     });
   }
+
+  showDialogMulti(
+    retroDetail: RetroDetailCreateEditDto,
+  ): void {
+    const item = Object.assign({}, retroDetail);
+    const dialogRef = this.dialog.open(AddMultiRetroDetailComponent, {
+      data: {
+        item: item,
+      } as RetroDetailDialogData,
+      disableClose: true,
+      width: "1000px",
+    });
+    dialogRef.afterClosed().subscribe((res) => {
+      if (res) {
+        this.getProjectPMRetroResult();
+        const firstPage = 1;
+        const pageNumber = retroDetail.id == null ? firstPage : this.pageNumber;
+        this.getDataPage(pageNumber);
+      }
+    });
+  }
+
   public onImportFile() {
     this.dialog
       .open(ImportRetroDetailComponent, {

@@ -670,5 +670,45 @@ namespace Ncc.Configuration
         {
             return await _hRMv2Service.CheckConnectToHRM();
         }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_CreateNewRetroConfig_View)]
+        public async Task<CreateNewRetroConfigDto> GetConfigCreateNewRetro()
+        {
+            return new CreateNewRetroConfigDto
+            {
+                CreateNewRetroEnableWorker = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.CreateNewRetroEnableWorker),
+                CreateNewRetroAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.CreateNewRetroAtHour),
+                CreateNewRetroOnDate = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.CreateNewRetroOnDate)
+            };
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_CreateNewRetroConfig_Update)]
+        public async Task<CreateNewRetroConfigDto> SetConfigCreateNewRetro(CreateNewRetroConfigDto input)
+        {
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.CreateNewRetroEnableWorker, input.CreateNewRetroEnableWorker);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.CreateNewRetroAtHour, input.CreateNewRetroAtHour);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.CreateNewRetroOnDate, input.CreateNewRetroOnDate);
+            return input;
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_GenerateRetroResultConfig_View)]
+        public async Task<GenerateRetroResultConfigDto> GetConfigGenerateRetroResult()
+        {
+            return new GenerateRetroResultConfigDto
+            {
+                GenerateRetroResultEnableWorker = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.GenerateRetroResultEnableWorker),
+                GenerateRetroResultAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.GenerateRetroResultAtHour),
+                GenerateRetroResultOnDate = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.GenerateRetroResultOnDate)
+            };
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_GenerateRetroResultConfig_Update)]
+        public async Task<GenerateRetroResultConfigDto> SetConfigGenerateRetroResult(GenerateRetroResultConfigDto input)
+        {
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateRetroResultEnableWorker, input.GenerateRetroResultEnableWorker);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateRetroResultAtHour, input.GenerateRetroResultAtHour);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateRetroResultOnDate, input.GenerateRetroResultOnDate);
+            return input;
+        }
     }
 }
