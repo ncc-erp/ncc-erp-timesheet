@@ -466,12 +466,13 @@ namespace Timesheet.APIs.Info
             }
             if(IsAlreadyUnlockToLog(userId.Value))
             {
+                Logger.Info(emailAddress + " Already Unlock");
                 return;
             }
 
-            var listUnlockWeekEmployee = await getMyTimesheetLockedAsync(userId.Value);
+            //var listUnlockWeekEmployee = await getMyTimesheetLockedAsync(userId.Value);
 
-            var timesLockedEmployee = listUnlockWeekEmployee == null ? 0 : listUnlockWeekEmployee.Count();
+            var timesLockedEmployee = 1;
 
             if (timesLockedEmployee > 0)
             {
