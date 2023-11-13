@@ -470,6 +470,12 @@ namespace Timesheet.APIs.Info
                 return;
             }
 
+            //Thay đổi sử dụng business mới
+            //Trước đây user có thể unlock nhiều tuần và user sẽ mất số tiền unlock tương ứng với số tuần
+            //Ví dụ: User unlock 3 tuần sẽ mất số tiền là: 3 * 20k
+            //Business mới:
+            //Mỗi lần user unlock sẽ mất 20k và chỉ được unlock tuần gần nhất. Nếu muốn unlock các tuần đổ về trước cần có sự xác nhận của IT và HR.
+
             //var listUnlockWeekEmployee = await getMyTimesheetLockedAsync(userId.Value);
 
             var timesLockedEmployee = 1;
