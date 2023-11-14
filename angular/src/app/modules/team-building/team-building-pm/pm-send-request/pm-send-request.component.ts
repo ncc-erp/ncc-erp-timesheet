@@ -243,7 +243,8 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
 
           if (isChoosingFile) {
             fileArray.set(count, invoiceForm.controls["invoiceFile"].value);
-            invoiceRequestDto.invoiceImageName = count.toString() + "." + invoiceForm.controls["invoiceFileName"].value.split(".")[1];
+            const fileExtension = invoiceForm.controls["invoiceFileName"].value.split(".").pop();
+            invoiceRequestDto.invoiceImageName = count.toString() + "." + fileExtension;
           }
 
           invoiceRequestDto.invoiceUrl = invoiceForm.controls["invoiceUrl"].value;
