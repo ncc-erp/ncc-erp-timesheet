@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { BaseApiService } from "./base-api.service";
 import { RetroDetailCreateEditDto } from "./model/retro-detail-dto";
-import { InputGetUserOtherProjectDto } from "@app/modules/team-building/const/const";
+import { InputGetUserOtherProjectRetroDto } from "@app/modules/retros/retro/retro-detail/app-add-user-other-project-retro-result/app-add-user-other-project-retro-result.component";
 @Injectable({
   providedIn: "root",
 })
@@ -91,7 +91,7 @@ export class RetroDetailService extends BaseApiService {
     return this.http.post(this.rootUrl + `/GetRetroResultInfoUser?retroId=${retroId}`, listEmpIds);
   }
 
-  public getAllUser(input: InputGetUserOtherProjectDto): Observable<any> {
+  public getAllUser(input: InputGetUserOtherProjectRetroDto): Observable<any> {
     return this.http.post(this.rootUrl + "/GetUserNotPaggingOtherProjectRetroResult", input);
   }
 

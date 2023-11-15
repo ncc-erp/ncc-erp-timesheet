@@ -9,5 +9,6 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM.Dto
         public List<long> Ids { get; set; }
         public long? BranchId { get; set; }
         public string SearchText { get; set; }
+        public long RetroId { get; set; }
     }
 }

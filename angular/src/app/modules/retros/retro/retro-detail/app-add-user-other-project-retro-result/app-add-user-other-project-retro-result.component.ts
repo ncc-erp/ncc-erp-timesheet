@@ -7,13 +7,14 @@ import { BranchDto } from '@shared/service-proxies/service-proxies';
 import * as _ from 'lodash';
 
 @Component({
-  selector: 'app-app-add-user-other-project-retro-result',
+  selector: 'app-add-user-other-project-retro-result',
   templateUrl: './app-add-user-other-project-retro-result.component.html',
   styleUrls: ['./app-add-user-other-project-retro-result.component.css']
 })
 export class AppAddUserOtherProjectRetroResultComponent implements OnInit {
 
   @Input() retroResultAdding: RetroDetailDto[] = [];
+  @Input() retroId: number;
   @Input() isCreateRequest: boolean;
   @Input() isShowBtnAddUser: boolean = true;
 
@@ -34,7 +35,7 @@ export class AppAddUserOtherProjectRetroResultComponent implements OnInit {
     public retroResultService: RetroDetailService,
     public appBaseService: AppServiceBase
   ) { }
-  
+
   ngOnInit() {
     this.getListBranchUserOtherProject();
     this.getAllUser();
@@ -43,10 +44,11 @@ export class AppAddUserOtherProjectRetroResultComponent implements OnInit {
   getAllUser() {
     this.isLoading = true;
     let listId = this.retroResultAdding.map((x) => x.userId);
-    const input: InputGetUserOtherProjectDto = {
+    const input: InputGetUserOtherProjectRetroDto = {
       ids: listId,
       branchId: this.branchIdUserOtherProject,
-      searchText: this.searchText
+      searchText: this.searchText,
+      retroId: this.retroId
     };
 
     this.retroResultService.getAllUser(input).subscribe((data) => {
@@ -141,4 +143,11 @@ export class AppAddUserOtherProjectRetroResultComponent implements OnInit {
     this.onAddUsers.emit(this.listSelectedItemUserOtherProject.filter(item => item.selected));
     this.handleCancel();
   }
+}
+
+export class InputGetUserOtherProjectRetroDto {
+  ids: number [] = [];
+  retroId: number;
+  searchText?: string;
+  branchId?: string;
 }

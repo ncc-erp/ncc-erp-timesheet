@@ -50,7 +50,24 @@
         </button>
       </div>
     </div>
-    <div *ngIf="requestInfo.length == 0">No data</div>
+    <div *ngIf="requestInfo.length == 0">
+      <div class="table-responsive d-flex">
+        <div class="fixedHeader" style="max-height: calc(100vh - 450px); text-align: center;" [ngClass]="isShowBtnAddUser ? 'table-team-selected' : 'full-width'">
+        No Data
+        </div>
+         <!-- Add Users -->
+         <div *ngIf="isShowBtnAddUser" class="table-team-select">
+          <mat-expansion-panel [expanded]="true">
+            <app-add-user-other-project-retro-result *ngIf="isShowBtnAddUser"
+              [retroResultAdding]="retroResultAdding"
+              [retroId]="retroId"
+              (onAddUsers)="getSelectedUserOtherProjectRetro($event)"
+              (onCancel)="closePopup($event)">
+            </app-add-user-other-project-retro-result>
+          </mat-expansion-panel>
+        </div>
+      </div>
+    </div>
     <div *ngIf="requestInfo.length > 0">
       <div class="table-responsive d-flex">
         <div class="fixedHeader" style="max-height: calc(100vh - 450px);"
@@ -157,11 +174,12 @@
          <!-- Add Users -->
         <div *ngIf="isShowBtnAddUser" class="table-team-select">
           <mat-expansion-panel [expanded]="true">
-            <app-app-add-user-other-project-retro-result *ngIf="isShowBtnAddUser"
+            <app-add-user-other-project-retro-result *ngIf="isShowBtnAddUser"
               [retroResultAdding]="retroResultAdding"
+              [retroId]="retroId"
               (onAddUsers)="getSelectedUserOtherProjectRetro($event)"
               (onCancel)="closePopup($event)">
-            </app-app-add-user-other-project-retro-result>
+            </app-add-user-other-project-retro-result>
           </mat-expansion-panel>
         </div>
       </div>

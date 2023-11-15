@@ -788,54 +788,60 @@ namespace Timesheet.APIs.RetroDetails
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Retro_RetroDetail_GenerateData)]
         public async Task<List<RetroResult>> GenerateDataRetroResult(InputGenerateDataRetroResultDto input)
         {
+            var isExist = WorkScope.GetAll<RetroResult>()
+                .Any(s => s.RetroId == input.RetroId);
+
+            if(isExist)
+            {
+                throw new UserFriendlyException("Record already exists, with retroId = " + input.RetroId);
+            }
+
             var listUser = await WorkScope.GetAll<MyTimesheet>()
                 .Include(s => s.UserId)
                 .Where(s => s.User.IsActive)
                 .Where(s => s.DateAt.Year == input.Year && s.DateAt.Month == input.Month)
                 .Where(s => s.User.Level >= UserLevel.Intern_2)
-                .Where(s => s.User.PositionId != null)
                 .Select(s => new
                 {
                     UserId = s.UserId,
-                    UserLevel = s.User.Level,
-                    BranchId = s.User.BranchId,
-                    PositionId = s.User.PositionId,
-                    EmailAddress = s.User.EmailAddress,
-                    UserType = s.User.Type,
-                    ProjectTask = s.ProjectTask,
+                    ProjectId = s.ProjectTask.ProjectId,
                     WorkingTime = s.WorkingTime
                 })
                 .ToListAsync();
 
-            var listProjectIdWithEmail = listUser
-                .GroupBy(t => t.EmailAddress)
+            var projectWithMostWorkingTime = listUser
+                .GroupBy(t => t.UserId)
                 .Select(g => new
                 {
-                    EmailAddress = g.Key,
-                    ProjectId = g.GroupBy(t => t.ProjectTask.ProjectId)
-                                .Select(t => new { ProjectId = t.Key, WorkingTime = t.Sum(wt => wt.WorkingTime) })
-                                .OrderByDescending(t => t.WorkingTime)
-                                .Select(p => p.ProjectId)
-                                .FirstOrDefault()
+                    UserId = g.Key,
+                    ProjectId = g.GroupBy(t => t.ProjectId)
+                    .Select(t => new 
+                    { 
+                        ProjectId = t.Key, 
+                        WorkingTime = t.Sum(wt => wt.WorkingTime) 
+                    })
+                    .OrderByDescending(t => t.WorkingTime)
+                    .Select(p => p.ProjectId)
+                    .FirstOrDefault()
                 })
                 .Distinct()
                 .ToList();
 
-            var listUserInfo = listUser
-                .Join(listProjectIdWithEmail,
-                    user => user.EmailAddress,
-                    project => project.EmailAddress,
-                    (user, project) => new
-                    {
-                        UserId = user.UserId,
-                        PositionId = user.PositionId,
-                        UserLevel = user.UserLevel.Value,
-                        UserType = user.UserType.Value,
-                        BranchId = user.BranchId,
-                        RetroId = input.RetroId,
-                        ProjectId = project.ProjectId
-                    })
-                .Distinct()
+            var dicUserIdToProjectId = projectWithMostWorkingTime.ToDictionary(s => s.UserId, s => s.ProjectId);
+
+            var listUserInfo = WorkScope.GetAll<User>()
+                .Where(s => s.IsActive)
+                .Where(s => listUser.Select(x => x.UserId).Contains(s.Id))
+                .Select(s => new
+                {
+                    UserId = s.Id,
+                    PositionId = s.PositionId,
+                    Level = s.Level,
+                    Type = s.Type,
+                    BranchId = s.BranchId,
+                    RetroId = input.RetroId,
+                    ProjectId = dicUserIdToProjectId[s.Id]
+                })
                 .ToList();
 
             List<RetroResult> result = new List<RetroResult>();
@@ -845,10 +851,10 @@ namespace Timesheet.APIs.RetroDetails
                 var item = new RetroResult
                 {
                     UserId = i.UserId,
-                    PositionId = i.PositionId ?? 0,
-                    UserLevel = i.UserLevel,
-                    UserType = i.UserType,
-                    BranchId = i.BranchId,
+                    PositionId = i.PositionId.Value,
+                    UserLevel = i.Level.Value,
+                    UserType = i.Type.Value,
+                    BranchId = i.BranchId.Value,
                     RetroId = i.RetroId,
                     ProjectId = i.ProjectId,
                     Point = default,
@@ -959,6 +965,7 @@ namespace Timesheet.APIs.RetroDetails
         public async Task<List<GetAllUserRequestMoneyDto>> GetUserNotPaggingOtherProjectRetroResult(InputGetUserOtherProjectDto input)
         {
             var listUserIdByRetroResult = await WorkScope.GetAll<RetroResult>()
+                .Where(x => x.RetroId == input.RetroId)
                 .Where(x => !input.Ids.Contains(x.UserId))
                 .Where(x => x.User.IsActive)
                 .Where(x => x.Note == null)
