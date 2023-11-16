@@ -12,7 +12,7 @@
   import { AppComponentBase } from '@shared/app-component-base';
   import { AppConsts } from '@shared/AppConsts';
   import { CalendarEvent, CalendarMonthViewBeforeRenderEvent, CalendarView } from 'angular-calendar';
-  import { moment } from 'ngx-bootstrap/chronos/test/chain';
+  import * as moment from 'moment';
   import { Subject } from 'rxjs';
   import { dayOffDTO } from '../day-off/day-off.component';
   import { PopupComponent } from './popup/popup.component';

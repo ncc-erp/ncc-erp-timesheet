@@ -26,6 +26,8 @@ import { GestureConfig } from '@angular/material';
 import * as _ from 'lodash';
 import { HttpErrorInterceptor } from '@shared/interceptor-errors/http-error.interceptor';
 import { SentryService } from '@shared/sentry-service';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
+
 
 export function appInitializerFactory(injector: Injector,
     platformLocation: PlatformLocation) {
@@ -107,6 +109,7 @@ export function getCurrentLanguage(): string {
         BrowserAnimationsModule,
         SharedModule.forRoot(),
         ModalModule.forRoot(),
+        CollapseModule.forRoot(),
         AbpModule,
         ServiceProxyModule,
         RootRoutingModule,
