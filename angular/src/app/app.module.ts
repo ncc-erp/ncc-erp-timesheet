@@ -55,6 +55,8 @@ import { EditSidebarComponent } from './layout/edit-sidebar/edit-sidebar.compone
 import { EditRoleComponent } from './roles/edit-role/edit-role.component';
 import { CreateRoleDialogComponent } from './roles/create-role/create-role-dialog.component';
 import { UpdatePunishMoneyComponent } from './configuration/update-punish-money/update-punish-money.component';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
+
 
 let config = new AuthServiceConfig([
   {
@@ -114,6 +116,8 @@ export function provideConfig() {
     MatFormFieldModule,
     NgxCurrencyModule,
     MatListModule,
+    CollapseModule,
+
   ],
   providers: [
     {

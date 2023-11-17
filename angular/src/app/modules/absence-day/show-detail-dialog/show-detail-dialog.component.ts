@@ -4,8 +4,9 @@ import { Component, OnInit, Injector } from '@angular/core';
 import { Inject } from "@node_modules/@angular/core";
 import { MAT_DIALOG_DATA } from "@node_modules/@angular/material";
 import { AbsenceRequestDetailDto, LeaveDayDTO } from '@app/service/api/model/absence-day-dto';
-import { moment } from 'ngx-bootstrap/chronos/test/chain';
+
 import { MatDialogRef } from '@angular/material/dialog';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-show-detail-dialog',

@@ -1,4 +1,4 @@
-import { moment } from 'ngx-bootstrap/chronos/test/chain';
+
 import { Component, ViewChild, TemplateRef, OnInit, ChangeDetectionStrategy, Injector, ChangeDetectorRef, OnChanges, AfterViewChecked } from '@angular/core';
 import { isSameDay, isSameMonth } from 'date-fns';
 import { Subject } from 'rxjs';
@@ -11,6 +11,7 @@ import * as _ from 'lodash';
 import { DatePipe } from '@angular/common';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { APP_CONSTANT } from '@app/constant/api.constants';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-off-day',
