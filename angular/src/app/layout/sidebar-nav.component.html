@@ -4,22 +4,25 @@
         <ng-template ngFor let-menuItem [ngForOf]="menuItems" let-mainMenuItemIndex="index">
             <li *ngIf="isMenuItemVisible(menuItem)" routerLinkActive="active"  [class.menu-open]="!menuItem.isCollapsed" [class.has-treeview]="menuItem.children">
                 <!-- route name -->
-                <a [routerLink]="[menuItem.route]" 
-                    *ngIf="!menuItem.children&& menuItem.route.indexOf('http') != 0" [class.active]="menuItem.isActive" >
+                <a [routerLink]="[menuItem.route]"
+                    *ngIf="!menuItem.children&& menuItem.route.indexOf('http') != 0" [class.active]="menuItem.isActive"
+                    class="d-flex" style="align-items: center;">
                     <i *ngIf="menuItem.icon" class="material-icons">{{menuItem.icon}}</i>
                     <span>{{menuItem.name}}</span>
                 </a>
                 <!-- Static link (starts with 'http') -->
                 <a href="{{menuItem.route}}" target="_blank"
-                    *ngIf="!menuItem.children && menuItem.route.indexOf('http') == 0">
+                    *ngIf="!menuItem.children && menuItem.route.indexOf('http') == 0"
+                    class="d-flex" style="align-items: center;">
                     <i *ngIf="menuItem.icon" class="material-icons">{{menuItem.icon}}</i>
                     <span>{{menuItem.name}}</span>
                 </a>
                 <!-- Has child menu items (so, this is a parent menu) -->
                 <a  [ngClass]="{'menu-toggle': menuItem.children}"
                     [class.active]="menuItem.isActive"
-                    *ngIf="menuItem.children" 
-                    (click)="menuItem.isCollapsed = !menuItem.isCollapsed">
+                    *ngIf="menuItem.children"
+                    (click)="menuItem.isCollapsed = !menuItem.isCollapsed"
+                    class="d-flex" style="align-items: center;">
                     <i *ngIf="menuItem.icon" class="material-icons">{{menuItem.icon}}</i>
                     <span>{{menuItem.name}}</span>
                 </a>
@@ -28,21 +31,24 @@
                         <li *ngIf="isMenuItemVisible(subMenuItem)" routerLinkActive="active" [class.menu-open]="!subMenuItem.isCollapsed" [class.has-treeview]="subMenuItem.children" >
                             <!-- route name -->
                             <a [routerLink]="[subMenuItem.route]" class="toggled"
-                                *ngIf="!subMenuItem.children && subMenuItem.route.indexOf('http') != 0" [class.active]="subMenuItem.isActive">
+                                *ngIf="!subMenuItem.children && subMenuItem.route.indexOf('http') != 0" [class.active]="subMenuItem.isActive"
+                                class="d-flex" style="align-items: center;">
                                 <i *ngIf="subMenuItem.icon" class="material-icons">{{subMenuItem.icon}}</i>
                                 <span>{{subMenuItem.name}}</span>
                             </a>
                             <!-- Static link (starts with 'http') -->
                             <a href="{{subMenuItem.route}}" class="toggled" target="_blank"
-                                *ngIf="!subMenuItem.children && subMenuItem.route.indexOf('http') == 0">
+                                *ngIf="!subMenuItem.children && subMenuItem.route.indexOf('http') == 0"
+                                class="d-flex" style="align-items: center;">
                                 <i *ngIf="subMenuItem.icon" class="material-icons">{{subMenuItem.icon}}</i>
                                 <span>{{subMenuItem.name}}</span>
                             </a>
                             <!-- Has child menu items (so, this is a parent menu) -->
                             <a [ngClass]="{'menu-toggle': subMenuItem.children}"
-                                [class.active]="subMenuItem.isActive" 
-                                *ngIf="subMenuItem.children" 
-                                (click)="subMenuItem.isCollapsed = !subMenuItem.isCollapsed">
+                                [class.active]="subMenuItem.isActive"
+                                *ngIf="subMenuItem.children"
+                                (click)="subMenuItem.isCollapsed = !subMenuItem.isCollapsed"
+                                class="d-flex" style="align-items: center;">
                                 <i *ngIf="subMenuItem.icon" class="material-icons">{{subMenuItem.icon}}</i>
                                 <span>{{subMenuItem.name}}</span>
                             </a>
@@ -50,14 +56,25 @@
                                 <ng-template ngFor let-subSubMenuItem [ngForOf]="subMenuItem.children" let-mainMenuItemIndex="index" style="height: 650px !important;" >
                                     <li *ngIf="isMenuItemVisible(subSubMenuItem)" routerLinkActive="active" [class.menu-open]="!subSubMenuItem.isCollapsed" [class.has-treeview]="subSubMenuItem.children" >
                                         <!-- route name -->
-                                        <a [routerLink]="[subSubMenuItem.route]" 
-                                            *ngIf="subSubMenuItem.route.indexOf('http') != 0" [class.active]="subSubMenuItem.isActive">
+                                        <a [routerLink]="[subSubMenuItem.route]"
+                                            *ngIf="subSubMenuItem.route.indexOf('http') != 0" [class.active]="subSubMenuItem.isActive"
+                                            class="d-flex" style="align-items: center;">
                                             <i *ngIf="subSubMenuItem.icon" class="material-icons">{{subSubMenuItem.icon}}</i>
                                             <span>{{subSubMenuItem.name}}</span>
                                         </a>
                                         <!-- Static link (starts with 'http') -->
                                         <a href="{{subSubMenuItem.route}}" target="_blank"
-                                            *ngIf="subSubMenuItem.route.indexOf('http') == 0">
+                                            *ngIf="subSubMenuItem.route.indexOf('http') == 0"
+                                            class="d-flex" style="align-items: center;">
+                                            <i *ngIf="subSubMenuItem.icon" class="material-icons">{{subSubMenuItem.icon}}</i>
+                                            <span>{{subSubMenuItem.name}}</span>
+                                        </a>
+                                        <!-- Has child menu items (so, this is a parent menu) -->
+                                        <a [ngClass]="{'menu-toggle': subSubMenuItem.children}"
+                                            [class.active]="subSubMenuItem.isActive"
+                                            *ngIf="subSubMenuItem.children"
+                                            (click)="subSubMenuItem.isCollapsed = !subSubMenuItem.isCollapsed"
+                                            class="d-flex" style="align-items: center;">
                                             <i *ngIf="subSubMenuItem.icon" class="material-icons">{{subSubMenuItem.icon}}</i>
                                             <span>{{subSubMenuItem.name}}</span>
                                         </a>
