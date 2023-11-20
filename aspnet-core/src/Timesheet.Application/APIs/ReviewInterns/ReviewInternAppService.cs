@@ -211,7 +211,7 @@ namespace Timesheet.APIs.ReviewInterns
             }
 
             var details = await (from rv in WorkScope.GetAll<ReviewDetail>()
-                                    .Where(x => x.ReviewId == reviewId && x.Status == ReviewInternStatus.Approved)
+                                    .Where(x => x.ReviewId == reviewId && (x.Status == ReviewInternStatus.Approved || x.Status == ReviewInternStatus.Rejected))
                                     .Where(x => (isCheckToOffical && x.NewLevel > UserLevel.Intern_3) || (!isCheckToOffical && x.NewLevel <= UserLevel.Intern_3))
                                  select new
                                  {

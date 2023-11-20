@@ -631,6 +631,10 @@ namespace Timesheet.APIs.ReviewDetails
             if (detail.Status == ReviewInternStatus.Approved || detail.Status == ReviewInternStatus.Reviewed)
             {
                 detail.Status = ReviewInternStatus.Rejected;
+                if(detail.Status == ReviewInternStatus.Rejected)
+                {
+                    detail.NewLevel = detail.CurrentLevel;
+                }
                 await WorkScope.UpdateAsync(detail);
             }
             else
