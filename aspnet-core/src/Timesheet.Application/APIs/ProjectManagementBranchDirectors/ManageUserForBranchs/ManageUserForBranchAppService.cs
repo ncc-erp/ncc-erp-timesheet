@@ -153,5 +153,6 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
             var temp = await result.GetGridResult(result, input);
             return new PagedResultDto<UserStatisticInProjectDto>(temp.TotalCount, temp.Items);
         }
+
     }
 }
