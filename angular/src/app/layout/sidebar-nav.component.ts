@@ -351,4 +351,5 @@ export class SideBarNavComponent extends AppComponentBase {
         }
         return this.permission.isGranted(item.permissionName);
     }
+
 }
