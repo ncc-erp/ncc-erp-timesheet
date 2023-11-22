@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Timesheet.APIs.CapabilitySettings.Dto;
 using Timesheet.APIs.ReviewDetails.Dto;
 using Timesheet.APIs.ReviewInternCapabilities.Dto;
+using Timesheet.APIs.ReviewInterns.Dto;
 using Timesheet.BackgroundJob;
 using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
@@ -1297,15 +1298,38 @@ namespace Timesheet.APIs.ReviewDetails
 
             await WorkScope.UpdateAsync(reviewDetail);
         }
-
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern)]
+       
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern)]
         [HttpPost]
-        public async Task HrVerify(CreatePrivateNoteDto input)
+        public async Task HeadPmVerify(HeadPmVerifyDto input)
         {
-            if (input.Status == ReviewInternStatus.HrApproved || input.Status == ReviewInternStatus.ReOpen)
+            if (input.Status == ReviewInternStatus.Reviewed || input.Status == ReviewInternStatus.Rejected)
             {
                 var detail = await WorkScope.GetAsync<ReviewDetail>(input.ReviewDetailId);
                 if (detail.Status == ReviewInternStatus.PmReviewed)
+                {
+                    detail.Status = input.Status;
+                    await WorkScope.UpdateAsync(detail);
+                }
+                else
+                {
+                    throw new UserFriendlyException("Review này chưa được PM review hoặc đã review xong");
+                }
+            }
+            else
+            {
+                throw new UserFriendlyException("Trạng thái chỉ được là Reviewed hoặc Rejected.");
+            }
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote)]
+        [HttpPost]
+        public async Task CreatePMNote(CreatePrivateNoteDto input)
+        {
+            if (input.Status == ReviewInternStatus.Reviewed)
+            {
+                var detail = await WorkScope.GetAsync<ReviewDetail>(input.ReviewDetailId);
+                if (detail.Status == ReviewInternStatus.Reviewed)
                 {
                     detail.Status = input.Status;
                     if (input.PrivateNote != null)
@@ -1331,26 +1355,36 @@ namespace Timesheet.APIs.ReviewDetails
             }
         }
 
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_CreateInterviewNote)]
         [HttpPost]
-        public async Task HeadPmVerify(HeadPmVerifyDto input)
+        public async Task CreateInterviewNote(CreatePrivateNoteDto input)
         {
-            if (input.Status == ReviewInternStatus.Reviewed || input.Status == ReviewInternStatus.Rejected)
+            if (input.Status == ReviewInternStatus.Reviewed)
             {
                 var detail = await WorkScope.GetAsync<ReviewDetail>(input.ReviewDetailId);
-                if (detail.Status == ReviewInternStatus.HrApproved)
+                if (detail.Status == ReviewInternStatus.Reviewed)
                 {
                     detail.Status = input.Status;
+                    if (input.PrivateNote != null)
+                    {
+                        var reviewInternComment = new ReviewInternPrivateNote
+                        {
+                            ReviewDetailId = input.ReviewDetailId,
+                            NoteByUserId = AbpSession.UserId.Value,
+                            PrivateNote = input.PrivateNote.Trim()
+                        };
+                        await WorkScope.InsertAsync(reviewInternComment);
+                    }
                     await WorkScope.UpdateAsync(detail);
                 }
                 else
                 {
-                    throw new UserFriendlyException("Review này chưa được HR Approve");
+                    throw new UserFriendlyException("Review này chưa được PM review hoặc đã review xong");
                 }
             }
             else
             {
-                throw new UserFriendlyException("Trạng thái chỉ được là Reviewed hoặc Rejected.");
+                throw new UserFriendlyException("Trạng thái chỉ được là HR Approved hoặc Reopen.");
             }
         }
     }

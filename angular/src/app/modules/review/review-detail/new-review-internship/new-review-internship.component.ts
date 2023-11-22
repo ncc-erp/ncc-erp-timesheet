@@ -194,10 +194,6 @@ export class NewReviewInternshipComponent extends AppComponentBase implements On
       id: this.reviewId,
       reviewInternCapabilities: this.review.reviewInternCapabilities
     } as ReviewInternshipDto; 
-    if(this.privateNote === ""){
-      this.notify.error(this.l("Bạn phải nhập ghi chú cho thực thập sinh"));
-      return
-    }
     if (this.review.newLevel == null) {
       this.notify.error(this.l("Bạn phải nhập New Level cho thực thập sinh"));
       return

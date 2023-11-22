@@ -255,7 +255,14 @@
                                         <mat-icon class="mat-18" style="color: green">fact_check</mat-icon>
                                         Approve
                                     </button>
-
+                                    <button *ngIf="isShowBtnPMNote(item)" mat-menu-item="mat-menu-item" class="choices" name="pmNote" (click)="createPMNote(item)">
+                                        <mat-icon class="mat-18">verified_user</mat-icon>
+                                        PM / Loren Note  
+                                    </button>
+                                    <button *ngIf="isShowBtnInterviewNote(item)" mat-menu-item="mat-menu-item" class="choices" name="interviewNote" (click)="createInterviewNote(item)">
+                                        <mat-icon class="mat-18">verified_user</mat-icon>
+                                        Interview Note
+                                    </button>
                                     <button *ngIf="
                   isShowBtnChotLuong(item)
                     " class="choices" mat-menu-item="mat-menu-item" [name]="'confirmSalaryInternshipBtn-'+item.id"  (click)="confirmSalaryInternship(item)">

@@ -20,6 +20,9 @@ import { ConfirmSalaryInternshipComponent } from './confirm-salary-internship/co
 import { NewReviewInternshipComponent } from './new-review-internship/new-review-internship.component';
 import { UpdateReviewerComponent } from './update-reviewer/update-reviewer.component';
 import { NewHrVerifyInternshipComponent } from './new-hr-verify-internship/new-hr-verify-internship.component';
+import { CreatePmNoteComponent } from './create-pm-note/create-pm-note.component';
+import { CreateInterviewNoteComponent } from './create-interview-note/create-interview-note.component';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-review-detail',
@@ -40,6 +43,8 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern
   ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern
   ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern
+  ReviewIntern_ReviewDetail_CreatePMNote = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreatePMNote
+  ReviewIntern_ReviewDetail_CreateInterviewNote = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreateInterviewNote
 
   ReviewIntern_ReviewDetail_UpdateDetailSubLevel = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_UpdateDetailSubLevel
   ReviewIntern_ReviewDetail_ApproveForOneIntern =PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_ApproveForOneIntern
@@ -109,7 +114,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     });
   }
 
-  ngOnInit() {
+  ngOnInit() { 
     this.reviewId = Number(this.route.snapshot.queryParamMap.get("id"))
     this.reviewYear = Number(this.route.snapshot.queryParamMap.get("year"))
     this.reviewMonth = Number(this.route.snapshot.queryParamMap.get("month"))
@@ -143,58 +148,58 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     }
   }
 
-  protected list(request: PagedRequestDto, pageNumber: number, finishedCallback: Function): void {
-    request.searchText = this.searchText;
-    request.filterItems = [];
-    // if (this.branchId != 0){
-    //   request.filterItems.push({propertyName: 'branchId', comparison: 0, value: this.branchId} as FilterDto)
-    // }
-    if (this.selectedStatus != InitParam.ALLSTATUS){
-      request.filterItems.push({propertyName: 'status', comparison: 0, value: this.selectedStatus} as FilterDto)
-    }
-    if (this.selectedReviewer > InitParam.ALL){
-      request.filterItems.push({propertyName: 'reviewerId', comparison: 0, value: this.selectedReviewer} as FilterDto)
-    }
-    if (this.selectedReviewer == InitParam.NOREVIEWER){
-      request.filterItems.push({propertyName: 'reviewerId', comparison: 0, value: null} as FilterDto)
-    }
-    if (this.selectedCurrentLevel != InitParam.ALL){
-      request.filterItems.push({propertyName: 'currentLevel', comparison: 0, value: this.selectedCurrentLevel} as FilterDto)
-    }
-    if (this.selectedNewLevel != InitParam.ALL){
-      request.filterItems.push({propertyName: 'newLevel', comparison: 0, value: this.selectedNewLevel} as FilterDto)
-    }
-    if (this.selectedIntership != InitParam.ALL){
-      request.filterItems.push({propertyName: 'internshipId', comparison: 0, value: this.selectedIntership  } as FilterDto)
-    }
-    if(this.selectedChangeLevel != InitParam.ALL){
-      request.filterItems.push({propertyName: 'levelChange', comparison: 0, value: this.selectedChangeLevel  } as FilterDto)
-    }
-    this.reviewDetailService
-      .getAllPaging(request, this.reviewId, this.branchId)
-      .pipe(finalize(() => {
-        finishedCallback();
-      }))
-      // .subscribe((result: any) => {
-      //   this.listReviewIntern = result.result.items;
-      //   this.showPaging(result.result, pageNumber);
-      .subscribe((rs: any) => {
-        this.totalItems = rs.result.totalCount
-        if (rs.result == null || rs.result.items.length == 0) {
-          this.listReviewIntern = []
-        }
-        else {
-          this.listReviewIntern = rs.result.items;
-          this.showPaging(rs.result, pageNumber);
-          this.listReviewIntern.forEach(item => {
-            item.history = false;
-            item.hideNote = false;
-            item.hidePrivateNote = false;
-            item.more = false;
-          })
-        }
-      });
-    }
+   protected list(request: PagedRequestDto, pageNumber: number, finishedCallback: Function): void {
+     request.searchText = this.searchText;
+     request.filterItems = [];
+     // if (this.branchId != 0){
+     //   request.filterItems.push({propertyName: 'branchId', comparison: 0, value: this.branchId} as FilterDto)
+     // }
+     if (this.selectedStatus != InitParam.ALLSTATUS){
+       request.filterItems.push({propertyName: 'status', comparison: 0, value: this.selectedStatus} as FilterDto)
+     }
+     if (this.selectedReviewer > InitParam.ALL){
+       request.filterItems.push({propertyName: 'reviewerId', comparison: 0, value: this.selectedReviewer} as FilterDto)
+     }
+     if (this.selectedReviewer == InitParam.NOREVIEWER){
+       request.filterItems.push({propertyName: 'reviewerId', comparison: 0, value: null} as FilterDto)
+     }
+     if (this.selectedCurrentLevel != InitParam.ALL){
+       request.filterItems.push({propertyName: 'currentLevel', comparison: 0, value: this.selectedCurrentLevel} as FilterDto)
+     }
+     if (this.selectedNewLevel != InitParam.ALL){
+       request.filterItems.push({propertyName: 'newLevel', comparison: 0, value: this.selectedNewLevel} as FilterDto)
+     }
+     if (this.selectedIntership != InitParam.ALL){
+       request.filterItems.push({propertyName: 'internshipId', comparison: 0, value: this.selectedIntership  } as FilterDto)
+     }
+     if(this.selectedChangeLevel != InitParam.ALL){
+       request.filterItems.push({propertyName: 'levelChange', comparison: 0, value: this.selectedChangeLevel  } as FilterDto)
+     }
+     this.reviewDetailService
+       .getAllPaging(request, this.reviewId, this.branchId)
+       .pipe(finalize(() => {
+         finishedCallback();
+       }))
+       // .subscribe((result: any) => {
+       //   this.listReviewIntern = result.result.items;
+       //   this.showPaging(result.result, pageNumber);
+       .subscribe((rs: any) => {
+         this.totalItems = rs.result.totalCount
+         if (rs.result == null || rs.result.items.length == 0) {
+           this.listReviewIntern = []
+         }
+         else {
+           this.listReviewIntern = rs.result.items;
+           this.showPaging(rs.result, pageNumber);
+           this.listReviewIntern.forEach(item => {
+             item.history = false;
+             item.hideNote = false;
+             item.hidePrivateNote = false;
+             item.more = false;
+           })
+         }
+       });
+     }
 
     isShowBtnChotLuong(item:ReviewDetailDto){
       return this.isGranted(PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_ConfirmSalaryForOneIntern)
@@ -275,7 +280,19 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
 
     isShowDelete(item: ReviewDetailDto){
       return this.isGranted(PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_Delete) &&
-      this.checkStatus(item.status, 'delete')
+      this.checkStatus(item.status, 'delete') 
+    }
+
+    isShowBtnPMNote(item: ReviewDetailDto){
+      return this.isGranted(
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreatePMNote
+      ) && this.checkStatus(item.status, 'pmNote') && item.newLevel.valueOf() <= 3
+    }
+
+    isShowBtnInterviewNote(item: ReviewDetailDto){
+      return this.isGranted(
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreateInterviewNote
+      ) && this.checkStatus(item.status, 'interviewNote') && item.newLevel.valueOf() >=4
     }
 
     protected delete(entity: any): void {
@@ -736,13 +753,13 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   checkStatus(status:number, action:string):boolean{
     switch(status){
       case 0: return action=="edit"|| action=="delete" || action == "pmReview" ? true :false
-      case 1: return action=="edit"|| action=="review" || action == "approve" || action == "reject" ? true : false
+      case 1: return action=="edit"|| action=="review" || action == "approve" || action == "reject" || action =="pmNote" || action == "interviewNote" ? true : false
       case 2: return action=="sendEmail" || action=="reject" || action == "print" ? true : false
       case -1: return action=="edit"|| action=="review" || action == "approve" ? true : false
       case 3: return action=="update to HRM"|| action=="rejectSentMail" || action=="print" ? true : false
-      case 4: return action=="edit"|| action=="hrVerify" || action == "reject" ? true : false
-      case 5: return action=="headPm" ? true : false
-      case 6: return action=="edit"|| action=="pmReview" ? true : false
+      // case 4: return action=="edit"|| action=="hrVerify" || action == "reject" ? true : false
+      case 4: return action=="headPm" ? true : false
+      case 5: return action=="edit"|| action=="pmReview" ? true : false
       default: return false
 
     }
@@ -833,6 +850,33 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
         return 'label-danger'
     }
   }
+
+  createPMNote(item: ReviewDetailDto): void{
+    const dialogRef = this._dialog.open(CreatePmNoteComponent, {
+      disableClose : true,
+      width : "750px",
+      data: item,
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        abp.notify.success('PM/ Loren Note success');
+        this.refresh()
+      }
+    });
+  }
+  createInterviewNote(item : ReviewDetailDto): void{
+    const dialogRef = this._dialog.open(CreateInterviewNoteComponent, {
+      disableClose : true,
+      width : "750px",
+      data: item,
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        abp.notify.success('Interview Note success');
+        this.refresh()
+      }
+    });
+  }
 }
 
 export enum EnumReviewStatus {
@@ -881,7 +925,8 @@ export class ReviewDetailDto {
   hideNote : boolean;
   hidePrivateNote: boolean;
   reviewInternCommentDto: reviewInternCommentDto[];
-  id?: number
+  id?: number;
+  countMonthLevelMax: number;
 }
 
 export class reviewInternCommentDto{
