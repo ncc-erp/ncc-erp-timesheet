@@ -20,6 +20,7 @@ import { ConfirmSalaryInternshipComponent } from './confirm-salary-internship/co
 import { NewReviewInternshipComponent } from './new-review-internship/new-review-internship.component';
 import { UpdateReviewerComponent } from './update-reviewer/update-reviewer.component';
 import { NewHrVerifyInternshipComponent } from './new-hr-verify-internship/new-hr-verify-internship.component';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-review-detail',
@@ -84,6 +85,8 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   branchSearch: FormControl = new FormControl("")
   listBranchFilter : BranchDto[];
   branchId;
+  listInternshipMaxLevelMonths : InternshipMaxLevelMonths [] = [];
+  sortByMonth = true;
   constructor(
     private route: ActivatedRoute,
     public _dialog: MatDialog,
@@ -142,7 +145,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       this.listReviewer = this.listReviewerFilter.slice();
     }
   }
-
+  
   protected list(request: PagedRequestDto, pageNumber: number, finishedCallback: Function): void {
     request.searchText = this.searchText;
     request.filterItems = [];
@@ -171,6 +174,12 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       request.filterItems.push({propertyName: 'levelChange', comparison: 0, value: this.selectedChangeLevel  } as FilterDto)
     }
     this.reviewDetailService
+      .countMonthLevelMax()
+      .subscribe(rs => {
+          this.listInternshipMaxLevelMonths = rs.result as InternshipMaxLevelMonths []; 
+    });
+    
+    this.reviewDetailService
       .getAllPaging(request, this.reviewId, this.branchId)
       .pipe(finalize(() => {
         finishedCallback();
@@ -187,6 +196,11 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
           this.listReviewIntern = rs.result.items;
           this.showPaging(rs.result, pageNumber);
           this.listReviewIntern.forEach(item => {
+            const internshipSuitable = this.listInternshipMaxLevelMonths.find(x => x.internshipId === item.internshipId);
+            if (internshipSuitable) {
+                item.countMonthLevelMax = internshipSuitable.countMonthLevelMax;
+                item.maxLevel = internshipSuitable.maxLevel;  
+            }
             item.history = false;
             item.hideNote = false;
             item.hidePrivateNote = false;
@@ -276,6 +290,10 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     isShowDelete(item: ReviewDetailDto){
       return this.isGranted(PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_Delete) &&
       this.checkStatus(item.status, 'delete')
+    }
+
+    isShowCountMonthMaxLevel(item: ReviewDetailDto){
+      return typeof item.newLevel === 'number' && item.newLevel <= 3;
     }
 
     protected delete(entity: any): void {
@@ -437,14 +455,18 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
 
 
   getSubLevelById(subLevel, newLevel){
-    if(newLevel != null){
-      for(let i = 0 ; i < this.listSubLevels.length; i++){
-        if(newLevel == this.listSubLevels[i].id)
-        {
-          let res = this.listSubLevels[i].subLevels;
-          for(let j = 0 ; j < res.length; j++){
-            if(res[j].id == subLevel){
-              return res[j].name;
+    if(newLevel != null && this.listSubLevels && this.listSubLevels.length > 0){
+      if(this.listSubLevels.length > 0){
+        for(let i = 0 ; i < this.listSubLevels.length; i++){
+          if(newLevel == this.listSubLevels[i].id)
+          {
+            let res = this.listSubLevels[i].subLevels;
+            if (res && res.length) {
+              for(let j = 0 ; j < res.length; j++){
+                if(res[j].id == subLevel){
+                  return res[j].name;
+                }
+              }
             }
           }
         }
@@ -833,6 +855,16 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
         return 'label-danger'
     }
   }
+
+  sortByCountMonth(){
+    if(this.sortByMonth){
+      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['countMonthLevelMax'], ['asc']);
+    }
+    else {
+      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['countMonthLevelMax'], ['desc']);
+    }
+    this.sortByMonth = !this.sortByMonth;
+  }
 }
 
 export enum EnumReviewStatus {
@@ -881,7 +913,9 @@ export class ReviewDetailDto {
   hideNote : boolean;
   hidePrivateNote: boolean;
   reviewInternCommentDto: reviewInternCommentDto[];
-  id?: number
+  id?: number;
+  countMonthLevelMax: number;
+  maxLevel:number;
 }
 
 export class reviewInternCommentDto{
@@ -929,5 +963,10 @@ export class InfoReviewerDto {
 }
 function UpdateReviewDetailComponent(UpdateReviewDetailComponent: any, arg1: { disableClose: true; width: string; data: ReviewDetailDto; }) {
   throw new Error('Function not implemented.');
+}
+export class InternshipMaxLevelMonths {
+  internshipId: number;  
+  maxLevel: number;
+  countMonthLevelMax: number;
 }
 
