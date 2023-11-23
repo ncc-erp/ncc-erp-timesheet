@@ -160,6 +160,16 @@
                                 <mat-icon>update</mat-icon>
                                 <span>Update To Project</span>
                             </button>
+                            <button  type="button" *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" 
+                                 (click)="headPmAprroveOrRejectAll(headPmVerifyStatus)" class="btn-pm-head btn" [disabled]="!(listSelectedItem?.length > 0)" >
+                                <mat-icon>check</mat-icon>
+                                <span>Head PM Verify All</span> 
+                            </button>
+                            <button  type="button" *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" 
+                                (click)="headPmAprroveOrRejectAll(headPmRejectStatus)" class="btn-pm-head btn" [disabled]="!(listSelectedItem?.length > 0)" >
+                                <mat-icon>thumb_down_off_alt</mat-icon>
+                                <span>Head PM Reject All</span> 
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -173,19 +183,52 @@
                 <table class="table table-hover table-bordered table-striped">
                     <thead class="head-table">
                         <tr>
+                            <th >
+                                <mat-checkbox name="selectAll" (change)="setAll($event.checked)" matTooltip="Select/DeSelect all"
+                                  [checked]="allComplete" [indeterminate]="someComplete()" [color]="'primary'"
+                                  style="display: flex; justify-content: center;">
+                                </mat-checkbox>
+                              </th>
                             <th>{{ "STT" | localize }}</th>
                             <th>{{ "Action" | localize }}</th>
-                            <th>{{ "User" | localize }}</th>
-                            <th>{{ "Review content" | localize }}</th>
-                            <th>{{ "Reviewer" | localize }}</th>
-                            <th>{{ "History" | localize }}</th>
-                            <th>{{ "Level" | localize }}</th>
-                            <th>{{ "New Level" | localize }}</th>
-                            <th (click)="sortByCountMonth()" style="display: flex; margin-top: 6px;">
-                                <span>{{ "Count Month Level Max" | localize}}</span>
-                                <mat-icon>unfold_more</mat-icon>
+                            <th (click)="sortByUser()">
+                                <span style="margin-left: 100px;">
+                                     {{ "User" | localize }}
+                                     <mat-icon>unfold_more</mat-icon>
+                                </span>
                             </th>
-                            <th>{{ "Status" | localize }}</th>
+                            <th>{{ "Review content" | localize }}</th>
+                            <th (click)="sortByReviewer()">
+                                <span style="margin-left: 90px;">
+                                    {{ "Reviewer" | localize }}
+                                    <mat-icon>unfold_more</mat-icon>
+                               </span>
+                            </th>
+                            <th>{{ "History" | localize }}</th>
+                            <th (click)="sortByLevel()">
+                                <span>
+                                    {{ "Level" | localize }}
+                                    <mat-icon>unfold_more</mat-icon>
+                                </span> 
+                            </th>
+                            <th (click)="sortByNewLevel()">
+                                <span>
+                                    {{ "New Level" | localize }}
+                                    <mat-icon>unfold_more</mat-icon>
+                                </span>
+                            </th>
+                            <th (click)="sortByCountMonth()">
+                                <span>
+                                    {{ "Count Month Level Max" | localize}}
+                                    <mat-icon>unfold_more</mat-icon>
+                                </span>
+                            </th>
+                            <th (click)="sortByStatus()">
+                                <span>
+                                    {{ "Status" | localize }}
+                                    <mat-icon>unfold_more</mat-icon>
+                                </span>
+                            </th>
                             <th>{{ "Note" | localize }}</th>
                             <th>{{ "Updated Info" | localize }}</th>
                         </tr>
@@ -201,7 +244,12 @@
                         totalItems: totalItems
                       };
                 index as i
-              ">
+              ">            
+                            <td class="text-center">
+                                <mat-checkbox *ngIf="item.status === 4" [name]="'selected-' + item.id" [checked]="getIsSelected(item)"
+                                [color]="'primary'" (change)="ishandleSelectlistReviewInternItem(i, $event)">
+                                </mat-checkbox>
+                            </td>
                             <!-- STT -->
                             <td style="text-align: center">
                                 {{ (pageNumber - 1) * pageSize + i + 1 }}

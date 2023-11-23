@@ -251,6 +251,7 @@ export const PERMISSIONS_CONSTANT = {
     ReviewIntern_ApproveAll: "ReviewIntern.ApproveAll",
     ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern: "ReviewIntern.ReviewDetail.VerifyPmReviewedForOneIntern",
     ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern: "ReviewIntern.ReviewDetail.AcceptHrRequestForOneIntern",
+    ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern: "ReviewIntern.ReviewDetail.AcceptPMReviewForAllIntern",
 
     ReviewIntern_ViewAll: "ReviewIntern.ViewAll",
     ReviewIntern_ReviewDetail_ViewDetailLevel: "ReviewIntern.ReviewDetail.ViewDetailLevel",

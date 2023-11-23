@@ -200,6 +200,22 @@ body{
     background-color: #2196f3!important;
 }
 
+.btn-pm-head{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 160px;
+    margin: 8px auto 0px;
+    height: 35px;
+    text-align: right;
+    padding-right: 20px;
+    color : #ffff;
+    background-color: #0b984a!important;
+}
+
+.btn-pm-head[disabled] {
+    background-color: #4f4e4e!important;
+}
 .avatar{
     padding: 0px;
     margin-left: 10px;
@@ -307,6 +323,14 @@ body{
 th{
     font-size: 14px;
     text-align: center;
+}
+
+th>span {
+    display: flex; align-items: center; text-align: center;
+}
+
+.btn {
+    margin: 5px;
 }
 /* respondsive */
 @media only screen and (max-width: 1200px) {

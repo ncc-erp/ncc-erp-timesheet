@@ -1203,7 +1203,7 @@ namespace Timesheet.APIs.ReviewDetails
                 {
                     ReviewDetailId = input.Id,
                     NoteByUserId = AbpSession.UserId.Value,
-                    PrivateNote = input.PrivateNote.Trim()
+                    PrivateNote = input.PrivateNote.Trim()   
                 };
                 await WorkScope.InsertAsync(reviewInternComment);
             }
@@ -1353,6 +1353,33 @@ namespace Timesheet.APIs.ReviewDetails
             {
                 throw new UserFriendlyException("Trạng thái chỉ được là Reviewed hoặc Rejected.");
             }
+        }
+            
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern)]
+        [HttpPost]
+        public async Task HeadPmVerifyOrRejectAll(List<HeadPmVerifyDto> input)
+        {
+            foreach(var inputItem in input)
+            {
+                if (inputItem.Status == ReviewInternStatus.Reviewed || inputItem.Status == ReviewInternStatus.Rejected)
+                {
+                    var detail = await WorkScope.GetAsync<ReviewDetail>(inputItem.ReviewDetailId);
+                    if (detail.Status == ReviewInternStatus.PmReviewed)
+                    {
+                        detail.Status = inputItem.Status;
+                        await WorkScope.UpdateAsync(detail);
+                    }
+                    else
+                    {
+                        throw new UserFriendlyException("Review này chưa PM Review");
+                    }
+                }
+                else
+                {
+                    throw new UserFriendlyException("Trạng thái chỉ được là Reviewed hoặc Rejected.");
+                }
+            }
+            
         }
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_ViewAll)]
         [HttpGet]
