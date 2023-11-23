@@ -98,4 +98,7 @@ export class ReviewDetailService extends BaseApiService{
   headPmApproveIntern(data: object): Observable<any>{
     return this.http.post(this.rootUrl + '/HeadPmVerify', data);
   }
+  countMonthLevelMax(): Observable<any>{
+    return this.http.get(this.rootUrl + '/CountMonthLevelMax');
+  }
 }

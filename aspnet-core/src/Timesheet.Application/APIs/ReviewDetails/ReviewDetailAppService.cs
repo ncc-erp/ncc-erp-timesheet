@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Timesheet.APIs.CapabilitySettings.Dto;
 using Timesheet.APIs.ReviewDetails.Dto;
 using Timesheet.APIs.ReviewInternCapabilities.Dto;
+using Timesheet.APIs.ReviewInterns.Dto;
 using Timesheet.BackgroundJob;
 using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
@@ -1352,6 +1353,23 @@ namespace Timesheet.APIs.ReviewDetails
             {
                 throw new UserFriendlyException("Trạng thái chỉ được là Reviewed hoặc Rejected.");
             }
+        }
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_ViewAll)]
+        [HttpGet]
+        public async Task<List<InternshipMaxLevelMonthsDto>> CountMonthLevelMax()
+        {
+            long userId = AbpSession.UserId.Value;
+            var listInternshipMaxLevelMonths = await WorkScope.GetAll<ReviewDetail>()
+                        .Where(x =>  x.IsDeleted == false && x.NewLevel != null && x.NewLevel.Value < UserLevel.FresherMinus && x.Status != ReviewInternStatus.Draft)
+                        .GroupBy(x => x.InternshipId)
+                        .Select(gp => new InternshipMaxLevelMonthsDto
+                        {
+                            internshipId = gp.Key,
+                            maxLevel = gp.Max(y=> y.NewLevel).Value,
+                            countMonthLevelMax = gp.Count(rd => rd.NewLevel == gp.Max(y => y.NewLevel))
+                        })
+                        .ToListAsync();
+            return listInternshipMaxLevelMonths;
         }
     }
 }
