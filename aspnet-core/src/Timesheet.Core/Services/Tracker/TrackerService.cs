@@ -33,9 +33,17 @@ namespace Timesheet.Services.Tracker
         }
 
         public virtual List<GetSUerAndActiveTimeTrackerDto> GetTimeTrackerToDay(DateTime day, List<string> userNames)
-        { 
-            var url = "api/0/report?day="+day.ToString("yyyy/MM/dd");
-            return  PostAsync<List<GetSUerAndActiveTimeTrackerDto>>(url, new GetUserTimeTrackerToDayDto { emails = userNames }).Result;
+        {
+            var url = "api/0/report?day=" + day.ToString("yyyy/MM/dd");
+            try
+            {
+                return PostAsync<List<GetSUerAndActiveTimeTrackerDto>>(url, new GetUserTimeTrackerToDayDto { emails = userNames }).Result;
+            }
+            catch (Exception e)
+            {
+                logger.LogError($"CHECK TRACKER - Post: {url} day: {day} userNames: {userNames} Error: {e.Message}");
+            }
+            return default;
         }
 
         public async Task<T> PostAsync<T>(string url, object input)
@@ -49,6 +57,7 @@ namespace Timesheet.Services.Tracker
 
                 var contentString = new StringContent(strInput, Encoding.UTF8, "application/json");
 
+                httpClient.Timeout = TimeSpan.FromMinutes(10);
                 HttpResponseMessage response = await httpClient.PostAsync(url, contentString);
 
                 var responseContent = await response.Content.ReadAsStringAsync();
