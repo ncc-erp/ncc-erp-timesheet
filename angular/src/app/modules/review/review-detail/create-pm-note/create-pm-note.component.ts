@@ -12,7 +12,7 @@ export class CreatePmNoteComponent implements OnInit {
   public active = true;
   public saving = false;
   public pmNote = '';
-  public createPmNoteStatus = EnumCreatePmNoteStatus.Approved;
+  public createPmNoteStatus = EnumCreatePmNoteStatus.Approved;  
   constructor(
     public dialogRef: MatDialogRef<CreatePmNoteComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,

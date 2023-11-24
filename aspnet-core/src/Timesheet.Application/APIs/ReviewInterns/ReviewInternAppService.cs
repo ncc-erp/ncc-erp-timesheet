@@ -238,7 +238,7 @@ namespace Timesheet.APIs.ReviewInterns
 
             if (details.Count() == 0)
             {
-                throw new UserFriendlyException("Chưa có TTS mới nào được approve");
+                throw new UserFriendlyException("Chưa có TTS mới nào được approve hoặc reject");
             }
 
             List<Object> failedList = new List<object>();

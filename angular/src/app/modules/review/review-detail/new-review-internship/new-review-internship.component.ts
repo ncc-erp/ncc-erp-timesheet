@@ -190,7 +190,6 @@ export class NewReviewInternshipComponent extends AppComponentBase implements On
       type: this.review.type,
       subLevel: this.review.subLevel,
       isFullSalary: this.review.isFullSalary ? this.review.isFullSalary : false,
-      privateNote: this.privateNote,
       id: this.reviewId,
       reviewInternCapabilities: this.review.reviewInternCapabilities
     } as ReviewInternshipDto; 

@@ -181,8 +181,13 @@
                             <th>{{ "History" | localize }}</th>
                             <th>{{ "Level" | localize }}</th>
                             <th>{{ "New Level" | localize }}</th>
+                            <th (click)="sortByCountMonth()" style="display: flex; margin-top: 6px;">
+                                <span>{{ "Count Month Level Max" | localize}}</span>
+                                <mat-icon>unfold_more</mat-icon>
+                            </th>
                             <th>{{ "Status" | localize }}</th>
-                            <th>{{ "Note" | localize }}</th>
+                            <th>{{ "PM/ Loren Note" | localize }}</th>
+                            <th>{{ "Interview Note" | localize }}</th>
                             <th>{{ "Updated Info" | localize }}</th>
                         </tr>
                     </thead>
@@ -438,6 +443,10 @@
                                         [maxStars]="1" [initialStars]="1" [readonly]="true"></ngx-stars>
                                 </div>
                             </td>
+                            <td style="text-align: center;" *ngIf="isShowCountMonthMaxLevel(item)  else emptyContent" >
+                                <span class="countMonth">{{item.countMonthLevelMax}} </span>
+                                <span class="label status-label mr-left" [ngStyle]="userLevels[item.newLevel].style">{{getLevelById(item.maxLevel)}}</span>
+                            </td>
                             <!-- Trạng thái -->
                             <td style="text-align: center">
                                 <div class="label status-label ng-star-inserted" [ngClass]="getStatusCssClass(item.status)">
@@ -450,9 +459,26 @@
                                     <p [ngClass]="item.hidePrivateNote == false ? 'preReview' : 'review'"
                                     title="Cuộn chuột hoặc Click để mở rộng nội dung" name="pmNote">
                                         <ng-container *ngFor="let note of item.reviewInternPrivateNoteDtos">
-                                            <b class="">{{note.noteByUserName}}:</b>
+                                            <div *ngIf="isShowPmNote(note)" >
+                                                <b class="">{{note.noteByUserName}}:</b>
                                             {{note.privateNote}} <br>
                                             <i>{{ note.created | date: "dd/MM/yyyy" }} {{ note.created | date: "hh:mm:ss" }}</i> <br>
+                                             </div>
+                                        </ng-container>      
+                                    </p>
+                                </div>
+                            </td>
+                            <td>
+                                <div (click)="togglePrivateNote(item)">
+                                    <p [ngClass]="item.hidePrivateNote == false ? 'preReview' : 'review'"
+                                    title="Cuộn chuột hoặc Click để mở rộng nội dung" name="interviewNote">
+                                        <ng-container *ngFor="let note of item.reviewInternPrivateNoteDtos">
+                                            <div *ngIf="isShowInterviewNote(note)">
+                                                <b class="">{{note.noteByUserName}}:</b>
+                                                {{note.privateNote}} <br>
+                                                <i>{{ note.created | date: "dd/MM/yyyy" }} {{ note.created | date: "hh:mm:ss" }}</i> <br>
+                                            </div>
+                                                 
                                         </ng-container>
                                     </p>
                                 </div>
@@ -478,3 +504,6 @@
         </div>
     </div>
 </div>
+<ng-template #emptyContent>
+    <td style="text-align: center;"></td>
+</ng-template>

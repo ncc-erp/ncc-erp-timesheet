@@ -93,7 +93,8 @@ namespace Timesheet.APIs.ReviewDetails
                                NoteByUserId = c.NoteByUserId,
                                NoteByUserName = u.Name,
                                PrivateNote = c.PrivateNote,
-                               Created = c.CreationTime
+                               Created = c.CreationTime,
+                               ReviewInternNoteType = c.ReviewInternNoteType
                            };
             var listNote = qnote.ToList();
             var reviewDetails = from rv in WorkScope.GetAll<ReviewDetail>()
@@ -145,7 +146,8 @@ namespace Timesheet.APIs.ReviewDetails
                                         NoteByUserId = s.NoteByUserId,
                                         NoteByUserName = s.NoteByUserName,
                                         PrivateNote = s.PrivateNote,
-                                        Created = s.Created
+                                        Created = s.Created,
+                                        ReviewInternNoteType = s.ReviewInternNoteType
                                     }).OrderByDescending(s => s.Created).ToList(),
                                 };
             var result = await reviewDetails.OrderBy(x => x.InternshipId).GetGridResult(reviewDetails, input);
@@ -1338,7 +1340,8 @@ namespace Timesheet.APIs.ReviewDetails
                         {
                             ReviewDetailId = input.ReviewDetailId,
                             NoteByUserId = AbpSession.UserId.Value,
-                            PrivateNote = input.PrivateNote.Trim()
+                            PrivateNote = input.PrivateNote.Trim(),
+                            ReviewInternNoteType = ReviewInternNoteType.PmNote
                         };
                         await WorkScope.InsertAsync(reviewInternComment);
                     }
@@ -1371,7 +1374,8 @@ namespace Timesheet.APIs.ReviewDetails
                         {
                             ReviewDetailId = input.ReviewDetailId,
                             NoteByUserId = AbpSession.UserId.Value,
-                            PrivateNote = input.PrivateNote.Trim()
+                            PrivateNote = input.PrivateNote.Trim(),
+                            ReviewInternNoteType = ReviewInternNoteType.InterviewerNote
                         };
                         await WorkScope.InsertAsync(reviewInternComment);
                     }
@@ -1386,6 +1390,23 @@ namespace Timesheet.APIs.ReviewDetails
             {
                 throw new UserFriendlyException("Trạng thái chỉ được là HR Approved hoặc Reopen.");
             }
+        }
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_ViewAll)]
+        [HttpGet]
+        public async Task<List<InternshipMaxLevelMonthsDto>> CountMonthLevelMax()
+        {
+            long userId = AbpSession.UserId.Value;
+            var listInternshipMaxLevelMonths = await WorkScope.GetAll<ReviewDetail>()
+                        .Where(x =>  x.IsDeleted == false && x.NewLevel != null && x.NewLevel.Value < UserLevel.FresherMinus && x.Status != ReviewInternStatus.Draft)
+                        .GroupBy(x => x.InternshipId)
+                        .Select(gp => new InternshipMaxLevelMonthsDto
+                        {
+                            internshipId = gp.Key,
+                            maxLevel = gp.Max(y=> y.NewLevel).Value,
+                            countMonthLevelMax = gp.Count(rd => rd.NewLevel == gp.Max(y => y.NewLevel))
+                        })
+                        .ToListAsync();
+            return listInternshipMaxLevelMonths;
         }
     }
 }

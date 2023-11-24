@@ -1,27 +1,25 @@
 <form *ngIf="active" style="position: relative;" #verifyForm="ngForm">
   <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>
-    {{"Interview Note" | localize}} : <b>{{data.internName}}</b>
+    {{"Interview Note" | localize}}
   </h1>
   <mat-icon (click)="close(0)" name="closeBtn" style="position: absolute; top: 0; right: 0;
   cursor: pointer;">close</mat-icon>
   <hr>
   <mat-dialog-content class="mat-typography">
     <label class="col-xl-3 col-lg-2 col-md-3 col-sm-3 col-3 col-form-label">
-      {{ "Private Note:" | localize }}
+      {{ "Note:" | localize }}
     </label>
     <mat-form-field class="example-full-width row-item-rest col-xl-9
         col-lg-9 col-md-9 col-xs-9" appearance="outline">
-      <mat-label>Private Note</mat-label>
+      <mat-label>Note</mat-label>
       <textarea matInput rows="4" name="interviewNote" [(ngModel)]="interviewNote" required></textarea>
     </mat-form-field>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
     <button mat-raised-button mat-dialog-close>Cancel</button>
-    <!-- <button mat-raised-button color="warn" name="reopen" [disabled]="verifyForm.invalid"
-     (click)="saveHrVerifyIntern(hrReopenStatus)">Reopen</button> -->
     <button mat-raised-button color="primary" name="saveBtn" [disabled]="verifyForm.invalid" 
-    (click)="savePmNote(createPmNoteStatus)">Approve</button>
+    (click)="saveInterviewNote(createInterviewNoteStatus)">Approve</button>
   </mat-dialog-actions>
 
 </form>

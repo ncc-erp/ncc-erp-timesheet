@@ -322,3 +322,8 @@ th{
         margin: 20px 0px;
     }
 }
+
+.countMonth::after {
+    content: '-';
+    margin-right: 5px; 
+}

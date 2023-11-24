@@ -89,6 +89,8 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   branchSearch: FormControl = new FormControl("")
   listBranchFilter : BranchDto[];
   branchId;
+  listInternshipMaxLevelMonths : InternshipMaxLevelMonths [] = [];
+  sortByMonth = true;
   constructor(
     private route: ActivatedRoute,
     public _dialog: MatDialog,
@@ -147,59 +149,69 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       this.listReviewer = this.listReviewerFilter.slice();
     }
   }
-
-   protected list(request: PagedRequestDto, pageNumber: number, finishedCallback: Function): void {
-     request.searchText = this.searchText;
-     request.filterItems = [];
-     // if (this.branchId != 0){
-     //   request.filterItems.push({propertyName: 'branchId', comparison: 0, value: this.branchId} as FilterDto)
-     // }
-     if (this.selectedStatus != InitParam.ALLSTATUS){
-       request.filterItems.push({propertyName: 'status', comparison: 0, value: this.selectedStatus} as FilterDto)
-     }
-     if (this.selectedReviewer > InitParam.ALL){
-       request.filterItems.push({propertyName: 'reviewerId', comparison: 0, value: this.selectedReviewer} as FilterDto)
-     }
-     if (this.selectedReviewer == InitParam.NOREVIEWER){
-       request.filterItems.push({propertyName: 'reviewerId', comparison: 0, value: null} as FilterDto)
-     }
-     if (this.selectedCurrentLevel != InitParam.ALL){
-       request.filterItems.push({propertyName: 'currentLevel', comparison: 0, value: this.selectedCurrentLevel} as FilterDto)
-     }
-     if (this.selectedNewLevel != InitParam.ALL){
-       request.filterItems.push({propertyName: 'newLevel', comparison: 0, value: this.selectedNewLevel} as FilterDto)
-     }
-     if (this.selectedIntership != InitParam.ALL){
-       request.filterItems.push({propertyName: 'internshipId', comparison: 0, value: this.selectedIntership  } as FilterDto)
-     }
-     if(this.selectedChangeLevel != InitParam.ALL){
-       request.filterItems.push({propertyName: 'levelChange', comparison: 0, value: this.selectedChangeLevel  } as FilterDto)
-     }
-     this.reviewDetailService
-       .getAllPaging(request, this.reviewId, this.branchId)
-       .pipe(finalize(() => {
-         finishedCallback();
-       }))
-       // .subscribe((result: any) => {
-       //   this.listReviewIntern = result.result.items;
-       //   this.showPaging(result.result, pageNumber);
-       .subscribe((rs: any) => {
-         this.totalItems = rs.result.totalCount
-         if (rs.result == null || rs.result.items.length == 0) {
-           this.listReviewIntern = []
-         }
-         else {
-           this.listReviewIntern = rs.result.items;
-           this.showPaging(rs.result, pageNumber);
-           this.listReviewIntern.forEach(item => {
-             item.history = false;
-             item.hideNote = false;
-             item.hidePrivateNote = false;
-             item.more = false;
-           })
-         }
-       });
-     }
+  
+  protected list(request: PagedRequestDto, pageNumber: number, finishedCallback: Function): void {
+    request.searchText = this.searchText;
+    request.filterItems = [];
+    // if (this.branchId != 0){
+    //   request.filterItems.push({propertyName: 'branchId', comparison: 0, value: this.branchId} as FilterDto)
+    // }
+    if (this.selectedStatus != InitParam.ALLSTATUS){
+      request.filterItems.push({propertyName: 'status', comparison: 0, value: this.selectedStatus} as FilterDto)
+    }
+    if (this.selectedReviewer > InitParam.ALL){
+      request.filterItems.push({propertyName: 'reviewerId', comparison: 0, value: this.selectedReviewer} as FilterDto)
+    }
+    if (this.selectedReviewer == InitParam.NOREVIEWER){
+      request.filterItems.push({propertyName: 'reviewerId', comparison: 0, value: null} as FilterDto)
+    }
+    if (this.selectedCurrentLevel != InitParam.ALL){
+      request.filterItems.push({propertyName: 'currentLevel', comparison: 0, value: this.selectedCurrentLevel} as FilterDto)
+    }
+    if (this.selectedNewLevel != InitParam.ALL){
+      request.filterItems.push({propertyName: 'newLevel', comparison: 0, value: this.selectedNewLevel} as FilterDto)
+    }
+    if (this.selectedIntership != InitParam.ALL){
+      request.filterItems.push({propertyName: 'internshipId', comparison: 0, value: this.selectedIntership  } as FilterDto)
+    }
+    if(this.selectedChangeLevel != InitParam.ALL){
+      request.filterItems.push({propertyName: 'levelChange', comparison: 0, value: this.selectedChangeLevel  } as FilterDto)
+    }
+    this.reviewDetailService
+      .countMonthLevelMax()
+      .subscribe(rs => {
+        this.listInternshipMaxLevelMonths = rs.result as InternshipMaxLevelMonths []; 
+        this.reviewDetailService
+          .getAllPaging(request, this.reviewId, this.branchId)
+          .pipe(finalize(() => {
+            finishedCallback();
+          }))
+          // .subscribe((result: any) => {
+          //   this.listReviewIntern = result.result.items;
+          //   this.showPaging(result.result, pageNumber);
+          .subscribe((rs: any) => {
+            this.totalItems = rs.result.totalCount
+            if (rs.result == null || rs.result.items.length == 0) {
+              this.listReviewIntern = []
+            }
+            else {
+              this.listReviewIntern = rs.result.items;
+              this.showPaging(rs.result, pageNumber);
+              this.listReviewIntern.forEach(item => {
+                const internshipSuitable = this.listInternshipMaxLevelMonths.find(x => x.internshipId === item.internshipId);
+                if (internshipSuitable) {
+                    item.countMonthLevelMax = internshipSuitable.countMonthLevelMax;
+                    item.maxLevel = internshipSuitable.maxLevel;  
+                }
+                item.history = false;
+                item.hideNote = false;
+                item.hidePrivateNote = false;
+                item.more = false;
+              })
+            }
+          });
+      });
+    }
 
     isShowBtnChotLuong(item:ReviewDetailDto){
       return this.isGranted(PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_ConfirmSalaryForOneIntern)
@@ -283,21 +295,40 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       this.checkStatus(item.status, 'delete') 
     }
 
+    isShowCountMonthMaxLevel(item: ReviewDetailDto){
+      return typeof item.newLevel === 'number' && item.newLevel <= 3;
+    }
+
     isShowBtnPMNote(item: ReviewDetailDto){
       return this.isGranted(
         PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreatePMNote
-      ) && this.checkStatus(item.status, 'pmNote') && item.newLevel.valueOf() <= 3
+      ) && this.checkStatus(item.status, 'pmNote') 
     }
 
     isShowBtnInterviewNote(item: ReviewDetailDto){
       return this.isGranted(
         PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreateInterviewNote
-      ) && this.checkStatus(item.status, 'interviewNote') && item.newLevel.valueOf() >=4
+      ) && this.checkStatus(item.status, 'interviewNote') 
     }
 
     protected delete(entity: any): void {
 
     }
+
+    isShowPmNote(item: reviewInternCommentDto) {
+      if (item && item.reviewInternNoteType !== undefined ) {
+        return item.reviewInternNoteType === 0;
+      }
+      return false;
+    }
+
+    isShowInterviewNote(item: reviewInternCommentDto){
+      if (item && item.reviewInternNoteType !== undefined ) {
+        return item.reviewInternNoteType === 1;
+      }
+      return false;
+    }
+
 
   getAllPM() {
     this.listReviewerService.getAllPM().subscribe(res => {
@@ -454,14 +485,18 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
 
 
   getSubLevelById(subLevel, newLevel){
-    if(newLevel != null){
-      for(let i = 0 ; i < this.listSubLevels.length; i++){
-        if(newLevel == this.listSubLevels[i].id)
-        {
-          let res = this.listSubLevels[i].subLevels;
-          for(let j = 0 ; j < res.length; j++){
-            if(res[j].id == subLevel){
-              return res[j].name;
+    if(newLevel != null && this.listSubLevels && this.listSubLevels.length > 0){
+      if(this.listSubLevels.length > 0){
+        for(let i = 0 ; i < this.listSubLevels.length; i++){
+          if(newLevel == this.listSubLevels[i].id)
+          {
+            let res = this.listSubLevels[i].subLevels;
+            if (res && res.length) {
+              for(let j = 0 ; j < res.length; j++){
+                if(res[j].id == subLevel){
+                  return res[j].name;
+                }
+              }
             }
           }
         }
@@ -757,7 +792,6 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       case 2: return action=="sendEmail" || action=="reject" || action == "print" ? true : false
       case -1: return action=="edit"|| action=="review" || action == "approve" ? true : false
       case 3: return action=="update to HRM"|| action=="rejectSentMail" || action=="print" ? true : false
-      // case 4: return action=="edit"|| action=="hrVerify" || action == "reject" ? true : false
       case 4: return action=="headPm" ? true : false
       case 5: return action=="edit"|| action=="pmReview" ? true : false
       default: return false
@@ -851,6 +885,16 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     }
   }
 
+  sortByCountMonth(){
+    if(this.sortByMonth){
+      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['countMonthLevelMax'], ['asc']);
+    }
+    else {
+      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['countMonthLevelMax'], ['desc']);
+    }
+    this.sortByMonth = !this.sortByMonth;
+  }
+
   createPMNote(item: ReviewDetailDto): void{
     const dialogRef = this._dialog.open(CreatePmNoteComponent, {
       disableClose : true,
@@ -927,13 +971,18 @@ export class ReviewDetailDto {
   reviewInternCommentDto: reviewInternCommentDto[];
   id?: number;
   countMonthLevelMax: number;
+  maxLevel:number;
 }
 
 export class reviewInternCommentDto{
+
   reviewDetailId?: number;
-  commentUserId?: number;
+  poteByUserId?: number;
+  noteByUserName?: string;
+  created?: Date;
   privateNote?: string;
-  id?: number
+  id?: number;
+  reviewInternNoteType: number;
 }
 
 export class UpdateReviewDetailDto {
@@ -974,5 +1023,10 @@ export class InfoReviewerDto {
 }
 function UpdateReviewDetailComponent(UpdateReviewDetailComponent: any, arg1: { disableClose: true; width: string; data: ReviewDetailDto; }) {
   throw new Error('Function not implemented.');
+}
+export class InternshipMaxLevelMonths {
+  internshipId: number;  
+  maxLevel: number;
+  countMonthLevelMax: number;
 }
 

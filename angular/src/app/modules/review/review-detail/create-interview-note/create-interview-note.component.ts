@@ -26,16 +26,16 @@ export class CreateInterviewNoteComponent implements OnInit {
     this.dialogRef.close(res);
   }
 
-  savePmNote(status: number){
+  saveInterviewNote(status: number){
     const interviewNoteDto = {
       reviewDetailId: this.data.id,
       status: status,
-      interviewNote: this.interviewNote,
+      privateNote: this.interviewNote,
     }
 
-    // this.reviewDetailService.saveInterviewNote(interviewNoteDto).subscribe(res => {
-    //   this.dialogRef.close(this.interviewNote);
-    // })
+    this.reviewDetailService.saveInterviewNote(interviewNoteDto).subscribe(res => {
+      this.dialogRef.close(this.interviewNote);
+    })
   }
 
 }
