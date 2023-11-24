@@ -24,4 +24,14 @@
     text-decoration: underline;
     cursor: pointer;
     color: #41a0e4;
-  }
+}
+
+.red {
+    color: red;
+    font-weight: bold;
+}
+
+.green {
+    color: green;
+    font-weight: bold;
+}

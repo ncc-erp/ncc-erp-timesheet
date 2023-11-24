@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 import { BaseApiService } from './base-api.service';
 import { Observable } from 'rxjs';
 import { ApiResponse } from './model/api-response.model';
-import { DisburseDto, DisburseTeamBuildingRequestInfoDto, EditRequestDto, InputGetAllDetailByRequestIdDto, InputGetUserOtherProjectDto, ResponseDetailTeamBuildingHistoryDto } from '@app/modules/team-building/const/const';
+import { DisburseDto, DisburseTeamBuildingRequestInfoDto, EditOneInvoiceAmountDto, EditRequestDto, InputGetAllDetailByRequestIdDto, InputGetUserOtherProjectDto, ResponseDetailTeamBuildingHistoryDto } from '@app/modules/team-building/const/const';
 
 
 @Injectable({
@@ -64,5 +64,13 @@ import { DisburseDto, DisburseTeamBuildingRequestInfoDto, EditRequestDto, InputG
       params = params.append("teamBuildingRequestId", teamBuildingRequestId.toString());
       params = params.append("requesterId", requesterId.toString());
       return this.http.get(this.rootUrl + "/GetTeamBuildingRequestForDisburse", { params : params });
+    }
+
+    editOneInvoice(input: EditOneInvoiceAmountDto): Observable<any> {
+      return this.http.post(this.rootUrl + "/EditOneInvoice", input);
+    }
+
+    getOneInvoice(id: number): Observable<any> {
+      return this.http.get(this.rootUrl + `/GetOneInvoice?id=${id}`);
     }
   }

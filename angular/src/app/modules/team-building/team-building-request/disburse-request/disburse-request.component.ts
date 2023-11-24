@@ -1,11 +1,12 @@
 import { Component, Inject, Injector, OnInit, ViewChild } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material';
 import { BranchService } from '@app/service/api/branch.service';
 import { TeamBuildingRequestService } from '@app/service/api/team-building-request.service';
 import { AppComponentBase } from '@shared/app-component-base';
 import { NgxStarsComponent } from 'ngx-stars';
 import { DisburseDto, DisburseTeamBuildingRequestDto, DisburseTeamBuildingRequestInfoDto, InvoiceDisburseDto } from '../../const/const';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { EditInvoiceMoneyComponent } from './edit-invoice-money/edit-invoice-money.component';
 
 @Component({
   selector: 'app-disburse-request',
@@ -35,6 +36,7 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
     private branchService: BranchService,
     private formBuilder : FormBuilder,
     public dialogRef: MatDialogRef<DisburseRequestComponent>,
+    public _dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     super(injector);
@@ -69,7 +71,7 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
   }
 
   calculateInvoiceAmountAfterTaxing(invoiceMoney : number, hasVAT : boolean) {
-    return hasVAT ? invoiceMoney : invoiceMoney * this.billPercentage;
+    return hasVAT ? invoiceMoney : (invoiceMoney / this.billPercentage);
   }
 
   updateInvoiveStatusInDisburseInvoiceList(orderNumber : number, hasVAT : boolean) {
@@ -85,17 +87,17 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
         })
       }
     }
-    suggestedDisburseMoney += this.disburseTeambuildingRequestInfoDto.remainingMoney;
+    //suggestedDisburseMoney += this.disburseTeambuildingRequestInfoDto.remainingMoney;
     return suggestedDisburseMoney;
   }
 
-  close(res): void {
-    this.dialogRef.close(res);
+  close(): void {
+    this.dialogRef.close(this.disburse);
   }
 
   getBillPercentageConfig(){
     this.teamBuildingRequestService.getBillPercentageConfig().subscribe((rs)=>{
-      this.billPercentage = rs.result;
+      this.billPercentage = (1 + rs.result/100);
     })
   }
 
@@ -107,11 +109,35 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
 
     if(this.disburseDto.disburseMoney >= 0){
       this.teamBuildingRequestService.disburseRequest(this.disburseDto).subscribe(res => {
-        this.dialogRef.close(this.disburse)
+        this.dialogRef.close(this.disburse);
       });
     } else {
       this.notify.error(this.l("Disburse money required!"));
     }
+  }
+
+  editOneInvoice(id: number) {
+    const dialogRef = this._dialog.open(EditInvoiceMoneyComponent, {
+      disableClose: true,
+      width: window.innerWidth >= 600 ? "600px" : "90%",
+      data: id,
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        abp.notify.success("Edit invoice money successful");
+        this.getDisburseRequestInfo();
+      }
+    });
+  }
+
+  calculateTotalSuggestedRemainingMoney() {
+    let suggestedRemainingMoney = 0;
+    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
+      if(this.disburseTeambuildingRequestInfoDto.requestMoney !== undefined && this.disburseMoney > 0) {
+          suggestedRemainingMoney += this.disburseTeambuildingRequestInfoDto.requestMoney - this.invoiceAmount
+      }
+    }
+    return suggestedRemainingMoney;
   }
 }
 

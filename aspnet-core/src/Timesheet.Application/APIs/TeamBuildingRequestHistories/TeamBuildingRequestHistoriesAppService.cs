@@ -59,7 +59,8 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                     RemainingMoneyStatus = s.RemainingMoneyStatus,
                     Status = s.Status,
                     CreationTime = s.CreationTime,
-                    InvoiceAmount = s.InvoiceAmount.HasValue ? s.InvoiceAmount.Value : 0,
+                    InvoiceAmount = s.InvoiceAmount,
+                    VATMoney = s.VATMoney,
                 })
                 .OrderByDescending(item => item.CreationTime)
                 .ThenBy(item => item.Status == TeamBuildingRequestStatus.Pending ? 0 : 1)
@@ -179,6 +180,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                     if (listRequestByRequesterIdWithoutLast.IsNullOrEmpty())
                     {
                         request.DisbursedMoney = input.DisburseMoney;
+                        request.VATMoney = sumAmount - input.DisburseMoney;
                         request.Status = TeamBuildingRequestStatus.Done;
                         request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
                     }
@@ -189,12 +191,14 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                         if (item == null || item.RemainingMoneyStatus == RemainingMoneyStatus.Done || item.RemainingMoneyStatus == null)
                         {
                             request.DisbursedMoney = input.DisburseMoney;
+                            request.VATMoney = sumAmount - input.DisburseMoney;
                             request.Status = TeamBuildingRequestStatus.Done;
                             request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
                         } // có RemainingMoney
                         else if (item.RemainingMoneyStatus == RemainingMoneyStatus.Remaining)
                         {
                             request.DisbursedMoney = input.DisburseMoney;
+                            request.VATMoney = sumAmount - input.DisburseMoney;
                             request.Status = TeamBuildingRequestStatus.Done;
                             item.RemainingMoneyStatus = RemainingMoneyStatus.Done;
                             request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
@@ -209,6 +213,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                     if (listRequestByRequesterIdWithoutLast.IsNullOrEmpty())
                     {
                         request.DisbursedMoney = input.DisburseMoney;
+                        request.VATMoney = sumAmount - input.DisburseMoney;
                         request.RemainingMoney = request.RequestMoney - sumAmount;
                         request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
                         request.Status = TeamBuildingRequestStatus.Done;
@@ -219,6 +224,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                         if (item.RemainingMoneyStatus == RemainingMoneyStatus.Done)
                         {
                             request.DisbursedMoney = input.DisburseMoney;
+                            request.VATMoney = sumAmount - input.DisburseMoney;
                             request.RemainingMoney = request.RequestMoney - sumAmount;
                             request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
                             request.Status = TeamBuildingRequestStatus.Done;
@@ -226,6 +232,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                         else if (item.RemainingMoneyStatus == RemainingMoneyStatus.Remaining)
                         {
                             request.DisbursedMoney = input.DisburseMoney;
+                            request.VATMoney = sumAmount - input.DisburseMoney;
                             request.RemainingMoney = request.RequestMoney - sumAmount;
                             item.RemainingMoneyStatus = RemainingMoneyStatus.Done;
                             request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
@@ -241,6 +248,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                     if (listRequestByRequesterIdWithoutLast.IsNullOrEmpty())
                     {
                         request.DisbursedMoney = input.DisburseMoney;
+                        request.VATMoney = sumAmount - input.DisburseMoney;
                         request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
                         request.Status = TeamBuildingRequestStatus.Done;
                     }
@@ -250,12 +258,14 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                         if (item.RemainingMoneyStatus == RemainingMoneyStatus.Done)
                         {
                             request.DisbursedMoney = input.DisburseMoney;
+                            request.VATMoney = sumAmount - input.DisburseMoney;
                             request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
                             request.Status = TeamBuildingRequestStatus.Done;
                         }// co RemainingMoney
                         else if (item.RemainingMoneyStatus == RemainingMoneyStatus.Remaining)
                         {
                             request.DisbursedMoney = input.DisburseMoney;
+                            request.VATMoney = sumAmount - input.DisburseMoney;
                             item.RemainingMoneyStatus = RemainingMoneyStatus.Done;
                             request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
                             request.Status = TeamBuildingRequestStatus.Done;
@@ -369,7 +379,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
         public float GetBillPercentageConfig()
         {
             var strBillPercent = SettingManager.GetSettingValueForApplication(AppSettingNames.BillPercentage);
-            return float.TryParse(strBillPercent, out float billPercent) ? billPercent / 100 : 0.9f;
+            return float.TryParse(strBillPercent, out float billPercent) ? billPercent  : 10f;
         }
 
         [HttpGet]
@@ -653,6 +663,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
 
             request.DisbursedMoney = null;
             request.RemainingMoney = null;
+            request.VATMoney = null;
             request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
             request.Status = TeamBuildingRequestStatus.Pending;
 
@@ -770,6 +781,47 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                 })
                 .OrderByDescending(x => x.Status).ThenBy(x => x.EmployeeFullName).ThenBy(x => x.ApplyMonth)
                 .ToListAsync();
+        }
+
+        [HttpPost]
+        public async Task<EditOneInvoiceDto> EditOneInvoice(EditOneInvoiceDto input)
+        {
+            var item = await WorkScope.GetAsync<TeamBuildingRequestHistoryFile>(input.Id);
+            ObjectMapper.Map(input, item);
+            await WorkScope.UpdateAsync(item);
+
+            var teamBuildingHistoryId = await WorkScope.GetAll<TeamBuildingRequestHistoryFile>()
+                .Where(s => s.Id == input.Id)
+                .Select(s => s.TeamBuildingRequestHistoryId)
+                .FirstOrDefaultAsync();
+
+            var teamBuildingHistory = await WorkScope.GetAll<TeamBuildingRequestHistory>()
+                .Where(s => s.Id == teamBuildingHistoryId)
+                .FirstOrDefaultAsync();
+
+            var totalInvoiceAmount = await WorkScope.GetAll<TeamBuildingRequestHistoryFile>()
+                .Where(s => s.TeamBuildingRequestHistoryId == teamBuildingHistory.Id)
+                .Where(s => s.Id != input.Id)
+                .SumAsync(s => s.InvoiceAmount);
+
+            teamBuildingHistory.InvoiceAmount = totalInvoiceAmount + input.InvoiceAmount;
+
+            await WorkScope.UpdateAsync(teamBuildingHistory);
+
+            return input;
+        }
+
+        [HttpGet]
+        public async Task<EditOneInvoiceDto> GetOneInvoice(long id)
+        {
+            return await WorkScope.GetAll<TeamBuildingRequestHistoryFile>()
+                .Where(s => s.Id == id)
+                .Select(s => new EditOneInvoiceDto 
+                {
+                    Id = s.Id,
+                    InvoiceAmount = s.InvoiceAmount
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }

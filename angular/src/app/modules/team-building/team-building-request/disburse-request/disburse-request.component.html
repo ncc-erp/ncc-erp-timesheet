@@ -1,6 +1,6 @@
 <form #disburseRequestForm="ngForm" style="position: relative;" autocomplete="off" id="frm_create_group" novalidate>
   <p style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>Disburse request ID #{{this.disburseTeambuildingRequestInfoDto.requestId}}</p>
-  <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0;
+  <mat-icon (click)="close()" style="position: absolute; top: 0; right: 0;
   cursor: pointer;">close</mat-icon>
   <hr>
   <div>
@@ -28,7 +28,7 @@
                   </th>
                   <th style="width: 40%">
                     Invoice Bill Resource
-                  </th> 
+                  </th>
                   <th style="width: 15%">
                     Has VAT
                   </th>
@@ -42,8 +42,10 @@
                   <td>
                     <span>Invoice #{{i + 1}}</span>
                   </td>
-                  <td>
+                  <td class="d-flex" style="align-items: center;">
                     <span>{{invoice.invoiceMoney | number : "1.0" : "en-US"}} VNĐ</span>
+                        <mat-icon color="primary" style="cursor: pointer; margin-left: 10px; font-size: 24px;"
+                        (click)="editOneInvoice(invoice.invoiceId);$event.stopPropagation()">edit</mat-icon>
                   </td>
                   <td>
                     <a target="_blank" href="{{invoice.invoiceResourceUrl}}">{{invoice.invoiceResourceName}}</a>
@@ -72,15 +74,18 @@
         <div class="align-item format-col form-group row required">
           <label class="col-md-4 col-form-label" for="connectionString">
             {{ "Disburse money:" | localize }}
-            </label>
+          </label>
+          <div class="d-flex" style="flex-direction: column; width: 100%;">
             <mat-form-field class="col-xl-8 col-lg-8 col-md-8 col-xs-8" appearance="outline">
               <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ'}"
               matInput="matInput" [(ngModel)]="disburseMoney" name="money" required/>
           </mat-form-field>
+          <p style="float: right; margin-left: 15px;"><b>{{ "Total Remaining Money:" | localize }}</b> {{calculateTotalSuggestedRemainingMoney() | number : "1.0" : "en-US"}} VNĐ</p>
+          </div>
         </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-      <button name="cancelButton" class="btn btn-default" mat-raised-button mat-dialog-close >{{l('Cancel')}}</button>
+      <button name="cancelButton" class="btn btn-default" mat-raised-button mat-dialog-close (click)="close()">{{l('Cancel')}}</button>
       <button name="saveButton" mat-raised-button color="primary" (click)="onSaveAndClose()"  cdkFocusInitial>{{l('Save')}}</button>
   </mat-dialog-actions>
 </form>

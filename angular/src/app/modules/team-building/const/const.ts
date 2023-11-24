@@ -169,6 +169,7 @@ export class TeamBuildingDetailDto {
     creationTime: string;
     status: StatusTeamBuildingRequestEnum;
     invoiceAmount: number;
+    vatMoney: number;
   }
 
   export class PagedRequestHistoryDto {
@@ -332,6 +333,10 @@ export class InvoiceDisburseDto {
   hasVAT : boolean;
 }
 
+export class EditOneInvoiceAmountDto {
+  id: number;
+  invoiceAmount: number;
+}
 
 
 
