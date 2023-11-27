@@ -146,6 +146,10 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
             {
                 throw new UserFriendlyException("Please provide the invoice data!");
             }
+            else if(input.DisburseMoney <= 0)
+            {
+                throw new UserFriendlyException("The requested disbursement amount is greater than 0!");
+            }
 
             var listRequestByRequesterId = WorkScope.GetAll<TeamBuildingRequestHistory>()
                 .Where(s => s.RequesterId == input.RequesterId).ToList();
