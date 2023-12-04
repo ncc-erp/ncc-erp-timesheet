@@ -36,5 +36,8 @@ import { Observable } from 'rxjs';
     return this.http.get<any>(this.rootUrl + `/GetAllEmployeeTeamBuilding`);
   }
 
+  deleteAll(): Observable<any> {
+    return this.http.delete(this.rootUrl + '/DeleteAll');
+  }
 
 }
