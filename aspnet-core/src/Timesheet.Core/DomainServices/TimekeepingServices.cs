@@ -89,10 +89,10 @@ namespace Timesheet.DomainServices
                 })).ToList();
 
             listTimekeepingOldBySelectedDate.ForEach(s =>
-                {
-                    s.IsDeleted = true;
-                    s.DeletionTime = DateTimeUtils.GetNow();
-                });
+            {
+                s.IsDeleted = true;
+                s.DeletionTime = DateTimeUtils.GetNow();
+            });
             CurrentUnitOfWork.SaveChanges();
 
             var mapAbsenceUsers = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request)
@@ -144,6 +144,7 @@ namespace Timesheet.DomainServices
             var listUserName = users.Select(x => x.UserName).Distinct().ToList();
             var userTrackerTimes = _trackerService.GetTimeTrackerToDay(selectedDate, listUserName);
             var dicUserNameToTrackerTime = userTrackerTimes.ToDictionary(s => s.email, s => new { s.ActiveMinute, s.active_time });
+
             foreach (var user in users)
             {
 
@@ -159,7 +160,6 @@ namespace Timesheet.DomainServices
                 if (mapCheckInUsers.ContainsKey(user.EmailAddress))
                 {
                     var checkInUser = mapCheckInUsers[user.EmailAddress];
-
                     t.CheckIn = checkInUser?.VerifyStartTimeStr;
                     t.CheckOut = checkInUser?.VerifyEndTimeStr;
                     if (registerCheckInOut.AbsenceDayType == DayType.Afternoon)
@@ -232,10 +232,78 @@ namespace Timesheet.DomainServices
                 {
                     var absenceUser = mapAbsenceUsers[user.UserId];
                     var dateType = absenceUser.Select(x => x.DateType).FirstOrDefault();
-                    if (dateType == DayType.Fullday)
+                    var type = absenceUser.Select(x => x.Type).FirstOrDefault();
+                    var timeStartChangingCheckinToCheckout = await SettingManager.GetSettingValueAsync(AppSettingNames.TimeStartChangingCheckinToCheckout);
+                    var timeStartChangingCheckinToCheckoutCaseOffAfternoon = await SettingManager.GetSettingValueAsync(AppSettingNames.TimeStartChangingCheckinToCheckoutCaseOffAfternoon);
+
+                    var emailUserCheckIn = WorkScope.GetAll<User>().Where(s => s.Id == user.UserId)
+                                    .Select(s => s.EmailAddress).FirstOrDefault();
+
+                    var timeCheckInOut = checkInUsers.Where(s => s.Email == emailUserCheckIn).Select(s => new
+                    {
+                        CheckIn = s.VerifyStartTimeStr,
+                        CheckOut = s.VerifyEndTimeStr
+                    }).FirstOrDefault();
+
+                    if (dateType == DayType.Fullday && type == RequestType.Off)
                     {
                         t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
                         t.MoneyPunish = 0;
+                    }
+                    else if (type == RequestType.Onsite && timeCheckInOut != null)
+                    {
+                        // Onsite buổi sáng, nghỉ buổi chiều:
+                        // th1: user checkin sau 11h lúc này sẽ chuyển thành checkout => không checkin + có checkout => bị phạt đi muộn   
+                        if (dateType == DayType.Morning)
+                        {
+                            if (DateTime.Parse(timeCheckInOut.CheckIn) > DateTime.Parse(timeStartChangingCheckinToCheckoutCaseOffAfternoon))
+                            {
+                                ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(t);
+                                t.StatusPunish = CheckInCheckOutPunishmentType.Late;
+                                t.MoneyPunish = await GetMoneyPunishByType(t.StatusPunish);
+                                t.NoteReply = "Onsite Morning";
+                            }
+                            else
+                            {
+                                t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                                t.MoneyPunish = 0;
+                            }
+                        }
+                        // th1: checkin + checkout => ko bị phạt      
+                        else if (!string.IsNullOrEmpty(timeCheckInOut.CheckIn)
+                            && !string.IsNullOrEmpty(timeCheckInOut.CheckOut)
+                            && CommonUtils.SubtractHHmm(timeCheckInOut.CheckIn, user.MorningStartAt) <= LimitedMinute)
+                        {
+                            t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                            t.MoneyPunish = 0;
+                        }
+
+                        // th2: checkin + ko checkout => ko bị phạt 
+                        else if (!string.IsNullOrEmpty(timeCheckInOut.CheckIn)
+                            && string.IsNullOrEmpty(timeCheckInOut.CheckOut)
+                            && CommonUtils.SubtractHHmm(timeCheckInOut.CheckIn, user.MorningStartAt) <= LimitedMinute)
+                        {
+                            t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                            t.MoneyPunish = 0;
+                        }
+
+                        // Th4: User checkin sau 15h chuyển thành checkout => không checkin + có checkout => bị phạt đi muộn 
+                        else if (DateTime.Parse(timeCheckInOut.CheckIn) > DateTime.Parse(timeStartChangingCheckinToCheckout) 
+                            && !string.IsNullOrEmpty(timeCheckInOut.CheckIn))
+                        {
+                            ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
+                            t.StatusPunish = CheckInCheckOutPunishmentType.Late;
+                            t.MoneyPunish = await GetMoneyPunishByType(t.StatusPunish);
+                        }
+
+                        // Th3: checkin muộn + không checkout => không bị phạt 
+                        else if (!string.IsNullOrEmpty(timeCheckInOut.CheckIn) 
+                            && string.IsNullOrEmpty(timeCheckInOut.CheckOut) 
+                            && CommonUtils.SubtractHHmm(timeCheckInOut.CheckIn, user.MorningStartAt) > LimitedMinute)
+                        {
+                            t.StatusPunish = CheckInCheckOutPunishmentType.LateAndNoCheckOut;
+                            t.MoneyPunish = 0;
+                        }
                     }
                 }
                 t.TrackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].active_time : "0";
