@@ -205,7 +205,10 @@ namespace Ncc.Entities.Enum
             RemoteMorning = 5,
             RemoteAfternoon = 6,
             Tardiness = 7,
-            EarlyLeave = 8
+            EarlyLeave = 8,
+            OnsiteFull = 9,
+            OnsiteMorning = 10,
+            OnsiteAfternoon = 11
         }
 
         public enum TsStatusFilter
