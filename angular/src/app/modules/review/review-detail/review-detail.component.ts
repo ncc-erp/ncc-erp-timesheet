@@ -20,6 +20,8 @@ import { ConfirmSalaryInternshipComponent } from './confirm-salary-internship/co
 import { NewReviewInternshipComponent } from './new-review-internship/new-review-internship.component';
 import { UpdateReviewerComponent } from './update-reviewer/update-reviewer.component';
 import { NewHrVerifyInternshipComponent } from './new-hr-verify-internship/new-hr-verify-internship.component';
+import { List, forEach } from 'lodash';
+import { P } from '@angular/cdk/keycodes';
 import * as _ from 'lodash';
 
 @Component({
@@ -41,7 +43,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern
   ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern
   ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern
-
+  ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern
   ReviewIntern_ReviewDetail_UpdateDetailSubLevel = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_UpdateDetailSubLevel
   ReviewIntern_ReviewDetail_ApproveForOneIntern =PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_ApproveForOneIntern
   ReviewIntern_ReviewDetail_ConfirmSalaryForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_ConfirmSalaryForOneIntern
@@ -86,7 +88,13 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   listBranchFilter : BranchDto[];
   branchId;
   listInternshipMaxLevelMonths : InternshipMaxLevelMonths [] = [];
-  sortByMonth = true;
+  sortStatus = true;
+  listSelectedItem: SelectReviewInternDetailDto[] = [];
+  selectedCheckboxCount: number = 0;
+  allComplete: boolean = false;
+  public saving: boolean = false;
+  listHeadPmVerify: HeadPmVerifyDto[] = [];
+
   constructor(
     private route: ActivatedRoute,
     public _dialog: MatDialog,
@@ -177,7 +185,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       .countMonthLevelMax()
       .subscribe(rs => {
           this.listInternshipMaxLevelMonths = rs.result as InternshipMaxLevelMonths []; 
-    });
+    
     
     this.reviewDetailService
       .getAllPaging(request, this.reviewId, this.branchId)
@@ -208,6 +216,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
           })
         }
       });
+    });
     }
 
     isShowBtnChotLuong(item:ReviewDetailDto){
@@ -251,7 +260,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
 
     isShowBtnHeadPm(item: ReviewDetailDto){
       return this.isGranted(
-        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern
       ) && this.checkStatus(item.status, 'headPm')
     }
 
@@ -856,14 +865,118 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     }
   }
 
-  sortByCountMonth(){
-    if(this.sortByMonth){
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['countMonthLevelMax'], ['asc']);
+  toggleSort(columnName) {
+    if (this.sortStatus) {
+      this.listReviewIntern = <ReviewDetailDto[]>_.orderBy(this.listReviewIntern, [columnName], ['asc']);
+    } else {
+      this.listReviewIntern = <ReviewDetailDto[]>_.orderBy(this.listReviewIntern, [columnName], ['desc']);
+    }
+    this.sortStatus = !this.sortStatus;
+  }
+
+  setAll(completed: boolean) {
+    this.allComplete = completed;
+    if (this.listReviewIntern == null) {
+      return;
+    }
+
+    this.listSelectedItem = []; 
+
+    this.listReviewIntern.forEach((reviewDetail) => {
+      if (reviewDetail.status === 4) {
+        reviewDetail.selected = completed;
+
+        if (completed) {
+          this.listSelectedItem.push({
+            selected: completed,
+            id: reviewDetail.id,
+            status: reviewDetail.status,
+          });
+        }
+      }
+    });
+    this.checkSelectedCheckbox();
+  }
+
+  handleSelectlistReviewInternItem(index, $event) {
+    console.log("item", this.listReviewIntern[index]);
+    if (index != undefined && this.listReviewIntern[index]) {
+      this.listReviewIntern[index].selected = $event.checked;
+  
+      if (!this.listSelectedItem) {
+        this.listSelectedItem = [];
+      }
+  
+      const item = this.listSelectedItem.find(
+        (item) => item.id == this.listReviewIntern[index].id
+      );
+  
+      if (item) {
+        item.selected = $event.checked;
+      } else {
+        this.listSelectedItem.push({
+          selected: $event.checked,
+          id: this.listReviewIntern[index].id,
+          status: this.listReviewIntern[index].status
+        });
+      }
+  
+      this.updateAllComplete();
+      this.checkSelectedCheckbox();
+    }
+  }
+
+  checkSelectedCheckbox() {
+    this.selectedCheckboxCount = this.listSelectedItem.filter(
+      (x) => x.selected
+    ).length;
+  }
+
+  updateAllComplete() {
+    this.allComplete =
+      this.listReviewIntern != null &&
+      this.listReviewIntern.every((t) => this.getIsSelected(t));
+  }
+
+  
+  getIsSelected(item) {
+    return this.listSelectedItem.find((c) => c.id == item.id)
+      ? this.listSelectedItem.find((c) => c.id == item.id).selected
+      : item.selected;
+  }
+
+  someComplete(): boolean {
+    if (this.listReviewIntern == null || this.listReviewIntern.length == 0) {
+      return false;
+    }
+  
+    return this.listReviewIntern.some((t) => this.getIsSelected(t)) && !this.allComplete;
+  }
+
+  hasSelectedItems(){
+    return this.listReviewIntern.some(item => item.selected === true);
+  }
+
+  headPmAprroveOrRejectAll(status: number){
+    if(this.selectedCheckboxCount === 0){
+      abp.notify.error("Please select the listing record before performing this action");
     }
     else {
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['countMonthLevelMax'], ['desc']);
+      this.saving = true;
+      this.listHeadPmVerify = this.listSelectedItem.map(item => ({
+        ReviewDetailId: item.id,
+        Status: status
+      }));
+      
+      const messageSuccessfully: string = (this.listHeadPmVerify[0].Status == 1) ? "PM Approve Successfully" : "PM Reject Successfully" ;
+      this.reviewDetailService.headPmVerifyOrRejectAll(this.listHeadPmVerify).subscribe(
+        (rs) => {
+          abp.notify.success(messageSuccessfully);
+          this.saving = false;
+          this.refresh();
+        }
+      )
     }
-    this.sortByMonth = !this.sortByMonth;
   }
 }
 
@@ -916,6 +1029,7 @@ export class ReviewDetailDto {
   id?: number;
   countMonthLevelMax: number;
   maxLevel:number;
+  selected?: boolean;
 }
 
 export class reviewInternCommentDto{
@@ -970,3 +1084,13 @@ export class InternshipMaxLevelMonths {
   countMonthLevelMax: number;
 }
 
+export class SelectReviewInternDetailDto {
+  id: number;
+  selected?: boolean;
+  status: number;
+}
+
+export class HeadPmVerifyDto {
+  ReviewDetailId: number;
+  Status: number;
+}

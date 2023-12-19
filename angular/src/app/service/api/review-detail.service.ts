@@ -101,4 +101,7 @@ export class ReviewDetailService extends BaseApiService{
   countMonthLevelMax(): Observable<any>{
     return this.http.get(this.rootUrl + '/CountMonthLevelMax');
   }
+  headPmVerifyOrRejectAll (data: object): Observable<any>{
+    return this.http.post(this.rootUrl + '/HeadPmVerifyOrRejectAll', data);
+  }
 }
