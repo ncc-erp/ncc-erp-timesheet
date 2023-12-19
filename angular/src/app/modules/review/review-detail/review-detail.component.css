@@ -176,8 +176,6 @@ body{
 }
 
 .btn-mail-hrm{
-    display: flex;
-    align-items: center;
     width: 136px;
     margin: 8px auto 0px;
     height: 35px;
@@ -188,9 +186,6 @@ body{
 }
 
 .btn-mail-project{
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
     width: 160px;
     margin: 8px auto 0px;
     height: 35px;
@@ -201,9 +196,6 @@ body{
 }
 
 .btn-pm-head{
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
     width: 160px;
     margin: 8px auto 0px;
     height: 35px;
@@ -331,6 +323,10 @@ th>span {
 
 .btn {
     margin: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+
 }
 /* respondsive */
 @media only screen and (max-width: 1200px) {

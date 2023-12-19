@@ -1332,7 +1332,7 @@ namespace Timesheet.APIs.ReviewDetails
             }
         }
 
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern)]
         [HttpPost]
         public async Task HeadPmVerify(HeadPmVerifyDto input)
         {
@@ -1346,12 +1346,12 @@ namespace Timesheet.APIs.ReviewDetails
                 }
                 else
                 {
-                    throw new UserFriendlyException("Review này chưa được HR Approve");
+                    throw new UserFriendlyException("This review has not yet been PM Reviewed");
                 }
             }
             else
             {
-                throw new UserFriendlyException("Trạng thái chỉ được là Reviewed hoặc Rejected.");
+                throw new UserFriendlyException("Status can only be Reviewed or Rejected.");
             }
         }
             
@@ -1359,7 +1359,9 @@ namespace Timesheet.APIs.ReviewDetails
         [HttpPost]
         public async Task HeadPmVerifyOrRejectAll(List<HeadPmVerifyDto> input)
         {
-            foreach(var inputItem in input)
+            var listReviewDetail = new List<ReviewDetail>();
+
+            foreach (var inputItem in input)
             {
                 if (inputItem.Status == ReviewInternStatus.Reviewed || inputItem.Status == ReviewInternStatus.Rejected)
                 {
@@ -1367,20 +1369,22 @@ namespace Timesheet.APIs.ReviewDetails
                     if (detail.Status == ReviewInternStatus.PmReviewed)
                     {
                         detail.Status = inputItem.Status;
-                        await WorkScope.UpdateAsync(detail);
+                        listReviewDetail.Add(detail);
                     }
                     else
                     {
-                        throw new UserFriendlyException("Review này chưa PM Review");
+                        throw new UserFriendlyException("This review has not yet been PM Reviewed");
                     }
                 }
                 else
                 {
-                    throw new UserFriendlyException("Trạng thái chỉ được là Reviewed hoặc Rejected.");
+                    throw new UserFriendlyException("Status can only be Reviewed or Rejected.");
                 }
             }
-            
+
+            await WorkScope.UpdateRangeAsync(listReviewDetail);
         }
+
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_ViewAll)]
         [HttpGet]
         public async Task<List<InternshipMaxLevelMonthsDto>> CountMonthLevelMax()

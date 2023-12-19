@@ -191,39 +191,39 @@
                               </th>
                             <th>{{ "STT" | localize }}</th>
                             <th>{{ "Action" | localize }}</th>
-                            <th (click)="sortByUser()">
+                            <th (click)="toggleSort('internName')">
                                 <span style="margin-left: 100px;">
                                      {{ "User" | localize }}
                                      <mat-icon>unfold_more</mat-icon>
                                 </span>
                             </th>
                             <th>{{ "Review content" | localize }}</th>
-                            <th (click)="sortByReviewer()">
+                            <th (click)="toggleSort('reviewerName')">
                                 <span style="margin-left: 90px;">
                                     {{ "Reviewer" | localize }}
                                     <mat-icon>unfold_more</mat-icon>
                                </span>
                             </th>
                             <th>{{ "History" | localize }}</th>
-                            <th (click)="sortByLevel()">
+                            <th (click)="toggleSort('currentLevel')">
                                 <span>
                                     {{ "Level" | localize }}
                                     <mat-icon>unfold_more</mat-icon>
                                 </span> 
                             </th>
-                            <th (click)="sortByNewLevel()">
+                            <th (click)="toggleSort('newLevel')">
                                 <span>
                                     {{ "New Level" | localize }}
                                     <mat-icon>unfold_more</mat-icon>
                                 </span>
                             </th>
-                            <th (click)="sortByCountMonth()">
+                            <th (click)="toggleSort('countMonthLevelMax')">
                                 <span>
                                     {{ "Count Month Level Max" | localize}}
                                     <mat-icon>unfold_more</mat-icon>
                                 </span>
                             </th>
-                            <th (click)="sortByStatus()">
+                            <th (click)="toggleSort('status')">
                                 <span>
                                     {{ "Status" | localize }}
                                     <mat-icon>unfold_more</mat-icon>
@@ -246,8 +246,8 @@
                 index as i
               ">            
                             <td class="text-center">
-                                <mat-checkbox *ngIf="item.status === 4" [name]="'selected-' + item.id" [checked]="getIsSelected(item)"
-                                [color]="'primary'" (change)="ishandleSelectlistReviewInternItem(i, $event)">
+                                <mat-checkbox *ngIf="item.status === 4 && permission.isGranted(ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern)" [name]="'selected-' + item.id" [checked]="getIsSelected(item)"
+                                [color]="'primary'" (change)="handleSelectlistReviewInternItem(i, $event)">
                                 </mat-checkbox>
                             </td>
                             <!-- STT -->

@@ -260,7 +260,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
 
     isShowBtnHeadPm(item: ReviewDetailDto){
       return this.isGranted(
-        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern
       ) && this.checkStatus(item.status, 'headPm')
     }
 
@@ -865,63 +865,11 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     }
   }
 
-  sortByCountMonth(){
-    if(this.sortStatus){
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['countMonthLevelMax'], ['asc']);
-    }
-    else {
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['countMonthLevelMax'], ['desc']);
-    }
-    this.sortStatus = !this.sortStatus;
-  }
-
-  sortByNewLevel(){
-    if(this.sortStatus){
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['newLevel'], ['asc']);
-    }
-    else {
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['newLevel'], ['desc']);
-    }
-    this.sortStatus = !this.sortStatus;
-  }
-  
-  sortByLevel(){
-    if(this.sortStatus){
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['currentLevel'], ['asc']);
-    }
-    else {
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['currentLevel'], ['desc']);
-    }
-    this.sortStatus = !this.sortStatus;
-  }
-
-  sortByUser(){
-    if(this.sortStatus){
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['internName'], ['asc']);
-    }
-    else {
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['internName'], ['desc']);
-    }
-    this.sortStatus = !this.sortStatus;
-  }
-  
-  sortByReviewer(){
-    if(this.sortStatus){
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['reviewerName'], ['asc']);
-    }
-    else {
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['reviewerName'], ['desc']);
-    }
-    this.sortStatus = !this.sortStatus;
-  }
-
- 
-  sortByStatus(){
-    if(this.sortStatus){
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['status'], ['asc']);
-    }
-    else {
-      this.listReviewIntern = _.orderBy(this.listReviewIntern, ['status'], ['desc']);
+  toggleSort(columnName) {
+    if (this.sortStatus) {
+      this.listReviewIntern = <ReviewDetailDto[]>_.orderBy(this.listReviewIntern, [columnName], ['asc']);
+    } else {
+      this.listReviewIntern = <ReviewDetailDto[]>_.orderBy(this.listReviewIntern, [columnName], ['desc']);
     }
     this.sortStatus = !this.sortStatus;
   }
@@ -950,7 +898,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     this.checkSelectedCheckbox();
   }
 
-  ishandleSelectlistReviewInternItem(index, $event) {
+  handleSelectlistReviewInternItem(index, $event) {
     console.log("item", this.listReviewIntern[index]);
     if (index != undefined && this.listReviewIntern[index]) {
       this.listReviewIntern[index].selected = $event.checked;
@@ -1011,18 +959,15 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
 
   headPmAprroveOrRejectAll(status: number){
     if(this.selectedCheckboxCount === 0){
-      abp.notify.error("Need to select at least one record");
+      abp.notify.error("Please select the listing record before performing this action");
     }
     else {
-      
       this.saving = true;
-      for(let i = 0; i<this.listSelectedItem.length;i++){
-        const headPmApprove = {
-          ReviewDetailId: this.listSelectedItem[i].id,
-          Status: status
-        }
-        this.listHeadPmVerify.push(headPmApprove)
-      }
+      this.listHeadPmVerify = this.listSelectedItem.map(item => ({
+        ReviewDetailId: item.id,
+        Status: status
+      }));
+      
       const messageSuccessfully: string = (this.listHeadPmVerify[0].Status == 1) ? "PM Approve Successfully" : "PM Reject Successfully" ;
       this.reviewDetailService.headPmVerifyOrRejectAll(this.listHeadPmVerify).subscribe(
         (rs) => {
