@@ -246,7 +246,7 @@
                 index as i
               ">            
                             <td class="text-center">
-                                <mat-checkbox *ngIf="item.status === 4 && permission.isGranted(ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern)" [name]="'selected-' + item.id" [checked]="getIsSelected(item)"
+                                <mat-checkbox *ngIf="item.status === 4 && permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" [name]="'selected-' + item.id" [checked]="getIsSelected(item)"
                                 [color]="'primary'" (change)="handleSelectlistReviewInternItem(i, $event)">
                                 </mat-checkbox>
                             </td>
