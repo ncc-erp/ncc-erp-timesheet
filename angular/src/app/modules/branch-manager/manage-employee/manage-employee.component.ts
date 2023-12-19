@@ -29,6 +29,8 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   public positionId = -1;
   public filterItems: FilterDto[] = [];
   public users: ManageUserDto[];
+  startDate: Date;
+  endDate: Date;
   keyword;
   constructor(
     injector: Injector,
@@ -55,7 +57,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
 
   ngOnInit() {
     this.refresh();
-  } 
+  }
   filterPosition(): void{
     if(this.positionSearch.value){
       this.listPosition = this.listPositionFilter.filter(data => data.name.toLowerCase().includes(this.positionSearch.value.toLowerCase().trim()));
@@ -88,7 +90,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       this.addFilterItem('positionId', this.positionId);
     }
     request.filterItems = this.filterItems;
-    this.manageUserForBranchService.getAllUserPagging(request)
+    this.manageUserForBranchService.getAllUserPagging(request, this.startDate, this.endDate)
     .pipe(
       finalize(() => {
         finishedCallback()
@@ -166,7 +168,18 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       data: user,
     })
     dialogRef.afterClosed().subscribe(() => {
-      
+
     })
+  }
+
+  handleDateSelectorChange(date) {
+    const { fromDate, toDate } = date;
+    this.setFromAndToDate(fromDate, toDate);
+    this.refresh();
+  }
+
+  setFromAndToDate(fromDate, toDate) {
+    this.startDate = fromDate;
+    this.endDate = toDate;
   }
 }

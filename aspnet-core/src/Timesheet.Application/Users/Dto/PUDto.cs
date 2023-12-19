@@ -12,5 +12,7 @@ namespace Timesheet.Users.Dto
         public string ProjectName { get; set; }
         public ProjectUserType ProjectUserType { get; set; }
         public List<string> Pms { get; set; }
+        public float SumWorkingTime { get; set; }
+        //public long CountProject { get; set; }
     }
 }

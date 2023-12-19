@@ -16,12 +16,11 @@ export class ManageUserForBranchService extends BaseApiService {
     return 'ManageUserForBranch';
   }
 
-  getAllUserPagging(page: PagedRequestDto): Observable<any>{
-    return this.http.post(this.rootUrl + "/GetAllUserPagging", page);
+  getAllUserPagging(page: PagedRequestDto, startDate?: Date, endDate?: Date): Observable<any>{
+    return this.http.post(this.rootUrl + `/GetAllUserPagging?startDate=${startDate}&endDate=${endDate}`, page);
   }
 
   getAllValueOfUserInProjectByUserId(page: PagedRequestDto, branchId: number): Observable<any> {
     return this.http.post(this.rootUrl + `/GetStatisticNumOfUsersInProject?branchId=${branchId}`, page);
   }
 }
- 

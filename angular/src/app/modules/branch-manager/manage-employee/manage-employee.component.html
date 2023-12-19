@@ -19,17 +19,15 @@
       </div>
 
       <div class="body">
-        <div class="group"> 
+        <div class="group">
           <div class="col-lg-10">
-            <div class="row">
-              <div class="col-lg-5 mb-0">
-                <mat-form-field class="example-full-width" appearance="outline">
-                  <mat-label>Search by Email</mat-label>
-                  <mat-icon matSuffix>search</mat-icon>
-                  <input matInput="matInput" [(ngModel)]="keyword" name="keyword" (keyup.enter)="searchOrFilter()">
-                </mat-form-field>
+            <div class="row" style="margin-left: 0px;">
+              <div class="col-lg-8">
+                <date-selector [type]="APP_CONSTANT.TypeViewHomePage.Month"
+                  (onDateSelectorChange)="handleDateSelectorChange($event)">
+                </date-selector>
               </div>
-              <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-0">
+              <div class="col-lg-2">
                 <mat-form-field class="w-100" appearance="outline">
                   <mat-label> {{ "Position" | localize }}</mat-label>
                   <mat-select name="positionId" [(value)]="positionId" (selectionChange)="searchOrFilter()">
@@ -45,7 +43,7 @@
                   </mat-select>
                 </mat-form-field>
               </div>
-              <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-0">
+              <div class="col-lg-2">
                 <ng-container *ngIf="isShowSelectBranch()">
                   <mat-form-field class="w-100" appearance="outline">
                     <mat-label> {{ "Branch" | localize }}</mat-label>
@@ -61,10 +59,18 @@
                     </mat-select>
                   </mat-form-field>
                 </ng-container>
-                
               </div>
-              
+
             </div>
+            <div class="row">
+
+                <mat-form-field class="example-full-width" appearance="outline">
+                  <mat-label>Search by Email</mat-label>
+                  <mat-icon matSuffix>search</mat-icon>
+                  <input matInput="matInput" [(ngModel)]="keyword" name="keyword" (keyup.enter)="searchOrFilter()">
+                </mat-form-field>
+              </div>
+
           </div>
           <div class="col-lg-2">
             <div class="row row-btn">
@@ -137,6 +143,7 @@
                       <span class="label bg-blue" *ngFor="let pms of project.pms">
                         {{pms}}
                       </span>
+                      <b style="margin-left: 5px;">Total working time: {{project.sumWorkingTime}}</b>
                     </div>
                   </div>
                 </td>

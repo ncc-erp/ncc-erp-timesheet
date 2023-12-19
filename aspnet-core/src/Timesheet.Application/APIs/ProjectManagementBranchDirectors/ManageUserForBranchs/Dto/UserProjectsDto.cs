@@ -18,7 +18,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
         public string EmailAddress { get; set; }
 
         public string FullName { get; set; }
-        public IEnumerable<PUDto> ProjectUsers { get; set; }
+        public List<PUDto> ProjectUsers { get; set; }
         public Usertype? Type { get; set; }
         public UserLevel? Level { get; set; }
         public Sex? Sex { get; set; }
@@ -28,7 +28,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
         public string BranchDisplayName { get; set; }
         public long? PositionId { get; set; }
         public string PositionName { get; set; }
-        public long? ProjectCount { get; set; }
+        public long? ProjectCount => ProjectUsers.Count;
     }
 
     public class UserValueProjectDto

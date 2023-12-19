@@ -35,7 +35,7 @@ namespace Timesheet.DomainServices
             bool parseResult = double.TryParse(SettingManager.GetSettingValueForApplication(AppSettingNames.TeamBuildingMoney), out moneyDefault);
             var isExist = _workScope.GetAll<TeamBuildingDetail>()
                 .Where(s => s.ApplyMonth.Month == input.Month && s.ApplyMonth.Year == input.Year)
-                .Select(s => s.Id)
+                .Select(s => s.EmployeeId)
                 .ToList();
 
             if (!parseResult)
@@ -50,10 +50,10 @@ namespace Timesheet.DomainServices
             if (input.Month > DateTimeUtils.GetNow().Month && input.Year >= DateTimeUtils.GetNow().Year)
                 throw new UserFriendlyException("The selected month cannot greater than the current month!");
 
-            if (isExist.Count() > 0)
-            {
-                throw new UserFriendlyException(String.Format($"Records already exist for the {input.Month}/{input.Year}"));
-            }
+            //if (isExist.Count() > 0)
+            //{
+            //    throw new UserFriendlyException(String.Format($"Records already exist for the {input.Month}/{input.Year}"));
+            //}
 
             var employeeWorking = _workScope.GetAll<MyTimesheet>()
                 .Where(s => s.User.IsActive)
@@ -211,15 +211,19 @@ namespace Timesheet.DomainServices
                 {
                     if (listEmployeeIntern2.Contains(i.UserId)) continue;
                     var money = (float)Math.Floor(moneyDefault * i.DayWorking / standardDay);
-                    var UpdateTeamBuildingDetails = new TeamBuildingDetail
+
+                    if (!isExist.Contains(i.UserId))
                     {
-                        ApplyMonth = new DateTime(input.Year, input.Month, input.Day.HasValue ? input.Day.Value : 1),
-                        EmployeeId = i.UserId,
-                        ProjectId = x.ProjectId,
-                        Status = TeamBuildingStatus.Open,
-                        Money = money > 100000 ? 100000 : money,
-                    };
-                    _workScope.Insert(UpdateTeamBuildingDetails);
+                        var UpdateTeamBuildingDetails = new TeamBuildingDetail
+                        {
+                            ApplyMonth = new DateTime(input.Year, input.Month, input.Day.HasValue ? input.Day.Value : 1),
+                            EmployeeId = i.UserId,
+                            ProjectId = x.ProjectId,
+                            Status = TeamBuildingStatus.Open,
+                            Money = money > 100000 ? 100000 : money,
+                        };
+                        _workScope.Insert(UpdateTeamBuildingDetails);
+                    }
                 }
             }
         }
