@@ -184,7 +184,7 @@
                     <thead class="head-table">
                         <tr>
                             <th >
-                                <mat-checkbox *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern)" name="selectAll" (change)="setAll($event.checked)" matTooltip="Select/DeSelect all"
+                                <mat-checkbox *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" name="selectAll" (change)="setAll($event.checked)" matTooltip="Select/DeSelect all"
                                   [checked]="allComplete" [indeterminate]="someComplete()" [color]="'primary'"
                                   style="display: flex; justify-content: center;">
                                 </mat-checkbox>
