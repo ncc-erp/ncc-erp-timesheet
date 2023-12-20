@@ -437,7 +437,7 @@ namespace Timesheet.APIs.ProjectManagement
                         Point = s.RateStar,
                         isRetro = false,
                         Note = s.Note != null ? s.Note.Replace("<strong>", "").Replace("</strong>", "") : null,
-                        ProjectName = "Basic Training by " +
+                        ProjectName = "Basic Training by\n" +
                             (s.Reviewer.Contains(' ')
                                 ? $"{string.Join(" ", s.Reviewer.Split(' ').Skip(1))} {s.Reviewer.Split(' ')[0]}": s.Reviewer)
                     })
