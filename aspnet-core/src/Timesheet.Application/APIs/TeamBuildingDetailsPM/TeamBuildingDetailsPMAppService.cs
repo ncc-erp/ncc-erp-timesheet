@@ -609,21 +609,23 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
                     Users = s.Users
                 }).ToList(),
             };
-
+           
             var sb = new StringBuilder();
             foreach (var item in listResult.ProjectInfos)
             {
-                foreach(var item2 in item.PmInfos) {
+                int countUser = item.Users.Select(user => user.EmployeeId).Distinct().Count();
+
+                foreach (var item2 in item.PmInfos) {
                     sb.AppendLine($"{item2.KomuAccountTag()}");
                 }
 
-                if(item.Users.Count == 1)
+                if(countUser == 1)
                 {
-                    sb.AppendLine($"PM {listResult.KomuAccountTagRequester()} is requesting teambuilding for **{item.Users.Count}** member from your team:");
+                    sb.AppendLine($"PM {listResult.KomuAccountTagRequester()} is requesting teambuilding for **{countUser}** member from your team:");
                 }
                 else
                 {
-                    sb.AppendLine($"PM {listResult.KomuAccountTagRequester()} is requesting teambuilding for **{item.Users.Count}** members from your team:");
+                    sb.AppendLine($"PM {listResult.KomuAccountTagRequester()} is requesting teambuilding for **{countUser}** members from your team:");
                 }
 
                 sb.AppendLine($"```");
