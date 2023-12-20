@@ -27,6 +27,7 @@ export class CreateInterviewNoteComponent implements OnInit {
   }
 
   saveInterviewNote(status: number){
+    this.saving = true;
     const interviewNoteDto = {
       reviewDetailId: this.data.id,
       status: status,
@@ -34,6 +35,7 @@ export class CreateInterviewNoteComponent implements OnInit {
     }
 
     this.reviewDetailService.saveInterviewNote(interviewNoteDto).subscribe(res => {
+      this.saving = false;
       this.dialogRef.close(this.interviewNote);
     })
   }

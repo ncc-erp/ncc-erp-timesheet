@@ -18,7 +18,7 @@
 
   <mat-dialog-actions align="end">
     <button mat-raised-button mat-dialog-close>Cancel</button>
-    <button mat-raised-button color="primary" name="saveBtn" [disabled]="verifyForm.invalid" 
+    <button mat-raised-button color="primary" name="saveBtn" [disabled]="saving || verifyForm.invalid"
     (click)="saveInterviewNote(createInterviewNoteStatus)">Approve</button>
   </mat-dialog-actions>
 

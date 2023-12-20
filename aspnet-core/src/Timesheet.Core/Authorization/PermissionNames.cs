@@ -295,6 +295,7 @@ namespace Ncc.Authorization
         public const string ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern = "ReviewIntern.ReviewDetail.AcceptHrRequestForOneIntern";
         public const string ReviewIntern_ReviewDetail_CreatePMNote = "ReviewIntern.ReviewDetail.CreatePMNote";
         public const string ReviewIntern_ReviewDetail_CreateInterviewNote = "ReviewIntern.ReviewDetail.CreatInterviewNote";
+        public const string ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern = "ReviewIntern.ReviewDetail.AcceptPMReviewForAllIntern";
 
         public const string OverTimeSetting = "OverTimeSetting";
         public const string OverTimeSetting_View = "OverTimeSetting.View";
@@ -622,6 +623,7 @@ namespace Ncc.Authorization
                     PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern,
                     PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote,
                     PermissionNames.ReviewIntern_ReviewDetail_CreateInterviewNote,
+                    PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern,
 
                     PermissionNames.Timekeeping_UserNote,
                     PermissionNames.ManageWorkingTime_ViewAll,
@@ -827,6 +829,7 @@ namespace Ncc.Authorization
                     PermissionNames.ManageWorkingTime_ViewDetail,
                     PermissionNames.ManageWorkingTime_Approval,
                     PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern,
+                    PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern,
 
                     PermissionNames.ProjectManagementBranchDirectors,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs,
@@ -1114,6 +1117,7 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Accept HrRequest For One Intern" },
             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Create PM note"},
             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_CreateInterviewNote, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Create Interview note"},
+            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Acept all PmReviewed for all intern"},
 
             new SystemPermission{ Name =  PermissionNames.OverTimeSetting, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Setting overtime" },
             new SystemPermission{ Name =  PermissionNames.OverTimeSetting_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View overtime settings" },
@@ -1699,6 +1703,7 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Accept HrRequest For One Intern" },
                             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Create PM note"},
                             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_CreateInterviewNote, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Create Interview note"},
+                            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Accept PmReviewed for all intern"},
                         }},
                 },
              },

@@ -107,4 +107,7 @@ export class ReviewDetailService extends BaseApiService{
   saveInterviewNote(data: Object): Observable<any> {
     return this.http.post(this.rootUrl + '/CreateInterviewNote', data);
   }
+  headPmVerifyOrRejectAll (data: object): Observable<any>{
+    return this.http.post(this.rootUrl + '/HeadPmVerifyOrRejectAll', data);
+  }
 }

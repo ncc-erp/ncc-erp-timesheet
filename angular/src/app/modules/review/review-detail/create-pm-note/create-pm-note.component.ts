@@ -8,7 +8,6 @@ import { ReviewDetailService } from '@app/service/api/review-detail.service';
   styleUrls: ['./create-pm-note.component.css']
 })
 export class CreatePmNoteComponent implements OnInit {
-
   public active = true;
   public saving = false;
   public pmNote = '';
@@ -27,12 +26,14 @@ export class CreatePmNoteComponent implements OnInit {
   }
 
   savePmNote(status: number){
+    this.saving = true;
     const pmNoteDto = {
       reviewDetailId: this.data.id,
       status: status,
       privateNote: this.pmNote,
     }
     this.reviewDetailService.savePMNote(pmNoteDto).subscribe(res => {
+      this.saving = false;
       this.dialogRef.close(this.pmNote);
     })
   }
