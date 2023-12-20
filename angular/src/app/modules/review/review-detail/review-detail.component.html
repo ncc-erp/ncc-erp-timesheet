@@ -229,7 +229,8 @@
                                     <mat-icon>unfold_more</mat-icon>
                                 </span>
                             </th>
-                            <th>{{ "Note" | localize }}</th>
+                            <th>{{ "PM/ Loren Note" | localize }}</th>
+                            <th>{{ "Interview Note" | localize }}</th>
                             <th>{{ "Updated Info" | localize }}</th>
                         </tr>
                     </thead>
@@ -307,7 +308,14 @@
                                         <mat-icon class="mat-18" style="color: green">fact_check</mat-icon>
                                         Approve
                                     </button>
-
+                                    <button *ngIf="isShowBtnPMNote(item)" mat-menu-item="mat-menu-item" class="choices" name="pmNote" (click)="createPMNote(item)">
+                                        <mat-icon class="mat-18">verified_user</mat-icon>
+                                        PM / Loren Note  
+                                    </button>
+                                    <button *ngIf="isShowBtnInterviewNote(item)" mat-menu-item="mat-menu-item" class="choices" name="interviewNote" (click)="createInterviewNote(item)">
+                                        <mat-icon class="mat-18">verified_user</mat-icon>
+                                        Interview Note
+                                    </button>
                                     <button *ngIf="
                   isShowBtnChotLuong(item)
                     " class="choices" mat-menu-item="mat-menu-item" [name]="'confirmSalaryInternshipBtn-'+item.id"  (click)="confirmSalaryInternship(item)">
@@ -499,9 +507,26 @@
                                     <p [ngClass]="item.hidePrivateNote == false ? 'preReview' : 'review'"
                                     title="Cuộn chuột hoặc Click để mở rộng nội dung" name="pmNote">
                                         <ng-container *ngFor="let note of item.reviewInternPrivateNoteDtos">
-                                            <b class="">{{note.noteByUserName}}:</b>
+                                            <div *ngIf="isShowPmNote(note)" >
+                                                <b class="">{{note.noteByUserName}}:</b>
                                             {{note.privateNote}} <br>
                                             <i>{{ note.created | date: "dd/MM/yyyy" }} {{ note.created | date: "hh:mm:ss" }}</i> <br>
+                                             </div>
+                                        </ng-container>      
+                                    </p>
+                                </div>
+                            </td>
+                            <td>
+                                <div (click)="togglePrivateNote(item)">
+                                    <p [ngClass]="item.hidePrivateNote == false ? 'preReview' : 'review'"
+                                    title="Cuộn chuột hoặc Click để mở rộng nội dung" name="interviewNote">
+                                        <ng-container *ngFor="let note of item.reviewInternPrivateNoteDtos">
+                                            <div *ngIf="isShowInterviewNote(note)">
+                                                <b class="">{{note.noteByUserName}}:</b>
+                                                {{note.privateNote}} <br>
+                                                <i>{{ note.created | date: "dd/MM/yyyy" }} {{ note.created | date: "hh:mm:ss" }}</i> <br>
+                                            </div>
+                                                 
                                         </ng-container>
                                     </p>
                                 </div>

@@ -20,6 +20,8 @@ import { ConfirmSalaryInternshipComponent } from './confirm-salary-internship/co
 import { NewReviewInternshipComponent } from './new-review-internship/new-review-internship.component';
 import { UpdateReviewerComponent } from './update-reviewer/update-reviewer.component';
 import { NewHrVerifyInternshipComponent } from './new-hr-verify-internship/new-hr-verify-internship.component';
+import { CreatePmNoteComponent } from './create-pm-note/create-pm-note.component';
+import { CreateInterviewNoteComponent } from './create-interview-note/create-interview-note.component';
 import { List, forEach } from 'lodash';
 import { P } from '@angular/cdk/keycodes';
 import * as _ from 'lodash';
@@ -43,6 +45,9 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern
   ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern
   ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern
+  ReviewIntern_ReviewDetail_CreatePMNote = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreatePMNote
+  ReviewIntern_ReviewDetail_CreateInterviewNote = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreateInterviewNote
+
   ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern
   ReviewIntern_ReviewDetail_UpdateDetailSubLevel = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_UpdateDetailSubLevel
   ReviewIntern_ReviewDetail_ApproveForOneIntern =PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_ApproveForOneIntern
@@ -120,7 +125,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     });
   }
 
-  ngOnInit() {
+  ngOnInit() { 
     this.reviewId = Number(this.route.snapshot.queryParamMap.get("id"))
     this.reviewYear = Number(this.route.snapshot.queryParamMap.get("year"))
     this.reviewMonth = Number(this.route.snapshot.queryParamMap.get("month"))
@@ -184,39 +189,37 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     this.reviewDetailService
       .countMonthLevelMax()
       .subscribe(rs => {
-          this.listInternshipMaxLevelMonths = rs.result as InternshipMaxLevelMonths []; 
-    
-    
-    this.reviewDetailService
-      .getAllPaging(request, this.reviewId, this.branchId)
-      .pipe(finalize(() => {
-        finishedCallback();
-      }))
-      // .subscribe((result: any) => {
-      //   this.listReviewIntern = result.result.items;
-      //   this.showPaging(result.result, pageNumber);
-      .subscribe((rs: any) => {
-        this.totalItems = rs.result.totalCount
-        if (rs.result == null || rs.result.items.length == 0) {
-          this.listReviewIntern = []
-        }
-        else {
-          this.listReviewIntern = rs.result.items;
-          this.showPaging(rs.result, pageNumber);
-          this.listReviewIntern.forEach(item => {
-            const internshipSuitable = this.listInternshipMaxLevelMonths.find(x => x.internshipId === item.internshipId);
-            if (internshipSuitable) {
-                item.countMonthLevelMax = internshipSuitable.countMonthLevelMax;
-                item.maxLevel = internshipSuitable.maxLevel;  
+        this.listInternshipMaxLevelMonths = rs.result as InternshipMaxLevelMonths []; 
+        this.reviewDetailService
+          .getAllPaging(request, this.reviewId, this.branchId)
+          .pipe(finalize(() => {
+            finishedCallback();
+          }))
+          // .subscribe((result: any) => {
+          //   this.listReviewIntern = result.result.items;
+          //   this.showPaging(result.result, pageNumber);
+          .subscribe((rs: any) => {
+            this.totalItems = rs.result.totalCount
+            if (rs.result == null || rs.result.items.length == 0) {
+              this.listReviewIntern = []
             }
-            item.history = false;
-            item.hideNote = false;
-            item.hidePrivateNote = false;
-            item.more = false;
-          })
-        }
+            else {
+              this.listReviewIntern = rs.result.items;
+              this.showPaging(rs.result, pageNumber);
+              this.listReviewIntern.forEach(item => {
+                const internshipSuitable = this.listInternshipMaxLevelMonths.find(x => x.internshipId === item.internshipId);
+                if (internshipSuitable) {
+                    item.countMonthLevelMax = internshipSuitable.countMonthLevelMax;
+                    item.maxLevel = internshipSuitable.maxLevel;  
+                }
+                item.history = false;
+                item.hideNote = false;
+                item.hidePrivateNote = false;
+                item.more = false;
+              })
+            }
+          });
       });
-    });
     }
 
     isShowBtnChotLuong(item:ReviewDetailDto){
@@ -298,16 +301,43 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
 
     isShowDelete(item: ReviewDetailDto){
       return this.isGranted(PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_Delete) &&
-      this.checkStatus(item.status, 'delete')
+      this.checkStatus(item.status, 'delete') 
     }
 
     isShowCountMonthMaxLevel(item: ReviewDetailDto){
       return typeof item.newLevel === 'number' && item.newLevel <= 3;
     }
 
+    isShowBtnPMNote(item: ReviewDetailDto){
+      return this.isGranted(
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreatePMNote
+      ) && this.checkStatus(item.status, 'pmNote') 
+    }
+
+    isShowBtnInterviewNote(item: ReviewDetailDto){
+      return this.isGranted(
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreateInterviewNote
+      ) && this.checkStatus(item.status, 'interviewNote') 
+    }
+
     protected delete(entity: any): void {
 
     }
+
+    isShowPmNote(item: reviewInternCommentDto) {
+      if (item && item.reviewInternNoteType !== undefined ) {
+        return item.reviewInternNoteType === 0;
+      }
+      return false;
+    }
+
+    isShowInterviewNote(item: reviewInternCommentDto){
+      if (item && item.reviewInternNoteType !== undefined ) {
+        return item.reviewInternNoteType === 1;
+      }
+      return false;
+    }
+
 
   getAllPM() {
     this.listReviewerService.getAllPM().subscribe(res => {
@@ -767,13 +797,12 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   checkStatus(status:number, action:string):boolean{
     switch(status){
       case 0: return action=="edit"|| action=="delete" || action == "pmReview" ? true :false
-      case 1: return action=="edit"|| action=="review" || action == "approve" || action == "reject" ? true : false
+      case 1: return action=="edit"|| action=="review" || action == "approve" || action == "reject" || action =="pmNote" || action == "interviewNote" ? true : false
       case 2: return action=="sendEmail" || action=="reject" || action == "print" ? true : false
       case -1: return action=="edit"|| action=="review" || action == "approve" ? true : false
       case 3: return action=="update to HRM"|| action=="rejectSentMail" || action=="print" ? true : false
-      case 4: return action=="edit"|| action=="hrVerify" || action == "reject" ? true : false
-      case 5: return action=="headPm" ? true : false
-      case 6: return action=="edit"|| action=="pmReview" ? true : false
+      case 4: return action=="headPm" ? true : false
+      case 5: return action=="edit"|| action=="pmReview" ? true : false
       default: return false
 
     }
@@ -978,6 +1007,33 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       )
     }
   }
+
+  createPMNote(item: ReviewDetailDto): void{
+    const dialogRef = this._dialog.open(CreatePmNoteComponent, {
+      disableClose : true,
+      width : "750px",
+      data: item,
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        abp.notify.success('PM/ Loren Note success');
+        this.refresh()
+      }
+    });
+  }
+  createInterviewNote(item : ReviewDetailDto): void{
+    const dialogRef = this._dialog.open(CreateInterviewNoteComponent, {
+      disableClose : true,
+      width : "750px",
+      data: item,
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        abp.notify.success('Interview Note success');
+        this.refresh()
+      }
+    });
+  }
 }
 
 export enum EnumReviewStatus {
@@ -1033,10 +1089,14 @@ export class ReviewDetailDto {
 }
 
 export class reviewInternCommentDto{
+
   reviewDetailId?: number;
-  commentUserId?: number;
+  poteByUserId?: number;
+  noteByUserName?: string;
+  created?: Date;
   privateNote?: string;
-  id?: number
+  id?: number;
+  reviewInternNoteType: number;
 }
 
 export class UpdateReviewDetailDto {
