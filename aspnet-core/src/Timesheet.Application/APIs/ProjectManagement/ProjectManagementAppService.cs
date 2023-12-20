@@ -417,7 +417,6 @@ namespace Timesheet.APIs.ProjectManagement
             var userPointHistoryInReviewIntern = WorkScope.GetAll<ReviewDetail>()   
                 .Select(s => new
                 {
-                    EmailReviewer = s.Reviewer.EmailAddress,
                     s.InterShip.EmailAddress,
                     s.RateStar,
                     s.Review.Month,
