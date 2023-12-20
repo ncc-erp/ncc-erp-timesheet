@@ -422,6 +422,7 @@ namespace Timesheet.APIs.ProjectManagement
                     s.RateStar,
                     s.Review.Month,
                     s.Review.Year,
+                    Reviewer = s.Reviewer.FullName,
                     s.Note
                 })
                 .Where(x => input.Emails.Contains(x.EmailAddress))
@@ -437,7 +438,9 @@ namespace Timesheet.APIs.ProjectManagement
                         Point = s.RateStar,
                         isRetro = false,
                         Note = s.Note != null ? s.Note.Replace("<strong>", "").Replace("</strong>", "") : null,
-                        ProjectName = "Basic Training - Reviewer: " + s.EmailReviewer
+                        ProjectName = "Basic Training by " +
+                            (s.Reviewer.Contains(' ')
+                                ? $"{string.Join(" ", s.Reviewer.Split(' ').Skip(1))} {s.Reviewer.Split(' ')[0]}": s.Reviewer)
                     })
                     .ToList()
                 })
