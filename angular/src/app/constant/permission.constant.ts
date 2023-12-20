@@ -12,6 +12,7 @@ export const PERMISSIONS_CONSTANT = {
     UploadWorkingTime:"Admin.Users.UploadWorkingTime",
     UpdateUserWorkingTime: "Admin.Users.UpdateUserWorkingTime",
     ViewLevelUser: "Admin.Users.ViewLevelUser",
+    ExportDataCheckpoint: "Admin.Users.ExportDataCheckpoint",
 
     //role
     ViewRoles: "Admin.Roles.View",

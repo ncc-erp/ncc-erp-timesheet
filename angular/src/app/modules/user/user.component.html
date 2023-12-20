@@ -31,6 +31,11 @@
                             <mat-icon>local_printshop</mat-icon> Import
                         </button>
                     </div>
+                    <div *ngIf="permission.isGranted(ExportDataCheckpoint)" class="col-md-6" style="padding:5px 15px 10px 15px">
+                        <button large mat-raised-button color="primary" style="width: 123px;" (click)='exportExcel()'>
+                            <mat-icon>local_printshop</mat-icon> Export
+                        </button>
+                    </div>
                 </div>
 <div class="col-sm-5ths">
     <mat-form-field appearance="outline">
@@ -49,7 +54,7 @@
     </mat-form-field>
 </div>
 
-                <mat-form-field class="col-md-7 field-padding" appearance="outline" style="width: 880px;">
+                <mat-form-field class="col-md-7 field-padding" appearance="outline" style="width: 460px;">
                     <mat-icon style="color:#9E9E9E" matPrefix>search</mat-icon>
                     <mat-label>Search by Username, Name, Surname or Email</mat-label>
                     <input matInput [(ngModel)]="keyword" name="keyword" (keyup.enter)="searchOrFilter()">

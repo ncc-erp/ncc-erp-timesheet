@@ -48,6 +48,9 @@ using Timesheet.Constants;
 using Timesheet.Services.HRMv2;
 using Timesheet.APIs.RetroDetails.Dto;
 using System.Net.Mail;
+using Timesheet.APIs.Public;
+using Ncc.Net.MimeTypes;
+using Timesheet.DataExport;
 
 namespace Ncc.Users
 {
@@ -70,6 +73,8 @@ namespace Ncc.Users
         private readonly ProjectService _projectService;
         private readonly HRMService _hrmService;
         private readonly HRMv2Service _hrmV2Service;
+        private readonly PublicAppService _publicAppService;
+        private readonly string templateFolder = Path.Combine("wwwroot", "template");
         public UserAppService(
 
             IRepository<User, long> repository,
@@ -87,7 +92,8 @@ namespace Ncc.Users
             UploadAvatarService filesService,
             ProjectService projectService,
             HRMService hrmService,
-            HRMv2Service hRMv2Service
+            HRMv2Service hRMv2Service,
+            PublicAppService publicAppService
             )
         //IRepository<Entities.Member, long> memberRepository)
             : base(repository)
@@ -107,6 +113,7 @@ namespace Ncc.Users
             _projectService = projectService;
             _hrmService = hrmService;
             _hrmV2Service = hRMv2Service;
+            _publicAppService = publicAppService;
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_AddNew)]
@@ -764,6 +771,56 @@ namespace Ncc.Users
                .ToListAsync();
 
             return users;
+        }
+
+        // export file Data Checkpoint
+        private void FillDataCheckpointResult(ExcelPackage excelPackageIn, List<DataCheckPointDto> listDataCheckpointInput)
+        {
+            var sheet = excelPackageIn.Workbook.Worksheets[0];
+            var rowIndex = 4;
+            foreach (var item in listDataCheckpointInput)
+            {
+                sheet.Cells[1, 1].Value = item.CheckPointName;
+                sheet.Cells[rowIndex, 1].Value = rowIndex - 3;
+                sheet.Cells[rowIndex, 2].Value = item.UserId;
+                sheet.Cells[rowIndex, 3].Value = item.FullName;
+                sheet.Cells[rowIndex, 4].Value = item.EmailAddress;
+                sheet.Cells[rowIndex, 5].Value = item.Branch;
+                sheet.Cells[rowIndex, 6].Value = (int)item.Type;
+                sheet.Cells[rowIndex, 7].Value = item.TypeName;
+                sheet.Cells[rowIndex, 8].Value = item.WorkingTime;
+                sheet.Cells[rowIndex, 9].Value = item.LevelName;
+                sheet.Cells[rowIndex, 10].Value = item.ProjectNames;
+                sheet.Cells[rowIndex, 11].Value = item.ReviewerId;
+                sheet.Cells[rowIndex, 12].Value = item.ReviewerName;
+                sheet.Cells[rowIndex, 13].Value = item.ReviewerEmail;
+                sheet.Cells[rowIndex, 14].Value = item.ReviewerIsActive;
+
+                rowIndex++;
+            }
+        }
+
+        [HttpGet]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_ExportDataCheckpoint)]
+        public async Task<FileBase64Dto> ExportDataCheckpoint(DateTime startDate, DateTime endDate)
+        {
+            var listDataCheckpointInput = _publicAppService.GetDataForCheckPoint(startDate, endDate);
+            var templateFilePath = Path.Combine(templateFolder, "ExportDataCheckPoint.xlsx");
+            using (var memoryStream = new MemoryStream(File.ReadAllBytes(templateFilePath)))
+            {
+                using (var excelPackageIn = new ExcelPackage(memoryStream))
+                {
+                    FillDataCheckpointResult(excelPackageIn, await listDataCheckpointInput);
+                    string fileBase64 = Convert.ToBase64String(excelPackageIn.GetAsByteArray());
+
+                    return new FileBase64Dto
+                    {
+                        FileName = "Checkpoint_data_" + startDate.ToString("yyyy-MM-dd") + " - " + endDate.ToString("yyyy-MM-dd"),
+                        FileType = MimeTypeNames.ApplicationVndOpenxmlformatsOfficedocumentSpreadsheetmlSheet,
+                        Base64 = fileBase64
+                    };
+                }
+            }
         }
     }
 }
