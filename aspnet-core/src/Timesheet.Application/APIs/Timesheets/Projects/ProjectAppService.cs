@@ -74,7 +74,7 @@ namespace Timesheet.Timesheets.Projects
             {
                 throw new UserFriendlyException("Start time cannot be greater than end time !");
             }
-
+            
             if (input.Id <= 0)//insert 3 bang project, projectTask, projectUser
             {
                 var project = ObjectMapper.Map<Project>(input);
@@ -493,6 +493,7 @@ namespace Timesheet.Timesheets.Projects
                                   IsNoticeKMRequestChangeWorkingTime = p.IsNoticeKMRequestChangeWorkingTime,
                                   IsNoticeKMApproveChangeWorkingTime = p.IsNoticeKMApproveChangeWorkingTime,
                                   isAllUserBelongTo = p.isAllUserBelongTo,
+                                  IsAllowTeamBuilding = p.IsAllowTeamBuilding,
                                   Users = Users.Select(s => new ProjectUsersDto
                                   {
                                       Id = s.Id,
