@@ -373,7 +373,7 @@ export class RetroDetailComponent
     this.refresh();
   }
 
-  handleSortPm() {
+  handleSortByPm() {
     this.sortByName.value = EnumSort.NotArranged;
     this.sortByPoint.value = EnumSort.NotArranged;
     if (this.sortByPm.value === EnumSort.NotArranged) {
