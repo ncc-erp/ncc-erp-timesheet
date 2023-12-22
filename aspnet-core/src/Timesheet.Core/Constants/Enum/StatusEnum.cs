@@ -284,5 +284,11 @@ namespace Ncc.Entities.Enum
             Approved = 1,
             Reject = 2,
         } 
+
+        public enum ReviewInternNoteType
+        {
+            PmNote = 0,
+            InterviewerNote = 1,
+        }
     }
 }

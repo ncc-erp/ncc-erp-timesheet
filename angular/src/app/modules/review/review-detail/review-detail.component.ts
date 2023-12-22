@@ -20,6 +20,11 @@ import { ConfirmSalaryInternshipComponent } from './confirm-salary-internship/co
 import { NewReviewInternshipComponent } from './new-review-internship/new-review-internship.component';
 import { UpdateReviewerComponent } from './update-reviewer/update-reviewer.component';
 import { NewHrVerifyInternshipComponent } from './new-hr-verify-internship/new-hr-verify-internship.component';
+import { CreatePmNoteComponent } from './create-pm-note/create-pm-note.component';
+import { CreateInterviewNoteComponent } from './create-interview-note/create-interview-note.component';
+import { List, forEach } from 'lodash';
+import { P } from '@angular/cdk/keycodes';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-review-detail',
@@ -40,7 +45,10 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern
   ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern
   ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern
+  ReviewIntern_ReviewDetail_CreatePMNote = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreatePMNote
+  ReviewIntern_ReviewDetail_CreateInterviewNote = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreateInterviewNote
 
+  ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern
   ReviewIntern_ReviewDetail_UpdateDetailSubLevel = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_UpdateDetailSubLevel
   ReviewIntern_ReviewDetail_ApproveForOneIntern =PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_ApproveForOneIntern
   ReviewIntern_ReviewDetail_ConfirmSalaryForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_ConfirmSalaryForOneIntern
@@ -84,6 +92,14 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   branchSearch: FormControl = new FormControl("")
   listBranchFilter : BranchDto[];
   branchId;
+  listInternshipMaxLevelMonths : InternshipMaxLevelMonths [] = [];
+  sortStatus = true;
+  listSelectedItem: SelectReviewInternDetailDto[] = [];
+  selectedCheckboxCount: number = 0;
+  allComplete: boolean = false;
+  public saving: boolean = false;
+  listHeadPmVerify: HeadPmVerifyDto[] = [];
+
   constructor(
     private route: ActivatedRoute,
     public _dialog: MatDialog,
@@ -109,7 +125,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     });
   }
 
-  ngOnInit() {
+  ngOnInit() { 
     this.reviewId = Number(this.route.snapshot.queryParamMap.get("id"))
     this.reviewYear = Number(this.route.snapshot.queryParamMap.get("year"))
     this.reviewMonth = Number(this.route.snapshot.queryParamMap.get("month"))
@@ -142,7 +158,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       this.listReviewer = this.listReviewerFilter.slice();
     }
   }
-
+  
   protected list(request: PagedRequestDto, pageNumber: number, finishedCallback: Function): void {
     request.searchText = this.searchText;
     request.filterItems = [];
@@ -171,28 +187,38 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       request.filterItems.push({propertyName: 'levelChange', comparison: 0, value: this.selectedChangeLevel  } as FilterDto)
     }
     this.reviewDetailService
-      .getAllPaging(request, this.reviewId, this.branchId)
-      .pipe(finalize(() => {
-        finishedCallback();
-      }))
-      // .subscribe((result: any) => {
-      //   this.listReviewIntern = result.result.items;
-      //   this.showPaging(result.result, pageNumber);
-      .subscribe((rs: any) => {
-        this.totalItems = rs.result.totalCount
-        if (rs.result == null || rs.result.items.length == 0) {
-          this.listReviewIntern = []
-        }
-        else {
-          this.listReviewIntern = rs.result.items;
-          this.showPaging(rs.result, pageNumber);
-          this.listReviewIntern.forEach(item => {
-            item.history = false;
-            item.hideNote = false;
-            item.hidePrivateNote = false;
-            item.more = false;
-          })
-        }
+      .countMonthLevelMax()
+      .subscribe(rs => {
+        this.listInternshipMaxLevelMonths = rs.result as InternshipMaxLevelMonths []; 
+        this.reviewDetailService
+          .getAllPaging(request, this.reviewId, this.branchId)
+          .pipe(finalize(() => {
+            finishedCallback();
+          }))
+          // .subscribe((result: any) => {
+          //   this.listReviewIntern = result.result.items;
+          //   this.showPaging(result.result, pageNumber);
+          .subscribe((rs: any) => {
+            this.totalItems = rs.result.totalCount
+            if (rs.result == null || rs.result.items.length == 0) {
+              this.listReviewIntern = []
+            }
+            else {
+              this.listReviewIntern = rs.result.items;
+              this.showPaging(rs.result, pageNumber);
+              this.listReviewIntern.forEach(item => {
+                const internshipSuitable = this.listInternshipMaxLevelMonths.find(x => x.internshipId === item.internshipId);
+                if (internshipSuitable) {
+                    item.countMonthLevelMax = internshipSuitable.countMonthLevelMax;
+                    item.maxLevel = internshipSuitable.maxLevel;  
+                }
+                item.history = false;
+                item.hideNote = false;
+                item.hidePrivateNote = false;
+                item.more = false;
+              })
+            }
+          });
       });
     }
 
@@ -237,7 +263,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
 
     isShowBtnHeadPm(item: ReviewDetailDto){
       return this.isGranted(
-        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern
       ) && this.checkStatus(item.status, 'headPm')
     }
 
@@ -275,12 +301,43 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
 
     isShowDelete(item: ReviewDetailDto){
       return this.isGranted(PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_Delete) &&
-      this.checkStatus(item.status, 'delete')
+      this.checkStatus(item.status, 'delete') 
+    }
+
+    isShowCountMonthMaxLevel(item: ReviewDetailDto){
+      return typeof item.newLevel === 'number' && item.newLevel <= 3;
+    }
+
+    isShowBtnPMNote(item: ReviewDetailDto){
+      return this.isGranted(
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreatePMNote
+      ) && this.checkStatus(item.status, 'pmNote') 
+    }
+
+    isShowBtnInterviewNote(item: ReviewDetailDto){
+      return this.isGranted(
+        PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreateInterviewNote
+      ) && this.checkStatus(item.status, 'interviewNote') 
     }
 
     protected delete(entity: any): void {
 
     }
+
+    isShowPmNote(item: reviewInternCommentDto) {
+      if (item && item.reviewInternNoteType !== undefined ) {
+        return item.reviewInternNoteType === 0;
+      }
+      return false;
+    }
+
+    isShowInterviewNote(item: reviewInternCommentDto){
+      if (item && item.reviewInternNoteType !== undefined ) {
+        return item.reviewInternNoteType === 1;
+      }
+      return false;
+    }
+
 
   getAllPM() {
     this.listReviewerService.getAllPM().subscribe(res => {
@@ -437,14 +494,18 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
 
 
   getSubLevelById(subLevel, newLevel){
-    if(newLevel != null){
-      for(let i = 0 ; i < this.listSubLevels.length; i++){
-        if(newLevel == this.listSubLevels[i].id)
-        {
-          let res = this.listSubLevels[i].subLevels;
-          for(let j = 0 ; j < res.length; j++){
-            if(res[j].id == subLevel){
-              return res[j].name;
+    if(newLevel != null && this.listSubLevels && this.listSubLevels.length > 0){
+      if(this.listSubLevels.length > 0){
+        for(let i = 0 ; i < this.listSubLevels.length; i++){
+          if(newLevel == this.listSubLevels[i].id)
+          {
+            let res = this.listSubLevels[i].subLevels;
+            if (res && res.length) {
+              for(let j = 0 ; j < res.length; j++){
+                if(res[j].id == subLevel){
+                  return res[j].name;
+                }
+              }
             }
           }
         }
@@ -736,13 +797,12 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   checkStatus(status:number, action:string):boolean{
     switch(status){
       case 0: return action=="edit"|| action=="delete" || action == "pmReview" ? true :false
-      case 1: return action=="edit"|| action=="review" || action == "approve" || action == "reject" ? true : false
+      case 1: return action=="edit"|| action=="review" || action == "approve" || action == "reject" || action =="pmNote" || action == "interviewNote" ? true : false
       case 2: return action=="sendEmail" || action=="reject" || action == "print" ? true : false
       case -1: return action=="edit"|| action=="review" || action == "approve" ? true : false
       case 3: return action=="update to HRM"|| action=="rejectSentMail" || action=="print" ? true : false
-      case 4: return action=="edit"|| action=="hrVerify" || action == "reject" ? true : false
-      case 5: return action=="headPm" ? true : false
-      case 6: return action=="edit"|| action=="pmReview" ? true : false
+      case 4: return action=="headPm" ? true : false
+      case 5: return action=="edit"|| action=="pmReview" ? true : false
       default: return false
 
     }
@@ -833,6 +893,147 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
         return 'label-danger'
     }
   }
+
+  toggleSort(columnName) {
+    if (this.sortStatus) {
+      this.listReviewIntern = <ReviewDetailDto[]>_.orderBy(this.listReviewIntern, [columnName], ['asc']);
+    } else {
+      this.listReviewIntern = <ReviewDetailDto[]>_.orderBy(this.listReviewIntern, [columnName], ['desc']);
+    }
+    this.sortStatus = !this.sortStatus;
+  }
+
+  setAll(completed: boolean) {
+    this.allComplete = completed;
+    if (this.listReviewIntern == null) {
+      return;
+    }
+
+    this.listSelectedItem = []; 
+
+    this.listReviewIntern.forEach((reviewDetail) => {
+      if (reviewDetail.status === 4) {
+        reviewDetail.selected = completed;
+
+        if (completed) {
+          this.listSelectedItem.push({
+            selected: completed,
+            id: reviewDetail.id,
+            status: reviewDetail.status,
+          });
+        }
+      }
+    });
+    this.checkSelectedCheckbox();
+  }
+
+  handleSelectlistReviewInternItem(index, $event) {
+    console.log("item", this.listReviewIntern[index]);
+    if (index != undefined && this.listReviewIntern[index]) {
+      this.listReviewIntern[index].selected = $event.checked;
+  
+      if (!this.listSelectedItem) {
+        this.listSelectedItem = [];
+      }
+  
+      const item = this.listSelectedItem.find(
+        (item) => item.id == this.listReviewIntern[index].id
+      );
+  
+      if (item) {
+        item.selected = $event.checked;
+      } else {
+        this.listSelectedItem.push({
+          selected: $event.checked,
+          id: this.listReviewIntern[index].id,
+          status: this.listReviewIntern[index].status
+        });
+      }
+  
+      this.updateAllComplete();
+      this.checkSelectedCheckbox();
+    }
+  }
+
+  checkSelectedCheckbox() {
+    this.selectedCheckboxCount = this.listSelectedItem.filter(
+      (x) => x.selected
+    ).length;
+  }
+
+  updateAllComplete() {
+    this.allComplete =
+      this.listReviewIntern != null &&
+      this.listReviewIntern.every((t) => this.getIsSelected(t));
+  }
+
+  
+  getIsSelected(item) {
+    return this.listSelectedItem.find((c) => c.id == item.id)
+      ? this.listSelectedItem.find((c) => c.id == item.id).selected
+      : item.selected;
+  }
+
+  someComplete(): boolean {
+    if (this.listReviewIntern == null || this.listReviewIntern.length == 0) {
+      return false;
+    }
+  
+    return this.listReviewIntern.some((t) => this.getIsSelected(t)) && !this.allComplete;
+  }
+
+  hasSelectedItems(){
+    return this.listReviewIntern.some(item => item.selected === true);
+  }
+
+  headPmAprroveOrRejectAll(status: number){
+    if(this.selectedCheckboxCount === 0){
+      abp.notify.error("Please select the listing record before performing this action");
+    }
+    else {
+      this.saving = true;
+      this.listHeadPmVerify = this.listSelectedItem.map(item => ({
+        ReviewDetailId: item.id,
+        Status: status
+      }));
+      
+      const messageSuccessfully: string = (this.listHeadPmVerify[0].Status == 1) ? "PM Approve Successfully" : "PM Reject Successfully" ;
+      this.reviewDetailService.headPmVerifyOrRejectAll(this.listHeadPmVerify).subscribe(
+        (rs) => {
+          abp.notify.success(messageSuccessfully);
+          this.saving = false;
+          this.refresh();
+        }
+      )
+    }
+  }
+
+  createPMNote(item: ReviewDetailDto): void{
+    const dialogRef = this._dialog.open(CreatePmNoteComponent, {
+      disableClose : true,
+      width : "750px",
+      data: item,
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        abp.notify.success('PM/ Loren Note success');
+        this.refresh()
+      }
+    });
+  }
+  createInterviewNote(item : ReviewDetailDto): void{
+    const dialogRef = this._dialog.open(CreateInterviewNoteComponent, {
+      disableClose : true,
+      width : "750px",
+      data: item,
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        abp.notify.success('Interview Note success');
+        this.refresh()
+      }
+    });
+  }
 }
 
 export enum EnumReviewStatus {
@@ -881,14 +1082,21 @@ export class ReviewDetailDto {
   hideNote : boolean;
   hidePrivateNote: boolean;
   reviewInternCommentDto: reviewInternCommentDto[];
-  id?: number
+  id?: number;
+  countMonthLevelMax: number;
+  maxLevel:number;
+  selected?: boolean;
 }
 
 export class reviewInternCommentDto{
+
   reviewDetailId?: number;
-  commentUserId?: number;
+  poteByUserId?: number;
+  noteByUserName?: string;
+  created?: Date;
   privateNote?: string;
-  id?: number
+  id?: number;
+  reviewInternNoteType: number;
 }
 
 export class UpdateReviewDetailDto {
@@ -930,4 +1138,19 @@ export class InfoReviewerDto {
 function UpdateReviewDetailComponent(UpdateReviewDetailComponent: any, arg1: { disableClose: true; width: string; data: ReviewDetailDto; }) {
   throw new Error('Function not implemented.');
 }
+export class InternshipMaxLevelMonths {
+  internshipId: number;  
+  maxLevel: number;
+  countMonthLevelMax: number;
+}
 
+export class SelectReviewInternDetailDto {
+  id: number;
+  selected?: boolean;
+  status: number;
+}
+
+export class HeadPmVerifyDto {
+  ReviewDetailId: number;
+  Status: number;
+}

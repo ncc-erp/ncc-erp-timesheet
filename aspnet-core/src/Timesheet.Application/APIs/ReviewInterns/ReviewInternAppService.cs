@@ -211,7 +211,7 @@ namespace Timesheet.APIs.ReviewInterns
             }
 
             var details = await (from rv in WorkScope.GetAll<ReviewDetail>()
-                                    .Where(x => x.ReviewId == reviewId && x.Status == ReviewInternStatus.Approved)
+                                    .Where(x => x.ReviewId == reviewId && (x.Status == ReviewInternStatus.Approved || x.Status == ReviewInternStatus.Rejected))
                                     .Where(x => (isCheckToOffical && x.NewLevel > UserLevel.Intern_3) || (!isCheckToOffical && x.NewLevel <= UserLevel.Intern_3))
                                  select new
                                  {
@@ -238,7 +238,7 @@ namespace Timesheet.APIs.ReviewInterns
 
             if (details.Count() == 0)
             {
-                throw new UserFriendlyException("Chưa có TTS mới nào được approve");
+                throw new UserFriendlyException("Chưa có TTS mới nào được approve hoặc reject");
             }
 
             List<Object> failedList = new List<object>();
