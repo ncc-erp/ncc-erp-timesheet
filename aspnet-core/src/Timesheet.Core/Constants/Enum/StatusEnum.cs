@@ -192,8 +192,7 @@ namespace Ncc.Entities.Enum
             SentEmail = 3,
             Rejected = -1,
             PmReviewed = 4,
-            HrApproved = 5,
-            ReOpen = 6
+            ReOpen = 5
         }
 
         public enum EnumRequest
