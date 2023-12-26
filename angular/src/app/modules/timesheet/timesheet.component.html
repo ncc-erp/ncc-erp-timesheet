@@ -367,6 +367,8 @@
                                           <th>PROJECT</th>
                                           <th>TASK NAME</th>
                                           <th>TIME</th>
+                                          <th>BILL ACCOUNT</th>
+                                          <th>BILL TIME</th>
                                           <th>STATUS</th>
                                           <th>WORK TYPE</th>
                                           <th>NOTE</th>
@@ -389,6 +391,16 @@
                                             <span>{{
                                               convertMinuteToHour(t.workingTime)
                                               }}</span>
+                                          </td>
+                                          <td>
+                                            {{t.projectTargetUser}}
+                                          </td>
+                                          <td>
+                                            <span>
+                                              {{
+                                                convertMinuteToHour(t.workingTimeTargetUser)
+                                              }}
+                                            </span>
                                           </td>
                                           <td>
                                             <span [innerHtml]="

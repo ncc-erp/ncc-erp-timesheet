@@ -112,7 +112,9 @@ namespace Timesheet.Timesheets.Timesheets
                         BranchDisplayName = a.User.Branch.DisplayName,
                         OffHour = absencedays.Where(s => s.DateAt.Date == a.DateAt.Date && s.UserId == a.User.Id).Select(h => h.Hour).Sum(),
                         IsOffDay = DateTimeUtils.IsOffDay(dayOffSettings, a.DateAt),
-                        IsUnlockedByEmployee = a.IsUnlockedByEmployee
+                        IsUnlockedByEmployee = a.IsUnlockedByEmployee,
+                        ProjectTargetUser = a.ProjectTargetUser.User.FullName,
+                        WorkingTimeTargetUser = a.TargetUserWorkingTime
                     };
             var query = await q.OrderBy(i => i.EmailAddress).ThenByDescending(s => s.DateAt).ToListAsync();
             var listTimekeeping = WorkScope.GetAll<Timekeeping>()
