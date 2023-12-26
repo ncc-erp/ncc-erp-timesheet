@@ -887,8 +887,6 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
         return 'label-info';
       case EnumReviewStatus.PMReviewed:
         return 'label-warning';
-      case EnumReviewStatus.HRApproved:
-        return 'label-purple';
       default:
         return 'label-danger'
     }

@@ -1386,104 +1386,11 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
         }
 
         [Fact]
-        public async Task Should_HrVerify_Approve_Success()
-        {
-            var hrApprove = new CreatePrivateNoteDto
-            {
-                ReviewDetailId = 18,
-                Status = ReviewInternStatus.HrApproved,
-                PrivateNote = "Ok"
-            };
-
-            await WithUnitOfWorkAsync(async () =>
-            {
-                await _reviewDetailAppService.HrVerify(hrApprove);
-            });
-
-            await WithUnitOfWorkAsync(async () =>
-            {
-                var reviewDetailResponse = await _workScope.GetAsync<ReviewDetail>(hrApprove.ReviewDetailId);
-
-                reviewDetailResponse.Id.ShouldBe(hrApprove.ReviewDetailId);
-                reviewDetailResponse.Status.ShouldBe(hrApprove.Status);
-
-                var reviewCommentResponse = await _workScope.GetAsync<ReviewInternPrivateNote>(10);
-
-                reviewCommentResponse.PrivateNote.ShouldBe(hrApprove.PrivateNote);
-            });
-        }
-
-        [Fact]
-        public async Task Should_HrVerify_ReOpen_Success()
-        {
-            var hrReOpen = new CreatePrivateNoteDto
-            {
-                ReviewDetailId = 18,
-                Status = ReviewInternStatus.ReOpen,
-                PrivateNote = "ReOpen"
-            };
-
-            await WithUnitOfWorkAsync(async () =>
-            {
-                await _reviewDetailAppService.HrVerify(hrReOpen);
-            });
-
-            await WithUnitOfWorkAsync(async () =>
-            {
-                var reviewDetailResponse = await _workScope.GetAsync<ReviewDetail>(hrReOpen.ReviewDetailId);
-
-                reviewDetailResponse.Id.ShouldBe(hrReOpen.ReviewDetailId);
-                reviewDetailResponse.Status.ShouldBe(hrReOpen.Status);
-
-                var reviewCommentResponse = await _workScope.GetAsync<ReviewInternPrivateNote>(10);
-
-                reviewCommentResponse.PrivateNote.ShouldBe(hrReOpen.PrivateNote);
-            });
-        }
-
-        [Fact]
-        public async Task Should_Throw_Exception_When_HrVerify_Input_Status_Is_Not_HrApprovedOrReOpen()
-        {
-            var hrApprove = new CreatePrivateNoteDto
-            {
-                ReviewDetailId = 18,
-                Status = ReviewInternStatus.Reviewed,
-                PrivateNote = "ReOpen"
-            };
-
-            var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
-            {
-                await _reviewDetailAppService.HrVerify(hrApprove);
-            });
-
-            exception.Message.ShouldBe("Trạng thái chỉ được là HR Approved hoặc Reopen.");
-        }
-
-        [Fact]
-        public async Task Should_Throw_Exception_When_HrVerify_ReviewDetailStatus_Is_Not_PmReviewed()
-        {
-            var hrApprove = new CreatePrivateNoteDto
-            {
-                ReviewDetailId = 17,
-                Status = ReviewInternStatus.HrApproved,
-                PrivateNote = "ReOpen"
-            };
-
-            var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
-            {
-                await _reviewDetailAppService.HrVerify(hrApprove);
-            });
-
-            exception.Message.ShouldBe("Review này chưa được PM review hoặc đã review xong");
-        }
-
-
-        [Fact]
         public async Task Should_HeadPmVerify_Approve_Success()
         {
             var headPmVerify = new HeadPmVerifyDto
             {
-                ReviewDetailId = 19,
+                ReviewDetailId = 18,
                 Status = ReviewInternStatus.Reviewed,
             };
 
@@ -1506,7 +1413,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
         {
             var headPmVerify = new HeadPmVerifyDto
             {
-                ReviewDetailId = 19,
+                ReviewDetailId = 18,
                 Status = ReviewInternStatus.Rejected,
             };
 
@@ -1530,7 +1437,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
             var headPmVerify = new HeadPmVerifyDto
             {
                 ReviewDetailId = 19,
-                Status = ReviewInternStatus.HrApproved,
+                Status = ReviewInternStatus.PmReviewed,
             };
 
             var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -1542,11 +1449,11 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
         }
 
         [Fact]
-        public async Task Should_Throw_Exception_When_HeadPMVerify_ReviewDetailStatus_Is_Not_HrApproved()
+        public async Task Should_Throw_Exception_When_HeadPMVerify_ReviewDetailStatus_Is_Not_PmReviewed()
         {
             var headPmVerify = new HeadPmVerifyDto
             {
-                ReviewDetailId = 18,
+                ReviewDetailId = 19,
                 Status = ReviewInternStatus.Reviewed,
             };
 
@@ -1555,7 +1462,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
                 await _reviewDetailAppService.HeadPmVerify(headPmVerify);
             });
 
-            exception.Message.ShouldBe("Review này chưa được HR Approve");
+            exception.Message.ShouldBe("Review này chưa được PM review hoặc đã review xong");
         }
     }
 }
