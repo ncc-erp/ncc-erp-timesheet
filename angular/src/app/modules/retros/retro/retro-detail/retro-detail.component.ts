@@ -245,8 +245,9 @@ export class RetroDetailComponent
         if (result) {
           this.retroDetailService.delete(item.id).subscribe(() => {
             abp.notify.info("Deleted user " + item.fullName);
-            this.getProjectPMRetroResult();
-            this.refresh();
+            this.listRetroDetail = this.listRetroDetail.filter(
+              (x) => x.id !== item.id
+            );
           });
         }
       }
