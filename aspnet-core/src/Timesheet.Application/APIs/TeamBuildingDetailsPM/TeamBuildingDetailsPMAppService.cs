@@ -405,9 +405,14 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
                 throw new UserFriendlyException($"Total money greater than in Invoice amount {float.Parse(strTeamBuildingMoney)} VNĐ");
             }
 
-            if(!hasInvoiceWithVat && totalMoney > pMRequestDto.InvoiceAmount * 1.1)
+            if(!hasInvoiceWithVat)
             {
-                throw new UserFriendlyException($"Total money greater than in Invoice amount {pMRequestDto.InvoiceAmount * 0.1} VNĐ");
+                var vatMoney = pMRequestDto.InvoiceAmount - (pMRequestDto.InvoiceAmount / 1.1);
+                var invoiceAndVat = (pMRequestDto.InvoiceAmount + vatMoney) * 1.1;
+                if (totalMoney > invoiceAndVat)
+                {
+                    throw new UserFriendlyException($"Total money greater than in Invoice amount and VAT money: {(pMRequestDto.InvoiceAmount + vatMoney) * 0.1} VNĐ");
+                }
             }
 
             //create new history
