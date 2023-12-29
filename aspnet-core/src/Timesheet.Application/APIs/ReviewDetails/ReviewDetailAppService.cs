@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Timesheet.APIs.CapabilitySettings.Dto;
 using Timesheet.APIs.ReviewDetails.Dto;
 using Timesheet.APIs.ReviewInternCapabilities.Dto;
+using Timesheet.APIs.ReviewInterns.Dto;
 using Timesheet.BackgroundJob;
 using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
@@ -92,7 +93,8 @@ namespace Timesheet.APIs.ReviewDetails
                                NoteByUserId = c.NoteByUserId,
                                NoteByUserName = u.Name,
                                PrivateNote = c.PrivateNote,
-                               Created = c.CreationTime
+                               Created = c.CreationTime,
+                               ReviewInternNoteType = c.ReviewInternNoteType
                            };
             var listNote = qnote.ToList();
             var reviewDetails = from rv in WorkScope.GetAll<ReviewDetail>()
@@ -144,7 +146,8 @@ namespace Timesheet.APIs.ReviewDetails
                                         NoteByUserId = s.NoteByUserId,
                                         NoteByUserName = s.NoteByUserName,
                                         PrivateNote = s.PrivateNote,
-                                        Created = s.Created
+                                        Created = s.Created,
+                                        ReviewInternNoteType = s.ReviewInternNoteType
                                     }).OrderByDescending(s => s.Created).ToList(),
                                 };
             var result = await reviewDetails.OrderBy(x => x.InternshipId).GetGridResult(reviewDetails, input);
@@ -631,6 +634,10 @@ namespace Timesheet.APIs.ReviewDetails
             if (detail.Status == ReviewInternStatus.Approved || detail.Status == ReviewInternStatus.Reviewed)
             {
                 detail.Status = ReviewInternStatus.Rejected;
+                if(detail.Status == ReviewInternStatus.Rejected)
+                {
+                    detail.NewLevel = detail.CurrentLevel;
+                }
                 await WorkScope.UpdateAsync(detail);
             }
             else
@@ -1198,7 +1205,7 @@ namespace Timesheet.APIs.ReviewDetails
                 {
                     ReviewDetailId = input.Id,
                     NoteByUserId = AbpSession.UserId.Value,
-                    PrivateNote = input.PrivateNote.Trim()
+                    PrivateNote = input.PrivateNote.Trim()   
                 };
                 await WorkScope.InsertAsync(reviewInternComment);
             }
@@ -1293,15 +1300,38 @@ namespace Timesheet.APIs.ReviewDetails
 
             await WorkScope.UpdateAsync(reviewDetail);
         }
-
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern)]
+       
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern)]
         [HttpPost]
-        public async Task HrVerify(CreatePrivateNoteDto input)
+        public async Task HeadPmVerify(HeadPmVerifyDto input)
         {
-            if (input.Status == ReviewInternStatus.HrApproved || input.Status == ReviewInternStatus.ReOpen)
+            if (input.Status == ReviewInternStatus.Reviewed || input.Status == ReviewInternStatus.Rejected)
             {
                 var detail = await WorkScope.GetAsync<ReviewDetail>(input.ReviewDetailId);
                 if (detail.Status == ReviewInternStatus.PmReviewed)
+                {
+                    detail.Status = input.Status;
+                    await WorkScope.UpdateAsync(detail);
+                }
+                else
+                {
+                    throw new UserFriendlyException("Review này chưa được PM review hoặc đã review xong");
+                }
+            }
+            else
+            {
+                throw new UserFriendlyException("Trạng thái chỉ được là Reviewed hoặc Rejected.");
+            }
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote)]
+        [HttpPost]
+        public async Task CreatePMNote(CreatePrivateNoteDto input)
+        {
+            if (input.Status == ReviewInternStatus.Reviewed)
+            {
+                var detail = await WorkScope.GetAsync<ReviewDetail>(input.ReviewDetailId);
+                if (detail.Status == ReviewInternStatus.Reviewed)
                 {
                     detail.Status = input.Status;
                     if (input.PrivateNote != null)
@@ -1310,7 +1340,8 @@ namespace Timesheet.APIs.ReviewDetails
                         {
                             ReviewDetailId = input.ReviewDetailId,
                             NoteByUserId = AbpSession.UserId.Value,
-                            PrivateNote = input.PrivateNote.Trim()
+                            PrivateNote = input.PrivateNote.Trim(),
+                            ReviewInternNoteType = ReviewInternNoteType.PmNote
                         };
                         await WorkScope.InsertAsync(reviewInternComment);
                     }
@@ -1327,27 +1358,86 @@ namespace Timesheet.APIs.ReviewDetails
             }
         }
 
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_CreateInterviewNote)]
         [HttpPost]
-        public async Task HeadPmVerify(HeadPmVerifyDto input)
+        public async Task CreateInterviewNote(CreatePrivateNoteDto input)
         {
-            if (input.Status == ReviewInternStatus.Reviewed || input.Status == ReviewInternStatus.Rejected)
+            if (input.Status == ReviewInternStatus.Reviewed)
             {
                 var detail = await WorkScope.GetAsync<ReviewDetail>(input.ReviewDetailId);
-                if (detail.Status == ReviewInternStatus.HrApproved)
+                if (detail.Status == ReviewInternStatus.Reviewed)
                 {
                     detail.Status = input.Status;
+                    if (input.PrivateNote != null)
+                    {
+                        var reviewInternComment = new ReviewInternPrivateNote
+                        {
+                            ReviewDetailId = input.ReviewDetailId,
+                            NoteByUserId = AbpSession.UserId.Value,
+                            PrivateNote = input.PrivateNote.Trim(),
+                            ReviewInternNoteType = ReviewInternNoteType.InterviewerNote
+                        };
+                        await WorkScope.InsertAsync(reviewInternComment);
+                    }
                     await WorkScope.UpdateAsync(detail);
                 }
                 else
                 {
-                    throw new UserFriendlyException("Review này chưa được HR Approve");
+                    throw new UserFriendlyException("This review has not yet been PM Reviewed");
                 }
             }
             else
             {
-                throw new UserFriendlyException("Trạng thái chỉ được là Reviewed hoặc Rejected.");
+                throw new UserFriendlyException("Status can only be Reviewed or Rejected.");
             }
+        }
+            
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern)]
+        [HttpPost]
+        public async Task HeadPmVerifyOrRejectAll(List<HeadPmVerifyDto> input)
+        {
+            var listReviewDetail = new List<ReviewDetail>();
+
+            foreach (var inputItem in input)
+            {
+                if (inputItem.Status == ReviewInternStatus.Reviewed || inputItem.Status == ReviewInternStatus.Rejected)
+                {
+                    var detail = await WorkScope.GetAsync<ReviewDetail>(inputItem.ReviewDetailId);
+                    if (detail.Status == ReviewInternStatus.PmReviewed)
+                    {
+                        detail.Status = inputItem.Status;
+                        listReviewDetail.Add(detail);
+                    }
+                    else
+                    {
+                        throw new UserFriendlyException("This review has not yet been PM Reviewed");
+                    }
+                }
+                else
+                {
+                    throw new UserFriendlyException("Status can only be Reviewed or Rejected.");
+                }
+            }
+
+            await WorkScope.UpdateRangeAsync(listReviewDetail);
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_ViewAll)]
+        [HttpGet]
+        public async Task<List<InternshipMaxLevelMonthsDto>> CountMonthLevelMax()
+        {
+            long userId = AbpSession.UserId.Value;
+            var listInternshipMaxLevelMonths = await WorkScope.GetAll<ReviewDetail>()
+                        .Where(x =>  x.IsDeleted == false && x.NewLevel != null && x.NewLevel.Value < UserLevel.FresherMinus && x.Status != ReviewInternStatus.Draft)
+                        .GroupBy(x => x.InternshipId)
+                        .Select(gp => new InternshipMaxLevelMonthsDto
+                        {
+                            internshipId = gp.Key,
+                            maxLevel = gp.Max(y=> y.NewLevel).Value,
+                            countMonthLevelMax = gp.Count(rd => rd.NewLevel == gp.Max(y => y.NewLevel))
+                        })
+                        .ToListAsync();
+            return listInternshipMaxLevelMonths;
         }
     }
 }

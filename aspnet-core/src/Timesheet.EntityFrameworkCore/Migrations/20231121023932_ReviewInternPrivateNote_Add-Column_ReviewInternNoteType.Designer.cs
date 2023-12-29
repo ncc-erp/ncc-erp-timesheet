@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ncc.EntityFrameworkCore;
 
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    partial class TimesheetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231121023932_ReviewInternPrivateNote_Add-Column_ReviewInternNoteType")]
+    partial class ReviewInternPrivateNote_AddColumn_ReviewInternNoteType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2212,8 +2214,6 @@ namespace Timesheet.Migrations
                     b.Property<byte>("Status");
 
                     b.Property<string>("TitleRequest");
-
-                    b.Property<float?>("VATMoney");
 
                     b.HasKey("Id");
 

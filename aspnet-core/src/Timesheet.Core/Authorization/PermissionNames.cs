@@ -21,6 +21,7 @@ namespace Ncc.Authorization
         public const string Admin_Users_ImportWorkingTime = "Admin.Users.UploadWorkingTime";
         public const string Admin_Users_UpdateUserWorkingTime = "Admin.Users.UpdateUserWorkingTime";
         public const string Admin_Users_ViewLevelUser = "Admin.Users.ViewLevelUser";
+        public const string Admin_Users_ExportDataCheckpoint = "Admin.Users.ExportDataCheckpoint";
         public const string Admin_Roles = "Admin.Roles";
         public const string Admin_Roles_View = "Admin.Roles.View";
         public const string Admin_Roles_ViewDetail = "Admin.Roles.ViewDetail";
@@ -293,6 +294,9 @@ namespace Ncc.Authorization
 
         public const string ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern = "ReviewIntern.ReviewDetail.VerifyPmReviewedForOneIntern";
         public const string ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern = "ReviewIntern.ReviewDetail.AcceptHrRequestForOneIntern";
+        public const string ReviewIntern_ReviewDetail_CreatePMNote = "ReviewIntern.ReviewDetail.CreatePMNote";
+        public const string ReviewIntern_ReviewDetail_CreateInterviewNote = "ReviewIntern.ReviewDetail.CreatInterviewNote";
+        public const string ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern = "ReviewIntern.ReviewDetail.AcceptPMReviewForAllIntern";
 
         public const string OverTimeSetting = "OverTimeSetting";
         public const string OverTimeSetting_View = "OverTimeSetting.View";
@@ -370,6 +374,7 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_Users_ImportWorkingTime,
                     PermissionNames.Admin_Users_UpdateUserWorkingTime,
                     PermissionNames.Admin_Users_ViewLevelUser,
+                    PermissionNames.Admin_Users_ExportDataCheckpoint,
                     PermissionNames.Admin_Roles,
                     PermissionNames.Admin_Roles_View,
                     PermissionNames.Admin_Roles_ViewDetail,
@@ -618,6 +623,9 @@ namespace Ncc.Authorization
                     PermissionNames.ReviewIntern_ReviewDetail_ReviewByCapabilityForOneIntern,
                     PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern,
                     PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern,
+                    PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote,
+                    PermissionNames.ReviewIntern_ReviewDetail_CreateInterviewNote,
+                    PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern,
 
                     PermissionNames.Timekeeping_UserNote,
                     PermissionNames.ManageWorkingTime_ViewAll,
@@ -823,6 +831,7 @@ namespace Ncc.Authorization
                     PermissionNames.ManageWorkingTime_ViewDetail,
                     PermissionNames.ManageWorkingTime_Approval,
                     PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern,
+                    PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern,
 
                     PermissionNames.ProjectManagementBranchDirectors,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs,
@@ -857,6 +866,7 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Users_ImportWorkingTime, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Import working time" },
             new SystemPermission{ Name =  PermissionNames.Admin_Users_UpdateUserWorkingTime, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update user's working time" },
             new SystemPermission{ Name =  PermissionNames.Admin_Users_ViewLevelUser, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View level user" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Users_ExportDataCheckpoint, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Export Data For Checkpoint"},
             new SystemPermission{ Name =  PermissionNames.Admin_Roles, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Roles" },
             new SystemPermission{ Name =  PermissionNames.Admin_Roles_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View roles" },
             new SystemPermission{ Name =  PermissionNames.Admin_Roles_ViewDetail, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View detail role" },
@@ -1108,6 +1118,9 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_UpdateDetailFullSalary, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Full Lương"},
             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern,MultiTenancySides = MultiTenancySides.Host, DisplayName = "Verify PmReviewed For One Intern" },
             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Accept HrRequest For One Intern" },
+            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Create PM note"},
+            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_CreateInterviewNote, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Create Interview note"},
+            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Acept all PmReviewed for all intern"},
 
             new SystemPermission{ Name =  PermissionNames.OverTimeSetting, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Setting overtime" },
             new SystemPermission{ Name =  PermissionNames.OverTimeSetting_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View overtime settings" },
@@ -1181,6 +1194,8 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.Admin_Users_ImportWorkingTime, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Import working time" },
                             new SystemPermission{ Name =  PermissionNames.Admin_Users_UpdateUserWorkingTime, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update user's working time" },
                             new SystemPermission{ Name =  PermissionNames.Admin_Users_ViewLevelUser, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View level user" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Users_ExportDataCheckpoint, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Export Data For Checkpoint"},
+
                         }
                     },
                     new SystemPermission{ Name =  PermissionNames.Admin_Roles, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Roles",
@@ -1691,6 +1706,9 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_UpdateDetailFullSalary, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Full Lương"},
                             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern,MultiTenancySides = MultiTenancySides.Host, DisplayName = "Verify PmReviewed For One Intern" },
                             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Accept HrRequest For One Intern" },
+                            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Create PM note"},
+                            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_CreateInterviewNote, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Create Interview note"},
+                            new SystemPermission{ Name =  PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Accept PmReviewed for all intern"},
                         }},
                 },
              },
