@@ -398,18 +398,23 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
             {
                 totalMoney += LastRequestHistory?.RemainingMoney ?? 0;
             }
-
+            
             bool hasInvoiceWithVat = pMRequestDto.ListInvoiceRequestDto.Any(invoiceDto => invoiceDto.HasVat);
 
             if(hasInvoiceWithVat && totalMoney > (pMRequestDto.InvoiceAmount + float.Parse(strTeamBuildingMoney))) {
                 throw new UserFriendlyException($"Total money greater than in Invoice amount {float.Parse(strTeamBuildingMoney)} VNĐ");
             }
 
-            if(!hasInvoiceWithVat && totalMoney > pMRequestDto.InvoiceAmount * 1.1)
+            if (!hasInvoiceWithVat)
             {
-                throw new UserFriendlyException($"Total money greater than in Invoice amount {pMRequestDto.InvoiceAmount * 0.1} VNĐ");
+                var VAT = pMRequestDto.InvoiceAmount - pMRequestDto.InvoiceAmount / 1.1;
+                var maxTotalRequestMoneyWithoutVAT = pMRequestDto.InvoiceAmount + VAT;
+                if(totalMoney > maxTotalRequestMoneyWithoutVAT * 1.1)
+                {
+                    throw new UserFriendlyException($"Total money greater than in Invoice amount {maxTotalRequestMoneyWithoutVAT * 0.1} VNĐ");
+                }
             }
-
+            
             //create new history
             TeamBuildingRequestHistory history = new TeamBuildingRequestHistory
             {
