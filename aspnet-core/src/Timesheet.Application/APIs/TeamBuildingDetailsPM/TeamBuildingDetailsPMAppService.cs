@@ -398,7 +398,7 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
             {
                 totalMoney += LastRequestHistory?.RemainingMoney ?? 0;
             }
-
+            
             bool hasInvoiceWithVat = pMRequestDto.ListInvoiceRequestDto.Any(invoiceDto => invoiceDto.HasVat);
 
             if(hasInvoiceWithVat && totalMoney > (pMRequestDto.InvoiceAmount + float.Parse(strTeamBuildingMoney))) {
@@ -414,7 +414,7 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
                     throw new UserFriendlyException($"Total money greater than in Invoice amount and VAT money: {(pMRequestDto.InvoiceAmount + vatMoney) * 0.1} VNĐ");
                 }
             }
-
+            
             //create new history
             TeamBuildingRequestHistory history = new TeamBuildingRequestHistory
             {

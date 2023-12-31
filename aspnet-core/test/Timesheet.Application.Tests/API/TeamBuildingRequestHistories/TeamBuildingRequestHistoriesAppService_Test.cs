@@ -765,6 +765,98 @@ namespace Timesheet.Application.Tests.API.TeamBuildingRequestHistories
             });
         }
 
+        // requestMoney < Invoice + VAT
+        [Fact]
+        public async Task DisburseRequest_Test8()
+        {
+            var input = new DisburseTeamBuildingRequestDto
+            {
+                RequesterId = 5,
+                DisburseMoney = 60000f,
+                RequestId = 12,
+                InvoiceDisburseList = new List<DisburseTeamBuildingInvoiceRequestDto>()
+                { new DisburseTeamBuildingInvoiceRequestDto {InvoiceId = 12, HasVAT = false } },
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var requestBeforeChange = await _workScope.GetAsync<TeamBuildingRequestHistory>(input.RequestId);
+                var requestAfterChange = await _workScope.GetAsync<TeamBuildingRequestHistory>(input.RequestId);
+
+                requestBeforeChange.Status.ShouldBe(Ncc.Entities.Enum.StatusEnum.TeamBuildingRequestStatus.Pending);
+                requestBeforeChange.DisbursedMoney.ShouldBe(0f);
+                requestBeforeChange.VATMoney.ShouldBe(0f);
+
+                await _requestHistoryAppService.DisburseRequest(input);
+
+                requestAfterChange.Status.ShouldBe(Ncc.Entities.Enum.StatusEnum.TeamBuildingRequestStatus.Done);
+                requestAfterChange.DisbursedMoney.ShouldBe(input.DisburseMoney);
+                requestBeforeChange.VATMoney.ShouldBe(10000f);
+            });
+        }
+
+        // requestMoney = Invoice + VAT
+        [Fact]
+        public async Task DisburseRequest_Test9()
+        {
+            var input = new DisburseTeamBuildingRequestDto
+            {
+                RequesterId = 5,
+                DisburseMoney = 120000f,
+                RequestId = 13,
+                InvoiceDisburseList = new List<DisburseTeamBuildingInvoiceRequestDto>()
+                { new DisburseTeamBuildingInvoiceRequestDto {InvoiceId = 13, HasVAT = false } },
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var requestBeforeChange = await _workScope.GetAsync<TeamBuildingRequestHistory>(input.RequestId);
+                var requestAfterChange = await _workScope.GetAsync<TeamBuildingRequestHistory>(input.RequestId);
+
+                requestBeforeChange.Status.ShouldBe(Ncc.Entities.Enum.StatusEnum.TeamBuildingRequestStatus.Pending);
+                requestBeforeChange.DisbursedMoney.ShouldBe(0f);
+                requestBeforeChange.VATMoney.ShouldBe(0f);
+
+                await _requestHistoryAppService.DisburseRequest(input);
+
+                requestAfterChange.Status.ShouldBe(Ncc.Entities.Enum.StatusEnum.TeamBuildingRequestStatus.Done);
+                requestAfterChange.DisbursedMoney.ShouldBe(input.DisburseMoney);
+                requestBeforeChange.VATMoney.ShouldBe(10000f);
+            });
+        }
+
+        // requestMoney > Invoice + VAT
+        [Fact]
+        public async Task DisburseRequest_Test10()
+        {
+            var input = new DisburseTeamBuildingRequestDto
+            {
+                RequesterId = 5,
+                DisburseMoney = 120000f,
+                RequestId = 14,
+                InvoiceDisburseList = new List<DisburseTeamBuildingInvoiceRequestDto>()
+                { new DisburseTeamBuildingInvoiceRequestDto {InvoiceId = 14, HasVAT = false } },
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var requestBeforeChange = await _workScope.GetAsync<TeamBuildingRequestHistory>(input.RequestId);
+                var requestAfterChange = await _workScope.GetAsync<TeamBuildingRequestHistory>(input.RequestId);
+
+                requestBeforeChange.Status.ShouldBe(Ncc.Entities.Enum.StatusEnum.TeamBuildingRequestStatus.Pending);
+                requestBeforeChange.DisbursedMoney.ShouldBe(0f);
+                requestBeforeChange.VATMoney.ShouldBe(0f);
+                requestBeforeChange.RemainingMoney.ShouldBe(0f);
+
+                await _requestHistoryAppService.DisburseRequest(input);
+
+                requestAfterChange.Status.ShouldBe(Ncc.Entities.Enum.StatusEnum.TeamBuildingRequestStatus.Done);
+                requestAfterChange.DisbursedMoney.ShouldBe(input.DisburseMoney);
+                requestBeforeChange.VATMoney.ShouldBe(10000f);
+                requestAfterChange.RemainingMoney.ShouldBe(10000f);
+            });
+        }
+
         [Fact]
         // request status = Rejected
         public async Task GetDetailOfHistory_Test1()

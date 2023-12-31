@@ -23,16 +23,19 @@
                   <th style="width: 10%">
                     No
                   </th>
-                  <th style="width: 20%">
+                  <th style="width: 15%">
                     Invoice Amount
                   </th>
                   <th style="width: 40%">
                     Invoice Bill Resource
-                  </th>
-                  <th style="width: 15%">
+                  </th> 
+                  <th style="width: 10%">
                     Has VAT
                   </th>
-                  <th style="width: 15%;">
+                  <th style="width: 15%">
+                     VAT
+                  </th>
+                  <th style="width: 25%;">
                     Invoice Amount After Taxing
                   </th>
                 </tr>
@@ -51,7 +54,11 @@
                     <a target="_blank" href="{{invoice.invoiceResourceUrl}}">{{invoice.invoiceResourceName}}</a>
                   </td>
                   <td>
-                    <mat-checkbox [name]="'invoiceVAT' + (i + 1)" [(ngModel)]="invoice.hasVAT"  [ngModelOptions]="{standalone: true}" (ngModelChange)="updateInvoiveStatusInDisburseInvoiceList(i, invoice.hasVAT)"></mat-checkbox>
+                    <mat-icon *ngIf="invoice.hasVAT">check_box</mat-icon>
+                    <mat-icon *ngIf="!invoice.hasVAT">check_box_outline_blank</mat-icon>
+                  </td>
+                  <td>
+                    {{calculateVAT(invoice.invoiceMoney)}}
                   </td>
                   <td>
                     <p>{{calculateInvoiceAmountAfterTaxing(invoice.invoiceMoney, invoice.hasVAT) | number : "1.0" : "en-US"}} VNĐ</p>

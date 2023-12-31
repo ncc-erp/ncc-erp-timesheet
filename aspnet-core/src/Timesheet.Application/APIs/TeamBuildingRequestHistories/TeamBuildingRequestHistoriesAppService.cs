@@ -141,26 +141,35 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
         public async System.Threading.Tasks.Task DisburseRequest(DisburseTeamBuildingRequestDto input)
         {
             var request = await GetTeamBuildingRequestById(input.RequestId);
+            var listRequestByRequesterId = WorkScope.GetAll<TeamBuildingRequestHistory>()
+                .Where(s => s.RequesterId == input.RequesterId).ToList();
+            var listRequestByRequesterIdWithoutLast = listRequestByRequesterId.Take(listRequestByRequesterId.Count() - 1).ToList();
+            var listInvoice = WorkScope.GetAll<TeamBuildingRequestHistoryFile>()
+                .Where(s => s.TeamBuildingRequestHistoryId == input.RequestId)
+                .Select(s => new
+                {
+                    s.InvoiceAmount,
+                    s.IsVAT
+                }).ToList();
+            float totalVAT = 0;
+
+            foreach (var item in listInvoice)
+            {
+                if (item.IsVAT == false && item.InvoiceAmount.HasValue)
+                {
+                    totalVAT += item.InvoiceAmount.Value - (item.InvoiceAmount.Value / 1.1f);
+                }
+            }
 
             if (input.InvoiceDisburseList.IsNullOrEmpty())
             {
                 throw new UserFriendlyException("Please provide the invoice data!");
             }
-            else if(input.DisburseMoney <= 0)
+            else if (input.DisburseMoney <= 0)
             {
                 throw new UserFriendlyException("The requested disbursement amount is greater than 0!");
             }
-
-            var listRequestByRequesterId = WorkScope.GetAll<TeamBuildingRequestHistory>()
-                .Where(s => s.RequesterId == input.RequesterId).ToList();
-
-            var listRequestByRequesterIdWithoutLast = listRequestByRequesterId.Take(listRequestByRequesterId.Count() - 1).ToList();
-
-            var sumAmount = WorkScope.GetAll<TeamBuildingRequestHistoryFile>()
-                .Where(s => s.TeamBuildingRequestHistoryId == input.RequestId)
-                .Sum(s => s.InvoiceAmount);
-
-            if (request.Status == TeamBuildingRequestStatus.Cancelled)
+            else if (request.Status == TeamBuildingRequestStatus.Cancelled)
             {
                 throw new UserFriendlyException(string.Format("This request {0} has been cancelled", input.RequestId));
             }
@@ -178,104 +187,13 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
             }
             else
             {
-                // RequestMoney = sumAmount 
-                if (request.RequestMoney == sumAmount) 
-                { 
-                    if (listRequestByRequesterIdWithoutLast.IsNullOrEmpty())
-                    {
-                        request.DisbursedMoney = input.DisburseMoney;
-                        request.VATMoney = sumAmount - input.DisburseMoney;
-                        request.Status = TeamBuildingRequestStatus.Done;
-                        request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
-                    }
-
-                    foreach (var item in listRequestByRequesterIdWithoutLast)
-                    {
-                        // không có RemainingMoney
-                        if (item == null || item.RemainingMoneyStatus == RemainingMoneyStatus.Done || item.RemainingMoneyStatus == null)
-                        {
-                            request.DisbursedMoney = input.DisburseMoney;
-                            request.VATMoney = sumAmount - input.DisburseMoney;
-                            request.Status = TeamBuildingRequestStatus.Done;
-                            request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
-                        } // có RemainingMoney
-                        else if (item.RemainingMoneyStatus == RemainingMoneyStatus.Remaining)
-                        {
-                            request.DisbursedMoney = input.DisburseMoney;
-                            request.VATMoney = sumAmount - input.DisburseMoney;
-                            request.Status = TeamBuildingRequestStatus.Done;
-                            item.RemainingMoneyStatus = RemainingMoneyStatus.Done;
-                            request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
-                        }
-
-                        await WorkScope.UpdateAsync(item);
-                    }
-                }
-                // RequestMoney > sumAmount
-                else if (request.RequestMoney > sumAmount)
+                if (totalVAT == 0)
                 {
-                    if (listRequestByRequesterIdWithoutLast.IsNullOrEmpty())
-                    {
-                        request.DisbursedMoney = input.DisburseMoney;
-                        request.VATMoney = sumAmount - input.DisburseMoney;
-                        request.RemainingMoney = request.RequestMoney - sumAmount;
-                        request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
-                        request.Status = TeamBuildingRequestStatus.Done;
-                    }
-                    foreach (var item in listRequestByRequesterIdWithoutLast)
-                    {
-                        // Khong co RemainingMoney
-                        if (item.RemainingMoneyStatus == RemainingMoneyStatus.Done)
-                        {
-                            request.DisbursedMoney = input.DisburseMoney;
-                            request.VATMoney = sumAmount - input.DisburseMoney;
-                            request.RemainingMoney = request.RequestMoney - sumAmount;
-                            request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
-                            request.Status = TeamBuildingRequestStatus.Done;
-                        }// co RemainingMoney
-                        else if (item.RemainingMoneyStatus == RemainingMoneyStatus.Remaining)
-                        {
-                            request.DisbursedMoney = input.DisburseMoney;
-                            request.VATMoney = sumAmount - input.DisburseMoney;
-                            request.RemainingMoney = request.RequestMoney - sumAmount;
-                            item.RemainingMoneyStatus = RemainingMoneyStatus.Done;
-                            request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
-                            request.Status = TeamBuildingRequestStatus.Done;
-                        }
-
-                        await WorkScope.UpdateAsync(item);
-                    }
+                    DisburseRequestVAT(input, request);
                 }
-                // RequestMoney < sumAmount
-                else if (request.RequestMoney < sumAmount)
+                else
                 {
-                    if (listRequestByRequesterIdWithoutLast.IsNullOrEmpty())
-                    {
-                        request.DisbursedMoney = input.DisburseMoney;
-                        request.VATMoney = sumAmount - input.DisburseMoney;
-                        request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
-                        request.Status = TeamBuildingRequestStatus.Done;
-                    }
-                    foreach (var item in listRequestByRequesterIdWithoutLast)
-                    {
-                        // Khong co RemainingMoney
-                        if (item.RemainingMoneyStatus == RemainingMoneyStatus.Done)
-                        {
-                            request.DisbursedMoney = input.DisburseMoney;
-                            request.VATMoney = sumAmount - input.DisburseMoney;
-                            request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
-                            request.Status = TeamBuildingRequestStatus.Done;
-                        }// co RemainingMoney
-                        else if (item.RemainingMoneyStatus == RemainingMoneyStatus.Remaining)
-                        {
-                            request.DisbursedMoney = input.DisburseMoney;
-                            request.VATMoney = sumAmount - input.DisburseMoney;
-                            item.RemainingMoneyStatus = RemainingMoneyStatus.Done;
-                            request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
-                            request.Status = TeamBuildingRequestStatus.Done;
-                        }
-                        await WorkScope.UpdateAsync(item);
-                    }
+                    DisburseRequestNotVAT(input, request, totalVAT);
                 }
 
                 var listTeamBuildingDetail = WorkScope.GetAll<TeamBuildingDetail>()
@@ -290,8 +208,20 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                     await WorkScope.UpdateAsync(item);
                 }
             }
-            await WorkScope.UpdateAsync(request);
 
+            if (!listRequestByRequesterIdWithoutLast.IsNullOrEmpty())
+            {
+                foreach (var item in listRequestByRequesterIdWithoutLast)
+                {
+                    if (item.RemainingMoneyStatus == RemainingMoneyStatus.Remaining)
+                    {
+                        item.RemainingMoneyStatus = RemainingMoneyStatus.Done;
+                    }
+                    await WorkScope.UpdateAsync(item);
+                }
+            }
+
+            await WorkScope.UpdateAsync(request);
             // Saving VAT status for each Invoice Request in Team Building Request
             foreach (var item in input.InvoiceDisburseList)
             {
@@ -302,7 +232,56 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                     await WorkScope.UpdateAsync<TeamBuildingRequestHistoryFile>(invoiceRequest);
                 }
             }
+        }
 
+        private void DisburseRequestVAT
+            (
+                DisburseTeamBuildingRequestDto input,
+                TeamBuildingRequestHistory request
+            )
+        {
+            if (request.RequestMoney >= request.InvoiceAmount)
+            {
+                request.DisbursedMoney = input.DisburseMoney;
+                request.VATMoney = 0;
+                request.RemainingMoney = request.RequestMoney - input.DisburseMoney;
+                request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
+                request.Status = TeamBuildingRequestStatus.Done;
+            }
+            else
+            {
+                request.DisbursedMoney = input.DisburseMoney;
+                request.VATMoney = 0;
+                request.RemainingMoney = 0;
+                request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
+                request.Status = TeamBuildingRequestStatus.Done;
+            }
+        }
+
+        private async void DisburseRequestNotVAT(
+                DisburseTeamBuildingRequestDto input,
+                TeamBuildingRequestHistory request,
+                float totalVAT
+            )
+        {
+            float totalInvoiceAndVAT = request.InvoiceAmount.Value + totalVAT;
+
+            if (request.RequestMoney < totalInvoiceAndVAT)
+            {
+                request.DisbursedMoney = input.DisburseMoney;
+                request.VATMoney = totalVAT;
+                request.RemainingMoney = 0;
+                request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
+                request.Status = TeamBuildingRequestStatus.Done;
+            }
+            else
+            {
+                request.DisbursedMoney = input.DisburseMoney;
+                request.VATMoney = totalVAT;
+                request.RemainingMoney = request.RequestMoney - input.DisburseMoney;
+                request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
+                request.Status = TeamBuildingRequestStatus.Done;
+            }
         }
 
         [HttpPost]
@@ -383,7 +362,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
         public float GetBillPercentageConfig()
         {
             var strBillPercent = SettingManager.GetSettingValueForApplication(AppSettingNames.BillPercentage);
-            return float.TryParse(strBillPercent, out float billPercent) ? billPercent  : 10f;
+            return float.TryParse(strBillPercent, out float billPercent) ? billPercent : 10f;
         }
 
         [HttpGet]
@@ -820,7 +799,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
         {
             return await WorkScope.GetAll<TeamBuildingRequestHistoryFile>()
                 .Where(s => s.Id == id)
-                .Select(s => new EditOneInvoiceDto 
+                .Select(s => new EditOneInvoiceDto
                 {
                     Id = s.Id,
                     InvoiceAmount = s.InvoiceAmount
