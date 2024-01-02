@@ -13,6 +13,7 @@ export class EditInvoiceMoneyComponent extends AppComponentBase implements OnIni
   public invoiceInfo: EditOneInvoiceAmountDto = new EditOneInvoiceAmountDto();
   public invoiceDto: EditOneInvoiceAmountDto = new EditOneInvoiceAmountDto();
   public invoiceAmount: number = 0;
+  public hasVAT: boolean;
   constructor(
     injector: Injector,
     private teamBuildingRequestService: TeamBuildingRequestService,
@@ -28,8 +29,10 @@ export class EditInvoiceMoneyComponent extends AppComponentBase implements OnIni
   }
 
   getOneInvoice() {
+    
     this.teamBuildingRequestService.getOneInvoice(this.invoiceId).subscribe((res) => {
       this.invoiceInfo = res.result;
+      this.hasVAT = this.invoiceInfo.hasVAT;
     })
   }
 
@@ -40,6 +43,7 @@ export class EditInvoiceMoneyComponent extends AppComponentBase implements OnIni
   onSaveAndClose(){
     this.invoiceDto.id = this.invoiceId;
     this.invoiceDto.invoiceAmount = this.invoiceAmount;
+    this.invoiceDto.hasVAT = this.hasVAT;
 
     if(this.invoiceDto.invoiceAmount > 0){
       this.teamBuildingRequestService.editOneInvoice(this.invoiceDto).subscribe(res => {

@@ -336,6 +336,7 @@ export class InvoiceDisburseDto {
 export class EditOneInvoiceAmountDto {
   id: number;
   invoiceAmount: number;
+  hasVAT: boolean;
 }
 
 

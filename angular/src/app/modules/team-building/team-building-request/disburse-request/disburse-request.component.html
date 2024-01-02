@@ -26,16 +26,16 @@
                   <th style="width: 15%">
                     Invoice Amount
                   </th>
-                  <th style="width: 40%">
+                  <th style="width: 30%">
                     Invoice Bill Resource
                   </th> 
                   <th style="width: 10%">
                     Has VAT
                   </th>
-                  <th style="width: 15%">
+                  <th style="width: 10%">
                      VAT
                   </th>
-                  <th style="width: 25%;">
+                  <th style="width: 40%;">
                     Invoice Amount After Taxing
                   </th>
                 </tr>
@@ -58,7 +58,9 @@
                     <mat-icon *ngIf="!invoice.hasVAT">check_box_outline_blank</mat-icon>
                   </td>
                   <td>
-                    {{calculateVAT(invoice.invoiceMoney)}}
+                    <span *ngIf="invoice.hasVAT">0</span>
+                    <span *ngIf="!invoice.hasVAT">{{calculateVAT(invoice.invoiceMoney)}}</span>
+                    
                   </td>
                   <td>
                     <p>{{calculateInvoiceAmountAfterTaxing(invoice.invoiceMoney, invoice.hasVAT) | number : "1.0" : "en-US"}} VNĐ</p>
@@ -68,7 +70,7 @@
               <tfoot>
                 <tr>
                   <td colspan="5">
-                    <p style="float: right;"><b>{{ "Total Invoice Money:" | localize }}</b> {{calculateTotalSuggestedDisburseMoney() | number : "1.0" : "en-US"}} VNĐ</p>
+                    <p style="float: right;"><b>{{ "Suggest Disburse Money:" | localize }}</b> {{calculateTotalSuggestedDisburseMoney() | number : "1.0" : "en-US"}} VNĐ</p>
                     <b style="float: left; color: red; margin-top: 35px;" *ngIf="this.disburseTeambuildingRequestInfoDto.requestMoney < calculateTotalSuggestedDisburseMoney()">*The total requested amount is less than the total invoice amount, only {{this.disburseTeambuildingRequestInfoDto.requestMoney | number : "1.0" : "en-US"}} VNĐ can be disbursed</b>
                   </td>
                 </tr>
@@ -87,7 +89,7 @@
               <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ'}"
               matInput="matInput" [(ngModel)]="disburseMoney" name="money" required/>
           </mat-form-field>
-          <p style="float: right; margin-left: 15px;"><b>{{ "Total Remaining Money:" | localize }}</b> {{calculateTotalSuggestedRemainingMoney() | number : "1.0" : "en-US"}} VNĐ</p>
+          <p style="float: right; margin-left: 15px;"><b>{{ "Suggest Remaining Money:" | localize }}</b> {{calculateTotalSuggestedRemainingMoney() | number : "1.0" : "en-US"}} VNĐ</p>
           </div>
         </div>
   </mat-dialog-content>

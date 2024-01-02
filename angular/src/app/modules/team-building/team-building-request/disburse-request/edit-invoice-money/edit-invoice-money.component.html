@@ -7,12 +7,16 @@
         <div class="align-item format-col form-group row required">
           <label class="col-md-4 col-form-label" for="connectionString">
             {{ "Invoice money:" | localize }}
-            </label>
-            <mat-form-field class="col-xl-8 col-lg-8 col-md-8 col-xs-8" appearance="outline">
-              <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ'}"
-              matInput="matInput" [(ngModel)]="invoiceAmount" name="money" required/>
+          </label>
+          <mat-form-field class="col-xl-8 col-lg-8 col-md-8 col-xs-8" appearance="outline">
+            <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ'}"
+            matInput="matInput" [(ngModel)]="invoiceAmount" name="money" required/>
           </mat-form-field>
-        </div>
+          <label  class="col-md-4" >
+            {{"HasVAT:" | localize}}
+          </label>
+          <input class="col-xl-8" appearance="outline" style="position: static; opacity: 1; height: 20px; margin-left: 15px;" type="checkbox" [(ngModel)]="hasVAT" name = "hasVAT" [checked]="hasVAT">
+      </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
       <button name="cancelButton" class="btn btn-default" mat-raised-button mat-dialog-close >{{l('Cancel')}}</button>

@@ -11,5 +11,6 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories.dto
     public class EditOneInvoiceDto : EntityDto<long>
     {
         public float? InvoiceAmount { get; set; }
+        public bool? HasVAT { get; set; }
     }
 }

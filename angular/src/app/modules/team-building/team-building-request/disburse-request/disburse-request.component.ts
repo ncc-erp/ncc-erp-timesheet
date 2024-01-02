@@ -83,7 +83,7 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
     if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
       if(this.disburseTeambuildingRequestInfoDto.invoiceRequests !== undefined && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== null) {
         this.disburseTeambuildingRequestInfoDto.invoiceRequests.forEach(item => {
-          suggestedDisburseMoney += this.calculateDisburseMoney(this.requestMoney ,item.invoiceMoney, item.hasVAT);
+          suggestedDisburseMoney += this.calculateDisburseMoney(item.invoiceMoney, item.hasVAT);
         })
       }
     }
@@ -91,20 +91,16 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
     return suggestedDisburseMoney;
   }
   
-  calculateDisburseMoney(requestMoney: number, invoiceMoney: number, hasVAT: boolean){  
+  calculateDisburseMoney(invoiceMoney: number, hasVAT: boolean){  
     let rs = 0;
     if(hasVAT){
       rs = invoiceMoney;
     } 
     else{
       let VAT = invoiceMoney / 11;
-      if(requestMoney <= invoiceMoney + VAT){
-        rs = requestMoney - VAT;
-      }
-      else{
-        rs = invoiceMoney + VAT;
-      }
+      rs = invoiceMoney + VAT;
     }
+
     return rs;
   }
 
@@ -154,12 +150,16 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
   calculateTotalSuggestedRemainingMoney() {
     let suggestedRemainingMoney = 0;
     if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
-      if(this.disburseTeambuildingRequestInfoDto.requestMoney !== undefined && this.disburseMoney > 0) {
-          suggestedRemainingMoney += this.disburseTeambuildingRequestInfoDto.requestMoney - this.invoiceAmount
+      if(this.disburseTeambuildingRequestInfoDto.requestMoney !== undefined && this.disburseMoney > 0){
+        if(this.disburseTeambuildingRequestInfoDto.requestMoney <= this.invoiceAmount){
+          suggestedRemainingMoney = 0;
+        }
+        else {
+          suggestedRemainingMoney += this.requestMoney - this.disburseMoney;
+        }
       }
     }
     return suggestedRemainingMoney;
   }
 }
-
 

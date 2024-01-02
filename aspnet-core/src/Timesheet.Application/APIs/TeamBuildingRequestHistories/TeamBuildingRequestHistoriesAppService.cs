@@ -770,6 +770,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
         public async Task<EditOneInvoiceDto> EditOneInvoice(EditOneInvoiceDto input)
         {
             var item = await WorkScope.GetAsync<TeamBuildingRequestHistoryFile>(input.Id);
+            item.IsVAT = input.HasVAT;
             ObjectMapper.Map(input, item);
             await WorkScope.UpdateAsync(item);
 
@@ -788,7 +789,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                 .SumAsync(s => s.InvoiceAmount);
 
             teamBuildingHistory.InvoiceAmount = totalInvoiceAmount + input.InvoiceAmount;
-
+     
             await WorkScope.UpdateAsync(teamBuildingHistory);
 
             return input;
@@ -802,7 +803,8 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                 .Select(s => new EditOneInvoiceDto
                 {
                     Id = s.Id,
-                    InvoiceAmount = s.InvoiceAmount
+                    InvoiceAmount = s.InvoiceAmount,
+                    HasVAT = s.IsVAT
                 })
                 .FirstOrDefaultAsync();
         }
