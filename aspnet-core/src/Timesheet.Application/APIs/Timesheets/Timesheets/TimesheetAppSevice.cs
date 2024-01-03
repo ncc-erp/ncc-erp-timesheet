@@ -76,6 +76,8 @@ namespace Timesheet.Timesheets.Timesheets
                        s => s.ProjectTask.Project,
                        s => s.ProjectTask.Project.Customer
                        )
+                    join pu in WorkScope.GetRepo<ProjectUser>().GetAll() on new { UserId = a.UserId, ProjectId = a.ProjectTask.ProjectId } equals new { UserId = pu.UserId, ProjectId = pu.ProjectId } into projectUsers
+                    from pu in projectUsers.DefaultIfEmpty()
                     where (status == TimesheetStatus.All)
                     || (a.Status == status)
                     where (userIds.Contains(a.UserId))
@@ -83,7 +85,7 @@ namespace Timesheet.Timesheets.Timesheets
                     where (!endDate.HasValue || a.DateAt.Date <= endDate)
                     where (projectIds.Contains(a.ProjectTask.ProjectId))
                     where (searchText == null || a.User.EmailAddress.Contains(searchText) || a.User.UserName.Contains(searchText) || a.User.FullName.Contains(searchText))
-                    where (branchId == null || a.User.BranchId ==  branchId)
+                    where (branchId == null || a.User.BranchId == branchId)
                     select new MyTimeSheetDto
                     {
                         Id = a.Id,
@@ -112,7 +114,10 @@ namespace Timesheet.Timesheets.Timesheets
                         BranchDisplayName = a.User.Branch.DisplayName,
                         OffHour = absencedays.Where(s => s.DateAt.Date == a.DateAt.Date && s.UserId == a.User.Id).Select(h => h.Hour).Sum(),
                         IsOffDay = DateTimeUtils.IsOffDay(dayOffSettings, a.DateAt),
-                        IsUnlockedByEmployee = a.IsUnlockedByEmployee
+                        IsUnlockedByEmployee = a.IsUnlockedByEmployee,
+                        ProjectTargetUser = a.ProjectTargetUser.User.FullName,
+                        WorkingTimeTargetUser = a.TargetUserWorkingTime,
+                        ProjectUserType = pu.Type
                     };
             var query = await q.OrderBy(i => i.EmailAddress).ThenByDescending(s => s.DateAt).ToListAsync();
             var listTimekeeping = WorkScope.GetAll<Timekeeping>()

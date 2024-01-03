@@ -30,6 +30,9 @@ export class TimeSheetDto {
     branchDisplayName: string;
     offHour : number;
     isOffDay: boolean;
+    projectTargetUser?: string;
+    workingTimeTargetUser?: number;
+    projectUserType?: number
 }
 
 export class TimeSheetGroupDto {
