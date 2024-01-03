@@ -1,4 +1,5 @@
 ﻿using Abp.Application.Services.Dto;
+using Ncc.Entities;
 using System;
 using System.Collections.Generic;
 using Timesheet.Uitls;
@@ -49,8 +50,9 @@ namespace Timesheet.Timesheets.Timesheets.Dto
         public bool IsOffDay;
         public string CheckIn { get; set; }
         public string CheckOut { get; set; }
+        public ProjectUserType? ProjectUserType { get; set; }
         public string ProjectTargetUser {  get; set; }
-        public int WorkingTimeTargetUser { get; set; }
+        public int? WorkingTimeTargetUser { get; set; }
     }
     public class RequestDetail
     {

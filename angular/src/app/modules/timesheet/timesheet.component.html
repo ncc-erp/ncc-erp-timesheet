@@ -367,8 +367,8 @@
                                           <th>PROJECT</th>
                                           <th>TASK NAME</th>
                                           <th>TIME</th>
-                                          <th>BILL ACCOUNT</th>
-                                          <th>BILL TIME</th>
+                                          <th *ngIf="showBillAccountAndBillTimeColumn(dt.timesheets)">BILL ACCOUNT</th>
+                                          <th *ngIf="showBillAccountAndBillTimeColumn(dt.timesheets)">BILL TIME</th>
                                           <th>STATUS</th>
                                           <th>WORK TYPE</th>
                                           <th>NOTE</th>
@@ -392,10 +392,10 @@
                                               convertMinuteToHour(t.workingTime)
                                               }}</span>
                                           </td>
-                                          <td>
+                                          <td *ngIf="t.projectUserType === 2">
                                             {{t.projectTargetUser}}
                                           </td>
-                                          <td>
+                                          <td *ngIf="t.projectUserType === 2">
                                             <span>
                                               {{
                                                 convertMinuteToHour(t.workingTimeTargetUser)
@@ -562,6 +562,12 @@
                                   <th>PROJECT</th>
                                   <th>TASK NAME</th>
                                   <th>TIME</th>
+                                  <th *ngIf="showBillAccountAndBillTimeColumn(dt.timesheets)">
+                                    BILL ACCOUNT
+                                  </th>
+                                  <th *ngIf="showBillAccountAndBillTimeColumn(dt.timesheets)">
+                                    BILL TIME
+                                  </th>
                                   <th>STATUS</th>
                                   <th class="text-center">WORK TYPE</th>
                                   <th>NOTE</th>
@@ -584,6 +590,16 @@
                                     <span>{{
                                       convertMinuteToHour(t.workingTime)
                                       }}</span>
+                                  </td>
+                                  <td *ngIf="t.projectUserType === 2">
+                                    {{t.projectTargetUser}}
+                                  </td>
+                                  <td *ngIf="t.projectUserType === 2">
+                                    <span>
+                                      {{
+                                        convertMinuteToHour(t.workingTimeTargetUser)
+                                      }}
+                                    </span>
                                   </td>
                                   <td [innerHtml]="
                                       convertNumberOfStringStatus(

@@ -629,6 +629,10 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     else this.exportService.exportRemoteRequestDay(data, fileName);
     $('#modalSelectDay').modal('hide');
   }
+
+  showBillAccountAndBillTimeColumn(timesheets: TimeSheetDto[]): boolean {
+    return timesheets.some(t => t.projectUserType === 2);
+  }
 }
 
 // export interface DataDTO {
