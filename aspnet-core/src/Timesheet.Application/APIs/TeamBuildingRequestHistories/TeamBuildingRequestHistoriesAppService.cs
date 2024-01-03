@@ -151,13 +151,15 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                     s.InvoiceAmount,
                     s.IsVAT
                 }).ToList();
+
+            float VAT = GetVATConfig();
             float totalVAT = 0;
 
             foreach (var item in listInvoice)
             {
                 if (item.IsVAT == false && item.InvoiceAmount.HasValue)
                 {
-                    totalVAT += item.InvoiceAmount.Value - (item.InvoiceAmount.Value / 1.1f);
+                    totalVAT += item.InvoiceAmount.Value - (item.InvoiceAmount.Value / (1 + VAT/100f));
                 }
             }
 
@@ -359,10 +361,10 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
         }
 
         [HttpGet]
-        public float GetBillPercentageConfig()
+        public float GetVATConfig()
         {
-            var strBillPercent = SettingManager.GetSettingValueForApplication(AppSettingNames.BillPercentage);
-            return float.TryParse(strBillPercent, out float billPercent) ? billPercent : 10f;
+            var strVAT = SettingManager.GetSettingValueForApplication(AppSettingNames.VAT);
+            return float.TryParse(strVAT, out float VAT) ? VAT : 10f;
         }
 
         [HttpGet]

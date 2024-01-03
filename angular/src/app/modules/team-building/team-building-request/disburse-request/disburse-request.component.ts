@@ -23,7 +23,7 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
   public isCheckBill:boolean = true;
   public disableSelect: boolean = true;
   public disburseMoney: number = 0;
-  public billPercentage: number = 0;
+  public VAT: number = 0;
 
   public disburseTeambuildingRequestInfoDto : DisburseTeamBuildingRequestInfoDto = new DisburseTeamBuildingRequestInfoDto();
 
@@ -49,7 +49,7 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
     this.requesterId = this.data.requesterId;
     this.requestMoney = this.data.requestMoney;
     this.invoiceAmount = this.data.invoiceAmount;
-    this.getBillPercentageConfig();
+    this.VAT = this.getVATConfig();
     this.getDisburseRequestInfo();
   }
 
@@ -97,25 +97,26 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
       rs = invoiceMoney;
     } 
     else{
-      let VAT = invoiceMoney / 11;
-      rs = invoiceMoney + VAT;
+      let VATmoney = this.calculateVAT(invoiceMoney);
+      rs = invoiceMoney + VATmoney;
     }
 
     return rs;
   }
 
   calculateVAT(invoiceMoney: number){
-    return invoiceMoney / 11;
+    return invoiceMoney - invoiceMoney/ this.VAT;
   }
   
   close(res): void {
     this.dialogRef.close(res);
   }
 
-  getBillPercentageConfig(){
-    this.teamBuildingRequestService.getBillPercentageConfig().subscribe((rs)=>{
-      this.billPercentage = (1 + rs.result/100);
+  getVATConfig(){
+    this.teamBuildingRequestService.getVATConfig().subscribe((rs)=>{
+      this.VAT = (1 + rs.result/100);
     })
+    return this.VAT;
   }
 
   onSaveAndClose(){

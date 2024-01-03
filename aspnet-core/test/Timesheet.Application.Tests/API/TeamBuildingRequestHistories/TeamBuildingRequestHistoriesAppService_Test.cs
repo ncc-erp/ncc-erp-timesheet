@@ -37,7 +37,7 @@ namespace Timesheet.Application.Tests.API.TeamBuildingRequestHistories
             _requestHistoryAppService.AbpSession = AbpSession;
             _requestHistoryAppService.UnitOfWorkManager = Resolve<IUnitOfWorkManager>();
 
-            _settingManager.GetSettingValueForApplicationAsync(AppSettingNames.BillPercentage).Returns(Task.FromResult("90"));
+            _settingManager.GetSettingValueForApplicationAsync(AppSettingNames.VAT).Returns(Task.FromResult("10"));
 
             _requestHistoryAppService.SettingManager = _settingManager;
         }

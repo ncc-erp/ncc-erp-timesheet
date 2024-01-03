@@ -34,8 +34,8 @@ import { DisburseDto, DisburseTeamBuildingRequestInfoDto, EditOneInvoiceAmountDt
     disburseRequest(request : DisburseDto): Observable<any> {
       return this.http.post(this.rootUrl + "/DisburseRequest", request);
     }
-    getBillPercentageConfig(): Observable<ApiResponse<any>> {
-      return this.http.get<any>(this.rootUrl + "/GetBillPercentageConfig");
+    getVATConfig(): Observable<ApiResponse<any>> {
+      return this.http.get<any>(this.rootUrl + "/GetVATConfig");
     }
     getDetailOfHistory(teamBuildingHistoryId: number): Observable<ApiResponse<ResponseDetailTeamBuildingHistoryDto>> {
     return this.http.get<any>(this.rootUrl + `/GetDetailOfHistory?teamBuildingHistoryId=${teamBuildingHistoryId}` , {});
