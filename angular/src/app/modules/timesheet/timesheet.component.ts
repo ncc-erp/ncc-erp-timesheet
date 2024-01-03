@@ -153,7 +153,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     this.getProjects();
     this.getListBranch();
     this.defaultFromDate = moment().add(-1, 'months').startOf('month');
-    this.defaultToDate = moment();
+    this.defaultToDate = moment().endOf('month');
     this.fromDate = this.defaultFromDate.format("YYYY-MM-DD");
     this.toDate = this.defaultToDate.format("YYYY-MM-DD");
   }
