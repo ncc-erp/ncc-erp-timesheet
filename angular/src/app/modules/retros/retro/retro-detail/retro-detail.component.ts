@@ -186,7 +186,7 @@ export class RetroDetailComponent
     request: PagedRequestDto,
     pageNumber: number,
     finishedCallback: Function
-  ): void {
+  ): void { 
     this.requestRetroDetail = {
       gridParam: {
         ...request,
@@ -214,7 +214,7 @@ export class RetroDetailComponent
     request.gridParam.filterItems = [];
     request.gridParam.sort = "";
     request.gridParam.sortDirection = 0;
-    if (this.searchText) {
+    if (this.searchText !== undefined) {
       request.gridParam.searchText = this.searchText;
     }
     if (this.sortByName.value !== EnumSort.NotArranged) {
