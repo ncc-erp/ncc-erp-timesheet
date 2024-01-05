@@ -233,12 +233,12 @@ export class SideBarNavComponent extends AppComponentBase {
                     "access_time",
                     "/app/main/manage-working-times"
                 ),
-                new MenuItem(
-                    this.l("Branch Manager"),
-                    "ProjectManagementBranchDirectors",
-                    "location_city",
-                    "/app/main/branch-manager"
-                ),
+                // new MenuItem(
+                //     this.l("Branch Manager"),
+                //     "ProjectManagementBranchDirectors",
+                //     "location_city",
+                //     "/app/main/branch-manager"
+                // ),
                 new MenuItem(
                     this.l("Retrospectives"),
                     "Retro",
