@@ -257,7 +257,7 @@ namespace Timesheet.APIs.NormalWorkingHours
                 .Where(s => s.UserId.HasValue)
                  .ToList()
                 .Where(s => !dayOffSettings.Contains(s.DateAt.Date))
-                .Where(s => s.DateAt.DayOfWeek != DayOfWeek.Sunday)
+                .Where(s => s.DateAt.DayOfWeek != DayOfWeek.Sunday && s.DateAt.DayOfWeek != DayOfWeek.Saturday)
                 .GroupBy(s => s.UserId.Value)
                 .ToDictionary(s => s.Key, s => s.Select(x => x.DateAt.Date).AsEnumerable());
 
@@ -288,7 +288,7 @@ namespace Timesheet.APIs.NormalWorkingHours
                             .Where(ts => tsStatusFilter == (int)TsStatusFilter.PendingAndApproved ? listTimesheetStatus.Contains(ts.Status) :
                             ts.Status == TimesheetStatus.Approve)
                             .Where(ts => ts.DateAt.Year == year && ts.DateAt.Month == month)
-                            .Where(ts => ts.DateAt.DayOfWeek != DayOfWeek.Sunday)
+                            .Where(ts => ts.DateAt.DayOfWeek != DayOfWeek.Sunday && ts.DateAt.DayOfWeek != DayOfWeek.Saturday)
                             .Where(ts => ts.TypeOfWork == TypeOfWork.NormalWorkingHours).Select(x => new { x.UserId, x.DateAt })
                             .Distinct()
                             .GroupBy(s => s.UserId)
