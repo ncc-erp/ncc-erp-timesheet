@@ -776,7 +776,7 @@ namespace Timesheet.DomainServices
             else if (absenceTypeDictionary.ContainsKey(RequestType.Onsite) && timeCheckInOut != null)
             {
                 // Onsite buổi sáng, nghỉ buổi chiều:
-                // th1: user checkin sau 11h lúc này sẽ chuyển thành checkout => không checkin + có checkout => bị phạt đi muộn   
+                // th: user checkin sau 11h lúc này sẽ chuyển thành checkout => không checkin + có checkout => bị phạt đi muộn   
                 if (absenceTypeDictionary[RequestType.Onsite] == DayType.Morning
                     && (absenceTypeDictionary.ContainsKey(RequestType.Off) && absenceTypeDictionary[RequestType.Off] == DayType.Afternoon))
                 {
@@ -812,40 +812,35 @@ namespace Timesheet.DomainServices
                     t.RegisterCheckIn = user.AfternoonStartAt;
                     t.RegisterCheckOut = user.AfternoonEndAt;
                 }
-                // th1: checkin + checkout => ko bị phạt      
-                else if (!string.IsNullOrEmpty(timeCheckInOut.CheckIn)
-                    && !string.IsNullOrEmpty(timeCheckInOut.CheckOut)
+                else
+                {
+                    // th: checkin => ko bị phạt 
+                    if (!string.IsNullOrEmpty(timeCheckInOut.CheckIn)
                     && CommonUtils.SubtractHHmm(timeCheckInOut.CheckIn, user.MorningStartAt) <= LimitedMinute)
-                {
-                    t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                    t.MoneyPunish = 0;
-                }
+                    {
+                        t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                        t.MoneyPunish = 0;
+                    }
 
-                // th2: checkin + ko checkout => ko bị phạt 
-                else if (!string.IsNullOrEmpty(timeCheckInOut.CheckIn)
-                    && string.IsNullOrEmpty(timeCheckInOut.CheckOut)
-                    && CommonUtils.SubtractHHmm(timeCheckInOut.CheckIn, user.MorningStartAt) <= LimitedMinute)
-                {
-                    t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                    t.MoneyPunish = 0;
-                }
+                    // Th: User checkin sau 15h chuyển thành checkout => không checkin + có checkout => bị phạt đi muộn 
+                    else if (!string.IsNullOrEmpty(timeCheckInOut.CheckIn)
+                        && DateTime.Parse(timeCheckInOut.CheckIn) > DateTime.Parse(timeStartChangingCheckinToCheckout))
+                    {
+                        ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
+                        t.StatusPunish = CheckInCheckOutPunishmentType.Late;
+                        t.MoneyPunish = await GetMoneyPunishByType(t.StatusPunish);
+                    }
 
-                // Th4: User checkin sau 15h chuyển thành checkout => không checkin + có checkout => bị phạt đi muộn 
-                else if (DateTime.Parse(timeCheckInOut.CheckIn) > DateTime.Parse(timeStartChangingCheckinToCheckout)
-                    && !string.IsNullOrEmpty(timeCheckInOut.CheckIn))
-                {
-                    ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
-                    t.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                    t.MoneyPunish = await GetMoneyPunishByType(t.StatusPunish);
-                }
-
-                // Th3: checkin muộn + không checkout => không bị phạt 
-                else if (!string.IsNullOrEmpty(timeCheckInOut.CheckIn)
-                    && string.IsNullOrEmpty(timeCheckInOut.CheckOut)
-                    && CommonUtils.SubtractHHmm(timeCheckInOut.CheckIn, user.MorningStartAt) > LimitedMinute)
-                {
-                    t.StatusPunish = CheckInCheckOutPunishmentType.LateAndNoCheckOut;
-                    t.MoneyPunish = 0;
+                    // Th: checkin muộn + không checkout => không bị phạt 
+                    else if (!string.IsNullOrEmpty(timeCheckInOut.CheckIn)
+                        && string.IsNullOrEmpty(timeCheckInOut.CheckOut)
+                        && CommonUtils.SubtractHHmm(timeCheckInOut.CheckIn, user.MorningStartAt) > LimitedMinute)
+                    {
+                        t.StatusPunish = CheckInCheckOutPunishmentType.LateAndNoCheckOut;
+                        t.MoneyPunish = 0;
+                    }
+                    t.RegisterCheckIn = user.MorningStartAt;
+                    t.RegisterCheckOut = user.AfternoonEndAt;
                 }
             }
         }
