@@ -519,7 +519,7 @@ namespace Ncc.Configuration
             {
                 GenerateDataOnDate = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.GenerateDataOnDate),
                 TeamBuildingMoney = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.TeamBuildingMoney),
-                BillPercentage = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BillPercentage),
+                VAT = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.VAT),
             };
         }
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_TeamBuilding_Update)]
@@ -527,7 +527,7 @@ namespace Ncc.Configuration
         {
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateDataOnDate, input.GenerateDataOnDate);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.TeamBuildingMoney, input.TeamBuildingMoney);
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BillPercentage, input.BillPercentage);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.VAT, input.VAT);
             return input;
         }
 

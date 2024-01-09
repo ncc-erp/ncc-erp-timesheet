@@ -98,7 +98,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.TimesCanLateAndEarlyInWeek, "2", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.GenerateDataOnDate,"6",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.TeamBuildingMoney,"100000",scopes:SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.BillPercentage,"90",scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.VAT,"10",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.TimeStartChangingCheckinToCheckout,"15:00", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.TimeStartChangingCheckinToCheckoutEnable,"false", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.TimeStartChangingCheckinToCheckoutCaseOffAfternoon,"11:00", scopes: SettingScopes.Application|SettingScopes.Tenant),

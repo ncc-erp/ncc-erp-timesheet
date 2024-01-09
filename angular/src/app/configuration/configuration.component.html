@@ -1422,7 +1422,7 @@
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
                       <span class="special-label">Generate data on date *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: 6th of every month">help</mat-icon>
+                        matTooltip="ex: Data is generated on the 6th of every month">help</mat-icon>
                       <input type="text" matInput name="generateDataOnDate"
                         [(ngModel)]="TeamBuildingConfig.generateDataOnDate" required
                         [disabled]="!isEditTeamBuildingConfig" />
@@ -1431,7 +1431,7 @@
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
                       <span class="special-label">Team building money *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: 100.000đ">help</mat-icon>
+                        matTooltip="ex: monthly teambuilding amount for each member is 100.000đ">help</mat-icon>
                       <input type="text" matInput name="teamBuildingMoney"
                         [(ngModel)]="TeamBuildingConfig.teamBuildingMoney" required
                         [disabled]="!isEditTeamBuildingConfig" />
@@ -1439,9 +1439,9 @@
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Bill percentage *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: 90%">help</mat-icon>
-                      <input type="text" matInput name="billPercentage" [(ngModel)]="TeamBuildingConfig.billPercentage"
+                      <span class="special-label">VAT *</span> <mat-icon class="special-icon"
+                        matTooltip="ex: Value added tax is 10%">help</mat-icon>
+                      <input type="text" matInput name="VAT" [(ngModel)]="TeamBuildingConfig.vat"
                         required [disabled]="!isEditTeamBuildingConfig" />
                     </mat-form-field>
                   </div>

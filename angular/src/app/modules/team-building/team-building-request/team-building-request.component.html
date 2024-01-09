@@ -85,6 +85,12 @@
                   Request Money
                 </th>
                 <th style="max-width: 70px" class="text-center">
+                  Total Invoice Money
+                </th>
+                <th style="max-width: 70px" class="text-center">
+                  VAT Money
+                </th>
+                <th style="max-width: 70px" class="text-center">
                   Disbursed Money
                 </th>
                 <th style="max-width: 74px" class="text-center">
@@ -128,13 +134,15 @@
                   {{ item.creationTime | date : "yyyy" }}
                 </td>
                 <td class="text-center">{{ item.requestMoney | currency:'VND':''}}</td>
+                <td class="text-center">{{ item.invoiceAmount | currency:'VND':''}}</td>
+                <td [class]="getCssVATMoney(item.vatMoney)" style="text-align: center;">{{ item.vatMoney | currency:'VND':''}}</td>
                 <td class="text-center">{{ item.disbursedMoney | currency:'VND':''}}</td>
                 <td class="text-center">{{ item.remainingMoney | currency:'VND':''}}</td>
                 <td class="text-center">
                   <span *ngIf="item.status == 1" [ngClass]="{
                       'bg-green': item.remainingMoneyStatus === 0,
                       'bg-blue': item.remainingMoneyStatus === 1
-                    }" class="label status-label">
+                    }" class="label status-label" style="font-weight: 900;">
                     {{
                     listRemainingMoneyStatus[item.remainingMoneyStatus].title
                     }}
