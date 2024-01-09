@@ -740,5 +740,299 @@ namespace Timesheet.Application.Tests.API.Timekeepings
             Assert.Equal(input.CheckIn, "10:30");
             Assert.Equal(input.CheckOut, "11:34");
         }
+
+        [Fact]
+        public async Task CheckAbsenceUserAsyn_Test1()
+        {
+
+            var limitedMinute = 15;
+            var timekeeping = new Timekeeping
+            {
+                UserId = 10,
+                UserEmail = "testemail10@gmail.com"
+            };
+            var user = new TimesheetUserDto
+            {
+                UserId = 10,
+                MorningStartAt = "08:45",
+                MorningEndAt = "12:00",
+                AfternoonStartAt = "13:00",
+                AfternoonEndAt = "17:45",
+            };
+
+            // th: onsite fullday, có checkin
+            var mapAbsenceUsers = new Dictionary<long, List<MapAbsenceUserDto>>
+            {
+                { 10, new List<MapAbsenceUserDto>
+                    {
+                        new MapAbsenceUserDto
+                        {
+                            UserId = 10,
+                            DateType = DayType.Fullday,
+                            AbsenceTime = null,
+                            Hour = 8,
+                            Type = RequestType.Onsite
+                        }
+                    }
+                }
+            };
+            var checkInUsers = new List<UserCheckInDto>
+            {
+                new UserCheckInDto
+                {
+                    Email = "testemail10@gmail.com",
+                    DateTime = new DateTime(2023, 12, 1),
+                    VerifyStartTimeStr = "08:57",
+                    VerifyEndTimeStr = "18:12"
+                }
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _timekeepingServices.CheckAbsenceUserAsync(mapAbsenceUsers, checkInUsers, limitedMinute, timekeeping, user);
+
+                Assert.Equal(CheckInCheckOutPunishmentType.NoPunish, timekeeping.StatusPunish);
+                Assert.Equal(0, timekeeping.MoneyPunish);
+            });
+        }
+
+        [Fact]
+        public async Task CheckAbsenceUserAsyn_Test2()
+        {
+            var limitedMinute = 15;
+            var timekeeping = new Timekeeping
+            {
+                UserId = 10,
+                UserEmail = "testemail10@gmail.com"
+            };
+            var user = new TimesheetUserDto
+            {
+                UserId = 10,
+                MorningStartAt = "08:45",
+                MorningEndAt = "12:00",
+                AfternoonStartAt = "13:00",
+                AfternoonEndAt = "17:45",
+            };
+
+            var mapAbsenceUsers = new Dictionary<long, List<MapAbsenceUserDto>>
+            {
+                { 10, new List<MapAbsenceUserDto>
+                    {
+                        new MapAbsenceUserDto
+                        {
+                            UserId = 10,
+                            DateType = DayType.Fullday,
+                            AbsenceTime = null,
+                            Hour = 8,
+                            Type = RequestType.Onsite
+                        }
+                    }
+                }
+            };
+            var checkInUsers = new List<UserCheckInDto>
+            {
+                new UserCheckInDto
+                {
+                    Email = "testemail10@gmail.com",
+                    DateTime = new DateTime(2023, 12, 1),
+                    VerifyStartTimeStr = "09:57",
+                    VerifyEndTimeStr = ""
+                }
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _timekeepingServices.CheckAbsenceUserAsync(mapAbsenceUsers, checkInUsers, limitedMinute, timekeeping, user);
+
+                Assert.Equal(CheckInCheckOutPunishmentType.LateAndNoCheckOut, timekeeping.StatusPunish);
+                Assert.Equal(0, timekeeping.MoneyPunish);
+            });
+        }
+
+        // th:  User checkin sau 15h chuyển thành checkout => không checkin + có checkout => bị phạt đi muộn 
+        [Fact]
+        public async Task CheckAbsenceUserAsyn_Test3()
+        {
+            var limitedMinute = 15;
+            var timekeeping = new Timekeeping
+            {
+                UserId = 10,
+                UserEmail = "testemail10@gmail.com",
+                CheckIn = "16:00",
+                CheckOut = ""
+            };
+            var user = new TimesheetUserDto
+            {
+                UserId = 10,
+                MorningStartAt = "08:45",
+                MorningEndAt = "12:00",
+                AfternoonStartAt = "13:00",
+                AfternoonEndAt = "17:45",
+            };
+            var mapAbsenceUsers1 = new Dictionary<long, List<MapAbsenceUserDto>>
+            {
+                { 10, new List<MapAbsenceUserDto>
+                    {
+                        new MapAbsenceUserDto
+                        {
+                            UserId = 10,
+                            DateType = DayType.Fullday,
+                            AbsenceTime = null,
+                            Hour = 8,
+                            Type = RequestType.Onsite
+                        }
+                    }
+                }
+            };
+            var checkInUsers1 = new List<UserCheckInDto>
+            {
+                new UserCheckInDto
+                {
+                    Email = "testemail10@gmail.com",
+                    DateTime = new DateTime(2023, 12, 1),
+                    VerifyStartTimeStr = "16:00",
+                    VerifyEndTimeStr = ""
+                }
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _timekeepingServices.CheckAbsenceUserAsync(mapAbsenceUsers1, checkInUsers1, limitedMinute, timekeeping, user);
+
+                Assert.Equal(CheckInCheckOutPunishmentType.Late, timekeeping.StatusPunish);
+                Assert.Equal(20000, timekeeping.MoneyPunish);
+                Assert.Equal("", timekeeping.CheckIn);
+                Assert.Equal(checkInUsers1.First().VerifyStartTimeStr, timekeeping.CheckOut);
+            });
+        }
+
+        // Onsite buổi sáng, nghỉ buổi chiều:
+        // TH: user checkin sau 11h lúc này sẽ chuyển thành checkout => không checkin + có checkout => bị phạt đi muộn   
+        [Fact]
+        public async Task CheckAbsenceUserAsyn_Test4()
+        {
+            var mapAbsenceUsers = new Dictionary<long, List<MapAbsenceUserDto>>
+            {
+                { 10, new List<MapAbsenceUserDto>
+                    {
+                        new MapAbsenceUserDto
+                        {
+                            UserId = 10,
+                            DateType = DayType.Morning,
+                            AbsenceTime = null,
+                            Hour = 3.25,
+                            Type = RequestType.Onsite
+                        },
+                        new MapAbsenceUserDto {
+                            UserId = 10,
+                            DateType = DayType.Afternoon,
+                            AbsenceTime = null,
+                            Hour = 0,
+                            Type = RequestType.Off
+                        }
+                    }
+                }
+            };
+            var checkInUsers = new List<UserCheckInDto>
+            {
+                new UserCheckInDto
+                {
+                    Email = "testemail10@gmail.com",
+                    DateTime = new DateTime(2023, 12, 1),
+                    VerifyStartTimeStr = "11:25",
+                    VerifyEndTimeStr = ""
+                }
+            };
+            var limitedMinute = 15;
+            var timekeeping = new Timekeeping
+            {
+                UserId = 10,
+                UserEmail = "testemail10@gmail.com",
+                CheckIn = "11:25",
+                CheckOut = ""
+            };
+            var user = new TimesheetUserDto
+            {
+                UserId = 10,
+                EmailAddress = "testemail10@gmail.com",
+                MorningStartAt = "08:45",
+                MorningEndAt = "12:00",
+                AfternoonStartAt = "13:00",
+                AfternoonEndAt = "17:45",
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _timekeepingServices.CheckAbsenceUserAsync(mapAbsenceUsers, checkInUsers, limitedMinute, timekeeping, user);
+
+                Assert.Equal(CheckInCheckOutPunishmentType.Late, timekeeping.StatusPunish);
+                Assert.Equal(20000, timekeeping.MoneyPunish);
+                Assert.Equal("", timekeeping.CheckIn);
+                Assert.Equal("11:25", timekeeping.CheckOut);
+            });
+        }
+
+        // Off buổi sáng, onsite buổi chiều:
+        // TH: user checkin sau 15h lúc này sẽ chuyển thành checkout => không checkin + có checkout => bị phạt đi muộn   
+        [Fact]
+        public async Task CheckAbsenceUserAsyn_Test5()
+        {
+            var mapAbsenceUsers = new Dictionary<long, List<MapAbsenceUserDto>>
+            {
+                { 10, new List<MapAbsenceUserDto>
+                    {
+                        new MapAbsenceUserDto
+                        {
+                            UserId = 10,
+                            DateType = DayType.Afternoon,
+                            AbsenceTime = null,
+                            Hour = 4.75,
+                            Type = RequestType.Onsite
+                        },
+                        new MapAbsenceUserDto {
+                            UserId = 10,
+                            DateType = DayType.Morning,
+                            AbsenceTime = null,
+                            Hour = 0,
+                            Type = RequestType.Off
+                        }
+                    }
+                }
+            };
+            var checkInUsers = new List<UserCheckInDto>
+            {
+                new UserCheckInDto
+                {
+                    Email = "testemail10@gmail.com",
+                    DateTime = new DateTime(2023, 12, 1),
+                    VerifyStartTimeStr = "15:05",
+                    VerifyEndTimeStr = ""
+                }
+            };
+            var limitedMinute = 15;
+            var timekeeping = new Timekeeping
+            {
+                UserId = 10,
+                UserEmail = "testemail10@gmail.com",
+                CheckIn = "15:35",
+                CheckOut = "",
+                RegisterCheckIn = "08:45",
+                RegisterCheckOut = "17:45",
+            };
+            var user = new TimesheetUserDto
+            {
+                UserId = 10
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _timekeepingServices.CheckAbsenceUserAsync(mapAbsenceUsers, checkInUsers, limitedMinute, timekeeping, user);
+
+                Assert.Equal(CheckInCheckOutPunishmentType.Late, timekeeping.StatusPunish);
+                Assert.Equal(20000, timekeeping.MoneyPunish);
+                Assert.Equal("", timekeeping.CheckIn);
+                Assert.Equal("15:35", timekeeping.CheckOut);
+            });
+        }
     }
 }
