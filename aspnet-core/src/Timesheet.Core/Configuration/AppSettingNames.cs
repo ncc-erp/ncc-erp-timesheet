@@ -113,7 +113,9 @@
         public const string GenerateRetroResultEnableWorker = "App.GenerateRetroResultEnableWorker";
         public const string GenerateRetroResultAtHour = "App.GenerateRetroResultAtHour";
         public const string GenerateRetroResultOnDate = "App.GenerateRetroResultOnDate";
-
+        public const string ResetDataTeamBuildingEnableWorker = "Abp.ResetDataTeamBuildingEnableWorker";
+        public const string ResetDataTeamBuildingAtHour = "Abp.ResetDataTeamBuildingAtHour";
+        public const string ResetDataTeamBuildingOnDateAndMonth = "Abp.ResetDataTeamBuildingOnDateAndMonth";
 
         public const string TimeStartChangingCheckinToCheckout = "App.TimeStartChangingCheckinToCheckout";
         public const string TimeStartChangingCheckinToCheckoutEnable = "App.TimeStartChangingCheckinToCheckoutEnable";

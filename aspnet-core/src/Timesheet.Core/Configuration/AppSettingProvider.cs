@@ -67,7 +67,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.AutoSubmitAt, "Monday" , scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AutoSubmitAtHour, "8" , scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.CheckInInternalAtHour, "11" , scopes:SettingScopes.Application| SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.DateToLockTimesheetOfLastMonth, "5", scopes:SettingScopes.Application| SettingScopes.Tenant),				
+                new SettingDefinition(AppSettingNames.DateToLockTimesheetOfLastMonth, "5", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.UserLevelSetting, "" , scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.PercentSalaryProbationary, "85", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.KomuUserNameDevMode, "", scopes:SettingScopes.Application| SettingScopes.Tenant),
@@ -125,6 +125,9 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.GenerateRetroResultEnableWorker,"false",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.GenerateRetroResultAtHour,"2", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.GenerateRetroResultOnDate,"1", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.ResetDataTeamBuildingEnableWorker, "false", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.ResetDataTeamBuildingAtHour, "1", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.ResetDataTeamBuildingOnDateAndMonth, "1/1", scopes: SettingScopes.Application|SettingScopes.Tenant),
 
                 new SettingDefinition(AppSettingNames.SecretRegisterCode, Configuration["DefaultSettings:SecretRegisterCode"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
