@@ -265,7 +265,11 @@
                         <input class="form-control" type="url" formControlName="invoiceUrl" [name]="'invoiceUrlInput-' + (i + 1)">
                       </td>
                       <td>
-                        <label>Amount</label>
+                        <div class="required" style="display: flex; align-items: center;">
+                          <label class="col-form-label" style="margin-bottom: -10px;">
+                          {{ "Amount:" | localize }}
+                        </label>
+                        </div>
                         <br>
                         <br>
                         <label>Has VAT</label>

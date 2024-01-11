@@ -684,7 +684,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       this.isTableLoading = true;
       if(result) {
         abp.notify.success('Created Review');
-        this.refresh()
+        this.refresh();
         this.isTableLoading = false;
       }else{
         this.isTableLoading = false;
@@ -788,6 +788,11 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   formatNoteContent(content){
     return content.replaceAll('\n', '<br>');
   }
+  
+  getLineReviewContentCount(note: string): number {
+    const lineCount = note.split('\n').length;
+    return lineCount;
+}
 
   createHrNote(item: ReviewDetailDto): void{
     const dialogRef = this._dialog.open(NewHrVerifyInternshipComponent, {
