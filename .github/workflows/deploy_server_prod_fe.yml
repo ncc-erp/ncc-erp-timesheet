@@ -65,5 +65,5 @@ jobs:
     - name: Restart Nginx
       run: |
         cd angular/
-        cp appconfig.production.json /var/www/app_git/timesheet/timesheet-fe/
+        cp appconfig.production.json /var/www/app_git/timesheet/timesheet-fe/assets/
         sudo service nginx reload
