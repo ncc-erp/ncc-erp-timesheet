@@ -330,11 +330,13 @@
                             </td>
                             <!-- Review Content -->
                             <td>
-                                <div (click)="toggleHideNote(item)">
+                                <div >
                                     <p [ngClass]="item.hideNote == false ? 'preReview' : 'review'"
-                                        title="Cuộn chuột hoặc Click để mở rộng nội dung"
+                                        title=" Click để mở rộng nội dung"
                                         name="reviewContent" [innerHTML]="formatNoteContent(item.note)">
                                     </p>
+                                    <mat-icon *ngIf="getLineReviewContentCount(item.note) > 3" style="padding: 5px 0px 0px 10px; cursor: pointer" (click)="toggleHideNote(item)">more_horiz
+                                    </mat-icon>
                                 </div>
                             </td>
                             <!-- Reviewer -->
