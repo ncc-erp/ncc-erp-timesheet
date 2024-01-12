@@ -37,6 +37,7 @@ jobs:
 
     - name: Angular Build
       run: |
+        export NODE_OPTIONS="--max-old-space-size=8192"
         cd angular/
         export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
