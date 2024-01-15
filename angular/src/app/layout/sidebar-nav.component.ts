@@ -335,10 +335,6 @@ export class SideBarNavComponent extends AppComponentBase {
     }
 
     isMenuItemVisible(item: MenuItem): boolean {
-        if (!item.permissionName) {
-            return true;
-        }
-
         if (this.permission.isGranted(item.permissionName)) {
             return true;
         }
