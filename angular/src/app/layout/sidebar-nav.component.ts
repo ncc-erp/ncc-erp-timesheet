@@ -118,32 +118,30 @@ export class SideBarNavComponent extends AppComponentBase {
                     "/app/main/background-jobs"
                 ),
             ]),
-            new MenuItem(this.l("Personal timesheet"), "", "account_circle", "", [
-                new MenuItem(
-                    this.l("My timesheet"),
-                    "MyTimesheet",
-                    "alarm",
-                    "/app/main/mytimesheets"
-                ),
-                new MenuItem(
-                    this.l("My off/remote/onsite requests"),
-                    "MyAbsenceDay",
-                    "event_busy",
-                    "/app/main/absence-day"
-                ),
-                new MenuItem(
-                    this.l("Team working calendar"),
-                    "AbsenceDayOfTeam",
-                    "groups",
-                    "/app/main/off-day-project-for-user"
-                ),
-                new MenuItem(
-                    this.l("My working time"),
-                    "MyWorkingTime",
-                    "today",
-                    "/app/main/my-working-time"
-                ),
-            ]),
+            new MenuItem(
+                this.l("My timesheet"),
+                "MyTimesheet",
+                "alarm",
+                "/app/main/mytimesheets"
+            ),
+            new MenuItem(
+                this.l("My off/remote/onsite requests"),
+                "MyAbsenceDay",
+                "event_busy",
+                "/app/main/absence-day"
+            ),
+            new MenuItem(
+                this.l("Team working calendar"),
+                "AbsenceDayOfTeam",
+                "groups",
+                "/app/main/off-day-project-for-user"
+            ),
+            new MenuItem(
+                this.l("My working time"),
+                "MyWorkingTime",
+                "today",
+                "/app/main/my-working-time"
+            ),
             new MenuItem(this.l("Management"), "", "group_work", "", [
                 new MenuItem(this.l("Team building"), "TeamBuilding", "store", "", [
                     new MenuItem(
