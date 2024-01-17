@@ -72,6 +72,8 @@ export const PERMISSIONS_CONSTANT = {
     EditTeamBuildingSetting: "Admin.Configuration.TeamBuilding.UpdateTeamBuildingConfig",
     ViewApproveTimesheetNotifySetting: "Admin.Configuration.ApproveTimesheetNotifyConfig.ViewApproveTimesheetNotifyConfig",
     EditApproveTimesheetNotifySetting: "Admin.Configuration.ApproveTimesheetNotifyConfig.UpdateApproveTimesheetNotifyConfig",
+    ViewResetDataTeamBuildingSetting: "Admin.Configuration.ResetDataTeamBuildingConfig.ViewResetDataTeamBuildingConfig",
+    EditResetDataTeamBuildingSetting:"Admin.Configuration.ResetDataTeamBuildingConfig.UpdateResetDataTeamBuildingConfig",
     ViewApproveRequestOffNotifySetting: "Admin.Configuration.ApproveRequestOffNotifyConfig.ViewApproveRequestOffNotifyConfig",
     EditApproveRequestOffNotifySetting: "Admin.Configuration.ApproveRequestOffNotifyConfig.UpdateApproveRequestOffNotifyConfig",
 
@@ -315,6 +317,7 @@ export const PERMISSIONS_CONSTANT = {
     TeamBuilding_DetailHR_ViewAllProject : "TeamBuilding.DetailHR.ViewAllProject",
     TeamBuilding_DetailHR_GenerateData : "TeamBuilding.DetailHR.GenerateData",
     TeamBuilding_DetailHR_Management : "TeamBuilding.DetailHR.Management",
+    TeamBuilding_DetailHR_ResetData: "TeamBuilding.DetailHR.ResetData",
     TeamBuilding_DetailPM : "TeamBuilding.DetailPM",
     TeamBuilding_DetailPM_ViewMyProject : "TeamBuilding.DetailPM.ViewMyProject",
     TeamBuilding_DetailPM_CreateRequest : "TeamBuilding.DetailPM.CreateRequest",
