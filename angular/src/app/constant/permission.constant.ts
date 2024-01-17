@@ -12,6 +12,7 @@ export const PERMISSIONS_CONSTANT = {
     UploadWorkingTime:"Admin.Users.UploadWorkingTime",
     UpdateUserWorkingTime: "Admin.Users.UpdateUserWorkingTime",
     ViewLevelUser: "Admin.Users.ViewLevelUser",
+    ExportDataCheckpoint: "Admin.Users.ExportDataCheckpoint",
 
     //role
     ViewRoles: "Admin.Roles.View",
@@ -72,6 +73,8 @@ export const PERMISSIONS_CONSTANT = {
     EditTeamBuildingSetting: "Admin.Configuration.TeamBuilding.UpdateTeamBuildingConfig",
     ViewApproveTimesheetNotifySetting: "Admin.Configuration.ApproveTimesheetNotifyConfig.ViewApproveTimesheetNotifyConfig",
     EditApproveTimesheetNotifySetting: "Admin.Configuration.ApproveTimesheetNotifyConfig.UpdateApproveTimesheetNotifyConfig",
+    ViewResetDataTeamBuildingSetting: "Admin.Configuration.ResetDataTeamBuildingConfig.ViewResetDataTeamBuildingConfig",
+    EditResetDataTeamBuildingSetting:"Admin.Configuration.ResetDataTeamBuildingConfig.UpdateResetDataTeamBuildingConfig",
     ViewApproveRequestOffNotifySetting: "Admin.Configuration.ApproveRequestOffNotifyConfig.ViewApproveRequestOffNotifyConfig",
     EditApproveRequestOffNotifySetting: "Admin.Configuration.ApproveRequestOffNotifyConfig.UpdateApproveRequestOffNotifyConfig",
 
@@ -251,6 +254,9 @@ export const PERMISSIONS_CONSTANT = {
     ReviewIntern_ApproveAll: "ReviewIntern.ApproveAll",
     ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern: "ReviewIntern.ReviewDetail.VerifyPmReviewedForOneIntern",
     ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern: "ReviewIntern.ReviewDetail.AcceptHrRequestForOneIntern",
+    ReviewIntern_ReviewDetail_CreatePMNote: "ReviewIntern.ReviewDetail.CreatePMNote",
+    ReviewIntern_ReviewDetail_CreateInterviewNote: "ReviewIntern.ReviewDetail.CreatInterviewNote",
+    ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern: "ReviewIntern.ReviewDetail.AcceptPMReviewForAllIntern",
 
     ReviewIntern_ViewAll: "ReviewIntern.ViewAll",
     ReviewIntern_ReviewDetail_ViewDetailLevel: "ReviewIntern.ReviewDetail.ViewDetailLevel",
@@ -315,6 +321,7 @@ export const PERMISSIONS_CONSTANT = {
     TeamBuilding_DetailHR_ViewAllProject : "TeamBuilding.DetailHR.ViewAllProject",
     TeamBuilding_DetailHR_GenerateData : "TeamBuilding.DetailHR.GenerateData",
     TeamBuilding_DetailHR_Management : "TeamBuilding.DetailHR.Management",
+    TeamBuilding_DetailHR_ResetData: "TeamBuilding.DetailHR.ResetData",
     TeamBuilding_DetailPM : "TeamBuilding.DetailPM",
     TeamBuilding_DetailPM_ViewMyProject : "TeamBuilding.DetailPM.ViewMyProject",
     TeamBuilding_DetailPM_CreateRequest : "TeamBuilding.DetailPM.CreateRequest",

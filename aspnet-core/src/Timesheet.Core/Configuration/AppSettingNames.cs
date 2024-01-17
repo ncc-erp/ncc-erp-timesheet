@@ -106,14 +106,16 @@
         public const string TimesCanLateAndEarlyInWeek = "App.TimesCanLateAndEarlyInWeek";
         public const string GenerateDataOnDate = "App.GenerateDataOnDate";
         public const string TeamBuildingMoney = "App.TeamBuildingMoney";
-        public const string BillPercentage = "App.BillPercentage";
+        public const string VAT = "App.VAT";
         public const string CreateNewRetroEnableWorker = "App.CreateNewRetroEnableWorker";
         public const string CreateNewRetroAtHour = "App.CreateNewRetroAtHour";
         public const string CreateNewRetroOnDate = "App.CreateNewRetroOnDate";
         public const string GenerateRetroResultEnableWorker = "App.GenerateRetroResultEnableWorker";
         public const string GenerateRetroResultAtHour = "App.GenerateRetroResultAtHour";
         public const string GenerateRetroResultOnDate = "App.GenerateRetroResultOnDate";
-
+        public const string ResetDataTeamBuildingEnableWorker = "Abp.ResetDataTeamBuildingEnableWorker";
+        public const string ResetDataTeamBuildingAtHour = "Abp.ResetDataTeamBuildingAtHour";
+        public const string ResetDataTeamBuildingOnDateAndMonth = "Abp.ResetDataTeamBuildingOnDateAndMonth";
 
         public const string TimeStartChangingCheckinToCheckout = "App.TimeStartChangingCheckinToCheckout";
         public const string TimeStartChangingCheckinToCheckoutEnable = "App.TimeStartChangingCheckinToCheckoutEnable";

@@ -77,6 +77,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_CREATENEWRETRO_CONFIG = PERMISSIONS_CONSTANT.EditCreateNewRetroSetting;
   VIEW_GENERATERETRORESULT_CONFIG = PERMISSIONS_CONSTANT.ViewGenerateRetroResultSetting;
   EDIT_GENERATERETRORESULT_CONFIG = PERMISSIONS_CONSTANT.EditGenerateRetroResultSetting;
+  VIEW_RESETDATATEAMBUILDING_CONFIG = PERMISSIONS_CONSTANT.ViewResetDataTeamBuildingSetting;
+  EDIT_RESETDATATEAMBUILDING_CONFIG = PERMISSIONS_CONSTANT.EditResetDataTeamBuildingSetting;
 
   VIEW_TEAMBUILDING_CONFIG = PERMISSIONS_CONSTANT.ViewTeamBuildingSetting;
   EDIT_TEAMBUILDING_CONFIG = PERMISSIONS_CONSTANT.EditTeamBuildingSetting;
@@ -187,6 +189,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isShowTeamBuildingSetting: boolean = false;
   isEditTeamBuildingConfig: boolean = false;
   TeamBuildingConfig = {} as TeamBuildingConfigDto;
+  
+  isShowResetDataTeambuildingSetting: boolean = false;
+  isEditResetDataTeambuildingConfig: boolean = false;
+  ResetDataTeamBuildingConfig = {} as ResetDataTeamBuildingConfigDto;
 
   isShowTimeStartChangingCheckinToCheckoutSetting: boolean = false;
   isEditTimeStartChangingCheckinToCheckoutSetting: boolean = false;
@@ -275,6 +281,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getMoneyPMUnlockTimeSheetConfig();
     this.getCreateNewRetroConfig();
     this.getGenerateRetroResultConfig();
+    this.getResetDataTeamBuildingConfig();
     
     this.getSendMessageToPunishUserConfig();
   }
@@ -1060,8 +1067,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Team building money required!")
       return;
     }
-    if (_.isEmpty(this.TeamBuildingConfig.billPercentage)) {
-      abp.message.error("Bill percentage required!")
+    if (_.isEmpty(this.TeamBuildingConfig.vat)) {
+      abp.message.error("VAT required!")
       return;
     }
     this.configurationService.SetTeamBuildingConfig(this.TeamBuildingConfig).subscribe((res:any) => {
@@ -1275,6 +1282,48 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     }
     this.configurationService.setSendMessageRequestPendingTeamBuildingToHRConfig(this.sendMessageRequestPendingTeamBuildingToHRConfig).subscribe((res:any) => {
       this.isEditSendMessageRequestPendingTeamBuildingToHRConfig = !this.isEditSendMessageRequestPendingTeamBuildingToHRConfig;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
+
+  // Reset Data TeamBuilding config
+  refreshResetDataTeamBuildingConfig() {
+    this.getResetDataTeamBuildingConfig();
+    this.isEditResetDataTeambuildingConfig = false;
+  }
+  getResetDataTeamBuildingConfig() {
+    if (this.permission.isGranted(this.VIEW_RESETDATATEAMBUILDING_CONFIG)) {
+      this.configurationService.getResetDataTeamBuildingConfig().subscribe(data => {
+        this.ResetDataTeamBuildingConfig = data.result;
+      })
+    }
+  }
+  editResetDataTeamBuildingConfig() {
+    this.isEditResetDataTeambuildingConfig = true;
+  } 
+  
+  onResetDataTeamBuildingEnableWorker(e){
+    if(e.checked == true){
+      this.ResetDataTeamBuildingConfig.resetDataTeamBuildingEnableWorker = "true";
+    }
+    else{
+      this.ResetDataTeamBuildingConfig.resetDataTeamBuildingEnableWorker = "false";
+    }
+  } 
+
+  saveResetDataTeamBuildingConfig() {
+    if (_.isEmpty(this.ResetDataTeamBuildingConfig.resetDataTeamBuildingAtHour)) {
+      abp.message.error("Reset data at hour required!")
+      return;
+    }
+    if (_.isEmpty(this.ResetDataTeamBuildingConfig.resetDataTeamBuildingOnDateAndMonth)) {
+      abp.message.error("Reset data on date and month required!")
+      return;
+    }
+    this.configurationService.setResetDataTeamBuildingConfig(this.ResetDataTeamBuildingConfig).subscribe((res:any) => {
+      this.isEditResetDataTeambuildingConfig = !this.isEditResetDataTeambuildingConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
       }
@@ -1693,7 +1742,7 @@ export class RetroNotifyConfigDto {
 export class TeamBuildingConfigDto {
   generateDataOnDate: string;
   teamBuildingMoney: string;
-  billPercentage: string;
+  vat: string;
 }
 
 export class TimesCanLateAndEarlyInMonthSettingDto {
@@ -1756,4 +1805,10 @@ export class GenerateRetroResultConfigDto {
   generateRetroResultEnableWorker: string;
   generateRetroResultAtHour: string;
   generateRetroResultOnDate: string;
+}
+
+export class ResetDataTeamBuildingConfigDto {
+  resetDataTeamBuildingEnableWorker: string;
+  resetDataTeamBuildingAtHour: string;
+  resetDataTeamBuildingOnDateAndMonth: string;
 }
