@@ -89,8 +89,9 @@ body{
     border: none;
     resize: none;
     cursor: pointer;
-    overflow-y: scroll;
-    background-color: transparent;
+    overflow: hidden;
+    /* overflow-y: scroll; */
+    /* background-color: transparent; */
     text-overflow: ellipsis;
     line-height: 25px;
     word-wrap: break-word;
@@ -291,14 +292,14 @@ th>span {
 }
 
 .btn {
-    margin: 5px;
+    margin: 5px !important;
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-    margin: 8px auto 0px;
     height: 35px;
     text-align: right;
     padding-right: 20px;
+    font-size: 11px !important;
 }
 /* respondsive */
 @media only screen and (max-width: 1200px) {

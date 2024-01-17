@@ -28,6 +28,7 @@ if (environment.hmr) {
     } else {
         console.error('HMR is not enabled for webpack-dev-server!');
         console.log('Are you using the --hmr flag for ng serve?');
+        console.log('...');
     }
 } else {
     bootstrap(); // Regular bootstrap

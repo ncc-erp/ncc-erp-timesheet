@@ -126,8 +126,9 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_SendMessageToPunishUserConfig = "Admin.Configuration.SendMessageToPunishUserConfig";
         public const string Admin_Configuration_SendMessageToPunishUserConfig_View = "Admin.Configuration.SendMessageToPunishUserConfig.ViewSendMessageToPunishUserConfig";
         public const string Admin_Configuration_SendMessageToPunishUserConfig_Update = "Admin.Configuration.SendMessageToPunishUserConfig.UpdateSendMessageToPunishUserConfig";
-
-
+        public const string Admin_Configuration_ResetDataTeamBuildingConfig = "Admin.Configuration.ResetDataTeamBuildingConfig";
+        public const string Admin_Configuration_ResetDataTeamBuildingConfig_View = "Admin.Configuration.ResetDataTeamBuildingConfig.ViewResetDataTeamBuildingConfig";
+        public const string Admin_Configuration_ResetDataTeamBuildingConfig_Update = "Admin.Configuration.ResetDataTeamBuildingConfig.UpdateResetDataTeamBuildingConfig";
 
         public const string Admin_Clients = "Admin.Clients";
         public const string Admin_Clients_View = "Admin.Clients.View";
@@ -329,6 +330,7 @@ namespace Ncc.Authorization
         public const string TeamBuilding_DetailHR_ViewAllProject = "TeamBuilding.DetailHR.ViewAllProject";
         public const string TeamBuilding_DetailHR_GenerateData = "TeamBuilding.DetailHR.GenerateData";
         public const string TeamBuilding_DetailHR_Management = "TeamBuilding.DetailHR.Management";
+        public const string TeamBuilding_DetailHR_ResetData = "TeamBuilding.DetailHR.ResetData";
         public const string TeamBuilding_DetailPM = "TeamBuilding.DetailPM";
         public const string TeamBuilding_DetailPM_ViewMyProject = "TeamBuilding.DetailPM.ViewMyProject";
         public const string TeamBuilding_DetailPM_CreateRequest = "TeamBuilding.DetailPM.CreateRequest";
@@ -451,6 +453,8 @@ namespace Ncc.Authorization
 
         PermissionNames.Admin_Configuration_TeamBuilding_View,
                     PermissionNames.Admin_Configuration_TeamBuilding_Update,
+                    PermissionNames.Admin_Configuration_ResetDataTeamBuildingConfig_View,
+                    PermissionNames.Admin_Configuration_ResetDataTeamBuildingConfig_Update,
                     PermissionNames.Admin_Configuration_TimesCanLateAndEarlyInMonthSetting,
                     PermissionNames.Admin_Configuration_TimesCanLateAndEarlyInMonthSetting_View,
                     PermissionNames.Admin_Configuration_TimesCanLateAndEarlyInMonthSetting_Update,
@@ -660,6 +664,7 @@ namespace Ncc.Authorization
                     PermissionNames.TeamBuilding_DetailHR_ViewAllProject,
                     PermissionNames.TeamBuilding_DetailHR_GenerateData,
                     PermissionNames.TeamBuilding_DetailHR_Management,
+                    PermissionNames.TeamBuilding_DetailHR_ResetData,
                     PermissionNames.TeamBuilding_DetailPM,
                     PermissionNames.TeamBuilding_DetailPM_ViewMyProject,
                     PermissionNames.TeamBuilding_DetailPM_CreateRequest,
@@ -952,6 +957,9 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_ApproveRequestOffNotifyConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Approve Request Off Config" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_SendMessageRequestPendingTeamBuildingToHRConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Send Message Request Pending Team Building To HR Config" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_SendMessageRequestPendingTeamBuildingToHRConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Send Message Request Pending Team Building To HR Config" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_ResetDataTeamBuildingConfig_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Reset Data teambuilding Config" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_ResetDataTeamBuildingConfig_Update, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Update Reset Data teambuilding Config" },
+
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NotifyHRTheEmployeeMayHaveLeftConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Notify HR The Employee May Have Left Config" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NotifyHRTheEmployeeMayHaveLeftConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notify HR The Employee May Have Left Config" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_MoneyPMUnlockTimeSheetConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Money PM Unlock TimeSheets Config" },
@@ -1153,6 +1161,7 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailHR_ViewAllProject, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View all project"},
             new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailHR_GenerateData, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Generate data"},
             new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailHR_Management, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Management"},
+            new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailHR_ResetData, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Reset Data" },
             new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailPM, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Team building detail PM"},
             new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailPM_ViewMyProject, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View my project"},
             new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailPM_CreateRequest, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Create request money"},
@@ -1438,6 +1447,13 @@ namespace Ncc.Authorization
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_SendMessageToPunishUserConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View" },
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_SendMessageToPunishUserConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit" },
                                  }
+                            },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_ResetDataTeamBuildingConfig, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Reset Data TeamBuilding ",
+                                Childrens = new List<SystemPermission>
+                                {
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_ResetDataTeamBuildingConfig_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View"},
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_ResetDataTeamBuildingConfig_Update, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Update"},
+                                }
                             },
                         }
                     },
@@ -1763,6 +1779,7 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailHR_ViewAllProject, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View all project"},
                             new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailHR_GenerateData, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Generate data"},
                             new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailHR_Management, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Management"},
+                            new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailHR_ResetData, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Reset Data"},
                         }
                     },
                     new SystemPermission{ Name =  PermissionNames.TeamBuilding_DetailPM, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Team building detail PM",
