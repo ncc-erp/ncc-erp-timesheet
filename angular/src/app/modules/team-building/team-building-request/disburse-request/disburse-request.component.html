@@ -1,6 +1,6 @@
 <form #disburseRequestForm="ngForm" style="position: relative;" autocomplete="off" id="frm_create_group" novalidate>
   <p style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>Disburse request ID #{{this.disburseTeambuildingRequestInfoDto.requestId}}</p>
-  <mat-icon (click)="close()" style="position: absolute; top: 0; right: 0;
+  <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0;
   cursor: pointer;">close</mat-icon>
   <hr>
   <div>
@@ -94,7 +94,7 @@
         </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-      <button name="cancelButton" class="btn btn-default" mat-raised-button mat-dialog-close (click)="close()">{{l('Cancel')}}</button>
+      <button name="cancelButton" class="btn btn-default" mat-raised-button mat-dialog-close (click)="close(0)">{{l('Cancel')}}</button>
       <button name="saveButton" mat-raised-button color="primary" (click)="onSaveAndClose()"  cdkFocusInitial>{{l('Save')}}</button>
   </mat-dialog-actions>
 </form>
