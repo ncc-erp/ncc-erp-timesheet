@@ -59,6 +59,7 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
   availableTargetUsers: UserDto[] = [];
   displayAvailableTargetUsers: UserDto[] = [];
   isShowInactiveUser = false;
+  isAllowTeamBuildingSelected = false;
 
   respone = 0;
 

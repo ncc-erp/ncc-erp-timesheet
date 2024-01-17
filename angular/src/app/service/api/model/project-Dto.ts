@@ -27,6 +27,7 @@ export interface ProjectDto {
     isNoticeKMApproveRequestOffDate: boolean;
     isNoticeKMRequestChangeWorkingTime: boolean;
     isNoticeKMApproveChangeWorkingTime: boolean;
+    isAllowTeamBuilding: boolean;
 }
 export interface CustomerProjectDto {
     customerName: string;

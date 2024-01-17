@@ -1067,8 +1067,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Team building money required!")
       return;
     }
-    if (_.isEmpty(this.TeamBuildingConfig.billPercentage)) {
-      abp.message.error("Bill percentage required!")
+    if (_.isEmpty(this.TeamBuildingConfig.vat)) {
+      abp.message.error("VAT required!")
       return;
     }
     this.configurationService.SetTeamBuildingConfig(this.TeamBuildingConfig).subscribe((res:any) => {
@@ -1742,7 +1742,7 @@ export class RetroNotifyConfigDto {
 export class TeamBuildingConfigDto {
   generateDataOnDate: string;
   teamBuildingMoney: string;
-  billPercentage: string;
+  vat: string;
 }
 
 export class TimesCanLateAndEarlyInMonthSettingDto {

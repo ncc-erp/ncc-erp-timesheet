@@ -122,6 +122,11 @@ export class RetroDetailComponent
     value: EnumSort.NotArranged,
   };
 
+  public sortByPm: RetroDetailSort = {
+    name: EnumSortName.PmFullName,
+    value: EnumSort.NotArranged
+  }
+
   public status: EnumStatus;
   public title: string;
   public requestRetroDetail: PagedRequestRetroDetailDto;
@@ -219,6 +224,10 @@ export class RetroDetailComponent
     if (this.sortByPoint.value !== EnumSort.NotArranged) {
       request.gridParam.sort = this.sortByPoint.name;
       request.gridParam.sortDirection = this.sortByPoint.value;
+    }
+    if (this.sortByPm.value !== EnumSort.NotArranged) {
+      request.gridParam.sort = this.sortByPm.name;
+      request.gridParam.sortDirection = this.sortByPm.value;
     }
     request.usertypes = [...this.listUserTypeSelected];
     request.userlevels = [...this.listLevelSelected];
@@ -340,6 +349,7 @@ export class RetroDetailComponent
 
   handleSortName() {
     this.sortByPoint.value = EnumSort.NotArranged;
+    this.sortByPm.value = EnumSort.NotArranged;
     if (this.sortByName.value === EnumSort.NotArranged) {
       this.sortByName.value = EnumSort.ASC;
     } else if (this.sortByName.value === EnumSort.ASC) {
@@ -352,12 +362,26 @@ export class RetroDetailComponent
 
   handleSortPoint() {
     this.sortByName.value = EnumSort.NotArranged;
+    this.sortByPm.value = EnumSort.NotArranged;
     if (this.sortByPoint.value === EnumSort.NotArranged) {
       this.sortByPoint.value = EnumSort.ASC;
     } else if (this.sortByPoint.value === EnumSort.ASC) {
       this.sortByPoint.value = EnumSort.DEC;
     } else {
       this.sortByPoint.value = EnumSort.NotArranged;
+    }
+    this.refresh();
+  }
+
+  handleSortByPm() {
+    this.sortByName.value = EnumSort.NotArranged;
+    this.sortByPoint.value = EnumSort.NotArranged;
+    if (this.sortByPm.value === EnumSort.NotArranged) {
+      this.sortByPm.value = EnumSort.ASC;
+    } else if (this.sortByPm.value === EnumSort.ASC) {
+      this.sortByPm.value = EnumSort.DEC;
+    } else {
+      this.sortByPm.value = EnumSort.NotArranged;
     }
     this.refresh();
   }
@@ -554,7 +578,7 @@ export class RetroDetailComponent
                 abp.notify.success("Generated success");
                 this.refresh();
                 this.isTableLoading = false;
-                
+
               },
               () => (this.isTableLoading = false)
             );

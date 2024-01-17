@@ -641,14 +641,14 @@ namespace Timesheet.Application.Tests.API.Public
         [Fact]
         public async Task GetDataForCheckPoint_Test()
         {
-            var expectTotalCount = 1;
+            var expectTotalCount = 2;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _publicAppService.GetDataForCheckPoint(DateTime.Parse("2022/12/01"), DateTime.Parse("2022/12/31"), Usertype.Staff);
+                var result = await _publicAppService.GetDataForCheckPoint(DateTime.Parse("2022/12/01"), DateTime.Parse("2022/12/31"));
 
                 Assert.Equal(expectTotalCount, result.Count);
                 var r = result.Last().ToString();
-                Assert.Equal("{ UserId = 17, FullName = email17 test, EmailAddress = testemail17@gmail.com, Branch = [Branch 1], BranchName = [Branch 1], Type = Staff, TypeName = Staff, LevelName = JuniorMinus, ReviewerId = 1, ReviewerName = admin admin, ReviewerEmail = admin@aspnetboilerplate.com }", result.Last().ToString());
+                Assert.Equal("{ UserId = 6, FullName = email6 test, EmailAddress = testemail6@gmail.com, Branch = HN3, Type = Collaborators, TypeName = Collaborators, LevelName = FresherMinus, ReviewerId = 1, ReviewerName = admin admin, ReviewerEmail = admin@aspnetboilerplate.com }", result.Last().ToString());
             });
         }
 
