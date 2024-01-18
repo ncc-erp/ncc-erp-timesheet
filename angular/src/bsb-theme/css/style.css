@@ -1,4 +1,4 @@
-﻿﻿/* Show Fieldset and Legend ==================== */
+﻿/* Show Fieldset and Legend ==================== */
 
 .show-fieldset {
   margin: 10px;
@@ -9812,6 +9812,23 @@ section.content {
   -webkit-transform: scale(0);
   transform: scale(0);
 }
+.sidebar .menu .list .menu-toggle.active::before {
+  content: '\2013' !important;
+  -moz-transform: scale(1);
+  -ms-transform: scale(1);
+  -o-transform: scale(1);
+  -webkit-transform: scale(1);
+  transform: scale(1);
+}
+
+.sidebar .menu .list .menu-toggle.active::after {
+  content: '+' !important; 
+  -moz-transform: scale(0);
+  -ms-transform: scale(0);
+  -o-transform: scale(0);
+  -webkit-transform: scale(0);
+  transform: scale(0);
+}
 
 .sidebar .menu .list .menu-toggle.toggled:before {
   -moz-transform: scale(0);
@@ -9860,6 +9877,7 @@ section.content {
   list-style: none;
   display: none;
   padding-left: 0;
+  height: auto !important;
 }
 
 .sidebar .menu .list .ml-menu span {

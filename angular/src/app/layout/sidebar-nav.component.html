@@ -18,8 +18,7 @@
                     <span>{{menuItem.name}}</span>
                 </a>
                 <!-- Has child menu items (so, this is a parent menu) -->
-                <a  [ngClass]="{'menu-toggle': menuItem.children}"
-                    [class.active]="menuItem.isActive"
+                <a  [ngClass]="{'menu-toggle': menuItem.children,'active':menuItem.isActive}"
                     *ngIf="menuItem.children"
                     (click)="menuItem.isCollapsed = !menuItem.isCollapsed"
                     class="d-flex" style="align-items: center;">
@@ -30,14 +29,14 @@
                     <ng-template ngFor let-subMenuItem [ngForOf]="menuItem.children" let-mainMenuItemIndex="index">
                         <li *ngIf="isMenuItemVisible(subMenuItem)" routerLinkActive="active" [class.menu-open]="!subMenuItem.isCollapsed" [class.has-treeview]="subMenuItem.children" >
                             <!-- route name -->
-                            <a [routerLink]="[subMenuItem.route]" class="toggled"
+                            <a [routerLink]="[subMenuItem.route]" 
                                 *ngIf="!subMenuItem.children && subMenuItem.route.indexOf('http') != 0" [class.active]="subMenuItem.isActive"
                                 class="d-flex" style="align-items: center;">
                                 <i *ngIf="subMenuItem.icon" class="material-icons">{{subMenuItem.icon}}</i>
                                 <span>{{subMenuItem.name}}</span>
                             </a>
                             <!-- Static link (starts with 'http') -->
-                            <a href="{{subMenuItem.route}}" class="toggled" target="_blank"
+                            <a href="{{subMenuItem.route}}"  target="_blank"
                                 *ngIf="!subMenuItem.children && subMenuItem.route.indexOf('http') == 0"
                                 class="d-flex" style="align-items: center;">
                                 <i *ngIf="subMenuItem.icon" class="material-icons">{{subMenuItem.icon}}</i>
