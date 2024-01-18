@@ -268,7 +268,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
         {
             float totalInvoiceAndVAT = request.InvoiceAmount.Value + totalVAT;
 
-            if (request.RequestMoney < totalInvoiceAndVAT)
+            if (request.RequestMoney <= totalInvoiceAndVAT)
             {
                 request.DisbursedMoney = input.DisburseMoney;
                 request.VATMoney = totalVAT;

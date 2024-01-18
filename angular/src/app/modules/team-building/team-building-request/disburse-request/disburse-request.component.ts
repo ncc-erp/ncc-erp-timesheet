@@ -83,7 +83,7 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
     if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
       if(this.disburseTeambuildingRequestInfoDto.invoiceRequests !== undefined && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== null) {
         this.disburseTeambuildingRequestInfoDto.invoiceRequests.forEach(item => {
-          suggestedDisburseMoney += this.calculateDisburseMoney(item.invoiceMoney, item.hasVAT);
+          suggestedDisburseMoney += this.calculateDisburseMoney(this.requestMoney, item.invoiceMoney, item.hasVAT);
         })
       }
     }
@@ -91,14 +91,19 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
     return suggestedDisburseMoney;
   }
   
-  calculateDisburseMoney(invoiceMoney: number, hasVAT: boolean){  
+  calculateDisburseMoney(requestMoney: number, invoiceMoney: number, hasVAT: boolean){  
     let rs = 0;
     if(hasVAT){
       rs = invoiceMoney;
     } 
     else{
       let VATmoney = this.calculateVAT(invoiceMoney);
-      rs = invoiceMoney + VATmoney;
+      if(requestMoney <= invoiceMoney + VATmoney){
+        rs = requestMoney - VATmoney;
+      }
+      else{
+        rs = invoiceMoney + VATmoney;
+      }
     }
 
     return rs;
@@ -150,9 +155,10 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
 
   calculateTotalSuggestedRemainingMoney() {
     let suggestedRemainingMoney = 0;
+    let VATmoney = this.calculateVAT(this.invoiceAmount);
     if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
       if(this.disburseTeambuildingRequestInfoDto.requestMoney !== undefined && this.disburseMoney > 0){
-        if(this.disburseTeambuildingRequestInfoDto.requestMoney <= this.invoiceAmount){
+        if(this.disburseTeambuildingRequestInfoDto.requestMoney <= this.invoiceAmount + VATmoney){
           suggestedRemainingMoney = 0;
         }
         else {
