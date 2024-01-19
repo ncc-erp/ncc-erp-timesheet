@@ -23,6 +23,7 @@ namespace Timesheet.APIs.ReviewDetails.Dto
         public string PrivateNote { get; set; }
 
         public DateTime Created { get; set; }
+        public ReviewInternNoteType ReviewInternNoteType { get; set; }
 
     }
 

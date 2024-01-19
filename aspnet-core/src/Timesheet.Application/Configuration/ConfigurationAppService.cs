@@ -519,7 +519,7 @@ namespace Ncc.Configuration
             {
                 GenerateDataOnDate = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.GenerateDataOnDate),
                 TeamBuildingMoney = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.TeamBuildingMoney),
-                BillPercentage = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BillPercentage),
+                VAT = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.VAT),
             };
         }
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_TeamBuilding_Update)]
@@ -527,7 +527,7 @@ namespace Ncc.Configuration
         {
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateDataOnDate, input.GenerateDataOnDate);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.TeamBuildingMoney, input.TeamBuildingMoney);
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BillPercentage, input.BillPercentage);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.VAT, input.VAT);
             return input;
         }
 
@@ -708,6 +708,26 @@ namespace Ncc.Configuration
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateRetroResultEnableWorker, input.GenerateRetroResultEnableWorker);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateRetroResultAtHour, input.GenerateRetroResultAtHour);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.GenerateRetroResultOnDate, input.GenerateRetroResultOnDate);
+            return input;
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_ResetDataTeamBuildingConfig_View)]
+        public async Task<ResetDataTeamBuildingConfigDto> GetResetDataTeamBuildingConfig()
+        {
+            return new ResetDataTeamBuildingConfigDto
+            {
+                ResetDataTeamBuildingEnableWorker = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ResetDataTeamBuildingEnableWorker),
+                ResetDataTeamBuildingAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ResetDataTeamBuildingAtHour),
+                ResetDataTeamBuildingOnDateAndMonth = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ResetDataTeamBuildingOnDateAndMonth)
+            };
+        }
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_ResetDataTeamBuildingConfig_Update)]
+
+        public async Task<ResetDataTeamBuildingConfigDto> SetResetDataTeamBuildingConfig(ResetDataTeamBuildingConfigDto input)
+        {
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ResetDataTeamBuildingEnableWorker, input.ResetDataTeamBuildingEnableWorker);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ResetDataTeamBuildingAtHour, input.ResetDataTeamBuildingAtHour);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ResetDataTeamBuildingOnDateAndMonth, input.ResetDataTeamBuildingOnDateAndMonth);
             return input;
         }
     }

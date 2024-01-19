@@ -398,12 +398,23 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
             {
                 totalMoney += LastRequestHistory?.RemainingMoney ?? 0;
             }
+            
+            bool hasInvoiceWithVat = pMRequestDto.ListInvoiceRequestDto.Any(invoiceDto => invoiceDto.HasVat);
 
-            if(totalMoney > (pMRequestDto.InvoiceAmount + float.Parse(strTeamBuildingMoney)))
-            {
+            if(hasInvoiceWithVat && totalMoney > (pMRequestDto.InvoiceAmount + float.Parse(strTeamBuildingMoney))) {
                 throw new UserFriendlyException($"Total money greater than in Invoice amount {float.Parse(strTeamBuildingMoney)} VNĐ");
             }
 
+            if(!hasInvoiceWithVat)
+            {
+                var vatMoney = pMRequestDto.InvoiceAmount - (pMRequestDto.InvoiceAmount / 1.1);
+                var invoiceAndVat = (pMRequestDto.InvoiceAmount + vatMoney) * 1.1;
+                if (totalMoney > invoiceAndVat)
+                {
+                    throw new UserFriendlyException($"Total money greater than in Invoice amount and VAT money: {(pMRequestDto.InvoiceAmount + vatMoney) * 0.1} VNĐ");
+                }
+            }
+            
             //create new history
             TeamBuildingRequestHistory history = new TeamBuildingRequestHistory
             {
@@ -609,21 +620,23 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
                     Users = s.Users
                 }).ToList(),
             };
-
+           
             var sb = new StringBuilder();
             foreach (var item in listResult.ProjectInfos)
             {
-                foreach(var item2 in item.PmInfos) {
+                int countUser = item.Users.Select(user => user.EmployeeId).Distinct().Count();
+
+                foreach (var item2 in item.PmInfos) {
                     sb.AppendLine($"{item2.KomuAccountTag()}");
                 }
 
-                if(item.Users.Count == 1)
+                if(countUser == 1)
                 {
-                    sb.AppendLine($"PM {listResult.KomuAccountTagRequester()} is requesting teambuilding for **{item.Users.Count}** member from your team:");
+                    sb.AppendLine($"PM {listResult.KomuAccountTagRequester()} is requesting teambuilding for **{countUser}** member from your team:");
                 }
                 else
                 {
-                    sb.AppendLine($"PM {listResult.KomuAccountTagRequester()} is requesting teambuilding for **{item.Users.Count}** members from your team:");
+                    sb.AppendLine($"PM {listResult.KomuAccountTagRequester()} is requesting teambuilding for **{countUser}** members from your team:");
                 }
 
                 sb.AppendLine($"```");

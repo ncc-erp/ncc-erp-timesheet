@@ -44,13 +44,7 @@ body{
     margin-bottom: 0px !important;
 }
 .btn-email-all{
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
     width: 140px;
-    margin: 8px auto 0px;
-    height: 35px;
-    text-align: right;
 }
 .approve{
     color: green;
@@ -59,13 +53,7 @@ body{
     color: red;
 }
 .btn-approve-all{
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
     width: 120px;
-    margin: 8px auto 0px;
-    height: 35px;
-    text-align: right;
 }
 
 .button-group{
@@ -74,14 +62,7 @@ body{
     justify-content: space-around;
 }
 .btn-create{
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
     width: 100px;
-    margin: 8px auto 0px;
-    height: 35px;
-    text-align: right;
-    padding-right: 20px;
 }
 .preHistory{
     padding: 10px;
@@ -177,30 +158,26 @@ body{
 }
 
 .btn-mail-hrm{
-    display: flex;
-    align-items: center;
     width: 136px;
-    margin: 8px auto 0px;
-    height: 35px;
-    text-align: right;
-    padding-right: 20px;
     color : #ffff;
     background-color: #0c51a0!important;
 }
 
 .btn-mail-project{
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
     width: 160px;
-    margin: 8px auto 0px;
-    height: 35px;
-    text-align: right;
-    padding-right: 20px;
     color : #ffff;
     background-color: #2196f3!important;
 }
 
+.btn-pm-head{
+    width: 160px;
+    color : #ffff;
+    background-color: #0b984a!important;
+}
+
+.btn-pm-head[disabled] {
+    background-color: #4f4e4e!important;
+}
 .avatar{
     padding: 0px;
     margin-left: 10px;
@@ -337,4 +314,9 @@ th>span {
     .new-level{
         margin: 20px 0px;
     }
+}
+
+.countMonth::after {
+    content: '-';
+    margin-right: 5px; 
 }
