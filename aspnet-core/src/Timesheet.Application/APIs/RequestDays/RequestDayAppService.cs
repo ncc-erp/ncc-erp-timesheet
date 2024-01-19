@@ -166,7 +166,8 @@ namespace Timesheet.APIs.RequestDays
             var qUser = WorkScope.All<User>().Select(s => new
             {
                 s.Id,
-                s.FullName
+                s.FullName,
+                s.EmailAddress
             });
 
             var predicate = PredicateBuilder.New<AbsenceDayDetail>();
@@ -205,6 +206,7 @@ namespace Timesheet.APIs.RequestDays
                                                   Sex = s.Request.User.Sex,
                                                   FullName = s.Request.User.FullName,
                                                   Name = s.Request.User.Name,
+                                                  EmailAddress = s.Request.User.EmailAddress,
                                                   //Level = s.Request.User.Level,
                                                   Type = s.Request.User.Type,
                                                   DateAt = s.DateAt,
@@ -1506,12 +1508,13 @@ namespace Timesheet.APIs.RequestDays
                 sheet.Cells[1, 1].Value = "Data Team Working Calendar with Day Of Type : " +  item.DayOffName;
                 sheet.Cells[rowIndex, 1].Value = rowIndex - 3;
                 sheet.Cells[rowIndex, 2].Value = item.FullName;
-                sheet.Cells[rowIndex, 3].Value = item.LeavedayType;
-                sheet.Cells[rowIndex, 4].Value = item.DateType;
-                sheet.Cells[rowIndex, 5].Value = item.TimesheetStatus;
-                sheet.Cells[rowIndex, 6].Value = item.CreateTime.ToString(dateTimeFormat);
-                sheet.Cells[rowIndex, 7].Value = item.DateAt.ToString(dateTimeFormat);
-                sheet.Cells[rowIndex, 8].Value = item.LastModificationTime.HasValue ? item.LastModificationTime.Value.ToString(dateTimeFormat) : "";
+                sheet.Cells[rowIndex, 3].Value = item.EmailAddress;
+                sheet.Cells[rowIndex, 4].Value = item.LeavedayType;
+                sheet.Cells[rowIndex, 5].Value = item.DateType;
+                sheet.Cells[rowIndex, 6].Value = item.TimesheetStatus;
+                sheet.Cells[rowIndex, 7].Value = item.CreateTime.ToString(dateTimeFormat);
+                sheet.Cells[rowIndex, 8].Value = item.DateAt.ToString(dateTimeFormat);
+                sheet.Cells[rowIndex, 9].Value = item.LastModificationTime.HasValue ? item.LastModificationTime.Value.ToString(dateTimeFormat) : "";
                 //if (item.LastModificationTime.HasValue) {
                 //    sheet.Cells[rowIndex, 8].Value = item.LastModificationTime.Value.ToString(dateTimeFormat); 
                 //}
@@ -1553,7 +1556,153 @@ namespace Timesheet.APIs.RequestDays
                 throw;
             }            
         }
+        [HttpPost]
+        public async Task<List<CountRequestDto>> GetCountRequestForUser(InputRequestDto input)
+        {
+            var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
 
+            var branchIdByPM = await WorkScope.GetAll<User>()
+                .Where(s => s.Id == AbpSession.UserId)
+                .Select(s => s.BranchId).FirstOrDefaultAsync();
+
+            var activeMemberIds = await WorkScope.GetAll<ProjectUser>()
+                .Where(s => input.projectIds.Contains(s.ProjectId))
+                .Where(s => s.Type != ProjectUserType.DeActive)
+                .Select(s => s.UserId).Distinct().ToListAsync();
+
+            RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
+
+            var qUser = WorkScope.All<User>().Select(s => new
+            {
+                s.Id,
+                s.FullName
+            });
+
+            var predicate = PredicateBuilder.New<AbsenceDayDetail>();
+            if (isViewBranch)
+            {
+                if (input.projectIds.Count() > 0)
+                    predicate.And(s => (s.Request.User.BranchId == branchIdByPM && activeMemberIds.Contains(s.Request.UserId)) || activeMemberIds.Contains(s.Request.UserId));
+                else
+                    predicate.And(s => s.Request.User.BranchId == branchIdByPM || activeMemberIds.Contains(s.Request.UserId));
+            }
+            else
+            {
+                predicate.And(s => activeMemberIds.Contains(s.Request.UserId));
+            }
+
+            var query = from s in WorkScope.GetAll<AbsenceDayDetail>()
+                .Where(s => s.DateAt >= input.startDate)
+                .Where(s => s.DateAt.Date <= input.endDate)
+                .Where(predicate)
+                .Where(s => !input.status.HasValue || input.status.Value < 0 ||
+                        (input.status.Value == 0 ? (s.Request.Status == RequestStatus.Pending || s.Request.Status == RequestStatus.Approved) :
+                        s.Request.Status == arrayAbsenceStatus[input.status.Value]))
+                .Where(s => !input.type.HasValue || input.type.Value < 0 || s.Request.Type == input.type.Value)
+                .WhereIf(input.dayType.HasValue && input.dayType.Value > 0, s => s.DateType == input.dayType.Value)
+                .WhereIf(input.BranchId.HasValue, s => s.Request.User.BranchId == input.BranchId)
+                .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
+                .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
+                .GroupBy(s =>new { s.DateAt, s.Request.Type })
+                        select new
+                        {
+                            Date = s.Key.DateAt,
+                            Type = s.Key.Type,
+                            RequestCount = s.Count()
+                        };
+
+            var result = await query.ToListAsync();
+            return result.Select(item => new CountRequestDto
+            {
+                Date = item.Date,
+                Type = item.Type,
+                Count = item.RequestCount
+            }).ToList();
+        }
+
+        [HttpPost]
+        public async Task<List<GetRequestDto>> GetAllRequestForUserByDay(InputRequestDtoForDay input)
+        {
+            var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
+
+            var branchIdByPM = await WorkScope.GetAll<User>()
+                .Where(s => s.Id == AbpSession.UserId)
+                .Select(s => s.BranchId).FirstOrDefaultAsync();
+
+            var activeMemberIds = await WorkScope.GetAll<ProjectUser>()
+                .Where(s => input.projectIds.Contains(s.ProjectId))
+                .Where(s => s.Type != ProjectUserType.DeActive)
+                .Select(s => s.UserId).Distinct().ToListAsync();
+
+            RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
+
+            var qUser = WorkScope.All<User>().Select(s => new
+            {
+                s.Id,
+                s.FullName
+            });
+
+            var predicate = PredicateBuilder.New<AbsenceDayDetail>();
+            if (isViewBranch)
+            {
+                if (input.projectIds.Count() > 0)
+                    predicate.And(s => (s.Request.User.BranchId == branchIdByPM && activeMemberIds.Contains(s.Request.UserId)) || activeMemberIds.Contains(s.Request.UserId));
+                else
+                    predicate.And(s => s.Request.User.BranchId == branchIdByPM || activeMemberIds.Contains(s.Request.UserId));
+            }
+            else
+            {
+                predicate.And(s => activeMemberIds.Contains(s.Request.UserId));
+            }
+
+            IQueryable<GetRequestDto> query = from s in WorkScope.GetAll<AbsenceDayDetail>()
+                  .Where(s => s.DateAt == input.date)
+                  .Where(predicate)
+                  .Where(s => !input.status.HasValue || input.status.Value < 0 ||
+                           (input.status.Value == 0 ? (s.Request.Status == RequestStatus.Pending || s.Request.Status == RequestStatus.Approved) :
+                           s.Request.Status == arrayAbsenceStatus[input.status.Value]))
+                  .Where(s => !input.type.HasValue || input.type.Value < 0 || s.Request.Type == input.type.Value)
+                  .WhereIf(input.dayType.HasValue && input.dayType.Value > 0, s => s.DateType == input.dayType.Value)
+                  .WhereIf(input.BranchId.HasValue, s => s.Request.User.BranchId == input.BranchId)
+                  .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
+                  .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
+                        join u in qUser on s.Request.LastModifierUserId equals u.Id into updatedUser
+                        join cu in qUser on s.CreatorUserId equals cu.Id into cuu
+                        select new GetRequestDto
+                        {
+                            Id = s.Request.Id,
+                            UserId = s.Request.UserId,
+                            AvatarPath = s.Request.User.AvatarPath,
+                            Sex = s.Request.User.Sex,
+                            FullName = s.Request.User.FullName,
+                            Name = s.Request.User.Name,
+                            Type = s.Request.User.Type,
+                            DateAt = s.DateAt,
+                            DateType = s.DateType,
+                            DayOffName = s.Request.DayOffType.Name,
+                            Hour = s.Hour,
+                            Status = s.Request.Status,
+                            ShortName = s.Request.User.Name,
+                            LeavedayType = s.Request.Type,
+                            BranchDisplayName = s.Request.User.Branch.DisplayName,
+                            BranchColor = s.Request.User.Branch.Color,
+                            AbsenceTime = s.AbsenceTime,
+                            CreateTime = s.CreationTime,
+                            CreateBy = cuu.Select(x => x.FullName).FirstOrDefault(),
+                            LastModificationTime = s.Request.LastModificationTime,
+                            LastModifierUserName = updatedUser.Select(x => x.FullName).FirstOrDefault(),
+                        };
+            var res = await query.ToListAsync();
+
+            var dictUserProjectInfos = await DictUserProjectInfos(res.Select(s => s.UserId));
+
+            res.ForEach(s =>
+            {
+                s.ProjectInfos = dictUserProjectInfos.ContainsKey(s.UserId) ? dictUserProjectInfos[s.UserId] : default;
+            });
+
+            return res;
+        }
     } 
 }
 
