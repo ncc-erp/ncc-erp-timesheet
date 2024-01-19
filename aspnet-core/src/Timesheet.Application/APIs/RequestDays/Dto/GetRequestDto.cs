@@ -37,6 +37,7 @@ namespace Timesheet.APIs.RequestDays.Dto
         public string LastModifierUserName { get; set; }
         public List<ProjectInfoDto> ProjectInfos { get; set; }
         public TimesheetStatus TimesheetStatus { get; set; }
+        public string EmailAddress { get; set; }
     }
 
     public class ProjectInfoDto
@@ -53,4 +54,26 @@ namespace Timesheet.APIs.RequestDays.Dto
         public string PmFullName { get; set; }
         public string PmEmailAddress { get; set; }
     }
+
+    public class InputRequestDtoForDay
+    {
+            public DateTime date { get; set; }
+            public List<long> projectIds { get; set; }
+            public string name { get; set; }
+            public RequestType? type { get; set; }
+            public int dayOffTypeId { get; set; }
+            public int? status { get; set; }
+            public DayType? dayType { get; set; }
+            public long? BranchId { get; set; }
+
+    }
+
+
+    public class CountRequestDto
+    {
+        public DateTime Date { get; set; }
+        public long Count { get; set; }
+        public RequestType Type { get; set; }
+    }
+
 }
