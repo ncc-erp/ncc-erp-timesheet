@@ -8,6 +8,6 @@ namespace Timesheet.Configuration.Dto
     {
         public string GenerateDataOnDate { get; set; }
         public string TeamBuildingMoney { get; set; }
-        public string VAT { get; set; }
+        public string BillPercentage { get; set; }
     }
 }

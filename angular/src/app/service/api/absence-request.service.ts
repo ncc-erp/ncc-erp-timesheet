@@ -71,11 +71,4 @@ export class AbsenceRequestService extends BaseApiService {
     ExportTeamWorkingCalender(sd, ed, id, offType,dayAbsentStatus,branchId,dayOffTypeId1): Observable<any> {
         return this.http.post(this.rootUrl + "/ExportTeamWorkingCalender",{startDate: sd, endDate: ed, projectIds: id, type:offType, status: dayAbsentStatus,BranchId:branchId,dayOffTypeId:dayOffTypeId1});
     }
-
-    getCountAllRequestAbsenceOfTeam(sd, ed, id, name, offType, dayoffTypeId,dayAbsentStatus, dayType): Observable<any> {
-        return this.http.post(this.rootUrl + "/GetCountRequestForUser",{startDate: sd, endDate: ed, projectIds: id, name: name, type:offType, dayoffTypeId: dayoffTypeId,  status: dayAbsentStatus, dayType: dayType > 0 ? dayType : undefined});
-    }
-    getAllRequestForUserByDay(date, id, name, offType, dayoffTypeId,dayAbsentStatus, dayType): Observable<any> {
-        return this.http.post(this.rootUrl + "/GetAllRequestForUserByDay", {date: date, projectIds: id, name: name, type:offType, dayoffTypeId: dayoffTypeId,  status: dayAbsentStatus, dayType: dayType > 0 ? dayType : undefined});
-    }
 }

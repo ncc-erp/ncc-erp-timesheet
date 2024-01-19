@@ -18,7 +18,8 @@
                     <span>{{menuItem.name}}</span>
                 </a>
                 <!-- Has child menu items (so, this is a parent menu) -->
-                <a  [ngClass]="{'menu-toggle': menuItem.children, 'active': menuItem.isActive}"
+                <a  [ngClass]="{'menu-toggle': menuItem.children}"
+                    [class.active]="menuItem.isActive"
                     *ngIf="menuItem.children"
                     (click)="menuItem.isCollapsed = !menuItem.isCollapsed"
                     class="d-flex" style="align-items: center;">

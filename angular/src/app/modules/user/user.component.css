@@ -111,7 +111,6 @@ file-upload>span {
     min-height: 1px;
     padding-right: 15px;
     padding-left: 15px;
-    width: 555px;
 }
 
 .col-xs-5ths {
@@ -159,7 +158,7 @@ file-upload>span {
 }
 @media (min-width: 768px) {
     .col-sm-5ths {
-        width: 28%;
+        width: 20%;
         float: left;
     }
 }

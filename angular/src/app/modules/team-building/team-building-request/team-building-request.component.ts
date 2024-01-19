@@ -166,10 +166,8 @@ export class TeamBuildingRequestComponent
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
-      if (result.disbursedMoney > 0) {
+      if (result) {
         abp.notify.success("Disburse request successful");
-        this.refresh();
-      } else {
         this.refresh();
       }
     });
@@ -237,13 +235,5 @@ export class TeamBuildingRequestComponent
 
   protected delete(entity: TeamBuildingRequestDto): void {
     throw new Error("Method not implemented.");
-  }
-
-  getCssVATMoney(value) {
-    value = Number.parseInt(value);
-    if (value > 0) {
-      return "red";
-    }
-    return "green";
   }
 }

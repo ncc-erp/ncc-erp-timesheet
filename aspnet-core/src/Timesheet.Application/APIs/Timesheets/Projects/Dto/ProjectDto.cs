@@ -32,6 +32,5 @@ namespace Timesheet.Timesheets.Projects.Dto
         public bool IsNoticeKMRequestChangeWorkingTime { get; set; } = false;
         public bool IsNoticeKMApproveChangeWorkingTime { get; set; } = false;
         public bool isAllUserBelongTo { get; set; }
-        public bool IsAllowTeamBuilding { get; set; } 
     }
 }

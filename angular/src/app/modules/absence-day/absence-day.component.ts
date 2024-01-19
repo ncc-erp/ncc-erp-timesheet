@@ -207,8 +207,6 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
     this.mapChanegRequest.set('remote-afternoon', [this.MORMING, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
     this.mapChanegRequest.set('di-muon', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
     this.mapChanegRequest.set('ve-som', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('onsite-morning', [this.AFTERNOON, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
-    this.mapChanegRequest.set('onsite-afternoon', [this.MORMING, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
 
     this.mapChanegRequest.set('off-morning__remote-afternoon', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
     this.mapChanegRequest.set('off-morning__di-muon', [this.AFTERNOON, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
@@ -223,9 +221,6 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
     this.mapChanegRequest.set('remote-afternoon__di-muon', [this.MORMING, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
     this.mapChanegRequest.set('remote-afternoon__ve-som', [this.MORMING, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
     this.mapChanegRequest.set('di-muon__ve-som', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EMPTY]);
-
-    this.mapChanegRequest.set('off-morning__onsite-afternoon', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
-    this.mapChanegRequest.set('onsite-morning__off-afternoon', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
   }
 
   getKey(sentItems: any[]) {
@@ -265,12 +260,6 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
       }
       if (_.isEqual(sendItem, this.VE_SOM)) {
         return 've-som'
-      }
-      if (_.isEqual(sendItem, this.ONSITE_MORNING)) {
-        return 'onsite-morning'
-      }
-      if (_.isEqual(sendItem, this.ONSITE_AFTERNOON)) {
-        return 'onsite-afternoon'
       }
     }
 
@@ -395,20 +384,6 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
       ) {
         return 'di-muon__ve-som'
       }
-
-      if (
-        (_.isEqual(sendItem1, this.ONSITE_MORNING) && _.isEqual(sendItem2, this.OFF_AFTERNOON)) ||
-        (_.isEqual(sendItem2, this.ONSITE_MORNING) && _.isEqual(sendItem1, this.OFF_AFTERNOON))
-      ) {
-        return 'onsite-morning__off-afternoon'
-      }
-
-      if (
-        (_.isEqual(sendItem1, this.OFF_MORMING) && _.isEqual(sendItem2, this.ONSITE_AFTERNOON)) ||
-        (_.isEqual(sendItem2, this.OFF_MORMING) && _.isEqual(sendItem1, this.ONSITE_AFTERNOON))
-      ) {
-        return 'off-morning__onsite-afternoon'
-      }
     }
   }
 
@@ -444,7 +419,8 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
     }
     return null;
 
-    }
+  }
+
 
   showPopupDiMuonVeSom(currentRequest: any, selectedDate: string) {
     let absenceTime = currentRequest.absenceTime;
@@ -673,18 +649,6 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
 
   REMOTE_AFTERNOON = {
     type: 2,
-    dateType: 3,
-    absenceTime: null
-  }
-
-  ONSITE_MORNING = {
-    type: 1,
-    dateType:2,
-    absenceTime: null
-  }
-
-  ONSITE_AFTERNOON = {
-    type:1,
     dateType: 3,
     absenceTime: null
   }

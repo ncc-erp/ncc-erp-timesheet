@@ -19,8 +19,6 @@ import { FormControl } from '@angular/forms';
 import { BranchService } from '@app/service/api/branch.service';
 import { PositionDto } from '@app/service/api/model/position-dto';
 import { PositionService } from '@app/service/api/position.service';
-import { TimeGetDataCheckpointDialog, TimeGetDataCheckpointDto } from '@app/service/api/model/time-checkpoint-dto';
-import { ExportDataCheckPointComponent } from './export-data-check-point/export-data-check-point/export-data-check-point.component';
 
 @Component({
   selector: 'app-user',
@@ -38,7 +36,6 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
   UPLOAD_AVATAR = PERMISSIONS_CONSTANT.UploadAvatar;
   UploadWorkingTime = PERMISSIONS_CONSTANT.UploadWorkingTime;
   VIEW_LEVEL_USER = PERMISSIONS_CONSTANT.ViewLevelUser;
-  ExportDataCheckpoint = PERMISSIONS_CONSTANT.ExportDataCheckpoint;
   enableExpandName = true;
   isLoadingFileUpload: boolean;
   isActive;
@@ -519,30 +516,6 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
       if (result === 'refresh') {
         this.ngOnInit();
       }
-    });
-  }
-
-  exportExcel(): void {
-    let item = {} as TimeGetDataCheckpointDto;
-    this.showDialog(item);
-  }
-
-  showDialog(timeCheckpoint: TimeGetDataCheckpointDto): void {
-    const { startDate, endDate} = timeCheckpoint;
-    let item = {
-      startDate,
-      endDate,
-    } as TimeGetDataCheckpointDto;
-    const dialogRef = this.dialog.open(ExportDataCheckPointComponent, {
-      data: {
-        item: item
-      } as TimeGetDataCheckpointDialog,
-      disableClose: true,
-      width: "700px",
-    });
-
-    dialogRef.afterClosed().subscribe((res) => {
-      this.refresh();
     });
   }
 }

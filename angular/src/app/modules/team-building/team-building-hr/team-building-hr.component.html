@@ -19,7 +19,7 @@
       </div>
       <div class="body" style="height: 100%">
         <div class="row">
-          <div class="col-lg-6">
+          <div class="col-lg-9">
             <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Search by User Name</mat-label>
               <input type="search" [(ngModel)]="searchText" name="Search" (keyup.enter)="refresh()" matInput>
@@ -27,7 +27,7 @@
             </mat-form-field>
           </div>
 
-          <div class="col-lg-6 margin-btn" style="margin-top: 0">
+          <div class="col-lg-3 margin-btn" style="margin-top: 0">
             <div class="gr-btn-action flex-btn">
               <button name="createBtn" *ngIf="permission.isGranted(TeamBuilding_DetailHR_Management)" style="margin-top: 10px" mat-raised-button color="primary" class="btn btn-border btn-add" (click) = "create()" >
                 <div>
@@ -39,10 +39,7 @@
                 <i class="fa fa-database" style="margin-bottom: 7px; margin-right: 10px"></i>
                 Generate Data
               </button>
-              <button name="generateDataBtn" *ngIf="permission.isGranted(TeamBuilding_DetailHR_ResetData)" style="margin-top: 10px" mat-raised-button color="primary" class="btn btn-border btn-download" (click) = "deleteData()">
-                <i class="fa fa-database" style="margin-bottom: 7px; margin-right: 10px"></i>
-                Reset Data
-              </button>
+
             </div>
           </div>
 

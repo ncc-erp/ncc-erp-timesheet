@@ -17,11 +17,10 @@ import { ClickOutsideModule } from 'ng-click-outside';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { MAT_DATE_LOCALE } from '@angular/material';
 import { ImportUserWorkingTimeComponent } from './import-user-working-time/import-user-working-time.component';
-import { ExportDataCheckPointComponent } from './export-data-check-point/export-data-check-point/export-data-check-point.component';
 
 
 @NgModule({
-  declarations: [UserSecondComponent, CreateUserComponent,UpdateUserComponent,RoleUserComponent, ImportUserWorkingTimeComponent, ExportDataCheckPointComponent],
+  declarations: [UserSecondComponent, CreateUserComponent,UpdateUserComponent,RoleUserComponent, ImportUserWorkingTimeComponent],
   imports: [
     CommonModule,
     UserRoutingModule,
@@ -40,11 +39,10 @@ import { ExportDataCheckPointComponent } from './export-data-check-point/export-
     RoleUserComponent,
     UpdateUserComponent,
     UploadComponent,
-    ImportUserWorkingTimeComponent,
-    ExportDataCheckPointComponent
+    ImportUserWorkingTimeComponent
   ],
   exports: [
-    ExportDataCheckPointComponent
+    
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }

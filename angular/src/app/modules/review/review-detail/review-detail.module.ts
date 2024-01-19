@@ -15,12 +15,10 @@ import { NewReviewInternshipComponent } from './new-review-internship/new-review
 import { ViewGuidelineDialogComponent } from './new-review-internship/view-guideline-dialog/view-guideline-dialog.component';
 import { UpdateReviewerComponent } from './update-reviewer/update-reviewer.component';
 import { NewHrVerifyInternshipComponent } from './new-hr-verify-internship/new-hr-verify-internship.component';
-import { CreatePmNoteComponent } from './create-pm-note/create-pm-note.component';
-import { CreateInterviewNoteComponent } from './create-interview-note/create-interview-note.component';
 
 
 @NgModule({
-  declarations: [ReviewDetailComponent, CreateReviewDetailComponent, ReviewInternshipComponent, ConfirmSalaryInternshipComponent,NewReviewInternshipComponent, ViewGuidelineDialogComponent, UpdateReviewerComponent, NewHrVerifyInternshipComponent, CreatePmNoteComponent, CreateInterviewNoteComponent ],
+  declarations: [ReviewDetailComponent, CreateReviewDetailComponent, ReviewInternshipComponent, ConfirmSalaryInternshipComponent,NewReviewInternshipComponent, ViewGuidelineDialogComponent, UpdateReviewerComponent, NewHrVerifyInternshipComponent ],
   imports: [
     CommonModule,
     SharedModule,
@@ -39,9 +37,7 @@ import { CreateInterviewNoteComponent } from './create-interview-note/create-int
     NewReviewInternshipComponent,
     ViewGuidelineDialogComponent,
     UpdateReviewerComponent,
-    NewHrVerifyInternshipComponent,
-    CreatePmNoteComponent,
-    CreateInterviewNoteComponent
+    NewHrVerifyInternshipComponent
   ]
 })
 export class ReviewDetailModule { }

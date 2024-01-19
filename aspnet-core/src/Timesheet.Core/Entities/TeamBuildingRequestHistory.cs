@@ -22,6 +22,5 @@ namespace Timesheet.Entities
         public RemainingMoneyStatus RemainingMoneyStatus { get; set; }
         public TeamBuildingRequestStatus Status { get; set; }
         public float? InvoiceAmount { get; set; }
-        public float? VATMoney { get; set; }
     }
 }

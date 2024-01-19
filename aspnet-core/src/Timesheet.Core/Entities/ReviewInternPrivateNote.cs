@@ -15,7 +15,6 @@ namespace Timesheet.Entities
         public long NoteByUserId { get; set; }
 
         public string PrivateNote { get; set; }
-        public ReviewInternNoteType ReviewInternNoteType { get; set; }
 
         [ForeignKey(nameof(ReviewDetailId))]
         public ReviewDetail Review { get; set; }

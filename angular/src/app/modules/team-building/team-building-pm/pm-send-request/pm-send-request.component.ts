@@ -290,9 +290,9 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
     const numSelections = Math.floor(parseFloat(totalInvoiceAmount.value));
     const listIds = this.getListSuggestSelectedItemIds(this.requestInfo.filter(s => s.status == 0), numSelections);
 
-    // for (let i = 0; i < this.requestInfo.length; i++) {
-    //   this.handleSelectRequestInfoItem(i, { checked: listIds.indexOf(this.requestInfo[i].id) != -1 });
-    // }
+    for (let i = 0; i < this.requestInfo.length; i++) {
+      this.handleSelectRequestInfoItem(i, { checked: listIds.indexOf(this.requestInfo[i].id) != -1 });
+    }
   }
 
   getListSuggestSelectedItemIds(objectList: RequestDto[], totalMoney): number[] {

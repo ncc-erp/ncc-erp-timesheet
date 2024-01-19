@@ -143,8 +143,5 @@ export class UserService extends BaseApiService {
     }
     GetAllActiveUser(): Observable<any> {
         return this.http.get(this.getUrl(`GetAllActiveUser`))
-    }
-    ExportDataCheckpoint(startDate: string, endDate: string): Observable<any>{
-        return this.http.get(this.rootUrl + `/ExportDataCheckpoint?startDate=${startDate}&endDate=${endDate}`)
-    }
+      }
 }

@@ -24,7 +24,6 @@ using Timesheet.APIs.ReviewInterns.Dto;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Uitls;
-using Timesheet.Users.Dto;
 using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.Public
@@ -804,6 +803,92 @@ namespace Timesheet.APIs.Public
             };
 
         }
+
+        [AbpAllowAnonymous]
+        [HttpGet]
+        public async Task<List<Object>> GetDataForCheckPoint(DateTime startDate, DateTime endDate, Usertype? userType)
+        {
+            var querymts = WorkScope.GetAll<MyTimesheet>()
+              .Where(s => s.DateAt >= startDate && s.DateAt.Date <= endDate)
+              .Where(s => s.Status >= TimesheetStatus.Pending)
+              .Where(s => s.User.IsActive && !s.User.IsStopWork)
+              .Where(s => s.User.Level >= UserLevel.Intern_2)
+              .Where(s => !userType.HasValue || s.User.Type == userType.Value)
+              .Where(s => !s.ProjectTask.Project.isAllUserBelongTo);
+
+
+            var userIds = querymts
+                .Select(s => s.UserId)
+                .Distinct()
+                .ToList();
+
+
+            var qmts = querymts
+                .Select(s => new
+                {
+                    s.UserId,
+                    s.Id,
+                    s.WorkingTime,
+                    s.ProjectTask.ProjectId
+                });
+
+
+            var qprojectPms = from s in (WorkScope.GetAll<ProjectUser>()
+                .Where(s => s.Type == ProjectUserType.PM)
+                .Select(s => new { s.ProjectId, PMId = s.UserId }))
+                              group s by s.ProjectId into g
+                              select new { ProjectId = g.Key, PmId = g.FirstOrDefault().PMId };
+
+            var mapUserPmId = await (from s in (from mts in qmts
+                                                join pu in qprojectPms on mts.ProjectId equals pu.ProjectId
+                                                select new { mts.UserId, mts.WorkingTime, pu.PmId })
+                                     group s by s.UserId into g
+                                     select new
+                                     {
+                                         UserId = g.Key,
+                                         PM = g.GroupBy(s => s.PmId, (key, lst) => new { PmId = key, WorkingTime = lst.Sum(s => s.WorkingTime) })
+                                         .OrderByDescending(s => s.WorkingTime)
+                                         .FirstOrDefault()
+                                     }).ToDictionaryAsync(s => s.UserId, s => s.PM.PmId);
+
+            var mapUserInfo = WorkScope.GetAll<User>()
+                .Where(s => s.IsActive)
+                .Select(s => new { s.Id, s.FullName, s.EmailAddress, s.Branch, s.Type, s.Level })
+                .ToDictionary(s => s.Id);
+
+            var resultList = new List<Object>();
+            foreach (var userId in userIds)
+            {
+                if (mapUserPmId.ContainsKey(userId))
+                {
+                    var reviewerId = mapUserPmId[userId];
+                    var reviewDetail = new
+                    {
+                        UserId = userId,
+                        FullName = mapUserInfo[userId].FullName,
+                        EmailAddress = mapUserInfo[userId].EmailAddress,
+                        Branch = mapUserInfo[userId].Branch,
+                        BranchName = mapUserInfo[userId].Branch.ToString(),
+                        Type = mapUserInfo[userId].Type,
+                        TypeName = mapUserInfo[userId].Type.ToString(),
+                        //Level = mapUserInfo[userId].Level,
+                        LevelName = mapUserInfo[userId].Level.ToString(),
+
+                        ReviewerId = reviewerId,
+                        ReviewerName = mapUserInfo[reviewerId].FullName,
+                        ReviewerEmail = mapUserInfo[reviewerId].EmailAddress,
+                    };
+
+                    resultList.Add(reviewDetail);
+
+                }
+
+
+            }
+
+            return resultList;
+        }
+        [HttpGet]
         public List<UserInfo> GetAllUsers()
         {
             return WorkScope.GetAll<User>().Select(x => new UserInfo()
@@ -968,110 +1053,6 @@ namespace Timesheet.APIs.Public
                     MorningStartTime = user.MorningStartAt,
                 })
                 .ToListAsync();
-        }
-
-        [HttpGet]
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_ExportDataCheckpoint)]
-        public async Task<List<DataCheckPointDto>> GetDataForCheckPoint(DateTime startDate, DateTime endDate)
-        {
-            var querymts = _ws.GetAll<MyTimesheet>()
-                .Select(s => new {
-                    s.UserId,
-                    s.DateAt,
-                    s.Status,
-                    s.User.IsActive,
-                    s.User.Level,
-                    UserType = s.User.Type,
-                    s.ProjectTask.Project.ProjectType,
-                    s.WorkingTime,
-                    s.ProjectTask.Project.IsAllowTeamBuilding,
-                    s.ProjectTask.ProjectId
-                })
-              .Where(s => s.DateAt >= startDate && s.DateAt.Date <= endDate)
-              .Where(s => s.Status == TimesheetStatus.Approve)
-              .Where(s => s.IsActive)
-              .Where(s => s.Level >= UserLevel.Intern_2)
-              .Where(s => s.IsAllowTeamBuilding)
-              .AsNoTracking()
-              .ToList();
-
-            var userIds = querymts
-                .Select(s => s.UserId)
-                .Distinct()
-                .ToList();
-
-            var qmts = querymts
-                .Select(s => new
-                {
-                    s.UserId,
-                    s.WorkingTime,
-                    s.ProjectId
-                });
-
-            var qprojectPms = (from s in (_ws.GetAll<ProjectUser>()
-                .Where(s => s.Type == ProjectUserType.PM)
-                .Select(s => new { s.ProjectId, ProjectName = s.Project.Name, PMId = s.UserId }))
-                               group s by new { s.ProjectId, s.ProjectName } into g
-                               select new { g.Key.ProjectId, g.Key.ProjectName, PmId = g.FirstOrDefault().PMId }
-                ).ToList();
-
-            var mapUserPmId = (from s in (from mts in qmts
-                                          join pu in qprojectPms on mts.ProjectId equals pu.ProjectId
-                                          select new { mts.UserId, mts.WorkingTime, pu.PmId, pu.ProjectName })
-                               group s by s.UserId into g
-                               select new
-                               {
-                                   UserId = g.Key,
-                                   ProjectNames = g.Select(x => x.ProjectName).Distinct().ToList(),
-                                   PM = g.GroupBy(s => s.PmId, (key, lst) => new { PmId = key, WorkingTime = lst.Sum(s => s.WorkingTime) })
-                                   .OrderByDescending(s => s.WorkingTime)
-                                   .FirstOrDefault()
-                               }).ToDictionary(s => s.UserId, s => new { s.PM.PmId, s.PM.WorkingTime, s.ProjectNames });
-
-            var mapUserInfo = _ws.GetAll<User>()
-                .Select(s => new { s.Id, s.FullName, s.EmailAddress, Branch = s.Branch.Name, s.Type, s.Level, s.IsActive })
-                .ToDictionary(s => s.Id);
-
-            var resultList = new List<DataCheckPointDto>();
-            var userNotHaveInfoList = new LinkedList<Object>();
-            foreach (var userId in userIds)
-            {
-                if (!mapUserInfo.ContainsKey(userId))
-                {
-                    userNotHaveInfoList.AddLast(userId);
-                    continue;
-                }
-                if (mapUserPmId.ContainsKey(userId))
-                {
-                    var reviewerId = mapUserPmId[userId].PmId;
-                    var projectName = mapUserPmId[userId].ProjectNames.JoinAsString(", ");
-                    var workingTime = mapUserPmId[userId].WorkingTime / 60;
-                    var checkPointName = "Data Checkpoint tháng " + startDate.Month + '/' + startDate.Year;
-                    var reviewDetail = new DataCheckPointDto
-                    {
-                        CheckPointName = checkPointName,
-                        UserId = userId,
-                        FullName = mapUserInfo[userId].FullName,
-                        EmailAddress = mapUserInfo[userId].EmailAddress,
-                        Branch = mapUserInfo[userId].Branch,
-                        //BranchName = mapUserInfo[userId].Branch.ToString(),
-                        Type = mapUserInfo[userId].Type,
-                        TypeName = mapUserInfo[userId].Type.ToString(),
-                        //Level = mapUserInfo[userId].Level,
-                        WorkingTime = workingTime,
-                        LevelName = mapUserInfo[userId].Level.ToString(),
-                        ProjectNames = projectName,
-                        ReviewerId = reviewerId,
-                        ReviewerName = mapUserInfo.ContainsKey(reviewerId) ? mapUserInfo[reviewerId].FullName : "",
-                        ReviewerEmail = mapUserInfo.ContainsKey(reviewerId) ? mapUserInfo[reviewerId].EmailAddress : "",
-                        ReviewerIsActive = mapUserInfo.ContainsKey(reviewerId) ? mapUserInfo[reviewerId].IsActive.ToString() : "not found",
-                    };
-
-                    resultList.Add(reviewDetail);
-
-                }
-            }
-            return resultList;
         }
     }
 }

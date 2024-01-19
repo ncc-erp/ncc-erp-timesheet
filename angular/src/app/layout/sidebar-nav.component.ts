@@ -134,7 +134,7 @@ export class SideBarNavComponent extends AppComponentBase {
                 new MenuItem(
                     this.l("Team working calendar"),
                     "AbsenceDayOfTeam",
-                    "groups",   
+                    "groups",
                     "/app/main/off-day-project-for-user"
                 ),
                 new MenuItem(
@@ -145,54 +145,6 @@ export class SideBarNavComponent extends AppComponentBase {
                 ),
             ]),
             new MenuItem(this.l("Management"), "", "group_work", "", [
-                new MenuItem(
-                    this.l("Manage off/remote/onsite requests"),
-                    "AbsenceDayByProject",
-                    "rule",
-                    "/app/main/off-day-project"
-                ),
-                new MenuItem(
-                    this.l("Timesheet management"),
-                    "Timesheet",
-                    "date_range",
-                    "/app/main/timesheets"
-                ),
-                new MenuItem(
-                    this.l("Timesheets monitoring"),
-                    "TimesheetSupervision",
-                    "supervised_user_circle",
-                    "/app/main/timesheets-supervisior"
-                ),
-                new MenuItem(
-                    this.l("Project management"),
-                    "Project",
-                    "assessment",
-                    "/app/main/projects"
-                ),
-                new MenuItem(
-                    this.l("Review Interns"),
-                    "ReviewIntern",
-                    "rate_review",
-                    "/app/main/review"
-                ),
-                new MenuItem(
-                    this.l("Retrospectives"),
-                    "Retro",
-                    "event_note",
-                    "/app/main/retro"
-                ),
-                new MenuItem(
-                    this.l("Manage employee working times"),
-                    "ManageWorkingTime",
-                    "access_time",
-                    "/app/main/manage-working-times"
-                ),
-                new MenuItem(
-                    this.l("Branch Manager"),
-                    "ProjectManagementBranchDirectors",
-                    "location_city",
-                    "/app/main/branch-manager"
-                ),
                 new MenuItem(this.l("Team building"), "TeamBuilding", "store", "", [
                     new MenuItem(
                         this.l("Team building HR"),
@@ -251,10 +203,57 @@ export class SideBarNavComponent extends AppComponentBase {
                         "/app/main/komu-tracker"
                     ),
                 ]),
+                new MenuItem(
+                    this.l("Manage off/remote/onsite requests"),
+                    "AbsenceDayByProject",
+                    "rule",
+                    "/app/main/off-day-project"
+                ),
+                new MenuItem(
+                    this.l("Timesheet management"),
+                    "Timesheet",
+                    "date_range",
+                    "/app/main/timesheets"
+                ),
+                new MenuItem(
+                    this.l("Timesheets monitoring"),
+                    "TimesheetSupervision",
+                    "supervised_user_circle",
+                    "/app/main/timesheets-supervisior"
+                ),
+                new MenuItem(
+                    this.l("Project management"),
+                    "Project",
+                    "assessment",
+                    "/app/main/projects"
+                ),
+                new MenuItem(
+                    this.l("Manage employee working times"),
+                    "ManageWorkingTime",
+                    "access_time",
+                    "/app/main/manage-working-times"
+                ),
+                new MenuItem(
+                    this.l("Branch Manager"),
+                    "ProjectManagementBranchDirectors",
+                    "location_city",
+                    "/app/main/branch-manager"
+                ),
+                new MenuItem(
+                    this.l("Retrospectives"),
+                    "Retro",
+                    "event_note",
+                    "/app/main/retro"
+                ),
+                new MenuItem(
+                    this.l("Review Interns"),
+                    "ReviewIntern",
+                    "rate_review",
+                    "/app/main/review"
+                ),
             ]),
         ];
     }
-
     constructor(injector: Injector, private router: Router) {
         super(injector);
         this.router.events.subscribe(this.routerEvents);
@@ -335,7 +334,11 @@ export class SideBarNavComponent extends AppComponentBase {
         }
     }
 
-    isMenuItemVisible(item: MenuItem): boolean {    
+    isMenuItemVisible(item: MenuItem): boolean {
+        if (!item.permissionName) {
+            return true;
+        }
+
         if (this.permission.isGranted(item.permissionName)) {
             return true;
         }
@@ -348,4 +351,5 @@ export class SideBarNavComponent extends AppComponentBase {
         }
         return this.permission.isGranted(item.permissionName);
     }
+
 }

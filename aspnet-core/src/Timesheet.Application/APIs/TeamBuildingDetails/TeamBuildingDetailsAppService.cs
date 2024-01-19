@@ -315,21 +315,5 @@ namespace Timesheet.APIs.TeamBuildingDetails
 
             await WorkScope.GetRepo<TeamBuildingDetail>().DeleteAsync(input.Id);
         }
-
-        [HttpDelete]
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.TeamBuilding_DetailHR_ResetData)]
-        public async System.Threading.Tasks.Task DeleteAll()
-        {
-            DateTime now = DateTime.UtcNow;
-            var listIdDelete =await WorkScope.GetAll<TeamBuildingDetail>()
-                .Where(s => s.ApplyMonth.Year == now.Year -1)
-                .Where(t => t.Status == TeamBuildingStatus.Open)
-                .Select(t => t.Id)
-                .ToListAsync();
-            foreach (var item in listIdDelete)
-            {
-                await WorkScope.GetRepo<TeamBuildingDetail>().DeleteAsync(item);
-            }
-        }
     }
 }
