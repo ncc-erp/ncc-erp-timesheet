@@ -23,19 +23,16 @@
                   <th style="width: 10%">
                     No
                   </th>
-                  <th style="width: 15%">
+                  <th style="width: 20%">
                     Invoice Amount
                   </th>
-                  <th style="width: 30%">
+                  <th style="width: 40%">
                     Invoice Bill Resource
                   </th> 
-                  <th style="width: 10%">
+                  <th style="width: 15%">
                     Has VAT
                   </th>
-                  <th style="width: 10%">
-                     VAT
-                  </th>
-                  <th style="width: 40%;">
+                  <th style="width: 15%;">
                     Invoice Amount After Taxing
                   </th>
                 </tr>
@@ -45,22 +42,14 @@
                   <td>
                     <span>Invoice #{{i + 1}}</span>
                   </td>
-                  <td class="d-flex" style="align-items: center;">
+                  <td>
                     <span>{{invoice.invoiceMoney | number : "1.0" : "en-US"}} VNĐ</span>
-                        <mat-icon color="primary" style="cursor: pointer; margin-left: 10px; font-size: 24px;"
-                        (click)="editOneInvoice(invoice.invoiceId);$event.stopPropagation()">edit</mat-icon>
                   </td>
                   <td>
                     <a target="_blank" href="{{invoice.invoiceResourceUrl}}">{{invoice.invoiceResourceName}}</a>
                   </td>
                   <td>
-                    <mat-icon *ngIf="invoice.hasVAT">check_box</mat-icon>
-                    <mat-icon *ngIf="!invoice.hasVAT">check_box_outline_blank</mat-icon>
-                  </td>
-                  <td>
-                    <span *ngIf="invoice.hasVAT">0</span>
-                    <span *ngIf="!invoice.hasVAT">{{calculateVAT(invoice.invoiceMoney)}}</span>
-                    
+                    <mat-checkbox [name]="'invoiceVAT' + (i + 1)" [(ngModel)]="invoice.hasVAT"  [ngModelOptions]="{standalone: true}" (ngModelChange)="updateInvoiveStatusInDisburseInvoiceList(i, invoice.hasVAT)"></mat-checkbox>
                   </td>
                   <td>
                     <p>{{calculateInvoiceAmountAfterTaxing(invoice.invoiceMoney, invoice.hasVAT) | number : "1.0" : "en-US"}} VNĐ</p>
@@ -70,7 +59,7 @@
               <tfoot>
                 <tr>
                   <td colspan="5">
-                    <p style="float: right;"><b>{{ "Suggest Disburse Money:" | localize }}</b> {{calculateTotalSuggestedDisburseMoney() | number : "1.0" : "en-US"}} VNĐ</p>
+                    <p style="float: right;"><b>{{ "Total Invoice Money:" | localize }}</b> {{calculateTotalSuggestedDisburseMoney() | number : "1.0" : "en-US"}} VNĐ</p>
                     <b style="float: left; color: red; margin-top: 35px;" *ngIf="this.disburseTeambuildingRequestInfoDto.requestMoney < calculateTotalSuggestedDisburseMoney()">*The total requested amount is less than the total invoice amount, only {{this.disburseTeambuildingRequestInfoDto.requestMoney | number : "1.0" : "en-US"}} VNĐ can be disbursed</b>
                   </td>
                 </tr>
@@ -83,18 +72,15 @@
         <div class="align-item format-col form-group row required">
           <label class="col-md-4 col-form-label" for="connectionString">
             {{ "Disburse money:" | localize }}
-          </label>
-          <div class="d-flex" style="flex-direction: column; width: 100%;">
+            </label>
             <mat-form-field class="col-xl-8 col-lg-8 col-md-8 col-xs-8" appearance="outline">
               <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ'}"
               matInput="matInput" [(ngModel)]="disburseMoney" name="money" required/>
           </mat-form-field>
-          <p style="float: right; margin-left: 15px;"><b>{{ "Suggest Remaining Money:" | localize }}</b> {{calculateTotalSuggestedRemainingMoney() | number : "1.0" : "en-US"}} VNĐ</p>
-          </div>
         </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-      <button name="cancelButton" class="btn btn-default" mat-raised-button mat-dialog-close (click)="close(0)">{{l('Cancel')}}</button>
+      <button name="cancelButton" class="btn btn-default" mat-raised-button mat-dialog-close >{{l('Cancel')}}</button>
       <button name="saveButton" mat-raised-button color="primary" (click)="onSaveAndClose()"  cdkFocusInitial>{{l('Save')}}</button>
   </mat-dialog-actions>
 </form>

@@ -11,10 +11,9 @@ import { TeamBuildingRequestRoutingModule } from "./team-building-request-routin
 import { TeamBuildingRequestComponent } from "./team-building-request.component";
 import { RequestDetailComponent } from './request-detail/request-detail.component';
 import { EditRequestComponent } from './edit-request/edit-request.component';
-import { EditInvoiceMoneyComponent } from './disburse-request/edit-invoice-money/edit-invoice-money.component';
 
 @NgModule({
-    declarations: [TeamBuildingRequestComponent, DisburseRequestComponent, RequestDetailComponent, EditRequestComponent, EditInvoiceMoneyComponent],
+    declarations: [TeamBuildingRequestComponent, DisburseRequestComponent, RequestDetailComponent, EditRequestComponent],
     imports: [
       CommonModule,
       SharedModule,
@@ -29,8 +28,7 @@ import { EditInvoiceMoneyComponent } from './disburse-request/edit-invoice-money
     entryComponents: [
       DisburseRequestComponent,
       RequestDetailComponent,
-      EditRequestComponent,
-      EditInvoiceMoneyComponent
+      EditRequestComponent
     ],
     exports: [
 

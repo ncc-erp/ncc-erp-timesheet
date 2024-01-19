@@ -44,9 +44,7 @@ namespace Timesheet.APIs.RetroDetails.Dto
         public DateTime? LastModifierTime { get; set; }
         public long UserId { get; set; }
         public long? PmId { get; set; }
-        [ApplySearch]
         public string PmFullName { get; set; }
-        [ApplySearch]
         public string PmEmailAddress { get; set; }
     }
 }

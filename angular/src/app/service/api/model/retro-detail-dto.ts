@@ -156,7 +156,6 @@ export enum EnumSort {
 export enum EnumSortName {
   FullName = "fullName",
   Point = "point",
-  PmFullName = "pmFullName"
 }
 
 export enum EnumStatus {

@@ -37,10 +37,3 @@ export class PmInfoDto {
     pmFullName : string;
     pmEmailAddress : string;
 }
-
-export class CountRequestDto
-{
-    date : string ;
-    count : number;
-    type: number;
-}

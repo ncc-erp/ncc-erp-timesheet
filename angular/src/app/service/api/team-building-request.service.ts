@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 import { BaseApiService } from './base-api.service';
 import { Observable } from 'rxjs';
 import { ApiResponse } from './model/api-response.model';
-import { DisburseDto, DisburseTeamBuildingRequestInfoDto, EditOneInvoiceAmountDto, EditRequestDto, InputGetAllDetailByRequestIdDto, InputGetUserOtherProjectDto, ResponseDetailTeamBuildingHistoryDto } from '@app/modules/team-building/const/const';
+import { DisburseDto, DisburseTeamBuildingRequestInfoDto, EditRequestDto, InputGetAllDetailByRequestIdDto, InputGetUserOtherProjectDto, ResponseDetailTeamBuildingHistoryDto } from '@app/modules/team-building/const/const';
 
 
 @Injectable({
@@ -34,8 +34,8 @@ import { DisburseDto, DisburseTeamBuildingRequestInfoDto, EditOneInvoiceAmountDt
     disburseRequest(request : DisburseDto): Observable<any> {
       return this.http.post(this.rootUrl + "/DisburseRequest", request);
     }
-    getVATConfig(): Observable<ApiResponse<any>> {
-      return this.http.get<any>(this.rootUrl + "/GetVATConfig");
+    getBillPercentageConfig(): Observable<ApiResponse<any>> {
+      return this.http.get<any>(this.rootUrl + "/GetBillPercentageConfig");
     }
     getDetailOfHistory(teamBuildingHistoryId: number): Observable<ApiResponse<ResponseDetailTeamBuildingHistoryDto>> {
     return this.http.get<any>(this.rootUrl + `/GetDetailOfHistory?teamBuildingHistoryId=${teamBuildingHistoryId}` , {});
@@ -64,13 +64,5 @@ import { DisburseDto, DisburseTeamBuildingRequestInfoDto, EditOneInvoiceAmountDt
       params = params.append("teamBuildingRequestId", teamBuildingRequestId.toString());
       params = params.append("requesterId", requesterId.toString());
       return this.http.get(this.rootUrl + "/GetTeamBuildingRequestForDisburse", { params : params });
-    }
-
-    editOneInvoice(input: EditOneInvoiceAmountDto): Observable<any> {
-      return this.http.post(this.rootUrl + "/EditOneInvoice", input);
-    }
-
-    getOneInvoice(id: number): Observable<any> {
-      return this.http.get(this.rootUrl + `/GetOneInvoice?id=${id}`);
     }
   }

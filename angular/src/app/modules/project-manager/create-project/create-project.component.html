@@ -126,32 +126,6 @@
                 project when creating new user</mat-checkbox>
             </div>
           </div>
-          <div class="row row-mar-0">
-            <div class="col-md-2 col-sm-2 col-xl-2 col-lg-2" required>
-              <label>Allow Teambuilding*</label>
-            </div>
-            
-            <div class="col-md-10 col-sm-10 col-lg-10 col-xl-10">
-              <div class="row">
-                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
-                  <label class="i-check">
-                    <input type="radio" name="isAllowTeamBuilding" [value]="true" [(ngModel)]="project.isAllowTeamBuilding" (change)="isAllowTeamBuildingSelected = true">
-                    <span>Yes</span>
-                  </label>
-                </div>
-                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
-                  <label class="i-check">
-                    <input type="radio" name="isAllowTeamBuilding" [value]="false" [(ngModel)]="project.isAllowTeamBuilding" (change)="isAllowTeamBuildingSelected = true">
-                    <span>No</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          
-            <div *ngIf="!isAllowTeamBuildingSelected && project.isAllowTeamBuilding === undefined" class="text-danger">
-              Allow TeamBuilding is required!
-            </div>
-          </div>
           <div class="row row-mar-0 mr-top-20">
             <div class="col-md-2 col-sm-2 col-xl-2 col-lg-2">
               <label>Project Type*</label>

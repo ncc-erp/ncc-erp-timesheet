@@ -20,7 +20,6 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories.dto
         public RemainingMoneyStatus RemainingMoneyStatus { get; set; }
         public TeamBuildingRequestStatus Status { get; set; }
         public DateTime CreationTime { get; set; }
-        public float? InvoiceAmount { get; set; }
-        public float? VATMoney { get; set; }
+        public float InvoiceAmount { get; set; }
     }
 }

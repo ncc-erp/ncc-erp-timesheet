@@ -192,7 +192,8 @@ namespace Ncc.Entities.Enum
             SentEmail = 3,
             Rejected = -1,
             PmReviewed = 4,
-            ReOpen = 5
+            HrApproved = 5,
+            ReOpen = 6
         }
 
         public enum EnumRequest
@@ -204,10 +205,7 @@ namespace Ncc.Entities.Enum
             RemoteMorning = 5,
             RemoteAfternoon = 6,
             Tardiness = 7,
-            EarlyLeave = 8,
-            OnsiteFull = 9,
-            OnsiteMorning = 10,
-            OnsiteAfternoon = 11
+            EarlyLeave = 8
         }
 
         public enum TsStatusFilter
@@ -286,11 +284,5 @@ namespace Ncc.Entities.Enum
             Approved = 1,
             Reject = 2,
         } 
-
-        public enum ReviewInternNoteType
-        {
-            PmNote = 0,
-            InterviewerNote = 1,
-        }
     }
 }

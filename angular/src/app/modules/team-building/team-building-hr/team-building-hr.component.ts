@@ -50,7 +50,7 @@ export class TeamBuildingHrComponent
 
   TeamBuilding_DetailHR_GenerateData = PERMISSIONS_CONSTANT.TeamBuilding_DetailHR_GenerateData;
   TeamBuilding_DetailHR_Management = PERMISSIONS_CONSTANT.TeamBuilding_DetailHR_Management;
-  TeamBuilding_DetailHR_ResetData = PERMISSIONS_CONSTANT.TeamBuilding_DetailHR_ResetData;
+
   constructor(
     injector: Injector,
     private _teamBuildingHRService: TeamBuildingHRService,
@@ -275,19 +275,5 @@ export class TeamBuildingHrComponent
         this.getDataPage(pageNumber);
       }
     });
-  }
-
-  deleteData(){
-    abp.message.confirm(
-      "Delete all record ?",
-      (result: boolean) => {
-        if (result) {
-          this._teamBuildingHRService.deleteAll().subscribe(() => {
-            abp.notify.info("Deleted all record success");
-            this.refresh();
-          });
-        }
-      }
-    );
   }
 }

@@ -2121,8 +2121,6 @@ namespace Timesheet.Migrations
 
                     b.Property<long>("ReviewDetailId");
 
-                    b.Property<int>("ReviewInternNoteType");
-
                     b.HasKey("Id");
 
                     b.HasIndex("NoteByUserId");
@@ -2212,8 +2210,6 @@ namespace Timesheet.Migrations
                     b.Property<byte>("Status");
 
                     b.Property<string>("TitleRequest");
-
-                    b.Property<float?>("VATMoney");
 
                     b.HasKey("Id");
 
