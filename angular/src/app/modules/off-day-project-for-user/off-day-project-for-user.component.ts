@@ -6,7 +6,7 @@
   import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
   import { AbsenceRequestService } from '@app/service/api/absence-request.service';
   import { DayOffService } from '@app/service/api/day-off.service';
-  import { AbsenceRequestDto } from '@app/service/api/model/absence.dto';
+  import { AbsenceRequestDto, CountRequestDto } from '@app/service/api/model/absence.dto';
   import { GetProjectDto } from '@app/service/api/model/project-Dto';
   import { ProjectManagerService } from '@app/service/api/project-manager.service';
   import { AppComponentBase } from '@shared/app-component-base';
@@ -32,6 +32,7 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
   contextMenuPosition = { x: '0px', y: '0px' };
   view: CalendarView = CalendarView.Month;
   absenceRequestList: AbsenceRequestDto[] = [];
+  countRequestList: CountRequestDto [] = [];
   CalendarView = CalendarView;
   viewDate: Date = new Date();
   isEdit = true;
@@ -208,21 +209,15 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
       this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
     }
 
-    this.absenceService.getAllRequestAbsenceOfTeam(startDate, endDate, this.listProjectSelected, this.searchText, this.absentDayType, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
+    this.absenceService.getCountAllRequestAbsenceOfTeam(startDate, endDate, this.listProjectSelected, this.searchText, this.absentDayType, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
       this.isLoading = false;
-      this.absenceRequestList = res.result;
-      this.absenceRequestList.forEach(item => {
-        // for (let i = 0; i < 5; i++) {
-
+      this.countRequestList = res.result;
+      this.countRequestList.forEach(item => {
         this.events.push({
-          start: moment(item.dateAt, 'YYYY-MM-DD').toDate(),
-          end: moment(item.dateAt, 'YYYY-MM-DD').toDate(),
-          avatarFullPath: item.avatarFullPath,
-          color: { primary: item.dateType.toString() + ' | ' + item.hour, secondary: item.name },
-          meta: item.leavedayType,
-          absenceTime: item.absenceTime,
+          count: item.count,
+          date: moment(item.date, 'YYYY-MM-DD').toDate(),
+          meta: item.type
         });
-        // }
       })
       this.refresh.next();
     }, () => {
@@ -233,14 +228,17 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
 
   dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }) {
     if (!this.permission.isGranted(PERMISSIONS_CONSTANT.ViewDetailAbsenceDayOfTeam)) return;
-    const eventOfDay = this.absenceRequestList.filter(event => moment(event.dateAt, 'YYYY-MM-DD').toDate().getDate() == date.getDate() && moment(event.dateAt, 'YYYY-MM-DD').toDate().getMonth() == date.getMonth());
-    if (eventOfDay && eventOfDay.length) {
-      this.diaLog.open(PopupComponent, {
-        disableClose: true,
-        width: "1240px",
-        data: { events: eventOfDay, date: date }
-      });
-    }
+    this.absenceService.getAllRequestForUserByDay(date, this.listProjectSelected, this.searchText, this.absentDayType, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
+      this.absenceRequestList = res.result;
+      const eventOfDay = this.absenceRequestList.filter(event => moment(event.dateAt, 'YYYY-MM-DD').toDate().getDate() == date.getDate() && moment(event.dateAt, 'YYYY-MM-DD').toDate().getMonth() == date.getMonth());
+      if (eventOfDay && eventOfDay.length) {
+        this.diaLog.open(PopupComponent, {
+          disableClose: true,
+          width: "1240px",
+          data: { events: eventOfDay, date: date }
+        });
+      }
+    })
   }
 
   onExport() {
