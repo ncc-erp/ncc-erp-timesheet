@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Timesheet.APIs.MyAbsenceDays.Dto;
 using Timesheet.APIs.RequestDays.Dto;
@@ -1556,8 +1557,7 @@ namespace Timesheet.APIs.RequestDays
                 throw;
             }            
         }
-        [HttpPost]
-        public async Task<List<CountRequestDto>> GetCountRequestForUser(InputRequestDto input)
+        private async Task<Expression<Func<AbsenceDayDetail, bool>>> GetPredicate(List<long> projectIds)
         {
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
 
@@ -1566,22 +1566,14 @@ namespace Timesheet.APIs.RequestDays
                 .Select(s => s.BranchId).FirstOrDefaultAsync();
 
             var activeMemberIds = await WorkScope.GetAll<ProjectUser>()
-                .Where(s => input.projectIds.Contains(s.ProjectId))
+                .Where(s => projectIds.Contains(s.ProjectId))
                 .Where(s => s.Type != ProjectUserType.DeActive)
                 .Select(s => s.UserId).Distinct().ToListAsync();
-
-            RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
-
-            var qUser = WorkScope.All<User>().Select(s => new
-            {
-                s.Id,
-                s.FullName
-            });
 
             var predicate = PredicateBuilder.New<AbsenceDayDetail>();
             if (isViewBranch)
             {
-                if (input.projectIds.Count() > 0)
+                if (projectIds.Count() > 0)
                     predicate.And(s => (s.Request.User.BranchId == branchIdByPM && activeMemberIds.Contains(s.Request.UserId)) || activeMemberIds.Contains(s.Request.UserId));
                 else
                     predicate.And(s => s.Request.User.BranchId == branchIdByPM || activeMemberIds.Contains(s.Request.UserId));
@@ -1590,6 +1582,15 @@ namespace Timesheet.APIs.RequestDays
             {
                 predicate.And(s => activeMemberIds.Contains(s.Request.UserId));
             }
+
+            return predicate;
+        }
+
+        [HttpPost]
+        public async Task<List<CountRequestDto>> GetCountRequestForUser(InputRequestDto input)
+        {
+            RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
+            var predicate = await GetPredicate(input.projectIds);
 
             var query = from s in WorkScope.GetAll<AbsenceDayDetail>()
                 .Where(s => s.DateAt >= input.startDate)
@@ -1623,37 +1624,14 @@ namespace Timesheet.APIs.RequestDays
         [HttpPost]
         public async Task<List<GetRequestDto>> GetAllRequestForUserByDay(InputRequestDtoForDay input)
         {
-            var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
-
-            var branchIdByPM = await WorkScope.GetAll<User>()
-                .Where(s => s.Id == AbpSession.UserId)
-                .Select(s => s.BranchId).FirstOrDefaultAsync();
-
-            var activeMemberIds = await WorkScope.GetAll<ProjectUser>()
-                .Where(s => input.projectIds.Contains(s.ProjectId))
-                .Where(s => s.Type != ProjectUserType.DeActive)
-                .Select(s => s.UserId).Distinct().ToListAsync();
-
-            RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
-
             var qUser = WorkScope.All<User>().Select(s => new
             {
                 s.Id,
                 s.FullName
             });
 
-            var predicate = PredicateBuilder.New<AbsenceDayDetail>();
-            if (isViewBranch)
-            {
-                if (input.projectIds.Count() > 0)
-                    predicate.And(s => (s.Request.User.BranchId == branchIdByPM && activeMemberIds.Contains(s.Request.UserId)) || activeMemberIds.Contains(s.Request.UserId));
-                else
-                    predicate.And(s => s.Request.User.BranchId == branchIdByPM || activeMemberIds.Contains(s.Request.UserId));
-            }
-            else
-            {
-                predicate.And(s => activeMemberIds.Contains(s.Request.UserId));
-            }
+            RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
+            var predicate = await GetPredicate(input.projectIds);
 
             IQueryable<GetRequestDto> query = from s in WorkScope.GetAll<AbsenceDayDetail>()
                   .Where(s => s.DateAt == input.date)

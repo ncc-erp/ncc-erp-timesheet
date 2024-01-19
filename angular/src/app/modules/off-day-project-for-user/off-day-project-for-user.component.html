@@ -161,16 +161,20 @@
     <div class="cal-day-item">
       <ng-container *ngFor="let event of events">
         <ng-container *ngIf="event.date.getTime() === day.date.getTime()">
-          <div style="display: flex; justify-content: center; align-items: center;">
-            <div style="display: flex; padding: 10px;">
-              <span *ngIf="absentDayType.value === -1">
-                <span class="cal-day-badge text-primary day-chip-full-day mr-1" *ngIf="event.meta==0">{{ event.count }}</span>
-                <span class="cal-day-badge text-primary onsite" *ngIf="event.meta==1">{{ event.count }}</span>
-                <span class="cal-day-badge text-primary remote" *ngIf="event.meta==2">{{ event.count }}</span>
+          <div style="display: flex; ">
+            <div style="display: flex; padding: 2px">
+              <span class="cal-day-badge text-primary day-chip-full-day mr-1" *ngIf="event.meta==0" style="width: 80px;">
+                <span style="float: left">Off:</span>
+                <span style="float: right">{{ event.count }}</span>
               </span>
-              <span class="cal-day-badge text-primary day-chip-full-day mr-1" *ngIf="event.meta==0">{{ event.count }}</span>
-              <span class="cal-day-badge text-primary onsite" *ngIf="event.meta==1">{{ event.count }}</span>
-              <span class="cal-day-badge text-primary remote" *ngIf="event.meta==2">{{ event.count }}</span>
+              <span class="cal-day-badge text-primary onsite" *ngIf="event.meta==1" style="width: 80px;">
+                <span style="float: left">Onsite:</span>
+                <span style="float: right">{{ event.count }}</span>
+              </span>
+              <span class="cal-day-badge text-primary remote" *ngIf="event.meta==2" style="width: 80px;">
+                <span style="float: left">Remote:</span>
+                <span style="float: right">{{ event.count }}</span>
+              </span>
             </div>
           </div>
         </ng-container>
