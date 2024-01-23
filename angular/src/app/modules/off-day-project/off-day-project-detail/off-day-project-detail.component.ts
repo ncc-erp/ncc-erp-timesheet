@@ -1,8 +1,9 @@
 import { Component, Inject, Injector, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { AbsenceRequestService } from '@app/service/api/absence-request.service';
 import { AbsenceRequestDto } from '@app/service/api/model/absence.dto';
+import { ProjectManagerService } from '@app/service/api/project-manager.service';
 import { AppComponentBase } from '@shared/app-component-base';
 import { AppConsts } from '@shared/AppConsts';
 import * as moment from 'moment';
@@ -14,6 +15,7 @@ import * as moment from 'moment';
 })
 export class OffDayProjectDetailComponent extends AppComponentBase implements OnInit {
   APPROVAL_ABSENCE_DAY_PROJECT = PERMISSIONS_CONSTANT.ApprovalAbsenceDayByProject;
+  RELEASE_USER_FROM_PROJECT = PERMISSIONS_CONSTANT.ReleaseUser;
 
   title = "";
   events: AbsenceRequestDto[] = [];
@@ -29,6 +31,8 @@ export class OffDayProjectDetailComponent extends AppComponentBase implements On
   constructor(
     injector: Injector,
     private absenceRequest: AbsenceRequestService,
+    private projectManagerService: ProjectManagerService,
+    public dialogRef: MatDialogRef<OffDayProjectDetailComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     super(injector);
@@ -148,6 +152,23 @@ export class OffDayProjectDetailComponent extends AppComponentBase implements On
     }, (error) => {
       this.isLoading = false;
     });
+  }
+
+  onDeactiveAction(projectId: number, userId: number){
+    this.isLoading = true;
+    this.projectManagerService.releaseUserFromProject(projectId, userId).subscribe((res) => {
+      if(res){
+        this.notify.success(this.l("Deactive Successfully!"));
+        this.close();
+      }
+      this.isLoading = false;
+    }, (error) => {
+      this.isLoading = false;
+    });
+  }
+
+  close(): void {
+    this.dialogRef.close();
   }
 
 }

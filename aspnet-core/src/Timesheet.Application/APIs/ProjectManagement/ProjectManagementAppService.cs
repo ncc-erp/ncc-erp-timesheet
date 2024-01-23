@@ -519,6 +519,40 @@ namespace Timesheet.APIs.ProjectManagement
                 })
                 .ToList();
         }
+
+        [HttpPost]
+        [NccAuthentication]
+        public async System.Threading.Tasks.Task ReleaseUserFromProject(string projectCode, string userEmail)
+        {
+            var projectId = WorkScope.GetAll<Project>()
+                .Where(s => s.Code == projectCode)
+                .Select(s => s.Id)
+                .FirstOrDefault();
+
+            if (projectId == null)
+            {
+                throw new UserFriendlyException($"There is no project with code {projectCode}");
+            }
+
+            var userId = WorkScope.GetAll<User>()
+                .Where(s => s.NormalizedEmailAddress == userEmail.ToUpper())
+                .Select(s => s.Id)
+                .FirstOrDefault();
+            if (userId == null)
+            {
+                throw new UserFriendlyException($"There is no user with useremail {userEmail}");
+            }
+
+            var projectUser = WorkScope.GetAll<ProjectUser>()
+                .Where(s => s.ProjectId == projectId && s.UserId == userId)
+                .FirstOrDefault();
+            if (projectUser == null)
+            {
+                throw new UserFriendlyException($"User is not in the project with projectCode is + {projectCode}");
+            }
+            projectUser.Type = ProjectUserType.DeActive;
+            await WorkScope.UpdateAsync(projectUser);
+        }
     }
 }
 

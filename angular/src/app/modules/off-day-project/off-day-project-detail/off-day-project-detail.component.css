@@ -72,6 +72,18 @@
   color: white;
 }
 
+.deactive-button {
+  float: right;
+  margin-bottom: 8px;
+  background-color:  #F44336 !important;
+  color: white;
+  padding: 0px 5px; 
+  border-radius: 10px; 
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 2;
+}
+
 .reject-button {
   margin: 0px 5px;
   background-color: #9e9e9e;
