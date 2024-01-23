@@ -574,10 +574,9 @@ namespace Timesheet.APIs.NormalWorkingHours
                  .ToListAsync();
 
             var openTalkTaskId = await SettingManager.GetSettingValueAsync(AppSettingNames.OpenTalkTaskId);
+            var unassignedTaskId = await SettingManager.GetSettingValueAsync(AppSettingNames.UnassignedTaskId);
 
-            long opentalkTaskId = long.Parse(openTalkTaskId);
-
-            long[] listOpenTalkTaskId = new long[] { 20077, opentalkTaskId };
+            long[] listOpenTalkTaskId = new long[] { long.Parse(openTalkTaskId), long.Parse(unassignedTaskId) };
 
             var listMyTimesheet = await WorkScope.GetAll<MyTimesheet>()
                         .Where(ts=>ts.UserId == userId)
