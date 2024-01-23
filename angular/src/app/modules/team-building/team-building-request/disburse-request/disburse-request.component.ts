@@ -74,30 +74,22 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
     return hasVAT ? invoiceMoney : invoiceMoney + this.calculateVAT(invoiceMoney);
   }
 
-  // updateInvoiveStatusInDisburseInvoiceList(orderNumber : number, hasVAT : boolean) {
-  //   this.invoiceDisburseDto[orderNumber].hasVAT = hasVAT;
-  // }
-
   calculateTotalSuggestedDisburseMoney() {
-    let suggestedDisburseMoney = 0;
     let totalAmount = 0;
     let totalVAT = 0;
-    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
-      if(this.disburseTeambuildingRequestInfoDto.invoiceRequests !== undefined && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== null) {
-        this.disburseTeambuildingRequestInfoDto.invoiceRequests.forEach(item => {
-          totalAmount += item.invoiceMoney;
-          totalVAT += this.calculateTotalVAT(item.invoiceMoney, item.hasVAT);
-        })
-      }
+    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null 
+      && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== undefined && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== null) {
+      this.disburseTeambuildingRequestInfoDto.invoiceRequests.forEach(item => {
+        totalAmount += item.invoiceMoney;
+        totalVAT += this.calculateTotalVAT(item.invoiceMoney, item.hasVAT);
+      })
     }
     if(this.requestMoney <= totalAmount + totalVAT){
-      suggestedDisburseMoney = this.requestMoney - totalVAT;
+      return this.requestMoney - totalVAT;
     }
     else{
-      suggestedDisburseMoney = totalAmount + totalVAT;
+      return totalAmount + totalVAT;
     }
-    //suggestedDisburseMoney += this.disburseTeambuildingRequestInfoDto.remainingMoney;
-    return suggestedDisburseMoney;
   }
 
   calculateVAT(invoiceMoney: number){
@@ -147,29 +139,23 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
   calculateTotalSuggestedRemainingMoney() {
     let suggestedRemainingMoney = 0;
     let VATmoney = this.calculateVAT(this.invoiceAmount);
-    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
-      if(this.disburseTeambuildingRequestInfoDto.requestMoney !== undefined && this.disburseMoney > 0){
-        if(this.disburseTeambuildingRequestInfoDto.requestMoney <= this.invoiceAmount + VATmoney){
-          suggestedRemainingMoney = 0;
-        }
-        else {
-          suggestedRemainingMoney += this.requestMoney - this.disburseMoney;
-        }
+    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null
+      && this.disburseTeambuildingRequestInfoDto.requestMoney !== undefined && this.disburseMoney > 0){
+      if(this.disburseTeambuildingRequestInfoDto.requestMoney <= this.invoiceAmount + VATmoney){
+        suggestedRemainingMoney = 0;
+      }
+      else {
+        suggestedRemainingMoney += this.requestMoney - this.disburseMoney;
       }
     }
     return suggestedRemainingMoney;
   }
 
   calculateTotalVAT(invoiceMoney: number, hasVAT: boolean){
-    let totalVAT = 0;
-    if(hasVAT){
-      totalVAT += 0;
+    if(!hasVAT) {
+      return invoiceMoney - invoiceMoney/ this.VAT;
     }
-    else {
-      let VATmoney = invoiceMoney - invoiceMoney/ this.VAT;
-      totalVAT += VATmoney;
-    }
-    return totalVAT;
+    return 0;
   }
 }
 

@@ -240,15 +240,9 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
             width: "1240px",
             data: { events: eventOfDay, date: date }
           });
-          this.isLoading= false;
         }
-        else{
-          this.isLoading = false;
-        }
+        this.isLoading = false;
       })
-    }
-    else {
-      this.isLoading = false;
     }
   }
 
