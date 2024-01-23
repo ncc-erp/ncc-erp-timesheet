@@ -242,7 +242,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                 TeamBuildingRequestHistory request
             )
         {
-            if (request.RequestMoney >= request.InvoiceAmount)
+            if (request.RequestMoney > request.InvoiceAmount)
             {
                 request.DisbursedMoney = input.DisburseMoney;
                 request.VATMoney = 0;

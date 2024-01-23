@@ -228,17 +228,28 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
 
   dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }) {
     if (!this.permission.isGranted(PERMISSIONS_CONSTANT.ViewDetailAbsenceDayOfTeam)) return;
-    this.absenceService.getAllRequestForUserByDay(date, this.listProjectSelected, this.searchText, this.absentDayType, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
-      this.absenceRequestList = res.result;
-      const eventOfDay = this.absenceRequestList.filter(event => moment(event.dateAt, 'YYYY-MM-DD').toDate().getDate() == date.getDate() && moment(event.dateAt, 'YYYY-MM-DD').toDate().getMonth() == date.getMonth());
-      if (eventOfDay && eventOfDay.length) {
-        this.diaLog.open(PopupComponent, {
-          disableClose: true,
-          width: "1240px",
-          data: { events: eventOfDay, date: date }
-        });
-      }
-    })
+    const countRequestForDay = this.countRequestList.find(item => moment(item.date).isSame(date, 'day'));
+    if (countRequestForDay && countRequestForDay.count > 0) {
+      this.isLoading = true;
+      this.absenceService.getAllRequestForUserByDay(date, this.listProjectSelected, this.searchText, this.absentDayType, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
+        this.absenceRequestList = res.result;
+        const eventOfDay = this.absenceRequestList.filter(event => moment(event.dateAt, 'YYYY-MM-DD').toDate().getDate() == date.getDate() && moment(event.dateAt, 'YYYY-MM-DD').toDate().getMonth() == date.getMonth());
+        if (eventOfDay && eventOfDay.length) {
+          this.diaLog.open(PopupComponent, {
+            disableClose: true,
+            width: "1240px",
+            data: { events: eventOfDay, date: date }
+          });
+          this.isLoading= false;
+        }
+        else{
+          this.isLoading = false;
+        }
+      })
+    }
+    else {
+      this.isLoading = false;
+    }
   }
 
   onExport() {

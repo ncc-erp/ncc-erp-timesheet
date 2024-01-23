@@ -80,33 +80,24 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
 
   calculateTotalSuggestedDisburseMoney() {
     let suggestedDisburseMoney = 0;
+    let totalAmount = 0;
+    let totalVAT = 0;
     if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
       if(this.disburseTeambuildingRequestInfoDto.invoiceRequests !== undefined && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== null) {
         this.disburseTeambuildingRequestInfoDto.invoiceRequests.forEach(item => {
-          suggestedDisburseMoney += this.calculateDisburseMoney(this.requestMoney, item.invoiceMoney, item.hasVAT);
+          totalAmount += item.invoiceMoney;
+          totalVAT += this.calculateTotalVAT(item.invoiceMoney, item.hasVAT);
         })
       }
     }
+    if(this.requestMoney <= totalAmount + totalVAT){
+      suggestedDisburseMoney = this.requestMoney - totalVAT;
+    }
+    else{
+      suggestedDisburseMoney = totalAmount + totalVAT;
+    }
     //suggestedDisburseMoney += this.disburseTeambuildingRequestInfoDto.remainingMoney;
     return suggestedDisburseMoney;
-  }
-  
-  calculateDisburseMoney(requestMoney: number, invoiceMoney: number, hasVAT: boolean){  
-    let rs = 0;
-    if(hasVAT){
-      rs = invoiceMoney;
-    } 
-    else{
-      let VATmoney = this.calculateVAT(invoiceMoney);
-      if(requestMoney <= invoiceMoney + VATmoney){
-        rs = requestMoney - VATmoney;
-      }
-      else{
-        rs = invoiceMoney + VATmoney;
-      }
-    }
-
-    return rs;
   }
 
   calculateVAT(invoiceMoney: number){
@@ -167,6 +158,18 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
       }
     }
     return suggestedRemainingMoney;
+  }
+
+  calculateTotalVAT(invoiceMoney: number, hasVAT: boolean){
+    let totalVAT = 0;
+    if(hasVAT){
+      totalVAT += 0;
+    }
+    else {
+      let VATmoney = invoiceMoney - invoiceMoney/ this.VAT;
+      totalVAT += VATmoney;
+    }
+    return totalVAT;
   }
 }
 
