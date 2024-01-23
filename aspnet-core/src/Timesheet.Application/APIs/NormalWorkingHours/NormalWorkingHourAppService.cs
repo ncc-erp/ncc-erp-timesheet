@@ -575,6 +575,10 @@ namespace Timesheet.APIs.NormalWorkingHours
 
             var openTalkTaskId = await SettingManager.GetSettingValueAsync(AppSettingNames.OpenTalkTaskId);
 
+            long opentalkTaskId = long.Parse(openTalkTaskId);
+
+            long[] listOpenTalkTaskId = new long[] { 20077, opentalkTaskId };
+
             var listMyTimesheet = await WorkScope.GetAll<MyTimesheet>()
                         .Where(ts=>ts.UserId == userId)
                         .Where(ts => ts.DateAt.Year == year && ts.DateAt.Month == month)
@@ -592,7 +596,7 @@ namespace Timesheet.APIs.NormalWorkingHours
                              DayName = s.DateAt.DayOfWeek,
                              WorkingHour = s.WorkingTime,
                              DateAt = s.DateAt,
-                             IsOpenTalk = s.ProjectTask == null ? false : s.ProjectTask.Id == long.Parse(openTalkTaskId) ? true : false,
+                             IsOpenTalk = s.ProjectTask == null ? false : listOpenTalkTaskId.Contains(s.ProjectTask.Id) ? true : false,
                          }).GroupBy(s => new { s.DayName, s.DateAt })
                             .Select(x => new WorkingHourDto
                             {
