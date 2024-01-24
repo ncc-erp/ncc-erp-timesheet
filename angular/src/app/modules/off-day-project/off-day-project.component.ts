@@ -222,6 +222,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
   }
 
   refreshData() {
+    let typeAbsenceDay = this.absentDayType;
     this.updateDay();
     // this.updateListYears();
     this.events = [];
@@ -232,7 +233,13 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
       this.dayOffType = APP_CONSTANT.FILTER_DEFAULT.All;
       this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
     }
-    this.absenceService.getAllRequestAbsence(startDate, endDate, this.listProjectSelected, this.searchText, this.absentDayType, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
+
+    if(this.absentDayType === 3){
+      this.dayType = 4;
+      typeAbsenceDay = 0;
+      this.absentDayType = 3;
+    }
+    this.absenceService.getAllRequestAbsence(startDate, endDate, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
       this.isLoading = false;
       this.absenceRequestList = res.result;
       this.absenceRequestList.forEach(item => {

@@ -136,6 +136,7 @@ export const APP_CONSTANT = {
     Off: 0,
     Onsite: 1,
     Remote: 2,
+    "Đi muộn Về sớm": 3,
   },
   ListYear: [
     new Date().getFullYear() - 5,
