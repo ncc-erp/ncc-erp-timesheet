@@ -13,9 +13,9 @@
       <thead>
         <tr>
           <th>STT</th>
-          <th style="width: 200px; min-width: 200px;">User</th>
+          <th style="width: 190px; min-width: 190px;">User</th>
           <!-- <th>Sex</th> -->
-          <th style="width: 250px; min-width: 250px;">Project/PM</th>
+          <th style="width: 300px; min-width: 300px;">Project/PM</th>
           <th style="min-width: 120px;">Request</th>
           <th style="width: 136px; min-width: 136px;">Off Type</th>
           <th style="width: 160px; min-width: 160px;">Note</th>
@@ -27,7 +27,7 @@
         <tr *ngFor="let item of events, index as i">
           <td style="text-align: center;">{{i + 1}}</td>
           <td>
-            <div style="display: flex; justify-content: flex-start; align-items: center; width: 200px;">
+            <div style="display: flex; justify-content: flex-start; align-items: center; width: 190px;">
               <div>
                 <button [name]="'viewByAvatarBtn-'+item.userId" class="btn-route" mat-dialog-close [routerLink]="['app/main/leave-day-of-user/', item.userId]">
                   <img style="max-width: 40px;min-width: 40px; height: 40px; border-radius: 50%;"
@@ -69,7 +69,7 @@
               </div>
             </div>
           </td>
-          <td style="text-align: left;">
+          <td style="text-align: left; padding: 8px 20px;">
             <div *ngFor="let projectItem of item.projectInfos">
               <div class="row" style="margin-top: 5px;">
                 <b>{{projectItem.projectName}}</b>

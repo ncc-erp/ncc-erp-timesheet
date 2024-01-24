@@ -1,3 +1,8 @@
+
+td {
+  border-right: 1px solid #ccc;
+}
+
 .table th {
   text-align: center;
 }
@@ -75,7 +80,7 @@
 .deactive-button {
   float: right;
   margin-bottom: 8px;
-  background-color:  #F44336 !important;
+  background-color:  #9e9e9e !important;
   color: white;
   padding: 0px 5px; 
   border-radius: 10px; 
@@ -105,7 +110,7 @@
 
 td.note {
   text-align: justify;
-  width: 210px;
+  width: 190px;
 }
 
 .day-chip-tardiness-leave-early {
