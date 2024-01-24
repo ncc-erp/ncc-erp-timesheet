@@ -74,39 +74,22 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
     return hasVAT ? invoiceMoney : invoiceMoney + this.calculateVAT(invoiceMoney);
   }
 
-  // updateInvoiveStatusInDisburseInvoiceList(orderNumber : number, hasVAT : boolean) {
-  //   this.invoiceDisburseDto[orderNumber].hasVAT = hasVAT;
-  // }
-
   calculateTotalSuggestedDisburseMoney() {
-    let suggestedDisburseMoney = 0;
-    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
-      if(this.disburseTeambuildingRequestInfoDto.invoiceRequests !== undefined && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== null) {
-        this.disburseTeambuildingRequestInfoDto.invoiceRequests.forEach(item => {
-          suggestedDisburseMoney += this.calculateDisburseMoney(this.requestMoney, item.invoiceMoney, item.hasVAT);
-        })
-      }
+    let totalAmount = 0;
+    let totalVAT = 0;
+    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null 
+      && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== undefined && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== null) {
+      this.disburseTeambuildingRequestInfoDto.invoiceRequests.forEach(item => {
+        totalAmount += item.invoiceMoney;
+        totalVAT += this.calculateTotalVAT(item.invoiceMoney, item.hasVAT);
+      })
     }
-    //suggestedDisburseMoney += this.disburseTeambuildingRequestInfoDto.remainingMoney;
-    return suggestedDisburseMoney;
-  }
-  
-  calculateDisburseMoney(requestMoney: number, invoiceMoney: number, hasVAT: boolean){  
-    let rs = 0;
-    if(hasVAT){
-      rs = invoiceMoney;
-    } 
+    if(this.requestMoney <= totalAmount + totalVAT){
+      return this.requestMoney - totalVAT;
+    }
     else{
-      let VATmoney = this.calculateVAT(invoiceMoney);
-      if(requestMoney <= invoiceMoney + VATmoney){
-        rs = requestMoney - VATmoney;
-      }
-      else{
-        rs = invoiceMoney + VATmoney;
-      }
+      return totalAmount + totalVAT;
     }
-
-    return rs;
   }
 
   calculateVAT(invoiceMoney: number){
@@ -156,17 +139,23 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
   calculateTotalSuggestedRemainingMoney() {
     let suggestedRemainingMoney = 0;
     let VATmoney = this.calculateVAT(this.invoiceAmount);
-    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
-      if(this.disburseTeambuildingRequestInfoDto.requestMoney !== undefined && this.disburseMoney > 0){
-        if(this.disburseTeambuildingRequestInfoDto.requestMoney <= this.invoiceAmount + VATmoney){
-          suggestedRemainingMoney = 0;
-        }
-        else {
-          suggestedRemainingMoney += this.requestMoney - this.disburseMoney;
-        }
+    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null
+      && this.disburseTeambuildingRequestInfoDto.requestMoney !== undefined && this.disburseMoney > 0){
+      if(this.disburseTeambuildingRequestInfoDto.requestMoney <= this.invoiceAmount + VATmoney){
+        suggestedRemainingMoney = 0;
+      }
+      else {
+        suggestedRemainingMoney += this.requestMoney - this.disburseMoney;
       }
     }
     return suggestedRemainingMoney;
+  }
+
+  calculateTotalVAT(invoiceMoney: number, hasVAT: boolean){
+    if(!hasVAT) {
+      return invoiceMoney - invoiceMoney/ this.VAT;
+    }
+    return 0;
   }
 }
 
