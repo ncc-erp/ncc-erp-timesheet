@@ -219,7 +219,9 @@
                             </th>
                             <th (click)="toggleSort('countMonthLevelMax')">
                                 <span>
-                                    {{ "Count Month Level Max" | localize}}
+                                    {{ "Count Month"}}
+                                    <br>
+                                    {{ "Max Level" | localize }}
                                     <mat-icon>unfold_more</mat-icon>
                                 </span>
                             </th>
@@ -390,12 +392,12 @@
                             </td>
                             <!-- Review Content -->
                             <td>
-                                <div >
+                                <div (click)="toggleHideNote(item)">
                                     <p [ngClass]="item.hideNote == false ? 'preReview' : 'review'"
                                         title=" Click để mở rộng nội dung"
                                         name="reviewContent" [innerHTML]="formatNoteContent(item.note)">
                                     </p>
-                                    <mat-icon *ngIf="getLineReviewContentCount(item.note) > 3" style="padding: 5px 0px 0px 10px; cursor: pointer" (click)="toggleHideNote(item)">more_horiz
+                                    <mat-icon *ngIf="getLineReviewContentCount(item.note) > 3" style="padding: 5px 0px 0px 10px; cursor: pointer">more_horiz
                                     </mat-icon>
                                 </div>
                             </td>
