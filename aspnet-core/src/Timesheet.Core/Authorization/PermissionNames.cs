@@ -188,6 +188,7 @@ namespace Ncc.Authorization
         public const string Project_ViewDetail = "Project.ViewDetail";
         public const string Project_Export = "Project.Export";
         public const string Project_Edit_Team_WorkType = "Project.EditTeamWorkType";
+        public const string Project_Realease_User = "Project.ReleaseUser";
 
         public const string MyTimesheet = "MyTimesheet";
         public const string MyTimesheet_View = "MyTimesheet.View";
@@ -528,6 +529,7 @@ namespace Ncc.Authorization
                     PermissionNames.Project_ViewDetail,
                     PermissionNames.Project_Export,
                     PermissionNames.Project_Edit_Team_WorkType,
+                    PermissionNames.Project_Realease_User,
                     PermissionNames.MyTimesheet,
                     PermissionNames.MyTimesheet_View,
                     PermissionNames.MyTimesheet_AddNew,
@@ -794,6 +796,7 @@ namespace Ncc.Authorization
                     PermissionNames.Project_UpdateDefaultProjectTask,
                     PermissionNames.Project_ViewDetail,
                     PermissionNames.Project_Export,
+                    PermissionNames.Project_Realease_User,
                     PermissionNames.MyTimesheet,
                     PermissionNames.MyTimesheet_View,
                     PermissionNames.MyTimesheet_AddNew,
@@ -1022,6 +1025,7 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Project_UpdateDefaultProjectTask, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Set default project task" },
             new SystemPermission{ Name =  PermissionNames.Project_Edit_Team_WorkType, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit Team Work Type (Temp/Official)" },
             new SystemPermission{ Name =  PermissionNames.Project_Export, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Export excel" },
+            new SystemPermission{ Name =  PermissionNames.Project_Realease_User, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Release User From Project"},
             new SystemPermission{ Name =  PermissionNames.MyTimesheet, MultiTenancySides = MultiTenancySides.Host , DisplayName = "My timesheets" },
             new SystemPermission{ Name =  PermissionNames.MyTimesheet_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View my timesheet by day/week" },
             new SystemPermission{ Name =  PermissionNames.MyTimesheet_AddNew, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add new timesheet" },
@@ -1567,6 +1571,7 @@ namespace Ncc.Authorization
                     new SystemPermission{ Name =  PermissionNames.Project_ViewDetail, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View detail of project" },
                     new SystemPermission{ Name =  PermissionNames.Project_Export, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Export excel" },
                     new SystemPermission{ Name =  PermissionNames.Project_Edit_Team_WorkType, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit Team Work Type (Temp/Official)" },
+                    new SystemPermission{ Name =  PermissionNames.Project_Realease_User, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Release User From Project"}
                 }
             },
             new SystemPermission{ Name =  PermissionNames.MyProfile, MultiTenancySides = MultiTenancySides.Host , DisplayName = "My profile",

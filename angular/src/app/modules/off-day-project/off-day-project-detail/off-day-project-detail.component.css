@@ -1,3 +1,8 @@
+
+td {
+  border-right: 1px solid #ccc;
+}
+
 .table th {
   text-align: center;
 }
@@ -72,6 +77,18 @@
   color: white;
 }
 
+.deactive-button {
+  float: right;
+  margin-bottom: 8px;
+  background-color:  #9e9e9e !important;
+  color: white;
+  padding: 0px 5px; 
+  border-radius: 10px; 
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 2;
+}
+
 .reject-button {
   margin: 0px 5px;
   background-color: #9e9e9e;
@@ -93,7 +110,7 @@
 
 td.note {
   text-align: justify;
-  width: 210px;
+  width: 190px;
 }
 
 .day-chip-tardiness-leave-early {

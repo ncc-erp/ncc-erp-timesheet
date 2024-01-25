@@ -138,6 +138,7 @@ export const PERMISSIONS_CONSTANT = {
     ExportExcelProject: "Project.Export",
     UpdateDefaultProjectTask: "Project.UpdateDefaultProjectTask",
     EditTypeWork: "Project.EditTeamWorkType",
+    ReleaseUser: "Project.ReleaseUser",
 
     //my timesheet
     AddMyTimesheet: "MyTimesheet.AddNew",
