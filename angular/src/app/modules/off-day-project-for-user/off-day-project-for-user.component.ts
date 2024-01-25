@@ -198,6 +198,7 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
   }
 
   refreshData() {
+    let typeAbsenceDay = this.absentDayType;
     this.updateDay();
     // this.updateListYears();
     this.events = [];
@@ -208,8 +209,12 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
       this.dayOffType = APP_CONSTANT.FILTER_DEFAULT.All;
       this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
     }
-
-    this.absenceService.getCountAllRequestAbsenceOfTeam(startDate, endDate, this.listProjectSelected, this.searchText, this.absentDayType, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
+    if(this.absentDayType === 3){
+      this.dayType = 4;
+      typeAbsenceDay = 0;
+      this.absentDayType = 3;
+    }
+    this.absenceService.getCountAllRequestAbsenceOfTeam(startDate, endDate, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
       this.isLoading = false;
       this.countRequestList = res.result;
       this.countRequestList.forEach(item => {
@@ -227,11 +232,17 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
   }
 
   dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }) {
+    let typeAbsenceDay = this.absentDayType;
+    if(this.absentDayType === 3){
+      this.dayType = 4;
+      typeAbsenceDay = 0;
+      this.absentDayType = 3;
+    }
     if (!this.permission.isGranted(PERMISSIONS_CONSTANT.ViewDetailAbsenceDayOfTeam)) return;
     const countRequestForDay = this.countRequestList.find(item => moment(item.date).isSame(date, 'day'));
     if (countRequestForDay && countRequestForDay.count > 0) {
       this.isLoading = true;
-      this.absenceService.getAllRequestForUserByDay(date, this.listProjectSelected, this.searchText, this.absentDayType, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
+      this.absenceService.getAllRequestForUserByDay(date, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
         this.absenceRequestList = res.result;
         const eventOfDay = this.absenceRequestList.filter(event => moment(event.dateAt, 'YYYY-MM-DD').toDate().getDate() == date.getDate() && moment(event.dateAt, 'YYYY-MM-DD').toDate().getMonth() == date.getMonth());
         if (eventOfDay && eventOfDay.length) {

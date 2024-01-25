@@ -312,6 +312,7 @@
     <div>
       <span>Remain money: <b>{{ lastRemainMoney | currency : "VND" : "" }}</b></span>
       <span style="margin-left: 100px;">Total money: <b>{{ getTotalMoney() + lastRemainMoney | currency : "VND" : ""}}</b></span>
+      <span *ngIf="error" style="color: red; margin-left: 45px; font-weight: 1000; font-size: 19px;">All invoices must have (not) VAT</span>
     </div>
     <div>
       <button class="btn btn-default" mat-raised-button mat-dialog-close name="cancelButton">

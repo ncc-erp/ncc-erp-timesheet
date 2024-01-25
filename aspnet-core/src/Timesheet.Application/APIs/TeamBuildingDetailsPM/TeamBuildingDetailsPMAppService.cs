@@ -7,6 +7,7 @@ using Abp.Domain.Uow;
 using Abp.Extensions;
 using Abp.Linq.Extensions;
 using Abp.UI;
+using DocumentFormat.OpenXml.VariantTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ncc;
@@ -338,6 +339,13 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
                 throw new UserFriendlyException("Invoice Request cannot be null!");
 
             List<InvoiceRequestDto> invoiceRequestDtos = pMRequestDto.ListInvoiceRequestDto;
+
+            bool hasDifferentIsVAT = invoiceRequestDtos.Select(i => i.HasVat).Distinct().Count() > 1;
+
+            if(invoiceRequestDtos.Count() >= 2 && hasDifferentIsVAT)
+            {
+                throw new UserFriendlyException(string.Format("All invoices must have (not) VAT"));
+            }
 
             foreach (InvoiceRequestDto invoiceRequest in invoiceRequestDtos)
             {

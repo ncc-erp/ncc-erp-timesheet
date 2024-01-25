@@ -4,6 +4,8 @@ using Abp.Configuration;
 using Abp.Domain.Uow;
 using Abp.Linq.Extensions;
 using Abp.UI;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
 using MassTransit.Initializers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -159,7 +161,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
             {
                 if (item.IsVAT == false && item.InvoiceAmount.HasValue)
                 {
-                    totalVAT += item.InvoiceAmount.Value - (item.InvoiceAmount.Value / (1 + VAT/100f));
+                    totalVAT += item.InvoiceAmount.Value * VAT/100f;
                 }
             }
 
@@ -266,22 +268,24 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                 float totalVAT
             )
         {
-            float totalInvoiceAndVAT = request.InvoiceAmount.Value + totalVAT;
+            float VAT = GetVATConfig()/100f;
+            float InvoiceAmountAfterTaxing = (float)(request.InvoiceAmount + totalVAT);
 
-            if (request.RequestMoney <= totalInvoiceAndVAT)
+            if(request.RequestMoney > InvoiceAmountAfterTaxing)
             {
                 request.DisbursedMoney = input.DisburseMoney;
                 request.VATMoney = totalVAT;
-                request.RemainingMoney = 0;
-                request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
+                request.RemainingMoney = request.RequestMoney - InvoiceAmountAfterTaxing;
+                request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
                 request.Status = TeamBuildingRequestStatus.Done;
             }
             else
             {
-                request.DisbursedMoney = input.DisburseMoney;
-                request.VATMoney = totalVAT;
-                request.RemainingMoney = request.RequestMoney - input.DisburseMoney;
-                request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
+                float VATmoney = (float)(request.RequestMoney - request.RequestMoney / (1 + VAT));
+                request.DisbursedMoney = (float)(request.RequestMoney / (1 + VAT));
+                request.VATMoney = VATmoney;
+                request.RemainingMoney = 0;
+                request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
                 request.Status = TeamBuildingRequestStatus.Done;
             }
         }

@@ -38,32 +38,37 @@
                   <th style="width: 40%;">
                     Invoice Amount After Taxing
                   </th>
+                  <th>
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let invoice of this.disburseTeambuildingRequestInfoDto.invoiceRequests; let i = index">
                   <td>
-                    <span>Invoice #{{i + 1}}</span>
+                    <span> #{{i + 1}}</span>
                   </td>
-                  <td class="d-flex" style="align-items: center;">
+                  <td>
                     <span>{{invoice.invoiceMoney | number : "1.0" : "en-US"}} VNĐ</span>
-                        <mat-icon color="primary" style="cursor: pointer; margin-left: 10px; font-size: 24px;"
-                        (click)="editOneInvoice(invoice.invoiceId);$event.stopPropagation()">edit</mat-icon>
                   </td>
                   <td>
                     <a target="_blank" href="{{invoice.invoiceResourceUrl}}">{{invoice.invoiceResourceName}}</a>
                   </td>
                   <td>
-                    <mat-icon *ngIf="invoice.hasVAT">check_box</mat-icon>
-                    <mat-icon *ngIf="!invoice.hasVAT">check_box_outline_blank</mat-icon>
+                    <mat-icon *ngIf="invoice.hasVAT">done</mat-icon>
+                    <mat-icon *ngIf="!invoice.hasVAT"></mat-icon>
                   </td>
                   <td>
                     <span *ngIf="invoice.hasVAT">0</span>
-                    <span *ngIf="!invoice.hasVAT">{{calculateVAT(invoice.invoiceMoney)}}</span>
+                    <span *ngIf="!invoice.hasVAT">{{calculateVAT(invoice.invoiceMoney) | number : "1.0" : "en-US"}}</span>
                     
                   </td>
                   <td>
                     <p>{{calculateInvoiceAmountAfterTaxing(invoice.invoiceMoney, invoice.hasVAT) | number : "1.0" : "en-US"}} VNĐ</p>
+                  </td>
+                  <td>
+                    <mat-icon color="primary" style="cursor: pointer; margin-left: 10px; font-size: 24px;"
+                    (click)="editOneInvoice(invoice.invoiceId);$event.stopPropagation()">edit</mat-icon>
                   </td>
                 </tr>
               </tbody>
@@ -88,7 +93,7 @@
             <mat-form-field class="col-xl-8 col-lg-8 col-md-8 col-xs-8" appearance="outline">
               <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ'}"
               matInput="matInput" [(ngModel)]="disburseMoney" name="money" required/>
-          </mat-form-field>
+            </mat-form-field>
           <p style="float: right; margin-left: 15px;"><b>{{ "Suggest Remaining Money:" | localize }}</b> {{calculateTotalSuggestedRemainingMoney() | number : "1.0" : "en-US"}} VNĐ</p>
           </div>
         </div>
