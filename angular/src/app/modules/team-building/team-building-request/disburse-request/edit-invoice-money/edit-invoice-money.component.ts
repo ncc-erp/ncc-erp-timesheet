@@ -29,9 +29,9 @@ export class EditInvoiceMoneyComponent extends AppComponentBase implements OnIni
   }
 
   getOneInvoice() {
-    
     this.teamBuildingRequestService.getOneInvoice(this.invoiceId).subscribe((res) => {
       this.invoiceInfo = res.result;
+      this.invoiceAmount = res.result.invoiceAmount;
       this.hasVAT = this.invoiceInfo.hasVAT;
     })
   }
