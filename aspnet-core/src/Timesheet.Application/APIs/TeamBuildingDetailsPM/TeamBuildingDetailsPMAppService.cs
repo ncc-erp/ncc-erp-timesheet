@@ -413,9 +413,9 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
                 throw new UserFriendlyException($"Total money greater than in Invoice amount {float.Parse(strTeamBuildingMoney)} VNĐ");
             }
 
-            if(!hasInvoiceWithVat)
+            if (!hasInvoiceWithVat)
             {
-                var vatMoney = pMRequestDto.InvoiceAmount - (pMRequestDto.InvoiceAmount / 1.1);
+                var vatMoney = pMRequestDto.InvoiceAmount * 0.1;
                 var invoiceAndVat = (pMRequestDto.InvoiceAmount + vatMoney) * 1.1;
                 if (totalMoney > invoiceAndVat)
                 {

@@ -80,21 +80,11 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
 
   calculateTotalSuggestedDisburseMoney() {
     let totalVAT = this.calculateTotalVAT();
-    if(totalVAT === 0){
-      if(this.requestMoney > this.invoiceAmount){
-        return this.invoiceAmount;
-      }
-      else{
-        return this.requestMoney;
-      }
+    if(this.requestMoney > this.invoiceAmount + totalVAT){
+      return this.invoiceAmount;
     }
     else{
-      if(this.requestMoney > this.invoiceAmount + totalVAT){
-        return this.invoiceAmount;
-      }
-      else{
-        return Math.round(this.requestMoney / (1 + this.VAT));
-      }
+      return Math.round(this.requestMoney / (1 + (totalVAT === 0 ? 0 : this.VAT)));
     }
   }
 
