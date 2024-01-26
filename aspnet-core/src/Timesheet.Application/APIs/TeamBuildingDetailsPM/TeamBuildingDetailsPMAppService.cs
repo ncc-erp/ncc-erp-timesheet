@@ -413,13 +413,16 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
                 throw new UserFriendlyException($"Total money greater than in Invoice amount {float.Parse(strTeamBuildingMoney)} VNĐ");
             }
 
+            var strVAT = SettingManager.GetSettingValueForApplication(AppSettingNames.VAT);
+            float VAT = float.TryParse(strVAT, out VAT) ? VAT : 10f;
+
             if (!hasInvoiceWithVat)
             {
-                var vatMoney = pMRequestDto.InvoiceAmount * 0.1;
-                var invoiceAndVat = (pMRequestDto.InvoiceAmount + vatMoney) * 1.1;
+                var vatMoney = pMRequestDto.InvoiceAmount * (VAT/100f);
+                var invoiceAndVat = (pMRequestDto.InvoiceAmount + vatMoney) * (1 + VAT/100f);
                 if (totalMoney > invoiceAndVat)
                 {
-                    throw new UserFriendlyException($"Total money greater than in Invoice amount and VAT money: {(pMRequestDto.InvoiceAmount + vatMoney) * 0.1} VNĐ");
+                    throw new UserFriendlyException($"Total money greater than in Invoice amount and VAT money: {(pMRequestDto.InvoiceAmount + vatMoney) * (VAT/100f)} VNĐ");
                 }
             }
             
