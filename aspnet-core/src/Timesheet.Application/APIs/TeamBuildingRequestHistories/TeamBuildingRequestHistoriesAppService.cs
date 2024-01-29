@@ -148,22 +148,11 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
             var listRequestByRequesterIdWithoutLast = listRequestByRequesterId.Take(listRequestByRequesterId.Count() - 1).ToList();
             var listInvoice = WorkScope.GetAll<TeamBuildingRequestHistoryFile>()
                 .Where(s => s.TeamBuildingRequestHistoryId == input.RequestId)
-                .Select(s => new
+                .Select(s => new TeamBuildingRequestHistoryFileDTO
                 {
-                    s.InvoiceAmount,
-                    s.IsVAT
+                    InvoiceAmount= s.InvoiceAmount,
+                    IsVAT= s.IsVAT
                 }).ToList();
-
-            float VAT = GetVATConfig();
-            float totalVAT = 0;
-
-            foreach (var item in listInvoice)
-            {
-                if (item.IsVAT == false && item.InvoiceAmount.HasValue)
-                {
-                    totalVAT += item.InvoiceAmount.Value * VAT/100f;
-                }
-            }
 
             if (input.InvoiceDisburseList.IsNullOrEmpty())
             {
@@ -189,19 +178,42 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
             {
                 throw new UserFriendlyException(string.Format("Disbursement money cannot be more than request money"));
             }
-            else if (listInvoice.Count() > 1 && listInvoice.Select(i => i.IsVAT).Distinct().Count() > 1)
-            {
-                throw new UserFriendlyException(string.Format("All invoices must have (not) VAT"));
-            }
             else
             {
-                if (totalVAT == 0)
+
+                float VAT = GetVATConfig() / 100f;
+                float totalVAT = 0;
+                float totalInvoiceAmountNoVAT = 0;
+                float totalInvoiceAmountVAT = 0;
+
+                foreach (var item in listInvoice)
                 {
-                    DisburseRequestVAT(input, request);
+                    if (item.IsVAT == false && item.InvoiceAmount.HasValue)
+                    {
+                        totalVAT += item.InvoiceAmount.Value * VAT;
+                        totalInvoiceAmountNoVAT += item.InvoiceAmount.Value;
+                    }
+                }
+                totalInvoiceAmountVAT = request.InvoiceAmount.Value - totalInvoiceAmountNoVAT;
+
+                float InvoiceAmountAfterTaxing = (float)(totalInvoiceAmountNoVAT * (1 + VAT)) + totalInvoiceAmountVAT;
+
+                if (request.RequestMoney > InvoiceAmountAfterTaxing)
+                {
+                    request.DisbursedMoney = input.DisburseMoney;
+                    request.VATMoney = totalVAT;
+                    request.RemainingMoney = request.RequestMoney - InvoiceAmountAfterTaxing;
+                    request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
+                    request.Status = TeamBuildingRequestStatus.Done;
                 }
                 else
                 {
-                    DisburseRequestNotVAT(input, request, totalVAT);
+                    float totalRequestMoneyForNoVAT = request.RequestMoney - totalInvoiceAmountVAT;
+                    request.DisbursedMoney = (totalVAT == 0 || totalInvoiceAmountVAT > request.RequestMoney) ? request.RequestMoney : (float)(totalRequestMoneyForNoVAT / (1 + VAT)) + totalInvoiceAmountVAT;
+                    request.VATMoney = (totalVAT == 0 || totalInvoiceAmountVAT > request.RequestMoney) ? 0: (float)(totalRequestMoneyForNoVAT - totalRequestMoneyForNoVAT / (1 + VAT)); 
+                    request.RemainingMoney = 0;
+                    request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
+                    request.Status = TeamBuildingRequestStatus.Done;
                 }
 
                 var listTeamBuildingDetail = WorkScope.GetAll<TeamBuildingDetail>()
@@ -242,57 +254,6 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
             }
         }
 
-        private void DisburseRequestVAT
-            (
-                DisburseTeamBuildingRequestDto input,
-                TeamBuildingRequestHistory request
-            )
-        {
-            if (request.RequestMoney > request.InvoiceAmount)
-            {
-                request.DisbursedMoney = input.DisburseMoney;
-                request.VATMoney = 0;
-                request.RemainingMoney = request.RequestMoney - input.DisburseMoney;
-                request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
-                request.Status = TeamBuildingRequestStatus.Done;
-            }
-            else
-            {
-                request.DisbursedMoney = input.DisburseMoney;
-                request.VATMoney = 0;
-                request.RemainingMoney = 0;
-                request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
-                request.Status = TeamBuildingRequestStatus.Done;
-            }
-        }
-
-        private async void DisburseRequestNotVAT(
-                DisburseTeamBuildingRequestDto input,
-                TeamBuildingRequestHistory request,
-                float totalVAT
-            )
-        {
-            float VAT = GetVATConfig()/100f;
-            float InvoiceAmountAfterTaxing = (float)(request.InvoiceAmount + totalVAT);
-
-            if(request.RequestMoney > InvoiceAmountAfterTaxing)
-            {
-                request.DisbursedMoney = input.DisburseMoney;
-                request.VATMoney = totalVAT;
-                request.RemainingMoney = request.RequestMoney - InvoiceAmountAfterTaxing;
-                request.RemainingMoneyStatus = RemainingMoneyStatus.Remaining;
-                request.Status = TeamBuildingRequestStatus.Done;
-            }
-            else
-            {
-                float VATmoney = (float)(request.RequestMoney - request.RequestMoney / (1 + VAT));
-                request.DisbursedMoney = (float)(request.RequestMoney / (1 + VAT));
-                request.VATMoney = VATmoney;
-                request.RemainingMoney = 0;
-                request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
-                request.Status = TeamBuildingRequestStatus.Done;
-            }
-        }
 
         [HttpPost]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.TeamBuilding_Request_RejectRequest)]

@@ -340,13 +340,6 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
 
             List<InvoiceRequestDto> invoiceRequestDtos = pMRequestDto.ListInvoiceRequestDto;
 
-            bool hasDifferentIsVAT = invoiceRequestDtos.Select(i => i.HasVat).Distinct().Count() > 1;
-
-            if(invoiceRequestDtos.Count() >= 2 && hasDifferentIsVAT)
-            {
-                throw new UserFriendlyException(string.Format("All invoices must have (not) VAT"));
-            }
-
             foreach (InvoiceRequestDto invoiceRequest in invoiceRequestDtos)
             {
                 if (invoiceRequest.InvoiceUrl.IsNullOrEmpty() && invoiceRequest.InvoiceImageName.IsNullOrEmpty())

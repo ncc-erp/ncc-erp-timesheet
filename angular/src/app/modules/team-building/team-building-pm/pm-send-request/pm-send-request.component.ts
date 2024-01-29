@@ -279,8 +279,7 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
             this.dialogRef.close(true);
           }
         },
-        (error) => {
-          this.error = true;
+        () => {
           this.saving = false
         }
       );

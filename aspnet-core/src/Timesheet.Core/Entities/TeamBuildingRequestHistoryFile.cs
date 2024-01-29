@@ -15,4 +15,9 @@ namespace Timesheet.Entities
         public float? InvoiceAmount { get; set; }
         public bool? IsVAT { get; set; }
     }
+    public class TeamBuildingRequestHistoryFileDTO
+    {
+        public float? InvoiceAmount { get; set; }
+        public bool? IsVAT { get; set; }
+    }
 }
