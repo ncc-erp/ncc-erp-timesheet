@@ -949,14 +949,12 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
                 status: this.listReviewIntern[index].status
             });
         }
-    } else {
-        if (itemIndex !== -1) {
-            this.listSelectedItem.splice(itemIndex, 1);
-        }
-    }
-      this.updateAllComplete();
-      this.checkSelectedCheckbox();
-    }
+      } else if(itemIndex !== -1){
+          this.listSelectedItem.splice(itemIndex, 1);
+      }
+        this.updateAllComplete();
+        this.checkSelectedCheckbox();
+      }
   }
 
   checkSelectedCheckbox() {
