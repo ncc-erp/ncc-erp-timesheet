@@ -189,6 +189,10 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
             {
                 throw new UserFriendlyException(string.Format("Disbursement money cannot be more than request money"));
             }
+            else if (listInvoice.Count() > 1 && listInvoice.Select(i => i.IsVAT).Distinct().Count() > 1)
+            {
+                throw new UserFriendlyException(string.Format("All invoices must have (not) VAT"));
+            }
             else
             {
                 if (totalVAT == 0)
