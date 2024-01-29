@@ -79,12 +79,18 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
   }
 
   calculateTotalSuggestedDisburseMoney() {
-    let totalVAT = this.calculateTotalVAT();
+    let totalInvoiceAmountVAT = 0;
+    let totalInvoiceAmountNoVAT = this.calculateTotalVAT().totalInvoiceAmountNoVAT;
+    let totalVAT = this.calculateTotalVAT().totalVAT;
     if(this.requestMoney > this.invoiceAmount + totalVAT){
       return this.invoiceAmount;
     }
     else{
-      return Math.round(this.requestMoney / (1 + (totalVAT === 0 ? 0 : this.VAT)));
+      totalInvoiceAmountVAT = this.invoiceAmount - totalInvoiceAmountNoVAT;
+        return (totalVAT === 0 || totalInvoiceAmountVAT > this.requestMoney)
+            ? this.requestMoney
+            : Math.round(totalInvoiceAmountVAT + (this.requestMoney - totalInvoiceAmountVAT) / (1 + this.VAT));
+      // return Math.round(this.requestMoney / (1 + (totalVAT === 0 ? 0 : this.VAT)));
     }
   }
 
@@ -94,15 +100,17 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
   
   calculateTotalVAT(){
     let totalVAT = 0;
+    let totalInvoiceAmountNoVAT = 0;
     if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null 
       && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== undefined && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== null) {
       this.disburseTeambuildingRequestInfoDto.invoiceRequests.forEach(item => {
         if(!item.hasVAT){
           totalVAT += Math.round(item.invoiceMoney * this.VAT);
+          totalInvoiceAmountNoVAT += item.invoiceMoney;
         }
       })
     }
-    return totalVAT;
+    return {totalVAT, totalInvoiceAmountNoVAT};
   }
 
   close(res): void {
@@ -146,7 +154,7 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
   }
 
   calculateTotalSuggestedRemainingMoney() {
-    let totalVAT = this.calculateTotalVAT();
+    let totalVAT = this.calculateTotalVAT().totalVAT;
     if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null
       && this.disburseTeambuildingRequestInfoDto.requestMoney !== undefined && this.disburseMoney > 0){
       if(this.disburseTeambuildingRequestInfoDto.requestMoney <= this.invoiceAmount + totalVAT){
