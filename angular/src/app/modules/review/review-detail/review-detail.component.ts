@@ -44,7 +44,6 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   ReviewIntern_ReviewDetail_Update = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_Update
   ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern
   ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern
-  ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern
   ReviewIntern_ReviewDetail_CreatePMNote = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreatePMNote
   ReviewIntern_ReviewDetail_CreateInterviewNote = PERMISSIONS_CONSTANT.ReviewIntern_ReviewDetail_CreateInterviewNote
 
@@ -931,7 +930,6 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   }
 
   handleSelectlistReviewInternItem(index, $event) {
-    console.log("item", this.listReviewIntern[index]);
     if (index != undefined && this.listReviewIntern[index]) {
       this.listReviewIntern[index].selected = $event.checked;
   
@@ -939,20 +937,23 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
         this.listSelectedItem = [];
       }
   
-      const item = this.listSelectedItem.find(
-        (item) => item.id == this.listReviewIntern[index].id
-      );
-  
-      if (item) {
-        item.selected = $event.checked;
-      } else {
-        this.listSelectedItem.push({
-          selected: $event.checked,
-          id: this.listReviewIntern[index].id,
-          status: this.listReviewIntern[index].status
-        });
-      }
-  
+      const itemIndex = this.listSelectedItem.findIndex(item => item.id === this.listReviewIntern[index].id);
+
+      if ($event.checked) {
+        if (itemIndex !== -1) {
+            this.listSelectedItem[itemIndex].selected = $event.checked;
+        } else {
+            this.listSelectedItem.push({
+                selected: $event.checked,
+                id: this.listReviewIntern[index].id,
+                status: this.listReviewIntern[index].status
+            });
+        }
+    } else {
+        if (itemIndex !== -1) {
+            this.listSelectedItem.splice(itemIndex, 1);
+        }
+    }
       this.updateAllComplete();
       this.checkSelectedCheckbox();
     }
@@ -1004,6 +1005,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
       this.reviewDetailService.headPmVerifyOrRejectAll(this.listHeadPmVerify).subscribe(
         (rs) => {
           abp.notify.success(messageSuccessfully);
+          this.listSelectedItem = [];
           this.saving = false;
           this.refresh();
         }

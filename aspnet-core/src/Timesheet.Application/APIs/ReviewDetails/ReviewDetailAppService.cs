@@ -616,14 +616,14 @@ namespace Timesheet.APIs.ReviewDetails
         public async System.Threading.Tasks.Task Approve(long Id)
         {
             var detail = await WorkScope.GetAsync<ReviewDetail>(Id);
-            if (detail.Status == ReviewInternStatus.Rejected || detail.Status == ReviewInternStatus.Reviewed)
+            if (detail.Status == ReviewInternStatus.Reviewed)
             {
                 detail.Status = ReviewInternStatus.Approved;
                 await WorkScope.UpdateAsync(detail);
             }
             else
             {
-                throw new UserFriendlyException("Review này chưa được review hoặc đã review xong");
+                throw new UserFriendlyException("Review này chưa được review hoặc đã review xong hoặc đã bị reject");
             }
         }
 
@@ -1301,27 +1301,23 @@ namespace Timesheet.APIs.ReviewDetails
             await WorkScope.UpdateAsync(reviewDetail);
         }
        
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern)]
         [HttpPost]
         public async Task HeadPmVerify(HeadPmVerifyDto input)
         {
-            if (input.Status == ReviewInternStatus.Reviewed || input.Status == ReviewInternStatus.Rejected)
+            var detail = await WorkScope.GetAsync<ReviewDetail>(input.ReviewDetailId);
+
+            if (detail.Status != ReviewInternStatus.PmReviewed)
             {
-                var detail = await WorkScope.GetAsync<ReviewDetail>(input.ReviewDetailId);
-                if (detail.Status == ReviewInternStatus.PmReviewed)
-                {
-                    detail.Status = input.Status;
-                    await WorkScope.UpdateAsync(detail);
-                }
-                else
-                {
-                    throw new UserFriendlyException("Review này chưa được PM review hoặc đã review xong");
-                }
+                throw new UserFriendlyException("Review này chưa được PM review hoặc đã review xong");
             }
-            else
+
+            if (input.Status == ReviewInternStatus.Rejected)
             {
-                throw new UserFriendlyException("Trạng thái chỉ được là Reviewed hoặc Rejected.");
+                detail.NewLevel = detail.CurrentLevel;
             }
+            detail.Status = input.Status;
+            await WorkScope.UpdateAsync(detail);
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote)]
@@ -1400,25 +1396,21 @@ namespace Timesheet.APIs.ReviewDetails
 
             foreach (var inputItem in input)
             {
-                if (inputItem.Status == ReviewInternStatus.Reviewed || inputItem.Status == ReviewInternStatus.Rejected)
-                {
-                    var detail = await WorkScope.GetAsync<ReviewDetail>(inputItem.ReviewDetailId);
-                    if (detail.Status == ReviewInternStatus.PmReviewed)
-                    {
-                        detail.Status = inputItem.Status;
-                        listReviewDetail.Add(detail);
-                    }
-                    else
-                    {
-                        throw new UserFriendlyException("This review has not yet been PM Reviewed");
-                    }
-                }
-                else
-                {
-                    throw new UserFriendlyException("Status can only be Reviewed or Rejected.");
-                }
-            }
+                var detail = await WorkScope.GetAsync<ReviewDetail>(inputItem.ReviewDetailId);
 
+                if (detail.Status != ReviewInternStatus.PmReviewed)
+                {
+                    throw new UserFriendlyException("Review này chưa được PM review hoặc đã review xong");
+                }
+
+                if (inputItem.Status == ReviewInternStatus.Rejected)
+                {
+                    detail.NewLevel = detail.CurrentLevel;
+                }
+
+                detail.Status = inputItem.Status;
+                listReviewDetail.Add(detail);
+            }
             await WorkScope.UpdateRangeAsync(listReviewDetail);
         }
 

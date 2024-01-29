@@ -175,6 +175,14 @@ body{
     background-color: #0b984a!important;
 }
 
+.btn-pm-head.approve{
+    background-color: #0b984a!important;
+}
+
+.btn-pm-head.reject{
+    background-color: #cf2222!important;
+}
+
 .btn-pm-head[disabled] {
     background-color: #4f4e4e!important;
 }

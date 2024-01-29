@@ -161,12 +161,12 @@
                                 <span>Update To Project</span>
                             </button>
                             <button  type="button" *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" 
-                                 (click)="headPmAprroveOrRejectAll(headPmVerifyStatus)" class="btn-pm-head btn" [disabled]="!(listSelectedItem?.length > 0)" >
+                                 (click)="headPmAprroveOrRejectAll(headPmVerifyStatus)" class="btn-pm-head btn approve" [disabled]="!(listSelectedItem?.length > 0)" >
                                 <mat-icon>check</mat-icon>
                                 <span>Head PM Verify All</span> 
                             </button>
                             <button  type="button" *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" 
-                                (click)="headPmAprroveOrRejectAll(headPmRejectStatus)" class="btn-pm-head btn" [disabled]="!(listSelectedItem?.length > 0)" >
+                                (click)="headPmAprroveOrRejectAll(headPmRejectStatus)" class="btn-pm-head btn reject" [disabled]="!(listSelectedItem?.length > 0)" >
                                 <mat-icon>thumb_down_off_alt</mat-icon>
                                 <span>Head PM Reject All</span> 
                             </button>
@@ -290,10 +290,10 @@
                                         <mat-icon class="mat-18">rate_review</mat-icon>
                                         PM Review
                                     </button>
-                                    <button *ngIf="isShowBtnHrVerify(item)" mat-menu-item="mat-menu-item" class="choices" name="hrVerifyIntern" (click)="createHrNote(item)">
+                                    <!-- <button *ngIf="isShowBtnHrVerify(item)" mat-menu-item="mat-menu-item" class="choices" name="hrVerifyIntern" (click)="createHrNote(item)">
                                         <mat-icon class="mat-18">verified_user</mat-icon>
                                         HR Verify  
-                                    </button>
+                                    </button> -->
                                     <button *ngIf="isShowBtnHeadPm(item)" mat-menu-item="mat-menu-item" class="choices" style="color: green" name="headPmVerifyIntern" (click)="headPmApproveOrReject(item, headPmVerifyStatus)">
                                         <mat-icon class="mat-18" style="color: green">rate_review</mat-icon>
                                         Head PM Verify 
