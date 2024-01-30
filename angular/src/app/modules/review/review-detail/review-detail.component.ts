@@ -853,6 +853,13 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     const lineCount = note.split('\n').length;
     return lineCount;
 }
+  getLineReviewContentsCount(items: any[]): number {
+    let lineCount = 0;
+    items.forEach(item => {
+        lineCount += this.getLineReviewContentCount(item.privateNote);
+    });
+    return lineCount;
+  }
 
   createHrNote(item: ReviewDetailDto): void{
     const dialogRef = this._dialog.open(NewHrVerifyInternshipComponent, {

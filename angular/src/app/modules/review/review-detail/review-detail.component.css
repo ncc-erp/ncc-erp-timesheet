@@ -288,7 +288,10 @@ th{
 }
 
 th>span {
-    display: flex; align-items: center; text-align: center;
+    display: flex; 
+    align-items: center;
+    text-align: center;
+    justify-content: center;
 }
 
 .btn {

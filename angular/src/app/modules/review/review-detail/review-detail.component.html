@@ -192,14 +192,14 @@
                             <th>{{ "STT" | localize }}</th>
                             <th>{{ "Action" | localize }}</th>
                             <th (click)="toggleSort('internName')">
-                                <span style="margin-left: 100px;">
+                                <span>
                                      {{ "User" | localize }}
                                      <mat-icon>unfold_more</mat-icon>
                                 </span>
                             </th>
                             <th>{{ "Review content" | localize }}</th>
                             <th (click)="toggleSort('reviewerName')">
-                                <span style="margin-left: 90px;">
+                                <span>
                                     {{ "Reviewer" | localize }}
                                     <mat-icon>unfold_more</mat-icon>
                                </span>
@@ -213,7 +213,9 @@
                             </th>
                             <th (click)="toggleSort('newLevel')">
                                 <span>
-                                    {{ "New Level" | localize }}
+                                    {{ "New" | localize }}
+                                    <br>
+                                    {{ "Level" | localize }}
                                     <mat-icon>unfold_more</mat-icon>
                                 </span>
                             </th>
@@ -231,8 +233,8 @@
                                     <mat-icon>unfold_more</mat-icon>
                                 </span>
                             </th>
-                            <th>{{ "PM/ Loren Note" | localize }}</th>
-                            <th>{{ "Interview Note" | localize }}</th>
+                            <!-- <th>{{ "PM/ Loren Note" | localize }}</th> -->
+                            <th>{{ "Note" | localize }}</th>
                             <th>{{ "Updated Info" | localize }}</th>
                         </tr>
                     </thead>
@@ -386,13 +388,13 @@
                                                     getLevelById(item.userLevel) }}</span>
                                             </span>
                                         </div>
-                                        <div class="email">{{ item.internEmail }}</div>
+                                        <div class="email">{{ item.internEmail.split('@')[0] }}</div>
                                     </div>
                                 </div>
                             </td>
                             <!-- Review Content -->
-                            <td>
-                                <div (click)="toggleHideNote(item)">
+                            <td (click)="toggleHideNote(item)" style="cursor: pointer;">
+                                <div>
                                     <p [ngClass]="item.hideNote == false ? 'preReview' : 'review'"
                                         title=" Click để mở rộng nội dung"
                                         name="reviewContent" [innerHTML]="formatNoteContent(item.note)">
@@ -414,7 +416,7 @@
                                         <div class="full-name" *ngIf="item.reviewerName == null">
                                             No Reviewer
                                         </div>
-                                        <div class="email">{{ item.reviewerEmail }}</div>
+                                        <div class="email">{{ item.reviewerEmail.split('@')[0] }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -506,33 +508,36 @@
                                 </div>
                             </td>
                             <!-- note -->
-                            <td>
-                                <div (click)="togglePrivateNote(item)">
+                            <!-- <td (click)="togglePrivateNote(item)" style="cursor: pointer;">
+                                <div>
                                     <p [ngClass]="item.hidePrivateNote == false ? 'preReview' : 'review'"
                                     title="Cuộn chuột hoặc Click để mở rộng nội dung" name="pmNote">
                                         <ng-container *ngFor="let note of item.reviewInternPrivateNoteDtos">
                                             <div *ngIf="isShowPmNote(note)" >
                                                 <b class="">{{note.noteByUserName}}:</b>
-                                            {{note.privateNote}} <br>
-                                            <i>{{ note.created | date: "dd/MM/yyyy" }} {{ note.created | date: "hh:mm:ss" }}</i> <br>
+                                            <p [innerHTML]="formatNoteContent(note.privateNote)"></p>
+                                            <i>{{ note.created | date: "dd/MM/yyyy" }} {{ note.created | date: "hh:mm:ss" }}</i> <br> 
                                              </div>
-                                        </ng-container>      
+                                        </ng-container>  
                                     </p>
+                                    <mat-icon *ngIf="getLineReviewContentsCount(item.reviewInternPrivateNoteDtos)> 3" style="padding: 5px 0px 0px 10px; cursor: pointer">more_horiz
+                                    </mat-icon> 
                                 </div>
-                            </td>
-                            <td>
-                                <div (click)="togglePrivateNote(item)">
+                            </td> -->
+                            <td (click)="togglePrivateNote(item)" style="cursor: pointer;">
+                                <div>
                                     <p [ngClass]="item.hidePrivateNote == false ? 'preReview' : 'review'"
                                     title="Cuộn chuột hoặc Click để mở rộng nội dung" name="interviewNote">
                                         <ng-container *ngFor="let note of item.reviewInternPrivateNoteDtos">
                                             <div *ngIf="isShowInterviewNote(note)">
                                                 <b class="">{{note.noteByUserName}}:</b>
-                                                {{note.privateNote}} <br>
+                                                <p [innerHTML]="formatNoteContent(note.privateNote)"></p>
                                                 <i>{{ note.created | date: "dd/MM/yyyy" }} {{ note.created | date: "hh:mm:ss" }}</i> <br>
                                             </div>
-                                                 
                                         </ng-container>
                                     </p>
+                                    <mat-icon *ngIf="getLineReviewContentsCount(item.reviewInternPrivateNoteDtos)> 3" style="padding: 5px 0px 0px 10px; cursor: pointer">more_horiz
+                                    </mat-icon> 
                                 </div>
                             </td>
                             <!-- Updated At -->
