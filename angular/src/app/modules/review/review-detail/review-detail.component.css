@@ -85,7 +85,7 @@ body{
 .preReview{
     padding: 10px;
     width: 100%;
-    min-width: 250px;
+    min-width: 90px;
     border: none;
     resize: none;
     cursor: pointer;
@@ -296,7 +296,10 @@ th{
 }
 
 th>span {
-    display: flex; align-items: center; text-align: center;
+    display: flex; 
+    align-items: center;
+    text-align: center;
+    justify-content: center;
 }
 
 .btn {
