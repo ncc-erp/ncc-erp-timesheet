@@ -6,6 +6,7 @@ import { AbsenceRequestDto } from '@app/service/api/model/absence.dto';
 import { ProjectManagerService } from '@app/service/api/project-manager.service';
 import { AppComponentBase } from '@shared/app-component-base';
 import { AppConsts } from '@shared/AppConsts';
+import { result } from 'lodash';
 import * as moment from 'moment';
 
 @Component({
@@ -154,17 +155,21 @@ export class OffDayProjectDetailComponent extends AppComponentBase implements On
     });
   }
 
-  onDeactiveAction(projectId: number, userId: number){
-    this.isLoading = true;
-    this.projectManagerService.releaseUserFromProject(projectId, userId).subscribe((res) => {
-      if(res){
-        this.notify.success(this.l("Deactive Successfully!"));
-        this.close();
+  onDeactiveAction(projectId: number, projectName: string, userId: number, fullname: string){
+    var msg = `Deactive ` +  `${fullname}` + ` From Project ` + `${projectName}`
+    abp.message.confirm(
+      msg,
+      (result: boolean) => {
+        if(result) {
+          this.projectManagerService.releaseUserFromProject(projectId, userId).subscribe((res) => {
+            if(res){
+              this.notify.success(this.l("Deactive Successfully!"));
+              this.close();
+            }
+          })
+        }
       }
-      this.isLoading = false;
-    }, (error) => {
-      this.isLoading = false;
-    });
+    )
   }
 
   close(): void {

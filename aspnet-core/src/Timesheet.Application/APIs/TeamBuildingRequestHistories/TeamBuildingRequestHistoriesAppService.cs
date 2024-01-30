@@ -209,7 +209,7 @@ namespace Timesheet.APIs.TeamBuildingRequestHistories
                 else
                 {
                     float totalRequestMoneyForNoVAT = request.RequestMoney - totalInvoiceAmountVAT;
-                    request.DisbursedMoney = (totalVAT == 0 || totalInvoiceAmountVAT > request.RequestMoney) ? request.RequestMoney : (float)(totalRequestMoneyForNoVAT / (1 + VAT)) + totalInvoiceAmountVAT;
+                    request.DisbursedMoney = input.DisburseMoney;
                     request.VATMoney = (totalVAT == 0 || totalInvoiceAmountVAT > request.RequestMoney) ? 0: (float)(totalRequestMoneyForNoVAT - totalRequestMoneyForNoVAT / (1 + VAT)); 
                     request.RemainingMoney = 0;
                     request.RemainingMoneyStatus = RemainingMoneyStatus.Done;
