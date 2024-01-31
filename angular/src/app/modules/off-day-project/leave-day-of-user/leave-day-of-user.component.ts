@@ -207,7 +207,7 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
 
   selectionChange(resetDayType: boolean) {
     if (resetDayType) this.dayType = -1;
-    this.viewDate = new Date(this.year, this.month, this.day);
+    this.viewDate = new Date(this.year, this.month);
     this.updateDay();
     this.refreshData();
   }
