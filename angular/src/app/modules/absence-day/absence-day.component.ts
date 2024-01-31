@@ -104,7 +104,7 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
 
   selectionChange(resetDayType: boolean) {
     if (resetDayType) this.dayType = -1;
-    let date = new Date(this.year, this.month, this.day);
+    let date = new Date(this.year, this.month);
     this.viewDate = moment(date, 'YYYY-MM-DD').toDate()
     this.updateDay();
     this.refreshData();
