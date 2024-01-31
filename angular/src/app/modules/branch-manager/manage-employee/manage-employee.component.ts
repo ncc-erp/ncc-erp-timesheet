@@ -29,6 +29,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   public positionId = -1;
   public filterItems: FilterDto[] = [];
   public users: ManageUserDto[];
+  public dateType = 1;
   keyword;
   constructor(
     injector: Injector,
@@ -88,7 +89,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       this.addFilterItem('positionId', this.positionId);
     }
     request.filterItems = this.filterItems;
-    this.manageUserForBranchService.getAllUserPagging(request)
+    this.manageUserForBranchService.getAllUserPagging(request, this.dateType)
     .pipe(
       finalize(() => {
         finishedCallback()
@@ -127,6 +128,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     this.keyword = '';
     this.positionId = -1;
     this.branchId = 0;
+    this.dateType = 1;
     this.searchOrFilter();
   }
 

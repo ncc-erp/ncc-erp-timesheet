@@ -292,5 +292,12 @@ namespace Ncc.Entities.Enum
             PmNote = 0,
             InterviewerNote = 1,
         }
+
+        public enum TypeOfDate
+        {
+            Day = 0,
+            Month = 1,
+            Year = 2,
+        }
     }
 }
