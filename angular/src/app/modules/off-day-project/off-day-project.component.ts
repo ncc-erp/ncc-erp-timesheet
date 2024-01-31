@@ -109,8 +109,8 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     });
   }
 
-  onDayOffTypeChange() {
-    let date = new Date(this.year, this.month, this.day);
+  onDayOffTypeChange(envent?) {
+    let date = new Date(this.year, this.month);
     this.viewDate = moment(date, 'YYYY-MM-DD').toDate()
     this.getDayOff();
   }

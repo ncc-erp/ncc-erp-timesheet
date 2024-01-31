@@ -17,7 +17,7 @@
           <div class="item">
             <mat-form-field appearance="outline">
               <mat-label>Month</mat-label>
-              <mat-select name="monthSelect" [(value)]="month" (selectionChange)="selectionChange()">
+              <mat-select name="monthSelect" [(value)]="month" (selectionChange)="selectionChange($event)">
                 <mat-option *ngFor="let item of listMonth" [value]='item'>
                   {{item + 1}}
                 </mat-option>

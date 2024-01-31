@@ -105,8 +105,8 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
     this.getDayOff();
   }
 
-  selectionChange(): void {
-    let date = new Date(this.year, this.month, this.day);
+  selectionChange(event?): void {
+    let date = new Date(this.year, this.month);
     this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
     this.getDayOff();
   }
