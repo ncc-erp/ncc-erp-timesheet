@@ -111,7 +111,7 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
   }
 
   refreshData() {
-    let typeAbsenceDay =this.absentDayType;
+    let typeAbsenceDay = this.absentDayType;
     this.listDayShow = [];
     this.selectedDays.clear()
     this.isLoading = true
@@ -122,7 +122,6 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
     if(this.absentDayType === 3){
       this.dayType = 4;
       typeAbsenceDay = 0;
-      this.absentDayType = 3;
     }
     this.dayOffService.getAll(this.viewDate.getMonth() + 1, this.viewDate.getFullYear(), this.branchId).subscribe(data => {
       this.dayOffs = data.result;

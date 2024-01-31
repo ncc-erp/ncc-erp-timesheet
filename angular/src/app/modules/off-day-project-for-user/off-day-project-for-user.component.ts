@@ -200,7 +200,6 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
   refreshData() {
     let typeAbsenceDay = this.absentDayType;
     this.updateDay();
-    // this.updateListYears();
     this.events = [];
     const startDate = moment(this.viewDate).startOf("M").subtract(7, "d").format("YYYY-MM-DD");
     const endDate = moment(this.viewDate).endOf("M").add(7, "d").format("YYYY-MM-DD");
@@ -212,7 +211,6 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
     if(this.absentDayType === 3){
       this.dayType = 4;
       typeAbsenceDay = 0;
-      this.absentDayType = 3;
     }
     this.absenceService.getCountAllRequestAbsenceOfTeam(startDate, endDate, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
       this.isLoading = false;
@@ -236,7 +234,6 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
     if(this.absentDayType === 3){
       this.dayType = 4;
       typeAbsenceDay = 0;
-      this.absentDayType = 3;
     }
     if (!this.permission.isGranted(PERMISSIONS_CONSTANT.ViewDetailAbsenceDayOfTeam)) return;
     const countRequestForDay = this.countRequestList.find(item => moment(item.date).isSame(date, 'day'));
