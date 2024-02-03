@@ -559,7 +559,7 @@ namespace Timesheet.APIs.ReviewDetails
             {
                 throw new UserFriendlyException("Bạn không thể review TTS của PM khác");
             }
-            if (detail.Status >= ReviewInternStatus.Approved)
+            if (detail.Status >= ReviewInternStatus.Reviewed && detail.Status != ReviewInternStatus.PmReviewed)
             {
                 throw new UserFriendlyException("Bạn không thể sửa vì kết quả review cho tts này đã được gửi mail");
             }
@@ -1103,7 +1103,7 @@ namespace Timesheet.APIs.ReviewDetails
             {
                 throw new UserFriendlyException("Bạn không thể review TTS của PM khác");
             }
-            if (detail.Status >= ReviewInternStatus.Approved && detail.Status != ReviewInternStatus.ReOpen)
+            if (detail.Status >= ReviewInternStatus.Reviewed && detail.Status != ReviewInternStatus.ReOpen && detail.Status != ReviewInternStatus.PmReviewed)
             {
                 throw new UserFriendlyException("Bạn không thể sửa vì kết quả review cho tts này đã được gửi mail");
             }

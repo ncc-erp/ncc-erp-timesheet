@@ -796,11 +796,11 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
   checkStatus(status:number, action:string):boolean{
     switch(status){
       case 0: return action=="edit"|| action=="delete" || action == "pmReview" ? true :false
-      case 1: return action=="edit"|| action=="review" || action == "approve" || action == "reject" || action =="pmNote" || action == "interviewNote" ? true : false
+      case 1: return  action == "approve" || action == "reject" || action =="pmNote" || action == "interviewNote" ? true : false
       case 2: return action=="sendEmail" || action=="reject" || action == "print" ? true : false
       case -1: return action=="edit"|| action=="review" || action == "approve" ? true : false
       case 3: return action=="update to HRM"|| action=="rejectSentMail" || action=="print" ? true : false
-      case 4: return action=="headPm" ? true : false
+      case 4: return action=="headPm" || action=="pmReview" ? true : false
       case 5: return action=="edit"|| action=="pmReview" ? true : false
       default: return false
 
