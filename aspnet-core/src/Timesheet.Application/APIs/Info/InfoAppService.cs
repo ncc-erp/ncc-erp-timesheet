@@ -321,7 +321,8 @@ namespace Timesheet.APIs.Info
                     var offMinute = mapOffDay.ContainsKey(d) ? mapOffDay[d].Hour * 60 : 0;
                     Logger.Debug($"date={d}, workingMinute={workingMinute} offMinute={offMinute}");
 
-                    if (offMinute != 480 && workingMinute <= 0)
+                    workingMinute += (int)offMinute;
+                    if (workingMinute < 480)
                     {
                         listInvalidDate.Add(d.ToString("yyyy-MM-dd"));
                         Logger.Info("invalidDate: " + d.ToString("yyyy-MM-dd"));
