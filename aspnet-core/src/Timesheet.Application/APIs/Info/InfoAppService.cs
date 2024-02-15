@@ -76,17 +76,17 @@ namespace Timesheet.APIs.Info
                 float amountPM = 0;
                 if (!isAlreadyUnlockToLog)
                 {
-                    listLockedDate = await getMyTimesheetLockedAsync(userId);
-                    timesLockedEm = listLockedDate == null ? 0 : listLockedDate.Count();
-                    amount = timesLockedEm >= 4 ? 100000 : timesLockedEm * 20000;
+                    //listLockedDate = await getMyTimesheetLockedAsync(userId);
+                    //timesLockedEm = listLockedDate == null ? 0 : listLockedDate.Count();
+                    //amount = timesLockedEm >= 4 ? 100000 : timesLockedEm * 20000;
+                    amount = 20000;
                 }
                 if (!isAlreadyUnlockToApprove)
                 {
-
-
                     lockedPM = await getTimesheetLockedOfPMAsync(userId);
-                    amountPM = fMoneyPMUnlockTimeSheet * lockedPM;
-                }
+                    //amountPM = fMoneyPMUnlockTimeSheet * lockedPM;
+                    amountPM = fMoneyPMUnlockTimeSheet;
+            }
 
                 return new UserLockedTimesheetDto
                 {
@@ -481,7 +481,7 @@ namespace Timesheet.APIs.Info
 
             if (timesLockedEmployee > 0)
             {
-                var amount = (timesLockedEmployee >= 4 ? 100000 : timesLockedEmployee * 20000);
+                var amount = 20000;
                 var fund = await WorkScope.GetAll<Fund>().Where(s => s.Status == FundStatus.Proceeds).FirstOrDefaultAsync();
                 if (fund == null)
                 {
@@ -546,8 +546,8 @@ namespace Timesheet.APIs.Info
         }
         private async System.Threading.Tasks.Task UnlockToApproveTimesheet(long userId, int timesLockedPM)
         {
-            float fMoneyPMUnlockTimeSheet = getMoneyPMUnlockTimeSheet();           
-            var amount = timesLockedPM * fMoneyPMUnlockTimeSheet;
+            float fMoneyPMUnlockTimeSheet = getMoneyPMUnlockTimeSheet();
+            var amount = fMoneyPMUnlockTimeSheet;
             var fund = await WorkScope.GetAll<Fund>().Where(s => s.Status == FundStatus.Proceeds).FirstOrDefaultAsync();
             if (fund == null)
             {
