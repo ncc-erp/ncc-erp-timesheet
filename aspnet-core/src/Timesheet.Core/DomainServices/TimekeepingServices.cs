@@ -76,6 +76,8 @@ namespace Timesheet.DomainServices
                 throw new UserFriendlyException("The day " + selectedDate + " is not a working day for any branch.");
             }
 
+            Logger.Info($"Count Users in Database: ${users.Count()}");
+
             var listTimekeepingOldBySelectedDate = WorkScope.GetAll<Timekeeping>()
                 .Where(s => s.DateAt.Date == selectedDate.Date)
                 .ToList();
@@ -125,6 +127,8 @@ namespace Timesheet.DomainServices
                 return default;
             }
 
+            Logger.Info($"Count Users Checkin: ${checkInUsers.Count()}");
+
             var dailyAndMentionPunishs = _komuService.GetDailyReport(selectedDate);
             if (dailyAndMentionPunishs == null)
             {
@@ -133,8 +137,10 @@ namespace Timesheet.DomainServices
             }
 
             var listDaily = dailyAndMentionPunishs.daily.ToList();
+            Logger.Info($"Count Users Komu punish Daily: ${listDaily.Count()}");
 
             var listMention = dailyAndMentionPunishs.mention.ToList();
+            Logger.Info($"Count Users Komu punish Mention: ${listMention.Count()}");
 
             var mapCheckInUsers = checkInUsers.ToDictionary(s => s.Email, s => s);
 
@@ -144,6 +150,8 @@ namespace Timesheet.DomainServices
 
             var listUserName = users.Select(x => x.UserName).Distinct().ToList();
             var userTrackerTimes = _trackerService.GetTimeTrackerToDay(selectedDate, listUserName);
+            Logger.Info($"Count Users Tracker times: ${listUserName.Count()}");
+
             var dicUserNameToTrackerTime = userTrackerTimes.ToDictionary(s => s.email, s => new { s.ActiveMinute, s.active_time });
 
             foreach (var user in users)
@@ -235,8 +243,15 @@ namespace Timesheet.DomainServices
                 }
                 t.TrackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].active_time : "0";
 
-                t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
-                rs.Add(t);
+                try
+                {
+                    t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
+                    rs.Add(t);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
+                }
             }
 
             // co trong checkIn nhung ko co trong user
@@ -255,8 +270,16 @@ namespace Timesheet.DomainServices
                     TrackerTime = dicUserNameToTrackerTime.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTrackerTime[checkIn.Email.Split("@")[0]].active_time : "0",
                 };
                 ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
-                t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
-                rs.Add(t);
+
+                try
+                {
+                    t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
+                    rs.Add(t);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
+                }
             }
 
             Logger.Info("AddTimekeepingByDay() finish update " + rs.Count() +" rows!");
