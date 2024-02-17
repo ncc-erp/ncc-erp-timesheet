@@ -138,6 +138,7 @@ export const PERMISSIONS_CONSTANT = {
     ExportExcelProject: "Project.Export",
     UpdateDefaultProjectTask: "Project.UpdateDefaultProjectTask",
     EditTypeWork: "Project.EditTeamWorkType",
+    ReleaseUser: "Project.ReleaseUser",
 
     //my timesheet
     AddMyTimesheet: "MyTimesheet.AddNew",
@@ -253,7 +254,6 @@ export const PERMISSIONS_CONSTANT = {
     ReviewIntern_ReviewDetail_UpdateStarToProject: "ReviewIntern.ReviewDetail.UpdateStarToProject",
     ReviewIntern_ApproveAll: "ReviewIntern.ApproveAll",
     ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern: "ReviewIntern.ReviewDetail.VerifyPmReviewedForOneIntern",
-    ReviewIntern_ReviewDetail_AcceptHrRequestForOneIntern: "ReviewIntern.ReviewDetail.AcceptHrRequestForOneIntern",
     ReviewIntern_ReviewDetail_CreatePMNote: "ReviewIntern.ReviewDetail.CreatePMNote",
     ReviewIntern_ReviewDetail_CreateInterviewNote: "ReviewIntern.ReviewDetail.CreatInterviewNote",
     ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern: "ReviewIntern.ReviewDetail.AcceptPMReviewForAllIntern",

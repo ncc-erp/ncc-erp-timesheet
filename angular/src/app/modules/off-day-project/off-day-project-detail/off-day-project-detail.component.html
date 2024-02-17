@@ -13,9 +13,9 @@
       <thead>
         <tr>
           <th>STT</th>
-          <th style="width: 250px; min-width: 250px;">User</th>
+          <th style="width: 190px; min-width: 190px;">User</th>
           <!-- <th>Sex</th> -->
-          <th style="width: fit-content;">Project/PM</th>
+          <th style="width: 300px; min-width: 300px;">Project/PM</th>
           <th style="min-width: 120px;">Request</th>
           <th style="width: 136px; min-width: 136px;">Off Type</th>
           <th style="width: 160px; min-width: 160px;">Note</th>
@@ -27,7 +27,7 @@
         <tr *ngFor="let item of events, index as i">
           <td style="text-align: center;">{{i + 1}}</td>
           <td>
-            <div style="display: flex; justify-content: flex-start; align-items: center; width: 250px;">
+            <div style="display: flex; justify-content: flex-start; align-items: center; width: 190px;">
               <div>
                 <button [name]="'viewByAvatarBtn-'+item.userId" class="btn-route" mat-dialog-close [routerLink]="['app/main/leave-day-of-user/', item.userId]">
                   <img style="max-width: 40px;min-width: 40px; height: 40px; border-radius: 50%;"
@@ -38,15 +38,6 @@
                 <div>
                   <span><button [name]="'viewByUserBtn-'+item.userId" class="btn-route" mat-dialog-close
                       [routerLink]="['app/main/leave-day-of-user/', item.userId]">{{item.fullName}} </button></span>
-                  <span class="label status-label day-off-state-pending" *ngIf="item.status === 1">
-                    Pending
-                  </span>
-                  <span class="label status-label day-off-state-approved" *ngIf="item.status === 2">
-                    Approved
-                  </span>
-                  <span class="label status-label day-off-state-reject" *ngIf="item.status === 3">
-                    Rejected
-                  </span>
                 </div>
                 <div>
                   <ng-container *ngIf="item.type || item.type == 0">
@@ -64,12 +55,28 @@
                     {{item.branchDisplayName}}
                   </span>
                 </div>
+                <div style="margin-top: 4px;">
+                  <span class="label status-label day-off-state-pending" *ngIf="item.status === 1">
+                   Pending
+                 </span>
+                 <span class="label status-label day-off-state-approved" *ngIf="item.status === 2">
+                   Approved
+                 </span>
+                 <span class="label status-label day-off-state-reject" *ngIf="item.status === 3">
+                   Rejected
+                 </span>
+               </div>
               </div>
             </div>
           </td>
-          <td style="text-align: left;">
+          <td style="text-align: left; padding: 8px 20px;">
             <div *ngFor="let projectItem of item.projectInfos">
-              <div class="row" style="margin-top: 5px;"><b>{{projectItem.projectName}}</b></div>
+              <div class="row" style="margin-top: 5px;">
+                <b>{{projectItem.projectName}}</b>
+                <button type="submit" class="deactive-button" *ngIf="permission.isGranted(RELEASE_USER_FROM_PROJECT)" (click)="onDeactiveAction(projectItem.projectId, projectItem.projectName , item.userId, item.fullName)" 
+                mat-raised-button matTooltip="ex: Deactive member in this project">  <mat-icon style="font-size: 15px; margin-top: 6px;">block</mat-icon> Deactive</button>
+               
+              </div>
               <div class="row d-flex" style="flex-wrap: wrap;">
                 <div class="pm" *ngFor="let item of projectItem.pms" style="margin-bottom: 3px; white-space: nowrap;">{{item.pmFullName}}
                 </div>

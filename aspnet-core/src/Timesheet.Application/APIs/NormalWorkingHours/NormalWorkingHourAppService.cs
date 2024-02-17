@@ -574,6 +574,9 @@ namespace Timesheet.APIs.NormalWorkingHours
                  .ToListAsync();
 
             var openTalkTaskId = await SettingManager.GetSettingValueAsync(AppSettingNames.OpenTalkTaskId);
+            var unassignedTaskId = await SettingManager.GetSettingValueAsync(AppSettingNames.UnassignedTaskId);
+
+            long[] listOpenTalkTaskId = new long[] { long.Parse(openTalkTaskId), long.Parse(unassignedTaskId) };
 
             var listMyTimesheet = await WorkScope.GetAll<MyTimesheet>()
                         .Where(ts=>ts.UserId == userId)
@@ -592,7 +595,7 @@ namespace Timesheet.APIs.NormalWorkingHours
                              DayName = s.DateAt.DayOfWeek,
                              WorkingHour = s.WorkingTime,
                              DateAt = s.DateAt,
-                             IsOpenTalk = s.ProjectTask == null ? false : s.ProjectTask.Id == long.Parse(openTalkTaskId) ? true : false,
+                             IsOpenTalk = s.ProjectTask == null ? false : listOpenTalkTaskId.Contains(s.ProjectTask.Id) ? true : false,
                          }).GroupBy(s => new { s.DayName, s.DateAt })
                             .Select(x => new WorkingHourDto
                             {

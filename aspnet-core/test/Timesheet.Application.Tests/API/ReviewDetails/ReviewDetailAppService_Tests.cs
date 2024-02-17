@@ -540,7 +540,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
                     await _reviewDetailAppService.Approve(reviewDetailId);
                 });
 
-                exception.Message.ShouldBe("Review này chưa được review hoặc đã review xong");
+                exception.Message.ShouldBe("Review này chưa được review hoặc đã review xong hoặc đã bị reject");
             });
         }
 

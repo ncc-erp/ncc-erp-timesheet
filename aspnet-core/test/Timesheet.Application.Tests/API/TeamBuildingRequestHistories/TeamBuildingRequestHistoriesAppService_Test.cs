@@ -772,7 +772,7 @@ namespace Timesheet.Application.Tests.API.TeamBuildingRequestHistories
             var input = new DisburseTeamBuildingRequestDto
             {
                 RequesterId = 5,
-                DisburseMoney = 60000f,
+                DisburseMoney = 63636.363f,
                 RequestId = 12,
                 InvoiceDisburseList = new List<DisburseTeamBuildingInvoiceRequestDto>()
                 { new DisburseTeamBuildingInvoiceRequestDto {InvoiceId = 12, HasVAT = false } },
@@ -791,7 +791,7 @@ namespace Timesheet.Application.Tests.API.TeamBuildingRequestHistories
 
                 requestAfterChange.Status.ShouldBe(Ncc.Entities.Enum.StatusEnum.TeamBuildingRequestStatus.Done);
                 requestAfterChange.DisbursedMoney.ShouldBe(input.DisburseMoney);
-                requestBeforeChange.VATMoney.ShouldBe(10000f);
+                requestBeforeChange.VATMoney.ShouldBe(6363.6367f);
             });
         }
 
@@ -802,7 +802,7 @@ namespace Timesheet.Application.Tests.API.TeamBuildingRequestHistories
             var input = new DisburseTeamBuildingRequestDto
             {
                 RequesterId = 5,
-                DisburseMoney = 120000f,
+                DisburseMoney = 109090.91f,
                 RequestId = 13,
                 InvoiceDisburseList = new List<DisburseTeamBuildingInvoiceRequestDto>()
                 { new DisburseTeamBuildingInvoiceRequestDto {InvoiceId = 13, HasVAT = false } },
@@ -821,7 +821,7 @@ namespace Timesheet.Application.Tests.API.TeamBuildingRequestHistories
 
                 requestAfterChange.Status.ShouldBe(Ncc.Entities.Enum.StatusEnum.TeamBuildingRequestStatus.Done);
                 requestAfterChange.DisbursedMoney.ShouldBe(input.DisburseMoney);
-                requestBeforeChange.VATMoney.ShouldBe(10000f);
+                requestBeforeChange.VATMoney.ShouldBe(10909.094f);
             });
         }
 
@@ -852,8 +852,8 @@ namespace Timesheet.Application.Tests.API.TeamBuildingRequestHistories
 
                 requestAfterChange.Status.ShouldBe(Ncc.Entities.Enum.StatusEnum.TeamBuildingRequestStatus.Done);
                 requestAfterChange.DisbursedMoney.ShouldBe(input.DisburseMoney);
-                requestBeforeChange.VATMoney.ShouldBe(10000f);
-                requestAfterChange.RemainingMoney.ShouldBe(10000f);
+                requestBeforeChange.VATMoney.ShouldBe(11000f);
+                requestAfterChange.RemainingMoney.ShouldBe(9000f);
             });
         }
 

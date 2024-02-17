@@ -24,7 +24,7 @@
               <mat-select
                 name="monthSelect"
                 [(value)]="month"
-                (selectionChange)="onDayOffTypeChange()"
+                (selectionChange)="onDayOffTypeChange($event)"
               >
                 <mat-option *ngFor="let item of listMonth" [value]="item">
                   {{ item + 1 }}

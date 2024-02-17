@@ -7,6 +7,7 @@ import { NgxStarsComponent } from 'ngx-stars';
 import { DisburseDto, DisburseTeamBuildingRequestDto, DisburseTeamBuildingRequestInfoDto, InvoiceDisburseDto } from '../../const/const';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { EditInvoiceMoneyComponent } from './edit-invoice-money/edit-invoice-money.component';
+import { request } from 'http';
 
 @Component({
   selector: 'app-disburse-request',
@@ -57,14 +58,17 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
     this.teamBuildingRequestService.getTeamBuildingRequestForDisburse(this.requestId, this.requesterId).subscribe((response) => {
       this.disburseTeambuildingRequestInfoDto = response.result;
       this.initDisburseInvoiceList();
-    });
+      this.disburseMoney = this.calculateTotalSuggestedDisburseMoney();
+    }); 
   }
 
   initDisburseInvoiceList() {
+    this.invoiceAmount = 0;
     if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
       if(this.disburseTeambuildingRequestInfoDto.invoiceRequests !== null) {
         this.disburseTeambuildingRequestInfoDto.invoiceRequests.forEach(item => {
           this.invoiceDisburseDto.push(new InvoiceDisburseDto(item.invoiceId, item.hasVAT));
+          this.invoiceAmount += item.invoiceMoney;
         });
       }
     }
@@ -74,52 +78,48 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
     return hasVAT ? invoiceMoney : invoiceMoney + this.calculateVAT(invoiceMoney);
   }
 
-  // updateInvoiveStatusInDisburseInvoiceList(orderNumber : number, hasVAT : boolean) {
-  //   this.invoiceDisburseDto[orderNumber].hasVAT = hasVAT;
-  // }
-
   calculateTotalSuggestedDisburseMoney() {
-    let suggestedDisburseMoney = 0;
-    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
-      if(this.disburseTeambuildingRequestInfoDto.invoiceRequests !== undefined && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== null) {
-        this.disburseTeambuildingRequestInfoDto.invoiceRequests.forEach(item => {
-          suggestedDisburseMoney += this.calculateDisburseMoney(this.requestMoney, item.invoiceMoney, item.hasVAT);
-        })
-      }
+    let totalInvoiceAmountVAT = 0;
+    let totalInvoiceAmountNoVAT = this.calculate().totalInvoiceAmountNoVAT;
+    let totalVAT = this.calculate().totalVAT;
+    if(this.requestMoney > this.invoiceAmount + totalVAT){
+      return this.invoiceAmount;
     }
-    //suggestedDisburseMoney += this.disburseTeambuildingRequestInfoDto.remainingMoney;
-    return suggestedDisburseMoney;
-  }
-  
-  calculateDisburseMoney(requestMoney: number, invoiceMoney: number, hasVAT: boolean){  
-    let rs = 0;
-    if(hasVAT){
-      rs = invoiceMoney;
-    } 
     else{
-      let VATmoney = this.calculateVAT(invoiceMoney);
-      if(requestMoney <= invoiceMoney + VATmoney){
-        rs = requestMoney - VATmoney;
-      }
-      else{
-        rs = invoiceMoney + VATmoney;
-      }
+      totalInvoiceAmountVAT = this.invoiceAmount - totalInvoiceAmountNoVAT;
+      return (totalVAT === 0 || totalInvoiceAmountVAT > this.requestMoney)
+          ? this.requestMoney
+          : Math.round(totalInvoiceAmountVAT + (this.requestMoney - totalInvoiceAmountVAT) / (1 + this.VAT));
     }
-
-    return rs;
   }
 
   calculateVAT(invoiceMoney: number){
-    return invoiceMoney - invoiceMoney/ this.VAT;
+    return Math.round(invoiceMoney * this.VAT);
   }
   
+  // function calculate totalVAT and totalInvoiceAmountNoVAT
+  calculate(){
+    let totalVAT = 0;
+    let totalInvoiceAmountNoVAT = 0;
+    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null 
+      && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== undefined && this.disburseTeambuildingRequestInfoDto.invoiceRequests !== null) {
+      this.disburseTeambuildingRequestInfoDto.invoiceRequests.forEach(item => {
+        if(!item.hasVAT){
+          totalVAT += Math.round(item.invoiceMoney * this.VAT);
+          totalInvoiceAmountNoVAT += item.invoiceMoney;
+        }
+      })
+    }
+    return {totalVAT, totalInvoiceAmountNoVAT};
+  }
+
   close(res): void {
     this.dialogRef.close(res);
   }
 
   getVATConfig(){
     this.teamBuildingRequestService.getVATConfig().subscribe((rs)=>{
-      this.VAT = (1 + rs.result/100);
+      this.VAT = rs.result / 100;
     })
     return this.VAT;
   }
@@ -154,19 +154,16 @@ export class DisburseRequestComponent extends AppComponentBase implements OnInit
   }
 
   calculateTotalSuggestedRemainingMoney() {
-    let suggestedRemainingMoney = 0;
-    let VATmoney = this.calculateVAT(this.invoiceAmount);
-    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null) {
-      if(this.disburseTeambuildingRequestInfoDto.requestMoney !== undefined && this.disburseMoney > 0){
-        if(this.disburseTeambuildingRequestInfoDto.requestMoney <= this.invoiceAmount + VATmoney){
-          suggestedRemainingMoney = 0;
-        }
-        else {
-          suggestedRemainingMoney += this.requestMoney - this.disburseMoney;
-        }
+    let totalVAT = this.calculate().totalVAT;
+    if(this.disburseTeambuildingRequestInfoDto !== undefined && this.disburseTeambuildingRequestInfoDto !== null
+      && this.disburseTeambuildingRequestInfoDto.requestMoney !== undefined && this.disburseMoney > 0){
+      if(this.disburseTeambuildingRequestInfoDto.requestMoney <= this.invoiceAmount + totalVAT){
+        return 0;
+      }
+      else {
+        return this.requestMoney - this.invoiceAmount - totalVAT;
       }
     }
-    return suggestedRemainingMoney;
   }
 }
 

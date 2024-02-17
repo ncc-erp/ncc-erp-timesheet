@@ -17,7 +17,7 @@
           <div class="item">
             <mat-form-field appearance="outline">
               <mat-label>Month</mat-label>
-              <mat-select name="monthSelect" [(value)]="month" (selectionChange)="selectionChange()">
+              <mat-select name="monthSelect" [(value)]="month" (selectionChange)="selectionChange($event)">
                 <mat-option *ngFor="let item of listMonth" [value]='item'>
                   {{item + 1}}
                 </mat-option>
@@ -154,11 +154,11 @@
 </div>
 
 <ng-template #customCellTemplate let-day="day" let-locale="locale">
-  <div class="cal-cell-top position-relative" [attr.name]="'daySelectBtn-'+(day.date | date:'dd-MM-yyyy')" style="overflow: hidden;cursor: pointer;">
+  <div class="cal-cell-top position-relative" [attr.name]="'daySelectBtn-'+(day.date | date:'dd-MM-yyyy')" style="overflow: hidden;">
     <span class="cal-day-badge" *ngIf="day.cssClass == 'back-red'">Off</span>
     <!-- <span class="cal-day-badge" *ngIf="day.badgeTotal > 0 && day.cssClass != 'back-red'">{{day.badgeTotal}}</span> -->
     <span class="cal-day-number">{{ day.date | calendarDate:'monthViewDayNumber':locale }}</span>
-    <div class="cal-day-item">
+    <div class="cal-day-item" style="cursor: pointer;">
       <ng-container *ngFor="let event of events">
         <ng-container *ngIf="event.date.getTime() === day.date.getTime()">
           <div style="display: flex; ">

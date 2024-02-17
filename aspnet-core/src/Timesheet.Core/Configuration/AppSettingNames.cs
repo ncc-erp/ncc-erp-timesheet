@@ -64,6 +64,7 @@
         public const string WFHSetting = "App.WFHSetting";
         public const string AllowInternToWorkRemote = "App.AllowInternToWorkRemote";
         public const string OpenTalkTaskId = "App.OpenTalkTaskId";
+        public const string UnassignedTaskId = "App.UnassignedTaskId";
         public const string DateToLockTimesheetOfLastMonth = "App.DateToLockTimesheetOfLastMonth";
         //public const string AccountIDCheckIn = "App.AccountIDCheckIn";
         //public const string SercurityCodeCheckIn = "App.SercurityCodeCheckIn";

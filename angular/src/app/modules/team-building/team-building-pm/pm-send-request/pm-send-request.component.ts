@@ -35,7 +35,7 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
 
   public listSelectedItemUserOtherProjectId: number[] = [];
   public invoiceFormGroup: FormGroup = new FormGroup({});
-
+  public error = false;
   constructor(
     injector: Injector,
     public teamBuildingPMService: TeamBuildingPMService,
@@ -251,7 +251,7 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
           invoiceRequestDto.amount = invoiceForm.controls["amount"].value;
           invoiceRequestDto.hasVat = invoiceForm.controls["isVat"].value;
           invoiceRequestDtoList.push(invoiceRequestDto);
-
+        
           count++;
 
         }
@@ -271,7 +271,6 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
 
       };
       this.requestAdding = [];
-
       this.teamBuildingPMService.addDataToTeamBuildingDetail(request, fileArray).subscribe(
         (response) => {
           if (response) {
@@ -280,7 +279,9 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
             this.dialogRef.close(true);
           }
         },
-        () => (this.saving = false)
+        () => {
+          this.saving = false
+        }
       );
     }
   }

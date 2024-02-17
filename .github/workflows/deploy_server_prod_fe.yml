@@ -50,6 +50,8 @@ jobs:
       run: |
         cd angular/dist/assets
         rm -rf appconfig.production.json
+        rm -rf /var/www/app_git/timesheet/timesheet-fe-bk/*
+        cp -r /var/www/app_git/timesheet/timesheet-fe/* /var/www/app_git/timesheet/timesheet-fe-bk/
         rm -rf /var/www/app_git/timesheet/timesheet-fe/*
         
     - name: Copy AngularBuild
