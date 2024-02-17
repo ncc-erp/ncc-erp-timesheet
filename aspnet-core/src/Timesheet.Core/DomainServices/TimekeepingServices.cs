@@ -42,249 +42,253 @@ namespace Timesheet.DomainServices
         [UnitOfWork]
         public async Task<List<Timekeeping>> AddTimekeepingByDay(DateTime selectedDate)
         {
-            Logger.Info("AddTimekeepingByDay() selectedDate = " + selectedDate.ToString());
-            // check ngày nghỉ thì ko cần tạo Timekeeping
-            var isOffDate = WorkScope.GetAll<DayOffSetting>()
-                .Where(s => s.DayOff.Date == selectedDate.Date)
-                .Any();
+            try {
+                Logger.Info("AddTimekeepingByDay() selectedDate = " + selectedDate.ToString());
+                // check ngày nghỉ thì ko cần tạo Timekeeping
+                var isOffDate = WorkScope.GetAll<DayOffSetting>()
+                    .Where(s => s.DayOff.Date == selectedDate.Date)
+                    .Any();
 
-            if (isOffDate)
-            {
-                Logger.Info("AddTimekeepingByDay() isOffDate = true ==> stop");
-                throw new UserFriendlyException($"{selectedDate.ToString("MM/dd/yyyy HH:mm:ss")} is Off Date => stop");
-            }
-
-            var users = WorkScope.GetAll<User>()
-                .Where(u => u.IsActive)
-                .Where(u => u.StartDateAt <= selectedDate)
-                .Select(u => new TimesheetUserDto
+                if (isOffDate)
                 {
-                    UserId = u.Id,
-                    IsStopWork = u.IsStopWork,
-                    StopWorkingDate = u.EndDateAt,
-                    EmailAddress = u.EmailAddress,
-                    MorningStartAt = u.MorningStartAt,
-                    MorningEndAt = u.MorningEndAt,
-                    MorningWorking = u.MorningWorking,
-                    AfternoonStartAt = u.AfternoonStartAt,
-                    AfternoonEndAt = u.AfternoonEndAt,
-                    AfternoonWorking = u.AfternoonWorking,
-                }).ToList();
-
-            if (users.Count < 1)
-            {
-                throw new UserFriendlyException("The day " + selectedDate + " is not a working day for any branch.");
-            }
-
-            Logger.Info($"Count Users in Database: ${users.Count()}");
-
-            var listTimekeepingOldBySelectedDate = WorkScope.GetAll<Timekeeping>()
-                .Where(s => s.DateAt.Date == selectedDate.Date)
-                .ToList();
-
-            var listDicUserIdToNote = listTimekeepingOldBySelectedDate
-                .GroupBy(s => s.UserId != null ? s.UserId : 0)
-                .ToDictionary(s => s.Key,
-                s => s.Select(x => new
-                {
-                    x.NoteReply,
-                    x.UserNote
-                })).ToList();
-
-            listTimekeepingOldBySelectedDate.ForEach(s =>
-            {
-                s.IsDeleted = true;
-                s.DeletionTime = DateTimeUtils.GetNow();
-            });
-            CurrentUnitOfWork.SaveChanges();
-
-            var mapAbsenceUsers = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request)
-                .Where(s => s.DateAt.Date == selectedDate.Date
-                && s.Request.Status == RequestStatus.Approved
-                && (s.Request.Type == RequestType.Off || s.Request.Type == RequestType.Onsite))
-                .GroupBy(s => s.Request.UserId)
-                .ToDictionary(s => s.Key, s => s.Select(x => new MapAbsenceUserDto
-                {
-                    UserId = x.Request.UserId,
-                    DateType = x.DateType,//morning, afternoon, fullday, custom
-                    AbsenceTime = x.AbsenceTime,//dau. giua, cuoi
-                    Hour = x.Hour,
-                    Type = x.Request.Type,
-                })
-                                .OrderBy(x => x.AbsenceTime)
-                                .ToList());
-
-            //var mapAbsenceUsers = list.ToDictionary(s => s.UserId, s => s);
-            Logger.Info("AddTimekeepingByDay() mapAbsenceUsers = " + mapAbsenceUsers.Count());
-
-            var rs = new List<Timekeeping>();
-            var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
-
-            var checkInUsers = _faceIdService.GetEmployeeCheckInOutMini(selectedDate);
-            if (checkInUsers == null)
-            {
-                Logger.Info("AddTimekeepingByDay() checkInUsers null or empty");
-                return default;
-            }
-
-            Logger.Info($"Count Users Checkin: ${checkInUsers.Count()}");
-
-            var dailyAndMentionPunishs = _komuService.GetDailyReport(selectedDate);
-            if (dailyAndMentionPunishs == null)
-            {
-                Logger.Info("AddTimekeepingByDay() dailyAndMentionPunishs null or empty");
-                return default;
-            }
-
-            var listDaily = dailyAndMentionPunishs.daily.ToList();
-            Logger.Info($"Count Users Komu punish Daily: ${listDaily.Count()}");
-
-            var listMention = dailyAndMentionPunishs.mention.ToList();
-            Logger.Info($"Count Users Komu punish Mention: ${listMention.Count()}");
-
-            var mapCheckInUsers = checkInUsers.ToDictionary(s => s.Email, s => s);
-
-            var mapDailyUsers = listDaily.ToDictionary(s => s.email, s => s.count);
-
-            var mapMentionUsers = listMention.ToDictionary(s => s.email, s => s.count);
-
-            var listUserName = users.Select(x => x.UserName).Distinct().ToList();
-            var userTrackerTimes = _trackerService.GetTimeTrackerToDay(selectedDate, listUserName);
-            Logger.Info($"Count Users Tracker times: ${listUserName.Count()}");
-
-            var dicUserNameToTrackerTime = userTrackerTimes.ToDictionary(s => s.email, s => new { s.ActiveMinute, s.active_time });
-
-            foreach (var user in users)
-            {
-
-                var t = new Timekeeping { };
-
-                // Tính toán register check in out với leave
-                //var RegisterCheckInOut = CaculateCheckInOutTime(mapAbsenceUsers, user);
-                var registerCheckInOut = CaculateCheckInOutTimeNew(mapAbsenceUsers, user);
-                t.RegisterCheckIn = registerCheckInOut.CheckIn;
-                t.RegisterCheckOut = registerCheckInOut.CheckOut;
-                t.NoteReply = registerCheckInOut.Note;
-
-                if (mapCheckInUsers.ContainsKey(user.EmailAddress))
-                {
-                    var checkInUser = mapCheckInUsers[user.EmailAddress];
-                    t.CheckIn = checkInUser?.VerifyStartTimeStr;
-                    t.CheckOut = checkInUser?.VerifyEndTimeStr;
-                    if (registerCheckInOut.AbsenceDayType == DayType.Afternoon)
-                    {
-                        ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(t);
-                    }
-                    else
-                    {
-                        ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
-                    }
+                    Logger.Info("AddTimekeepingByDay() isOffDate = true ==> stop");
+                    throw new UserFriendlyException($"{selectedDate.ToString("MM/dd/yyyy HH:mm:ss")} is Off Date => stop");
                 }
 
-                if(mapDailyUsers.ContainsKey(user.UserName))
-                {
-                    var dailyUser = mapDailyUsers[user.UserName];
-
-                    t.CountPunishDaily = dailyUser;
-                }
-
-                if (mapMentionUsers.ContainsKey(user.UserName))
-                {
-                    var mentionUser = mapMentionUsers[user.UserName];
-
-                    t.CountPunishMention = mentionUser;
-                }
-
-                listDicUserIdToNote.ForEach(item =>
-                {
-                    if (user.UserId == item.Key)
+                var users = WorkScope.GetAll<User>()
+                    .Where(u => u.IsActive)
+                    .Where(u => u.StartDateAt <= selectedDate)
+                    .Select(u => new TimesheetUserDto
                     {
-                        t.NoteReply = item.Value.Select(s => s.NoteReply).FirstOrDefault();
-                        t.UserNote = item.Value.Select(s => s.UserNote).FirstOrDefault();
-                    }
+                        UserId = u.Id,
+                        IsStopWork = u.IsStopWork,
+                        StopWorkingDate = u.EndDateAt,
+                        EmailAddress = u.EmailAddress,
+                        MorningStartAt = u.MorningStartAt,
+                        MorningEndAt = u.MorningEndAt,
+                        MorningWorking = u.MorningWorking,
+                        AfternoonStartAt = u.AfternoonStartAt,
+                        AfternoonEndAt = u.AfternoonEndAt,
+                        AfternoonWorking = u.AfternoonWorking,
+                    }).ToList();
+
+                if (users.Count < 1)
+                {
+                    throw new UserFriendlyException("The day " + selectedDate + " is not a working day for any branch.");
+                }
+
+                Logger.Info($"INSERT DATA ISSUE Count Users in Database: ${users.Count()}");
+
+                var listTimekeepingOldBySelectedDate = WorkScope.GetAll<Timekeeping>()
+                    .Where(s => s.DateAt.Date == selectedDate.Date)
+                    .ToList();
+
+                var listDicUserIdToNote = listTimekeepingOldBySelectedDate
+                    .GroupBy(s => s.UserId != null ? s.UserId : 0)
+                    .ToDictionary(s => s.Key,
+                    s => s.Select(x => new
+                    {
+                        x.NoteReply,
+                        x.UserNote
+                    })).ToList();
+
+                listTimekeepingOldBySelectedDate.ForEach(s =>
+                {
+                    s.IsDeleted = true;
+                    s.DeletionTime = DateTimeUtils.GetNow();
                 });
+                CurrentUnitOfWork.SaveChanges();
 
-                t.UserEmail = user.EmailAddress;
-                t.DateAt = selectedDate;
-                t.UserId = user.UserId;
+                var mapAbsenceUsers = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request)
+                    .Where(s => s.DateAt.Date == selectedDate.Date
+                    && s.Request.Status == RequestStatus.Approved
+                    && (s.Request.Type == RequestType.Off || s.Request.Type == RequestType.Onsite))
+                    .GroupBy(s => s.Request.UserId)
+                    .ToDictionary(s => s.Key, s => s.Select(x => new MapAbsenceUserDto
+                    {
+                        UserId = x.Request.UserId,
+                        DateType = x.DateType,//morning, afternoon, fullday, custom
+                        AbsenceTime = x.AbsenceTime,//dau. giua, cuoi
+                        Hour = x.Hour,
+                        Type = x.Request.Type,
+                    })
+                                    .OrderBy(x => x.AbsenceTime)
+                                    .ToList());
 
-                //Check punish by checkin/checkout times
-                CheckIsPunished(t, LimitedMinute);
+                //var mapAbsenceUsers = list.ToDictionary(s => s.UserId, s => s);
+                Logger.Info("AddTimekeepingByDay() mapAbsenceUsers = " + mapAbsenceUsers.Count());
 
-                await CheckIsPunishedByRule(t, LimitedMinute, dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].ActiveMinute : 0);
-                if (user.IsStopWork || (user.StopWorkingDate.HasValue && user.StopWorkingDate.Value.Date < selectedDate))
+                var rs = new List<Timekeeping>();
+                var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
+
+                var checkInUsers = _faceIdService.GetEmployeeCheckInOutMini(selectedDate);
+                if (checkInUsers == null)
                 {
-                    t.IsPunishedCheckIn = false;
-                    t.IsPunishedCheckOut = false;
+                    Logger.Info("AddTimekeepingByDay() checkInUsers null or empty");
+                    return default;
                 }
-                if (selectedDate.DayOfWeek == DayOfWeek.Saturday)
-                {
-                    t.RegisterCheckIn = "10:00";
-                    t.RegisterCheckOut = "12:00";
-                    t.NoteReply += " Saturday";
-                    t.IsPunishedCheckIn = false;
-                    t.IsPunishedCheckOut = false;
-                    t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                    t.MoneyPunish = 0;
-                }
-                else if (selectedDate.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    t.RegisterCheckIn = "";
-                    t.RegisterCheckOut = "";
-                    t.NoteReply = "Sunday";
-                    t.IsPunishedCheckIn = false;
-                    t.IsPunishedCheckOut = false;
-                    t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                    t.MoneyPunish = 0;
-                }
-                if (mapAbsenceUsers.ContainsKey(user.UserId))
-                {
-                    await CheckAbsenceUserAsync(mapAbsenceUsers, checkInUsers, LimitedMinute, t, user);
-                }
-                t.TrackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].active_time : "0";
 
-                try
+                Logger.Info($"INSERT DATA ISSUE Count Users Checkin: ${checkInUsers.Count()}");
+
+                var dailyAndMentionPunishs = _komuService.GetDailyReport(selectedDate);
+                if (dailyAndMentionPunishs == null)
                 {
-                    t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
-                    rs.Add(t);
+                    Logger.Info("AddTimekeepingByDay() dailyAndMentionPunishs null or empty");
+                    return default;
                 }
-                catch (Exception e)
+
+                var listDaily = dailyAndMentionPunishs.daily.ToList();
+                Logger.Info($"INSERT DATA ISSUE Count Users Komu punish Daily: ${listDaily.Count()}");
+
+                var listMention = dailyAndMentionPunishs.mention.ToList();
+                Logger.Info($"INSERT DATA ISSUE Count Users Komu punish Mention: ${listMention.Count()}");
+
+                var mapCheckInUsers = checkInUsers.ToDictionary(s => s.Email, s => s);
+
+                var mapDailyUsers = listDaily.ToDictionary(s => s.email, s => s.count);
+
+                var mapMentionUsers = listMention.ToDictionary(s => s.email, s => s.count);
+
+                var listUserName = users.Select(x => x.UserName).Distinct().ToList();
+                var userTrackerTimes = _trackerService.GetTimeTrackerToDay(selectedDate, listUserName);
+                Logger.Info($"INSERT DATA ISSUE Count Users Tracker times: ${listUserName.Count()}");
+
+                var dicUserNameToTrackerTime = userTrackerTimes.ToDictionary(s => s.email, s => new { s.ActiveMinute, s.active_time });
+
+                foreach (var user in users)
                 {
-                    Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
+
+                    var t = new Timekeeping { };
+
+                    // Tính toán register check in out với leave
+                    //var RegisterCheckInOut = CaculateCheckInOutTime(mapAbsenceUsers, user);
+                    var registerCheckInOut = CaculateCheckInOutTimeNew(mapAbsenceUsers, user);
+                    t.RegisterCheckIn = registerCheckInOut.CheckIn;
+                    t.RegisterCheckOut = registerCheckInOut.CheckOut;
+                    t.NoteReply = registerCheckInOut.Note;
+
+                    if (mapCheckInUsers.ContainsKey(user.EmailAddress))
+                    {
+                        var checkInUser = mapCheckInUsers[user.EmailAddress];
+                        t.CheckIn = checkInUser?.VerifyStartTimeStr;
+                        t.CheckOut = checkInUser?.VerifyEndTimeStr;
+                        if (registerCheckInOut.AbsenceDayType == DayType.Afternoon)
+                        {
+                            ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(t);
+                        }
+                        else
+                        {
+                            ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
+                        }
+                    }
+
+                    if(mapDailyUsers.ContainsKey(user.UserName))
+                    {
+                        var dailyUser = mapDailyUsers[user.UserName];
+
+                        t.CountPunishDaily = dailyUser;
+                    }
+
+                    if (mapMentionUsers.ContainsKey(user.UserName))
+                    {
+                        var mentionUser = mapMentionUsers[user.UserName];
+
+                        t.CountPunishMention = mentionUser;
+                    }
+
+                    listDicUserIdToNote.ForEach(item =>
+                    {
+                        if (user.UserId == item.Key)
+                        {
+                            t.NoteReply = item.Value.Select(s => s.NoteReply).FirstOrDefault();
+                            t.UserNote = item.Value.Select(s => s.UserNote).FirstOrDefault();
+                        }
+                    });
+
+                    t.UserEmail = user.EmailAddress;
+                    t.DateAt = selectedDate;
+                    t.UserId = user.UserId;
+
+                    //Check punish by checkin/checkout times
+                    CheckIsPunished(t, LimitedMinute);
+
+                    await CheckIsPunishedByRule(t, LimitedMinute, dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].ActiveMinute : 0);
+                    if (user.IsStopWork || (user.StopWorkingDate.HasValue && user.StopWorkingDate.Value.Date < selectedDate))
+                    {
+                        t.IsPunishedCheckIn = false;
+                        t.IsPunishedCheckOut = false;
+                    }
+                    if (selectedDate.DayOfWeek == DayOfWeek.Saturday)
+                    {
+                        t.RegisterCheckIn = "10:00";
+                        t.RegisterCheckOut = "12:00";
+                        t.NoteReply += " Saturday";
+                        t.IsPunishedCheckIn = false;
+                        t.IsPunishedCheckOut = false;
+                        t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                        t.MoneyPunish = 0;
+                    }
+                    else if (selectedDate.DayOfWeek == DayOfWeek.Sunday)
+                    {
+                        t.RegisterCheckIn = "";
+                        t.RegisterCheckOut = "";
+                        t.NoteReply = "Sunday";
+                        t.IsPunishedCheckIn = false;
+                        t.IsPunishedCheckOut = false;
+                        t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                        t.MoneyPunish = 0;
+                    }
+                    if (mapAbsenceUsers.ContainsKey(user.UserId))
+                    {
+                        await CheckAbsenceUserAsync(mapAbsenceUsers, checkInUsers, LimitedMinute, t, user);
+                    }
+                    t.TrackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].active_time : "0";
+
+                    try
+                    {
+                        t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
+                        rs.Add(t);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
+                    }
                 }
-            }
 
-            // co trong checkIn nhung ko co trong user
-            var userEmails = users.Select(s => s.EmailAddress).ToHashSet();
-            var checkInUsersOnly = checkInUsers.Where(s => !userEmails.Contains(s.Email));
+                // co trong checkIn nhung ko co trong user
+                var userEmails = users.Select(s => s.EmailAddress).ToHashSet();
+                var checkInUsersOnly = checkInUsers.Where(s => !userEmails.Contains(s.Email));
 
-            foreach (var checkIn in checkInUsersOnly)
-            {
-                var t = new Timekeeping
+                foreach (var checkIn in checkInUsersOnly)
                 {
-                    UserEmail = checkIn.Email,
-                    CheckIn = checkIn?.VerifyStartTimeStr,
-                    CheckOut = checkIn?.VerifyEndTimeStr,
-                    DateAt = selectedDate,
-                    NoteReply = "Email not match",
-                    TrackerTime = dicUserNameToTrackerTime.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTrackerTime[checkIn.Email.Split("@")[0]].active_time : "0",
-                };
-                ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
+                    var t = new Timekeeping
+                    {
+                        UserEmail = checkIn.Email,
+                        CheckIn = checkIn?.VerifyStartTimeStr,
+                        CheckOut = checkIn?.VerifyEndTimeStr,
+                        DateAt = selectedDate,
+                        NoteReply = "Email not match",
+                        TrackerTime = dicUserNameToTrackerTime.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTrackerTime[checkIn.Email.Split("@")[0]].active_time : "0",
+                    };
+                    ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
 
-                try
-                {
-                    t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
-                    rs.Add(t);
+                    try
+                    {
+                        t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
+                        rs.Add(t);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
+                    }
                 }
-                catch (Exception e)
-                {
-                    Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
-                }
-            }
 
-            Logger.Info("AddTimekeepingByDay() finish update " + rs.Count() +" rows!");
+                Logger.Info("AddTimekeepingByDay() finish update " + rs.Count() +" rows!");
 
-            return rs;
+                return rs;
+            } catch (Exception e) {
+                Logger.Info("INSERT DATA ISSUE exception: " + e.message);
+            } 
         }
        
         public void ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(Timekeeping t)
