@@ -1,4 +1,5 @@
 ﻿using Abp.Domain.Entities;
+using Ncc.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -45,6 +46,7 @@ namespace Timesheet.APIs.RequestDays.Dto
         public long ProjectId { get; set; }
         public string ProjectName { get; set; }
         public string ProjectCode { get; set; }
+        public ProjectUserType Type { get; set; }
         public List<PmInfoDto> Pms { get; set; }
     }
 

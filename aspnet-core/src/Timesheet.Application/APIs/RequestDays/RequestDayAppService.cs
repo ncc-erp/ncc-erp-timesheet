@@ -81,7 +81,7 @@ namespace Timesheet.APIs.RequestDays
             }
 
             var projectMember = await WorkScope.GetAll<ProjectUser>().Where(s => input.projectIds.Contains(s.ProjectId))
-                .Where(s => s.Type != ProjectUserType.DeActive)
+                /*.Where(s => s.Type != ProjectUserType.DeActive)*/
                 .Select(s => s.UserId).Distinct().ToListAsync();
 
             RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
@@ -250,7 +250,7 @@ namespace Timesheet.APIs.RequestDays
 
             var userProject = WorkScope.GetAll<ProjectUser>()
                                        .Where(s => projectIds.Contains(s.ProjectId))
-                                       .Where(s => s.Type != ProjectUserType.DeActive)
+/*                                       .Where(s => s.Type != ProjectUserType.DeActive)*/
                                        .Where(s => s.Project.Status == ProjectStatus.Active)
                                        .Select(s => new
                                        {
@@ -291,6 +291,7 @@ namespace Timesheet.APIs.RequestDays
                     ProjectId = x.ProjectId,
                     ProjectCode = x.ProjectCode,
                     ProjectName = x.ProjectName,
+                    Type = x.Type,
                     Pms = projectAndPMs.Where(p => p.ProjectId == x.ProjectId)
                                             .Select(p => p.PMs.ToList())
                                             .FirstOrDefault()

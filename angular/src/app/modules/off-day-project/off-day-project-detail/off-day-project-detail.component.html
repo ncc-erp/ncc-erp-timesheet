@@ -73,9 +73,10 @@
             <div *ngFor="let projectItem of item.projectInfos">
               <div class="row" style="margin-top: 5px;">
                 <b>{{projectItem.projectName}}</b>
-                <button type="submit" class="deactive-button" *ngIf="permission.isGranted(RELEASE_USER_FROM_PROJECT)" (click)="onDeactiveAction(projectItem.projectId, projectItem.projectName , item.userId, item.fullName)" 
+                <button type="submit" class="deactive-button" *ngIf="permission.isGranted(RELEASE_USER_FROM_PROJECT) && isActivesMap.get(projectItem.projectId + ' ' + item.userId)" (click)="onDeactiveAction(projectItem.projectId, projectItem.projectName , item.userId, item.fullName)" 
                 mat-raised-button matTooltip="ex: Deactive member in this project">  <mat-icon style="font-size: 15px; margin-top: 6px;">block</mat-icon> Deactive</button>
-               
+                <button type="submit" class="active-button" *ngIf="permission.isGranted(RELEASE_USER_FROM_PROJECT) && !isActivesMap.get(projectItem.projectId + ' ' + item.userId)" (click)="onActiveAction(projectItem.projectId, projectItem.projectName , item.userId, item.fullName)" 
+                mat-raised-button matTooltip="ex: Active member in this project">  <mat-icon style="font-size: 15px; margin-top: 6px;">check</mat-icon> Active</button>
               </div>
               <div class="row d-flex" style="flex-wrap: wrap;">
                 <div class="pm" *ngFor="let item of projectItem.pms" style="margin-bottom: 3px; white-space: nowrap;">{{item.pmFullName}}
