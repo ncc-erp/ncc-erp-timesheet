@@ -858,7 +858,23 @@ namespace Timesheet.Timesheets.Projects
             {
                 throw new UserFriendlyException($"User with id {userId} is not in the project with Id {projectId}");
             }
+            projectUser.PreviousType = projectUser.Type;
             projectUser.Type = ProjectUserType.DeActive;
+            await WorkScope.UpdateAsync(projectUser);
+        }
+
+        [HttpGet]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Project_Realease_User)]
+        public async System.Threading.Tasks.Task ActiveProjectUser(long projectId, long userId)
+        {
+            var projectUser = WorkScope.GetAll<ProjectUser>()
+                .Where(s => s.Project.Id == projectId && s.User.Id == userId)
+                .FirstOrDefault();
+            if (projectUser == null)
+            {
+                throw new UserFriendlyException($"User with id {userId} is not in the project with Id {projectId}");
+            }
+            projectUser.Type = projectUser.PreviousType;
             await WorkScope.UpdateAsync(projectUser);
         }
     }

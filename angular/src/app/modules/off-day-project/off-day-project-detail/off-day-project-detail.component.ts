@@ -6,7 +6,7 @@ import { AbsenceRequestDto } from '@app/service/api/model/absence.dto';
 import { ProjectManagerService } from '@app/service/api/project-manager.service';
 import { AppComponentBase } from '@shared/app-component-base';
 import { AppConsts } from '@shared/AppConsts';
-import { result } from 'lodash';
+import { forEach, result } from 'lodash';
 import * as moment from 'moment';
 
 @Component({
@@ -17,11 +17,11 @@ import * as moment from 'moment';
 export class OffDayProjectDetailComponent extends AppComponentBase implements OnInit {
   APPROVAL_ABSENCE_DAY_PROJECT = PERMISSIONS_CONSTANT.ApprovalAbsenceDayByProject;
   RELEASE_USER_FROM_PROJECT = PERMISSIONS_CONSTANT.ReleaseUser;
-
+  DEACTIVE_TYPE = 3;
   title = "";
   events: AbsenceRequestDto[] = [];
   date = null;
-
+  isActivesMap = new Map<string, boolean>();
   public userTypes = [
     { value: 0, label: 'Staff' },
     { value: 1, label: 'Intern' },
@@ -40,6 +40,11 @@ export class OffDayProjectDetailComponent extends AppComponentBase implements On
     if (data) {
       this.events = data.events;
       this.date = data.date;
+      forEach(this.events, (item) => {
+        forEach(item.projectInfos, (projectInfo) => {
+          this.isActivesMap.set(projectInfo.projectId + ' ' + item.userId , projectInfo.type !== this.DEACTIVE_TYPE);
+        })
+      });
     }
   }
 
@@ -157,20 +162,23 @@ export class OffDayProjectDetailComponent extends AppComponentBase implements On
 
   onDeactiveAction(projectId: number, projectName: string, userId: number, fullname: string){
     var msg = `Deactive ` +  `${fullname}` + ` From Project ` + `${projectName}`
-    abp.message.confirm(
-      msg,
-      (result: boolean) => {
-        if(result) {
-          this.projectManagerService.releaseUserFromProject(projectId, userId).subscribe((res) => {
-            if(res){
-              this.notify.success(this.l("Deactive Successfully!"));
-              this.close();
-            }
-          })
-        }
+    this.projectManagerService.releaseUserFromProject(projectId, userId).subscribe((res) => {
+      if(res){
+        this.isActivesMap.set(projectId + ' ' + userId, false);
+        this.notify.success(this.l("Deactive Successfully!"));
       }
-    )
+    });
   }
+
+  onActiveAction(projectId: number, projectName: string, userId: number, fullname: string){
+    var msg = `Active ` +  `${fullname}` + ` From Project ` + `${projectName}`
+    this.projectManagerService.activeProjectUser(projectId, userId).subscribe((res) => {
+      if(res){
+        this.isActivesMap.set(projectId + ' ' + userId, true);
+        this.notify.success(this.l("Active Successfully!"));
+      }
+    });
+  } 
 
   close(): void {
     this.dialogRef.close();

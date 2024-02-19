@@ -29,6 +29,7 @@ export class ProjectInfoDto {
     projectId : number;
     projectName : string;
     projectCode : string;
+    type: number;
     pms : PmInfoDto[]
 }
 

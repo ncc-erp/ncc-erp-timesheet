@@ -77,11 +77,10 @@ td {
   color: white;
 }
 
-.deactive-button {
+.active-button, .deactive-button {
   height: 26px;
   float: right;
   margin-bottom: 8px;
-  background-color:  #e9db82 ;
   color: white;
   padding: 0px 5px; 
   border-radius: 5px; 
@@ -90,8 +89,20 @@ td {
   line-height: 2;
 }
 
+.deactive-button {
+  background-color:  #e9db82 ;
+}
+
+.active-button {
+  background-color: #2b982b;
+}
+
 .deactive-button:hover{
   background-color: #958103 !important;
+}
+
+.active-button:hover{
+  background-color: #12a012 !important;
 }
 
 .reject-button {

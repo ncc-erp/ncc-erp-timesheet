@@ -92,4 +92,8 @@ export class ProjectManagerService extends BaseApiService {
     return this.http.get(this.rootUrl + `/ReleaseUserFromProject?projectId=${projectId}&userId=${userId}`);
   }
 
+  activeProjectUser(projectId: number, userId: number): Observable<any> {
+    return this.http.get(this.rootUrl + `/ActiveProjectUser?projectId=${projectId}&userId=${userId}`);
+  }
+
 }

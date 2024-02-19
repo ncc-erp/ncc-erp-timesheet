@@ -17,8 +17,9 @@ namespace Ncc.Entities
         [ForeignKey(nameof(ProjectId))]
         public Project Project { get; set; }
         public long ProjectId { get; set; }
-                
+
         public ProjectUserType Type { get; set; }
+        public ProjectUserType PreviousType { get; set; }
         public bool IsTemp { get; set; }
 
     }
