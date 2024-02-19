@@ -10,6 +10,7 @@ namespace Timesheet.Users.Dto
         public long ProjectId { get; set; }
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
+        public int WorkingTimePercent { get; set; }
         public ProjectUserType ProjectUserType { get; set; }
         public List<string> Pms { get; set; }
     }

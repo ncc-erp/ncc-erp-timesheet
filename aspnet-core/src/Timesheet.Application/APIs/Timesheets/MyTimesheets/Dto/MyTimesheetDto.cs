@@ -21,5 +21,6 @@ namespace Timesheet.Timesheets.MyTimesheets.Dto
         public TimesheetStatus Status { get; set; }
         public long? ProjectTargetUserId { get; set; }
         public bool IsTemp { get; set; }
+        public long UserId { get; set; }
     }
 }

@@ -63,7 +63,25 @@
                 </ng-container>
                 
               </div>
-              
+              <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-0">
+                <ng-container>
+                  <mat-form-field class="w-100" appearance="outline">
+                    <mat-label> {{ "Date Type" | localize }}</mat-label>
+                    <mat-select name="dateType" [(value)]="dateType" (selectionChange)="searchOrFilter()">
+                      <mat-option [value]="0">
+                        Day
+                      </mat-option>
+                      <mat-option [value]="1">
+                        Month
+                      </mat-option>
+                      <mat-option [value]="2">
+                        Year
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </ng-container>
+                
+              </div>
             </div>
           </div>
           <div class="col-lg-2">
@@ -136,6 +154,9 @@
                       <b>{{project.projectName}}</b>
                       <span class="label bg-blue" *ngFor="let pms of project.pms">
                         {{pms}}
+                      </span>
+                      <span class="label bg-green">
+                        {{project.workingTimePercent}}% 
                       </span>
                     </div>
                   </div>

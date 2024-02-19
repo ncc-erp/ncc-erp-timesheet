@@ -16,8 +16,8 @@ export class ManageUserForBranchService extends BaseApiService {
     return 'ManageUserForBranch';
   }
 
-  getAllUserPagging(page: PagedRequestDto): Observable<any>{
-    return this.http.post(this.rootUrl + "/GetAllUserPagging", page);
+  getAllUserPagging(page: PagedRequestDto, dateType: number): Observable<any>{
+    return this.http.post(this.rootUrl + `/GetAllUserPagging?dateType=${dateType}`, page);
   }
 
   getAllValueOfUserInProjectByUserId(page: PagedRequestDto, branchId: number): Observable<any> {

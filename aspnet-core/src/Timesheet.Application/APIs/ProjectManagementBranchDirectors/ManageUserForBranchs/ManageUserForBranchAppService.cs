@@ -18,6 +18,10 @@ using Timesheet.Users.Dto;
 using static Ncc.Entities.Enum.StatusEnum;
 using Microsoft.AspNetCore.Mvc;
 using Timesheet.Extension;
+using Timesheet.Timesheets.MyTimesheets.Dto;
+using Timesheet.Timesheets.Projects.Dto;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
 {
@@ -42,7 +46,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
             }
 
             return WorkScope.GetAll<ProjectUser>()
-                .Where(s => s.Project.Status == ProjectStatus.Active 
+                .Where(s => s.Project.Status == ProjectStatus.Active
                 && !s.Project.isAllUserBelongTo)
                 .Where(s => s.User.IsActive)
                 .Where(predicate)
@@ -59,12 +63,65 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
         [HttpPost]
         [AbpAuthorize]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch)]
-        public async Task<PagedResultDto<UserProjectsDto>> GetAllUserPagging(GridParam input, long? positionId, long? branchId)
+        public async Task<PagedResultDto<UserProjectsDto>> GetAllUserPagging(GridParam input, long? positionId, long? branchId, int? dateType)
         {
             var qProjectUser = QProjectUser(branchId);
-
+            var qMyTimeSheet = from th in WorkScope.GetAll<MyTimesheet>()
+                               select new MyTimesheetDto
+                               {
+                                   UserId = th.UserId,
+                                   ProjectTaskId = th.ProjectTaskId,
+                                   WorkingTime = th.WorkingTime,
+                                   DateAt = th.DateAt
+                               };
+            var qProjectTask = from pt in WorkScope.GetAll<ProjectTask>()
+                               select new ProjectTaskDto
+                               {
+                                   Id = pt.Id,
+                                   ProjectId = pt.ProjectId,
+                               };
+            DateTime current = DateTime.Now;
+            if (dateType == null)
+            {
+                dateType = 1;
+            }
+            if ((TypeOfDate)dateType == TypeOfDate.Day)
+            {
+                qMyTimeSheet = qMyTimeSheet
+                    .Where(s => s.DateAt.Date == current.Date
+                            && s.DateAt.Month == current.Month
+                            && s.DateAt.Year == current.Year);
+            }
+            else if ((TypeOfDate)dateType == TypeOfDate.Month)
+            {
+                qMyTimeSheet = qMyTimeSheet.Where(s => s.DateAt.Month == current.Month
+                                     && s.DateAt.Year == current.Year);
+            }
+            else
+            {
+                qMyTimeSheet = qMyTimeSheet.Where(s => s.DateAt.Year == current.Year);
+            }
+            var joinQuery = from mth in qMyTimeSheet
+                            join pt in qProjectTask on mth.ProjectTaskId equals pt.Id
+                            select new
+                            {
+                                ProjectId = pt.ProjectId,
+                                UserId = mth.UserId,
+                                WorkingTime = mth.WorkingTime,
+                            };
+            var workingTimeProject = joinQuery.GroupBy(s => s.UserId)
+                                    .ToDictionary(g => g.Key, g => g.Sum(i => i.WorkingTime));
+            var workingTimeUserProject = joinQuery.GroupBy(s => s.ProjectId.ToString() + " " + s.UserId.ToString())
+                                    .ToDictionary(g => g.Key, g => g.Sum(i => i.WorkingTime));
+            var projectIds = new HashSet<long>();
+            foreach (var jq in joinQuery)
+            {
+                projectIds.Add(jq.ProjectId);
+            }
+            joinQuery = joinQuery.GroupBy(s => s.UserId).Select(s => s.First());
             var query = from u in WorkScope.GetAll<User>().Where(s => s.IsActive)
-                        join pu in qProjectUser on u.Id equals pu.UserId into puu
+                        join jq in joinQuery on u.Id equals jq.UserId
+                        join pu in qProjectUser.Where(s => projectIds.Contains(s.ProjectId)) on jq.UserId equals pu.UserId into puu
                         select new UserProjectsDto
                         {
                             Id = u.Id,
@@ -87,15 +144,8 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                             }).ToList(),
                             ProjectCount = puu.Count(),
                         };
-
+            query = query.OrderByDescending(u => u.ProjectCount);
             var temp = await query.GetGridResult(query, input);
-
-            var projectIds = new HashSet<long>();
-            foreach (var user in temp.Items)
-            {
-                projectIds.UnionWith(user.ProjectUsers.Select(s => s.ProjectId));
-            }
-
             var projects = (WorkScope.GetAll<ProjectUser>()
                     .Where(s => projectIds.Contains(s.ProjectId) && s.Type == ProjectUserType.PM)
                     .Select(s => new { s.ProjectId, s.User.FullName })
@@ -107,7 +157,15 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                 foreach (var pu in user.ProjectUsers)
                 {
                     pu.Pms = projects.Where(s => s.Key == pu.ProjectId).Select(s => s.pms).FirstOrDefault();
+                    string workingTimeUserProjectKey = pu.ProjectId.ToString() + " " + user.Id.ToString();
+                    long workingTimeProjectKey = user.Id;
+                    if (workingTimeUserProject.ContainsKey(workingTimeUserProjectKey) && workingTimeProject.ContainsKey(workingTimeProjectKey))
+                    {
+                        pu.WorkingTimePercent = (int)Math.Round((double)workingTimeUserProject[workingTimeUserProjectKey] * 100 / workingTimeProject[workingTimeProjectKey]);
+                    }
                 }
+                user.ProjectUsers = user.ProjectUsers.Where(s => s.WorkingTimePercent > 0).OrderByDescending(s => s.WorkingTimePercent).ToList();
+                user.ProjectCount = user.ProjectUsers.Count();
             }
 
             return new PagedResultDto<UserProjectsDto>(temp.TotalCount, temp.Items);
@@ -137,18 +195,18 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                     }).ToList()
                 });
 
-            var result = (from voup in WorkScope.GetAll<ProjectUser>() 
-                join p in query on voup.ProjectId equals p.Id
-                        select new UserStatisticInProjectDto
-                        {
-                            ProjectId = p.Id,
-                            ProjectCode = p.ProjectCode,
-                            ProjectName = p.ProjectName,
-                            TotalUser = p.Users.Count(),
-                            MemberCount = p.Users.Count(s => s.ValueType == ValueOfUserType.Member),
-                            ExposeCount = p.Users.Count(s => s.ValueType == ValueOfUserType.Expose),
-                            ShadowCount = p.Users.Count(s => s.ValueType == ValueOfUserType.Shadow)
-                        }).DistinctBy(s => s.ProjectId);
+            var result = (from voup in WorkScope.GetAll<ProjectUser>()
+                          join p in query on voup.ProjectId equals p.Id
+                          select new UserStatisticInProjectDto
+                          {
+                              ProjectId = p.Id,
+                              ProjectCode = p.ProjectCode,
+                              ProjectName = p.ProjectName,
+                              TotalUser = p.Users.Count(),
+                              MemberCount = p.Users.Count(s => s.ValueType == ValueOfUserType.Member),
+                              ExposeCount = p.Users.Count(s => s.ValueType == ValueOfUserType.Expose),
+                              ShadowCount = p.Users.Count(s => s.ValueType == ValueOfUserType.Shadow)
+                          }).DistinctBy(s => s.ProjectId);
 
             var temp = await result.GetGridResult(result, input);
             return new PagedResultDto<UserStatisticInProjectDto>(temp.TotalCount, temp.Items);
