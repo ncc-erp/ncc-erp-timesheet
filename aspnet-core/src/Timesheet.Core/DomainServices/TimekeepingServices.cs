@@ -151,7 +151,7 @@ namespace Timesheet.DomainServices
 
                 var listUserName = users.Select(x => x.UserName).Distinct().ToList();
                 var userTrackerTimes = _trackerService.GetTimeTrackerToDay(selectedDate, listUserName);
-                Logger.Info($"INSERT DATA ISSUE Count Users Tracker times: ${listUserName.Count()}");
+                Logger.Info($"INSERT DATA ISSUE Count Users Tracker times: ${userTrackerTimes.Count()}");
 
                 var dicUserNameToTrackerTime = userTrackerTimes.ToDictionary(s => s.email, s => new { s.ActiveMinute, s.active_time });
 
@@ -287,7 +287,8 @@ namespace Timesheet.DomainServices
 
                 return rs;
             } catch (Exception e) {
-                Logger.Info("INSERT DATA ISSUE exception: " + e.message);
+                Logger.Info("INSERT DATA ISSUE exception: " + e.Message);
+                throw;
             } 
         }
        
