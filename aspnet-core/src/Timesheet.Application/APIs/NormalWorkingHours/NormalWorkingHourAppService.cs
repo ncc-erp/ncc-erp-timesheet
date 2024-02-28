@@ -9,6 +9,7 @@ using Ncc;
 using Ncc.Authorization.Users;
 using Ncc.Configuration;
 using Ncc.Entities;
+using Ncc.Entities.Enum;
 using Ncc.IoC;
 using System;
 using System.Collections.Generic;
@@ -46,9 +47,9 @@ namespace Timesheet.APIs.NormalWorkingHours
 
         [HttpPost]
         [AbpAllowAnonymous]
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_NormalWorking,Ncc.Authorization.PermissionNames.Report_NormalWorking_View)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_NormalWorking, Ncc.Authorization.PermissionNames.Report_NormalWorking_View)]
         public async Task<GridResult<GetNormalWorkingHourDto>> GetAllPagging(GridParam input, int year, int month, long? branchId, long? projectId,
-                                                                            bool isThanDefaultWorking, int? checkInFilter, int tsStatusFilter)
+                                                                            bool isThanDefaultWorking, int? checkInFilter, int tsStatusFilter, int absenceTypeFilter)
         {
             //bool isViewLevel = await this.IsGrantedAsync(Ncc.Authorization.PermissionNames.Report_NormalWorking_ViewLevel);
             byte[] arrDayOfWeek = { 7, 1, 2, 3, 4, 5, 6 };
@@ -84,19 +85,70 @@ namespace Timesheet.APIs.NormalWorkingHours
                .Where(s => s.Type != ProjectUserType.DeActive)
                .Select(s => s.UserId).Distinct().ToListAsync();
 
-            var absencedays = await WorkScope.GetAll<AbsenceDayDetail>()
-             .Where(s => s.DateAt.Year == year && s.DateAt.Month == month)
-             .Where(s => s.Request.Status != RequestStatus.Rejected)
-             .Select(s => new AbsenceDayDetailNormal
-             {
-                 UserId = s.Request.UserId,
-                 DateAt = s.DateAt.Date,
-                 DateType = s.DateType,
-                 Hour = s.Hour,
-                 Type = s.Request.Type,
-                 AbsenceTime = s.AbsenceTime
-             })
-             .ToListAsync();
+            var subQuery = WorkScope.GetAll<AbsenceDayDetail>()
+              .Where(s => s.DateAt.Year == year && s.DateAt.Month == month && s.Request.Status != RequestStatus.Rejected);
+            var userIds = new List<long> {};
+            // absenceTypeFilter == 1 <=> Get OffFull >= 3 days Or Off Morning/Afternoon >= 6 times
+            if (absenceTypeFilter == 1)
+            {
+                var offUserIds = await subQuery
+                .Where(s => s.DateType == DayType.Fullday)
+                .GroupBy(s => s.Request.UserId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    AbsenceCount = g.Count()
+                })
+                .Where(g => g.AbsenceCount >= 3)
+                .Select(g => g.UserId)
+                .ToListAsync();
+
+                var offMorningOrAfternoon = await subQuery
+                .Where(s => s.DateType == DayType.Morning || s.DateType == DayType.Afternoon)
+                .GroupBy(s => s.Request.UserId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    AbsenceCount = g.Count()
+                })
+                .Where(g => g.AbsenceCount >= 6)
+                .Select(g => g.UserId)
+                .ToListAsync();
+                userIds = offUserIds.Concat(offMorningOrAfternoon).Distinct().ToList();
+            }
+            // absenceTypeFilter == 2 <=> Get leave early/late >= 4 times
+            else if (absenceTypeFilter == 2)
+            {
+                userIds = await subQuery.Where(s => s.DateType == DayType.Custom)
+                .GroupBy(s => s.Request.UserId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    AbsenceCount = g.Count()
+                })
+                .Where(g => g.AbsenceCount >= 4)
+                .Select(g => g.UserId)
+                .ToListAsync();
+            }
+            // Get all
+            else
+            {
+                userIds = await subQuery.Select(g => g.Request.UserId)
+                    .Distinct().ToListAsync();
+            }
+
+            var absencedays = subQuery
+            .Where(s => userIds.Contains(s.Request.UserId))
+            .Select(s => new AbsenceDayDetailNormal
+            {
+                UserId = s.Request.UserId,
+                DateAt = s.DateAt.Date,
+                DateType = s.DateType,
+                Hour = s.Hour,
+                Type = s.Request.Type,
+                AbsenceTime = s.AbsenceTime
+            })
+              .ToList();
 
             var today = DateTimeUtils.GetNow();
             var listTimekeeping = await WorkScope.GetAll<Timekeeping>()
@@ -108,7 +160,7 @@ namespace Timesheet.APIs.NormalWorkingHours
                      DateAt = s.DateAt.Date
                  })
                  .Where(s => s.DateAt.Year == year && s.DateAt.Month == month)
-                 .Where(s => s.UserId.HasValue)
+                 .Where(s => s.UserId.HasValue && userIds.Contains(s.UserId.Value))
                  .Where(s => s.DateAt.Date <= today)
                  .Where(s => !dayOffSettings.Contains(s.DateAt.Date))
                  .Where(s => s.DateAt.DayOfWeek != DayOfWeek.Sunday)
@@ -130,6 +182,7 @@ namespace Timesheet.APIs.NormalWorkingHours
 
             TimesheetStatus[] listTimesheetStatus = new TimesheetStatus[] { TimesheetStatus.Pending, TimesheetStatus.Approve };
             var query = from u in WorkScope.GetAll<User>()
+                        .Where(s => userIds.Contains(s.Id))
                         .Where(s => s.IsActive == true)
                         .Where(s => !isThanDefaultWorking || listUserIdWarning.Contains(s.Id))
                         .Where(s => !checkInFilter.HasValue || listUserIdNoCheckIn.Contains(s.Id))
@@ -390,10 +443,10 @@ namespace Timesheet.APIs.NormalWorkingHours
         }
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_NormalWorking)]
         public async Task<Byte[]> ExportNormalWorking(GridParam input, int year, int month, long? branchId, long? projectId,
-                                                                            bool isThanDefaultWorking, int? checkInFilter, int tsStatusFilter)
+                                                                            bool isThanDefaultWorking, int? checkInFilter, int tsStatusFilter, int absenceTypeFilter)
         {
             var normalWorkingHourList = GetAllPagging(input, year, month, branchId, projectId,
-                                                                             isThanDefaultWorking, checkInFilter, tsStatusFilter).Result.Items;
+                                                                             isThanDefaultWorking, checkInFilter, tsStatusFilter, absenceTypeFilter).Result.Items;
             try
             {
                 int currentRow = 1;
@@ -579,7 +632,7 @@ namespace Timesheet.APIs.NormalWorkingHours
             long[] listOpenTalkTaskId = new long[] { long.Parse(openTalkTaskId), long.Parse(unassignedTaskId) };
 
             var listMyTimesheet = await WorkScope.GetAll<MyTimesheet>()
-                        .Where(ts=>ts.UserId == userId)
+                        .Where(ts => ts.UserId == userId)
                         .Where(ts => ts.DateAt.Year == year && ts.DateAt.Month == month)
                         .WhereIf(status == MyTimesheetFilterStatus.All, ts => true)
                         .WhereIf(status == MyTimesheetFilterStatus.Pending, ts => ts.Status == TimesheetStatus.Pending)

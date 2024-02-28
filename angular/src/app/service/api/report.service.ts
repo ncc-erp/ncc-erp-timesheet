@@ -19,8 +19,8 @@ export class ReportService extends BaseApiService {
 
     // @ts-ignore
     getAllPagging(request: PagedRequestDto, year: number, month: number, branchId: number, projectId: number,
-        isThanDefaultWorking: boolean, checkInFilter: number, tsStatusFilter: number): Observable<any> {
-        let url = `/GetAllPagging?year=${year}&month=${month}&branchId=${this.getPara(branchId)}&projectId=${this.getPara(projectId)}&isThanDefaultWorking=${isThanDefaultWorking}&checkInFilter=${this.getPara(checkInFilter)}&tsStatusFilter=${tsStatusFilter}`;
+        isThanDefaultWorking: boolean, checkInFilter: number, tsStatusFilter: number, absenceTypeFilter: number): Observable<any> {
+        let url = `/GetAllPagging?year=${year}&month=${month}&branchId=${this.getPara(branchId)}&projectId=${this.getPara(projectId)}&isThanDefaultWorking=${isThanDefaultWorking}&checkInFilter=${this.getPara(checkInFilter)}&tsStatusFilter=${tsStatusFilter}&absenceTypeFilter=${absenceTypeFilter}`;
         return this.http.post<any>(this.rootUrl + url, request);
     }
     private getPara(value){
@@ -36,8 +36,8 @@ export class ReportService extends BaseApiService {
     }
 
     ExportNormalWorking(request: PagedRequestDto, year: number, month: number, branchId: number, projectId: number,
-        isThanDefaultWorking: boolean, checkInFilter: number, tsStatusFilter: number): Observable<any> {
-        let url = `/ExportNormalWorking?year=${year}&month=${month}&branchId=${this.getPara(branchId)}&projectId=${this.getPara(projectId)}&isThanDefaultWorking=${isThanDefaultWorking}&checkInFilter=${this.getPara(checkInFilter)}&tsStatusFilter=${tsStatusFilter}`;
+        isThanDefaultWorking: boolean, checkInFilter: number, tsStatusFilter: number, absenceTypeFilter: number): Observable<any> {
+        let url = `/ExportNormalWorking?year=${year}&month=${month}&branchId=${this.getPara(branchId)}&projectId=${this.getPara(projectId)}&isThanDefaultWorking=${isThanDefaultWorking}&checkInFilter=${this.getPara(checkInFilter)}&tsStatusFilter=${tsStatusFilter}&absenceTypeFilter=${absenceTypeFilter}`;
         return this.http.post<any>(this.rootUrl + url, request);
     }
     getNormalWorkingHourByUserLogin( year: number, month: number, status: number): Observable<any> {

@@ -113,6 +113,14 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
+                    <mat-form-field class="col-sm-2 col-lg-2" appearance="outline">
+                        <mat-label>AbsenceType</mat-label>
+                        <mat-select name="absenceType" [(value)]='absenceTypeFilter' (selectionChange)='searchOrFilter()'>
+                            <mat-option *ngFor="let item of absenceTypeFilterList" [value]='APP_CONSTANT.AbsenceTypeFilter[item]'>
+                                {{item}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
                     <mat-form-field class="col-sm-6 col-lg-3" appearance="outline">
                         <mat-icon style="color: #9E9E9E" matPrefix>search</mat-icon>
                         <mat-label>Search by name, surname, email, username</mat-label>
@@ -204,8 +212,8 @@
 
                                     <td class="sticky-left"><b>{{item.totalOpenTalk}}</b></td>
 
-                                    <td [id]='"width" + i' *ngFor="let detail of item.listWorkingHour" class="text-center"
-                                        [ngClass]="getCssClass(detail)" [matTooltip] = "detail.infoTooltip" matTooltipClass="custom-tooltip">
+                                    <td [id]='"width" + i' *ngFor="let detail of item.listWorkingHour" class="text-center" 
+                                        [ngClass]="getCssClass(item.userId, detail)" [matTooltip] = "detail.infoTooltip" matTooltipClass="custom-tooltip">
                                         <div [className]="detail.isHalfWidth ? 'half-width sticky-left-day' : 'sticky-left-day'">
                                             <span class="d-block f-size-11">{{detail.workingHour}}
                                             </span>

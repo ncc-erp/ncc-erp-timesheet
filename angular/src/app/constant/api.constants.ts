@@ -203,6 +203,11 @@ export const APP_CONSTANT = {
     'No Check In & No Check Out': 3,
     'No Check In & No Check Out but have TS': 4
   },
+  AbsenceTypeFilter: {
+    'All': -1,
+    'Off (Full >= 3 or Morning/Afternoon >= 6)':1,
+    'Leave early/late >= 4 times': 2
+  },
 
   HaveCheckInFilter: {
     'All': -1,
