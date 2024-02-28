@@ -83,6 +83,9 @@ export class NormalWorkingComponent extends PagedListingComponentBase<WorkingRep
   tsStatusFilterList = Object.keys(this.APP_CONSTANT.TsStatusFilter)
   checkInFilter = APP_CONSTANT.FILTER_DEFAULT['All'];
   checkInFilterList = Object.keys(this.APP_CONSTANT.CheckInFilter)
+  absenceTypeFilter = APP_CONSTANT.FILTER_DEFAULT['All'];
+  absenceTypeFilterList = Object.keys(this.APP_CONSTANT.AbsenceTypeFilter)
+  warningMap = new Map();
   isDisabled: boolean = false;
   constructor(
     injector: Injector,
@@ -175,22 +178,47 @@ export class NormalWorkingComponent extends PagedListingComponentBase<WorkingRep
       });
     }
     this.reportService.getAllPagging(request, Number(this.year), Number(this.month), Number(this.branchId), Number(this.projectId)
-      , this.isThanDefaultWorking, Number(this.checkInFilter), Number(this.tsStatusFilter))
+      , this.isThanDefaultWorking, Number(this.checkInFilter), Number(this.tsStatusFilter), Number(this.absenceTypeFilter))
       .pipe(finalize(() => {
         finishedCallback();
       }))
       .subscribe(resp => {
         this.disabledCheckbox = false;
         this.workingReports = resp.result.items;
+        this.workingReports.forEach((item) => {
+          this.checkTwoWeeksConsecutiveWithoutSubmitTimesheet(item.userId, item.listWorkingHour)
+        });
         this.showPaging(resp.result, pageNumber);
       });
+  }
+  // Check user khong log timeSheet 2 tuan lien tiep
+  checkTwoWeeksConsecutiveWithoutSubmitTimesheet(userId: number , details: WorkingHourDto[]) {
+    var count = 0
+    var endDate = details.findIndex((ele) => ele.isLock === false)
+    var firstMondayWithoutLogTS = details.findIndex((ele) => ele.dayName === "Monday")
+    for (let i=firstMondayWithoutLogTS; i<= endDate; i++) {
+      if (count >= 14) {
+        this.warningMap.set(userId, {idxStart: firstMondayWithoutLogTS, idxEnd: firstMondayWithoutLogTS + count})
+      }
+      if (details[i].workingHour === null) {
+        if (details[i].listAbsenceDetaiInDay.length > 0 && details[i].listAbsenceDetaiInDay[0].absenceType === 1) {
+          count = 0
+          firstMondayWithoutLogTS += 7
+          i = firstMondayWithoutLogTS
+        } else count++
+      } else {
+        count = 0
+        firstMondayWithoutLogTS += 7
+        i = firstMondayWithoutLogTS
+      }
+    }
   }
 
   isShowDay(detail: WorkingHourDto) {
     return detail.dayName !== 'Sunday';
   }
 
-  getCssClass(detail: WorkingHourDto) {
+  getCssClass(userId: number, detail: WorkingHourDto) {
     if ((detail.isThanDefaultWorkingHourPerDay && this.isThanDefaultWorking) ||
       (detail.isOffDaySetting && this.isThanDefaultWorking && detail.workingHour != null)
     ) {
@@ -200,11 +228,14 @@ export class NormalWorkingComponent extends PagedListingComponentBase<WorkingRep
     if (detail.isNoCheckIn) {
       return 'dayNoCheckIn';
     }
-
+    var warningValue = this.warningMap.get(userId)
+    if (warningValue !== undefined && detail.date > warningValue.idxStart && detail.date <= warningValue.idxEnd) {
+      return 'dayWarning'
+    }
     return detail.isOffDaySetting ? 'dayOff'
-      : !detail.isOnsite && detail.workingHour + detail.offHour != 8 && (detail.workingHour != null || detail.offHour != null) && !detail.isOpenTalk ? 'dayWarning'
-        : detail.isLock ? 'dayLocked'
-          : 'defaultDay'
+    : !detail.isOnsite && detail.workingHour + detail.offHour != 8 && (detail.workingHour != null || detail.offHour != null) && !detail.isOpenTalk ? 'dayWarning'
+      : detail.isLock ? 'dayLocked'
+        : 'defaultDay'
   }
 
 
@@ -316,7 +347,7 @@ export class NormalWorkingComponent extends PagedListingComponentBase<WorkingRep
       });
     }
     this.reportService.ExportNormalWorking(req, Number(this.year), Number(this.month), Number(this.branchId), Number(this.projectId)
-      , this.isThanDefaultWorking, Number(this.checkInFilter), Number(this.tsStatusFilter)).subscribe(data => {
+      , this.isThanDefaultWorking, Number(this.checkInFilter), Number(this.tsStatusFilter), Number(this.absenceTypeFilter)).subscribe(data => {
         const file = new Blob([this.s2ab(atob(data.result))], {
           type: "application/vnd.ms-excel;charset=utf-8"
         });
