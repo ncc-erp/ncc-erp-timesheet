@@ -157,12 +157,12 @@ namespace Timesheet.DomainServices
 
                 foreach (var user in users)
                 {
-
                     var t = new Timekeeping { };
 
                     // Tính toán register check in out với leave
                     //var RegisterCheckInOut = CaculateCheckInOutTime(mapAbsenceUsers, user);
                     var registerCheckInOut = CaculateCheckInOutTimeNew(mapAbsenceUsers, user);
+                    Logger.Info($"AddTimekeepingByDay() Caculate CheckInOut Time New: userName: {user.UserName} - userId: {user.UserId}");
                     t.RegisterCheckIn = registerCheckInOut.CheckIn;
                     t.RegisterCheckOut = registerCheckInOut.CheckOut;
                     t.NoteReply = registerCheckInOut.Note;
@@ -175,10 +175,12 @@ namespace Timesheet.DomainServices
                         if (registerCheckInOut.AbsenceDayType == DayType.Afternoon)
                         {
                             ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(t);
+                            Logger.Info($"AddTimekeepingByDay() ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(): userName: {user.UserName} - userId: {user.UserId}");
                         }
                         else
                         {
                             ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
+                            Logger.Info($"AddTimekeepingByDay() ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(): userName: {user.UserName} - userId: {user.UserId}");
                         }
                     }
 
@@ -211,8 +213,9 @@ namespace Timesheet.DomainServices
 
                     //Check punish by checkin/checkout times
                     CheckIsPunished(t, LimitedMinute);
-
+                    Logger.Info($"AddTimekeepingByDay() CheckIsPunished(): userName: {user.UserName} - userId: {user.UserId}");
                     await CheckIsPunishedByRule(t, LimitedMinute, dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].ActiveMinute : 0);
+                    Logger.Info($"AddTimekeepingByDay() Check IsPunished by Rule: userName: {user.UserName} - userId: {user.UserId}");
                     if (user.IsStopWork || (user.StopWorkingDate.HasValue && user.StopWorkingDate.Value.Date < selectedDate))
                     {
                         t.IsPunishedCheckIn = false;
@@ -241,12 +244,14 @@ namespace Timesheet.DomainServices
                     if (mapAbsenceUsers.ContainsKey(user.UserId))
                     {
                         await CheckAbsenceUserAsync(mapAbsenceUsers, checkInUsers, LimitedMinute, t, user);
+                        Logger.Info($"AddTimekeepingByDay() Check Absence User Async: userName: {user.UserName} - userId: {user.UserId}");
                     }
                     t.TrackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].active_time : "0";
 
                     try
                     {
                         t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
+                        Logger.Info($"AddTimekeepingByDay() InsertAndGetId: {user.UserName} - userId: {user.UserId}");
                         rs.Add(t);
                     }
                     catch (Exception e)
