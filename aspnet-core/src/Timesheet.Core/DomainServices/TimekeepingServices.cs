@@ -240,6 +240,13 @@ namespace Timesheet.DomainServices
                     t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
                     t.MoneyPunish = 0;
                 }
+                if (t.UserId == 51446)
+                {
+                    Logger.Info($"UserId = 51446: timeKeeping {Convert.ToString(t)}");
+                    Logger.Info($"UserId = 51446: user {Convert.ToString(user)}");
+                    Logger.Info($"checkIn UserId = 51446: checkIn {Convert.ToString(checkInUsers)}");
+                    Logger.Info($"mapAbsenceUsers: {Convert.ToString(mapAbsenceUsers)}");
+                }
                 if (mapAbsenceUsers.ContainsKey(user.UserId))
                 {
                     Logger.Info($"AddTimekeepingByDay() Before Check Absence User Async: userName: {user.UserName} - userId: {user.UserId}");
