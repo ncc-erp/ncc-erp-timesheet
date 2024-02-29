@@ -242,15 +242,18 @@ namespace Timesheet.DomainServices
                 }
                 if (mapAbsenceUsers.ContainsKey(user.UserId))
                 {
+                    Logger.Info($"AddTimekeepingByDay() Before Check Absence User Async: userName: {user.UserName} - userId: {user.UserId}");
                     await CheckAbsenceUserAsync(mapAbsenceUsers, checkInUsers, LimitedMinute, t, user);
-                    Logger.Info($"AddTimekeepingByDay() Check Absence User Async: userName: {user.UserName} - userId: {user.UserId}");
+                    Logger.Info($"AddTimekeepingByDay() After Check Absence User Async: userName: {user.UserName} - userId: {user.UserId}");
                 }
+                Logger.Info($"AddTimekeepingByDay() Before t.TrackerTime: userName: {user.UserName} - userId: {user.UserId}");
                 t.TrackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].active_time : "0";
-
+                Logger.Info($"AddTimekeepingByDay() After t.TrackerTime: userName: {user.UserName} - userId: {user.UserId}");
                 try
                 {
+                    Logger.Info($"AddTimekeepingByDay() Before InsertAndGetId: userName: {user.UserName} - userId: {user.UserId}");
                     t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
-                    Logger.Info($"AddTimekeepingByDay() InsertAndGetId: {user.UserName} - userId: {user.UserId}");
+                    Logger.Info($"AddTimekeepingByDay() After InsertAndGetId: {user.UserName} - userId: {user.UserId}");
                     rs.Add(t);
                 }
                 catch (Exception e)
