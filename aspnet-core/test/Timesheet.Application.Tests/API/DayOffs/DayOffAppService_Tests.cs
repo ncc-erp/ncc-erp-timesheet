@@ -98,7 +98,7 @@ namespace Timesheet.Application.Tests.API.DayOffs
             await WithUnitOfWorkAsync(async () =>
             {
                 var dayOffs = _work.GetAll<DayOffSetting>();
-                Assert.Equal(18, dayOffs.Count());
+                Assert.Equal(29, dayOffs.Count());
                 dayOffs.ShouldContain(x => x.DayOff == input.DayOff);
                 dayOffs.ShouldContain(x => x.Name == input.Name);
                 dayOffs.ShouldContain(x => x.Branch == input.Branch);
@@ -128,7 +128,7 @@ namespace Timesheet.Application.Tests.API.DayOffs
             await WithUnitOfWorkAsync(async () =>
             {
                 var dayOffs = _work.GetAll<DayOffSetting>();
-                Assert.Equal(17, dayOffs.Count());
+                Assert.Equal(28, dayOffs.Count());
                 var dayOff = await _work.GetAsync<DayOffSetting>(1);
                 Assert.Equal(input.DayOff, dayOff.DayOff);
                 Assert.Equal(input.Coefficient, dayOff.Coefficient);
@@ -149,7 +149,7 @@ namespace Timesheet.Application.Tests.API.DayOffs
             await WithUnitOfWorkAsync(async () =>
             {
                 var dayOffs = _work.GetAll<DayOffSetting>();
-                Assert.Equal(16, dayOffs.Count());
+                Assert.Equal(27, dayOffs.Count());
                 dayOffs.ShouldNotContain(x => x.Id == 1);
 ;
             });

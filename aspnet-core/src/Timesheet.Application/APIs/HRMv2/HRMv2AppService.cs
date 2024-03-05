@@ -253,7 +253,8 @@ namespace Timesheet.APIs.HRMv2
         {
             var query = WorkScope.GetAll<DayOffSetting>()
                       .Where(s => s.DayOff.Year == year && s.DayOff.Month == month && s.DayOff.DayOfWeek == DayOfWeek.Saturday)
-                      .Select(s => s.DayOff).ToList();
+                      .Select(s => s.DayOff)
+                      .OrderBy(s => s.Date).ToList();
             return query;
         }
 

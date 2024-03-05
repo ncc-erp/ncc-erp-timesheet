@@ -338,6 +338,19 @@ namespace Timesheet.Application.Tests.API.HRMV2
         }
 
         [Fact]
+        public async Task GetAllSaturdaySettingOffInMonth_Test()
+        {
+            WithUnitOfWork(() =>
+            {
+                var result = _appService.GetAllSaturdaySettingOffInMonth(2024,3);
+                Assert.Equal(2 , result.Count);
+                result[0].Date.ShouldBe(new DateTime(2024, 03, 09).Date);
+                result[1].Date.ShouldBe(new DateTime(2024, 03, 16).Date);
+            });
+        }
+    
+
+        [Fact]
         public async Task GetSettingOffDates_Test()
         {
 
@@ -866,6 +879,7 @@ namespace Timesheet.Application.Tests.API.HRMV2
             Assert.Equal(listSaturdayDate[1], input.OpenTalkDates[1]);
             Assert.Equal(listSaturdayDate[2], input.OpenTalkDates[2]);
             Assert.Equal(listSaturdayDate[3], input.OpenTalkDates[3]);
+
         }
 
         // Test case có StartWorkingDate, EndWorkingDate  
