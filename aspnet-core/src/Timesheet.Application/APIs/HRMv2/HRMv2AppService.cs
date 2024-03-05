@@ -2,6 +2,8 @@
 using Abp.Collections.Extensions;
 using Abp.Configuration;
 using Abp.UI;
+using MassTransit.Initializers;
+using MassTransit.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -241,11 +243,20 @@ namespace Timesheet.APIs.HRMv2
                 }).ToList();
 
             List<DateTime> listSaturdayDate = DateTimeUtils.GetListSaturdayDate(input.Year, input.Month);
+            var dayoffSettings = GetDayoffSetting(input.Year, input.Month);
+            listSaturdayDate = listSaturdayDate.Except(dayoffSettings).ToList();
             var dicUserEmailToOpentalkCount = GetDicUserIdToOpentalkCount(input.Year, input.Month);
             ProcessOpentalkByNewWay(resultList, dicUserEmailToOpentalkCount, listSaturdayDate);
-
             return resultList;
         }
+        public List<DateTime> GetDayoffSetting(int year, int month)
+        {
+            var query = WorkScope.GetAll<DayOffSetting>()
+                      .Where(s => s.DayOff.Year == year && s.DayOff.Month == month)
+                      .Select(s => s.DayOff.Date).ToList();
+            return query;
+        }
+
 
         /// <summary>
         ///  Get Dictionary key : userId, value : opentalk count khác thứ bảy
