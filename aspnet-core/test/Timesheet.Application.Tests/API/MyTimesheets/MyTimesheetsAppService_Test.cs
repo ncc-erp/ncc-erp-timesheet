@@ -606,7 +606,7 @@ namespace Timesheet.Application.Tests.API.MyTimesheets
             await WithUnitOfWorkAsync(async () =>
             {
                 var myTimesheets = _work.GetAll<MyTimesheet>();
-                Assert.Equal(99, myTimesheets.Count());
+                Assert.Equal(112, myTimesheets.Count());
                 var myTimesheet = await _work.GetAsync<MyTimesheet>(result.Id);
                 Assert.Equal(input.ProjectTaskId, myTimesheet.ProjectTaskId);
                 Assert.Equal(input.Note, myTimesheet.Note);
@@ -879,7 +879,7 @@ namespace Timesheet.Application.Tests.API.MyTimesheets
             await WithUnitOfWorkAsync(async () =>
             {
                 var myTimesheets = _work.GetAll<MyTimesheet>();
-                Assert.Equal(98, myTimesheets.Count());
+                Assert.Equal(112, myTimesheets.Count());
                 var myTimesheet = await _work.GetAsync<MyTimesheet>(input.Id);
                 Assert.Equal(input.ProjectTaskId, myTimesheet.ProjectTaskId);
                 Assert.Equal(input.Note, myTimesheet.Note);
@@ -1008,7 +1008,7 @@ namespace Timesheet.Application.Tests.API.MyTimesheets
             await WithUnitOfWorkAsync(async () =>
             {
                 var myTimesheets = _work.GetAll<MyTimesheet>();
-                Assert.Equal(97, myTimesheets.Count());
+                Assert.Equal(111, myTimesheets.Count());
             });
         }
 
@@ -1537,7 +1537,7 @@ namespace Timesheet.Application.Tests.API.MyTimesheets
             await WithUnitOfWorkAsync(async () =>
             {
                 var myTimesheets = _work.GetAll<MyTimesheet>();
-                Assert.Equal(98, myTimesheets.Count());
+                Assert.Equal(112, myTimesheets.Count());
             });
         }
 
@@ -1688,7 +1688,7 @@ namespace Timesheet.Application.Tests.API.MyTimesheets
             await WithUnitOfWorkAsync(async () =>
             {
                 var myTimesheets = _work.GetAll<MyTimesheet>();
-                Assert.Equal(99, myTimesheets.Count());
+                Assert.Equal(112, myTimesheets.Count());
             });
         }
 

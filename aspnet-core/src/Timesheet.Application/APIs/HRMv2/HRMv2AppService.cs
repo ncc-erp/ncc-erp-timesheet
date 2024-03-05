@@ -243,18 +243,17 @@ namespace Timesheet.APIs.HRMv2
                 }).ToList();
 
             List<DateTime> listSaturdayDate = DateTimeUtils.GetListSaturdayDate(input.Year, input.Month);
-            var listSaturdaySettingOffInMonth = GetAllSaturdaySettingOffInMonth(input.Year, input.Month);
-            var listValidSaturdayDateInMonth = listSaturdayDate.Except(listSaturdaySettingOffInMonth).ToList();
+            var dayoffSettings = GetDayoffSetting(input.Year, input.Month);
+            listSaturdayDate = listSaturdayDate.Except(dayoffSettings).ToList();
             var dicUserEmailToOpentalkCount = GetDicUserIdToOpentalkCount(input.Year, input.Month);
-            ProcessOpentalkByNewWay(resultList, dicUserEmailToOpentalkCount, listValidSaturdayDateInMonth);
+            ProcessOpentalkByNewWay(resultList, dicUserEmailToOpentalkCount, listSaturdayDate);
             return resultList;
         }
-        public List<DateTime> GetAllSaturdaySettingOffInMonth(int year, int month)
+        public List<DateTime> GetDayoffSetting(int year, int month)
         {
             var query = WorkScope.GetAll<DayOffSetting>()
-                      .Where(s => s.DayOff.Year == year && s.DayOff.Month == month && s.DayOff.DayOfWeek == DayOfWeek.Saturday)
-                      .Select(s => s.DayOff)
-                      .OrderBy(s => s.Date).ToList();
+                      .Where(s => s.DayOff.Year == year && s.DayOff.Month == month)
+                      .Select(s => s.DayOff.Date).ToList();
             return query;
         }
 

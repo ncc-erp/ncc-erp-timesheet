@@ -342,10 +342,9 @@ namespace Timesheet.Application.Tests.API.HRMV2
         {
             WithUnitOfWork(() =>
             {
-                var result = _appService.GetAllSaturdaySettingOffInMonth(2024,3);
-                Assert.Equal(2 , result.Count);
+                var result = _appService.GetDayoffSetting(2024,3);
+                Assert.Equal(1 , result.Count);
                 result[0].Date.ShouldBe(new DateTime(2024, 03, 09).Date);
-                result[1].Date.ShouldBe(new DateTime(2024, 03, 16).Date);
             });
         }
     
@@ -775,6 +774,28 @@ namespace Timesheet.Application.Tests.API.HRMV2
 
                 result.First().NormalizeEmailAddress.ShouldBe("TESTEMAIL6@GMAIL.COM");
                 result.First().NormalWorkingDates.Count().ShouldBe(5);
+                result.First().OpenTalkDates.Count().ShouldBe(3);
+            });
+        }
+        // Case 5: 1 opentalk thứ bảy ngày 3/2/2024 trước nghỉ lễ
+        // 1 opentalk ngày thường (thứ 6 ngày 16/2/2024) sau nghỉ lễ 
+        // 11 ngày làm việc bình thường
+        [Fact]
+        public void GetChamCongInfo_Test6()
+        {
+            InputCollectDataForPayslipDto input = new InputCollectDataForPayslipDto
+            {
+                Year = 2024,
+                Month = 2,
+                UpperEmails = new List<string> { "TESTEMAIL20@GMAIL.COM" }
+            };
+
+            WithUnitOfWork(() =>
+            {
+                var result = _appService.GetChamCongInfo(input);
+
+                result.First().NormalizeEmailAddress.ShouldBe("TESTEMAIL20@GMAIL.COM");
+                result.First().NormalWorkingDates.Count().ShouldBe(11);
                 result.First().OpenTalkDates.Count().ShouldBe(3);
             });
         }
