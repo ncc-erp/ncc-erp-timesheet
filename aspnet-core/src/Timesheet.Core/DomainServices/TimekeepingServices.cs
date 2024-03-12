@@ -201,6 +201,16 @@ namespace Timesheet.DomainServices
                 t.UserId = user.UserId;
 
                 //Check punish by checkin/checkout times
+                if (mapAbsenceUsers.ContainsKey(user.UserId)) {
+                    var absenceUser = mapAbsenceUsers[user.UserId];
+                    var arriveLate = absenceUser
+                            .Where(s => s.Type == RequestType.Off && s.DateType == DayType.Custom && s.AbsenceTime == OnDayType.DiMuon)
+                            .FirstOrDefault();
+                    if (arriveLate != null)
+                    {
+                        LimitedMinute += (int) (arriveLate.Hour * 60);
+                    }
+                }
                 CheckIsPunished(t, LimitedMinute);
 
                 await CheckIsPunishedByRule(t, LimitedMinute, dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].ActiveMinute : 0);
@@ -231,7 +241,11 @@ namespace Timesheet.DomainServices
                 }
                 if (mapAbsenceUsers.ContainsKey(user.UserId))
                 {
-                    await CheckAbsenceUserAsync(mapAbsenceUsers, checkInUsers, LimitedMinute, t, user);
+                    var absenceUser = mapAbsenceUsers[user.UserId];
+                    if (!(absenceUser.Count > 1 && absenceUser[0].Type == absenceUser[1].Type))
+                    {
+                        await CheckAbsenceUserAsync(mapAbsenceUsers, checkInUsers, LimitedMinute, t, user);
+                    }
                 }
                 t.TrackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].active_time : "0";
 
@@ -259,11 +273,11 @@ namespace Timesheet.DomainServices
                 rs.Add(t);
             }
 
-            Logger.Info("AddTimekeepingByDay() finish update " + rs.Count() +" rows!");
+            Logger.Info("AddTimekeepingByDay() finish update " + rs.Count() + " rows!");
 
             return rs;
         }
-       
+
         public void ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(Timekeeping t)
         {
             try
@@ -848,7 +862,6 @@ namespace Timesheet.DomainServices
                     t.MoneyPunish = 0;
                 }
             }
-        }
-
+        }   
     }
 }
