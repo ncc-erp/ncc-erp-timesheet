@@ -76,6 +76,8 @@ namespace Timesheet.DomainServices
                 throw new UserFriendlyException("The day " + selectedDate + " is not a working day for any branch.");
             }
 
+            Logger.Info($"INSERT DATA ISSUE Count Users in Database: ${users.Count()}");
+
             var listTimekeepingOldBySelectedDate = WorkScope.GetAll<Timekeeping>()
                 .Where(s => s.DateAt.Date == selectedDate.Date)
                 .ToList();
@@ -125,6 +127,8 @@ namespace Timesheet.DomainServices
                 return default;
             }
 
+            Logger.Info($"INSERT DATA ISSUE Count Users Checkin: ${checkInUsers.Count()}");
+
             var dailyAndMentionPunishs = _komuService.GetDailyReport(selectedDate);
             if (dailyAndMentionPunishs == null)
             {
@@ -133,8 +137,10 @@ namespace Timesheet.DomainServices
             }
 
             var listDaily = dailyAndMentionPunishs.daily.ToList();
+            Logger.Info($"INSERT DATA ISSUE Count Users Komu punish Daily: ${listDaily.Count()}");
 
             var listMention = dailyAndMentionPunishs.mention.ToList();
+            Logger.Info($"INSERT DATA ISSUE Count Users Komu punish Mention: ${listMention.Count()}");
 
             var mapCheckInUsers = checkInUsers.ToDictionary(s => s.Email, s => s);
 
@@ -144,16 +150,18 @@ namespace Timesheet.DomainServices
 
             var listUserName = users.Select(x => x.UserName).Distinct().ToList();
             var userTrackerTimes = _trackerService.GetTimeTrackerToDay(selectedDate, listUserName);
+            Logger.Info($"INSERT DATA ISSUE Count Users Tracker times: ${listUserName.Count()}");
+
             var dicUserNameToTrackerTime = userTrackerTimes.ToDictionary(s => s.email, s => new { s.ActiveMinute, s.active_time });
 
             foreach (var user in users)
             {
-
                 var t = new Timekeeping { };
 
                 // Tính toán register check in out với leave
                 //var RegisterCheckInOut = CaculateCheckInOutTime(mapAbsenceUsers, user);
                 var registerCheckInOut = CaculateCheckInOutTimeNew(mapAbsenceUsers, user);
+                Logger.Info($"AddTimekeepingByDay() Caculate CheckInOut Time New: userName: {user.UserName} - userId: {user.UserId}");
                 t.RegisterCheckIn = registerCheckInOut.CheckIn;
                 t.RegisterCheckOut = registerCheckInOut.CheckOut;
                 t.NoteReply = registerCheckInOut.Note;
@@ -166,14 +174,16 @@ namespace Timesheet.DomainServices
                     if (registerCheckInOut.AbsenceDayType == DayType.Afternoon)
                     {
                         ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(t);
+                        Logger.Info($"AddTimekeepingByDay() ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(): userName: {user.UserName} - userId: {user.UserId}");
                     }
                     else
                     {
                         ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
+                        Logger.Info($"AddTimekeepingByDay() ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(): userName: {user.UserName} - userId: {user.UserId}");
                     }
                 }
 
-                if(mapDailyUsers.ContainsKey(user.UserName))
+                if (mapDailyUsers.ContainsKey(user.UserName))
                 {
                     var dailyUser = mapDailyUsers[user.UserName];
 
@@ -212,8 +222,9 @@ namespace Timesheet.DomainServices
                     }
                 }
                 CheckIsPunished(t, LimitedMinute);
-
+                Logger.Info($"AddTimekeepingByDay() CheckIsPunished(): userName: {user.UserName} - userId: {user.UserId}");
                 await CheckIsPunishedByRule(t, LimitedMinute, dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].ActiveMinute : 0);
+                Logger.Info($"AddTimekeepingByDay() Check IsPunished by Rule: userName: {user.UserName} - userId: {user.UserId}");
                 if (user.IsStopWork || (user.StopWorkingDate.HasValue && user.StopWorkingDate.Value.Date < selectedDate))
                 {
                     t.IsPunishedCheckIn = false;
@@ -239,6 +250,13 @@ namespace Timesheet.DomainServices
                     t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
                     t.MoneyPunish = 0;
                 }
+                if (t.UserId == 51446)
+                {
+                    Logger.Info($"UserId = 51446: timeKeeping {Convert.ToString(t)}");
+                    Logger.Info($"UserId = 51446: user {Convert.ToString(user)}");
+                    Logger.Info($"checkIn UserId = 51446: checkIn {Convert.ToString(checkInUsers)}");
+                    Logger.Info($"mapAbsenceUsers: {Convert.ToString(mapAbsenceUsers)}");
+                }
                 if (mapAbsenceUsers.ContainsKey(user.UserId))
                 {
                     var absenceUser = mapAbsenceUsers[user.UserId];
@@ -247,10 +265,20 @@ namespace Timesheet.DomainServices
                         await CheckAbsenceUserAsync(mapAbsenceUsers, checkInUsers, LimitedMinute, t, user);
                     }
                 }
+                Logger.Info($"AddTimekeepingByDay() Before t.TrackerTime: userName: {user.UserName} - userId: {user.UserId}");
                 t.TrackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].active_time : "0";
-
-                t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
-                rs.Add(t);
+                Logger.Info($"AddTimekeepingByDay() After t.TrackerTime: userName: {user.UserName} - userId: {user.UserId}");
+                try
+                {
+                    Logger.Info($"AddTimekeepingByDay() Before InsertAndGetId: userName: {user.UserName} - userId: {user.UserId}");
+                    t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
+                    Logger.Info($"AddTimekeepingByDay() After InsertAndGetId: {user.UserName} - userId: {user.UserId}");
+                    rs.Add(t);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
+                }
             }
 
             // co trong checkIn nhung ko co trong user
@@ -269,8 +297,16 @@ namespace Timesheet.DomainServices
                     TrackerTime = dicUserNameToTrackerTime.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTrackerTime[checkIn.Email.Split("@")[0]].active_time : "0",
                 };
                 ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
-                t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
-                rs.Add(t);
+
+                try
+                {
+                    t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
+                    rs.Add(t);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
+                }
             }
 
             Logger.Info("AddTimekeepingByDay() finish update " + rs.Count() + " rows!");
@@ -334,7 +370,7 @@ namespace Timesheet.DomainServices
                     int timeStartChangingCheckInToCheckOutCaseOffAfternoonMinutes = DateTimeUtils.ConvertHHmmssToMinutes(SettingManager.GetSettingValue(AppSettingNames.TimeStartChangingCheckinToCheckoutCaseOffAfternoon));
                     if (checkInMinutes >= timeStartChangingCheckInToCheckOutCaseOffAfternoonMinutes)
                     {
-                        if (!string.IsNullOrEmpty(t.RegisterCheckIn) )
+                        if (!string.IsNullOrEmpty(t.RegisterCheckIn))
                         {
                             int registerCheckInTime = DateTimeUtils.ConvertHHmmssToMinutes(t.RegisterCheckIn);
                             int registerCheckOutTime = DateTimeUtils.ConvertHHmmssToMinutes(t.RegisterCheckOut);
@@ -861,6 +897,12 @@ namespace Timesheet.DomainServices
                     t.StatusPunish = CheckInCheckOutPunishmentType.LateAndNoCheckOut;
                     t.MoneyPunish = 0;
                 }
+            } 
+            else
+            {
+                Logger.Info($"CheckAbsenceUserAsync() before case ERROR: userName: {user.UserName} - userId: {user.UserId}");
+                t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                t.MoneyPunish = 0;
             }
         }   
     }
