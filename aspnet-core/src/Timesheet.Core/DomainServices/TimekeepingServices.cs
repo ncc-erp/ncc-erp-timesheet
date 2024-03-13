@@ -42,7 +42,6 @@ namespace Timesheet.DomainServices
         [UnitOfWork]
         public async Task<List<Timekeeping>> AddTimekeepingByDay(DateTime selectedDate)
         {
-            Logger.Info("AddTimekeepingByDay() selectedDate = " + selectedDate.ToString());
             // check ngày nghỉ thì ko cần tạo Timekeeping
             var isOffDate = WorkScope.GetAll<DayOffSetting>()
                 .Where(s => s.DayOff.Date == selectedDate.Date)
@@ -50,7 +49,6 @@ namespace Timesheet.DomainServices
 
             if (isOffDate)
             {
-                Logger.Info("AddTimekeepingByDay() isOffDate = true ==> stop");
                 throw new UserFriendlyException($"{selectedDate.ToString("MM/dd/yyyy HH:mm:ss")} is Off Date => stop");
             }
 
@@ -112,23 +110,18 @@ namespace Timesheet.DomainServices
                                 .OrderBy(x => x.AbsenceTime)
                                 .ToList());
 
-            //var mapAbsenceUsers = list.ToDictionary(s => s.UserId, s => s);
-            Logger.Info("AddTimekeepingByDay() mapAbsenceUsers = " + mapAbsenceUsers.Count());
-
             var rs = new List<Timekeeping>();
             var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
 
             var checkInUsers = _faceIdService.GetEmployeeCheckInOutMini(selectedDate);
             if (checkInUsers == null)
             {
-                Logger.Info("AddTimekeepingByDay() checkInUsers null or empty");
                 return default;
             }
 
             var dailyAndMentionPunishs = _komuService.GetDailyReport(selectedDate);
             if (dailyAndMentionPunishs == null)
             {
-                Logger.Info("AddTimekeepingByDay() dailyAndMentionPunishs null or empty");
                 return default;
             }
 
@@ -144,11 +137,11 @@ namespace Timesheet.DomainServices
 
             var listUserName = users.Select(x => x.UserName).Distinct().ToList();
             var userTrackerTimes = _trackerService.GetTimeTrackerToDay(selectedDate, listUserName);
+
             var dicUserNameToTrackerTime = userTrackerTimes.ToDictionary(s => s.email, s => new { s.ActiveMinute, s.active_time });
 
             foreach (var user in users)
             {
-
                 var t = new Timekeeping { };
 
                 // Tính toán register check in out với leave
@@ -212,7 +205,6 @@ namespace Timesheet.DomainServices
                     }
                 }
                 CheckIsPunished(t, LimitedMinute);
-
                 await CheckIsPunishedByRule(t, LimitedMinute, dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].ActiveMinute : 0);
                 if (user.IsStopWork || (user.StopWorkingDate.HasValue && user.StopWorkingDate.Value.Date < selectedDate))
                 {
@@ -248,9 +240,15 @@ namespace Timesheet.DomainServices
                     }
                 }
                 t.TrackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].active_time : "0";
-
-                t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
-                rs.Add(t);
+                try
+                {
+                    t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
+                    rs.Add(t);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
+                }
             }
 
             // co trong checkIn nhung ko co trong user
@@ -269,11 +267,17 @@ namespace Timesheet.DomainServices
                     TrackerTime = dicUserNameToTrackerTime.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTrackerTime[checkIn.Email.Split("@")[0]].active_time : "0",
                 };
                 ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
-                t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
-                rs.Add(t);
-            }
 
-            Logger.Info("AddTimekeepingByDay() finish update " + rs.Count() + " rows!");
+                try
+                {
+                    t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
+                    rs.Add(t);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
+                }
+            }
 
             return rs;
         }
@@ -334,7 +338,7 @@ namespace Timesheet.DomainServices
                     int timeStartChangingCheckInToCheckOutCaseOffAfternoonMinutes = DateTimeUtils.ConvertHHmmssToMinutes(SettingManager.GetSettingValue(AppSettingNames.TimeStartChangingCheckinToCheckoutCaseOffAfternoon));
                     if (checkInMinutes >= timeStartChangingCheckInToCheckOutCaseOffAfternoonMinutes)
                     {
-                        if (!string.IsNullOrEmpty(t.RegisterCheckIn) )
+                        if (!string.IsNullOrEmpty(t.RegisterCheckIn))
                         {
                             int registerCheckInTime = DateTimeUtils.ConvertHHmmssToMinutes(t.RegisterCheckIn);
                             int registerCheckOutTime = DateTimeUtils.ConvertHHmmssToMinutes(t.RegisterCheckOut);
@@ -861,6 +865,12 @@ namespace Timesheet.DomainServices
                     t.StatusPunish = CheckInCheckOutPunishmentType.LateAndNoCheckOut;
                     t.MoneyPunish = 0;
                 }
+            } 
+            else
+            {
+                Logger.Info($"CheckAbsenceUserAsync() before case ERROR: userName: {user.UserName} - userId: {user.UserId}");
+                t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                t.MoneyPunish = 0;
             }
         }   
     }
