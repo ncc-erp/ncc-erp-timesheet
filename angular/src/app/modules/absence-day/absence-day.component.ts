@@ -182,7 +182,7 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
       this.changeRequestItem(currentRequest, sentItems);
     }
 
-    if (currentRequest.absenceTime > 0 && !sentItems.find(x => x.dateType == 4)) {
+    if (currentRequest.absenceTime > 0) {
       this.showPopupDiMuonVeSom(currentRequest, selectedDate);
     }
     this.selectedDays.set(selectedDate, currentRequest.dateType);

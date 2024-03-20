@@ -12,8 +12,8 @@ namespace Timesheet.DomainServices
     {
         Task<List<Timekeeping>> AddTimekeepingByDay(DateTime selectedDate);
         CheckInOutTimeDto CaculateCheckInOutTime(Dictionary<long, MapAbsenceUserDto> mapAbsenceUsers, TimesheetUserDto user);
-        void CheckIsPunished(Timekeeping timekeeping, int LimitMinute);
-        void CheckIsPunished(Timekeeping timekeeping);
+        Task CheckIsPunished(Timekeeping timekeeping, int LimitMinute);
+        Task CheckIsPunished(Timekeeping timekeeping);
         Task<object> NoticePunishUserCheckInOut(DateTime now);
         Task CheckIsPunishedByRule(Timekeeping timekeeping, int limitedMinute, float trackerTime);
     }

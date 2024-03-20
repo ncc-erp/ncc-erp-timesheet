@@ -124,7 +124,7 @@
           *ngIf="item.cssClass === 'afternoon-absence' || item.cssClass === 'afternoon-request'">Afternoon</span>
 
         <div class="cal-day-badge text-primary day-custom-time"
-          *ngIf="item.cssClass === 'custom-absence-time' || item.cssClass === 'custom-request-time' && item.hour!=0">
+          *ngIf="item.cssClass === 'custom-absence-time' || item.cssClass === 'custom-request-time'">
           <span *ngIf="item.cssClass === 'custom-request-time' && item.hour==0">Time:</span>
           <span *ngIf="item.absenceTime == APP_CONSTANT.OnDayType.BeginOfDay && item.hour!=0">Đi muộn:</span>
           <span *ngIf="item.absenceTime == APP_CONSTANT.OnDayType.EndOfDay && item.hour!=0">Về sớm:</span>
