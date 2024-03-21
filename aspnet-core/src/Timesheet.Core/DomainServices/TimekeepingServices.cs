@@ -201,6 +201,8 @@ namespace Timesheet.DomainServices
                 {
                     t.IsPunishedCheckIn = false;
                     t.IsPunishedCheckOut = false;
+                    t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                    t.MoneyPunish = 0;
                 }
                 if (selectedDate.DayOfWeek == DayOfWeek.Saturday)
                 {
@@ -373,13 +375,19 @@ namespace Timesheet.DomainServices
 
             float percentageConfig = getPercentageConfig();
             var trackerTimeByRegisterWorkingHours = percentageConfig * registerWorkingHours;
-            if(!timekeeping.NoteReply.IsNullOrEmpty() && timekeeping.NoteReply.Contains("Onsite"))
+            if (!timekeeping.NoteReply.IsNullOrEmpty() && timekeeping.NoteReply.Contains("Off fullday"))
+            {
+                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
+            }
+            else if (!timekeeping.NoteReply.IsNullOrEmpty() && timekeeping.NoteReply.Contains("Onsite"))
             {
                 if ((CheckIn && CheckOut) || (CheckIn && NoCheckOut) || (CheckInLate && NoCheckOut))
                 {
                     timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
                     timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-                } else if (NoCheckIn && CheckOut)
+                }
+                else if (NoCheckIn && CheckOut)
                 {
                     timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
                     timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
@@ -555,7 +563,8 @@ namespace Timesheet.DomainServices
                                 t.AbsenceDayType = DayType.Custom;
                             }
                         }
-                    } else if(absenceUser.Type == RequestType.Onsite)
+                    }
+                    else if (absenceUser.Type == RequestType.Onsite)
                     {
                         if (absenceUser.DateType == DayType.Fullday)
                         {
