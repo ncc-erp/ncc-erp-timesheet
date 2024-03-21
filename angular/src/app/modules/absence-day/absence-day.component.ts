@@ -65,7 +65,7 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
   tardiness = this.APP_CONSTANT.OnDayType.BeginOfDay;
   leaveEarly = this.APP_CONSTANT.OnDayType.EndOfDay;
 
- 
+
 
   constructor(injector: Injector,
     private dayOffService: DayOffService,
@@ -186,7 +186,7 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
       this.showPopupDiMuonVeSom(currentRequest, selectedDate);
     }
     this.selectedDays.set(selectedDate, currentRequest.dateType);
-    if(currentRequest.dateType == -1 || 
+    if(currentRequest.dateType == -1 ||
       (currentRequest.cssClass == 'custom-request-time' && currentRequest.hour == "")){
       //empty
       this.selectedDays.delete(selectedDate);
