@@ -1033,17 +1033,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                 .Where(s => s.TypeOfWork == TypeOfWork.NormalWorkingHours)
                 .FirstOrDefault();
 
-            if (myTS != default)
-            {
-                if(myTS.Status == TimesheetStatus.Approve)
-                {
-                    return "Fail! Timesheet của bạn đã được Approve";
-                }
-                myTS.Note = input.Note;
-                myTS.WorkingTime = (int)(input.Hour * 60);
-                WorkScope.Update(myTS);
-            }
-            else
+            if(myTS == null || myTS == default)
             {
                 myTS = new MyTimesheet
                 {
@@ -1059,15 +1049,53 @@ namespace Timesheet.Timesheets.MyTimesheets
                 };
 
                 await WorkScope.InsertAsync(myTS);
-            }
 
-            return string.Format("Success! Bạn đã log: **{0}** task: **{1}** project: **{2}** ngày **{3}** với note là : **{4}**",
+                return string.Format("Success! Bạn đã log: **{0}** task: **{1}** project: **{2}** ngày **{3}** với note là : **{4}**",
                         CommonUtils.ConvertHourToHHmm(myTS.WorkingTime),
                         projectTask.TaskName,
                         projectTask.ProjectName,
                         myTS.DateAt.ToString("yyyy-MM-dd"),
                         input.Note
                     );
+            }
+
+            return default;
+
+            //if (myTS != default)
+            //{
+            //    if(myTS.Status == TimesheetStatus.Approve)
+            //    {
+            //        return "Fail! Timesheet của bạn đã được Approve";
+            //    }
+            //    myTS.Note = input.Note;
+            //    myTS.WorkingTime = (int)(input.Hour * 60);
+            //    WorkScope.Update(myTS);
+            //}
+            //else
+            //{
+            //    myTS = new MyTimesheet
+            //    {
+            //        DateAt = dateAt,
+            //        UserId = userId,
+            //        TypeOfWork = TypeOfWork.NormalWorkingHours,
+            //        IsCharged = false,
+            //        Note = input.Note,
+            //        ProjectTaskId = defaultProjectTaskId.Value,
+            //        Status = TimesheetStatus.None,
+            //        WorkingTime = (int)(input.Hour * 60),
+            //        IsTemp = projectUser.IsTemp
+            //    };
+
+            //    await WorkScope.InsertAsync(myTS);
+            //}
+
+            //return string.Format("Success! Bạn đã log: **{0}** task: **{1}** project: **{2}** ngày **{3}** với note là : **{4}**",
+            //            CommonUtils.ConvertHourToHHmm(myTS.WorkingTime),
+            //            projectTask.TaskName,
+            //            projectTask.ProjectName,
+            //            myTS.DateAt.ToString("yyyy-MM-dd"),
+            //            input.Note
+            //        );
         }
 
 
@@ -1126,24 +1154,57 @@ namespace Timesheet.Timesheets.MyTimesheets
             {
                 return CommonUtils.ConvertHourToHHmm(workingMinute) + " is illegal because this value must be than 0h";
             }
-            var timesheet = new MyTimesheet
+
+            var myTS = WorkScope.GetAll<MyTimesheet>()
+                .Include(s => s.ProjectTask)
+                .Where(s => s.ProjectTask.ProjectId == projectTask.Id)
+                .Where(s => s.DateAt.Date == today)
+                .Where(s => s.UserId == user.Id)
+                .Where(s => s.TypeOfWork == TypeOfWork.NormalWorkingHours)
+                .FirstOrDefault();
+
+            if (myTS == null || myTS == default)
             {
-                DateAt = today,
-                UserId = user.Id,
-                TypeOfWork = TypeOfWork.NormalWorkingHours,
-                WorkingTime = workingMinute,
-                Note = input.Note,
-                ProjectTaskId = projectTask.Id,
-                Status = TimesheetStatus.None,
-                IsTemp = projectUser.IsTemp
-            };
+                var timesheet = new MyTimesheet
+                {
+                    DateAt = today,
+                    UserId = user.Id,
+                    TypeOfWork = TypeOfWork.NormalWorkingHours,
+                    WorkingTime = workingMinute,
+                    Note = input.Note,
+                    ProjectTaskId = projectTask.Id,
+                    Status = TimesheetStatus.None,
+                    IsTemp = projectUser.IsTemp
+                };
 
-            await WorkScope.InsertAsync(timesheet);
+                await WorkScope.InsertAsync(timesheet);
 
-            return $"Success! Bạn đã log ```{CommonUtils.ConvertHourToHHmm(timesheet.WorkingTime)}``` " +
-                $"cho task ```{input.TaskName}``` của dự án ```{projectTask.Name}``` " +
-                $"ngày ```{timesheet.DateAt.ToString("yyyy-MM-dd")}``` " +
-                $"dạng {(timesheet.IsTemp ? "(temp)" : "(official)")} với note là : ```{input.Note}```";
+                return $"Success! Bạn đã log ```{CommonUtils.ConvertHourToHHmm(timesheet.WorkingTime)}``` " +
+                    $"cho task ```{input.TaskName}``` của dự án ```{projectTask.Name}``` " +
+                    $"ngày ```{timesheet.DateAt.ToString("yyyy-MM-dd")}``` " +
+                    $"dạng {(timesheet.IsTemp ? "(temp)" : "(official)")} với note là : ```{input.Note}```";
+            }
+
+            return default;
+
+            //var timesheet = new MyTimesheet
+            //{
+            //    DateAt = today,
+            //    UserId = user.Id,
+            //    TypeOfWork = TypeOfWork.NormalWorkingHours,
+            //    WorkingTime = workingMinute,
+            //    Note = input.Note,
+            //    ProjectTaskId = projectTask.Id,
+            //    Status = TimesheetStatus.None,
+            //    IsTemp = projectUser.IsTemp
+            //};
+
+            //await WorkScope.InsertAsync(timesheet);
+
+            //return $"Success! Bạn đã log ```{CommonUtils.ConvertHourToHHmm(timesheet.WorkingTime)}``` " +
+            //    $"cho task ```{input.TaskName}``` của dự án ```{projectTask.Name}``` " +
+            //    $"ngày ```{timesheet.DateAt.ToString("yyyy-MM-dd")}``` " +
+            //    $"dạng {(timesheet.IsTemp ? "(temp)" : "(official)")} với note là : ```{input.Note}```";
         }
 
         [HttpGet]
