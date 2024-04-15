@@ -52,7 +52,7 @@ namespace Timesheet.Services.Komu
 
         }
 
-        public void NotifyToChannel(string komuMessage, string channelId)
+        public void NotifyToChannel(string komuMessage, string channelId, bool isTimesheet = true)
         {
             
             if (_isNotifyToKomu != "true")
@@ -79,7 +79,7 @@ namespace Timesheet.Services.Komu
                 var listMessage = CommonUtils.SeparateMessage(messageToSend, MAX_LENGTH, "\n");
                 foreach(var message in listMessage)
                 {
-                    Post(KomuUrlConstant.KOMU_CHANNELID, new { message = message, channelid = channelIdToSend });
+                    Post(KomuUrlConstant.KOMU_CHANNELID, new { message = message, channelid = channelIdToSend, timesheet = isTimesheet });
                 }
             }
             else if (komuMessage.Contains(" "))
@@ -87,12 +87,12 @@ namespace Timesheet.Services.Komu
                 var listMessage = CommonUtils.SeparateMessage(messageToSend, MAX_LENGTH, " ");
                 foreach (var message in listMessage)
                 {
-                    Post(KomuUrlConstant.KOMU_CHANNELID, new { message = message, channelid = channelIdToSend });
+                    Post(KomuUrlConstant.KOMU_CHANNELID, new { message = message, channelid = channelIdToSend, timesheet = isTimesheet });
                 }
             }
             else
             {
-                Post(KomuUrlConstant.KOMU_CHANNELID, new { message = messageToSend, channelid = channelIdToSend });
+                Post(KomuUrlConstant.KOMU_CHANNELID, new { message = messageToSend, channelid = channelIdToSend, timesheet = isTimesheet });
             }
 
         }
