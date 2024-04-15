@@ -1218,6 +1218,7 @@ namespace Timesheet.APIs.RequestDays
                 var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
                     .Where(s => s.RequestId == requestId)
                     .Where(s => s.Request.Type == RequestType.Remote)
+                    .Where(s => s.Request.Status == RequestStatus.Rejected)
                     .Select(s => s.DateAt.ToString("yyyy-MM-dd"))
                     .FirstOrDefaultAsync();
 
