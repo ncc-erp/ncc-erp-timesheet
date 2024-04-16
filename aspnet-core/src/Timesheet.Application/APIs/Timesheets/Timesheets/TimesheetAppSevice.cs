@@ -613,7 +613,7 @@ namespace Timesheet.Timesheets.Timesheets
 
             var listUser = new List<long> { requesterId };
             listUser.AddRange(dicTimesheet.Keys);
-            var userTimesheetInfos = (await getNotifyListUserInfoDto(listUser))
+            var requesters = (await getNotifyListUserInfoDto(listUser))
                 .GroupBy(s => s.UserId)
                 .ToDictionary(
                     g => g.Key,
@@ -623,17 +623,17 @@ namespace Timesheet.Timesheets.Timesheets
 
             foreach (var userTimesheet in dicTimesheet)
             {
-                var receiversInfos = await getReceiverList(userTimesheet.Value);
-                notifyKomuWhenApproveOrRejectTimesheetToChannel(userTimesheetInfos[requesterId], userTimesheetInfos[userTimesheet.Key], receiversInfos, isApprove);
-                notifyKomuWhenApproveOrRejectTimesheetToUser(userTimesheetInfos[requesterId], userTimesheetInfos[userTimesheet.Key], receiversInfos, isApprove);
+                var receivers = await getReceiverList(userTimesheet.Value);
+                NotifyKomuWhenApproveOrRejectTimesheetToChannel(requesters[requesterId], requesters[userTimesheet.Key], receivers, isApprove);
+                NotifyKomuWhenApproveOrRejectTimesheetToUser(requesters[requesterId], receivers, isApprove);
             }
         }
 
-        public void notifyKomuWhenApproveOrRejectTimesheetToChannel(NotifyUserInfoDto approver, NotifyUserInfoDto userTimesheetInfo, List<NotifyKomuTimesheetDto> receivers, bool isApprove)
+        public void NotifyKomuWhenApproveOrRejectTimesheetToChannel(NotifyUserInfoDto approver, NotifyUserInfoDto requesters, List<NotifyKomuTimesheetDto> receivers, bool isApprove)
         {
-            var NotifyKomuWhenSubmitTimesheet = SettingManager.GetSettingValueForApplication(AppSettingNames.SendKomuSubmitTimesheet);
+            var notifyKomuWhenApproveOrRejectTimesheetToChannel = SettingManager.GetSettingValueForApplication(AppSettingNames.SendKomuSubmitTimesheet);
 
-            if (NotifyKomuWhenSubmitTimesheet != "true")
+            if (notifyKomuWhenApproveOrRejectTimesheetToChannel != "true")
             {
                 Logger.Info("NotifyKomuWhenSubmitTimesheet != true");
                 return;
@@ -650,7 +650,7 @@ namespace Timesheet.Timesheets.Timesheets
                 else
                 {
                     channelMessage.Clear();
-                    channelMessage.AppendLine($"PM {approver.KomuPMInfo}" + $" has **{(isApprove ? "approved" : "rejected")}** the following timesheets submitted by: {userTimesheetInfo.KomuPMInfo}");
+                    channelMessage.AppendLine($"PM {approver.KomuPMInfo}" + $" has **{(isApprove ? "approved" : "rejected")}** the following timesheets submitted by: {requesters.KomuAccountInfo}");
                     channelMessage.AppendLine("```");
                     channelMessage.Append(project.TimesheetsKomuMsg());
                     channelMessage.AppendLine("```");
@@ -660,11 +660,11 @@ namespace Timesheet.Timesheets.Timesheets
             }
         }
 
-        public void notifyKomuWhenApproveOrRejectTimesheetToUser(NotifyUserInfoDto approver, NotifyUserInfoDto userTimesheetInfo, List<NotifyKomuTimesheetDto> receivers, bool isApprove)
+        public void NotifyKomuWhenApproveOrRejectTimesheetToUser(NotifyUserInfoDto approver, List<NotifyKomuTimesheetDto> receivers, bool isApprove)
         {
-            var NotifyKomuWhenSubmitTimesheet = SettingManager.GetSettingValueForApplication(AppSettingNames.SendKomuSubmitTimesheet);
+            var notifyKomuWhenApproveOrRejectTimesheetToUser = SettingManager.GetSettingValueForApplication(AppSettingNames.SendKomuSubmitTimesheet);
 
-            if (NotifyKomuWhenSubmitTimesheet != "true")
+            if (notifyKomuWhenApproveOrRejectTimesheetToUser != "true")
             {
                 Logger.Info("NotifyKomuWhenSubmitTimesheet != true");
                 return;
@@ -685,7 +685,7 @@ namespace Timesheet.Timesheets.Timesheets
                     userMessage.AppendLine("```");
                     userMessage.Append(project.TimesheetsKomuMsg());
                     userMessage.AppendLine("```");
-                    _komuService.SendMessageToUser(userMessage.ToString(), userTimesheetInfo.Username);
+                    _komuService.SendMessageToUser(userMessage.ToString(), "");
                     Logger.Info(userMessage.ToString());
                 }
             }
