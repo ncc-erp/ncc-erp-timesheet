@@ -52,9 +52,10 @@ namespace Timesheet.Services.Komu
 
         }
 
-        public void NotifyToChannel(string komuMessage, string channelId, bool isTimesheet = true)
+        public void NotifyToChannel(string komuMessage, string channelId)
         {
-            
+            var isTimesheet = true;
+
             if (_isNotifyToKomu != "true")
             {
                 logger.LogInformation("_isNotifyToKomu=" + _isNotifyToKomu + " => stop");

@@ -43,8 +43,7 @@ namespace Timesheet.DomainServices.Dto
         {
             get
             {
-                var user = KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
-                return user;
+                return KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
             }
         }
 
