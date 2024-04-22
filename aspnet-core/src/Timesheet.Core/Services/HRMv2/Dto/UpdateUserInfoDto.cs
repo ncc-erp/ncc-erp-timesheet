@@ -17,6 +17,9 @@ namespace Timesheet.Services.HRMv2.Dto
         public string BankAccountNumber { get; set; }
         public string TaxCode { get; set; }
         public long? BankId { get; set; }
+        public string CurrentAddress { get; set; }
+        public string EmergencyContactName { get; set; }
+        public string EmergencyContactPhone { get; set; }
     }
 
     public class GetInfoToUPDateProfile : UpdateUserInfoDto

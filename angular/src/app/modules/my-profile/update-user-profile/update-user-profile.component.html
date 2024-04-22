@@ -98,6 +98,17 @@
           </mat-form-field>
         </div>
       </div>
+      <div class="form-group d-flex ">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mt-2 col-form-label"
+        matTooltip="Địa chỉ hiện tại">
+          Current address:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field appearance="outline" class="common-input">
+            <input matInput name="currentAddress" rows="1" [(ngModel)]="userProfile.currentAddress" cdkFocusInitial>
+          </mat-form-field>
+        </div>
+      </div>
       <div class="form-group d-flex">
         <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mt-2 align-middle"
         matTooltip="Nơi cấp">
@@ -133,6 +144,28 @@
               <button class="btn btn-primary" (click)="onPickIssuedBy(item)">Select</button>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="form-group d-flex ">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mt-2 col-form-label"
+        matTooltip="Người liên hệ khẩn cấp">
+          Emergency contact:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field appearance="outline" class="common-input">
+            <input matInput name="emergencyContactName" rows="1" [(ngModel)]="userProfile.emergencyContactName" cdkFocusInitial>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="form-group d-flex ">
+        <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mt-2 col-form-label"
+        matTooltip="SĐT của người liên hệ khẩn cấp">
+          Emergency contact phone:
+        </label>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 px-0">
+          <mat-form-field appearance="outline" class="common-input">
+            <input matInput name="emergencyContactPhone" rows="1" [(ngModel)]="userProfile.emergencyContactPhone" cdkFocusInitial>
+          </mat-form-field>
         </div>
       </div>
     </div>
