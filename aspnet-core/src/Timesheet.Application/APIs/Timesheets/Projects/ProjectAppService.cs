@@ -488,6 +488,7 @@ namespace Timesheet.Timesheets.Projects
                                   KomuChannelId = p.KomuChannelId,
                                   IsNotifyToKomu = p.IsNotifyToKomu,
                                   IsNoticeKMSubmitTS = p.IsNoticeKMSubmitTS,
+                                  IsNoticeKMApproveRejectTimesheet = p.IsNoticeKMApproveRejectTimesheet,
                                   IsNoticeKMRequestOffDate = p.IsNoticeKMRequestOffDate,
                                   IsNoticeKMApproveRequestOffDate = p.IsNoticeKMApproveRequestOffDate,
                                   IsNoticeKMRequestChangeWorkingTime = p.IsNoticeKMRequestChangeWorkingTime,

@@ -23,6 +23,7 @@ export interface ProjectDto {
     komuChannelId: string;
     isNotifyToKomu: boolean;
     isNoticeKMSubmitTS: boolean;
+    isNoticeKMApproveRejectTimesheet: boolean;
     isNoticeKMRequestOffDate: boolean;
     isNoticeKMApproveRequestOffDate: boolean;
     isNoticeKMRequestChangeWorkingTime: boolean;
