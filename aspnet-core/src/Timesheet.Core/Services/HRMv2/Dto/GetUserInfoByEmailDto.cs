@@ -30,8 +30,10 @@ namespace Timesheet.Services.HRMv2.Dto
         public string Level { get; set; }
         public string JobPosition { get; set; }
         public string Bank { get; set; }
-
         public long? BankId { get; set; }
+        public string CurrentAddress { get; set; }
+        public string EmergencyContactName { get; set; }
+        public string EmergencyContactPhone { get; set; }
     }
     public class ItemInfoDto
     {

@@ -54,7 +54,6 @@ export class UpdateUserProfileComponent extends AppComponentBase implements OnIn
   ngOnInit() {
     this.userEmail = this.data.email;
     this.employeeBankIdBefore = this.data.bankId;
-    console.log(this.data)
     this.getAllBanks();
     this.getInfoToUpdate();
 
@@ -80,6 +79,9 @@ export class UpdateUserProfileComponent extends AppComponentBase implements OnIn
       placeOfPermanent: this.userProfile.placeOfPermanent,
       issuedBy: this.userProfile.issuedBy,
       issuedOn: this.userProfile.issuedOn? moment(this.userProfile.issuedOn).format("YYYY-MM-DD"): this.userProfile.issuedOn,
+      currentAddress: this.userProfile.currentAddress,
+      emergencyContactName: this.userProfile.emergencyContactName,
+      emergencyContactPhone: this.userProfile.emergencyContactPhone,
     }
   }
   onSubmit() {

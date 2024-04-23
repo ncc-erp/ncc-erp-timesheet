@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Timesheet.DomainServices.Dto;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.MyAbsenceDays.Dto
 {
@@ -14,10 +15,11 @@ namespace Timesheet.APIs.MyAbsenceDays.Dto
         public bool IsNotifyEmail { get; set; }
         public bool IsNotifyKomu { get; set; }
         public bool IsNoticeKMSubmitTS { get; set; }
+        public bool IsNoticeKMApproveRejectTimesheet { get; set; }
         public bool IsNoticeKMRequestOffDate { get; set; }
         public bool IsNoticeKMApproveRequestOffDate { get; set; }
         public bool IsNoticeKMRequestChangeWorkingTime { get; set; }
-        public bool IsNoticeKMApproveChangeWorkingTime { get; set; }
+        public bool IsNoticeKMApproveChangeWorkingTime { get; set; }  
         public List<NotifyUserInfoDto> PMs { get; set; }
 
         public string KomuPMsTag()

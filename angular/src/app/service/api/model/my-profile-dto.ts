@@ -31,6 +31,9 @@ export class MyProfileDto{
     avatarFullPath: string;
     userTypeName: string;
     bankId: number;
+    currentAddress: string;
+    emergencyContactName: string;
+    emergencyContactPhone: string;
 }
 export class ItemInfoDto{
     name: string;
@@ -49,6 +52,9 @@ export class UpdateUserInfoDto{
     address: string;
     bankAccountNumber: number;
     taxCode: string;
+    currentAddress: string;
+    emergencyContactName: string;
+    emergencyContactPhone: string;
 }
 
 export class GetInfoToUpdateProfileDto extends UpdateUserInfoDto{

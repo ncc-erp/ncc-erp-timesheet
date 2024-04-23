@@ -32,13 +32,15 @@ namespace Ncc.Entities
         [DefaultValue(false)]
         public bool IsNoticeKMSubmitTS { get; set; }
         [DefaultValue(false)]
+        public bool IsNoticeKMApproveRejectTimesheet { get; set; }
+        [DefaultValue(false)]
         public bool IsNoticeKMRequestOffDate { get; set; }
         [DefaultValue(false)]
         public bool IsNoticeKMApproveRequestOffDate { get; set; }
         [DefaultValue(false)]
         public bool IsNoticeKMRequestChangeWorkingTime { get; set; }
         [DefaultValue(false)]
-        public bool IsNoticeKMApproveChangeWorkingTime { get; set; }
+        public bool IsNoticeKMApproveChangeWorkingTime { get; set; } 
         public bool isAllUserBelongTo { get; set; }
         [DefaultValue(true)]
         public bool IsAllowTeamBuilding { get; set; }

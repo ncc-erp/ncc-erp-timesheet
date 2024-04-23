@@ -24,6 +24,11 @@ using System.Globalization;
 using Ncc.Configuration;
 using Ncc.IoC;
 using Abp.Extensions;
+using Timesheet.APIs.Timesheets.MyTimesheets.Dto;
+using Timesheet.DomainServices.Dto;
+using Abp.Configuration;
+using Timesheet.Services.Komu;
+using Timesheet.Timesheets.MyTimesheets;
 
 namespace Timesheet.Timesheets.Timesheets
 {
@@ -33,10 +38,13 @@ namespace Timesheet.Timesheets.Timesheets
     {
         private readonly IBackgroundJobManager _backgroundJobManager;
         private readonly ICommonServices _commonService;
-        public TimesheetAppService(IBackgroundJobManager backgroundJobManager, ICommonServices commonService, IWorkScope workScope) : base(workScope)
+        private readonly KomuService _komuService;
+
+        public TimesheetAppService(IBackgroundJobManager backgroundJobManager, ICommonServices commonService, IWorkScope workScope, KomuService komuService) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _commonService = commonService;
+            _komuService = komuService;
         }
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_View)]
@@ -377,7 +385,7 @@ namespace Timesheet.Timesheets.Timesheets
                                 <tr>
                                 <td>{timesheet.TaskName}</td>
                                 <td>{timesheet.Note}</td>
-                                <td>{timesheet.DateAt.ToString("yyyy'-'MM'-'dd")}</td>    
+                                <td>{timesheet.DateAt.ToString("yyyy'-'MM'-'dd")}</td>
                                 <td>{(timesheet.TypeOfWork == TypeOfWork.NormalWorkingHours ? "NormalWorking" : "OverTime")}</td>
                                 <td>{(timesheet.Charged ? "Charged" : "")}</td>
                                 <td>{TimeSpan.FromMinutes(timesheet.WorkingTime).ToString(@"hh\:mm")}</td>
@@ -429,6 +437,8 @@ namespace Timesheet.Timesheets.Timesheets
                     item.Status = TimesheetStatus.Approve;
                 }
                 await WorkScope.UpdateRangeAsync(listApprove);
+
+                await NotifyApproveOrRejectTimesheet(listApprove, true);
             }
             else if (failTS > 0)
             {
@@ -528,7 +538,7 @@ namespace Timesheet.Timesheets.Timesheets
                                 <tr>
                                 <td>{timesheet.TaskName}</td>
                                 <td>{timesheet.Note}</td>
-                                <td>{timesheet.DateAt.ToString("yyyy'-'MM'-'dd")}</td>    
+                                <td>{timesheet.DateAt.ToString("yyyy'-'MM'-'dd")}</td>
                                 <td>{(timesheet.TypeOfWork == TypeOfWork.NormalWorkingHours ? "NormalWorking" : "OverTime")}</td>
                                 <td>{(timesheet.Charged ? "Charged" : "")}</td>
                                 <td>{TimeSpan.FromMinutes(timesheet.WorkingTime).ToString(@"hh\:mm")}</td>
@@ -574,6 +584,8 @@ namespace Timesheet.Timesheets.Timesheets
                     item.Status = TimesheetStatus.Reject;
                 }
                 await WorkScope.UpdateRangeAsync(listReject);
+
+                await NotifyApproveOrRejectTimesheet(listReject, false); 
             }
             else if (failTS > 0)
             {
@@ -586,6 +598,97 @@ namespace Timesheet.Timesheets.Timesheets
                 Fail = string.Format(" - Fail {0} timesheets.", failTS),
                 LockDate = string.Format(" - Locked date: {0}.", lockDate.ToString("dd'-'MM'-'yyyy")),
             };
+        }
+
+        public async System.Threading.Tasks.Task NotifyApproveOrRejectTimesheet(List<MyTimesheet> myTimesheets, bool isApprove)
+        {
+            var dicTimesheet = myTimesheets
+                .GroupBy(s => s.UserId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.ToList()
+                );
+
+            var requesterId = AbpSession.UserId.Value;
+
+            var listUser = new List<long> { requesterId };
+            listUser.AddRange(dicTimesheet.Keys);
+            var requesters = (await getNotifyListUserInfoDto(listUser))
+                .GroupBy(s => s.UserId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.FirstOrDefault()
+                );
+
+
+            foreach (var userTimesheet in dicTimesheet)
+            {
+                var receivers = await getReceiverList(userTimesheet.Value);
+                NotifyKomuWhenApproveOrRejectTimesheetToChannel(requesters[requesterId], requesters[userTimesheet.Key], receivers, isApprove);
+                NotifyKomuWhenApproveOrRejectTimesheetToUser(requesters[requesterId], receivers, isApprove);
+            }
+        }
+
+        public void NotifyKomuWhenApproveOrRejectTimesheetToChannel(NotifyUserInfoDto approver, NotifyUserInfoDto requesters, List<NotifyKomuTimesheetDto> receivers, bool isApprove)
+        {
+            var notifyKomuWhenApproveOrRejectTimesheetToChannel = SettingManager.GetSettingValueForApplication(AppSettingNames.SendKomuSubmitTimesheet);
+
+            if (notifyKomuWhenApproveOrRejectTimesheetToChannel != "true")
+            {
+                Logger.Info("NotifyKomuWhenSubmitTimesheet != true");
+                return;
+            }
+
+            var channelMessage = new StringBuilder();
+
+            foreach (var project in receivers)
+            {
+                if (!project.IsNotifyKomu)
+                {
+                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                }
+                else
+                {
+                    channelMessage.Clear();
+                    channelMessage.AppendLine($"PM {approver.KomuPMInfo}" + $" has **{(isApprove ? "approved" : "rejected")}** the following timesheets submitted by: {requesters.KomuAccountInfo}");
+                    channelMessage.AppendLine("```");
+                    channelMessage.Append(project.TimesheetsKomuMsg());
+                    channelMessage.AppendLine("```");
+                    _komuService.NotifyToChannel(channelMessage.ToString(), project.KomuChannelId);
+                    Logger.Info(channelMessage.ToString());
+                }
+            }
+        }
+
+        public void NotifyKomuWhenApproveOrRejectTimesheetToUser(NotifyUserInfoDto approver, List<NotifyKomuTimesheetDto> receivers, bool isApprove)
+        {
+            var notifyKomuWhenApproveOrRejectTimesheetToUser = SettingManager.GetSettingValueForApplication(AppSettingNames.SendKomuSubmitTimesheet);
+
+            if (notifyKomuWhenApproveOrRejectTimesheetToUser != "true")
+            {
+                Logger.Info("NotifyKomuWhenSubmitTimesheet != true");
+                return;
+            }
+
+            var userMessage = new StringBuilder();
+
+            foreach (var project in receivers)
+            {
+                if (!project.IsNotifyKomu)
+                {
+                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                }
+                else
+                {
+                    userMessage.Clear();
+                    userMessage.AppendLine($"PM **{approver.FullName}**" + $" has **{(isApprove ? "approved" : "rejected")}** your timesheet");
+                    userMessage.AppendLine("```");
+                    userMessage.Append(project.TimesheetsKomuMsg());
+                    userMessage.AppendLine("```");
+                    _komuService.SendMessageToUser(userMessage.ToString(), "");
+                    Logger.Info(userMessage.ToString());
+                }
+            }
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_NormalWorking_LockUnlockTimesheet)]
@@ -635,6 +738,7 @@ namespace Timesheet.Timesheets.Timesheets
 
 
         }
+
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin)]
         public async System.Threading.Tasks.Task<List<ExportTimeSheetOrRemoteDto>> GetAllTimeSheetOrRemote(DateTime date, bool isExportTimeSheet)
@@ -674,6 +778,7 @@ namespace Timesheet.Timesheets.Timesheets
                 throw new UserFriendlyException($"error:" + ex.Message);
             }
         }
+
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_ViewStatus)]
         public async Task<object> GetQuantiyTimesheetStatus(DateTime? startDate, DateTime? endDate, long? projectId, HaveCheckInFilter? checkInFilter, string searchText, long? branchId = 0)
@@ -726,7 +831,7 @@ namespace Timesheet.Timesheets.Timesheets
                 item.CheckOut = timekeepingByUserAtDate?.CheckOut;
                 listMyTimesheet.Add(item);
             }
-            
+
             if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.HaveCheckIn)
             {
                 listMyTimesheet = listMyTimesheet.Where(s => s.CheckIn != null && s.CheckIn != "").ToList();
@@ -747,7 +852,7 @@ namespace Timesheet.Timesheets.Timesheets
             {
                 listMyTimesheet = listMyTimesheet.Where(s => (s.CheckIn == null || s.CheckIn == "") && (s.CheckOut == null || s.CheckOut == "")).ToList();
             }
-            
+
             var statusQuantityList = listMyTimesheet.GroupBy(x => x.Status).Select(x => new
             {
                 Status = x.Key,
@@ -766,6 +871,89 @@ namespace Timesheet.Timesheets.Timesheets
                 var quantity = statusQuantityList.ContainsKey(status) ? statusQuantityList[status] : 0;
                 result.Add(new { Status = status, Quantity = quantity });
             }
+            return result;
+        }
+
+        public async Task<List<NotifyUserInfoDto>> getNotifyListUserInfoDto(List<long> userId)
+        {
+            return await WorkScope.GetAll<User>().Where(s => userId.Contains(s.Id))
+                .Select(user => new NotifyUserInfoDto
+                {
+                    Branch = user.BranchOld,
+                    EmailAddress = user.EmailAddress,
+                    FullName = user.FullName,
+                    KomuUserId = user.KomuUserId,
+                    Type = user.Type,
+                    UserId = user.Id,
+                    BranchDisplayName = user.Branch.DisplayName,
+                }).ToListAsync();
+        }
+
+        public async Task<List<NotifyKomuTimesheetDto>> getReceiverList(List<MyTimesheet> mytimesheets)
+        {
+            var mytimesheetIds = mytimesheets.Select(s => s.Id).ToList();
+
+            var projectTimesheets = await WorkScope.GetRepo<MyTimesheet>().GetAllIncluding(s => s.ProjectTask, s => s.ProjectTask.Project, s => s.ProjectTask.Task, s => s.User)
+                .Where(s => mytimesheetIds.Contains(s.Id))
+                .GroupBy(s => new { s.ProjectTask.ProjectId, s.ProjectTask.Project.Code, s.ProjectTask.Project.Name })
+                .Select(s => new
+                {
+                    s.Key.ProjectId,
+                    s.Key.Code,
+                    s.Key.Name,
+                    TimeSheets = s.Select(x => new TimesheetKomuDto
+                    {
+                        Id = x.Id,
+                        DateAt = x.DateAt,
+                        WorkingTime = x.WorkingTime,
+                        TypeOfWork = x.TypeOfWork,
+                        IsCharged = x.IsCharged,
+                        Note = x.Note,
+                        TaskName = x.ProjectTask.Task.Name,
+                        IsUnlockedByEmployee = x.IsUnlockedByEmployee
+                    }).ToList()
+                }).ToListAsync();
+
+            var projectIds = projectTimesheets.Select(s => s.ProjectId).ToList();
+
+
+            var pms = await WorkScope.GetAll<ProjectUser>()
+            .Where(s => s.Project.Status == ProjectStatus.Active)
+            .Where(s => s.Type == ProjectUserType.PM)
+            .Where(s => projectIds.Contains(s.ProjectId))
+            .GroupBy(s => new { s.ProjectId, s.Project.KomuChannelId, IsNotifyToKomu = s.Project.IsNoticeKMApproveRejectTimesheet })
+            .Select(s => new
+            {
+                ProjectId = s.Key.ProjectId,
+                KomuChannelId = s.Key.KomuChannelId,
+                IsNotifyToKomu = s.Key.IsNotifyToKomu,
+                Emails = s.Select(x => x.User.EmailAddress),
+
+                PMs = s.Select(x => new NotifyUserInfoDto
+                {
+                    EmailAddress = x.User.EmailAddress,
+                    FullName = x.User.FullName,
+                    KomuUserId = x.User.KomuUserId,
+                    UserId = x.UserId
+                }).ToList()
+
+            }).ToListAsync();
+
+            var result = (from pt in projectTimesheets
+                          join pm in pms on pt.ProjectId equals pm.ProjectId
+                          select new NotifyKomuTimesheetDto
+                          {
+                              KomuChannelId = pm.KomuChannelId,
+                              IsNotifyKomu = pm.IsNotifyToKomu,
+                              ProjectId = pt.ProjectId,
+                              Timesheets = pt.TimeSheets,
+                              ProjectCode = pt.Code,
+                              ProjectName = pt.Name,
+                              Emails = pm.Emails.ToList(),
+                              PMs = pm.PMs
+
+                          }).ToList();
+
             return result;
         }
     }

@@ -18,10 +18,11 @@ namespace Timesheet.DomainServices.Dto
         public string BranchDisplayName { get; set; }
         public double MorningWorking { get; set; }
         public double AfternoonWorking { get; set; }
+        public string UserName => EmailAddress.Split('@')[0];
 
         public string KomuAccountTag()
         {
-            return KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"**{FullName}**";
+            return KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
         }
 
         public string KomuAccountNoTag()
@@ -33,10 +34,19 @@ namespace Timesheet.DomainServices.Dto
         {
             get
             {
-                var user = KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"**{FullName}**";
+                var user = KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
                 return $"{user} [{ BranchDisplayName } - { CommonUtils.UserTypeName(Type)}]";
             }
         }
+
+        public string KomuPMInfo
+        {
+            get
+            {
+                return KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
+            }
+        }
+
         public string ToEmailString()
         {
             return $"{FullName} [{CommonUtils.BranchName(Branch)} - {CommonUtils.UserTypeName(Type)}]";

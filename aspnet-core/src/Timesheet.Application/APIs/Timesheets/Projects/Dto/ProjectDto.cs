@@ -27,6 +27,7 @@ namespace Timesheet.Timesheets.Projects.Dto
         public string KomuChannelId { get; set; }
         public bool IsNotifyToKomu { get; set; }
         public bool IsNoticeKMSubmitTS { get; set; } = false;
+        public bool IsNoticeKMApproveRejectTimesheet { get; set; } = false;
         public bool IsNoticeKMRequestOffDate { get; set; } = false;
         public bool IsNoticeKMApproveRequestOffDate { get; set; } = false;
         public bool IsNoticeKMRequestChangeWorkingTime { get; set; } = false;
