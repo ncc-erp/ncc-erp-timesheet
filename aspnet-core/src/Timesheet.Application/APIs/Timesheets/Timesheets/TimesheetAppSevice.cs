@@ -625,7 +625,7 @@ namespace Timesheet.Timesheets.Timesheets
             {
                 var receivers = await getReceiverList(userTimesheet.Value);
                 NotifyKomuWhenApproveOrRejectTimesheetToChannel(requesters[requesterId], requesters[userTimesheet.Key], receivers, isApprove);
-                NotifyKomuWhenApproveOrRejectTimesheetToUser(requesters[requesterId], receivers, isApprove);
+                NotifyKomuWhenApproveOrRejectTimesheetToUser(requesters[requesterId], requesters[userTimesheet.Key], receivers, isApprove);
             }
         }
 
@@ -660,7 +660,7 @@ namespace Timesheet.Timesheets.Timesheets
             }
         }
 
-        public void NotifyKomuWhenApproveOrRejectTimesheetToUser(NotifyUserInfoDto approver, List<NotifyKomuTimesheetDto> receivers, bool isApprove)
+        public void NotifyKomuWhenApproveOrRejectTimesheetToUser(NotifyUserInfoDto approver, NotifyUserInfoDto requester, List<NotifyKomuTimesheetDto> receivers, bool isApprove)
         {
             var notifyKomuWhenApproveOrRejectTimesheetToUser = SettingManager.GetSettingValueForApplication(AppSettingNames.SendKomuSubmitTimesheet);
 
@@ -685,7 +685,7 @@ namespace Timesheet.Timesheets.Timesheets
                     userMessage.AppendLine("```");
                     userMessage.Append(project.TimesheetsKomuMsg());
                     userMessage.AppendLine("```");
-                    _komuService.SendMessageToUser(userMessage.ToString(), "");
+                    _komuService.SendMessageToUser(userMessage.ToString(), requester.UserName);
                     Logger.Info(userMessage.ToString());
                 }
             }
