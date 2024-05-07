@@ -30,7 +30,7 @@ namespace Timesheet.Services.Tracker
 
             httpClient.BaseAddress = new Uri(baseAddress);
             httpClient.DefaultRequestHeaders.Add("X-Secret-Key", securityCode);
-            httpClient.Timeout = TimeSpan.FromMinutes(10);
+            httpClient.Timeout = TimeSpan.FromMinutes(15);
         }
 
         public virtual List<GetSUerAndActiveTimeTrackerDto> GetTimeTrackerToDay(DateTime day, List<string> userNames)
