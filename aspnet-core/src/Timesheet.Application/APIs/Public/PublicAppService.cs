@@ -58,7 +58,8 @@ namespace Timesheet.APIs.Public
                 EmailAddress = s.Request.User.EmailAddress,
                 DateAt = date,
                 Status = Enum.GetName(typeof(RequestStatus), s.Request.Status),
-                CreationTime = s.CreationTime
+                CreationTime = s.CreationTime,
+                DateType = s.DateType
             }).ToListAsync();
         }
 
