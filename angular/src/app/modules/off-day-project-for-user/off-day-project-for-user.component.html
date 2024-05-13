@@ -108,6 +108,17 @@
                 </mat-select>
               </mat-form-field>
             </div>
+            <div class="col-sm-2"  *ngIf="absentDayType === 2">
+              <mat-form-field appearance="outline">
+                <mat-label>Remote of week</mat-label>
+                <mat-select name="remoteOfWeek" [(value)]="remoteOfWeek" (selectionChange)="onremoteOfWeekChange()">
+                  <mat-option [value]="-1">All</mat-option>
+                  <mat-option *ngFor="let item of remoteOfWeekList" [value]='item'>
+                    {{item}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
             <div class="col-sm-2"  *ngIf="absentDayType === 0">
               <mat-form-field appearance="outline">
                 <mat-label>Type Of Request Type</mat-label>

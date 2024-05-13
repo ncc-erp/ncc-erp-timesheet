@@ -1593,7 +1593,61 @@ namespace Timesheet.APIs.RequestDays
             RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
             var predicate = await GetPredicate(input.projectIds);
 
-            var query = from s in WorkScope.GetAll<AbsenceDayDetail>()
+            if (input.type.Value == RequestType.Remote && input.remoteOfWeek.HasValue)
+            {
+                List<DateTime> weeks = new List<DateTime>();
+
+                DateTime current = input.startDate;
+                while (current <= input.endDate)
+                {
+                    if (current.DayOfWeek == DayOfWeek.Monday && current.AddDays(6).DayOfWeek == DayOfWeek.Sunday)
+                    {
+                        weeks.Add(current);
+                        current = current.AddDays(7);
+                    }
+                    else current = current.AddDays(1);
+                }
+
+                var result = new List<CountRequestDto>();
+
+                foreach(DateTime monday in weeks)
+                {
+                    var query = from s in WorkScope.GetAll<AbsenceDayDetail>()
+                    .Where(s => s.DateAt >= monday)
+                    .Where(s => s.DateAt.Date <= monday.AddDays(6))
+                    .Where(predicate)
+                    .Where(s => !input.status.HasValue || input.status.Value < 0 ||
+                            (input.status.Value == 0 ? (s.Request.Status == RequestStatus.Pending || s.Request.Status == RequestStatus.Approved) :
+                            s.Request.Status == arrayAbsenceStatus[input.status.Value]))
+                    .Where(s => !input.type.HasValue || input.type.Value < 0 || s.Request.Type == input.type.Value)
+                    .WhereIf(input.dayType.HasValue && input.dayType.Value > 0, s => s.DateType == input.dayType.Value)
+                    .WhereIf(input.BranchId.HasValue, s => s.Request.User.BranchId == input.BranchId)
+                    .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
+                    .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
+                                select s;
+
+                    var queryFilterByRemoteOfWeek = query.WhereIf(input.remoteOfWeek.Value > 0, s=>query.Count(s1=>s1.CreatorUserId == s.CreatorUserId) == input.remoteOfWeek.Value)
+                        .GroupBy(s => new { s.DateAt, s.Request.Type }).Select(s => new
+                    {
+                        Date = s.Key.DateAt,
+                        Type = s.Key.Type,
+                        RequestCount = s.Count()
+                    });
+
+
+                    var queryResult = await queryFilterByRemoteOfWeek.ToListAsync();
+                    var CountRequestDtoList = queryResult.Select(item => new CountRequestDto
+                    {
+                        Date = item.Date,
+                        Type = item.Type,
+                        Count = item.RequestCount
+                    }).ToList();
+                    result = result.Concat(CountRequestDtoList).ToList();
+                }
+
+                return result;
+            } else {
+                var query = from s in WorkScope.GetAll<AbsenceDayDetail>()
                 .Where(s => s.DateAt >= input.startDate)
                 .Where(s => s.DateAt.Date <= input.endDate)
                 .Where(predicate)
@@ -1606,20 +1660,21 @@ namespace Timesheet.APIs.RequestDays
                 .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
                 .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
                 .GroupBy(s =>new { s.DateAt, s.Request.Type })
-                        select new
-                        {
-                            Date = s.Key.DateAt,
-                            Type = s.Key.Type,
-                            RequestCount = s.Count()
-                        };
+                            select new
+                            {
+                                Date = s.Key.DateAt,
+                                Type = s.Key.Type,
+                                RequestCount = s.Count()
+                            };
 
-            var result = await query.ToListAsync();
-            return result.Select(item => new CountRequestDto
-            {
-                Date = item.Date,
-                Type = item.Type,
-                Count = item.RequestCount
-            }).ToList();
+                var result = await query.ToListAsync();
+                return result.Select(item => new CountRequestDto
+                {
+                    Date = item.Date,
+                    Type = item.Type,
+                    Count = item.RequestCount
+                }).ToList();
+            }
         }
 
         [HttpPost]
@@ -1635,7 +1690,7 @@ namespace Timesheet.APIs.RequestDays
             var predicate = await GetPredicate(input.projectIds);
 
             IQueryable<GetRequestDto> query = from s in WorkScope.GetAll<AbsenceDayDetail>()
-                  .Where(s => s.DateAt == input.date)
+                  //.Where(s => s.DateAt == input.date)
                   .Where(predicate)
                   .Where(s => !input.status.HasValue || input.status.Value < 0 ||
                            (input.status.Value == 0 ? (s.Request.Status == RequestStatus.Pending || s.Request.Status == RequestStatus.Approved) :
@@ -1671,6 +1726,18 @@ namespace Timesheet.APIs.RequestDays
                             LastModificationTime = s.Request.LastModificationTime,
                             LastModifierUserName = updatedUser.Select(x => x.FullName).FirstOrDefault(),
                         };
+            if(input.type.Value == RequestType.Remote && input.remoteOfWeek.HasValue && input.remoteOfWeek.Value > 0)
+            {
+                DateTime monday = input.date;
+                while (monday.DayOfWeek != DayOfWeek.Monday)
+                    monday = monday.AddDays(-1);
+
+                var queryCount = query.Where(s => monday <= s.DateAt && s.DateAt <= monday.AddDays(6)).Select(s => s);
+
+                query = query.Where(s => s.DateAt == input.date).Where(s => queryCount.Count(s1 => s1.UserId == s.UserId) == input.remoteOfWeek.Value).Select(s => s);
+            } else {
+                query = query.Where(s => s.DateAt == input.date).Select(s => s);
+            }
             var res = await query.ToListAsync();
 
             var dictUserProjectInfos = await DictUserProjectInfos(res.Select(s => s.UserId));
