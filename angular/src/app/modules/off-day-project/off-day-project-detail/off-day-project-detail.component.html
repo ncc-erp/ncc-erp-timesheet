@@ -16,8 +16,7 @@
           <th style="width: 190px; min-width: 190px;">User</th>
           <!-- <th>Sex</th> -->
           <th style="width: 300px; min-width: 300px;">Project/PM</th>
-          <th style="min-width: 120px;">Request</th>
-          <th style="width: 136px; min-width: 136px;">Off Type</th>
+          <th style="min-width: 120px;">Request-Off Type</th>
           <th style="width: 160px; min-width: 160px;">Note</th>
           <th style="width: 100px; min-width: 100px;">Submited At</th>
           <th style="width: 194px; min-width: 194px;">Action</th>
@@ -86,9 +85,7 @@
           <td class="pin" style="text-align: center;">
             <span [ngClass]="getListTypeClasses(item)">{{getLeaveTypeText(item)}}</span>
             <span [ngClass]="getListClasses(item)" style="margin-left: 5px;">{{getLeaveText(item)}}</span>
-          </td>
-          <td class="type" style="text-align: center;">
-            <span *ngIf="item.leavedayType == 0  && !item.absenceTime">{{item.dayOffName}}</span>
+            <span *ngIf="item.leavedayType == 0  && !item.absenceTime" style="color:black">{{item.dayOffName}}</span>
           </td>
           <td class="note">
             {{item.reason}}
