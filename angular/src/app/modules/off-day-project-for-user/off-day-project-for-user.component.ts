@@ -107,7 +107,7 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
     this.getDayOff();
   }
 
-  onremoteOfWeekChange() {
+  onRemoteOfWeekChange() {
     let date = new Date(this.year, this.month, this.day);
     this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
     this.getDayOff();

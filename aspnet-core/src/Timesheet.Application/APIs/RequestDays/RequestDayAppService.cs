@@ -1600,12 +1600,12 @@ namespace Timesheet.APIs.RequestDays
                 DateTime current = input.startDate;
                 while (current <= input.endDate)
                 {
-                    if (current.DayOfWeek == DayOfWeek.Monday && current.AddDays(6).DayOfWeek == DayOfWeek.Sunday)
+                    if (current.DayOfWeek == DayOfWeek.Monday)
                     {
                         weeks.Add(current);
                         current = current.AddDays(7);
                     }
-                    else current = current.AddDays(1);
+                    else current = current.AddDays(-1);
                 }
 
                 var result = new List<CountRequestDto>();
@@ -1626,23 +1626,17 @@ namespace Timesheet.APIs.RequestDays
                     .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
                                 select s;
 
-                    var queryFilterByRemoteOfWeek = query.WhereIf(input.remoteOfWeek.Value > 0, s=>query.Count(s1=>s1.CreatorUserId == s.CreatorUserId) == input.remoteOfWeek.Value)
-                        .GroupBy(s => new { s.DateAt, s.Request.Type }).Select(s => new
-                    {
-                        Date = s.Key.DateAt,
-                        Type = s.Key.Type,
-                        RequestCount = s.Count()
-                    });
+                    var queryFilterByRemoteOfWeek = query.WhereIf(input.remoteOfWeek.Value > 0, s => query.Count(s1 => s1.CreatorUserId == s.CreatorUserId) == input.remoteOfWeek.Value)
+                        .GroupBy(s => new { s.DateAt, s.Request.Type }).Select(s => new CountRequestDto
+                        {
+                            Date = s.Key.DateAt,
+                            Type = s.Key.Type,
+                            Count = s.Count()
+                        });
 
+                    var queryResult = queryFilterByRemoteOfWeek.ToList();
 
-                    var queryResult = await queryFilterByRemoteOfWeek.ToListAsync();
-                    var CountRequestDtoList = queryResult.Select(item => new CountRequestDto
-                    {
-                        Date = item.Date,
-                        Type = item.Type,
-                        Count = item.RequestCount
-                    }).ToList();
-                    result = result.Concat(CountRequestDtoList).ToList();
+                    result = result.Concat(queryResult).ToList();
                 }
 
                 return result;
@@ -1660,20 +1654,15 @@ namespace Timesheet.APIs.RequestDays
                 .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
                 .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
                 .GroupBy(s =>new { s.DateAt, s.Request.Type })
-                            select new
+                            select new CountRequestDto
                             {
                                 Date = s.Key.DateAt,
                                 Type = s.Key.Type,
-                                RequestCount = s.Count()
+                                Count = s.Count()
                             };
 
-                var result = await query.ToListAsync();
-                return result.Select(item => new CountRequestDto
-                {
-                    Date = item.Date,
-                    Type = item.Type,
-                    Count = item.RequestCount
-                }).ToList();
+                var result = query.ToList();
+                return result;
             }
         }
 
@@ -1738,7 +1727,7 @@ namespace Timesheet.APIs.RequestDays
             } else {
                 query = query.Where(s => s.DateAt == input.date).Select(s => s);
             }
-            var res = await query.ToListAsync();
+            var res = query.ToList();
 
             var dictUserProjectInfos = await DictUserProjectInfos(res.Select(s => s.UserId));
 
