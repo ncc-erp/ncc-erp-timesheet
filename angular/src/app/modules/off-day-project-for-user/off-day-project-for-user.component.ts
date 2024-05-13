@@ -49,8 +49,10 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
   listMonth = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
   dayAbsentTypeList = Object.keys(this.APP_CONSTANT.DayAbsenceType)
   dayTypeList = Object.keys(this.APP_CONSTANT.AbsenceType)
+  remoteOfWeekList = [1,2,3,4,5];
   absentDayType = -1;
   dayType = -1;
+  remoteOfWeek=-1;
   dayOffType = -1;
   dayOffTypes = [] as DayOffType[];
   modalData: {
@@ -100,6 +102,12 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
   }
 
   onDayTypeChange() {
+    let date = new Date(this.year, this.month, this.day);
+    this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
+    this.getDayOff();
+  }
+
+  onRemoteOfWeekChange() {
     let date = new Date(this.year, this.month, this.day);
     this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
     this.getDayOff();
@@ -209,12 +217,15 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
       this.dayOffType = APP_CONSTANT.FILTER_DEFAULT.All;
       this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
     }
+    if(this.absentDayType !== APP_CONSTANT.DayAbsenceType['Remote']){
+      this.remoteOfWeek = APP_CONSTANT.FILTER_DEFAULT.All;
+    }
     if(this.absentDayType === 3){
       this.dayType = 4;
       typeAbsenceDay = 0;
       this.absentDayType = 3;
     }
-    this.absenceService.getCountAllRequestAbsenceOfTeam(startDate, endDate, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
+    this.absenceService.getCountAllRequestAbsenceOfTeam(startDate, endDate, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType, this.remoteOfWeek).subscribe(res => {
       this.isLoading = false;
       this.countRequestList = res.result;
       this.countRequestList.forEach(item => {
@@ -238,11 +249,14 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
       typeAbsenceDay = 0;
       this.absentDayType = 3;
     }
+    if(this.absentDayType !== APP_CONSTANT.DayAbsenceType['Remote']){
+      this.remoteOfWeek = APP_CONSTANT.FILTER_DEFAULT.All;
+    }
     if (!this.permission.isGranted(PERMISSIONS_CONSTANT.ViewDetailAbsenceDayOfTeam)) return;
     const countRequestForDay = this.countRequestList.find(item => moment(item.date).isSame(date, 'day'));
     if (countRequestForDay && countRequestForDay.count > 0) {
       this.isLoading = true;
-      this.absenceService.getAllRequestForUserByDay(date, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
+      this.absenceService.getAllRequestForUserByDay(date, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType, this.remoteOfWeek).subscribe(res => {
         this.absenceRequestList = res.result;
         const eventOfDay = this.absenceRequestList.filter(event => moment(event.dateAt, 'YYYY-MM-DD').toDate().getDate() == date.getDate() && moment(event.dateAt, 'YYYY-MM-DD').toDate().getMonth() == date.getMonth());
         if (eventOfDay && eventOfDay.length) {

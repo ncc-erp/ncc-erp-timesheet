@@ -15,6 +15,7 @@ namespace Timesheet.APIs.RequestDays.Dto
         public int? status { get; set; }
         public DayType? dayType { get; set; }
         public long? BranchId { get; set; }
+        public int? remoteOfWeek { get; set; }
 
     }
 }
