@@ -85,7 +85,7 @@
           <td class="pin" style="text-align: center;">
             <span [ngClass]="getListTypeClasses(item)">{{getLeaveTypeText(item)}}</span>
             <span [ngClass]="getListClasses(item)" style="margin-left: 5px;">{{getLeaveText(item)}}</span>
-            <span *ngIf="item.leavedayType == 0  && !item.absenceTime" style="color:black">{{item.dayOffName}}</span>
+            <span *ngIf="item.leavedayType == 0  && !item.absenceTime" style="color:black;white-space: pre-wrap;">{{item.dayOffName}}</span>
           </td>
           <td class="note">
             {{item.reason}}
