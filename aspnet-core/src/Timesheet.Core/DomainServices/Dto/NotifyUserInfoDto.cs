@@ -39,14 +39,6 @@ namespace Timesheet.DomainServices.Dto
             }
         }
 
-        public string KomuPMInfo
-        {
-            get
-            {
-                return KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
-            }
-        }
-
         public string ToEmailString()
         {
             return $"{FullName} [{CommonUtils.BranchName(Branch)} - {CommonUtils.UserTypeName(Type)}]";

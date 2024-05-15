@@ -1311,7 +1311,7 @@ namespace Timesheet.APIs.RequestDays
                     var pmsTag = project.KomuPMsTag(alreadySentToPMIds);
                     pmsTag = string.IsNullOrEmpty(pmsTag) ? "" : $"PM {pmsTag}:";
 
-                    var komuMessage = $"{pmsTag} **{approver.KomuPMInfo}** " +
+                    var komuMessage = $"{pmsTag} **{approver.FullName}** " +
                         $"has **{(isApprove ? "approved" : "rejected")}** the request: {requester.KomuAccountInfo} " +
                         $"**{GetRequestName(request, requestDetail, offTypeName)}** {requestDetail.ToKomuString()}";
 

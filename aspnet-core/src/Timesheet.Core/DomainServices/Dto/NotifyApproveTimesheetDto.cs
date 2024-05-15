@@ -16,13 +16,13 @@ namespace Timesheet.DomainServices.Dto
     {
         public ulong? KomuUserId { get; set; }
         public string EmailAddress { get; set; }
-
+        public string UserName => EmailAddress.Split('@')[0];
         public List<UserInfoApproveTimesheetDto> Users { get; set; }
         public int CountUsers => Users.Count;
 
         public string KomuAccountTag()
         {
-            return KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"**{EmailAddress}**";
+            return KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
         }
     }
 }
