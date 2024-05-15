@@ -650,7 +650,7 @@ namespace Timesheet.Timesheets.Timesheets
                 else
                 {
                     channelMessage.Clear();
-                    channelMessage.AppendLine($"PM {approver.KomuPMInfo}" + $" has **{(isApprove ? "approved" : "rejected")}** the following timesheets submitted by: {requesters.KomuAccountInfo}");
+                    channelMessage.AppendLine($"PM {approver.KomuAccountTag()}" + $" has **{(isApprove ? "approved" : "rejected")}** the following timesheets submitted by: {requesters.KomuAccountInfo}");
                     channelMessage.AppendLine("```");
                     channelMessage.Append(project.TimesheetsKomuMsg());
                     channelMessage.AppendLine("```");

@@ -25,10 +25,11 @@ namespace Timesheet.DomainServices.Dto
 
         public List<UserInfoApproveRequestOffDto> Users { get; set; }
         public int CountUsers => Users.Count;
+        public string UserName => EmailAddress.Split('@')[0];
 
         public string KomuAccountTag()
         {
-            return KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"**{EmailAddress}**";
+            return KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
         }
     }
 
