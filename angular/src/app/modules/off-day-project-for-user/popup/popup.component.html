@@ -15,8 +15,8 @@
           <th>STT</th>
           <th style="width: 250px; min-width: 250px;">User</th>
           <th style="width: fit-content;">Project/PM</th>
-          <th style="min-width: 120px;">Request-Off Type</th>
-          <th style="width: 136px; min-width: 136px;"></th>
+          <th style="min-width: 120px;">Request</th>
+          <th style="width: 136px; min-width: 136px;">Off Type</th>
           <th style="width: 170px; min-width: 170px;">Created At</th>
           <th style="width: 170px; min-width: 170px;">Last Modified At</th>
         </tr>
@@ -83,7 +83,9 @@
           <td class="pin" style="text-align: center;">
             <span [ngClass]="getListTypeClasses(item)">{{getLeaveTypeText(item)}}</span>
             <span [ngClass]="getListClasses(item)" style="margin-left: 5px;">{{getLeaveText(item)}}</span>
-            <span *ngIf="item.leavedayType == 0  && !item.absenceTime" style="color:black;white-space: pre-wrap;">{{item.dayOffName}}</span>
+          </td>
+          <td class="type"  style="text-align: center;">
+            <span *ngIf="item.leavedayType == 0  && !item.absenceTime">{{item.dayOffName}}</span>
           </td>
           <td style="text-align: center;">
             <p>{{item.createTime | date : "dd/MM/yyyy HH:mm:ss"}}</p>
