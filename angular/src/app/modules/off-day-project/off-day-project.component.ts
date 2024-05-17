@@ -264,7 +264,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     const eventOfDay = this.absenceRequestList.filter(event => moment(event.dateAt, 'YYYY-MM-DD').toDate().getDate() == date.getDate() && moment(event.dateAt, 'YYYY-MM-DD').toDate().getMonth() == date.getMonth());
     if (eventOfDay && eventOfDay.length) {
       const dialogRef = this.diaLog.open(OffDayProjectDetailComponent, {
-        disableClose: true,
+        //disableClose: true,
         width: "1320px",
         data: { events: eventOfDay, date: date }
       });
