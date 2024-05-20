@@ -11,6 +11,7 @@ import { finalize } from 'rxjs/operators';
 import { ManageUserDto } from '../Dto/branch-manage-dto';
 import { DetailParticipatingProjectsComponent } from './detail-participating-projects/detail-participating-projects.component';
 import { MatDialog } from '@angular/material';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-manage-employee',
@@ -23,13 +24,19 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   @Input() listBranchFilter: BranchDto[];
   public branchSearch: FormControl = new FormControl("")
   branchId;
+
+  typeOfView = this.APP_CONSTANT.TypeViewHomePage.Month;
+  activeDay: any;
+  startDate: string;
+  endDate: string;
+  displayDay: any;
+
   @Input() listPosition: PositionDto[];
   @Input() listPositionFilter: PositionDto[];
   public positionSearch: FormControl = new FormControl("")
   public positionId = -1;
   public filterItems: FilterDto[] = [];
   public users: ManageUserDto[];
-  public dateType = 1;
   keyword;
   constructor(
     injector: Injector,
@@ -55,6 +62,10 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   ];
 
   ngOnInit() {
+    this.startDate = moment().startOf('M').format('YYYY-MM-DD');
+    this.endDate = moment().endOf('M').format('YYYY-MM-DD');
+    this.activeDay = this.startDate;
+    this.displayDay = this.startDate + " - " + this.endDate
     this.refresh();
   } 
   filterPosition(): void{
@@ -89,7 +100,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       this.addFilterItem('positionId', this.positionId);
     }
     request.filterItems = this.filterItems;
-    this.manageUserForBranchService.getAllUserPagging(request, this.dateType)
+    this.manageUserForBranchService.getAllUserPagging(request, this.startDate, this.endDate)
     .pipe(
       finalize(() => {
         finishedCallback()
@@ -128,7 +139,11 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     this.keyword = '';
     this.positionId = -1;
     this.branchId = 0;
-    this.dateType = 1;
+    this.typeOfView = this.APP_CONSTANT.TypeViewHomePage.Month;
+    this.startDate = moment().startOf('M').format('YYYY-MM-DD');
+    this.endDate = moment().endOf('M').format('YYYY-MM-DD');
+    this.activeDay = this.startDate;
+    this.displayDay = this.startDate + " - " + this.endDate;
     this.searchOrFilter();
   }
 
@@ -165,10 +180,72 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     let dialogRef = this._dialog.open(DetailParticipatingProjectsComponent, {
       minWidth: '450px',
       width: '800px',
-      data: user,
+      data: {
+        user: user,
+        startDate: this.startDate,
+        endDate: this.endDate
+      }
     })
     dialogRef.afterClosed().subscribe(() => {
       
     })
   }
+
+  nextOrPre(value){
+    value=value=='next'?1:value=='pre'?-1:0;
+    if (this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Day) {
+      this.activeDay = moment(this.activeDay).add(value, 'd').format('YYYY-MM-DD');
+      this.displayDay = this.activeDay;
+      this.startDate = this.activeDay;
+      this.endDate = this.activeDay;
+    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Week){
+      this.startDate = moment(this.activeDay).add(value, 'w').startOf('isoWeek').format('YYYY-MM-DD');
+      this.endDate = moment(this.activeDay).add(value, 'w').endOf('isoWeek').format('YYYY-MM-DD');
+      this.activeDay = this.startDate;
+      this.displayDay = this.startDate + " - " + this.endDate;
+    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Month){
+      this.startDate = moment(this.activeDay).add(value, 'M').startOf('M').format('YYYY-MM-DD');
+      this.endDate = moment(this.activeDay).add(value, 'M').endOf('M').format('YYYY-MM-DD');
+      this.activeDay = this.startDate;
+      this.displayDay = this.startDate + " - " + this.endDate;
+    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Year){
+      this.startDate = moment(this.activeDay).add(value, 'y').startOf('y').format('YYYY-MM-DD');
+      this.endDate = moment(this.activeDay).add(value, 'y').endOf('y').format('YYYY-MM-DD');
+      this.activeDay = this.startDate;
+      this.displayDay = this.startDate + " - " + this.endDate;
+    }
+    this.refresh();
+  }
+
+  customDate() {
+    if (this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Day) {
+      this.displayDay = moment(this.activeDay).format('YYYY-MM-DD');
+      this.displayDay = this.displayDay;
+      this.startDate = this.displayDay;
+      this.endDate = this.displayDay;
+    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Week){
+      this.startDate = moment(this.activeDay).startOf('isoWeek').format('YYYY-MM-DD');
+      this.endDate = moment(this.activeDay).endOf('isoWeek').format('YYYY-MM-DD');
+      this.activeDay = this.startDate;
+      this.displayDay = this.startDate + " - " + this.endDate;
+    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Month){
+      this.startDate = moment(this.activeDay).startOf('M').format('YYYY-MM-DD');
+      this.endDate = moment(this.activeDay).endOf('M').format('YYYY-MM-DD');
+      this.activeDay = this.startDate;
+      this.displayDay = this.startDate + " - " + this.endDate;
+    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Year){
+      this.startDate = moment(this.activeDay).startOf('y').format('YYYY-MM-DD');
+      this.endDate = moment(this.activeDay).endOf('y').format('YYYY-MM-DD');
+      this.activeDay = this.startDate;
+      this.displayDay = this.startDate + " - " + this.endDate;
+    }
+    this.refresh();
+  }
+
+  viewBy(value) {
+    this.typeOfView = value;
+    this.activeDay=moment().format('YYYY-MM-DD');
+    this.customDate();
+  }
+
 }

@@ -63,10 +63,11 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
         [HttpPost]
         [AbpAuthorize]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch)]
-        public async Task<PagedResultDto<UserProjectsDto>> GetAllUserPagging(GridParam input, long? positionId, long? branchId, int? dateType)
+        public async Task<PagedResultDto<UserProjectsDto>> GetAllUserPagging(GridParam input, long? positionId, long? branchId, DateTime? startDate, DateTime? endDate)
         {
             var qProjectUser = QProjectUser(branchId);
             var qMyTimeSheet = from th in WorkScope.GetAll<MyTimesheet>()
+                               .Where(s => startDate <= s.DateAt && s.DateAt <= endDate)
                                select new MyTimesheetDto
                                {
                                    UserId = th.UserId,
@@ -75,32 +76,12 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                                    DateAt = th.DateAt
                                };
             var qProjectTask = from pt in WorkScope.GetAll<ProjectTask>()
+                               join pu in qProjectUser on pt.ProjectId equals pu.ProjectId
                                select new ProjectTaskDto
                                {
                                    Id = pt.Id,
                                    ProjectId = pt.ProjectId,
                                };
-            DateTime current = DateTime.Now;
-            if (dateType == null)
-            {
-                dateType = 1;
-            }
-            if ((TypeOfDate)dateType == TypeOfDate.Day)
-            {
-                qMyTimeSheet = qMyTimeSheet
-                    .Where(s => s.DateAt.Date == current.Date
-                            && s.DateAt.Month == current.Month
-                            && s.DateAt.Year == current.Year);
-            }
-            else if ((TypeOfDate)dateType == TypeOfDate.Month)
-            {
-                qMyTimeSheet = qMyTimeSheet.Where(s => s.DateAt.Month == current.Month
-                                     && s.DateAt.Year == current.Year);
-            }
-            else
-            {
-                qMyTimeSheet = qMyTimeSheet.Where(s => s.DateAt.Year == current.Year);
-            }
             var joinQuery = from mth in qMyTimeSheet
                             join pt in qProjectTask on mth.ProjectTaskId equals pt.Id
                             select new
@@ -111,17 +92,17 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                             };
             var workingTimeProject = joinQuery.GroupBy(s => s.UserId)
                                     .ToDictionary(g => g.Key, g => g.Sum(i => i.WorkingTime));
-            var workingTimeUserProject = joinQuery.GroupBy(s => s.ProjectId.ToString() + " " + s.UserId.ToString())
+            var workingTimeUserProject = joinQuery.GroupBy(s => s.ProjectId.ToString() + "-" + s.UserId.ToString())
                                     .ToDictionary(g => g.Key, g => g.Sum(i => i.WorkingTime));
             var projectIds = new HashSet<long>();
+            var userIds = new HashSet<long>();
             foreach (var jq in joinQuery)
             {
+                userIds.Add(jq.UserId);
                 projectIds.Add(jq.ProjectId);
             }
-            joinQuery = joinQuery.GroupBy(s => s.UserId).Select(s => s.First());
-            var query = from u in WorkScope.GetAll<User>().Where(s => s.IsActive)
-                        join jq in joinQuery on u.Id equals jq.UserId
-                        join pu in qProjectUser.Where(s => projectIds.Contains(s.ProjectId)) on jq.UserId equals pu.UserId into puu
+            var query = from u in WorkScope.GetAll<User>().Where(s => s.IsActive).Where(s => userIds.Contains(s.Id))
+                        join pu in qProjectUser.Where(s => projectIds.Contains(s.ProjectId)) on u.Id equals pu.UserId into puu
                         select new UserProjectsDto
                         {
                             Id = u.Id,
@@ -157,7 +138,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                 foreach (var pu in user.ProjectUsers)
                 {
                     pu.Pms = projects.Where(s => s.Key == pu.ProjectId).Select(s => s.pms).FirstOrDefault();
-                    string workingTimeUserProjectKey = pu.ProjectId.ToString() + " " + user.Id.ToString();
+                    string workingTimeUserProjectKey = pu.ProjectId.ToString() + "-" + user.Id.ToString();
                     long workingTimeProjectKey = user.Id;
                     if (workingTimeUserProject.ContainsKey(workingTimeUserProjectKey) && workingTimeProject.ContainsKey(workingTimeProjectKey))
                     {
@@ -174,18 +155,41 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
         [HttpPost]
         [AbpAuthorize]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch)]
-        public async Task<PagedResultDto<UserStatisticInProjectDto>> GetStatisticNumOfUsersInProject(GridParam input, long? branchId)
+        public async Task<PagedResultDto<UserStatisticInProjectDto>> GetStatisticNumOfUsersInProject(GridParam input, long? branchId, DateTime? startDate, DateTime? endDate)
         {
             var qProjectUser = QProjectUser(branchId);
 
+            var qMyTimeSheet = from th in WorkScope.GetAll<MyTimesheet>()
+                               where startDate <= th.DateAt && th.DateAt <= endDate
+                               group th by new { th.UserId, th.ProjectTaskId } into g
+                               select new
+                               {
+                                   UserId = g.Key.UserId,
+                                   ProjectTaskId = g.Key.ProjectTaskId
+                               };
+            var qUserProject = from pt in WorkScope.GetAll<ProjectTask>()
+                               join mth in qMyTimeSheet on pt.Id equals mth.ProjectTaskId
+                               select new
+                               {
+                                   UserId = mth.UserId,
+                                   ProjectId = pt.ProjectId,
+                               };
+            var projectIds = new HashSet<long>();
+            var user_project = new HashSet<string>();
+            foreach (var up in qUserProject)
+            {
+                user_project.Add(up.UserId.ToString()+ "-" + up.ProjectId.ToString());
+                projectIds.Add(up.ProjectId);
+            }
             var query = qProjectUser
+                .Where(s=> projectIds.Contains(s.ProjectId))
                 .GroupBy(s => s.ProjectId)
                 .Select(s => new UserValueProjectDto
                 {
                     Id = s.Key,
                     ProjectCode = s.Select(x => x.Code).FirstOrDefault(),
                     ProjectName = s.Select(x => x.Name).FirstOrDefault(),
-                    Users = s.Select(x => new UserValueDto
+                    Users = s.Where(x=> user_project.Contains(x.UserId.ToString() + "-" +x.ProjectId.ToString())).Select(x => new UserValueDto
                     {
                         UserId = x.UserId,
                         BranchId = x.BranchId,

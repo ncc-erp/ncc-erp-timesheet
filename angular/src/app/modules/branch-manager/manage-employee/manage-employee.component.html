@@ -63,24 +63,32 @@
                 </ng-container>
                 
               </div>
-              <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 mb-0">
-                <ng-container>
-                  <mat-form-field class="w-100" appearance="outline">
-                    <mat-label> {{ "Date Type" | localize }}</mat-label>
-                    <mat-select name="dateType" [(value)]="dateType" (selectionChange)="searchOrFilter()">
-                      <mat-option [value]="0">
-                        Day
-                      </mat-option>
-                      <mat-option [value]="1">
-                        Month
-                      </mat-option>
-                      <mat-option [value]="2">
-                        Year
-                      </mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                </ng-container>
-                
+              <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12 mb-0">
+                <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+                  <mat-button-toggle name="previousBtn" matTooltip="Previous" matTooltipPosition="above" (click)="nextOrPre('pre')">
+                    <mat-icon>keyboard_arrow_left</mat-icon>
+                  </mat-button-toggle>
+
+                  <mat-button-toggle matTooltip="Today" matTooltipPosition="above">
+                    <mat-form-field>
+                      <span>{{displayDay}}</span>
+                      <input matInput [readonly]="true" [matDatepicker]="picker1" [(ngModel)]="activeDay"
+                        (dateInput)="customDate()" [hidden]="true">
+                    </mat-form-field>
+                  </mat-button-toggle>
+
+                  <mat-button-toggle name="nextBtn" matTooltip="Next" matTooltipPosition="above" (click)="nextOrPre('next')">
+                    <mat-icon>keyboard_arrow_right</mat-icon>
+                  </mat-button-toggle>
+                </mat-button-toggle-group>
+                <mat-datepicker-toggle name="datePicker" matSuffix [for]="picker1"></mat-datepicker-toggle>
+                <mat-datepicker #picker1></mat-datepicker>
+                <mat-button-toggle-group name="fontStyle" aria-label="Font Style" #group="matButtonToggleGroup" [(value)]="typeOfView">
+                  <mat-button-toggle name="dayBtnToggle" [(value)]="APP_CONSTANT.TypeViewHomePage.Day" (click)="viewBy(APP_CONSTANT.TypeViewHomePage.Day)">Day</mat-button-toggle>
+                  <mat-button-toggle name="weekBtnToggle" [(value)]="APP_CONSTANT.TypeViewHomePage.Week" (click)="viewBy(APP_CONSTANT.TypeViewHomePage.Week)">Week</mat-button-toggle>
+                  <mat-button-toggle name="monthBtnToggle" [(value)]="APP_CONSTANT.TypeViewHomePage.Month" (click)="viewBy(APP_CONSTANT.TypeViewHomePage.Month)">Month</mat-button-toggle>
+                  <mat-button-toggle name="yearBtnToggle" [(value)]="APP_CONSTANT.TypeViewHomePage.Year" (click)="viewBy(APP_CONSTANT.TypeViewHomePage.Year)">Year</mat-button-toggle>
+                </mat-button-toggle-group>
               </div>
             </div>
           </div>

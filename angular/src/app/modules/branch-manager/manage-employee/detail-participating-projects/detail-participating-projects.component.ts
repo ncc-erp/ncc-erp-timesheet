@@ -15,7 +15,7 @@ import { ProjectListManagement } from '../../Dto/branch-manage-dto';
   styleUrls: ['./detail-participating-projects.component.css']
 })
 export class DetailParticipatingProjectsComponent extends AppComponentBase implements OnInit {
-  public viewChange = new FormControl(this.APP_CONSTANT.TypeViewHomePage.Week);
+  public viewChange = new FormControl(this.APP_CONSTANT.TypeViewHomePage.CustomTime);
   public projectList: ProjectListManagement[] = [];
   private activeView: number = 0;
   distanceFromAndToDate = '';
@@ -42,8 +42,8 @@ export class DetailParticipatingProjectsComponent extends AppComponentBase imple
   }
 
   ngOnInit() {
-    this.userId = this.data.id;
-    this.changeView(true);
+    this.userId = this.data.user.id;
+    this.changeView(false,moment(this.data.startDate),moment(this.data.endDate));
   }
 
   getData(userId, fromDate, toDate){
