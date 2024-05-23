@@ -67,7 +67,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
         {
             var qProjectUser = QProjectUser(branchId);
             var qMyTimeSheet = from th in WorkScope.GetAll<MyTimesheet>()
-                               .Where(s => startDate <= s.DateAt && s.DateAt <= endDate)
+                               .WhereIf(startDate.HasValue && endDate.HasValue, s => startDate <= s.DateAt && s.DateAt <= endDate)
                                select new MyTimesheetDto
                                {
                                    UserId = th.UserId,
@@ -160,7 +160,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
             var qProjectUser = QProjectUser(branchId);
 
             var qMyTimeSheet = from th in WorkScope.GetAll<MyTimesheet>()
-                               where startDate <= th.DateAt && th.DateAt <= endDate
+                               .WhereIf(startDate.HasValue && endDate.HasValue,s => startDate <= s.DateAt && s.DateAt <= endDate)
                                group th by new { th.UserId, th.ProjectTaskId } into g
                                select new
                                {

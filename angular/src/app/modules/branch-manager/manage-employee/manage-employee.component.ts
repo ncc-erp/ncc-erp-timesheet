@@ -10,7 +10,7 @@ import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { finalize } from 'rxjs/operators';
 import { ManageUserDto } from '../Dto/branch-manage-dto';
 import { DetailParticipatingProjectsComponent } from './detail-participating-projects/detail-participating-projects.component';
-import { MatDialog } from '@angular/material';
+import { MatDatepicker, MatDialog } from '@angular/material';
 import * as moment from 'moment';
 
 @Component({
@@ -25,11 +25,13 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   public branchSearch: FormControl = new FormControl("")
   branchId;
 
-  typeOfView = this.APP_CONSTANT.TypeViewHomePage.Month;
+  typeOfView = this.APP_CONSTANT.TypeViewBranchManager.Month;
+  startView = "year";
   activeDay: any;
   startDate: string;
   endDate: string;
   displayDay: any;
+  TimeType = Object.keys(this.APP_CONSTANT.TypeViewBranchManager);
 
   @Input() listPosition: PositionDto[];
   @Input() listPositionFilter: PositionDto[];
@@ -139,7 +141,8 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     this.keyword = '';
     this.positionId = -1;
     this.branchId = 0;
-    this.typeOfView = this.APP_CONSTANT.TypeViewHomePage.Month;
+    this.typeOfView = this.APP_CONSTANT.TypeViewBranchManager.Month;
+    this.startView = "year";
     this.startDate = moment().startOf('M').format('YYYY-MM-DD');
     this.endDate = moment().endOf('M').format('YYYY-MM-DD');
     this.activeDay = this.startDate;
@@ -191,61 +194,54 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     })
   }
 
-  nextOrPre(value){
-    value=value=='next'?1:value=='pre'?-1:0;
-    if (this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Day) {
-      this.activeDay = moment(this.activeDay).add(value, 'd').format('YYYY-MM-DD');
-      this.displayDay = this.activeDay;
-      this.startDate = this.activeDay;
-      this.endDate = this.activeDay;
-    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Week){
-      this.startDate = moment(this.activeDay).add(value, 'w').startOf('isoWeek').format('YYYY-MM-DD');
-      this.endDate = moment(this.activeDay).add(value, 'w').endOf('isoWeek').format('YYYY-MM-DD');
-      this.activeDay = this.startDate;
-      this.displayDay = this.startDate + " - " + this.endDate;
-    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Month){
-      this.startDate = moment(this.activeDay).add(value, 'M').startOf('M').format('YYYY-MM-DD');
-      this.endDate = moment(this.activeDay).add(value, 'M').endOf('M').format('YYYY-MM-DD');
-      this.activeDay = this.startDate;
-      this.displayDay = this.startDate + " - " + this.endDate;
-    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Year){
-      this.startDate = moment(this.activeDay).add(value, 'y').startOf('y').format('YYYY-MM-DD');
-      this.endDate = moment(this.activeDay).add(value, 'y').endOf('y').format('YYYY-MM-DD');
-      this.activeDay = this.startDate;
-      this.displayDay = this.startDate + " - " + this.endDate;
-    }
-    this.refresh();
-  }
-
   customDate() {
-    if (this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Day) {
+    if (this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Day) {
       this.displayDay = moment(this.activeDay).format('YYYY-MM-DD');
       this.displayDay = this.displayDay;
       this.startDate = this.displayDay;
       this.endDate = this.displayDay;
-    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Week){
+      this.startView = "month";
+    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Week){
       this.startDate = moment(this.activeDay).startOf('isoWeek').format('YYYY-MM-DD');
       this.endDate = moment(this.activeDay).endOf('isoWeek').format('YYYY-MM-DD');
       this.activeDay = this.startDate;
       this.displayDay = this.startDate + " - " + this.endDate;
-    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Month){
+      this.startView = "month";
+    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Month){
       this.startDate = moment(this.activeDay).startOf('M').format('YYYY-MM-DD');
       this.endDate = moment(this.activeDay).endOf('M').format('YYYY-MM-DD');
       this.activeDay = this.startDate;
       this.displayDay = this.startDate + " - " + this.endDate;
-    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewHomePage.Year){
+      this.startView = "year";
+    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Year){
       this.startDate = moment(this.activeDay).startOf('y').format('YYYY-MM-DD');
       this.endDate = moment(this.activeDay).endOf('y').format('YYYY-MM-DD');
       this.activeDay = this.startDate;
       this.displayDay = this.startDate + " - " + this.endDate;
+      this.startView = "multi-year";
+    } else {
+      this.startDate = "";
+      this.endDate = "";
     }
     this.refresh();
   }
 
-  viewBy(value) {
-    this.typeOfView = value;
+  FilterByTime() {
     this.activeDay=moment().format('YYYY-MM-DD');
     this.customDate();
   }
-
+  setMonth(normalizedMonthAndYear: moment.Moment, datepicker: MatDatepicker<moment.Moment>) {
+    if(this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Month){
+      this.activeDay=moment(normalizedMonthAndYear).format('YYYY-MM-DD');
+      datepicker.close();
+      this.customDate();
+    }
+  }
+  setYear(normalizedMonthAndYear: moment.Moment, datepicker: MatDatepicker<moment.Moment>) {
+    if(this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Year){
+      this.activeDay=moment(normalizedMonthAndYear).format('YYYY-MM-DD');
+      datepicker.close();
+      this.customDate();
+    }
+  }
 }

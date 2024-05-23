@@ -66,13 +66,19 @@ export const APP_CONSTANT = {
     People: 1
   },
   TypeViewHomePage: {
+    Week: 0,
+    Month: 1,
+    Quater: 2,
+    Year: 3,
+    AllTime: 4,
+    CustomTime: 5
+  },
+  TypeViewBranchManager: {
+    All : -1,
     Day : 0,
     Week: 1,
     Month: 2,
-    Quater: 3,
-    Year: 4,
-    AllTime: 5,
-    CustomTime: 6
+    Year: 3
   },
   MyTimesheetView: {
     Day: 0,
