@@ -1205,64 +1205,68 @@ namespace Timesheet.APIs.RequestDays
 
         }
         [HttpPost]
-        public async System.Threading.Tasks.Task ApproveRequest(long requestId)
+        public async System.Threading.Tasks.Task ApproveRequest(long[] requestIds)
         {
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
-            var request = await WorkScope
+            foreach(var requestId in requestIds) {
+                var request = await WorkScope
                 .GetAll<AbsenceDayRequest>()
                 .Include(ar => ar.User) // Eager loading User
                 .FirstOrDefaultAsync(ar => ar.Id == requestId);
 
-            if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
-            {
-                var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
-                    .Where(s => s.RequestId == requestId)
-                    .Where(s => s.Request.Type == RequestType.Remote)
-                    .Where(s => s.Request.Status == RequestStatus.Rejected)
-                    .Select(s => s.DateAt.ToString("yyyy-MM-dd"))
-                    .FirstOrDefaultAsync();
-
-                if (dateRemote != null)
+                if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
-                    var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
+                    var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
+                        .Where(s => s.RequestId == requestId)
+                        .Where(s => s.Request.Type == RequestType.Remote)
+                        .Where(s => s.Request.Status == RequestStatus.Rejected)
+                        .Select(s => s.DateAt.ToString("yyyy-MM-dd"))
+                        .FirstOrDefaultAsync();
 
-                    if (wfhRequestDto == null)
+                    if (dateRemote != null)
                     {
-                        throw new UserFriendlyException("Cannot get request information from the W2 system!");
+                        var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
+
+                        if (wfhRequestDto == null)
+                        {
+                            throw new UserFriendlyException("Cannot get request information from the W2 system!");
+                        }
+                        if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
+                        {
+                            throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
+                        }
                     }
-                    if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
-                    {
-                        throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
-                    }
+
+                    request.Status = RequestStatus.Approved;
+                    await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
+
+                    await notifyKomuWhenApproveOrRejectRequest(request, true);
                 }
-
-                request.Status = RequestStatus.Approved;
-                await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
-
-                await notifyKomuWhenApproveOrRejectRequest(request, true);
-            }
-            else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
-            {
-                throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+                else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
+                {
+                    throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+                }
             }
         }
 
         [HttpPost]
-        public async System.Threading.Tasks.Task RejectRequest(long requestId)
+        public async System.Threading.Tasks.Task RejectRequest(long[] requestIds)
         {
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
-            var request = await WorkScope.GetAsync<AbsenceDayRequest>(requestId);
+            foreach (var requestId in requestIds) {
+                var request = await WorkScope.GetAsync<AbsenceDayRequest>(requestId);
 
-            if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
-            {
-                request.Status = RequestStatus.Rejected;
-                await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
+                if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
+                {
+                    request.Status = RequestStatus.Rejected;
+                    await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
 
-                await notifyKomuWhenApproveOrRejectRequest(request, false);
-            }
-            else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
-            {
-                throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+                    await notifyKomuWhenApproveOrRejectRequest(request, false);
+                }
+                else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
+                {
+                    throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+                }
             }
         }
 

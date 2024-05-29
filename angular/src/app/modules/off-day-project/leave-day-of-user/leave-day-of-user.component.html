@@ -101,6 +101,15 @@
                 </mat-option>
               </mat-select>
             </mat-form-field>
+            <mat-checkbox [checked]="multiSelectMode" (change)="multiSelectMode = $event.checked">
+              {{ "Multi-Select" | localize }}
+            </mat-checkbox>
+            <div *ngIf="multiSelectMode">
+              <button class="approve-button" [name]="approveBtn" (click)="onApprove()"
+              mat-raised-button>Approve</button>
+              <button class="reject-button" [name]="rejectBtn" (click)="onReject()"
+                mat-raised-button>Reject</button>
+            </div>
           </div>
         </div>
       </div>
@@ -109,7 +118,7 @@
         <div [ngSwitch]="view" style="user-select: none;">
           <mwl-calendar-month-view *ngSwitchCase="calendarView.Month" [cellTemplate]="customCellTemplate"
             [viewDate]="viewDate" [events]="events" [refresh]="refresh" [activeDayIsOpen]="activeDayIsOpen"
-            (dayClicked)="dayClicked($event.day)" (beforeViewRender)="getData($event)">
+            (dayClicked)="dayClicked($event)" (beforeViewRender)="getData($event)">
           </mwl-calendar-month-view>
         </div>
       </div>
@@ -124,6 +133,7 @@
     </div>
     <div *ngFor="let item of day.events">
       <div *ngIf="day.badgeTotal <= 0">
+        <span class="cal-day-badge text-primary selected-day" *ngIf="item.cssClass === 'selected-day'">✔</span>
         <span class="cal-day-badge text-primary day-chip-full-day"
           *ngIf="item.type === 0 && item.absenceTime==null">Off</span>
         <span class="cal-day-badge text-primary onsite" *ngIf="day.type === 1">Onsite</span>

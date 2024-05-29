@@ -41,6 +41,19 @@ pre {
         display: block;
     }
 }
+.approve-button {
+    margin: 0px 5px;
+    background-color: #2b982b !important;
+    color: white;
+}
+.reject-button {
+    margin: 0px 5px;
+    background-color: #9e9e9e;
+    color: white;
+}
+.selected-day {
+    background-color: #00ff37  !important;
+}
 .day-chip-full-day {
     background-color: #db0000  !important;
 }

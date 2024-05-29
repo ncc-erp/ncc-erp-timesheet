@@ -49,6 +49,7 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
   dayTypeList = Object.keys(this.APP_CONSTANT.AbsenceType)
   absentDayType = -1
   dayType = -1
+  multiSelectMode = false
 
   constructor(
     injector: Injector,
@@ -161,9 +162,22 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
     return data.some(d => d.status !== this.APP_CONSTANT.AbsenceStatus.Rejected);
   }
 
-  dayClicked({ date }: { date: Date }) {
+  dayClicked(event: any) {
+    if(this.multiSelectMode && event.day.events.length > 0){
+      let selectedDate = moment(event.day.date).format("YYYY-MM-DD")
+      const haveData = this.absenceReqs.find(day => day.detail.dateAt === selectedDate);
+      let indexSelected = event.day.events.findIndex(s => s.cssClass == "selected-day");
+      if(indexSelected == -1){
+        event.day.events.push({"cssClass":"selected-day"});
+        this.selectedDays.set(selectedDate,haveData.id);
+      } else {
+        event.day.events.splice(indexSelected,1);
+        this.selectedDays.delete(selectedDate);
+      }
+      return;
+    }
     let eventOfDay;
-    const formatDate = moment(date).format("YYYY-MM-DD");
+    const formatDate = moment(event.day.date).format("YYYY-MM-DD");
     const haveData = this.absenceReqs.some(day => day.detail.dateAt === formatDate);
     if (haveData) {
       this.isLoading = true;
@@ -174,7 +188,7 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
           const dialogRef = this.diaLog.open(OffDayProjectDetailComponent, {
             disableClose: true,
             width: "1224px",
-            data: { events: eventOfDay, date: date }
+            data: { events: eventOfDay, date: event.day.date }
           });
 
           dialogRef.afterClosed().subscribe(() => {
@@ -224,6 +238,32 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
 
   onBack() {
     history.back();
+  }
+
+  onApprove() {
+    this.isLoading = true;
+    this.absenceRequestService.approveAbsenceRequest(Array.from(this.selectedDays.values())).subscribe((res) => {
+      if (res) {
+        this.notify.success(this.l("Approve Successfully!"));
+        this.refreshData();
+      }
+      this.isLoading = false;
+    }, (error) => {
+      this.isLoading = false;
+    });
+  }
+
+  onReject() {
+    this.isLoading = true;
+    this.absenceRequestService.rejectAbsenceRequest(Array.from(this.selectedDays.values())).subscribe((res) => {
+      if (res) {
+        this.notify.success(this.l("Reject Successfully!"));
+        this.refreshData();
+      }
+      this.isLoading = false;
+    }, (error) => {
+      this.isLoading = false;
+    });
   }
 
 }
