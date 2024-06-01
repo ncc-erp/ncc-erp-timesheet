@@ -512,8 +512,14 @@ namespace Timesheet.Timesheets.MyTimesheets
 
             //var isUnlock = await validUnLockTimsheet(input);
             var isUnlocked = IsUserUnlockedToLogTS(AbpSession.UserId.Value);
+            DateTime lockDate = _commonService.getlockDateUser();
+            
+            if (!isUnlocked && input.DateAt.Date < lockDate)
+            {
+                throw new UserFriendlyException("Go to ims.nccsoft.vn > Unlock timesheet");
+            }
             CheckValidCreateUpdateTimesheet(input, isUnlocked);
-
+            
 
             var item = await WorkScope.GetAsync<MyTimesheet>(input.Id);
             if (item == null)
