@@ -30,7 +30,10 @@ namespace Timesheet.Uitls
                 var t = HHmm.Split(':');
                 double minute = double.Parse(t[0]) * 60 + double.Parse(t[1]) + hour * 60;
 
-                return (int) (minute / 60) + ":" + minute % 60;
+                int hours = (int) (minute / 60);
+                int minutes = (int) (minute % 60);
+
+                return $"{hours:D2}:{minutes:D2}";
 
             }
             return HHmm;
