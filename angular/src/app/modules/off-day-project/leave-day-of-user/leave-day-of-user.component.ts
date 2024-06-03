@@ -49,6 +49,7 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
   dayTypeList = Object.keys(this.APP_CONSTANT.AbsenceType)
   absentDayType = -1
   dayType = -1
+  multiSelect = false;
 
   constructor(
     injector: Injector,
@@ -161,27 +162,43 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
     return data.some(d => d.status !== this.APP_CONSTANT.AbsenceStatus.Rejected);
   }
 
-  dayClicked({ date }: { date: Date }) {
-    let eventOfDay;
-    const formatDate = moment(date).format("YYYY-MM-DD");
-    const haveData = this.absenceReqs.some(day => day.detail.dateAt === formatDate);
-    if (haveData) {
-      this.isLoading = true;
-      this.absenceRequestService.getUserRequestByDate(formatDate, this.userId).subscribe(res => {
-        eventOfDay = res.result as AbsenceRequestDto[];
-        this.isLoading = false;
-        if (eventOfDay && eventOfDay.length && this.checkApprove(eventOfDay)) {
-          const dialogRef = this.diaLog.open(OffDayProjectDetailComponent, {
-            disableClose: true,
-            width: "1224px",
-            data: { events: eventOfDay, date: date }
-          });
-
-          dialogRef.afterClosed().subscribe(() => {
-            this.refreshData();
-          })
+  dayClicked(day : any) {
+    if (!this.multiSelect) {
+      let eventOfDay;
+      const formatDate = moment(day.date).format("YYYY-MM-DD");
+      const haveData = this.absenceReqs.some(day => day.detail.dateAt === formatDate);
+      if (haveData) {
+        this.isLoading = true;
+        this.absenceRequestService.getUserRequestByDate(formatDate, this.userId).subscribe(res => {
+          eventOfDay = res.result as AbsenceRequestDto[];
+          this.isLoading = false;
+          if (eventOfDay && eventOfDay.length && this.checkApprove(eventOfDay)) {
+            const dialogRef = this.diaLog.open(OffDayProjectDetailComponent, {
+              disableClose: true,
+              width: "1224px",
+              data: { events: eventOfDay, date: day.date }
+            });
+  
+            dialogRef.afterClosed().subscribe(() => {
+              this.refreshData();
+            })
+          }
+        });
+      }
+    } else {
+      if(day.events.length > 0){
+        let selectedDate = moment(day.date).format("YYYY-MM-DD")
+        const haveData = this.absenceReqs.find(day => day.detail.dateAt === selectedDate);
+        let indexSelected = day.events.findIndex(s => s.cssClass == "select_multiday");
+        if(indexSelected == -1){
+          day.events.push({"cssClass":"select_multiday"});
+          this.selectedDays.set(selectedDate,haveData.id);
+        } else {
+          day.events.splice(indexSelected,1);
+          this.selectedDays.delete(selectedDate);
         }
-      });
+        return;
+      }
     }
   }
 
@@ -224,6 +241,32 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
 
   onBack() {
     history.back();
+  }
+
+  on_approve() {
+    this.isLoading = true;
+    this.absenceRequestService.approveAbsenceRequest(Array.from(this.selectedDays.values())).subscribe((res) => {
+      if (res) {
+        this.notify.success(this.l("Approve Successfully!"));
+        this.refreshData();
+      }
+      this.isLoading = false;
+    }, (error) => {
+      this.isLoading = false;
+    });
+  }
+
+  on_reject() {
+    this.isLoading = true;
+    this.absenceRequestService.rejectAbsenceRequest(Array.from(this.selectedDays.values())).subscribe((res) => {
+      if (res) {
+        this.notify.success(this.l("Reject Successfully!"));
+        this.refreshData();
+      }
+      this.isLoading = false;
+    }, (error) => {
+      this.isLoading = false;
+    });
   }
 
 }
