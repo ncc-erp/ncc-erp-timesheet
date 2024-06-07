@@ -558,7 +558,7 @@ namespace Timesheet.DomainServices
                             }
                             else if (absenceUser.AbsenceTime == OnDayType.VeSom)
                             {
-                                t.CheckOut = CommonUtils.AddMoreHourToHHmm(t.CheckOut, -absenceUser.Hour);
+                                t.CheckOut = CommonUtils.AddMoreHourToHHmm(t.CheckOut, -(absenceUser.Hour));
                                 t.Note += "Xin về sớm " + absenceUser.Hour + " h";
                                 t.AbsenceDayType = DayType.Custom;
                             }
