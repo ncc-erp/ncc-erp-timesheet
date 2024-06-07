@@ -508,7 +508,7 @@ namespace Timesheet.Timesheets.MyTimesheets
         public async Task<MyTimesheetDto> Update(MyTimesheetDto input)
         {
             if (input.WorkingTime < 0)
-                throw new UserFriendlyException("You can't log this time sheet");
+                throw new UserFriendlyException("Invalid working time. You can't log this Timesheet.");
 
             //var isUnlock = await validUnLockTimsheet(input);
             var isUnlocked = IsUserUnlockedToLogTS(AbpSession.UserId.Value);
@@ -516,7 +516,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             
             if (!isUnlocked && input.DateAt.Date < lockDate)
             {
-                throw new UserFriendlyException("Go to ims.nccsoft.vn > Unlock timesheet");
+                throw new UserFriendlyException("You can't update this Timesheet. Go to ims.nccsoft.vn > Unlock timesheet");
             }
             CheckValidCreateUpdateTimesheet(input, isUnlocked);
             
@@ -526,7 +526,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                 throw new UserFriendlyException(string.Format("Timesheet Id {0} is not exist", input.Id));
 
             if (AbpSession.UserId.Value != item.UserId)
-                throw new UserFriendlyException(string.Format("You can't update other people's timesheet"));
+                throw new UserFriendlyException(string.Format("You can't update other people's Timesheet"));
 
             if (item.Status == TimesheetStatus.Approve)
                 throw new UserFriendlyException(string.Format("You can't update approved Timesheet"));
