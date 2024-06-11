@@ -37,29 +37,13 @@
                         </button>
                     </div>
                 </div>
-<div class="col-sm-5ths">
-    <mat-form-field appearance="outline">
-        <mat-label>Position</mat-label>
-
-        <mat-select name="positionId" [(value)]="positionId" (selectionChange)="searchOrFilter()">
-            <mat-option>
-                <ngx-mat-select-search placeholderLabel="Search" [formControl]="positionSearch"
-                noEntriesFoundLabel= "No matching found"></ngx-mat-select-search>
-            </mat-option>
-            <mat-option [value]="-1">All</mat-option>
-            <mat-option *ngFor="let position of listPosition" [value]='position.id'>
-                {{position.name}}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
-</div>
-
-                <mat-form-field class="col-md-7 field-padding" appearance="outline" style="width: 460px;">
-                    <mat-icon style="color:#9E9E9E" matPrefix>search</mat-icon>
-                    <mat-label>Search by Username, Name, Surname or Email</mat-label>
-                    <input matInput [(ngModel)]="keyword" name="keyword" (keyup.enter)="searchOrFilter()">
-                    <!--  ngModelChange -->
-                </mat-form-field>
+                <div style="display: flex; justify-content: center; width: 100%;">
+                    <mat-form-field class="col-md-7 field-padding" appearance="outline" style="width: 460px;">
+                        <mat-icon style="color: #9E9E9E" matPrefix>search</mat-icon>
+                        <mat-label>Search by Username, Name, Surname or Email</mat-label>
+                        <input matInput [(ngModel)]="keyword" name="keyword" (keyup.enter)="searchOrFilter()">
+                    </mat-form-field>
+                </div>
             </div>
             <div class="clearfix" style="padding: 0 5px 0px 5px">
                 <mat-form-field class="col-sm-5ths field-padding" appearance="outline">
@@ -89,7 +73,7 @@
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field class="col-sm-5ths field-padding" appearance="outline">
-                    <mat-label>Basic Tranner</mat-label>
+                    <mat-label>Basic Trainer</mat-label>
                     <mat-select [(value)]="managerId" name="PM" (selectionChange)="searchOrFilter()">
                         <mat-option value="-1">All</mat-option>
                         <mat-option value="null">No Trainer</mat-option>
@@ -112,6 +96,20 @@
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
+                <mat-form-field class="col-sm-5ths field-padding" appearance="outline">
+                    <mat-label>Position</mat-label>
+            
+                    <mat-select name="positionId" [(value)]="positionId" (selectionChange)="searchOrFilter()">
+                        <mat-option>
+                            <ngx-mat-select-search placeholderLabel="Search" [formControl]="positionSearch"
+                            noEntriesFoundLabel= "No matching found"></ngx-mat-select-search>
+                        </mat-option>
+                        <mat-option [value]="-1">All</mat-option>
+                        <mat-option *ngFor="let position of listPosition" [value]='position.id'>
+                            {{position.name}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>   
             </div>
             <div style="position: relative; padding: 20px;">
                 <div class="table-responsive" style="border: 0;" id="tbl">
