@@ -232,7 +232,7 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
             var listUserIdByTeamBuildingDetail = await WorkScope.GetAll<TeamBuildingDetail>()
                 .Where(x => !input.Ids.Contains(x.EmployeeId))
                 .Where(x => x.Employee.IsActive)
-                .Where(x => x.Status != StatusEnum.TeamBuildingStatus.Done)
+                .Where(x => x.Status == StatusEnum.TeamBuildingStatus.Open)
                 .WhereIf(input.BranchId != null, x => x.Employee.BranchId == input.BranchId)
                 .WhereIf(input.SearchText != null, x => x.Employee.FullName.Contains(input.SearchText) || x.Employee.EmailAddress.Contains(input.SearchText))
                 .Select(x => x.EmployeeId).Distinct().ToListAsync();
