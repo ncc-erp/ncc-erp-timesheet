@@ -49,36 +49,34 @@ namespace Timesheet.DomainServices
                     RegisterCheckOut = s.RegisterCheckOut,
                     ResultCheckIn = CommonUtils.SubtractHHmm(s.CheckIn, s.RegisterCheckIn),
                     ResultCheckOut = CommonUtils.SubtractHHmm(s.RegisterCheckOut, s.CheckOut),
-                    NotePunish = GetNotePunish(s.IsPunishedCheckIn, s.IsPunishedCheckOut, CommonUtils.SubtractHHmm(s.CheckIn, s.RegisterCheckIn), CommonUtils.SubtractHHmm(s.RegisterCheckOut, s.CheckOut))
+                    NotePunish = GetNotePunish(CommonUtils.SubtractHHmm(s.CheckIn, s.RegisterCheckIn), CommonUtils.SubtractHHmm(s.RegisterCheckOut, s.CheckOut))
                 }).ToList();
 
             return query;
         }
 
-        private string GetNotePunish(bool isPunishedCheckIn, bool isPunishedCheckOut, double? resultCheckIn, double? resultCheckOut)
+        private string GetNotePunish(double? resultCheckIn, double? resultCheckOut)
         {
             var LimitedMinute = double.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
-            
-            if (isPunishedCheckIn && !isPunishedCheckOut)
+            if (resultCheckIn > LimitedMinute && resultCheckOut == 0)
             {
-                if (resultCheckIn > LimitedMinute)
-                {
-                    return "Being Late For Work";
-                }
+                return "Being Late For Work And Not CheckOut";
+            }
+            if (resultCheckIn <= LimitedMinute && resultCheckOut == 0)
+            {
+                return "Not CheckIn And Not CheckOut";
+            }
+            if (resultCheckIn > LimitedMinute)
+            {
+                return "Being Late For Work";
+            }
+            if (resultCheckIn <= LimitedMinute)
+            {
                 return "Not CheckIn";
-            } else if (!isPunishedCheckIn && isPunishedCheckOut && resultCheckOut == 0)
+            }
+            if (resultCheckOut == 0)
             {
                 return "Not CheckOut";
-            } else if (isPunishedCheckIn && isPunishedCheckOut)
-            {
-                if (resultCheckIn > LimitedMinute && resultCheckOut == 0)
-                {
-                    return "Being Late For Work And Not CheckOut";
-                } else if (resultCheckIn > LimitedMinute)
-                {
-                    return "Being Late For Work";
-                }
-                return "Not CheckIn And Not CheckOut";
             }
             return null;
         }
