@@ -1627,11 +1627,12 @@ namespace Timesheet.APIs.RequestDays
                                 select s;
 
                     var queryFilterByRemoteOfWeek = query.WhereIf(input.remoteOfWeek.Value > 0, s => query.Count(s1 => s1.CreatorUserId == s.CreatorUserId) == input.remoteOfWeek.Value)
-                        .GroupBy(s => new { s.DateAt, s.Request.Type }).Select(s => new CountRequestDto
+                        .GroupBy(s => new { s.DateAt, s.Request.Type, AbsenceType = s.AbsenceTime ?? OnDayType.None }).Select(s => new CountRequestDto
                         {
                             Date = s.Key.DateAt,
                             Type = s.Key.Type,
-                            Count = s.Count()
+                            Count = s.Count(),
+                            AbsenceType = s.Key.AbsenceType
                         });
 
                     var queryResult = queryFilterByRemoteOfWeek.ToList();
@@ -1653,12 +1654,13 @@ namespace Timesheet.APIs.RequestDays
                 .WhereIf(input.BranchId.HasValue, s => s.Request.User.BranchId == input.BranchId)
                 .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
                 .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
-                .GroupBy(s =>new { s.DateAt, s.Request.Type })
+                .GroupBy(s =>new { s.DateAt, s.Request.Type, AbsenceType = s.AbsenceTime ?? OnDayType.None })
                             select new CountRequestDto
                             {
                                 Date = s.Key.DateAt,
                                 Type = s.Key.Type,
-                                Count = s.Count()
+                                Count = s.Count(),
+                                AbsenceType = s.Key.AbsenceType
                             };
 
                 var result = query.ToList();

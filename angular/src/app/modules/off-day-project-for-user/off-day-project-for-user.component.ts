@@ -70,6 +70,7 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
   searchText = "";
   branchId;
   notifyPmAbsenceDayOfTeam = PERMISSIONS_CONSTANT.NotifyPmAbsenceDayOfTeam;
+  previousAbsentDayType = -1;
 
   constructor(
     injector: Injector,
@@ -87,6 +88,7 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
 
   ngOnInit() {
     this.getAllAbsenceType();
+    this.dayTypeList = Object.keys(this.APP_CONSTANT.AbsenceType).filter(key => this.APP_CONSTANT.AbsenceType[key] !== 4);
   }
 
   getAllAbsenceType() {
@@ -225,21 +227,54 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
       typeAbsenceDay = 0;
       this.absentDayType = 3;
     }
-    this.absenceService.getCountAllRequestAbsenceOfTeam(startDate, endDate, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType, this.remoteOfWeek).subscribe(res => {
-      this.isLoading = false;
-      this.countRequestList = res.result;
-      this.countRequestList.forEach(item => {
-        this.events.push({
-          count: item.count,
-          date: moment(item.date, 'YYYY-MM-DD').toDate(),
-          meta: item.type
-        });
-      })
-      this.refresh.next();
-    }, () => {
-      this.isLoading = false;
-      this.notify.error("An error has occured!");
-    })
+    if (this.previousAbsentDayType === 3 && this.absentDayType === APP_CONSTANT.DayAbsenceType["Off"]) {
+      this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
+    }
+    this.previousAbsentDayType = this.absentDayType;
+    this.absenceService
+      .getCountAllRequestAbsenceOfTeam(
+        startDate,
+        endDate,
+        this.listProjectSelected,
+        this.searchText,
+        typeAbsenceDay,
+        this.dayOffType,
+        this.dayAbsentStatus,
+        this.dayType,
+        this.remoteOfWeek
+      )
+      .subscribe(
+        (res) => {
+          this.isLoading = false;
+          this.countRequestList = res.result;
+          this.countRequestList.forEach((item) => {
+            this.events.push({
+              count: item.count,
+              date: moment(item.date, "YYYY-MM-DD").toDate(),
+              meta: item.type,
+              absenceType: item.absenceType,
+            });
+          });
+          this.sortEvents();
+          this.refresh.next();
+        },
+        () => {
+          this.isLoading = false;
+          this.notify.error("An error has occured!");
+        }
+      );
+  }
+
+  sortEvents() {
+    this.events.sort((a, b) => {
+      if (a.meta == 0 && (a.absenceType != 1 && a.absenceType != 2 && a.absenceType != 3)) {
+        return -1;
+      }
+      if (b.meta == 0 && (b.absenceType != 1 && b.absenceType != 2 && b.absenceType != 3)) {
+        return 1;
+      }
+      return 0;
+    });
   }
 
   dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }) {

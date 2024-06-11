@@ -43,4 +43,5 @@ export class CountRequestDto
     date : string ;
     count : number;
     type: number;
+  absenceType: number;
 }
