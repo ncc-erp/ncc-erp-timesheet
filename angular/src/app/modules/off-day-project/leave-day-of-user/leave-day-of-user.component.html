@@ -36,16 +36,6 @@
               Next
             </div>
           </div>
-          <br><br>
-          <mat-checkbox [checked]="multiSelect" (change)="multiSelect = $event.checked">
-            {{ "Nhiều lựa chọn" | localize }}
-          </mat-checkbox>
-          <div *ngIf="multiSelect">
-            <button class="approve-button" [name]="btn-approve" (click)="on_approve()"
-            mat-raised-button>Approved</button>
-            <button class="reject-button" [name]="btn-reject" (click)="on_reject()"
-            mat-raised-button>Reject</button>
-          </div>
         </div>
         <!-- <div class="col-md-2">
           <mat-checkbox class="example-margin" [checked]="isShowRejected" (change)="onChangeShowRejected($event)">
@@ -114,8 +104,16 @@
           </div>
         </div>
       </div>
-      <br />
       <div style="padding:0 20px 20px; overflow-x: scroll;" [busy]="isLoading">
+        <mat-checkbox [checked]="multiSelect" (change)="multiSelect = $event.checked" style="padding: 30px;">
+          {{ "Multi-select" | localize }}
+        </mat-checkbox>
+        <div *ngIf="multiSelect">
+          <button class="approve-button" [name]="btn-approve" (click)="on_approve()"
+          mat-raised-button>Approved</button>
+          <button class="reject-button" [name]="btn-reject" (click)="on_reject()"
+          mat-raised-button>Reject</button>
+        </div>  
         <div [ngSwitch]="view" style="user-select: none;">
           <mwl-calendar-month-view *ngSwitchCase="calendarView.Month" [cellTemplate]="customCellTemplate"
             [viewDate]="viewDate" [events]="events" [refresh]="refresh" [activeDayIsOpen]="activeDayIsOpen"
