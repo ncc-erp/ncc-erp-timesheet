@@ -81,7 +81,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
   dayOffTypes = [] as DayOffType[];
   dayAbsentStatus = APP_CONSTANT.AbsenceStatusFilter["Pending"];
   dayAbsentStatusList = Object.keys(this.APP_CONSTANT.AbsenceStatusFilter);
-
+  previousAbsentDayType = -1;
   public isRadiocheckfilterbyBranch: boolean;
 
   constructor(
@@ -102,6 +102,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
 
   ngOnInit() {
     this.getAllAbsenceType();
+    this.dayTypeList = Object.keys(this.APP_CONSTANT.AbsenceType).filter(key => this.APP_CONSTANT.AbsenceType[key] !== 4);
   }
   getAllAbsenceType() {
     this.dayOffService.getAllDayOffType().subscribe(resp => {
@@ -233,16 +234,20 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
       this.dayOffType = APP_CONSTANT.FILTER_DEFAULT.All;
       this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
     }
-
     if(this.absentDayType === 3){
       this.dayType = 4;
       typeAbsenceDay = 0;
       this.absentDayType = 3;
     }
+    if (this.previousAbsentDayType === 3 && this.absentDayType === APP_CONSTANT.DayAbsenceType["Off"]) {
+      this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
+    }
+    this.previousAbsentDayType = this.absentDayType;
     this.absenceService.getAllRequestAbsence(startDate, endDate, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
       this.isLoading = false;
       this.absenceRequestList = res.result;
       this.absenceRequestList.forEach(item => {
+        if (!(this.absentDayType === 0 && item.dateType === 4)) {
           this.events.push({
             start : moment(item.dateAt, 'YYYY-MM-DD').toDate(),
             end: moment(item.dateAt, 'YYYY-MM-DD').toDate(),
@@ -251,6 +256,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
             meta: item.leavedayType,
             absenceTime: item.absenceTime,
           });
+        }
       })
       this.refresh.next();
     }, () => {
@@ -261,7 +267,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
 
   dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }) {
     if (!this.permission.isGranted(PERMISSIONS_CONSTANT.ViewDetailAbsenceDayByProject)) return;
-    const eventOfDay = this.absenceRequestList.filter(event => moment(event.dateAt, 'YYYY-MM-DD').toDate().getDate() == date.getDate() && moment(event.dateAt, 'YYYY-MM-DD').toDate().getMonth() == date.getMonth());
+    const eventOfDay = this.absenceRequestList.filter(event => (moment(event.dateAt, 'YYYY-MM-DD').toDate().getDate() == date.getDate() && moment(event.dateAt, 'YYYY-MM-DD').toDate().getMonth() == date.getMonth()) && !(this.absentDayType === 0 && event.dateType === 4));
     if (eventOfDay && eventOfDay.length) {
       const dialogRef = this.diaLog.open(OffDayProjectDetailComponent, {
         //disableClose: true,
