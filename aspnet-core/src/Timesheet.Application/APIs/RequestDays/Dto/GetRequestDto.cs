@@ -74,6 +74,7 @@ namespace Timesheet.APIs.RequestDays.Dto
         public DateTime Date { get; set; }
         public long Count { get; set; }
         public RequestType Type { get; set; }
+        public OnDayType AbsenceType { get; set; }
     }
 
 }

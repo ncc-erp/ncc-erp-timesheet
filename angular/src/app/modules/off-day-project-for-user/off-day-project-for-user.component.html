@@ -174,14 +174,39 @@
         <ng-container *ngIf="event.date.getTime() === day.date.getTime()">
           <div style="display: flex; ">
             <div style="display: flex; padding: 2px">
-              <span class="cal-day-badge text-primary day-chip-full-day mr-1" *ngIf="event.meta==0" style="width: fit-content">
+              <span
+                class="cal-day-badge text-primary day-chip-full-day mr-1"
+                *ngIf="event.meta == 0 && event.absenceType != 1 && event.absenceType != 2 && event.absenceType != 3"
+                style="width: fit-content;"
+              >
                 <span style="float: left">Off: {{ event.count }}</span>
               </span>
               <span class="cal-day-badge text-primary onsite" *ngIf="event.meta==1" style="width: fit-content;">
                 <span style="float: left">Onsite: {{ event.count }}</span>
               </span>
-              <span class="cal-day-badge text-primary remote" *ngIf="event.meta==2" style="width: fit-content">
+              <span class="cal-day-badge text-primary remote" *ngIf="event.meta==2" style="width: fit-content;">
                 <span style="float: left">Remote: {{ event.count }}</span>
+              </span>
+              <span
+                class="cal-day-badge text-primary day-chip-custom"
+                *ngIf="event.meta == 0 && event.absenceType == 1 && (dayType == 4 || absentDayType == -1)"
+                style="width: fit-content;"
+              >
+                <span style="float: left">ĐM: {{ event.count }}</span>
+              </span>
+              <span
+                class="cal-day-badge text-primary day-chip-full-day"
+                *ngIf="event.meta == 0 && event.absenceType == 2 && (dayType == 4 || absentDayType == -1)"
+                style="width: fit-content;"
+              >
+                <span style="float: left">Off: {{ event.count }}</span>
+              </span>
+              <span
+                class="cal-day-badge text-primary day-chip-custom"
+                *ngIf="event.meta == 0 && event.absenceType == 3 && (dayType == 4 || absentDayType == -1)"
+                style="width: fit-content; ;"
+              >
+                <span style="float: left">VS: {{ event.count }}</span>
               </span>
             </div>
           </div>
