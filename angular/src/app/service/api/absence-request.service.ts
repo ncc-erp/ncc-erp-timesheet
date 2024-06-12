@@ -26,7 +26,7 @@ export class AbsenceRequestService extends BaseApiService {
                 'Content-Type': 'application/json-patch+json',
             })
         };
-        return this.http.post<any>(this.rootUrl + '/ApproveRequest?requestId='+  reqId , httpOptions);
+        return this.http.post<any>(this.rootUrl + '/ApproveRequest', reqId , httpOptions);
     }
 
     rejectAbsenceRequest(reqId: any): Observable<any> {
@@ -35,7 +35,7 @@ export class AbsenceRequestService extends BaseApiService {
                 'Content-Type': 'application/json-patch+json',
             })
         };
-        return this.http.post<any>(this.rootUrl + '/RejectRequest?requestId='+ reqId, httpOptions);
+        return this.http.post<any>(this.rootUrl + '/RejectRequest', reqId, httpOptions);
     }
 
     getAllRequestAbsence(sd, ed, id, name, offType, dayoffTypeId,dayAbsentStatus, dayType): Observable<any> {
