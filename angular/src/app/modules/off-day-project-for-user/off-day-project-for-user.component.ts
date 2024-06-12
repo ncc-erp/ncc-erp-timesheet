@@ -293,7 +293,10 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
       this.isLoading = true;
       this.absenceService.getAllRequestForUserByDay(date, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType, this.remoteOfWeek).subscribe(res => {
         this.absenceRequestList = res.result;
-        const eventOfDay = this.absenceRequestList.filter(event => moment(event.dateAt, 'YYYY-MM-DD').toDate().getDate() == date.getDate() && moment(event.dateAt, 'YYYY-MM-DD').toDate().getMonth() == date.getMonth());
+        let eventOfDay = this.absenceRequestList.filter(event => moment(event.dateAt, 'YYYY-MM-DD').toDate().getDate() == date.getDate() && moment(event.dateAt, 'YYYY-MM-DD').toDate().getMonth() == date.getMonth());
+        if (this.absentDayType === 0) {
+          eventOfDay = eventOfDay.filter(event => event.absenceTime !== 1 && event.absenceTime !== 2 && event.absenceTime !== 3);
+        }
         if (eventOfDay && eventOfDay.length) {
           this.diaLog.open(PopupComponent, {
             disableClose: true,
