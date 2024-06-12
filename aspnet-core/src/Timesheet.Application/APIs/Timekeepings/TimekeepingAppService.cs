@@ -200,7 +200,7 @@ namespace Timesheet.APIs.Timekeepings
             t.RegisterCheckIn = input.RegisterCheckIn;
             t.RegisterCheckOut = input.RegisterCheckOut;
             t.TrackerTime = input.TrackerTime;
-            timekeepingServices.CheckIsPunished(t);
+            await timekeepingServices.CheckIsPunished(t);
             await timekeepingServices.CheckIsPunishedByRule(t, LimitedMinute, DateTimeUtils.ConvertHHmmssToMinutes(input.TrackerTime));
             await WorkScope.GetRepo<Timekeeping>().UpdateAsync(t);
             return t;

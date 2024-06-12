@@ -58,20 +58,27 @@ namespace Timesheet.DomainServices
         private string GetNotePunish(bool isPunishedCheckIn, bool isPunishedCheckOut, double? resultCheckIn, double? resultCheckOut)
         {
             var LimitedMinute = double.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
-
-            if ((isPunishedCheckIn && !isPunishedCheckOut) && (resultCheckIn > LimitedMinute))
-                return "Being Late For Work";
-            else if (isPunishedCheckIn && !isPunishedCheckOut && (resultCheckIn <= LimitedMinute))
+            if (isPunishedCheckIn && !isPunishedCheckOut)
+            {
+                if (resultCheckIn > LimitedMinute)
+                {
+                    return "Being Late For Work";
+                }
                 return "Not CheckIn";
-            else if (!isPunishedCheckIn && isPunishedCheckOut && (resultCheckOut == 0))
+            }
+            if (!isPunishedCheckIn && isPunishedCheckOut && (resultCheckOut == 0))
             {
                 return "Not CheckOut";
             }
-            else if (isPunishedCheckIn && isPunishedCheckOut)
+            if (isPunishedCheckIn && isPunishedCheckOut)
             {
-                if(resultCheckIn > LimitedMinute && resultCheckOut == 0)
+                if (resultCheckIn > LimitedMinute && resultCheckOut == 0)
                 {
                     return "Being Late For Work And Not CheckOut";
+                }
+                if (resultCheckIn > LimitedMinute)
+                {
+                    return "Being Late For Work";
                 }
                 return "Not CheckIn And Not CheckOut";
             }
