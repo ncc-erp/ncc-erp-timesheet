@@ -94,6 +94,7 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
     this.workingTime.afternoonWorking = this.appSession.user.afternoonWorking;
     this.workingTime.afternoonStartAt = this.appSession.user.afternoonStartAt;
     this.workingTime.afternoonEndAt = this.appSession.user.afternoonEndAt;
+    this.dayTypeList = Object.keys(this.APP_CONSTANT.AbsenceType).filter(key => this.APP_CONSTANT.AbsenceType[key] !== 4);
   }
 
   updateDay(): void {
@@ -111,6 +112,7 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
   }
 
   refreshData() {
+    let typeAbsenceDay = this.absentDayType;
     this.listDayShow = [];
     this.selectedDays.clear()
     this.isLoading = true
@@ -132,7 +134,12 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
       this.refresh.next();
       let sDate = moment(new Date(this.year, this.month - 1, 1)).format("YYYY-MM-DD");
       let tDate = moment(new Date(this.year, this.month + 2, 0)).format("YYYY-MM-DD")
-      this.absenceDayService.getAllAbsenceReqs(sDate, tDate, this.absentDayType, this.dayType).subscribe(resp => {
+      if (this.absentDayType === 3) {
+        this.dayType = 4;
+        typeAbsenceDay = 0;
+        this.absentDayType = 3;
+      }
+      this.absenceDayService.getAllAbsenceReqs(sDate, tDate, typeAbsenceDay, this.dayType).subscribe(resp => {
         this.absenceReqs = resp.result as AbsenceRequestDto[];
         this.monthViewBody.forEach((d: any) => {
           if (moment().isAfter(d.date) || d.date.getDay() === 0) {
@@ -149,7 +156,9 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
                 absenceTime: req.detail.absenceTime,
                 hour: req.detail.hour
               };
-              d.events.push(item);
+              if (!(this.absentDayType === 0 && req.detail.dateType === 4)) {
+                d.events.push(item);
+              }
             }
           });
           d['countEventInDay'] = d.events.length;
