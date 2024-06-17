@@ -46,6 +46,8 @@ export class ViewLeaveDayOfUserComponent extends AppComponentBase implements OnI
   isShowRejected: boolean = false;
   dayAbsentTypeList = Object.keys(this.APP_CONSTANT.DayAbsenceType)
   dayTypeList = Object.keys(this.APP_CONSTANT.AbsenceType)
+  dayAbsentStatus = this.APP_CONSTANT.AbsenceStatusFilter["Pending"];
+  dayAbsentStatusList = Object.keys(this.APP_CONSTANT.AbsenceStatusFilter);
   absentDayType = -1
   dayType = -1
   constructor(
@@ -110,13 +112,8 @@ export class ViewLeaveDayOfUserComponent extends AppComponentBase implements OnI
   
       let sDate = moment(new Date(this.year, this.month - 1, 1)).format("YYYY-MM-DD");
       let tDate = moment(new Date(this.year, this.month + 2, 0)).format("YYYY-MM-DD");
-      this.absenceRequestService.getAllRequestByUserIdForTeamMember(sDate, tDate, this.userId, this.absentDayType, this.dayType).subscribe(resp => {
-        if (this.isShowRejected) {
-          this.absenceReqs = resp.result
-        } else {
-          this.absenceReqs = resp.result.filter(item => item.status !== this.APP_CONSTANT.AbsenceStatus.Rejected) as AbsenceRequestDto[];
-        }
-
+      this.absenceRequestService.getAllRequestByUserIdForTeamMember(sDate, tDate, this.userId, this.absentDayType, this.dayType, this.dayAbsentStatus).subscribe(resp => {
+        this.absenceReqs = resp.result;
         this.monthViewBody.forEach((d: any) => {
           if (moment().isAfter(d.date) || d.date.getDay() === 0) {
             d['isOut'] = true;

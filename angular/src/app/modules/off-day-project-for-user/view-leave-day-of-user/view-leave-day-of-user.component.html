@@ -46,7 +46,7 @@
           <h3>{{ title }}</h3>
         </div> -->
         <div class="col-md-9 d-flex-justify-content-end">
-          <div class="col-md-3">
+          <div class="col-md-2">
             <mat-form-field appearance="outline">
               <mat-label>Request Type</mat-label>
               <mat-select
@@ -64,7 +64,7 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="col-md-3"  *ngIf="absentDayType === 0">
+          <div class="col-md-2"  *ngIf="absentDayType === 0">
             <mat-form-field appearance="outline"> 
               <mat-label>Type Of Request Type</mat-label>
               <mat-select
@@ -82,7 +82,24 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Status</mat-label>
+              <mat-select
+                name="dayAbsentStatus"
+                [(value)]="dayAbsentStatus"
+                (selectionChange)="selectionChange(true)"
+              >
+                <mat-option
+                  *ngFor="let item of dayAbsentStatusList"
+                  [value]="APP_CONSTANT.AbsenceStatusFilter[item]"
+                >
+                  {{ item }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-2">
             <mat-form-field appearance="outline">
               <mat-label>Year</mat-label>
               <mat-select name="yearSelect" [(value)]="year" (selectionChange)="selectionChange($event)">
@@ -92,7 +109,7 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
             <mat-form-field appearance="outline">
               <mat-label>Month</mat-label>
               <mat-select name="monthSelect" [(value)]="month" (selectionChange)="selectionChange($event)">
@@ -146,8 +163,7 @@
             {{item.hour}}h
           </span>
         </div>
-
-
+        <br/>
         <span [class]="'cal-day-badge status-label ' + getClassByStatus(item.status)" *ngIf="item.status">
           {{item.status === 1 ? 'Pending' : (item.status === 2 ? 'Approved' : 'Rejected')}}
         </span>

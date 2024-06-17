@@ -41,6 +41,13 @@ pre {
         display: block;
     }
 }
+.group-multiSelect{
+    display: flex; 
+    padding-left: 50px; 
+    align-items: center;
+    padding-bottom: 10px;
+    height: 30px;
+}
 .approve-button{
     margin: 0px 5px;
     background-color: #2b982b !important;
@@ -48,7 +55,7 @@ pre {
 }
 .reject-button{
     margin: 0px 5px;
-    background-color: #9e9e9e !important;
+    background-color: #f24b50 !important;
     color: white;
 }
 .select_multiday{

@@ -1349,12 +1349,16 @@ namespace Timesheet.APIs.RequestDays
         }
 
         [HttpGet]
-        public async Task<List<GetMyRequestDto>> GetAllRequestByUserIdForTeamMember(DateTime? startDate, DateTime? endDate, int userId, RequestType? type = null, DayType? dayType = null)
+        public async Task<List<GetMyRequestDto>> GetAllRequestByUserIdForTeamMember(DateTime? startDate, DateTime? endDate, int userId, int? status, RequestType? type = null, DayType? dayType = null)
         {
+            RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
             var query = from u in WorkScope.GetAll<AbsenceDayRequest>()
                         join t in WorkScope.GetAll<AbsenceDayDetail>()
                         .Where(s => !type.HasValue || type.Value < 0 || s.Request.Type == type.Value)
                         .WhereIf(dayType.HasValue && dayType.Value > 0, s => s.DateType == dayType.Value)
+                        .Where(s => !status.HasValue || status.Value < 0 ||
+                            (status.Value == 0 ? (s.Request.Status == RequestStatus.Pending || s.Request.Status == RequestStatus.Approved) :
+                            s.Request.Status == arrayAbsenceStatus[status.Value]))
                         .Where(s => !startDate.HasValue || s.DateAt >= startDate)
                         .Where(s => !endDate.HasValue || s.DateAt <= endDate)
                         .Where(s => s.Request.UserId == userId)
@@ -1399,10 +1403,10 @@ namespace Timesheet.APIs.RequestDays
         }
 
         [HttpGet]
-        public async Task<List<GetMyRequestDto>> GetAllRequestByUserId(DateTime? startDate, DateTime? endDate, int userId, RequestType? type = null, DayType? dayType = null)
+        public async Task<List<GetMyRequestDto>> GetAllRequestByUserId(DateTime? startDate, DateTime? endDate, int userId, int? status, RequestType? type = null, DayType? dayType = null)
         {
             await checkPMOfUser(AbpSession.UserId.Value, userId);
-            return await GetAllRequestByUserIdForTeamMember(startDate, endDate, userId, type, dayType);
+            return await GetAllRequestByUserIdForTeamMember(startDate, endDate, userId, status, type, dayType);
         }
 
         [HttpGet]

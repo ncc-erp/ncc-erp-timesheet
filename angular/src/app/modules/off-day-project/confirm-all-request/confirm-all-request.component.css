@@ -1,0 +1,64 @@
+
+td {
+  border-right: 1px solid #ccc;
+}
+
+.table th {
+  text-align: center;
+}
+
+.pin span {
+  display: inline-block;
+  min-width: 10px;
+  padding: 3px 7px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  border-radius: 10px;
+  color: white;
+}
+.header {
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: grab;
+}
+
+.header button {
+  height: 35px;
+  background-color: transparent;
+  border: none;
+  position: absolute;
+  right: 10px;
+}
+
+td.note {
+  text-align: justify;
+  width: 190px;
+}
+
+.btn-confirm {
+  margin: 0px 5px;
+  right: 2px; 
+  bottom: 2px;
+  background-color: #0b2a88 !important;
+  color: white;
+  width: 20%;
+}
+.box-confirm{
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  gap: 10px;
+  align-items: flex-end;
+}
+.mat-typography{
+  width: 100%;
+}
+
+
+
+

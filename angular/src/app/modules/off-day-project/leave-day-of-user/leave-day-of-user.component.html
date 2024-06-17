@@ -8,7 +8,8 @@
         </button>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+            <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123"
+              class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu123="matMenu">
@@ -23,8 +24,8 @@
       <div class="row text-center flex" style="padding: 15px;">
         <div class="col-md-3">
           <div class="btn-group">
-            <div name="previousBtn" class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
-              (viewDateChange)="closeOpenMonthViewDay()">
+            <div name="previousBtn" class="btn btn-primary" mwlCalendarPreviousView [view]="view"
+              [(viewDate)]="viewDate" (viewDateChange)="closeOpenMonthViewDay()">
               Previous
             </div>
             <div name="currentDateBtn" class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate"
@@ -46,43 +47,39 @@
           <h3>{{ title }}</h3>
         </div> -->
         <div class="col-md-9 d-flex justify-content-end">
-          <div class="col-md-3">
+          <div class="col-md-2">
             <mat-form-field appearance="outline">
               <mat-label>Request Type</mat-label>
-              <mat-select
-                name="absentDayType"
-                [(value)]="absentDayType"
-                (selectionChange)="selectionChange(true)"
-              >
+              <mat-select name="absentDayType" [(value)]="absentDayType" (selectionChange)="selectionChange(true)">
                 <mat-option [value]="-1">All</mat-option>
-                <mat-option
-                  *ngFor="let item of dayAbsentTypeList"
-                  [value]="APP_CONSTANT.DayAbsenceType[item]"
-                >
+                <mat-option *ngFor="let item of dayAbsentTypeList" [value]="APP_CONSTANT.DayAbsenceType[item]">
                   {{ item }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="col-md-3"  *ngIf="absentDayType === 0">
-            <mat-form-field appearance="outline"> 
+          <div class="col-md-2" *ngIf="absentDayType === 0">
+            <mat-form-field appearance="outline">
               <mat-label>Type Of Request Type</mat-label>
-              <mat-select
-                name="dayType"
-                [(value)]="dayType"
-                (selectionChange)="selectionChange()"
-              >
+              <mat-select name="dayType" [(value)]="dayType" (selectionChange)="selectionChange()">
                 <mat-option [value]="-1">All</mat-option>
-                <mat-option
-                  *ngFor="let item of dayTypeList"
-                  [value]="APP_CONSTANT.AbsenceType[item]"
-                >
+                <mat-option *ngFor="let item of dayTypeList" [value]="APP_CONSTANT.AbsenceType[item]">
                   {{ item | dayType }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Status</mat-label>
+              <mat-select name="dayAbsentStatus" [(value)]="dayAbsentStatus" (selectionChange)="selectionChange(true)">
+                <mat-option *ngFor="let item of dayAbsentStatusList" [value]="APP_CONSTANT.AbsenceStatusFilter[item]">
+                  {{ item }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-2">
             <mat-form-field appearance="outline">
               <mat-label>Year</mat-label>
               <mat-select name="yearSelect" [(value)]="year" (selectionChange)="selectionChange($event)">
@@ -92,7 +89,7 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
             <mat-form-field appearance="outline">
               <mat-label>Month</mat-label>
               <mat-select name="monthSelect" [(value)]="month" (selectionChange)="selectionChange($event)">
@@ -104,16 +101,20 @@
           </div>
         </div>
       </div>
-      <div style="padding:0 20px 20px; overflow-x: scroll;" [busy]="isLoading">
-        <mat-checkbox [checked]="multiSelect" (change)="multiSelect = $event.checked" style="padding: 30px;">
+      <div class="group-multiSelect">
+        <mat-checkbox [checked]="multiSelect" (change)="multiSelect = $event.checked" style="padding-right: 10px;">
           {{ "Multi-select" | localize }}
         </mat-checkbox>
-        <div *ngIf="multiSelect">
-          <button class="approve-button" [name]="btn-approve" (click)="on_approve()"
-          mat-raised-button>Approved</button>
-          <button class="reject-button" [name]="btn-reject" (click)="on_reject()"
-          mat-raised-button>Reject</button>
-        </div>  
+        <div *ngIf="this.selectedDays.size">
+          <button class="approve-button" [name]="btn-approve" (click)="confirm(1)" mat-raised-button>Approved</button>
+          <button class="reject-button" [name]="btn-reject" (click)="confirm(0)" mat-raised-button>Reject</button>
+        </div>
+        <mat-checkbox [checked]="selectAll" (change)="clickSelectAll($event.checked)" style="padding: 10px;"
+          *ngIf="multiSelect">
+          {{ "Select-All" | localize }}
+        </mat-checkbox>
+      </div>
+      <div style="padding:0 20px 20px; overflow-x: scroll;" [busy]="isLoading">
         <div [ngSwitch]="view" style="user-select: none;">
           <mwl-calendar-month-view *ngSwitchCase="calendarView.Month" [cellTemplate]="customCellTemplate"
             [viewDate]="viewDate" [events]="events" [refresh]="refresh" [activeDayIsOpen]="activeDayIsOpen"
@@ -130,9 +131,10 @@
     <div style="height: 100%;" class="back-red" *ngIf="day.badgeTotal > 0">
       <span class="cal-day-badge">Off</span>
     </div>
-    <div *ngFor="let item of day.events">
+    <div *ngFor="let item of day.events;let i = index">
+      <span class="cal-day-badge text-primary select_multiday"
+        *ngIf="item.cssClass === 'select_multiday' || (this.selectAll && i === 0 && item.status === 1 && handlerKtra(day.date))">✔</span>
       <div *ngIf="day.badgeTotal <= 0">
-        <span class="cal-day-badge text-primary select_multiday" *ngIf="item.cssClass === 'select_multiday'">✔</span>
         <span class="cal-day-badge text-primary day-chip-full-day"
           *ngIf="item.type === 0 && item.absenceTime==null">Off</span>
         <span class="cal-day-badge text-primary onsite" *ngIf="day.type === 1">Onsite</span>
@@ -155,7 +157,8 @@
             {{item.hour}}h
           </span>
         </div>
-        <span [class]="'cal-day-badge status-label ' + getClassByStatus(day)" *ngIf="day.status">
+        <br/>
+        <span [class]="'cal-day-badge status-label ' + getClassByStatus(item.status)" *ngIf="item.status">
           {{item.status === 1 ? 'Pending' : (item.status === 2 ? 'Approved' : 'Rejected')}}
         </span>
       </div>

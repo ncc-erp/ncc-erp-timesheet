@@ -13,6 +13,7 @@ import { AppComponentBase } from '@shared/app-component-base';
 import { OffDayProjectDetailComponent } from '../off-day-project-detail/off-day-project-detail.component';
 import { MatDialog } from '@angular/material';
 import { UserService } from '@app/service/api/user.service';
+import { ConfirmAllRequestComponent } from '../confirm-all-request/confirm-all-request.component';
 
 @Component({
   selector: 'app-leave-day-of-user',
@@ -47,9 +48,12 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
   isShowRejected: boolean = false;
   dayAbsentTypeList = Object.keys(this.APP_CONSTANT.DayAbsenceType)
   dayTypeList = Object.keys(this.APP_CONSTANT.AbsenceType)
+  dayAbsentStatus = this.APP_CONSTANT.AbsenceStatusFilter["Pending"];
+  dayAbsentStatusList = Object.keys(this.APP_CONSTANT.AbsenceStatusFilter);
   absentDayType = -1
   dayType = -1
   multiSelect = false;
+  selectAll = false;
 
   constructor(
     injector: Injector,
@@ -110,13 +114,8 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
 
       let sDate = moment(new Date(this.year, this.month - 1, 1)).format("YYYY-MM-DD");
       let tDate = moment(new Date(this.year, this.month + 2, 0)).format("YYYY-MM-DD");
-      this.absenceRequestService.getAllRequestByUserId(sDate, tDate, this.userId, this.absentDayType, this.dayType).subscribe(resp => {
-        if (this.isShowRejected) {
-          this.absenceReqs = resp.result
-        } else {
-          this.absenceReqs = resp.result.filter(item => item.status !== this.APP_CONSTANT.AbsenceStatus.Rejected) as AbsenceRequestDto[];
-        }
-
+      this.absenceRequestService.getAllRequestByUserId(sDate, tDate, this.userId, this.absentDayType, this.dayType, this.dayAbsentStatus).subscribe(resp => {
+        this.absenceReqs = resp.result;
         this.monthViewBody.forEach((d: any) => {
           if (moment().isAfter(d.date) || d.date.getDay() === 0) {
             d['isOut'] = true;
@@ -162,43 +161,62 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
     return data.some(d => d.status !== this.APP_CONSTANT.AbsenceStatus.Rejected);
   }
 
-  dayClicked(day : any) {
-    if (!this.multiSelect) {
-      let eventOfDay;
-      const formatDate = moment(day.date).format("YYYY-MM-DD");
-      const haveData = this.absenceReqs.some(day => day.detail.dateAt === formatDate);
-      if (haveData) {
-        this.isLoading = true;
-        this.absenceRequestService.getUserRequestByDate(formatDate, this.userId).subscribe(res => {
-          eventOfDay = res.result as AbsenceRequestDto[];
-          this.isLoading = false;
-          if (eventOfDay && eventOfDay.length && this.checkApprove(eventOfDay)) {
-            const dialogRef = this.diaLog.open(OffDayProjectDetailComponent, {
-              disableClose: true,
-              width: "1224px",
-              data: { events: eventOfDay, date: day.date }
-            });
-  
-            dialogRef.afterClosed().subscribe(() => {
-              this.refreshData();
-            })
-          }
-        });
+  dayClicked(day: any) {
+    const formatDate = moment(day.date).format("YYYY-MM-DD");
+    if (this.multiSelect) {
+      const haveData = this.absenceReqs.filter(day => day.detail.dateAt === formatDate);
+      const haveDateId = haveData.map(s => s.id);
+      let indexSelected = day.events.findIndex(s => s.cssClass == "select_multiday");  
+      if (indexSelected == -1) {
+        day.events.push({ "cssClass": "select_multiday" });
+        this.selectedDays.set(formatDate, haveDateId);
+      } else {
+        day.events.splice(indexSelected, 1);
+        this.selectedDays.delete(formatDate);
       }
-    } else {
-      if(day.events.length > 0){
-        let selectedDate = moment(day.date).format("YYYY-MM-DD")
-        const haveData = this.absenceReqs.find(day => day.detail.dateAt === selectedDate);
-        let indexSelected = day.events.findIndex(s => s.cssClass == "select_multiday");
-        if(indexSelected == -1){
-          day.events.push({"cssClass":"select_multiday"});
-          this.selectedDays.set(selectedDate,haveData.id);
-        } else {
-          day.events.splice(indexSelected,1);
-          this.selectedDays.delete(selectedDate);
+      return;
+    }
+    let eventOfDay;
+    const haveData = this.absenceReqs.some(day => day.detail.dateAt === formatDate);
+    if (haveData) {
+      this.isLoading = true;
+      this.absenceRequestService.getUserRequestByDate(formatDate, this.userId).subscribe(res => {
+        eventOfDay = res.result as AbsenceRequestDto[];
+        this.isLoading = false;
+        if (eventOfDay && eventOfDay.length) {
+          const dialogRef = this.diaLog.open(OffDayProjectDetailComponent, {
+            disableClose: true,
+            width: "1224px",
+            data: { events: eventOfDay, date: day.date }
+          });
+
+          dialogRef.afterClosed().subscribe(() => {
+            this.refreshData();
+          })
         }
-        return;
+      });
+    }
+  }
+
+  clickSelectAll(value){
+    this.selectedDays.clear();
+    this.selectAll = value;
+    const currentMonth = (new Date()).getMonth() + 1;
+    const absencePending = this.absenceReqs.filter(day => {
+        const dateMonth = (new Date(day.detail.dateAt)).getMonth() + 1;
+        return dateMonth === currentMonth && day.status === 1;
+    });
+    absencePending.forEach(s => {
+      if (this.selectedDays.has(s.detail.dateAt)) {
+        let existingArray = this.selectedDays.get(s.detail.dateAt);
+        existingArray.push(s.id);
+        this.selectedDays.set(s.detail.dateAt, existingArray); 
+      } else {
+        this.selectedDays.set(s.detail.dateAt, [s.id]);
       }
+    });
+    if (!value) {
+      this.selectedDays.clear();
     }
   }
 
@@ -243,30 +261,22 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
     history.back();
   }
 
-  on_approve() {
-    this.isLoading = true;
-    this.absenceRequestService.approveAbsenceRequest(Array.from(this.selectedDays.values())).subscribe((res) => {
-      if (res) {
-        this.notify.success(this.l("Approve Successfully!"));
-        this.refreshData();
-      }
-      this.isLoading = false;
-    }, (error) => {
-      this.isLoading = false;
+  confirm(number : any) {
+    console.log(this.selectedDays)
+    const dialogRef = this.diaLog.open(ConfirmAllRequestComponent, {
+      disableClose: true,
+      width: "500px",
+      data: { events: this.selectedDays, date: new Date(), number: number}
     });
+    dialogRef.afterClosed().subscribe(() => {
+      this.refreshData();
+    })
   }
 
-  on_reject() {
-    this.isLoading = true;
-    this.absenceRequestService.rejectAbsenceRequest(Array.from(this.selectedDays.values())).subscribe((res) => {
-      if (res) {
-        this.notify.success(this.l("Reject Successfully!"));
-        this.refreshData();
-      }
-      this.isLoading = false;
-    }, (error) => {
-      this.isLoading = false;
-    });
+  handlerKtra(date: Date) : boolean{
+    const currentMonth = (new Date()).getMonth() + 1;
+    if (date.getMonth() + 1 === currentMonth) {
+      return true;
+    } else return false;
   }
-
 }
