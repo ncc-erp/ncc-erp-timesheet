@@ -98,7 +98,8 @@ namespace Timesheet.APIs.ReviewDetails
                            };
             var listNote = qnote.ToList();
             var reviewDetails = from rv in WorkScope.GetAll<ReviewDetail>()
-                                .Where(s => s.InterShip.Level <= UserLevel.Intern_3)
+                                //Tạm thời chưa sửa, chờ thêm thông tin
+                                //.Where(s => s.InterShip.Level <= UserLevel.Intern_3 || s.Status == ReviewInternStatus.SentEmail)
                                         .Where(s => !branchId.HasValue || s.InterShip.BranchId == branchId)
                                      .Where(x => x.ReviewId == reviewId
                                      && (levelChange != null && valueLevelChange > -1 ? (valueLevelChange == 2 ? x.NewLevel == x.CurrentLevel : x.NewLevel != x.CurrentLevel) : true))
