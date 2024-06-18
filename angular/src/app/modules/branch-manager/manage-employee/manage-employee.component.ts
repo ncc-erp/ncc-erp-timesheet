@@ -195,33 +195,37 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   }
 
   customDate() {
-    if (this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Day) {
-      this.displayDay = moment(this.activeDay).format('YYYY-MM-DD');
-      this.displayDay = this.displayDay;
-      this.startDate = this.displayDay;
-      this.endDate = this.displayDay;
-      this.startView = "month";
-    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Week){
-      this.startDate = moment(this.activeDay).startOf('isoWeek').format('YYYY-MM-DD');
-      this.endDate = moment(this.activeDay).endOf('isoWeek').format('YYYY-MM-DD');
-      this.activeDay = this.startDate;
-      this.displayDay = this.startDate + " - " + this.endDate;
-      this.startView = "month";
-    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Month){
-      this.startDate = moment(this.activeDay).startOf('M').format('YYYY-MM-DD');
-      this.endDate = moment(this.activeDay).endOf('M').format('YYYY-MM-DD');
-      this.activeDay = this.startDate;
-      this.displayDay = this.startDate + " - " + this.endDate;
-      this.startView = "year";
-    } else if(this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Year){
-      this.startDate = moment(this.activeDay).startOf('y').format('YYYY-MM-DD');
-      this.endDate = moment(this.activeDay).endOf('y').format('YYYY-MM-DD');
-      this.activeDay = this.startDate;
-      this.displayDay = this.startDate + " - " + this.endDate;
-      this.startView = "multi-year";
-    } else {
-      this.startDate = "";
-      this.endDate = "";
+    switch(this.typeOfView){
+      case this.APP_CONSTANT.TypeViewBranchManager.Day:
+        this.displayDay = moment(this.activeDay).format('YYYY-MM-DD');
+        this.startDate = this.displayDay;
+        this.endDate = this.displayDay;
+        this.startView = "month";
+        break;
+      case this.APP_CONSTANT.TypeViewBranchManager.Week:
+        this.startDate = moment(this.activeDay).startOf('isoWeek').format('YYYY-MM-DD');
+        this.endDate = moment(this.activeDay).endOf('isoWeek').format('YYYY-MM-DD');
+        this.activeDay = this.startDate;
+        this.displayDay = this.startDate + " - " + this.endDate;
+        this.startView = "month";
+        break;
+      case this.APP_CONSTANT.TypeViewBranchManager.Month:
+        this.startDate = moment(this.activeDay).startOf('M').format('YYYY-MM-DD');
+        this.endDate = moment(this.activeDay).endOf('M').format('YYYY-MM-DD');
+        this.activeDay = this.startDate;
+        this.displayDay = this.startDate + " - " + this.endDate;
+        this.startView = "year";
+        break;
+      case this.APP_CONSTANT.TypeViewBranchManager.Year:
+        this.startDate = moment(this.activeDay).startOf('y').format('YYYY-MM-DD');
+        this.endDate = moment(this.activeDay).endOf('y').format('YYYY-MM-DD');
+        this.activeDay = this.startDate;
+        this.displayDay = this.startDate + " - " + this.endDate;
+        this.startView = "multi-year";
+        break;
+      default:
+        this.startDate = "";
+        this.endDate = "";
     }
     this.refresh();
   }
