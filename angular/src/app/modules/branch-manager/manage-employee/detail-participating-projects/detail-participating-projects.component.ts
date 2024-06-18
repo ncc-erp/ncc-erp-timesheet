@@ -44,7 +44,7 @@ export class DetailParticipatingProjectsComponent extends AppComponentBase imple
   ngOnInit() {
     this.userId = this.data.user.id;
     if(this.data.startDate == "" || this.data.endDate == ""){
-      this.viewChange = new FormControl(this.APP_CONSTANT.TypeViewHomePage.Week);
+      this.viewChange = new FormControl(this.APP_CONSTANT.TypeViewHomePage.AllTime);
       this.changeView(true);
     } else this.changeView(false,moment(this.data.startDate),moment(this.data.endDate));
   }

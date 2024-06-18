@@ -39,29 +39,7 @@
                   </mat-form-field>
                 </ng-container>
               </div>
-              <div class="col-lg-4 mb-0">
-                <mat-form-field class="w-100" appearance="outline">
-                  <mat-label> {{ "Time Type" | localize }}</mat-label>
-                  <mat-select name="typeOfView" [(value)]="typeOfView" (selectionChange)="FilterByTime()">
-                    <mat-option *ngFor="let item of TimeType" [value]='APP_CONSTANT.TypeViewBranchManager[item]'>
-                      {{item}}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-              <div class="col-lg-4 mb-0" *ngIf="typeOfView != APP_CONSTANT.TypeViewBranchManager.All">
-                <mat-form-field class="w-100" appearance="outline">
-                  <mat-label> {{ "Time Range" | localize }}</mat-label>
-                  <span>{{displayDay}}</span>
-                  <input matInput [readonly]="true" [matDatepicker]="picker" [(ngModel)]="activeDay"
-                    (dateInput)="customDate()" [hidden]="true">
-                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                  <mat-datepicker #picker [startView]="startView"
-                    (monthSelected)="setMonth($event,picker)"
-                    (yearSelected)="setYear($event,picker)">
-                  </mat-datepicker>
-                </mat-form-field>
-              </div>
+              <app-date-filter (dateSelected)="onDateSelected($event)"></app-date-filter>
             </div>
           </div>
           <!-- <div class="col-lg-2">

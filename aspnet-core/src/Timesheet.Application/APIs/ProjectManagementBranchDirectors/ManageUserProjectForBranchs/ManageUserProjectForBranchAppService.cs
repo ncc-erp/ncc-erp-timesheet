@@ -44,6 +44,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
                 .Where(ts => ts.Status == TimesheetStatus.Approve)
                 .WhereIf((startDate.HasValue && endDate.HasValue), s => (s.DateAt.Date >= startDate) && (s.DateAt.Date <= endDate))
                 //.Where(ts => ts.TypeOfWork == TypeOfWork.NormalWorkingHours)
+                .Where(s => !s.ProjectTask.Project.isAllUserBelongTo)
                 .Select(s => new SumWorkingTimeByProjectDto
                 {
                     DateAt = s.DateAt.Date,

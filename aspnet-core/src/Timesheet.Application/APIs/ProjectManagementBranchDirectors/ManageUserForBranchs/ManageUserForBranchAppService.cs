@@ -68,35 +68,22 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
             var qProjectUser = QProjectUser(branchId);
             var qMyTimeSheet = from th in WorkScope.GetAll<MyTimesheet>()
                                .WhereIf(startDate.HasValue && endDate.HasValue, s => startDate <= s.DateAt && s.DateAt <= endDate)
-                               select new MyTimesheetDto
+                               .Where(s => s.Status == TimesheetStatus.Approve)
+                               .Where(s => !s.ProjectTask.Project.isAllUserBelongTo)
+                               .Where(s => s.ProjectTask.Project.Status == ProjectStatus.Active)
+                               select new
                                {
                                    UserId = th.UserId,
-                                   ProjectTaskId = th.ProjectTaskId,
-                                   WorkingTime = th.WorkingTime,
-                                   DateAt = th.DateAt
+                                   ProjectId = th.ProjectTask.ProjectId,
+                                   WorkingTime = th.WorkingTime
                                };
-            var qProjectTask = from pt in WorkScope.GetAll<ProjectTask>()
-                               join pu in qProjectUser on pt.ProjectId equals pu.ProjectId
-                               select new ProjectTaskDto
-                               {
-                                   Id = pt.Id,
-                                   ProjectId = pt.ProjectId,
-                               };
-            var joinQuery = from mth in qMyTimeSheet
-                            join pt in qProjectTask on mth.ProjectTaskId equals pt.Id
-                            select new
-                            {
-                                ProjectId = pt.ProjectId,
-                                UserId = mth.UserId,
-                                WorkingTime = mth.WorkingTime,
-                            };
-            var workingTimeProject = joinQuery.GroupBy(s => s.UserId)
+            var workingTimeProject = qMyTimeSheet.GroupBy(s => s.UserId)
                                     .ToDictionary(g => g.Key, g => g.Sum(i => i.WorkingTime));
-            var workingTimeUserProject = joinQuery.GroupBy(s => s.ProjectId.ToString() + "-" + s.UserId.ToString())
+            var workingTimeUserProject = qMyTimeSheet.GroupBy(s => s.ProjectId.ToString() + "-" + s.UserId.ToString())
                                     .ToDictionary(g => g.Key, g => g.Sum(i => i.WorkingTime));
             var projectIds = new HashSet<long>();
             var userIds = new HashSet<long>();
-            foreach (var jq in joinQuery)
+            foreach (var jq in qMyTimeSheet)
             {
                 userIds.Add(jq.UserId);
                 projectIds.Add(jq.ProjectId);
@@ -159,20 +146,14 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
         {
             var qProjectUser = QProjectUser(branchId);
 
-            var qMyTimeSheet = from th in WorkScope.GetAll<MyTimesheet>()
+            var qUserProject = from th in WorkScope.GetAll<MyTimesheet>()
                                .WhereIf(startDate.HasValue && endDate.HasValue,s => startDate <= s.DateAt && s.DateAt <= endDate)
-                               group th by new { th.UserId, th.ProjectTaskId } into g
+                               .Where(s => s.Status == TimesheetStatus.Approve)
+                               group th by new { th.UserId, th.ProjectTask.ProjectId } into g
                                select new
                                {
                                    UserId = g.Key.UserId,
-                                   ProjectTaskId = g.Key.ProjectTaskId
-                               };
-            var qUserProject = from pt in WorkScope.GetAll<ProjectTask>()
-                               join mth in qMyTimeSheet on pt.Id equals mth.ProjectTaskId
-                               select new
-                               {
-                                   UserId = mth.UserId,
-                                   ProjectId = pt.ProjectId,
+                                   ProjectId = g.Key.ProjectId
                                };
             var projectIds = new HashSet<long>();
             var user_project = new HashSet<string>();

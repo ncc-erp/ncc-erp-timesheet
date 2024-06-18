@@ -10,8 +10,8 @@ import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { finalize } from 'rxjs/operators';
 import { ManageUserDto } from '../Dto/branch-manage-dto';
 import { DetailParticipatingProjectsComponent } from './detail-participating-projects/detail-participating-projects.component';
-import { MatDatepicker, MatDialog } from '@angular/material';
-import * as moment from 'moment';
+import { MatDialog } from '@angular/material';
+import { DateInfo } from '../date-filter/date-filter.component';
 
 @Component({
   selector: 'app-manage-employee',
@@ -25,13 +25,8 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   public branchSearch: FormControl = new FormControl("")
   branchId;
 
-  typeOfView = this.APP_CONSTANT.TypeViewBranchManager.Month;
-  startView = "year";
-  activeDay: any;
   startDate: string;
   endDate: string;
-  displayDay: any;
-  TimeType = Object.keys(this.APP_CONSTANT.TypeViewBranchManager);
 
   @Input() listPosition: PositionDto[];
   @Input() listPositionFilter: PositionDto[];
@@ -64,11 +59,6 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   ];
 
   ngOnInit() {
-    this.startDate = moment().startOf('M').format('YYYY-MM-DD');
-    this.endDate = moment().endOf('M').format('YYYY-MM-DD');
-    this.activeDay = this.startDate;
-    this.displayDay = this.startDate + " - " + this.endDate
-    this.refresh();
   } 
   filterPosition(): void{
     if(this.positionSearch.value){
@@ -141,12 +131,6 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     this.keyword = '';
     this.positionId = -1;
     this.branchId = 0;
-    this.typeOfView = this.APP_CONSTANT.TypeViewBranchManager.Month;
-    this.startView = "year";
-    this.startDate = moment().startOf('M').format('YYYY-MM-DD');
-    this.endDate = moment().endOf('M').format('YYYY-MM-DD');
-    this.activeDay = this.startDate;
-    this.displayDay = this.startDate + " - " + this.endDate;
     this.searchOrFilter();
   }
 
@@ -194,58 +178,9 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     })
   }
 
-  customDate() {
-    switch(this.typeOfView){
-      case this.APP_CONSTANT.TypeViewBranchManager.Day:
-        this.displayDay = moment(this.activeDay).format('YYYY-MM-DD');
-        this.startDate = this.displayDay;
-        this.endDate = this.displayDay;
-        this.startView = "month";
-        break;
-      case this.APP_CONSTANT.TypeViewBranchManager.Week:
-        this.startDate = moment(this.activeDay).startOf('isoWeek').format('YYYY-MM-DD');
-        this.endDate = moment(this.activeDay).endOf('isoWeek').format('YYYY-MM-DD');
-        this.activeDay = this.startDate;
-        this.displayDay = this.startDate + " - " + this.endDate;
-        this.startView = "month";
-        break;
-      case this.APP_CONSTANT.TypeViewBranchManager.Month:
-        this.startDate = moment(this.activeDay).startOf('M').format('YYYY-MM-DD');
-        this.endDate = moment(this.activeDay).endOf('M').format('YYYY-MM-DD');
-        this.activeDay = this.startDate;
-        this.displayDay = this.startDate + " - " + this.endDate;
-        this.startView = "year";
-        break;
-      case this.APP_CONSTANT.TypeViewBranchManager.Year:
-        this.startDate = moment(this.activeDay).startOf('y').format('YYYY-MM-DD');
-        this.endDate = moment(this.activeDay).endOf('y').format('YYYY-MM-DD');
-        this.activeDay = this.startDate;
-        this.displayDay = this.startDate + " - " + this.endDate;
-        this.startView = "multi-year";
-        break;
-      default:
-        this.startDate = "";
-        this.endDate = "";
-    }
+  onDateSelected(dateInfo: DateInfo) {
+    this.startDate=dateInfo.startDate;
+    this.endDate=dateInfo.endDate;
     this.refresh();
-  }
-
-  FilterByTime() {
-    this.activeDay=moment().format('YYYY-MM-DD');
-    this.customDate();
-  }
-  setMonth(normalizedMonthAndYear: moment.Moment, datepicker: MatDatepicker<moment.Moment>) {
-    if(this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Month){
-      this.activeDay=moment(normalizedMonthAndYear).format('YYYY-MM-DD');
-      datepicker.close();
-      this.customDate();
-    }
-  }
-  setYear(normalizedMonthAndYear: moment.Moment, datepicker: MatDatepicker<moment.Moment>) {
-    if(this.typeOfView == this.APP_CONSTANT.TypeViewBranchManager.Year){
-      this.activeDay=moment(normalizedMonthAndYear).format('YYYY-MM-DD');
-      datepicker.close();
-      this.customDate();
-    }
   }
 }
