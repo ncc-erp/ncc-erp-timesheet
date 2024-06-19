@@ -859,6 +859,12 @@ namespace Timesheet.Timesheets.Projects
             {
                 throw new UserFriendlyException($"User with id {userId} is not in the project with Id {projectId}");
             }
+            if (projectUser.Type == ProjectUserType.PM)
+            {
+                throw new UserFriendlyException("You can't deactive PM of this project!");
+            } else {
+                projectUser.Type = ProjectUserType.DeActive;
+            }
             projectUser.Type = ProjectUserType.DeActive;
             await WorkScope.UpdateAsync(projectUser);
         }
