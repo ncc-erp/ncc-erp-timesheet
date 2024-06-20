@@ -32,29 +32,18 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="item text-center d-flex" style="align-items: center;">
-            <mat-radio-group
-            *ngIf="permission.isGranted('AbsenceDayByProject.ViewByBranch')"
-            aria-label="Select an option" class="d-flex" style="align-items: center;">
-              <mat-radio-button
-              [value]="true" checked="checked"
-              (change)="onChangeShowFilterByBranch()">
+          <div class="item2">
+            <mat-radio-group *ngIf="permission.isGranted('AbsenceDayByProject.ViewByBranch')" aria-label="Select an option">
+              <mat-radio-button style="padding-left: 10px;" [value]="true"  (change)="onChangeShowFilterByBranch()" checked="checked">
                 <div [style.color]="!isRadiocheckfilterbyBranch ? 'gray' : 'red'">Filter by project</div>
               </mat-radio-button>
-              <mat-radio-button
-              (change)="onChangeShowFilterByBranch()"
-              style="margin-left: 15px;"
-              [value]="false"
-              *ngIf="permission.isGranted('AbsenceDayByProject.ViewByBranch')"
-              (click)="onFilterBranchDirector()">
+              <mat-radio-button style="padding-left: 10px;" [value]="false" (change)="onChangeShowFilterByBranch()"  (click)="onFilterBranchDirector()">
                 <div [style.color]="isRadiocheckfilterbyBranch ? 'gray' : 'red'">Filter by branch</div>
               </mat-radio-button>
             </mat-radio-group>
           </div>
-        </div>
-        <div class="header-dropdown m-r--5 d-flex">
-          <div>
-            <div class="btn-group m-5">
+          <div class="item3">
+            <div class="btn-group" style="margin-top: 5px;margin-left: 30px;">
               <div
                 class="btn btn-primary"
                 name="previousBtn"
@@ -85,22 +74,17 @@
                 Next
               </div>
             </div>
-          </div>
-          <div class="center-flex">
-            <button
-              name="menuBtn"
-              mat-icon-button
-              [matMenuTriggerFor]="headerMenu123"
-              class="header-dropdown-mat-icon-button"
-            >
-              <mat-icon style="margin-top: 20px">more_vert</mat-icon>
-            </button>
-            <mat-menu #headerMenu123="matMenu">
-              <button name="refreshBtn" mat-menu-item (click)="refreshData()">
-                <mat-icon>refresh</mat-icon>
-                <span>{{ "Refresh" | localize }}</span>
+            <div>
+              <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="more">
+                <mat-icon>more_vert</mat-icon>
               </button>
-            </mat-menu>
+              <mat-menu #more="matMenu">
+                <button name="refreshBtn" mat-menu-item (click)="refreshData()">
+                  <mat-icon>refresh</mat-icon>
+                  <span>{{ "Refresh" | localize }}</span>
+                </button>
+              </mat-menu>
+            </div>
           </div>
         </div>
       </div>
@@ -120,23 +104,6 @@
         </div>
         <div class="col-md-10">
           <div class="row">
-            <div class="col-md-2">
-              <mat-form-field appearance="outline">
-                <mat-label>Status</mat-label>
-                <mat-select
-                  name="dayAbsentStatus"
-                  [(value)]="dayAbsentStatus"
-                  (selectionChange)="onLeaveDayTypeChange()"
-                >
-                  <mat-option
-                    *ngFor="let item of dayAbsentStatusList"
-                    [value]="APP_CONSTANT.AbsenceStatusFilter[item]"
-                  >
-                    {{ item }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
             <div class="col-md-2"
             *ngIf="isRadiocheckfilterbyBranch">
               <app-multiple-select
@@ -149,72 +116,91 @@
               >
               </app-multiple-select>
             </div>
-            <div class="col-md-2">
-              <mat-form-field appearance="outline">
-                <mat-label>Request Type</mat-label>
-                <mat-select
-                  name="absentDayType"
-                  [(value)]="absentDayType"
-                  (selectionChange)="onLeaveDayTypeChange()"
-                >
-                  <mat-option [value]="-1">All</mat-option>
-                  <mat-option
-                    *ngFor="let item of dayAbsentTypeList"
-                    [value]="APP_CONSTANT.DayAbsenceType[item]"
+              <div class="row1">
+              <div class="col-md-2 row1-child">
+                <mat-form-field appearance="outline">
+                  <mat-label>Status</mat-label>
+                  <mat-select
+                    name="dayAbsentStatus"
+                    [(value)]="dayAbsentStatus"
+                    (selectionChange)="onLeaveDayTypeChange()"
                   >
-                    {{ item }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-            <div class="col-md-2" >
-              <mat-form-field appearance="outline" *ngIf="absentDayType === 0">
-                <mat-label>Type Of Request Type</mat-label>
-                <mat-select
-                  name="dayType"
-                  [(value)]="dayType"
-                  (selectionChange)="onDayTypeChange()"
-                >
-                  <mat-option [value]="-1">All</mat-option>
-                  <mat-option
-                    *ngFor="let item of dayTypeList"
-                    [value]="APP_CONSTANT.AbsenceType[item]"
+                    <mat-option
+                      *ngFor="let item of dayAbsentStatusList"
+                      [value]="APP_CONSTANT.AbsenceStatusFilter[item]"
+                    >
+                      {{ item }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-2 row1-child">
+                <mat-form-field appearance="outline">
+                  <mat-label>Request Type</mat-label>
+                  <mat-select
+                    name="absentDayType"
+                    [(value)]="absentDayType"
+                    (selectionChange)="onLeaveDayTypeChange()"
                   >
-                    {{ item | dayType  }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+                    <mat-option [value]="-1">All</mat-option>
+                    <mat-option
+                      *ngFor="let item of dayAbsentTypeList"
+                      [value]="APP_CONSTANT.DayAbsenceType[item]"
+                    >
+                      {{ item }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-2 row1-child" style="margin-top: 7px;" *ngIf="absentDayType !== 0" >
+                <button name="filterBtn" mat-flat-button (click)="onFilter()" color="primary">
+                  Filter
+                </button>
+              </div>
             </div>
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" *ngIf="absentDayType === 0">
-                <mat-label>Off Type</mat-label>
-                <mat-select
-                  name="dayOffType"
-                  id="dayOffType"
-                  [(value)]="dayOffType"
-                  (selectionChange)="onDayOffTypeChange()"
-                >
-                  <mat-option [value]="-1">All</mat-option>
-                  <mat-option
-                    *ngFor="let type of dayOffTypes"
-                    [value]="type.id"
-                    >{{ type.name }}</mat-option
+            <div class="row1">
+              <div class="col-md-2 row1-child" *ngIf="absentDayType === 0">
+                <mat-form-field appearance="outline">
+                  <mat-label>Type Of Request Type</mat-label>
+                  <mat-select
+                    name="dayType"
+                    [(value)]="dayType"
+                    (selectionChange)="onDayTypeChange()"
                   >
-                </mat-select>
-              </mat-form-field>
+                    <mat-option [value]="-1">All</mat-option>
+                    <mat-option
+                      *ngFor="let item of dayTypeList"
+                      [value]="APP_CONSTANT.AbsenceType[item]"
+                    >
+                      {{ item | dayType  }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-2 row1-child" *ngIf="absentDayType === 0">
+                <mat-form-field appearance="outline">
+                  <mat-label>Off Type</mat-label>
+                  <mat-select
+                    name="dayOffType"
+                    id="dayOffType"
+                    [(value)]="dayOffType"
+                    (selectionChange)="onDayOffTypeChange()"
+                  >
+                    <mat-option [value]="-1">All</mat-option>
+                    <mat-option
+                      *ngFor="let type of dayOffTypes"
+                      [value]="type.id"
+                      >{{ type.name }}</mat-option
+                    >
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-2 row1-child" style="margin-top: 7px;" *ngIf="absentDayType === 0">
+                <button name="filterBtn" mat-flat-button (click)="onFilter()" color="primary">
+                  Filter
+                </button>
+              </div>
             </div>
-            <div class="col-md-1" style="float: right;">
-              <button
-                name="filterBtn"
-                style="height: 44px; margin-top: 4px;"
-                mat-flat-button
-                (click)="onFilter()"
-                color="primary"
-              >
-                Filter
-              </button>
-            </div>
-
           </div>
         </div>
       </div>
