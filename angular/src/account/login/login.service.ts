@@ -104,8 +104,6 @@ export class LoginService {
         AppPreBootstrap.getUserConfiguration(() => {
             location.href = `${AppConsts.appBaseUrl}${this.selectBestRoute()}`;
         });
-
-        location.href = initialUrl;
     }
 
 
