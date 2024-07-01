@@ -9,7 +9,7 @@ export class AppPreBootstrap {
     static run(appRootUrl: string, callback: () => void): void {
         AppPreBootstrap.getApplicationConfig(appRootUrl, () => {
             AppPreBootstrap.getUserConfiguration(callback);
-            AppPreBootstrap.getGoogleClientAppId(callback);
+            AppPreBootstrap.getGoogleClientAppId();
         });
     }
 
@@ -37,10 +37,8 @@ export class AppPreBootstrap {
         });
     }
 
-    private static getGoogleClientAppId(callback: () => void) {
-        if (AppConsts.backendIsNotABP){
-            callback();
-        }else{
+    private static getGoogleClientAppId() {
+        if (!AppConsts.backendIsNotABP){
             return abp.ajax({
                 url: AppConsts.remoteServiceBaseUrl + '/api/services/app/Configuration/GetGoogleClientAppId',
                 method: 'GET',
@@ -49,7 +47,6 @@ export class AppPreBootstrap {
                 }
             }).done(result => {
                 AppConsts.googleClientAppId = result;
-                callback();
             });
         }
 
