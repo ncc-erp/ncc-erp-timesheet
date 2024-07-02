@@ -3,7 +3,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { AbsenceRequestService } from '@app/service/api/absence-request.service';
 import { AppComponentBase } from '@shared/app-component-base';
-import * as moment from 'moment';
 
 @Component({
   selector: 'app-confirm-all-request',
@@ -16,8 +15,8 @@ export class ConfirmAllRequestComponent extends AppComponentBase implements OnIn
 
   title = "";
   events: Map<string, any>;
-  date = null;
-  number : any;
+  eventsKey = [];
+  status : boolean;
   isLoading: boolean;
 
   constructor(
@@ -29,14 +28,14 @@ export class ConfirmAllRequestComponent extends AppComponentBase implements OnIn
     super(injector);
     if (data) {
       this.events = data.events;
-      this.date = data.date;
-      this.number = data.number;
+      this.eventsKey = Array.from(this.events.keys());
+      this.status = data.status;
     }
   }
 
   confirmClick() {
     const arrays = Array.from(this.events.values());
-    if (this.number == 1) {
+    if (this.status) {
       this.isLoading = true;
       this.absenceRequestService.approveAbsenceRequest([].concat(...arrays)).subscribe((res) => {
         if (res) {
@@ -57,13 +56,13 @@ export class ConfirmAllRequestComponent extends AppComponentBase implements OnIn
         this.isLoading = false;
       });
     }
+    this.dialogRef.close(true);
   }
 
   ngOnInit() {
-    this.date = moment(this.date).format('DD-MM-YYYY');
   }
 
   close(): void {
-    this.dialogRef.close();
+    this.dialogRef.close(false);
   }
 }
