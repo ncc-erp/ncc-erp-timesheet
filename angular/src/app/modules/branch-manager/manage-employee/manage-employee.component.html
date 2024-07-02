@@ -63,7 +63,7 @@
                 </ng-container>
                 
               </div>
-              
+              <app-date-filter (dateSelected)="onDateSelected($event)"></app-date-filter>
             </div>
           </div>
           <div class="col-lg-2">
@@ -136,6 +136,9 @@
                       <b>{{project.projectName}}</b>
                       <span class="label bg-blue" *ngFor="let pms of project.pms">
                         {{pms}}
+                      </span>
+                      <span class="label bg-green">
+                        {{project.workingTimePercent}}% 
                       </span>
                     </div>
                   </div>

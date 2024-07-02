@@ -11,6 +11,7 @@ import { finalize } from 'rxjs/operators';
 import { ManageUserDto } from '../Dto/branch-manage-dto';
 import { DetailParticipatingProjectsComponent } from './detail-participating-projects/detail-participating-projects.component';
 import { MatDialog } from '@angular/material';
+import { DateInfo } from '../date-filter/date-filter.component';
 
 @Component({
   selector: 'app-manage-employee',
@@ -23,6 +24,10 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   @Input() listBranchFilter: BranchDto[];
   public branchSearch: FormControl = new FormControl("")
   branchId;
+
+  startDate: string;
+  endDate: string;
+
   @Input() listPosition: PositionDto[];
   @Input() listPositionFilter: PositionDto[];
   public positionSearch: FormControl = new FormControl("")
@@ -54,7 +59,6 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   ];
 
   ngOnInit() {
-    this.refresh();
   } 
   filterPosition(): void{
     if(this.positionSearch.value){
@@ -88,7 +92,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       this.addFilterItem('positionId', this.positionId);
     }
     request.filterItems = this.filterItems;
-    this.manageUserForBranchService.getAllUserPagging(request)
+    this.manageUserForBranchService.getAllUserPagging(request, this.startDate, this.endDate)
     .pipe(
       finalize(() => {
         finishedCallback()
@@ -163,10 +167,20 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     let dialogRef = this._dialog.open(DetailParticipatingProjectsComponent, {
       minWidth: '450px',
       width: '800px',
-      data: user,
+      data: {
+        user: user,
+        startDate: this.startDate,
+        endDate: this.endDate
+      }
     })
     dialogRef.afterClosed().subscribe(() => {
       
     })
+  }
+
+  onDateSelected(dateInfo: DateInfo) {
+    this.startDate=dateInfo.startDate;
+    this.endDate=dateInfo.endDate;
+    this.refresh();
   }
 }

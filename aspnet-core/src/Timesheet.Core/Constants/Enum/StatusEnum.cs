@@ -138,6 +138,7 @@ namespace Ncc.Entities.Enum
             DiMuon = 1,
             MiddleOfDay = 2,
             VeSom = 3,
+            None = 0,
         }
 
         public enum OffTypeStatus : byte

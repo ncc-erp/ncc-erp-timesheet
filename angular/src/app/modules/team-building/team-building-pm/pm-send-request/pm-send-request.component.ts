@@ -175,6 +175,8 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
           } as SelectTeamBuildingDetailDto
         })];
 
+        this.checkSelectedCheckbox();
+
         this.listSelectedItemUserOtherProjectId = [];
         this.listSelectedItemUserOtherProject = [];
 

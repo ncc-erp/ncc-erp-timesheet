@@ -7,6 +7,7 @@ import { ManageUserForBranchService } from '@app/service/api/manage-user-for-bra
 import { Chart } from 'chart.js'
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { finalize } from 'rxjs/operators';
+import { DateInfo } from '../date-filter/date-filter.component';
 
 @Component({
   selector: 'app-project-management',
@@ -19,6 +20,10 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
   @Input() listBranchFilter: BranchDto[];
   public branchSearch: FormControl = new FormControl("")
   branchId;
+
+  startDate: string;
+  endDate: string;
+
   public filterItems: FilterDto[] = [];
   public projects: ProjectDto[];
   private projectNames: string[] = [];
@@ -40,7 +45,6 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
   }
 
   ngOnInit() {
-    this.refresh();
   }
 
   filterBranch(): void{
@@ -109,7 +113,7 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
       this.filterBranchId = '';
     }
     request.filterItems = this.filterItems;
-    this.manageUserForBranchService.getAllValueOfUserInProjectByUserId(request, this.filterBranchId)
+    this.manageUserForBranchService.getAllValueOfUserInProjectByUserId(request, this.filterBranchId, this.startDate, this.endDate)
     .pipe(
       finalize(() => {
         finishedCallback()
@@ -164,4 +168,9 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
     throw new Error('Method not implemented.');
   }
 
+  onDateSelected(dateInfo: DateInfo) {
+    this.startDate=dateInfo.startDate;
+    this.endDate=dateInfo.endDate;
+    this.refresh();
+  }
 }

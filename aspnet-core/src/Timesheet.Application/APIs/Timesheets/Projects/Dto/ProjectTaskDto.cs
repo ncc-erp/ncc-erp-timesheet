@@ -11,6 +11,7 @@ namespace Timesheet.Timesheets.Projects.Dto
     [AutoMapTo(typeof(ProjectTask))]
     public class ProjectTaskDto : EntityDto<long>
     {
+        public long ProjectId { get; set; }
         public long TaskId { get; set; }
         public bool Billable { get; set; }
     }

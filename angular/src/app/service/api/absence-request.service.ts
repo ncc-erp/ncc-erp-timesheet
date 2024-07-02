@@ -26,7 +26,7 @@ export class AbsenceRequestService extends BaseApiService {
                 'Content-Type': 'application/json-patch+json',
             })
         };
-        return this.http.post<any>(this.rootUrl + '/ApproveRequest?requestId='+  reqId , httpOptions);
+        return this.http.post<any>(this.rootUrl + '/ApproveRequest', reqId , httpOptions);
     }
 
     rejectAbsenceRequest(reqId: any): Observable<any> {
@@ -35,7 +35,7 @@ export class AbsenceRequestService extends BaseApiService {
                 'Content-Type': 'application/json-patch+json',
             })
         };
-        return this.http.post<any>(this.rootUrl + '/RejectRequest?requestId='+ reqId, httpOptions);
+        return this.http.post<any>(this.rootUrl + '/RejectRequest', reqId, httpOptions);
     }
 
     getAllRequestAbsence(sd, ed, id, name, offType, dayoffTypeId,dayAbsentStatus, dayType): Observable<any> {
@@ -46,12 +46,12 @@ export class AbsenceRequestService extends BaseApiService {
         return this.http.post(this.rootUrl + "/GetAllRequestForUser",{startDate: sd, endDate: ed, projectIds: id, name: name, type:offType, dayoffTypeId: dayoffTypeId,  status: dayAbsentStatus, dayType: dayType > 0 ? dayType : undefined});
     }
 
-    getAllRequestByUserId(sd, ed, userId, absentDayType, dayType): Observable<any> {
-        return this.http.get(this.rootUrl + `/GetAllRequestByUserId?startDate=${sd}&endDate=${ed}&userId=${userId}&type=${absentDayType}${dayType < 0 ? '' : `&dayType=${dayType}`}`);
+    getAllRequestByUserId(sd, ed, userId, absentDayType, dayType, dayAbsentStatus): Observable<any> {
+        return this.http.get(this.rootUrl + `/GetAllRequestByUserId?startDate=${sd}&endDate=${ed}&userId=${userId}&status=${dayAbsentStatus}&type=${absentDayType}${dayType < 0 ? '' : `&dayType=${dayType}`}`);
     }
 
-    getAllRequestByUserIdForTeamMember(sd, ed, userId, absentDayType, dayType ): Observable<any> {
-        return this.http.get(this.rootUrl + `/GetAllRequestByUserIdForTeamMember?startDate=${sd}&endDate=${ed}&userId=${userId}&type=${absentDayType}${dayType < 0 ? '' : `&dayType=${dayType}`}`);
+    getAllRequestByUserIdForTeamMember(sd, ed, userId, absentDayType, dayType, dayAbsentStatus): Observable<any> {
+        return this.http.get(this.rootUrl + `/GetAllRequestByUserIdForTeamMember?startDate=${sd}&endDate=${ed}&userId=${userId}&status=${dayAbsentStatus}&type=${absentDayType}${dayType < 0 ? '' : `&dayType=${dayType}`}`);
     }
 
     getUserRequestByDate(date, userId): Observable<any> {

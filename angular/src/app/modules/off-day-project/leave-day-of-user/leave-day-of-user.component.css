@@ -41,6 +41,26 @@ pre {
         display: block;
     }
 }
+.group-multiSelect{
+    display: flex; 
+    padding-left: 50px; 
+    align-items: center;
+    padding-bottom: 10px;
+    height: 30px;
+}
+.approve-button{
+    margin: 0px 5px;
+    background-color: #2b982b !important;
+    color: white;
+}
+.reject-button{
+    margin: 0px 5px;
+    background-color: #f24b50 !important;
+    color: white;
+}
+.select_multiday{
+    background-color: #36ab50 !important;
+}
 .day-chip-full-day {
     background-color: #db0000  !important;
 }

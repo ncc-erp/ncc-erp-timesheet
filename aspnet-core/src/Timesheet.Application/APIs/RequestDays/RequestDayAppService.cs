@@ -1205,64 +1205,70 @@ namespace Timesheet.APIs.RequestDays
 
         }
         [HttpPost]
-        public async System.Threading.Tasks.Task ApproveRequest(long requestId)
+        public async System.Threading.Tasks.Task ApproveRequest(long[] requestIds)
         {
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
-            var request = await WorkScope
+            foreach (var requestId in requestIds)
+            {
+                var request = await WorkScope
                 .GetAll<AbsenceDayRequest>()
                 .Include(ar => ar.User) // Eager loading User
                 .FirstOrDefaultAsync(ar => ar.Id == requestId);
 
-            if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
-            {
-                var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
-                    .Where(s => s.RequestId == requestId)
-                    .Where(s => s.Request.Type == RequestType.Remote)
-                    .Where(s => s.Request.Status == RequestStatus.Rejected)
-                    .Select(s => s.DateAt.ToString("yyyy-MM-dd"))
-                    .FirstOrDefaultAsync();
-
-                if (dateRemote != null)
+                if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
-                    var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
+                    var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
+                        .Where(s => s.RequestId == requestId)
+                        .Where(s => s.Request.Type == RequestType.Remote)
+                        .Where(s => s.Request.Status == RequestStatus.Rejected)
+                        .Select(s => s.DateAt.ToString("yyyy-MM-dd"))
+                        .FirstOrDefaultAsync();
 
-                    if (wfhRequestDto == null)
+                    if (dateRemote != null)
                     {
-                        throw new UserFriendlyException("Cannot get request information from the W2 system!");
+                        var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
+
+                        if (wfhRequestDto == null)
+                        {
+                            throw new UserFriendlyException("Cannot get request information from the W2 system!");
+                        }
+                        if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
+                        {
+                            throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
+                        }
                     }
-                    if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
-                    {
-                        throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
-                    }
+
+                    request.Status = RequestStatus.Approved;
+                    await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
+
+                    await notifyKomuWhenApproveOrRejectRequest(request, true);
                 }
-
-                request.Status = RequestStatus.Approved;
-                await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
-
-                await notifyKomuWhenApproveOrRejectRequest(request, true);
-            }
-            else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
-            {
-                throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+                else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
+                {
+                    throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+                }
             }
         }
 
         [HttpPost]
-        public async System.Threading.Tasks.Task RejectRequest(long requestId)
+        public async System.Threading.Tasks.Task RejectRequest(long[] requestIds)
         {
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
-            var request = await WorkScope.GetAsync<AbsenceDayRequest>(requestId);
-
-            if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
+            foreach (var requestId in requestIds)
             {
-                request.Status = RequestStatus.Rejected;
-                await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
+                var request = await WorkScope.GetAsync<AbsenceDayRequest>(requestId);
 
-                await notifyKomuWhenApproveOrRejectRequest(request, false);
-            }
-            else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
-            {
-                throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+                if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
+                {
+                    request.Status = RequestStatus.Rejected;
+                    await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
+
+                    await notifyKomuWhenApproveOrRejectRequest(request, false);
+                }
+                else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
+                {
+                    throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+                }
             }
         }
 
@@ -1343,12 +1349,16 @@ namespace Timesheet.APIs.RequestDays
         }
 
         [HttpGet]
-        public async Task<List<GetMyRequestDto>> GetAllRequestByUserIdForTeamMember(DateTime? startDate, DateTime? endDate, int userId, RequestType? type = null, DayType? dayType = null)
+        public async Task<List<GetMyRequestDto>> GetAllRequestByUserIdForTeamMember(DateTime? startDate, DateTime? endDate, int userId, int? status, RequestType? type = null, DayType? dayType = null)
         {
+            RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
             var query = from u in WorkScope.GetAll<AbsenceDayRequest>()
                         join t in WorkScope.GetAll<AbsenceDayDetail>()
                         .Where(s => !type.HasValue || type.Value < 0 || s.Request.Type == type.Value)
                         .WhereIf(dayType.HasValue && dayType.Value > 0, s => s.DateType == dayType.Value)
+                        .Where(s => !status.HasValue || status.Value < 0 ||
+                            (status.Value == 0 ? (s.Request.Status == RequestStatus.Pending || s.Request.Status == RequestStatus.Approved) :
+                            s.Request.Status == arrayAbsenceStatus[status.Value]))
                         .Where(s => !startDate.HasValue || s.DateAt >= startDate)
                         .Where(s => !endDate.HasValue || s.DateAt <= endDate)
                         .Where(s => s.Request.UserId == userId)
@@ -1393,10 +1403,10 @@ namespace Timesheet.APIs.RequestDays
         }
 
         [HttpGet]
-        public async Task<List<GetMyRequestDto>> GetAllRequestByUserId(DateTime? startDate, DateTime? endDate, int userId, RequestType? type = null, DayType? dayType = null)
+        public async Task<List<GetMyRequestDto>> GetAllRequestByUserId(DateTime? startDate, DateTime? endDate, int userId, int? status, RequestType? type = null, DayType? dayType = null)
         {
             await checkPMOfUser(AbpSession.UserId.Value, userId);
-            return await GetAllRequestByUserIdForTeamMember(startDate, endDate, userId, type, dayType);
+            return await GetAllRequestByUserIdForTeamMember(startDate, endDate, userId, status, type, dayType);
         }
 
         [HttpGet]
@@ -1627,11 +1637,12 @@ namespace Timesheet.APIs.RequestDays
                                 select s;
 
                     var queryFilterByRemoteOfWeek = query.WhereIf(input.remoteOfWeek.Value > 0, s => query.Count(s1 => s1.CreatorUserId == s.CreatorUserId) == input.remoteOfWeek.Value)
-                        .GroupBy(s => new { s.DateAt, s.Request.Type }).Select(s => new CountRequestDto
+                        .GroupBy(s => new { s.DateAt, s.Request.Type, AbsenceType = s.AbsenceTime ?? OnDayType.None }).Select(s => new CountRequestDto
                         {
                             Date = s.Key.DateAt,
                             Type = s.Key.Type,
-                            Count = s.Count()
+                            Count = s.Count(),
+                            AbsenceType = s.Key.AbsenceType
                         });
 
                     var queryResult = queryFilterByRemoteOfWeek.ToList();
@@ -1653,12 +1664,13 @@ namespace Timesheet.APIs.RequestDays
                 .WhereIf(input.BranchId.HasValue, s => s.Request.User.BranchId == input.BranchId)
                 .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
                 .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
-                .GroupBy(s =>new { s.DateAt, s.Request.Type })
+                .GroupBy(s =>new { s.DateAt, s.Request.Type, AbsenceType = s.AbsenceTime ?? OnDayType.None })
                             select new CountRequestDto
                             {
                                 Date = s.Key.DateAt,
                                 Type = s.Key.Type,
-                                Count = s.Count()
+                                Count = s.Count(),
+                                AbsenceType = s.Key.AbsenceType
                             };
 
                 var result = query.ToList();

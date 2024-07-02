@@ -1,0 +1,40 @@
+<div class="header" cdkDragHandle cdkDrag cdkDragRootElement=".cdk-overlay-pane" [busy]="isLoading">
+  <h4 class="pin">
+    <div *ngIf="status">
+      Approve all requests below
+    </div>
+    <div *ngIf="!status">
+      Reject all requests below
+    </div>
+  </h4>
+  <button mat-dialog-close style="width: 40px;">
+    <i class="material-icons">close</i>
+  </button>
+</div>
+<div class="box-confirm">
+  <mat-dialog-content class="mat-typography">
+    <div class="table-responsive" style="border: 0; max-height: 30vh; overflow-y: auto;">
+      <table class="table table-hover table-striped styleUser">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th style="width: 190px; min-width: 190px;">List of selected requests</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let key of eventsKey; let i = index">
+            <td style="text-align: center;">{{i + 1}}</td>
+            <td>
+              <div style="display: flex; justify-content: flex-start; align-items: center; width: 190px;">
+                <div style="margin-left: 3px;">
+                  <span>{{key}}</span>
+                </div>
+              </div>
+            </td>   
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </mat-dialog-content>
+  <button class="btn-confirm" mat-raised-button (click)="confirmClick()">Confirm</button>  
+</div>

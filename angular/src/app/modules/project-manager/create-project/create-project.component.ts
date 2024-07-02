@@ -116,6 +116,7 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
     if (this.project.id == null) {
       this.title = 'Create Project';
       this.project.projectType = APP_CONSTANT.EnumProjectType.Fixedfee;
+      this.project.isAllowTeamBuilding = false;
     }
     else {
       this.title = 'Edit Project :';

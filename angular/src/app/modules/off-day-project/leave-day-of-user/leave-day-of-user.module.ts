@@ -7,6 +7,8 @@ import { OffDayProjectDetailComponent } from '../off-day-project-detail/off-day-
 import { OffDayProjectDetailModule } from '../off-day-project-detail/off-day-project-detail.module';
 import { LeaveDayOfUserRoutingModule } from './leave-day-of-user-routing.module';
 import { LeaveDayOfUserComponent } from './leave-day-of-user.component';
+import { ConfirmAllRequestModule } from '../confirm-all-request/confirm-all-request.module';
+import { ConfirmAllRequestComponent } from '../confirm-all-request/confirm-all-request.component';
 
 @NgModule({
   declarations: [LeaveDayOfUserComponent],
@@ -18,11 +20,13 @@ import { LeaveDayOfUserComponent } from './leave-day-of-user.component';
       provide: DateAdapter,
       useFactory: adapterFactory
     }),
-    OffDayProjectDetailModule
+    OffDayProjectDetailModule,
+    ConfirmAllRequestModule
   ],
 
   entryComponents: [
-    OffDayProjectDetailComponent
+    OffDayProjectDetailComponent,
+    ConfirmAllRequestComponent
   ],
   exports: []
 })
