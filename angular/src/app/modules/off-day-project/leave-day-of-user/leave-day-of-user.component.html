@@ -102,17 +102,17 @@
         </div>
       </div>
       <div class="group-multiSelect">
-        <mat-checkbox [checked]="multiSelect" (change)="multiSelect = $event.checked" style="padding-right: 10px;">
+        <mat-checkbox [checked]="multiSelect" (change)="clickMultiSelect($event.checked)" style="padding-right: 10px;">
           {{ "Multi-select" | localize }}
         </mat-checkbox>
-        <div *ngIf="this.selectedDays.size">
-          <button class="approve-button" [name]="btn-approve" (click)="confirm(1)" mat-raised-button>Approved</button>
-          <button class="reject-button" [name]="btn-reject" (click)="confirm(0)" mat-raised-button>Reject</button>
-        </div>
         <mat-checkbox [checked]="selectAll" (change)="clickSelectAll($event.checked)" style="padding: 10px;"
           *ngIf="multiSelect">
-          {{ "Select-All" | localize }}
+          {{ "Select-All-Pending" | localize }}
         </mat-checkbox>
+        <div *ngIf="this.selectedDays.size">
+          <button class="approve-button" (click)="ApproveOrReject(true)" mat-raised-button>Approved</button>
+          <button class="reject-button" (click)="ApproveOrReject(false)" mat-raised-button>Reject</button>
+        </div>
       </div>
       <div style="padding:0 20px 20px; overflow-x: scroll;" [busy]="isLoading">
         <div [ngSwitch]="view" style="user-select: none;">
@@ -131,9 +131,9 @@
     <div style="height: 100%;" class="back-red" *ngIf="day.badgeTotal > 0">
       <span class="cal-day-badge">Off</span>
     </div>
+    <span class="cal-day-badge text-primary select_multiday"
+        *ngIf="isSelected(day.date)">✔</span>
     <div *ngFor="let item of day.events;let i = index">
-      <span class="cal-day-badge text-primary select_multiday"
-        *ngIf="item.cssClass === 'select_multiday' || (this.selectAll && i === 0 && item.status === 1 && handlerKtra(day.date))">✔</span>
       <div *ngIf="day.badgeTotal <= 0">
         <span class="cal-day-badge text-primary day-chip-full-day"
           *ngIf="item.type === 0 && item.absenceTime==null">Off</span>

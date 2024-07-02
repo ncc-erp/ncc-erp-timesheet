@@ -92,6 +92,8 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
   }
 
   refreshData() {
+    this.multiSelect = false;
+    this.selectAll = false;
     this.listDayShow = [];
     this.selectedDays.clear()
     this.isLoading = true
@@ -163,16 +165,13 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
 
   dayClicked(day: any) {
     const formatDate = moment(day.date).format("YYYY-MM-DD");
-    if (this.multiSelect) {
+    if (this.multiSelect && day.events.length > 0) {
       const haveData = this.absenceReqs.filter(day => day.detail.dateAt === formatDate);
       const haveDateId = haveData.map(s => s.id);
-      let indexSelected = day.events.findIndex(s => s.cssClass == "select_multiday");  
-      if (indexSelected == -1) {
-        day.events.push({ "cssClass": "select_multiday" });
-        this.selectedDays.set(formatDate, haveDateId);
-      } else {
-        day.events.splice(indexSelected, 1);
+      if (this.selectedDays.has(formatDate)) {
         this.selectedDays.delete(formatDate);
+      } else {
+        this.selectedDays.set(formatDate, haveDateId);
       }
       return;
     }
@@ -198,25 +197,30 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
     }
   }
 
+  clickMultiSelect(value){
+    this.multiSelect=value;
+    if(!value){
+      this.selectedDays.clear()
+    }
+  }
+
   clickSelectAll(value){
     this.selectedDays.clear();
-    this.selectAll = value;
-    const currentMonth = (new Date()).getMonth() + 1;
-    const absencePending = this.absenceReqs.filter(day => {
-        const dateMonth = (new Date(day.detail.dateAt)).getMonth() + 1;
-        return dateMonth === currentMonth && day.status === 1;
-    });
-    absencePending.forEach(s => {
-      if (this.selectedDays.has(s.detail.dateAt)) {
-        let existingArray = this.selectedDays.get(s.detail.dateAt);
-        existingArray.push(s.id);
-        this.selectedDays.set(s.detail.dateAt, existingArray); 
-      } else {
-        this.selectedDays.set(s.detail.dateAt, [s.id]);
-      }
-    });
-    if (!value) {
-      this.selectedDays.clear();
+    if(value){
+      const currentMonth = new Date().getMonth();
+      const absencePending = this.absenceReqs.filter(day => {
+          const dateMonth = new Date(day.detail.dateAt).getMonth();
+          return dateMonth === currentMonth && day.status === this.APP_CONSTANT.AbsenceStatus.Pending;
+      });
+      absencePending.forEach(s => {
+        if (this.selectedDays.has(s.detail.dateAt)) {
+          let existingArray = this.selectedDays.get(s.detail.dateAt);
+          existingArray.push(s.id);
+          this.selectedDays.set(s.detail.dateAt, existingArray); 
+        } else {
+          this.selectedDays.set(s.detail.dateAt, [s.id]);
+        }
+      });
     }
   }
 
@@ -230,14 +234,11 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
   }
 
   getClassByStatus(status: number) {
-    if (status == 1)
-      return "day-off-state-pending";
-
-    if (status == 2)
-      return "day-off-state-approved";
-
-    if (status == 3)
-      return "day-off-state-reject";
+    switch(status){
+      case this.APP_CONSTANT.AbsenceStatus.Pending: return "day-off-state-pending";
+      case this.APP_CONSTANT.AbsenceStatus.Approved: return "day-off-state-approved";
+      case this.APP_CONSTANT.AbsenceStatus.Rejected: return "day-off-state-reject";
+    }
   }
 
   selectionChange(resetDayType: boolean) {
@@ -261,22 +262,18 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
     history.back();
   }
 
-  confirm(number : any) {
-    console.log(this.selectedDays)
+  ApproveOrReject(status : boolean) {
     const dialogRef = this.diaLog.open(ConfirmAllRequestComponent, {
       disableClose: true,
       width: "500px",
-      data: { events: this.selectedDays, date: new Date(), number: number}
+      data: { events: this.selectedDays, status}
     });
-    dialogRef.afterClosed().subscribe(() => {
-      this.refreshData();
+    dialogRef.afterClosed().subscribe(status => {
+      if(status) this.refreshData();
     })
   }
 
-  handlerKtra(date: Date) : boolean{
-    const currentMonth = (new Date()).getMonth() + 1;
-    if (date.getMonth() + 1 === currentMonth) {
-      return true;
-    } else return false;
+  isSelected(day : any){
+    return this.selectedDays.has(moment(day).format("YYYY-MM-DD"));
   }
 }

@@ -1,7 +1,11 @@
 <div class="header" cdkDragHandle cdkDrag cdkDragRootElement=".cdk-overlay-pane" [busy]="isLoading">
   <h4 class="pin">
-    Approve/Reject all requests below
-    <span style="background-color: green; margin-bottom: 2px;">{{date}}</span>
+    <div *ngIf="status">
+      Approve all requests below
+    </div>
+    <div *ngIf="!status">
+      Reject all requests below
+    </div>
   </h4>
   <button mat-dialog-close style="width: 40px;">
     <i class="material-icons">close</i>
@@ -18,7 +22,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let key of events.keys(), index as i">
+          <tr *ngFor="let key of eventsKey; let i = index">
             <td style="text-align: center;">{{i + 1}}</td>
             <td>
               <div style="display: flex; justify-content: flex-start; align-items: center; width: 190px;">
@@ -32,5 +36,5 @@
       </table>
     </div>
   </mat-dialog-content>
-  <button class="btn-confirm" [name]="btn-confirm" mat-raised-button (click)="confirmClick()">Confirm</button>  
+  <button class="btn-confirm" mat-raised-button (click)="confirmClick()">Confirm</button>  
 </div>
