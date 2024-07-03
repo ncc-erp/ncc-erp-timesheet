@@ -165,13 +165,18 @@
                                 aria-expanded="false" style="height: 0px;">
                                 <div class="panel-body">
                                   <div class="body table-responsive">
-                                    <table class="table table-hover">
+                                    <table class="table table-hover table-bordered">
                                       <thead>
                                         <tr>
                                           <th>PROJECT</th>
                                           <th>TASK NAME</th>
                                           <th>TIME</th>
                                           <th>STATUS</th>
+                                            <ng-container *ngIf="!dt.tasks[0].projectTargetUser;else shadow"></ng-container>
+                                            <ng-template #shadow>
+                                                <th>TARGET UER</th>
+                                                <th>TARGET TIME</th>
+                                            </ng-template>
                                           <th class="text-center">WORK TYPE</th>
                                           <th>NOTE</th>
                                           <th>L.M TIME</th>
@@ -186,7 +191,7 @@
                                           </td>
                                           <td><span>{{ t.taskName }}</span></td>
                                           <td><span>{{ convertMinuteToHour(t.workingTime) }}</span></td>
-                                          <td style="width: 200px;">
+                                          <td>
                                             <span [innerHtml]="convertNumberOfStringStatus(t.status)"></span>
                                             <span class="label status-label bg-red status"
                                               *ngIf="t.typeOfWork == '1'">OT</span>
@@ -195,6 +200,15 @@
                                               {{t.isCharged?'Charged':'Non-charged'}}
                                             </span>
                                           </td>
+                                            <ng-container *ngIf="!dt.tasks[0].projectTargetUser;else shadow1"></ng-container>
+                                            <ng-template #shadow1>
+                                                <td>
+                                                    {{t.projectTargetUser || ''}}
+                                                </td>
+                                                <td>
+                                                    {{t.workingTimeTargetUser || ''}}
+                                                </td>
+                                            </ng-template>
                                           <td class="text-center"><span [ngClass]="t.isTemp? 'temp':'official'">{{ t.workType }}</span></td>
                                           <td><span>{{ t.mytimesheetNote }}</span></td>
                                           <td>
