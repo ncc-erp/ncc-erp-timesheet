@@ -121,5 +121,8 @@ td.note {
 .day-chip-tardiness-leave-early {
   background-color: #f27024 !important;
 }
-
-
+@media screen and (max-width:767px){
+  .table-responsive {
+      overflow-y: auto;
+  }
+}
