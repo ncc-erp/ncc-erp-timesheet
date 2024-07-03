@@ -150,19 +150,36 @@ pre {
 }
 .header{
     display: flex;
+    flex-wrap: wrap;
 }
 
 .header .title{
     margin-top: 16px;
+    margin-bottom: 16px;
 }
 .header .filter-date{
     display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 .header .filter-date .item{
     margin-left: 20px;
-    width: 80px;
+    width: 65px;
+    flex: 1 1 auto;
 }
-
+.header .filter-date .item2{
+    margin-left: 10px;
+    width: 120px;
+    flex: 1 1 auto;
+}
+.header .filter-date .item3{
+    width: 200px;
+    height: 35px;
+    flex: 1 1 auto;
+    text-align: center;
+    display:inline-flex;
+}
 ::ng-deep .filter-date .item .mat-form-field-appearance-outline .mat-form-field-wrapper{
     margin: 0;
     padding: 0;
@@ -187,4 +204,16 @@ pre {
     top: 0;
     margin: 0 !important;
     font-size: 15px !important;
+}
+.row1-child{
+    width: 150px;
+}
+@media (max-width: 992px) {
+    .row1{
+        display: flex;
+        height: auto;
+    }
+    .row1-child{
+        width: 35%;
+    }
 }
