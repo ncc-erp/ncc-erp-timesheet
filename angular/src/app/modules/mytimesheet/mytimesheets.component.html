@@ -61,6 +61,7 @@
                       <span> <b>[{{ item.projectCode }}] [{{item.projectName}}] </b>
                         ({{item.customerName}}) {{ item.taskName }} - </span>
                         <span [ngClass]="item.isTemp? 'temp': 'official'">{{item.workType}}</span>
+                        <span *ngIf="item.projectTargetUser"> TargetUser: {{item.projectTargetUser}} - TargetTime: {{convertMinuteToHour(item.workingTimeTargetUser)}}</span>
                       <span><textarea matInput [readonly]="!item.isEditing">{{item.note}}</textarea></span>
                     </td>
                     <td style="width: 25px">{{convertMinuteToHour(item.workingTime) }}</td>
