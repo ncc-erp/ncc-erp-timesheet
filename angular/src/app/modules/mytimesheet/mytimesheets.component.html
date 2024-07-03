@@ -58,7 +58,7 @@
 
                   <tr *ngFor="let item of day.timesheets">
                     <td>
-                      <span> <b>[{{ item.projectCode }}]</b> {{ item.taskName }} - </span>
+                      <span> <b>[{{ item.projectName }}]</b> {{ item.taskName }} - </span>
                         <span [ngClass]="item.isTemp? 'temp': 'official'">{{item.workType}}</span>
                         <span *ngIf="item.projectTargetUser"> TargetUser: {{item.projectTargetUser}} - TargetTime: {{convertMinuteToFloat(item.workingTimeTargetUser)}}h</span>
                       <span><textarea matInput [readonly]="!item.isEditing">{{item.note}}</textarea></span>
