@@ -68,6 +68,8 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                               ListPM = pus.Select(pm => pm.PM).ToList(),
                               LastModificationTime = a.LastModificationTime,
                               IsUnlockedByEmployee = a.IsUnlockedByEmployee,
+                              projectTargetUser = a.ProjectTargetUser.User.FullName,
+                              workingTimeTargetUser = a.TargetUserWorkingTime,
                               LastModifierUser = qUsers.Where(x => x.Id == a.LastModifierUserId).Select(x => x.EmailAddress).FirstOrDefault()
                           })
                            .WhereIf(status.HasValue && status >= 0, s => s.Status == status)
