@@ -172,9 +172,9 @@
                                           <th>TASK NAME</th>
                                           <th>TIME</th>
                                           <th>STATUS</th>
-                                            <ng-container *ngIf="!dt.tasks[0].projectTargetUser;else shadow"></ng-container>
-                                            <ng-template #shadow>
-                                                <th>TARGET UER</th>
+                                            <ng-container *ngIf="!dt.tasks[0].projectTargetUser;else isShadow"></ng-container>
+                                            <ng-template #isShadow>
+                                                <th>TARGET USER</th>
                                                 <th>TARGET TIME</th>
                                             </ng-template>
                                           <th class="text-center">WORK TYPE</th>
@@ -200,8 +200,8 @@
                                               {{t.isCharged?'Charged':'Non-charged'}}
                                             </span>
                                           </td>
-                                            <ng-container *ngIf="!dt.tasks[0].projectTargetUser;else shadow1"></ng-container>
-                                            <ng-template #shadow1>
+                                            <ng-container *ngIf="!dt.tasks[0].projectTargetUser;else isShadow"></ng-container>
+                                            <ng-template #isShadow>
                                                 <td>
                                                     {{t.projectTargetUser || ''}}
                                                 </td>
