@@ -24,7 +24,7 @@
 }
 
 .day-off-state-pending {
-    color: darkgoldenrod !important;   
+    color: darkgoldenrod !important;
 }
 
 .day-off-state-approved {
@@ -35,7 +35,7 @@
 }
 
 .onsite{
-    background-color: #009688 !important;  
+    background-color: #009688 !important;
 }
 
 .pin span {
@@ -67,14 +67,14 @@
 }
 
 .approve-button{
-    margin: 0px 5px; 
-    background-color: #2b982b !important; 
+    margin: 0px 5px;
+    background-color: #2b982b !important;
     color: white;
 }
 
 .reject-button{
-    margin: 0px 5px; 
-    background-color: #9E9E9E; 
+    margin: 0px 5px;
+    background-color: #9E9E9E;
     color: white;
 }
 
@@ -104,4 +104,10 @@
 }
 .day-chip-tardiness-leave-early {
     background-color: #f27024 !important;
+}
+
+@media screen and (max-width:767px){
+    .table-responsive {
+        overflow-y: auto;
+    }
 }
