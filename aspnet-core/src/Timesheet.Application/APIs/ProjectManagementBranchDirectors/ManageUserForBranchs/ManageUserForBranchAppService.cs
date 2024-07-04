@@ -196,5 +196,35 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
             var temp = await result.GetGridResult(result, input);
             return new PagedResultDto<UserStatisticInProjectDto>(temp.TotalCount, temp.Items);
         }
+
+        [HttpPost]
+        [AbpAuthorize]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch)]
+        public async Task<List<UserInfoProjectDto>> GetAllUserInProject(long projectId, DateTime? startDate, DateTime? endDate)
+        {
+            var qMyTimeSheet = from th in WorkScope.GetAll<MyTimesheet>()
+                               .WhereIf(startDate.HasValue && endDate.HasValue, s => startDate <= s.DateAt && s.DateAt <= endDate)
+                               .Where(s => s.Status == TimesheetStatus.Approve)
+                               .Where(s => s.ProjectTask.Project.Id == projectId)
+                               select new
+                               {
+                                   UserId = th.UserId,
+                                   WorkingTime = th.WorkingTime
+                               };
+            var workingTimeProject = qMyTimeSheet.GroupBy(s => s.UserId)
+                                    .ToDictionary(g => g.Key, g => g.Sum(i => i.WorkingTime));
+            var query = from u in WorkScope.GetAll<User>().Where(s => s.IsActive).Where(s => workingTimeProject.ContainsKey(s.Id))
+                        select new UserInfoProjectDto
+                        {
+                            FullName = u.FullName,
+                            EmailAddress = u.EmailAddress,
+                            WorkingTime = workingTimeProject[u.Id],
+                            ValueType = WorkScope.GetAll<ValueOfUserInProject>()
+                                                .Where(p => p.UserId == u.Id && p.ProjectId == projectId).Select(p => p.Type)
+                                                .FirstOrDefault(),
+                        };
+
+            return query.ToList();
+        }
     }
 }

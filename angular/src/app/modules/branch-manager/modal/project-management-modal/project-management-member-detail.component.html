@@ -1,0 +1,23 @@
+<div class="table-responsive">
+    <h3 class="text-center margin-0 p-b-24">{{ this.data.projectItem.projectNames }}</h3>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>STT</th>
+            <th>Member</th>
+            <th>Email</th>
+            <th>Effort</th>
+            <th>Type</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let m of projectItem;let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ m.fullName }}</td>
+            <td>{{ m.emailAddress }}</td>
+            <td>50%</td>
+            <td>{{m.valueType | typeTargetUser}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

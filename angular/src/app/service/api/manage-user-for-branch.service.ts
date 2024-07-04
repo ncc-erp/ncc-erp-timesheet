@@ -23,5 +23,9 @@ export class ManageUserForBranchService extends BaseApiService {
   getAllValueOfUserInProjectByUserId(page: PagedRequestDto, branchId: number, startDate: string, endDate: string): Observable<any> {
     return this.http.post(this.rootUrl + `/GetStatisticNumOfUsersInProject?branchId=${branchId}&startDate=${startDate}&endDate=${endDate}`, page);
   }
+
+  getAllUserInProject(projectId: number, startDate: string, endDate: string, page: any): Observable<any> {
+    return this.http.post(this.rootUrl + `/GetAllUserInProject?projectId=${projectId}&startDate=${startDate}&endDate=${endDate}`, page);
+  }
 }
- 
+

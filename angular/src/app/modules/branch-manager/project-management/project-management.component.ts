@@ -8,6 +8,10 @@ import { Chart } from 'chart.js'
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { finalize } from 'rxjs/operators';
 import { DateInfo } from '../date-filter/date-filter.component';
+import { MatDialog } from '@angular/material/dialog';
+import {
+    ProjectManagementMemberDetailComponent
+} from '@app/modules/branch-manager/modal/project-management-modal/project-management-member-detail.component';
 
 @Component({
   selector: 'app-project-management',
@@ -34,6 +38,7 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
   private chart: Chart;
   constructor(
     injector: Injector,
+    private dialog: MatDialog,
     private manageUserForBranchService: ManageUserForBranchService,
   ) {
     super(injector);
@@ -57,13 +62,29 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
 
   showChart(){
     if(!this.chart){
-      this.chart = new Chart( 
+      this.chart = new Chart(
         document.getElementById('myChart'),{
           type: 'horizontalBar',
           tooltips: {enabled: true},
           legend: {display: false},
           responsive: true,
           options: {
+            onClick: (event, elements, chart) =>{
+                const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+                const dialogWidth = width >= 1024 ? '800px' : '80vw';
+                const indexData = elements[0]._index;
+                this.dialog.open(ProjectManagementMemberDetailComponent, {
+                    data: {
+                        projectItem: {
+                            projectId: this.projects[indexData].projectId,
+                            startDate: this.startDate,
+                            endDate: this.endDate,
+                            projectName: this.projectNames
+                        },
+                    },
+                    height: '50%', width: dialogWidth
+                });
+            },
             scales: {
               xAxes: [{
                 barPercentage: 0.5,
