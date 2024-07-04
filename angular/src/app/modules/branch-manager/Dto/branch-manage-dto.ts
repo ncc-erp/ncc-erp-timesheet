@@ -37,8 +37,8 @@ export class ProjectDto {
 export class ProjectTargetUserDto {
     fullName: string;
     emailAddress: string;
-    workingTime: number;
-    valueType: number;
+    workingTime: number | string;
+    valueType: number | string;
 }
 
 export class ProjectListManagement {

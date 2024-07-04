@@ -11,12 +11,12 @@
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let m of projectItem;let i = index">
+        <tr *ngFor="let m of projectItem | projectTargetUser;let i = index">
             <td>{{ i + 1 }}</td>
             <td>{{ m.fullName }}</td>
             <td>{{ m.emailAddress }}</td>
-            <td>50%</td>
-            <td>{{m.valueType | typeTargetUser}}</td>
+            <td>{{ m.workingTime }}</td>
+            <td>{{ m.valueType }}</td>
         </tr>
         </tbody>
     </table>

@@ -16,12 +16,13 @@ import {
     ProjectManagementMemberDetailComponent
 } from '@app/modules/branch-manager/modal/project-management-modal/project-management-member-detail.component';
 import {MatDialogModule} from '@node_modules/@angular/material';
-import {TypeTargetUserPipe} from '@shared/pipes/typeTargetUser.pipe';
+import {ProjectTargetUserPipe} from '@shared/pipes/projectTargetUser.pipe';
+
 
 @NgModule({
   declarations: [
-      TypeTargetUserPipe,
       DateFilterComponent,
+      ProjectTargetUserPipe,
       BranchManagerComponent,
       ManageEmployeeComponent,
       PopupCustomeTimeComponent,

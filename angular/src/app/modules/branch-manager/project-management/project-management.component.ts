@@ -69,7 +69,7 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
           legend: {display: false},
           responsive: true,
           options: {
-            onClick: (event, elements, chart) =>{
+            onClick: (event, elements) => {
                 const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
                 const dialogWidth = width >= 1024 ? '800px' : '80vw';
                 const indexData = elements[0]._index;
@@ -82,7 +82,7 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
                             projectName: this.projects[indexData].projectName
                         },
                     },
-                    height: '50%', width: dialogWidth
+                    height: 'auto', width: dialogWidth
                 });
             },
             scales: {

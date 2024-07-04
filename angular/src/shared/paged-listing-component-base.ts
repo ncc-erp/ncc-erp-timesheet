@@ -19,7 +19,19 @@ export class FilterDto{
 }
 
 export class ProjectUserDto {
-    result: [];
+    fullName: string;
+    emailAddress: string;
+    workingTime: number;
+    valueType: number;
+}
+
+export class  PageProjectUserDto {
+    result: ProjectUserDto[] = [];
+    targetUrl: null;
+    success: boolean;
+    error: null;
+    unAuthorizedRequest: boolean;
+    __abp: boolean;
 }
 
 export class PagedRequestDto {
