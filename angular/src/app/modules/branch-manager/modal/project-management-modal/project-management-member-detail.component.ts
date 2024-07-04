@@ -4,6 +4,7 @@ import {ProjectTargetUserDto} from '@app/modules/branch-manager/Dto/branch-manag
 import {ManageUserForBranchService} from '@app/service/api/manage-user-for-branch.service';
 import {OnInit} from '@node_modules/@angular/core';
 import {ProjectUserDto} from '@shared/paged-listing-component-base';
+import {IProjectTargetUser} from '@app/modules/branch-manager/modal/project-management-modal/interface/project-type.interface';
 
 @Component({
     selector: 'app-project-management-member-detail',
@@ -14,7 +15,7 @@ export class ProjectManagementMemberDetailComponent implements OnInit {
     projectItem: ProjectTargetUserDto[] = [];
     constructor(
         private manageUserForBranchService: ManageUserForBranchService,
-        @Inject(MAT_DIALOG_DATA) public data: { projectItem: any },
+        @Inject(MAT_DIALOG_DATA) public data: { projectItem: IProjectTargetUser },
     ) {}
 
     ngOnInit() {

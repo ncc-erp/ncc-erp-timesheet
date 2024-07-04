@@ -79,7 +79,7 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
                             projectId: this.projects[indexData].projectId,
                             startDate: this.startDate,
                             endDate: this.endDate,
-                            projectName: this.projectNames
+                            projectName: this.projects[indexData].projectName
                         },
                     },
                     height: '50%', width: dialogWidth
