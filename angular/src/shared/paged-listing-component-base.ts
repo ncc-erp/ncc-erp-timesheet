@@ -18,6 +18,22 @@ export class FilterDto{
     //comparisionName: string;
 }
 
+export class ProjectUserDto {
+    fullName: string;
+    emailAddress: string;
+    workingTime: number;
+    valueType: number;
+}
+
+export class  PageProjectUserDto {
+    result: ProjectUserDto[] = [];
+    targetUrl: null;
+    success: boolean;
+    error: null;
+    unAuthorizedRequest: boolean;
+    __abp: boolean;
+}
+
 export class PagedRequestDto {
     skipCount: number;
     maxResultCount: number;
@@ -94,7 +110,7 @@ export abstract class PagedListingComponentBase<TEntityDto> extends AppComponent
         }
         // console.log(this.filterItems);
     }
-    
+
 
     public deleteFilterItem(item: FilterDto){
         var index = this.filterItems.findIndex(i => i.comparison==item.comparison && i.propertyName==item.propertyName && i.value == item.value);

@@ -1,0 +1,13 @@
+.p-b-24 {
+    padding-bottom: 22px;
+}
+
+@media screen and (max-width:767px){
+    .table-responsive {
+        overflow-y: auto;
+        border: none;
+    }
+    .table-responsive>.table-bordered {
+        border: 1px solid #ddd;
+    }
+}
