@@ -373,42 +373,20 @@ namespace Timesheet.APIs.Info
             {
                 return 0;
             }
-            int count = 0;
-
-            var startMonth = await getStartDateToCheckApprove();
-
             var lockDate = _commonServices.getlockDatePM();
             var qprojectIds = WorkScope.GetAll<ProjectUser>().Where(s => s.UserId == userId && s.Type == ProjectUserType.PM).Select(s => s.ProjectId).Distinct();
 
             var qtimesheets = WorkScope.GetAll<MyTimesheet>()
                 .Where(s => s.Status == TimesheetStatus.Pending)
                 .Where(s => s.IsUnlockedByEmployee != true)
-                .Where(s => s.DateAt >= startMonth && s.DateAt.Date <= lockDate)
+                .Where(s => s.DateAt >= lockDate.AddDays(-6) && s.DateAt.Date <= lockDate)
                 .Select(s => new { s.ProjectTask.ProjectId, DateAt = s.DateAt.Date });
 
             var timesheets = await (from projectId in qprojectIds
                                     join ts in qtimesheets on projectId equals ts.ProjectId
                                     group ts by ts.DateAt.Date into gr
                                     select gr.Key).ToListAsync();
-
-
-            var mapWeek = await getMapWorkingDateByWeek(startMonth, lockDate, userId);
-
-            if (mapWeek == null)
-            {
-                return 0;
-            }
-            Logger.Debug("mapWeek.Count=" + mapWeek.Count);
-
-            foreach (var listDayOfWeek in mapWeek.Values)
-            {
-                Logger.Debug("listDayOfWeek.Count=" + listDayOfWeek.Count);
-                var startWeek = listDayOfWeek.FirstOrDefault();
-                var endWeek = listDayOfWeek.LastOrDefault();
-                var hasTimesheetPending = timesheets.Any(s => s.Date >= startWeek.Date && s.Date <= endWeek.Date);
-                if (hasTimesheetPending) { count++; }
-            }
-            return count;
+            return timesheets.Any()?1:0;
         }
         private async Task<Dictionary<DateTime, List<DateTime>>> getMapWorkingDateByWeek(DateTime startMonth, DateTime lockDate, long userId)
         {
@@ -534,12 +512,10 @@ namespace Timesheet.APIs.Info
             }
             var timesLockedPM = await getTimesheetLockedOfPMAsync(userId.Value);
 
-            //Có lỗi
-            if (timesLockedPM > 0)
+            if (timesLockedPM == 0)
             {
-                await UnlockToApproveTimesheet(userId.Value, timesLockedPM);
+                throw new UserFriendlyException("You have no pending timesheet in previous week. If you want to unlock please contact admin.");
             }
-            //Không lỗi
             else
             {
                 await UnlockToApproveTimesheet(userId.Value, 1);
