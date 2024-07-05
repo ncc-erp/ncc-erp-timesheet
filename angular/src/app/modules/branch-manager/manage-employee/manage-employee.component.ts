@@ -12,6 +12,7 @@ import { ManageUserDto } from '../Dto/branch-manage-dto';
 import { DetailParticipatingProjectsComponent } from './detail-participating-projects/detail-participating-projects.component';
 import { MatDialog } from '@angular/material';
 import { DateInfo } from '../date-filter/date-filter.component';
+import {ESortProjectUserNumber} from '@app/modules/branch-manager/manage-employee/enum/sort-project-user-number.enum';
 
 @Component({
   selector: 'app-manage-employee',
@@ -27,6 +28,9 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
 
   startDate: string;
   endDate: string;
+  sortProject: number = ESortProjectUserNumber.DOWN_PROJECT;
+  sortNumberOfProject: string  = ESortProjectUserNumber.DOWN_NUMBER;
+  protected readonly ESortProjectUserNumber = ESortProjectUserNumber;
 
   @Input() listPosition: PositionDto[];
   @Input() listPositionFilter: PositionDto[];
@@ -59,7 +63,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   ];
 
   ngOnInit() {
-  } 
+  }
   filterPosition(): void{
     if(this.positionSearch.value){
       this.listPosition = this.listPositionFilter.filter(data => data.name.toLowerCase().includes(this.positionSearch.value.toLowerCase().trim()));
@@ -182,5 +186,21 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     this.startDate=dateInfo.startDate;
     this.endDate=dateInfo.endDate;
     this.refresh();
+  }
+
+  toggleSortOrder(click: boolean) {
+      if (click === true) {
+          if (this.sortNumberOfProject === ESortProjectUserNumber.UP_NUMBER) {
+              this.sortNumberOfProject = ESortProjectUserNumber.DOWN_NUMBER;
+          } else {
+              this.sortNumberOfProject = ESortProjectUserNumber.UP_NUMBER;
+          }
+      } else  {
+          if (this.sortProject === ESortProjectUserNumber.UP_PROJECT) {
+              this.sortProject = ESortProjectUserNumber.DOWN_PROJECT;
+          } else {
+              this.sortProject = ESortProjectUserNumber.UP_PROJECT;
+          }
+      }
   }
 }

@@ -12,9 +12,10 @@ import { PopupCustomeTimeComponent } from './manage-employee/detail-participatin
 import { PopupUpdateProjectComponent } from './manage-employee/detail-participating-projects/popup-update-project/popup-update-project.component';
 import { ProjectManagementComponent } from './project-management/project-management.component';
 import { DateFilterComponent } from './date-filter/date-filter.component';
+import {SortNumberOfProjectAndProjectPipe} from '@shared/pipes/sortNumberOfProjectAndProject.pipe';
 
 @NgModule({
-  declarations: [BranchManagerComponent, ManageEmployeeComponent, DetailParticipatingProjectsComponent, PopupCustomeTimeComponent, PopupUpdateProjectComponent, ProjectManagementComponent, DateFilterComponent],
+  declarations: [BranchManagerComponent, ManageEmployeeComponent, DetailParticipatingProjectsComponent, PopupCustomeTimeComponent, PopupUpdateProjectComponent, ProjectManagementComponent, DateFilterComponent, SortNumberOfProjectAndProjectPipe],
   imports: [
     CommonModule,
     SharedModule,
