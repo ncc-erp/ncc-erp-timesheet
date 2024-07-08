@@ -2,12 +2,25 @@
     padding-bottom: 22px;
 }
 
+.table-responsive {
+    overflow: hidden;
+}
+
+.height {
+    height: 450px;
+}
+
+.height:hover {
+   overflow-y: auto;
+}
+
+th div.d-flex {
+    justify-content: space-between;
+}
+
 @media screen and (max-width:767px){
     .table-responsive {
-        overflow-y: auto;
         border: none;
-    }
-    .table-responsive>.table-bordered {
-        border: 1px solid #ddd;
+        overflow-y: hidden;
     }
 }

@@ -1,23 +1,45 @@
 <div class="table-responsive">
     <h3 class="text-center margin-0 p-b-24">{{ this.data.projectItem.projectName }}</h3>
-    <table class="table table-bordered">
-        <thead>
-        <tr>
-            <th>STT</th>
-            <th>Member</th>
-            <th>Email</th>
-            <th>Effort</th>
-            <th>Type</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let m of projectItem | projectTargetUser;let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ m.fullName }}</td>
-            <td>{{ m.emailAddress }}</td>
-            <td>{{ m.workingTime }}</td>
-            <td>{{ m.valueType }}</td>
-        </tr>
-        </tbody>
-    </table>
+    <div [ngClass]="{'height': projectItem.length > 10}">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>STT</th>
+                <th>
+                    <div class="d-flex align-center">
+                        <span>Member</span>
+                        <div  (click)="toggleSortOrder(true)">
+                            <i class="pi pi-sort-amount-up text-primary p-l-5" role="button"
+                               *ngIf="currentSortMember === sortMemberOrEffort.DOWN_MEMBER"></i>
+                            <i class="pi pi-sort-amount-down text-primary p-l-5" role="button"
+                               *ngIf="currentSortMember === sortMemberOrEffort.UP_MEMBER"></i>
+                        </div>
+                    </div>
+                </th>
+                <th>Email</th>
+                <th>
+                    <div class="d-flex">
+                        <span>Effort</span>
+                        <div (click)="toggleSortOrder(false)">
+                            <i class="pi pi-sort-amount-up text-primary p-l-5" role="button"
+                               *ngIf="currentSortEffort === sortMemberOrEffort.DOWN_EFFORT"></i>
+                            <i class="pi pi-sort-amount-down text-primary p-l-5" role="button"
+                               *ngIf="currentSortEffort === sortMemberOrEffort.UP_EFFORT"></i>
+                        </div>
+                    </div>
+                </th>
+                <th>Type</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let m of projectItem | projectTargetUser:currentSortMember:currentSortEffort:sortType;let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ m.fullName }}</td>
+                <td>{{ m.emailAddress }}</td>
+                <td>{{ m.workingTime }}</td>
+                <td>{{ m.valueType }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
