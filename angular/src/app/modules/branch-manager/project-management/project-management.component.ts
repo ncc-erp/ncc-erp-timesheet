@@ -70,18 +70,35 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
           responsive: true,
           options: {
             onClick: (event, elements) => {
-                const indexData = elements[0]._index;
-                this.dialog.open(ProjectManagementMemberDetailComponent, {
-                    data: {
-                        projectItem: {
-                            projectId: this.projects[indexData].projectId,
-                            startDate: this.startDate,
-                            endDate: this.endDate,
-                            projectName: this.projects[indexData].projectName
-                        },
-                    },
-                    height: 'auto', width: 'auto'
-                });
+                if (elements && elements.length > 0) {
+                    const indexData = elements[0]._index;
+                        this.dialog.open(ProjectManagementMemberDetailComponent, {
+                            data: {
+                                projectItem: {
+                                    projectId: this.projects[indexData].projectId,
+                                    startDate: this.startDate,
+                                    endDate: this.endDate,
+                                    projectName: this.projects[indexData].projectName
+                                },
+                            },
+                            height: 'auto', width: 'auto'
+                        });
+                }
+            },
+            legend: {
+                onHover: (e) => {
+                   e.target.style.cursor = 'pointer';
+                }
+            },
+            hover: {
+                onHover: function(e) {
+                   const point = this.getElementAtEvent(e);
+                   if (point.length) {
+                      e.target.style.cursor = 'pointer';
+                   } else {
+                      e.target.style.cursor = 'default';
+                   }
+                }
             },
             scales: {
               xAxes: [{
