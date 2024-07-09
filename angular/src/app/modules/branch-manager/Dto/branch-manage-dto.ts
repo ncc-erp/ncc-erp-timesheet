@@ -22,6 +22,8 @@ export class ManageProjectUsersDto {
     projectCode: string;
     projectName: string;
     projectUserType: number;
+    workingTimePercent: number;
+    pms: string;
 }
 
 export class ProjectDto {
