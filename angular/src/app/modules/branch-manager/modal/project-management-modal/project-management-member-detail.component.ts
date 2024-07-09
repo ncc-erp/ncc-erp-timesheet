@@ -12,6 +12,7 @@ import {ESortMemberEffort, ESortType} from '@app/modules/branch-manager/modal/pr
     styleUrls: ['./project-management-member-detail.component.css']
 })
 export class ProjectManagementMemberDetailComponent implements OnInit {
+    totalItems: number;
     projectItem: IProjectTargetUser[] = [];
     sortType = ESortType.Member;
     sortMemberOrEffort = ESortMemberEffort;
@@ -27,6 +28,7 @@ export class ProjectManagementMemberDetailComponent implements OnInit {
        this.manageUserForBranchService.getAllUserInProject(this.data.projectItem.projectId, this.data.projectItem.startDate,
             this.data.projectItem.endDate, request).subscribe((res) => {
         this.projectItem = res.result;
+        this.totalItems = res.result.length;
       });
     }
 

@@ -1,5 +1,5 @@
 <div class="table-responsive">
-    <h3 class="text-center margin-0 p-b-24">{{ this.data.projectItem.projectName }}</h3>
+    <h3 class="text-center margin-0 p-b-24">{{ data.projectItem.projectName }}</h3>
     <div [ngClass]="{'height': projectItem.length > 10}">
         <table class="table table-bordered">
             <thead>
@@ -42,4 +42,5 @@
             </tbody>
         </table>
     </div>
+    <span class="d-block text-right total_item">Total Item: {{totalItems}}</span>
 </div>

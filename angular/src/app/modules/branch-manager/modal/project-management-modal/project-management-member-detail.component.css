@@ -8,14 +8,16 @@
 
 .height {
     height: 450px;
-}
-
-.height:hover {
-   overflow-y: auto;
+    overflow-y: auto;
 }
 
 th div.d-flex {
     justify-content: space-between;
+}
+
+.total_item {
+    color: #555;
+    padding-right: 10px;
 }
 
 @media screen and (max-width:767px){
