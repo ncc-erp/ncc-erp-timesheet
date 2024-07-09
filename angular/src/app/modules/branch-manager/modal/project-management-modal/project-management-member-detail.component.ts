@@ -33,20 +33,12 @@ export class ProjectManagementMemberDetailComponent implements OnInit {
     }
 
     toggleSortOrder(click: boolean) {
-        if (click === true) {
+        if (click) {
             this.sortType = ESortType.Member;
-            if (this.currentSortMember === ESortMemberEffort.UP_MEMBER) {
-                this.currentSortMember = ESortMemberEffort.DOWN_MEMBER;
-            } else {
-                this.currentSortMember = ESortMemberEffort.UP_MEMBER;
-            }
-        } else  {
+            this.currentSortMember = (this.currentSortMember === ESortMemberEffort.UP_MEMBER) ? ESortMemberEffort.DOWN_MEMBER : ESortMemberEffort.UP_MEMBER;
+        } else {
             this.sortType = ESortType.Effort;
-            if (this.currentSortEffort === ESortMemberEffort.UP_EFFORT) {
-                this.currentSortEffort = ESortMemberEffort.DOWN_EFFORT;
-            } else {
-                this.currentSortEffort = ESortMemberEffort.UP_EFFORT;
-            }
+            this.currentSortEffort = (this.currentSortEffort === ESortMemberEffort.UP_EFFORT) ? ESortMemberEffort.DOWN_EFFORT : ESortMemberEffort.UP_EFFORT;
         }
     }
 }
