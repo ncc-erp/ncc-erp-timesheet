@@ -36,6 +36,13 @@ export class ProjectDto {
     shadowCount: number;
 }
 
+export class ProjectTargetUserDto {
+    fullName: string;
+    emailAddress: string;
+    workingTime: number | string;
+    valueType: number | string;
+}
+
 export class ProjectListManagement {
     projectId: number;
     projectName: string;

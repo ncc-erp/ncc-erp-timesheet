@@ -241,7 +241,9 @@ namespace Timesheet.Timesheets.MyTimesheets
                               TypeOfWork = myTimesheet.TypeOfWork,
                               IsCharged = myTimesheet.IsCharged,
                               Billable = ptask.Billable,
-                              IsTemp = myTimesheet.IsTemp
+                              IsTemp = myTimesheet.IsTemp,
+                              projectTargetUser = myTimesheet.ProjectTargetUser.User.FullName,
+                              workingTimeTargetUser = myTimesheet.TargetUserWorkingTime
                           }).ToListAsync();
         }
 
