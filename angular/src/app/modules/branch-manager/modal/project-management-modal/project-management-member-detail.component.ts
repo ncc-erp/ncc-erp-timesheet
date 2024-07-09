@@ -4,6 +4,7 @@ import {ManageUserForBranchService} from '@app/service/api/manage-user-for-branc
 import {OnInit} from '@node_modules/@angular/core';
 import {PageProjectUserDto} from '@shared/paged-listing-component-base';
 import {IProjectTargetUser} from '@app/modules/branch-manager/modal/project-management-modal/interface/project-type.interface';
+import {ESortMemberEffort, ESortType} from '@app/modules/branch-manager/modal/project-management-modal/enum/sort-member-effort.enum';
 
 @Component({
     selector: 'app-project-management-member-detail',
@@ -11,7 +12,12 @@ import {IProjectTargetUser} from '@app/modules/branch-manager/modal/project-mana
     styleUrls: ['./project-management-member-detail.component.css']
 })
 export class ProjectManagementMemberDetailComponent implements OnInit {
+    totalItems: number;
     projectItem: IProjectTargetUser[] = [];
+    sortType = ESortType.Member;
+    sortMemberOrEffort = ESortMemberEffort;
+    currentSortMember: ESortMemberEffort = ESortMemberEffort.UP_MEMBER;
+    currentSortEffort: ESortMemberEffort = ESortMemberEffort.UP_EFFORT;
     constructor(
         private manageUserForBranchService: ManageUserForBranchService,
         @Inject(MAT_DIALOG_DATA) public data: { projectItem: IProjectTargetUser },
@@ -22,6 +28,17 @@ export class ProjectManagementMemberDetailComponent implements OnInit {
        this.manageUserForBranchService.getAllUserInProject(this.data.projectItem.projectId, this.data.projectItem.startDate,
             this.data.projectItem.endDate, request).subscribe((res) => {
         this.projectItem = res.result;
+        this.totalItems = res.result.length;
       });
+    }
+
+    toggleSortOrder(click: boolean) {
+        if (click) {
+            this.sortType = ESortType.Member;
+            this.currentSortMember = (this.currentSortMember === ESortMemberEffort.UP_MEMBER) ? ESortMemberEffort.DOWN_MEMBER : ESortMemberEffort.UP_MEMBER;
+        } else {
+            this.sortType = ESortType.Effort;
+            this.currentSortEffort = (this.currentSortEffort === ESortMemberEffort.UP_EFFORT) ? ESortMemberEffort.DOWN_EFFORT : ESortMemberEffort.UP_EFFORT;
+        }
     }
 }
