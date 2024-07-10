@@ -77,13 +77,13 @@
           <table class="table customTable">
             <thead>
               <tr>
-                <th class="text-center" style="width: 20px;">No</th>
+                <th class="text-center col-lg-1">No</th>
                 <th class="text-center col-lg-3">Users</th>
-                <th class="text-center col-lg-2">Position</th>
-                <th class="text-center col-lg-1">
+                <th class="text-center" style="width: 25px">Position</th>
+                <th class="text-center col-lg-2">
                    <div class="project_sort">
                        <span>Number of Project</span>
-                       <div (click)="toggleSortOrder(true)">
+                       <span (click)="toggleSortOrder(true)">
                            <i
                               class="pi pi-sort-amount-up text-primary p-l-5"
                               role="button"
@@ -94,13 +94,13 @@
                               role="button"
                               *ngIf="sortNumberOfProject === sortProjectUserNumber.DOWN_NUMBER"
                            ></i>
-                       </div>
+                       </span>
                    </div>
                 </th>
                 <th class="text-center col-lg-4">
-                    <div class="project_sort1">
+                    <div class="project_sort">
                         <span>Projects</span>
-                        <div (click)="toggleSortOrder(false)">
+                        <span (click)="toggleSortOrder(false)">
                             <i
                                class="pi pi-sort-amount-up text-primary p-l-5"
                                role="button"
@@ -108,7 +108,7 @@
                             <i
                                class="pi pi-sort-amount-down text-primary p-l-5" role="button"
                                *ngIf="sortProject === sortProjectUserNumber.DOWN_PROJECT"></i>
-                        </div>
+                        </span>
                     </div>
                 </th>
               </tr>
