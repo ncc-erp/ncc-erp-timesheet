@@ -82,18 +82,10 @@
     position: relative;
 }
 
-.project_sort div i {
-    position: absolute;
-    bottom: -5px;
-    right: -2px;
+.project_sort span i {
+   position: absolute;
+   right: 0;
 }
 
-.project_sort1 {
-    position: relative;
-}
 
-.project_sort1 div i {
-    position: absolute;
-    bottom: -16px;
-    right: -2px;
-}
+
