@@ -34,10 +34,10 @@
           </div>
           <div class="item2">
             <mat-radio-group *ngIf="permission.isGranted('AbsenceDayByProject.ViewByBranch')" aria-label="Select an option">
-              <mat-radio-button style="padding-left: 10px;" [value]="true"  (change)="onChangeShowFilterByBranch()" checked="checked">
+              <mat-radio-button  [value]="true"  (change)="onChangeShowFilterByBranch()" checked="checked">
                 <div [style.color]="!isRadiocheckfilterbyBranch ? 'gray' : 'red'">Filter by project</div>
               </mat-radio-button>
-              <mat-radio-button style="padding-left: 10px;" [value]="false" (change)="onChangeShowFilterByBranch()"  (click)="onFilterBranchDirector()">
+              <mat-radio-button style="padding-left: 10px;" [value]="false" (change)="onChangeShowFilterByBranch()"  (click)="onFilterBranchDirector()" class="pd-rest-mobile">
                 <div [style.color]="isRadiocheckfilterbyBranch ? 'gray' : 'red'">Filter by branch</div>
               </mat-radio-button>
             </mat-radio-group>
