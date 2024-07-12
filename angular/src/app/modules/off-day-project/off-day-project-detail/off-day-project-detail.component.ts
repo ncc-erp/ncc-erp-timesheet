@@ -164,8 +164,8 @@ export class OffDayProjectDetailComponent extends AppComponentBase implements On
           this.projectManagerService.releaseUserFromProject(projectId, userId).subscribe((res) => {
             if(res){
               this.notify.success(this.l("Deactive Successfully!"));
-              let user = this.events.find(u => u.userId == userId);
-              user.projectInfos=user.projectInfos.filter(p=>p.projectId != projectId);
+              let users = this.events.filter(u => u.userId == userId);
+              users.forEach(user=>user.projectInfos=user.projectInfos.filter(p=>p.projectId != projectId));
             }
           })
         }
