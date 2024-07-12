@@ -206,7 +206,7 @@
                                                     {{t.projectTargetUser || ''}}
                                                 </td>
                                                 <td>
-                                                    {{convertMinuteToHour(t.workingTimeTargetUser) || ''}}
+                                                    {{convertMinuteToFloat(t.workingTimeTargetUser) || ''}}h
                                                 </td>
                                             </ng-template>
                                           <td class="text-center"><span [ngClass]="t.isTemp? 'temp':'official'">{{ t.workType }}</span></td>
