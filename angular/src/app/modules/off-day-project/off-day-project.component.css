@@ -181,6 +181,7 @@ pre {
     align-items: center;
     text-align: center;
     display:inline-flex;
+    margin-left: 20px;
 }
 ::ng-deep .filter-date .item .mat-form-field-appearance-outline .mat-form-field-wrapper{
     margin: 0;
@@ -248,17 +249,24 @@ pre {
         width: 100%;
         margin-left: 0;
     }
-
+    .header .filter-date .item3 {
+        margin-left: 0;
+    }
+    .pd-rest-mobile {
+        padding-left: 0 !important;
+    }
 }
 
 @media screen and (max-width: 650px) {
     .header .filter-date {
         width: 100%;
-        gap: 5px;
+        gap: 10px;
         flex-wrap: wrap;
+        justify-content: flex-start;
     }
     .header .filter-date .item2 {
         width: 150px;
         flex: none;
     }
 }
+
