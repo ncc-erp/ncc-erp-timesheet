@@ -63,8 +63,8 @@
                 </ng-container>
 
               </div>
-              <app-date-filter (dateSelected)="onDateSelected($event)"></app-date-filter>
             </div>
+            <app-date-filter (dateSelected)="onDateSelected($event)"></app-date-filter>
           </div>
           <div class="col-lg-2">
             <div class="row row-btn">
@@ -119,7 +119,7 @@
                 itemsPerPage: pageSize,
                 currentPage: pageNumber,
                 totalItems: totalItems
-               }) | sortProjectAndNumber:sortNumberOfProject:sortProject:sortType, index as i">
+               }), index as i">
                 <!-- No -->
                 <td class="text-center" style="width: 20px;">
                   {{ (pageNumber - 1) * pageSize + i + 1 }}

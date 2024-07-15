@@ -17,7 +17,6 @@ import {
 } from '@app/modules/branch-manager/modal/project-management-modal/project-management-member-detail.component';
 import {MatDialogModule} from '@node_modules/@angular/material';
 import {ProjectTargetUserPipe} from '@shared/pipes/projectTargetUser.pipe';
-import {SortNumberOfProjectAndProjectPipe} from '@shared/pipes/sortNumberOfProjectAndProject.pipe';
 
 
 @NgModule({
@@ -29,7 +28,6 @@ import {SortNumberOfProjectAndProjectPipe} from '@shared/pipes/sortNumberOfProje
       PopupCustomeTimeComponent,
       ProjectManagementComponent,
       PopupUpdateProjectComponent,
-      SortNumberOfProjectAndProjectPipe,
       DetailParticipatingProjectsComponent,
       ProjectManagementMemberDetailComponent,
   ],
