@@ -101,7 +101,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                 ProjectName = s.Name,
                 ProjectCode = s.Code,
                 WorkingTimePercent = workingTimeUserProject.ContainsKey(s.ProjectId + "-" + s.UserId) ? (int)Math.Round((double)workingTimeUserProject[s.ProjectId + "-" + s.UserId] * 100 / workingTimeProject[s.UserId]) : 0
-            }).Where(s => s.WorkingTimePercent > 0).OrderByDescending(s => s.WorkingTimePercent).ThenBy(s => s.ProjectName[0]);
+            }).Where(s => s.WorkingTimePercent > 0).OrderByDescending(s => s.WorkingTimePercent).ThenBy(s => s.ProjectName);
             var query = from u in WorkScope.GetAll<User>().Where(s => s.IsActive).Where(s => userIds.Contains(s.Id))
                         select new
                         {
@@ -133,10 +133,10 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                 switch (compare)
                 {
                     case (int)ESortProjectUserNumber.UP_PROJECT:
-                        query = query.OrderBy(user => user.SortProjectInfo.WorkingTimePercent).ThenBy(user => user.SortProjectInfo.ProjectName[0]);
+                        query = query.OrderBy(user => user.SortProjectInfo.WorkingTimePercent).ThenBy(user => user.SortProjectInfo.ProjectName);
                         break;
                     case (int)ESortProjectUserNumber.DOWN_PROJECT:
-                        query = query.OrderByDescending(user => user.SortProjectInfo.WorkingTimePercent).ThenBy(user => user.SortProjectInfo.ProjectName[0]);
+                        query = query.OrderByDescending(user => user.SortProjectInfo.WorkingTimePercent).ThenBy(user => user.SortProjectInfo.ProjectName);
                         break;
                 }
             }
