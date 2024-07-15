@@ -293,5 +293,17 @@ namespace Ncc.Entities.Enum
             PmNote = 0,
             InterviewerNote = 1,
         }
+        public enum ESortProjectUserNumber
+        {
+            UP_PROJECT = 0,
+            DOWN_PROJECT = 1,
+            UP_NUMBER = 2,
+            DOWN_NUMBER = 3,
+        }
+        public enum ESortType
+        {
+            PROJECT = 0,
+            NUMBER = 1,
+        }
     }
 }

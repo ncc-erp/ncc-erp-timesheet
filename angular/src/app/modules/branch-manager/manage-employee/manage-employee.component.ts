@@ -28,10 +28,11 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
 
   startDate: string;
   endDate: string;
-  sortType = ESortType.DEFAULT;
+  sortType = ESortType.NUMBER;
   sortProject: number = ESortProjectUserNumber.DOWN_PROJECT;
-  sortNumberOfProject: string  = ESortProjectUserNumber.DOWN_NUMBER;
+  sortNumberOfProject: number  = ESortProjectUserNumber.DOWN_NUMBER;
   sortProjectUserNumber = ESortProjectUserNumber;
+  currentComparision = ESortProjectUserNumber.DOWN_NUMBER;
 
   @Input() listPosition: PositionDto[];
   @Input() listPositionFilter: PositionDto[];
@@ -97,7 +98,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       this.addFilterItem('positionId', this.positionId);
     }
     request.filterItems = this.filterItems;
-    this.manageUserForBranchService.getAllUserPagging(request, this.startDate, this.endDate)
+    this.manageUserForBranchService.getAllUserPagging(request, this.startDate, this.endDate, this.sortType, this.currentComparision)
     .pipe(
       finalize(() => {
         finishedCallback()
@@ -192,20 +193,21 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   toggleSortOrder(click: boolean) {
       if (click === true) {
           if (this.sortNumberOfProject === ESortProjectUserNumber.UP_NUMBER) {
-              this.sortType = ESortType.DEFAULT;
               this.sortNumberOfProject = ESortProjectUserNumber.DOWN_NUMBER;
           } else {
-              this.sortType = ESortType.NUMBER;
               this.sortNumberOfProject = ESortProjectUserNumber.UP_NUMBER;
           }
+          this.currentComparision = this.sortNumberOfProject;
+          this.sortType = ESortType.NUMBER;
       } else  {
           if (this.sortProject === ESortProjectUserNumber.UP_PROJECT) {
-              this.sortType = ESortType.DEFAULT;
               this.sortProject = ESortProjectUserNumber.DOWN_PROJECT;
           } else {
-              this.sortType = ESortType.PROJECT;
               this.sortProject = ESortProjectUserNumber.UP_PROJECT;
           }
+          this.currentComparision = this.sortProject;
+          this.sortType = ESortType.PROJECT;
       }
+      this.refresh();
   }
 }
