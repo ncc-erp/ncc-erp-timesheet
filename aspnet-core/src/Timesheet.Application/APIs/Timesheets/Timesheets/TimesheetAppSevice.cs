@@ -378,7 +378,7 @@ namespace Timesheet.Timesheets.Timesheets
                     var timesheetTable = new StringBuilder();
                     foreach (var timesheet in project.Timesheets)
                     {
-                        if (timesheet.DateAt > lockDate || isUnlockPM || timesheet.IsUnlockedByEmployee)
+                        if (timesheet.DateAt > lockDate || (isUnlockPM && timesheet.DateAt >= lockDate.AddDays(-6)) || timesheet.IsUnlockedByEmployee)
                         {
                             myApproveTimesheetIds.Add(timesheet.Id);
                             timesheetTable.Append($@"
@@ -531,7 +531,7 @@ namespace Timesheet.Timesheets.Timesheets
                     var timesheetTable = new StringBuilder();
                     foreach (var timesheet in project.Timesheets)
                     {
-                        if (timesheet.DateAt > lockDate || isUnlockPM || timesheet.IsUnlockedByEmployee)
+                        if (timesheet.DateAt > lockDate || (isUnlockPM && timesheet.DateAt >= lockDate.AddDays(-6)) || timesheet.IsUnlockedByEmployee)
                         {
                             myRejectTimesheetIds.Add(timesheet.Id);
                             timesheetTable.Append($@"
