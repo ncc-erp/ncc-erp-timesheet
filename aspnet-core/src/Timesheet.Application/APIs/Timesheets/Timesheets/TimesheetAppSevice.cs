@@ -400,6 +400,7 @@ namespace Timesheet.Timesheets.Timesheets
                     }
                     if (successTS == 0 && failTS > 0)
                     {
+                        if (isUnlockPM) throw new UserFriendlyException(string.Format("Unlock timesheet chỉ có hiệu lực từ {0} đến {1}. Vui lòng liên hệ admin để được hỗ trợ.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy")));
                         throw new UserFriendlyException("PM hãy vào ims.nccsoft.vn để unlock timesheet!");
                     }
                     mailBody.Append($@"<table border='1'>
@@ -442,6 +443,7 @@ namespace Timesheet.Timesheets.Timesheets
             }
             else if (failTS > 0)
             {
+                if (isUnlockPM) throw new UserFriendlyException(string.Format("Unlock timesheet chỉ có hiệu lực từ {0} đến {1}. Vui lòng liên hệ admin để được hỗ trợ.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy")));
                 throw new UserFriendlyException("PM hãy vào ims.nccsoft.vn để unlock timesheet");
             }
 
@@ -451,7 +453,7 @@ namespace Timesheet.Timesheets.Timesheets
                 SuccessCount = successTS,
                 FailedCount = failTS,
                 Fail = string.Format(" - Fail {0} timesheets.", failTS),
-                LockDate = string.Format(" - Locked date: {0}.", lockDate.ToString("dd'-'MM'-'yyyy")),
+                LockDate = isUnlockPM ? string.Format(" - Unlock timesheet is valid from {0} to {1}.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy")) : string.Format(" - Locked date: {0}.", lockDate.ToString("dd'-'MM'-'yyyy")),
             };
         }
 
@@ -589,6 +591,7 @@ namespace Timesheet.Timesheets.Timesheets
             }
             else if (failTS > 0)
             {
+                if (isUnlockPM) throw new UserFriendlyException(string.Format("Unlock timesheet chỉ có hiệu lực từ {0} đến {1}. Vui lòng liên hệ admin để được hỗ trợ.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy"))); 
                 throw new UserFriendlyException("PM hãy vào ims.nccsoft.vn để unlock timesheet");
             }
 
@@ -596,7 +599,7 @@ namespace Timesheet.Timesheets.Timesheets
             {
                 Success = string.Format(" - Success {0} timesheets.", successTS),
                 Fail = string.Format(" - Fail {0} timesheets.", failTS),
-                LockDate = string.Format(" - Locked date: {0}.", lockDate.ToString("dd'-'MM'-'yyyy")),
+                LockDate = isUnlockPM ? string.Format(" - Unlock timesheet is valid from {0} to {1}.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy")) : string.Format(" - Locked date: {0}.", lockDate.ToString("dd'-'MM'-'yyyy")),
             };
         }
 
