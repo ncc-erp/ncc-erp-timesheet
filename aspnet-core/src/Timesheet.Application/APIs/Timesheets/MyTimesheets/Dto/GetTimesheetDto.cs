@@ -22,6 +22,8 @@ namespace Timesheet.Timesheets.MyTimesheets.Dto
         public bool IsCharged { get; set; }
         public bool Billable { get; set; }
         public bool IsTemp { get; set; }
+        public string projectTargetUser { get; set; }
+        public int? workingTimeTargetUser { get; set; }
         public string WorkType
         {
             get

@@ -12,9 +12,25 @@ import { PopupCustomeTimeComponent } from './manage-employee/detail-participatin
 import { PopupUpdateProjectComponent } from './manage-employee/detail-participating-projects/popup-update-project/popup-update-project.component';
 import { ProjectManagementComponent } from './project-management/project-management.component';
 import { DateFilterComponent } from './date-filter/date-filter.component';
+import {
+    ProjectManagementMemberDetailComponent
+} from '@app/modules/branch-manager/modal/project-management-modal/project-management-member-detail.component';
+import {MatDialogModule} from '@node_modules/@angular/material';
+import {ProjectTargetUserPipe} from '@shared/pipes/projectTargetUser.pipe';
+
 
 @NgModule({
-  declarations: [BranchManagerComponent, ManageEmployeeComponent, DetailParticipatingProjectsComponent, PopupCustomeTimeComponent, PopupUpdateProjectComponent, ProjectManagementComponent, DateFilterComponent],
+  declarations: [
+      DateFilterComponent,
+      ProjectTargetUserPipe,
+      BranchManagerComponent,
+      ManageEmployeeComponent,
+      PopupCustomeTimeComponent,
+      ProjectManagementComponent,
+      PopupUpdateProjectComponent,
+      DetailParticipatingProjectsComponent,
+      ProjectManagementMemberDetailComponent,
+  ],
   imports: [
     CommonModule,
     SharedModule,
@@ -22,11 +38,14 @@ import { DateFilterComponent } from './date-filter/date-filter.component';
     NgxMatSelectSearchModule,
     NgxPaginationModule,
     FormsModule,
+    MatDialogModule,
   ],
   entryComponents: [
     DetailParticipatingProjectsComponent,
     PopupCustomeTimeComponent,
     PopupUpdateProjectComponent,
+    DetailParticipatingProjectsComponent,
+    ProjectManagementMemberDetailComponent,
   ]
 })
 export class BranchManagerModule { }

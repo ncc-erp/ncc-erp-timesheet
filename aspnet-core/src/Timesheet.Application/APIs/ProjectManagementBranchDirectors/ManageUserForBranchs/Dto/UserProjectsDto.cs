@@ -6,6 +6,7 @@ using static Ncc.Entities.Enum.StatusEnum;
 using Timesheet.Anotations;
 using Timesheet.Uitls;
 using Timesheet.Users.Dto;
+using Timesheet.Entities;
 
 namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.Dto
 {
@@ -46,5 +47,13 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
         public string Name { get; set; }
         public long UserId { get; set; }
         public long? BranchId { get; set; }
+    }
+
+    public class UserInfoProjectDto
+    {
+        public string FullName { get; set; }
+        public string EmailAddress { get; set; }
+        public long WorkingTime { get; set; }
+        public ValueOfUserType ValueType { get; set; }
     }
 }

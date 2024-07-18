@@ -19,7 +19,7 @@
       </div>
 
       <div class="body">
-        <div class="group"> 
+        <div class="group">
           <div class="col-lg-10">
             <div class="row">
               <div class="col-lg-5 mb-0">
@@ -61,10 +61,10 @@
                     </mat-select>
                   </mat-form-field>
                 </ng-container>
-                
+
               </div>
-              <app-date-filter (dateSelected)="onDateSelected($event)"></app-date-filter>
             </div>
+            <app-date-filter (dateSelected)="onDateSelected($event)"></app-date-filter>
           </div>
           <div class="col-lg-2">
             <div class="row row-btn">
@@ -77,11 +77,40 @@
           <table class="table customTable">
             <thead>
               <tr>
-                <th class="text-center" style="width: 20px;">No</th>
+                <th class="text-center col-lg-1">No</th>
                 <th class="text-center col-lg-3">Users</th>
-                <th class="text-center col-lg-2">Position</th>
-                <th class="text-center col-lg-1">Number of Project</th>
-                <th class="text-center col-lg-4">Projects</th>
+                <th class="text-center" style="width: 25px">Position</th>
+                <th class="text-center col-lg-2">
+                   <div class="project_sort">
+                       <span>Number of Project</span>
+                       <span (click)="toggleSortOrder(true)">
+                           <i
+                              class="pi pi-sort-amount-up text-primary p-l-5"
+                              role="button"
+                              *ngIf="sortNumberOfProject === sortProjectUserNumber.UP_NUMBER"
+                           ></i>
+                           <i
+                              class="pi pi-sort-amount-down text-primary p-l-5"
+                              role="button"
+                              *ngIf="sortNumberOfProject === sortProjectUserNumber.DOWN_NUMBER"
+                           ></i>
+                       </span>
+                   </div>
+                </th>
+                <th class="text-center col-lg-4">
+                    <div class="project_sort">
+                        <span>Projects</span>
+                        <span (click)="toggleSortOrder(false)">
+                            <i
+                               class="pi pi-sort-amount-up text-primary p-l-5"
+                               role="button"
+                               *ngIf="sortProject === sortProjectUserNumber.UP_PROJECT"></i>
+                            <i
+                               class="pi pi-sort-amount-down text-primary p-l-5" role="button"
+                               *ngIf="sortProject === sortProjectUserNumber.DOWN_PROJECT"></i>
+                        </span>
+                    </div>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -90,7 +119,6 @@
                 itemsPerPage: pageSize,
                 currentPage: pageNumber,
                 totalItems: totalItems
-
                }), index as i">
                 <!-- No -->
                 <td class="text-center" style="width: 20px;">
@@ -138,7 +166,7 @@
                         {{pms}}
                       </span>
                       <span class="label bg-green">
-                        {{project.workingTimePercent}}% 
+                        {{project.workingTimePercent}}%
                       </span>
                     </div>
                   </div>

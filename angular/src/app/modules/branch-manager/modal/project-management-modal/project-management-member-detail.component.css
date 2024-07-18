@@ -1,0 +1,28 @@
+.p-b-24 {
+    padding-bottom: 22px;
+}
+
+.table-responsive {
+    overflow: hidden;
+}
+
+.height {
+    height: 450px;
+    overflow-y: auto;
+}
+
+th div.d-flex {
+    justify-content: space-between;
+}
+
+.total_item {
+    color: #555;
+    padding-right: 10px;
+}
+
+@media screen and (max-width:767px){
+    .table-responsive {
+        border: none;
+        overflow-y: hidden;
+    }
+}

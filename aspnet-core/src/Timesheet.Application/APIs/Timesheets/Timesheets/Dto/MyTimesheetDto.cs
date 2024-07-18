@@ -37,6 +37,8 @@ namespace Timesheet.Timesheets.Timesheets.Dto
         public string LastModifierUser { get; set; }
         public bool IsTemp { get; set; }
         public bool? IsUnlockedByEmployee { get; set; }
+        public string projectTargetUser { get; set; }
+        public int workingTimeTargetUser { get; set; }
 
         public string WorkType
         {

@@ -16,12 +16,14 @@ export class ManageUserDto {
     id: number;
     hideProjectName: boolean;
 }
-  
+
 export class ManageProjectUsersDto {
     projectId: number;
     projectCode: string;
     projectName: string;
     projectUserType: number;
+    workingTimePercent: number;
+    pms: string;
 }
 
 export class ProjectDto {
@@ -32,6 +34,13 @@ export class ProjectDto {
     memberCount: number;
     exposeCount: number;
     shadowCount: number;
+}
+
+export class ProjectTargetUserDto {
+    fullName: string;
+    emailAddress: string;
+    workingTime: number | string;
+    valueType: number | string;
 }
 
 export class ProjectListManagement {

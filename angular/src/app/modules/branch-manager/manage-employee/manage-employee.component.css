@@ -77,3 +77,15 @@
 .user_name:hover{
     color: #2196F3;
 }
+
+.project_sort {
+    position: relative;
+}
+
+.project_sort span i {
+   position: absolute;
+   right: 0;
+}
+
+
+
