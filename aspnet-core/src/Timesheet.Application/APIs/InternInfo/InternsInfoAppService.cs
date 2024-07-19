@@ -45,7 +45,7 @@ namespace Timesheet.APIs.InternInfo
                                                NextLevel = s.NewLevel,
                                                RateStar = s.RateStar.Value,
                                                ReviewerName = s.Reviewer.FullName,
-                                               Note = s.Note
+                                               Note = s.Note.IsEmpty() ? "" : s.Note.Replace("<strong>", "").Replace("</strong>", ""),
                                            })
                                            .Where(s => userIds.Contains(s.UserId));
 
