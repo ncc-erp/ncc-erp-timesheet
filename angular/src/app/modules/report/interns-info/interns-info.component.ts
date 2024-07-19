@@ -124,8 +124,8 @@ export class InternsInfoComponent extends PagedListingComponentBase<any> impleme
     });
   }
   getlocalStorageData(localStorageName: string){
-    let ls = localStorage.getItem(localStorageName);
-    return ls?ls:'';
+    let localStorageData = localStorage.getItem(localStorageName);
+    return localStorageData ? localStorageData : '';
   }
   setDefaultTime(){
     this.filter.startDate = moment(this.startDateDefault).format('YYYY-MM-DD');
@@ -246,9 +246,6 @@ export class InternsInfoComponent extends PagedListingComponentBase<any> impleme
   {
     this.pageSize = value;
     this.getDataPage(1);
-  }
-  stripHTMLTag(s:string){
-    return s?s.replace(/<[^>]*>/g, ''):'';
   }
 }
 

@@ -125,7 +125,7 @@
                   </td>
                   <td *ngFor="let detail of item.reviewDetails ; index as i"
                   matTooltipClass="custom-tooltip"
-                  [matTooltip]="detail.reviewerName != null ? 'Reviewer: ' + detail.reviewerName + '\n Review Note: ' + stripHTMLTag(detail.note) : ''"
+                  [matTooltip]="detail.reviewerName != null ? 'Reviewer: ' + detail.reviewerName + '\n Review Note: ' + detail.note : ''"
                   [ngClass]="getClassWarningType(detail.cellColor,detail.hasReview)"
                   class="text-center month-info">
                   <div class = "UserJoin">
