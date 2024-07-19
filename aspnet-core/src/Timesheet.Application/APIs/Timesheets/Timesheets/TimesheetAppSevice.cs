@@ -29,6 +29,8 @@ using Timesheet.DomainServices.Dto;
 using Abp.Configuration;
 using Timesheet.Services.Komu;
 using Timesheet.Timesheets.MyTimesheets;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace Timesheet.Timesheets.Timesheets
 {
@@ -38,12 +40,14 @@ namespace Timesheet.Timesheets.Timesheets
     {
         private readonly IBackgroundJobManager _backgroundJobManager;
         private readonly ICommonServices _commonService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly KomuService _komuService;
 
-        public TimesheetAppService(IBackgroundJobManager backgroundJobManager, ICommonServices commonService, IWorkScope workScope, KomuService komuService) : base(workScope)
+        public TimesheetAppService(IHttpContextAccessor httpContextAccessor, IBackgroundJobManager backgroundJobManager, ICommonServices commonService, IWorkScope workScope, KomuService komuService) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _commonService = commonService;
+            _httpContextAccessor = httpContextAccessor;
             _komuService = komuService;
         }
         [HttpGet]
@@ -602,7 +606,31 @@ namespace Timesheet.Timesheets.Timesheets
                 LockDate = isUnlockPM ? string.Format(" - Unlock timesheet is valid from {0} to {1}.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy")) : string.Format(" - Locked date: {0}.", lockDate.ToString("dd'-'MM'-'yyyy")),
             };
         }
-
+        private bool checkSecurityCode()
+        {
+            var securityCode = SettingManager.GetSettingValue(AppSettingNames.SecurityCode);
+            var header = _httpContextAccessor.HttpContext.Request.Headers;
+            var securityCodeHeader = header["securityCode"];
+            if (securityCode == securityCodeHeader)
+                return true;
+            return false;
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        [System.Security.SuppressUnmanagedCodeSecurity]
+        public async System.Threading.Tasks.Task RejectTimesheetsOpenTalk(string[] emailAddress)
+        {
+            if (!checkSecurityCode())
+            {
+                throw new UserFriendlyException("Wrong security code");
+            }
+            var UserIdList = WorkScope.GetAll<User>().Where(s => emailAddress.Contains(s.EmailAddress)).Select(s => s.Id);
+            var OpenTalkProjectTaskId = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
+            var OpenTalkIds = await WorkScope.GetAll<MyTimesheet>().Where(s => DateTimeUtils.FirstDayOfCurrentyWeek() <= s.DateAt && s.DateAt <= DateTimeUtils.LastDayOfCurrentWeek())
+                    .Where(s => s.ProjectTaskId == OpenTalkProjectTaskId && s.Status != TimesheetStatus.None && UserIdList.Contains(s.UserId)).ToListAsync();
+            OpenTalkIds.ForEach(s => s.Status = TimesheetStatus.Reject);
+            await WorkScope.UpdateRangeAsync<MyTimesheet>(OpenTalkIds);
+        }
         public async System.Threading.Tasks.Task NotifyApproveOrRejectTimesheet(List<MyTimesheet> myTimesheets, bool isApprove)
         {
             var dicTimesheet = myTimesheets
