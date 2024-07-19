@@ -1,3 +1,10 @@
+::ng-deep .custom-tooltip {
+  background: #858282;
+  color: #fff;
+  white-space: pre-line;
+  width: auto;
+  font-size: 12px;
+}
 tr,
 th,
 td {
