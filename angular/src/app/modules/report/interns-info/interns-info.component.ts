@@ -124,7 +124,8 @@ export class InternsInfoComponent extends PagedListingComponentBase<any> impleme
     });
   }
   getlocalStorageData(localStorageName: string){
-    return localStorage.getItem(localStorageName);
+    let localStorageData = localStorage.getItem(localStorageName);
+    return localStorageData ? localStorageData : '';
   }
   setDefaultTime(){
     this.filter.startDate = moment(this.startDateDefault).format('YYYY-MM-DD');
