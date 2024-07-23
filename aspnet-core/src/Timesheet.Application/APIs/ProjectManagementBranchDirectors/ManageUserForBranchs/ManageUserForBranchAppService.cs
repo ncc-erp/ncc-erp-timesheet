@@ -182,6 +182,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
 
             var qUserProject = from th in WorkScope.GetAll<MyTimesheet>()
                                .WhereIf(startDate.HasValue && endDate.HasValue,s => startDate <= s.DateAt && s.DateAt <= endDate)
+                               .Where(s => s.User.IsActive)
                                .Where(s => s.Status == TimesheetStatus.Approve)
                                group th by new { th.UserId, th.ProjectTask.ProjectId } into g
                                select new
