@@ -16,7 +16,7 @@ namespace Timesheet.APIs.InternInfo.Dto
     {
         public InternsInfoUserInfo MyInfo { get; set; }
         public List<MonthInfo> ReviewDetails { get; set; }
-        public string BasicTrannerFullName{ get; set; }
+        public string BasicTrainerFullName{ get; set; }
         public UserLevel? BeginLevel { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }

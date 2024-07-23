@@ -25,6 +25,8 @@ export class InternsInfoComponent extends PagedListingComponentBase<any> impleme
     request.searchText = this.searchText;
     request.startDate = this.filter.startDate;
     request.endDate = this.filter.endDate;
+    request.sortDirection = this.sortBasicTrainer ? 0 : 1;
+    request.sort = "BasicTrainerFullName";
     this.internsInfoService.getInternInfo(request)
     .subscribe(data => {
       if(data.result)
@@ -56,7 +58,8 @@ export class InternsInfoComponent extends PagedListingComponentBase<any> impleme
 
   selectedBasicTrainerIds : number[] = []
   selectedBranchIds : number[] = []
-  basicTraners: any[] = []
+  basicTrainers: any[] = []
+  sortBasicTrainer : boolean = true;
   branchIds: any[] = []
 
   localStorageBasicTraner = "interInfoSelectedBasicTrainerIds";
@@ -92,18 +95,18 @@ export class InternsInfoComponent extends PagedListingComponentBase<any> impleme
   getLocalStorageBasicTraner(){
     this.internsInfoService.getAllBasicTraner()
       .subscribe(data => {
-      this.basicTraners = data.result.map(item =>{
+      this.basicTrainers = data.result.map(item =>{
         return {id : item.id, name : item.fullName + ' - ' + item.emailAddress}
       });
       let localStorageData = this.getlocalStorageData(this.localStorageBasicTraner);
 
       localStorageData.split(",").forEach((value: string) => {
-        if (this.basicTraners.some(item => item.id === Number.parseInt(value))) {
+        if (this.basicTrainers.some(item => item.id === Number.parseInt(value))) {
           this.selectedBasicTrainerIds.push(Number.parseInt(value));
         }
       });
         this.refresh();
-        this.basicTraners.unshift({ id: -1, name: "No Trainer" })
+        this.basicTrainers.unshift({ id: -1, name: "No Trainer" })
     });
 
   }
@@ -134,7 +137,7 @@ export class InternsInfoComponent extends PagedListingComponentBase<any> impleme
   getAllBasicTraner(){
     this.internsInfoService.getAllBasicTraner()
     .subscribe(data => {
-      this.basicTraners = data.result.map(item =>{
+      this.basicTrainers = data.result.map(item =>{
         return {id : item.id, name : item.fullName + ' - ' + item.emailAddress}
       });
     });
@@ -246,6 +249,10 @@ export class InternsInfoComponent extends PagedListingComponentBase<any> impleme
   {
     this.pageSize = value;
     this.getDataPage(1);
+  }
+  sortBasicTrainner(){
+    this.sortBasicTrainer = !this.sortBasicTrainer;
+    this.refresh();
   }
 }
 

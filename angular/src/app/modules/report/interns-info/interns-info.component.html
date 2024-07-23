@@ -15,9 +15,9 @@
 
         <div class=" margin-r5 display-flex mt-3">
           <app-multiple-select
-            name="basicTraners"
-            labelName="Basic Traner"
-            [listOption]="basicTraners"
+            name="basicTrainers"
+            labelName="Basic Trainer"
+            [listOption]="basicTrainers"
             (onChange)="onChangeBasicTrannerSelected($event)"
             [defaultValue]="selectedBasicTrainerIds"
             [disabled]="isLoading"
@@ -67,7 +67,13 @@
                 <tr style="border: none;">
                   <th style="width: 15px;">#</th>
                   <th style="width: 160px;">Intern </th>
-                  <th style="width: 160px;">Basic Traner</th>
+                  <th style="width: 160px;" (click)="sortBasicTrainner()">
+                    Basic Trainer
+                    <i class="pi pi-sort-amount-up text-primary p-l-5" role="button"
+                        *ngIf="sortBasicTrainer"></i>
+                    <i class="pi pi-sort-amount-down text-primary p-l-5" role="button"
+                        *ngIf="!sortBasicTrainer"></i>
+                  </th>
                   <th *ngFor="let item of listMonth , let i=index" style="width:110px;">{{item}}</th>
                   <th *ngIf="!listMonth || listMonth.length < 9"></th>
                 </tr>
@@ -113,11 +119,11 @@
                     </div>
                   </td>
                   <td>
-                    <div style="display: flex; justify-content: flex-start; align-items: center;" *ngIf = "item.basicTrannerFullName">
+                    <div style="display: flex; justify-content: flex-start; align-items: center;" *ngIf = "item.basicTrainerFullName">
                       <div style="margin-left: 3px;">
                         <div>
                           <span>
-                            <strong>{{item.basicTrannerFullName}}</strong>
+                            <strong>{{item.basicTrainerFullName}}</strong>
                           </span>
                         </div>
                       </div>

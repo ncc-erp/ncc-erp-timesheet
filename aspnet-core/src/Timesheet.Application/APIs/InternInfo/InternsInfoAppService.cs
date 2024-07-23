@@ -81,7 +81,7 @@ namespace Timesheet.APIs.InternInfo
                                                Level = s.Level,
                                                Type = s.Type,
                                            },
-                                           BasicTrannerFullName = s.Manager.FullName,
+                                           BasicTrainerFullName = s.Manager.FullName,
                                            ReviewDetails = dictReviewDetailByUserId.ContainsKey(s.Id) ? dictReviewDetailByUserId[s.Id] : null,
                                            StartDate = s.StartDateAt,
                                            EndDate = !s.IsActive ? s.EndDateAt : null,
