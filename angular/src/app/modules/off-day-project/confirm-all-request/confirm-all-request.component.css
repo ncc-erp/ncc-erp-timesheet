@@ -41,24 +41,16 @@ td.note {
 }
 
 .btn-confirm {
-  margin: 0px 5px;
-  right: 2px; 
-  bottom: 2px;
   background-color: #0b2a88 !important;
   color: white;
-  width: 20%;
 }
-.box-confirm{
+
+.confirm {
   display: flex;
-  flex-direction: column;
-  height: auto;
-  gap: 10px;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: end;
 }
-.mat-typography{
+
+.mat-typography {
   width: 100%;
 }
-
-
-
-
