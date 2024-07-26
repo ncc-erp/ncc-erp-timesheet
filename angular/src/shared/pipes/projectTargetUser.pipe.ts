@@ -10,7 +10,6 @@ import {ESortMemberEffort, ESortType} from '@app/modules/branch-manager/modal/pr
 export class ProjectTargetUserPipe implements PipeTransform {
     transform(value: IProjectTargetUser[], sortMember: ESortMemberEffort, sortEffort: ESortMemberEffort,
               sortType: ESortType): IProjectTargetUser[] {
-        const totalWorkingTime = value.reduce((acc, user) => acc + Number(user.workingTime), 0);
             if (sortType) {
                 switch (sortMember) {
                     case ESortMemberEffort.DOWN_MEMBER:
@@ -32,7 +31,7 @@ export class ProjectTargetUserPipe implements PipeTransform {
             }
 
         return value.map(user => {
-            const percentage = (Number(user.workingTime) / totalWorkingTime) * 100;
+            const percentage = Number(user.workingPercent);
             const valueTypeTargetUser = ValueTypeTargetUserMap[user.valueType];
             const workingTimePercentage = percentage === 100 ? '100%' : `${percentage.toFixed(2)}%`;
             return {
@@ -44,6 +43,6 @@ export class ProjectTargetUserPipe implements PipeTransform {
     }
 
     private getNumericWorkingTime(user: IProjectTargetUser): number {
-        return typeof user.workingTime === 'string' ? Number(user.workingTime) : user.workingTime as number;
+        return typeof user.workingPercent === 'string' ? Number(user.workingPercent) : user.workingPercent as number;
     }
 }
