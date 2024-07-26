@@ -368,6 +368,11 @@
                                           <th>TASK NAME</th>
                                           <th>TIME</th>
                                           <th>STATUS</th>
+                                            <ng-container *ngIf="!dt?.timesheets[0]?.projectTargetUser;else isShadow"></ng-container>
+                                            <ng-template #isShadow>
+                                                <th>TARGET USER</th>
+                                                <th>TARGET TIME</th>
+                                            </ng-template>
                                           <th>WORK TYPE</th>
                                           <th>NOTE</th>
                                           <th>L.M TIME</th>
@@ -404,6 +409,15 @@
                                               {{t.isCharged?'Charged':'Non-charged'}}
                                             </span>
                                           </td>
+                                            <ng-container *ngIf="!t.projectTargetUser;else isShadow"></ng-container>
+                                            <ng-template #isShadow>
+                                                <td>
+                                                    {{t.projectTargetUser || ''}}
+                                                </td>
+                                                <td>
+                                                    {{convertMinuteToFloat(t.workingTimeTargetUser) || ''}}h
+                                                </td>
+                                            </ng-template>
                                           <td><span [ngClass]="t.isTemp?'temp':'official'">{{t.workType}}</span></td>
                                           <td>
                                             <span>
