@@ -28,7 +28,7 @@ export class ConfirmAllRequestComponent extends AppComponentBase implements OnIn
     super(injector);
     if (data) {
       this.events = data.events;
-      this.eventsKey = Array.from(this.events.keys());
+      this.eventsKey = this.data.data;
       this.status = data.status;
     }
   }

@@ -1,4 +1,5 @@
 export interface  IProjectTargetUser {
+    branchId: number;
     projectId: number;
     startDate: string;
     endDate: string;
@@ -6,5 +7,5 @@ export interface  IProjectTargetUser {
     emailAddress: string;
     fullName: string;
     valueType: number | string;
-    workingTime: string | number;
+    workingPercent: string | number;
 }

@@ -16,7 +16,7 @@
             </mat-menu>
           </li>
         </ul>
-      </div> 
+      </div>
       <div class="body table-responsive">
         <div class="row clearfix">
           <div class="col-lg-3 col-md-3 col-sm-3 col-sx-3" *ngIf="isAdmin">
@@ -57,7 +57,7 @@
                     [style.top]="contextMenuPosition.y" #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionsMenu">
                   </div>
                   <span align="start" style="line-height: 3; padding-left: 5px;">
-                    {{project.name}}
+                    {{project.name}} [{{project.code}}]
                   </span>
                   <span class="pm">{{project.pms.join(', ')}} </span>
                   <span class="member">{{project.activeMember}} members</span>

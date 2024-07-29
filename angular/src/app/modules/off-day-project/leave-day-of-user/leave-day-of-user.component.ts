@@ -216,7 +216,7 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
         if (this.selectedDays.has(s.detail.dateAt)) {
           let existingArray = this.selectedDays.get(s.detail.dateAt);
           existingArray.push(s.id);
-          this.selectedDays.set(s.detail.dateAt, existingArray); 
+          this.selectedDays.set(s.detail.dateAt, existingArray);
         } else {
           this.selectedDays.set(s.detail.dateAt, [s.id]);
         }
@@ -263,10 +263,12 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
   }
 
   ApproveOrReject(status : boolean) {
+    const keysArray = new Set(this.selectedDays.keys());
+    const filteredData = this.absenceReqs.filter(item => keysArray.has(item.detail.dateAt));
     const dialogRef = this.diaLog.open(ConfirmAllRequestComponent, {
       disableClose: true,
-      width: "500px",
-      data: { events: this.selectedDays, status}
+      width: "auto",
+      data: { events: this.selectedDays, status, data: filteredData }
     });
     dialogRef.afterClosed().subscribe(status => {
       if(status) this.refreshData();
