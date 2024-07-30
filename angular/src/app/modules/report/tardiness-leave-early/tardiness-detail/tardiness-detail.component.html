@@ -137,6 +137,8 @@
               <mat-option *ngFor="let item of APP_CONSTANT.PunishRules" [value] = 'item.value'>
                 {{item.name}}
               </mat-option>
+              <mat-option [value]='APP_CONSTANT.PunishType.NoDaily'>Không daily</mat-option>
+              <mat-option [value]='APP_CONSTANT.PunishType.NoReplyMention'>Không trả lời mention</mat-option>
           </mat-select>
           </mat-form-field>
         </div>
@@ -201,7 +203,9 @@
                   <th rowspan="2" style="min-width: 50px; max-width: 100px;">
                     {{ "Tracker Time" | localize }}
                   </th>
-
+                  <th style="min-width: 160px;" colspan="2">
+                    {{"Komu" | localize}}
+                  </th>
                   <th style="width: 80px;" rowspan="2">
                     {{ "Punishment Money" | localize }}
                   </th>
@@ -240,6 +244,12 @@
                   </th>
                   <th style="width: 60px;">
                     <div>Early</div>
+                  </th>
+                  <th style="width: 60px;">
+                    <div>Daily</div>
+                  </th>
+                  <th style="width: 60px;">
+                    <div>Mention</div>
                   </th>
                 </tr>
               </thead>
@@ -327,8 +337,10 @@
                         autocomplete="off">
                     </mat-form-field>
                   </td>
+                  <td style="text-align: center;" [class]="getCssClassByPunish(item.dailyPunish)">{{item.dailyPunish}}</td>
+                  <td style="text-align: center;" [class]="getCssClassByPunish(item.mentionPunish)">{{item.mentionPunish}}</td>
                   <td style="text-align: center;">
-                    <span class="label bg-red" [matTooltip]="item.statusPunish | punishName">{{item.moneyPunish | formatDisplayNumberToK}}</span>
+                    <span class="label bg-red" matTooltipClass="custom-tooltip" [matTooltip]="item | punishName : PunishSetting">{{item.moneyPunish | formatDisplayNumberToK}}</span>
                     <span *ngIf="item.status && !item.statusPunish > 0" class="label bg-red" matTooltip = "Punish">20k</span>
                   </td>
                   <!-- <td style="text-align: center;" class="font-size-13">

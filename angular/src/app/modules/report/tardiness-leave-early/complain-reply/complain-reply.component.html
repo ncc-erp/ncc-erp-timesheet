@@ -15,20 +15,40 @@
 
     <div class="form-group row">
       <label class="col-md-3 col-form-label" for="ischarge">Status Punish:</label>
+      <div class="col-md-9" style="display: flex; justify-content: space-evenly;">
+        <mat-checkbox [(ngModel)]="CheckInCheckOutBox">CheckIn/CheckOut</mat-checkbox>
+        <mat-checkbox [(ngModel)]="KOMUBox">KOMU</mat-checkbox>
+      </div>
+    </div>
+    <div class="form-group row" *ngIf="CheckInCheckOutBox">
+      <label class="col-md-3 label-punish" for="ischarge">CheckIn/CheckOut:</label>
       <div class="col-md-9">
-        <!-- <mat-checkbox [(ngModel)]="complain.isPunishedCheckIn" name="ischarge">is Punish
-        </mat-checkbox> -->
-        <mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Punish Type</mat-label>
           <mat-select [(ngModel)]="complain.statusPunish">
             <mat-option *ngFor="let item of APP_CONSTANT.PunishRules" [value] = 'item.value'>
               {{item.name}}
-          </mat-option>
+            </mat-option>
           </mat-select>
         </mat-form-field>
       </div>
     </div>
-
-
+    <div class="form-group row" *ngIf="KOMUBox">
+      <label class="col-md-3 label-punish">Daily:</label>
+      <div class="col-md-3">
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Không daily</mat-label>
+          <input type="number" matInput [(ngModel)]="complain.CountPunishDaily">
+        </mat-form-field>
+      </div>
+      <label class="col-md-3 label-punish">Mention:</label>
+      <div class="col-md-3">
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Không trả lời mention</mat-label>
+          <input type="number" matInput [(ngModel)]="complain.CountPunishMention">
+        </mat-form-field>
+      </div>
+    </div>
 
   </div>
   <div mat-dialog-actions align="end" class="justify-content-between">

@@ -84,7 +84,7 @@ namespace Timesheet.APIs.Timekeepings
                        && (!branchId.HasValue || branchId == t.User.BranchId)
                        && (!isPunished.HasValue || isPunished == t.IsPunishedCheckIn)
                        && (!isComplain.HasValue || String.IsNullOrEmpty(t.UserNote) != isComplain)
-                       &&(!statusPunish.HasValue || t.StatusPunish == statusPunish)
+                       &&(!statusPunish.HasValue || (statusPunish.Value == CheckInCheckOutPunishmentType.NoDaily && t.CountPunishDaily > 0) || (statusPunish.Value == CheckInCheckOutPunishmentType.NoReplyMention && t.CountPunishMention > 0) || t.StatusPunish == statusPunish)
                      select new GetTimekeepingUserDto
                      {
                          UserId = t.UserId,
@@ -161,18 +161,14 @@ namespace Timesheet.APIs.Timekeepings
                           }).OrderByDescending(t => t.Date).ToListAsync();
         }
 
-        private async Task<int> GetMoneyPunishByType(CheckInCheckOutPunishmentType StatusPunish)
+        private async Task SetMoneyPunishByType(Timekeeping timekeeping)
         {
             var checkInCheckOutPunishmentSetting = await SettingManager.GetSettingValueAsync(AppSettingNames.CheckInCheckOutPunishmentSetting);
             var rs = JsonConvert.DeserializeObject<List<CheckInCheckOutPunishmentSettingDto>>(checkInCheckOutPunishmentSetting);
-            var listPunish = rs.Select(item => new
-            {
-                Id = item.Id,
-                Name = item.Name,
-                Money = item.Money,
-            }).ToList();
-            var moneyForPunish = listPunish.Where(x => x.Id == StatusPunish).Select(x => x.Money).FirstOrDefault();
-            return moneyForPunish;
+            var MoneyPunish = rs.Where(x => x.Id == timekeeping.StatusPunish).Select(x => x.Money).FirstOrDefault();
+            if (timekeeping.CountPunishDaily > 0) MoneyPunish += rs.Where(x => x.Id == CheckInCheckOutPunishmentType.NoDaily).Select(x => x.Money).FirstOrDefault() * timekeeping.CountPunishDaily;
+            if (timekeeping.CountPunishMention > 0) MoneyPunish += rs.Where(x => x.Id == CheckInCheckOutPunishmentType.NoReplyMention).Select(x => x.Money).FirstOrDefault() * timekeeping.CountPunishMention;
+            timekeeping.MoneyPunish = MoneyPunish;
         }
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_Edit)]
         [HttpPost]
@@ -229,7 +225,7 @@ namespace Timesheet.APIs.Timekeepings
             }
         }
 
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.Timekeeping_UserNote)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Timekeeping_ReplyUserNote)]
         [HttpPost]
         public async Task<Timekeeping> TraLoiKhieuLai(TimekeepingDto input)
         {
@@ -251,7 +247,7 @@ namespace Timesheet.APIs.Timekeepings
             {
                 t.IsPunishedCheckIn = true;
             }
-            t.MoneyPunish = await GetMoneyPunishByType(t.StatusPunish);
+            await SetMoneyPunishByType(t);
             await WorkScope.GetRepo<Timekeeping>().UpdateAsync(t);
             return t;
         }

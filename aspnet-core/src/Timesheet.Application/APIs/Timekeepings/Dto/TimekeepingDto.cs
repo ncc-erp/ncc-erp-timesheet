@@ -17,5 +17,7 @@ namespace Timesheet.APIs.Timekeepings.Dto
         public string NoteReply { get; set; }
         public int MoneyPunish { get; set; }
         public CheckInCheckOutPunishmentType StatusPunish { get; set; }
+        public int CountPunishDaily { get; set; }
+        public int CountPunishMention { get; set; }
     }
 }

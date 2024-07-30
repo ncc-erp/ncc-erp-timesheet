@@ -378,73 +378,65 @@ namespace Timesheet.DomainServices
             if (!timekeeping.NoteReply.IsNullOrEmpty() && timekeeping.NoteReply.Contains("Off fullday"))
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (!timekeeping.NoteReply.IsNullOrEmpty() && timekeeping.NoteReply.Contains("Onsite"))
             {
                 if ((CheckIn && CheckOut) || (CheckIn && NoCheckOut) || (CheckInLate && NoCheckOut))
                 {
                     timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                    timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
                 }
                 else if (NoCheckIn && CheckOut)
                 {
                     timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                    timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
                 }
             }
             else if (NoCheckInAndNoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckInAndNoCheckOut;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (NoCheckInAndNoCheckOut && trackerTime >= trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckIn;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckInLate && NoCheckOut && trackerTime >= trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckInLate && timekeeping.CheckOut.HasValue())
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckInLate && NoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.LateAndNoCheckOut;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckIn && NoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckOut;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckIn && CheckOut)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckIn && !timekeeping.CheckOut.HasValue() && trackerTime >= trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (NoCheckIn)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckIn;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
+            await SetMoneyPunishByType(timekeeping);
 
         }
-        private async Task<int> GetMoneyPunishByType(CheckInCheckOutPunishmentType StatusPunish)
+        private async Task SetMoneyPunishByType(Timekeeping timekeeping)
         {
             var checkInCheckOutPunishmentSetting = await SettingManager.GetSettingValueAsync(AppSettingNames.CheckInCheckOutPunishmentSetting);
             var rs = JsonConvert.DeserializeObject<List<CheckInCheckOutPunishmentSettingDto>>(checkInCheckOutPunishmentSetting);
-            return rs.Where(x => x.Id == StatusPunish).Select(x => x.Money).FirstOrDefault();
+            var MoneyPunish = rs.Where(x => x.Id == timekeeping.StatusPunish).Select(x => x.Money).FirstOrDefault();
+            if (timekeeping.CountPunishDaily > 0) MoneyPunish += rs.Where(x => x.Id == CheckInCheckOutPunishmentType.NoDaily).Select(x => x.Money).FirstOrDefault() * timekeeping.CountPunishDaily;
+            if (timekeeping.CountPunishMention > 0) MoneyPunish += rs.Where(x => x.Id == CheckInCheckOutPunishmentType.NoReplyMention).Select(x => x.Money).FirstOrDefault() * timekeeping.CountPunishMention;
+            timekeeping.MoneyPunish = MoneyPunish;
         }
 
 

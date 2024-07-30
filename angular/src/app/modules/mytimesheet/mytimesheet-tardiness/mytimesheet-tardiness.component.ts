@@ -7,6 +7,8 @@ import { FormControl } from '@angular/forms';
 import { PERMISSIONS_CONSTANT } from './../../../constant/permission.constant';
 import { AppComponentBase } from 'shared/app-component-base';
 import { Component, OnInit, Injector } from '@angular/core';
+import { CheckInCheckOutPunishmentSettingService } from '@app/service/api/punish-by-rule.service';
+import { GetCheckInCheckOutPunishmentSettingDto } from '@app/configuration/configuration.component';
 
 @Component({
   selector: 'app-mytimesheet-tardiness',
@@ -37,9 +39,11 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   selectedDay: number = -1;
   dayList: any = []
   public countLate: number = 0;
+  PunishSetting = {} as GetCheckInCheckOutPunishmentSettingDto;
 
   constructor(
     private timekeepingService: TimekeepingService,
+    private punishByRulesService: CheckInCheckOutPunishmentSettingService,
     injector: Injector,
   ) {
     super(injector);
@@ -56,7 +60,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   }
 
   ngOnInit() {
-    this.getData();
+    this.getPunishSetting();
   }
 
   getData() {
@@ -144,6 +148,15 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     const formattedHours = hours.length === 1 ? `0${hours}` : hours;
     const formattedMinutes = minutes.length === 1 ? `0${minutes}` : minutes;
     return `${formattedHours}:${formattedMinutes}`;
+  }
+
+  getPunishSetting(){
+    this.isTableLoading = true;
+    this.punishByRulesService.getCheckInCheckOutPunishmentSetting().subscribe(rs => {
+      this.PunishSetting = rs.result.checkInCheckOutPunishmentSetting;
+      this.isTableLoading = false;
+      this.getData();
+    });
   }
 
   public maskTime = [/[\d]/, /\d/, ':', /\d/, /\d/]
