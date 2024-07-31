@@ -630,11 +630,15 @@ namespace Timesheet.APIs.TeamBuildingDetailsPM
             {
                 int countUser = item.Users.Select(user => user.EmployeeId).Distinct().Count();
 
-                foreach (var item2 in item.PmInfos) {
-                    sb.AppendLine($"{item2.KomuAccountTag()}");
+                if (item.PmInfos != null)
+                {
+                    foreach (var item2 in item.PmInfos)
+                    {
+                        sb.AppendLine($"{item2.KomuAccountTag()}");
+                    }
                 }
 
-                if(countUser == 1)
+                if (countUser == 1)
                 {
                     sb.AppendLine($"PM {listResult.KomuAccountTagRequester()} is requesting teambuilding for **{countUser}** member from your team:");
                 }
