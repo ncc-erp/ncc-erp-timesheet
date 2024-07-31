@@ -120,7 +120,9 @@ namespace Timesheet.Timesheets.Timesheets
                         BranchDisplayName = a.User.Branch.DisplayName,
                         OffHour = absencedays.Where(s => s.DateAt.Date == a.DateAt.Date && s.UserId == a.User.Id).Select(h => h.Hour).Sum(),
                         IsOffDay = DateTimeUtils.IsOffDay(dayOffSettings, a.DateAt),
-                        IsUnlockedByEmployee = a.IsUnlockedByEmployee
+                        IsUnlockedByEmployee = a.IsUnlockedByEmployee,
+                        projectTargetUser = a.ProjectTargetUser.User.FullName,
+                        workingTimeTargetUser = a.TargetUserWorkingTime,
                     };
             var query = await q.OrderBy(i => i.EmailAddress).ThenByDescending(s => s.DateAt).ToListAsync();
             var listTimekeeping = WorkScope.GetAll<Timekeeping>()
@@ -301,6 +303,7 @@ namespace Timesheet.Timesheets.Timesheets
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_Approval)]
         public async System.Threading.Tasks.Task<object> ApproveTimesheets(long[] myTimesheetIds)
         {
+            int weeksCanUnlockBefor = int.Parse(SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.WeeksCanUnlockBefor).Result);
             int successTS = 0;
             int failTS = 0;
             var lockDate = _commonService.getlockDatePM();
@@ -378,7 +381,7 @@ namespace Timesheet.Timesheets.Timesheets
                     var timesheetTable = new StringBuilder();
                     foreach (var timesheet in project.Timesheets)
                     {
-                        if (timesheet.DateAt > lockDate || (isUnlockPM && timesheet.DateAt >= lockDate.AddDays(-6)) || timesheet.IsUnlockedByEmployee)
+                        if (timesheet.DateAt > lockDate || (isUnlockPM && timesheet.DateAt > lockDate.AddDays(-(7 * weeksCanUnlockBefor)).Date) || timesheet.IsUnlockedByEmployee)
                         {
                             myApproveTimesheetIds.Add(timesheet.Id);
                             timesheetTable.Append($@"
@@ -460,6 +463,7 @@ namespace Timesheet.Timesheets.Timesheets
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_Approval)]
         public async System.Threading.Tasks.Task<object> RejectTimesheets(long[] myTimesheetIds)
         {
+            int weeksCanUnlockBefor = int.Parse(SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.WeeksCanUnlockBefor).Result);
             int successTS = 0;
             int failTS = 0;
             var lockDate = _commonService.getlockDatePM();
@@ -533,7 +537,7 @@ namespace Timesheet.Timesheets.Timesheets
                     var timesheetTable = new StringBuilder();
                     foreach (var timesheet in project.Timesheets)
                     {
-                        if (timesheet.DateAt > lockDate || (isUnlockPM && timesheet.DateAt >= lockDate.AddDays(-6)) || timesheet.IsUnlockedByEmployee)
+                        if (timesheet.DateAt > lockDate || (isUnlockPM && timesheet.DateAt > lockDate.AddDays(-(7*weeksCanUnlockBefor)).Date) || timesheet.IsUnlockedByEmployee)
                         {
                             myRejectTimesheetIds.Add(timesheet.Id);
                             timesheetTable.Append($@"

@@ -75,6 +75,7 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
                         this.dialog.open(ProjectManagementMemberDetailComponent, {
                             data: {
                                 projectItem: {
+                                    branchId : this.branchId != 0 ? this.branchId : '',
                                     projectId: this.projects[indexData].projectId,
                                     startDate: this.startDate,
                                     endDate: this.endDate,

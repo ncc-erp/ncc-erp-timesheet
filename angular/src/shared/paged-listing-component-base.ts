@@ -69,6 +69,7 @@ export abstract class PagedListingComponentBase<TEntityDto> extends AppComponent
 
     public getPageSize(value): void {
         this.pageSize = value;
+        this.pageNumber = 1;
         this.refresh();
     }
 

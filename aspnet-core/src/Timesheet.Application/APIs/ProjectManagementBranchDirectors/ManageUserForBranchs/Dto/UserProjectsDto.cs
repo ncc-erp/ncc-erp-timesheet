@@ -53,7 +53,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
     {
         public string FullName { get; set; }
         public string EmailAddress { get; set; }
-        public long WorkingTime { get; set; }
+        public float WorkingPercent { get; set; }
         public ValueOfUserType ValueType { get; set; }
     }
 }

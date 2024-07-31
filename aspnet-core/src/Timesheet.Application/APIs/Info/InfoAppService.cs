@@ -379,7 +379,7 @@ namespace Timesheet.APIs.Info
             var qtimesheets = WorkScope.GetAll<MyTimesheet>()
                 .Where(s => s.Status == TimesheetStatus.Pending)
                 .Where(s => s.IsUnlockedByEmployee != true)
-                .Where(s => s.DateAt >= lockDate.AddDays(-6) && s.DateAt.Date <= lockDate)
+                .Where(s => s.DateAt >= lockDate.AddDays(-6).Date && s.DateAt.Date <= lockDate)
                 .Select(s => new { s.ProjectTask.ProjectId, DateAt = s.DateAt.Date });
 
             var timesheets = await (from projectId in qprojectIds

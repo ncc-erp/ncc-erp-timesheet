@@ -25,7 +25,7 @@ export class ProjectManagementMemberDetailComponent implements OnInit {
 
     ngOnInit() {
         const request = new PageProjectUserDto();
-       this.manageUserForBranchService.getAllUserInProject(this.data.projectItem.projectId, this.data.projectItem.startDate,
+       this.manageUserForBranchService.getAllUserInProject(this.data.projectItem.branchId, this.data.projectItem.projectId, this.data.projectItem.startDate,
             this.data.projectItem.endDate, request).subscribe((res) => {
         this.projectItem = res.result;
         this.totalItems = res.result.length;

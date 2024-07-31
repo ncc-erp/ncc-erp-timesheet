@@ -55,8 +55,13 @@
         </div>
 
         <div class="abp-pagination-controls-wrapper">
-          <abp-pagination-controls [totalNumber]="totalItems" id="server" 
+          <abp-pagination-controls [totalNumber]="totalItems" id="server"
           (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)"></abp-pagination-controls>
+          <div *ngFor="let item of projects | paginate: {
+          id: 'server',
+          itemsPerPage: pageSize,
+          currentPage: pageNumber,
+          totalItems: totalItems }"></div>
         </div>
 
       </div>
