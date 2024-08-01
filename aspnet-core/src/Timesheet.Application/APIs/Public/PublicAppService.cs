@@ -157,6 +157,7 @@ namespace Timesheet.APIs.Public
             DateTime dateAt = date.HasValue ? date.Value.Date : DateTimeUtils.GetNow().Date;
             return await queryAbsenceDay(dateAt)
                 .Where(s => s.EmailAddress == emailAddress)
+                .Where(s => s.RequestType == RequestType.Remote || s.RequestType == RequestType.Onsite)
                 .FirstOrDefaultAsync();
         }
 
