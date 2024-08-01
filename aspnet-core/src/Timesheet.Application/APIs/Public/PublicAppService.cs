@@ -155,10 +155,11 @@ namespace Timesheet.APIs.Public
         public async Task<WorkingStatusUserDto> GetWorkingStatusByUser(string emailAddress, DateTime? date)
         {
             DateTime dateAt = date.HasValue ? date.Value.Date : DateTimeUtils.GetNow().Date;
-            return await queryAbsenceDay(dateAt)
-                .Where(s => s.EmailAddress == emailAddress)
-                .Where(s => s.RequestType == RequestType.Remote || s.RequestType == RequestType.Onsite)
-                .FirstOrDefaultAsync();
+            var status = await queryAbsenceDay(dateAt).Where(s => s.EmailAddress == emailAddress).ToListAsync();
+            var RemoteOrOnsite = status.Where(s => s.RequestType == RequestType.Remote || s.RequestType == RequestType.Onsite).FirstOrDefault();
+            if (RemoteOrOnsite != null)
+                return RemoteOrOnsite;
+            return status.FirstOrDefault();
         }
 
         private IQueryable<WorkingStatusUserDto> queryAbsenceDay(DateTime dateAt)
