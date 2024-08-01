@@ -39,7 +39,7 @@ namespace Timesheet.Timesheets.Timesheets.Dto
         public bool? IsUnlockedByEmployee { get; set; }
         public string projectTargetUser { get; set; }
         public int workingTimeTargetUser { get; set; }
-
+        public int? openTalkTime {  get; set; }
         public string WorkType
         {
             get

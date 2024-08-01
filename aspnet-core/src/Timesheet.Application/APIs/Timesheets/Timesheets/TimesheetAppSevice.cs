@@ -123,6 +123,7 @@ namespace Timesheet.Timesheets.Timesheets
                         IsUnlockedByEmployee = a.IsUnlockedByEmployee,
                         projectTargetUser = a.ProjectTargetUser.User.FullName,
                         workingTimeTargetUser = a.TargetUserWorkingTime,
+                        openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == a.User.Id && a.DateAt == s.startTime.Date).Select(s => s.totalTime).FirstOrDefault()
                     };
             var query = await q.OrderBy(i => i.EmailAddress).ThenByDescending(s => s.DateAt).ToListAsync();
             var listTimekeeping = WorkScope.GetAll<Timekeeping>()

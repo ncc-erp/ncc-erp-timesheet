@@ -367,6 +367,10 @@
                                           <th>PROJECT</th>
                                           <th>TASK NAME</th>
                                           <th>TIME</th>
+                                            <ng-container *ngIf="dt?.timesheets[0]?.taskId != 12;else isOpenTalk"></ng-container>
+                                            <ng-template #isOpenTalk>
+                                                <th>JOIN TIME</th>
+                                            </ng-template>
                                           <th>STATUS</th>
                                             <ng-container *ngIf="!dt?.timesheets[0]?.projectTargetUser;else isShadow"></ng-container>
                                             <ng-template #isShadow>
@@ -395,6 +399,10 @@
                                               convertMinuteToHour(t.workingTime)
                                               }}</span>
                                           </td>
+                                          <ng-container *ngIf="t.taskId != 12;else isOpenTalk"></ng-container>
+                                          <ng-template #isOpenTalk>
+                                            <td><span>{{ convertMinuteToHour(t.openTalkTime)}}</span></td>
+                                          </ng-template>
                                           <td>
                                             <span [innerHtml]="
                                                 convertNumberOfStringStatus(

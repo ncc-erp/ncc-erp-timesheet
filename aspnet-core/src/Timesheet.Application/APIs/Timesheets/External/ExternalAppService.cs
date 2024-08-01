@@ -26,14 +26,16 @@ namespace Timesheet.Timesheets.External
         [Route("api/external/timesheet/reject-opentalk")]
         [AbpAllowAnonymous]
         [NccAuthentication]
-        public async System.Threading.Tasks.Task RejectTimesheetOpenTalk(ListUserDto listUser)
+        public async System.Threading.Tasks.Task RejectTimesheetOpenTalk(ListUserDto[] listUser)
         {
-            var UserIdList = WorkScope.GetAll<User>().Where(s => listUser.employees.Contains(s.EmailAddress)).Select(s => s.Id);
-            var OpenTalkProjectTaskId = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
-            var OpenTalkIds = await WorkScope.GetAll<MyTimesheet>().Where(s => DateTimeUtils.FirstDayOfCurrentyWeek() <= s.DateAt && s.DateAt <= DateTimeUtils.LastDayOfCurrentWeek())
-                    .Where(s => s.ProjectTaskId == OpenTalkProjectTaskId && s.Status != TimesheetStatus.None && UserIdList.Contains(s.UserId)).ToListAsync();
-            OpenTalkIds.ForEach(s => s.Status = TimesheetStatus.Reject);
-            await WorkScope.UpdateRangeAsync(OpenTalkIds);
+            var OpentalkList = WorkScope.GetAll<User>().Where(s => listUser.Where(x => x.FullName == s.FullName).Any())
+                                      .Select(s => new OpenTalk
+                                      {
+                                          UserId = s.Id,
+                                          startTime = listUser.Where(x => x.FullName == s.FullName).Select(x => x.startTime).FirstOrDefault(),
+                                          endTime = listUser.Where(x => x.FullName == s.FullName).Select(x => x.endTime).FirstOrDefault()
+                                      });
+            await WorkScope.InsertRangeAsync(OpentalkList);
         }
     }
 }
