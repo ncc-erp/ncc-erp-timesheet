@@ -23,10 +23,10 @@ namespace Timesheet.Timesheets.External
             WorkScope = workScope;
         }
         [HttpPost]
-        [Route("api/external/timesheet/reject-opentalk")]
+        [Route("api/external/timesheet/opentalk")]
         [AbpAllowAnonymous]
         [NccAuthentication]
-        public async System.Threading.Tasks.Task RejectTimesheetOpenTalk(ListUserDto[] listUser)
+        public async System.Threading.Tasks.Task createTimeSheetOpentalk(ListUserDto[] listUser)
         {
             var OpentalkList = WorkScope.GetAll<User>().Where(s => listUser.Where(x => x.FullName == s.FullName).Any())
                                       .Select(s => new OpenTalk
