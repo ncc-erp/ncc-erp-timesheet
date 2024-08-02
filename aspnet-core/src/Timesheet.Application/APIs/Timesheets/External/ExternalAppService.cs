@@ -1,18 +1,14 @@
 ﻿using Abp.Application.Services;
 using Abp.Authorization;
-using DocumentFormat.OpenXml.Drawing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ncc.Authorization.Users;
-using Ncc.Configuration;
 using Ncc.IoC;
 using System;
 using System.Linq;
 using Timesheet.APIs.Timesheets.External.Dto;
 using Timesheet.Entities;
 using Timesheet.NCCAuthen;
-using Timesheet.Uitls;
-using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.Timesheets.External
 {
