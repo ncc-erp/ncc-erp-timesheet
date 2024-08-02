@@ -14,9 +14,6 @@ namespace Timesheet.Entities
         public User User { get; set; }
         public DateTime startTime { get; set; }
         public DateTime endTime { get; set; }
-        public int totalTime {
-            get { return Convert.ToInt32(endTime.Subtract(startTime).TotalMinutes); }
-            set { totalTime = value; }
-        }
+        public int totalTime {  get; set; }
     }
 }
