@@ -32,6 +32,7 @@ export class TimeSheetDto {
     isOffDay: boolean;
     projectTargetUser: string;
     workingTimeTargetUser: number;
+    openTalkTime : number;
 }
 
 export class TimeSheetGroupDto {
