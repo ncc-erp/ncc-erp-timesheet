@@ -23,14 +23,15 @@ namespace Timesheet.Timesheets.External
         [Route("api/external/timesheet/opentalk")]
         [AbpAllowAnonymous]
         [NccAuthentication]
-        public async System.Threading.Tasks.Task createTimeSheetOpentalk(ListUserDto[] listUser)
+        public async System.Threading.Tasks.Task createTimeSheetOpentalk(ListUserDto[] userList)
         {
-            var OpentalkList = await WorkScope.GetAll<User>().Where(s => listUser.Where(x => x.FullName == s.FullName).Any())
+            var userDict = userList.ToDictionary(s => s.google_id,s => s);
+            var OpentalkList = await WorkScope.GetAll<User>().Where(s => s.GoogleId != null && userDict.ContainsKey(s.GoogleId))
                                       .Select(s => new OpenTalk
                                       {
                                           UserId = s.Id,
-                                          startTime = listUser.Where(x => x.FullName == s.FullName).Select(x => x.startTime).FirstOrDefault(),
-                                          endTime = listUser.Where(x => x.FullName == s.FullName).Select(x => x.endTime).FirstOrDefault()
+                                          startTime = userDict[s.GoogleId].startTime,
+                                          endTime = userDict[s.GoogleId].endTime
                                       }).ToListAsync();
             foreach (var opentalk in OpentalkList)
             {
