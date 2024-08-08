@@ -9,7 +9,7 @@ namespace Timesheet.APIs.Timesheets.External.Dto
         public string fullName { get; set; }
         public string email { get; set; }
         public string google_id { get; set; }
-        public DateTime startTime { get; set; }
-        public DateTime endTime { get; set; }
+        public DateTime DateAt { get; set; }
+        public int totalTime { get; set; }
     }
 }

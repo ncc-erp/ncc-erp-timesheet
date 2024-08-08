@@ -30,23 +30,20 @@ namespace Timesheet.Timesheets.External
                                       .Select(s => new OpenTalk
                                       {
                                           UserId = s.Id,
-                                          startTime = userDict[s.GoogleId].startTime,
-                                          endTime = userDict[s.GoogleId].endTime
+                                          DateAt = userDict[s.GoogleId].DateAt,
+                                          totalTime = userDict[s.GoogleId].totalTime
                                       }).ToListAsync();
             foreach (var opentalk in OpentalkList)
             {
                 var dbRequest = await WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == opentalk.UserId)
-                                                                  .Where(s => s.startTime.Date == opentalk.startTime.Date)
+                                                                  .Where(s => s.DateAt.Date == opentalk.DateAt.Date)
                                                                   .FirstOrDefaultAsync();
                 if (dbRequest == null)
                 {
-                    opentalk.totalTime = Convert.ToInt32(opentalk.endTime.Subtract(opentalk.startTime).TotalMinutes);
                     await WorkScope.InsertAsync(opentalk);
                 } else
                 {
-                    dbRequest.startTime = opentalk.startTime;
-                    dbRequest.endTime = opentalk.endTime;
-                    dbRequest.totalTime = Convert.ToInt32(opentalk.endTime.Subtract(opentalk.startTime).TotalMinutes);
+                    dbRequest.totalTime = opentalk.totalTime;
                     await WorkScope.UpdateAsync(dbRequest);
                 }
             }
