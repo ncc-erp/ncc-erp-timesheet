@@ -46,6 +46,7 @@
         public const string SendEmailToSaoDo = "App.SendEmailToSaoDo";
         public const string ProjectTaskId = "App.ProjectTaskId";
         public const string SecurityCode = "App.SecurityCode";
+        public const string LogoutAllUser = "App.LogoutAllUser";
         public const string LockDayOfUser = "App.LockDayOfUser";
         public const string LockHourOfUser = "App.LockHourOfUser";
         public const string LockMinuteOfUser = "App.LockMinuteOfUser";

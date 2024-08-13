@@ -23,6 +23,7 @@ import * as _ from 'lodash';
 import { SendKomuPunishedCheckInService } from '@app/service/api/send-komu-punished-check-in.service';
 import * as moment from 'moment';
 import { type } from 'os';
+import { LogoutAllUserService } from '@app/service/api/logout-all-user.service';
 
 
 @Component({
@@ -36,6 +37,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   VIEW_GOOGLE_SETTING = PERMISSIONS_CONSTANT.ViewGoogleSingleSignOnSetting;
   VIEW_AUTO_LOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.ViewAutoLockTimesheetSetting;
   VIEW_SERCURITY_CODE_SETTING = PERMISSIONS_CONSTANT.ViewSercurityCodeSetting;
+  VIEW_LOGOUT_SETTING = PERMISSIONS_CONSTANT.ViewLogoutAllUserSetting;
   VIEW_LOG_TIMESHEET_IN_FUTURE = PERMISSIONS_CONSTANT.ViewLogTimesheetInFutureSetting;
   VIEW_AUTO_SUBMIT_TIMESHEET = PERMISSIONS_CONSTANT.ViewAutoSubmitTimesheetSetting;
   EDIT_EMAIL_SETTING = PERMISSIONS_CONSTANT.EditEmailSetting;
@@ -43,6 +45,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_GOOGLE_SETTING = PERMISSIONS_CONSTANT.EditGoogleSingleSignOnSetting;
   EDIT_AUTO_LOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.EditAutoLockTimesheetSetting;
   EDIT_SERCURITY_CODE_SETTING = PERMISSIONS_CONSTANT.EditSercurityCodeSetting;
+  EDIT_LOGOUT_SETTING = PERMISSIONS_CONSTANT.EditLogoutAllUserSetting;
   EDIT_LOG_TIMESHEET_IN_FUTURE = PERMISSIONS_CONSTANT.EditLogTimesheetInFutureSetting;
   EDIT_AUTO_SUBMIT_TIMESHEET = PERMISSIONS_CONSTANT.EditAutoSubmitTimesheetSetting;
   VIEW_HRM_CONFIG = PERMISSIONS_CONSTANT.ViewHRMSetting;
@@ -115,6 +118,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditTime: boolean = false;
   isEditLockTimesheet: boolean = false;
   isEditSercurityCode: boolean = false;
+  isEditLogoutAllUser: boolean = false;
   isEditWFHSetting: boolean = false;
   isEditUnlockSetting: boolean = false;
   isLevelSetting: boolean = false;
@@ -131,6 +135,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   punishByRule = {} as PunishByRuleDTO;
   lockTimesheet = {} as LockTimesheetDTO;
   sercurityCode = {} as SercurityCodeDTO;
+  loginBefore = {} as LogoutAllUserDTO;
   wfhSetting = {} as WFHSettingDTO;
   levelSetting = {} as LevelSettingDTO;
   getCheckInCheckOutPunishmentSetting = {} as GetCheckInCheckOutPunishmentSettingDto
@@ -154,6 +159,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isShowGoogleSetting: boolean = false;
   isShowAutoLogTimesheet: boolean = false;
   isShowSecurityCodeSetting: boolean =false;
+  isShowLogoutAllUserSetting: boolean =false;
   isShowLevelSetting: boolean = false;
   isShowPunishByRule: boolean = false;
   isShowLogTSInFuture: boolean = false;
@@ -233,6 +239,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     private levelSettingService: LevelSettingService,
     private autoLockTimeSheetService: AutoLockTimesheetService,
     private sercurityCodeService: SercurityCodeService,
+    private logoutAllUserService: LogoutAllUserService,
     private wfhService: WfhSettingService,
     private autoSubmitService: AutoSubmitTimesheetSettingService,
     private getDataFromFaceIdService: GetDataFromFaceIdSettingService,
@@ -253,6 +260,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getWorkingTime();
     this.getLockTimesheet();
     this.getSercurityCode();
+    this.getLogoutAllUser();
     this.getLevelSetting();
     this.getLogTimesheetInFuture();
     this.getAutoSubmitTimesheet();
@@ -391,6 +399,13 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       })
     }
   }
+  getLogoutAllUser() {
+    if (this.permission.isGranted(this.VIEW_LOGOUT_SETTING)) {
+      this.logoutAllUserService.get().subscribe((res: any) => {
+        this.loginBefore = res.result;
+      })
+    }
+  }
 
   getWFHSetting() {
     if (this.permission.isGranted(this.VIEW_WFH_SETTING)) {
@@ -463,6 +478,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   editSercurityCode() {
     this.isEditSercurityCode = true;
   }
+  editLogoutAllUser() {
+    this.isEditLogoutAllUser = true;
+  }
   editWFHSetting() {
     this.isEditWFHSetting = true;
   }
@@ -531,6 +549,14 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   SaveSercurityCode() {
     this.sercurityCodeService.change(this.sercurityCode).subscribe((res: any) => {
       this.isEditSercurityCode = !this.editSercurityCode;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
+  SaveLogoutAllUser() {
+    this.logoutAllUserService.change(this.loginBefore).subscribe((res: any) => {
+      this.isEditLogoutAllUser = !this.isEditLogoutAllUser;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
       }
@@ -752,7 +778,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getSercurityCode();
     this.isEditSercurityCode = false;
   }
-
+  refreshLogoutAllUser() {
+    this.getLogoutAllUser();
+    this.isEditLogoutAllUser = false;
+  }
   refreshWFHSetting() {
     this.getWFHSetting();
     this.isEditWFHSetting = false;
@@ -1622,7 +1651,9 @@ export class LockTimesheetDTO {
 export class SercurityCodeDTO {
   sercurityCode: string;
 }
-
+export class LogoutAllUserDTO {
+  loginBefore: string;
+}
 export class WFHSettingDTO {
   numOfRemoteDays: string;
   allowInternToWorkRemote: string;

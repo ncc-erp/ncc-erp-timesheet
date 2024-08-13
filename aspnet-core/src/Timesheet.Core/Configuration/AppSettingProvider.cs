@@ -148,6 +148,8 @@ namespace Ncc.Configuration
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SecurityCode, Configuration["DefaultSettings:SecurityCode"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.LogoutAllUser, "2024-04-01T00:00",
+                scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.CheckInInternalUrl, Configuration["DefaultSettings:CheckInInternalUrl"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.CheckInInternalAccount, Configuration["DefaultSettings:CheckInInternalAccount"],

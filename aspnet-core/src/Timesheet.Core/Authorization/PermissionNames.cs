@@ -34,6 +34,7 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_GoogleSignOn = "Admin.Configuration.GoogleSignOn";
         public const string Admin_Configuration_AutoLockTimesheet = "Admin.Configuration.AutoLockTimesheet";
         public const string Admin_Configuration_SercurityCode = "Admin.Configuration.SercurityCode";
+        public const string Admin_Configuration_LogoutAllUser = "Admin.Configuration.LogoutAllUser";
         public const string Admin_Configuration_LogTimesheetInFuture = "Admin.Configuration.LogTimesheetInFuture";
         public const string Admin_Configuration_AutoSubmitTimesheet = "Admin.Configuration.AutoSubmitTimesheet";
         public const string Admin_Configuration_EmailSaoDo = "Admin.Configuration.EmailSaoDo";
@@ -58,10 +59,12 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_GoogleSignOn_View = "Admin.Configuration.GoogleSignOn.ViewGoogleSignOn";
         public const string Admin_Configuration_AutoLockTimesheet_View = "Admin.Configuration.AutoLockTimesheet.ViewAutoLockTimesheet";
         public const string Admin_Configuration_SercurityCode_View = "Admin.Configuration.SercurityCode.ViewSercurityCode";
+        public const string Admin_Configuration_LogoutAllUser_View = "Admin.Configuration.LogoutAllUser.ViewLogoutAllUser";
         public const string Admin_Configuration_LogTimesheetInFuture_View = "Admin.Configuration.LogTimesheetInFuture.ViewLogTimesheetInFuture";
         public const string Admin_Configuration_AutoSubmitTimesheet_View = "Admin.Configuration.AutoSubmitTimesheet.ViewAutoSubmitTimesheet";
         public const string Admin_Configuration_EmailSaoDo_View = "Admin.Configuration.EmailSaoDo.ViewEmailSaoDo";
         public const string Admin_Configuration_SercurityCode_Edit = "Admin.Configuration.SercurityCode.EditSercurityCode";
+        public const string Admin_Configuration_LogoutAllUser_Edit = "Admin.Configuration.LogoutAllUser.EditLogoutAllUser";
         public const string Admin_Configuration_Email_Edit = "Admin.Configuration.Email.EditEmail";
         public const string Admin_Configuration_WorkingDay_Edit = "Admin.Configuration.WorkingDay.EditWorkingDay";
         public const string Admin_Configuration_GoogleSignOn_Edit = "Admin.Configuration.GoogleSignOn.EditGoogleSignOn";
@@ -389,6 +392,7 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_Configuration_GoogleSignOn,
                     PermissionNames.Admin_Configuration_AutoLockTimesheet,
                     PermissionNames.Admin_Configuration_SercurityCode,
+                    PermissionNames.Admin_Configuration_LogoutAllUser,
                     PermissionNames.Admin_Configuration_EmailSaoDo,
                     PermissionNames.Admin_Configuration_AutoLockTimesheet,
                     PermissionNames.Admin_Configuration_LogTimesheetInFuture,
@@ -410,10 +414,12 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_Configuration_GoogleSignOn_Edit,
                     PermissionNames.Admin_Configuration_AutoLockTimesheet_View,
                     PermissionNames.Admin_Configuration_SercurityCode_View,
+                    PermissionNames.Admin_Configuration_LogoutAllUser_View,
                     PermissionNames.Admin_Configuration_EmailSaoDo_View,
                     PermissionNames.Admin_Configuration_EmailSaoDo_Edit,
                     PermissionNames.Admin_Configuration_AutoLockTimesheet_Edit,
                     PermissionNames.Admin_Configuration_SercurityCode_Edit,
+                    PermissionNames.Admin_Configuration_LogoutAllUser_Edit,
                     PermissionNames.Admin_Configuration_LogTimesheetInFuture_View,
                     PermissionNames.Admin_Configuration_LogTimesheetInFuture_Edit,
                     PermissionNames.Admin_Configuration_AutoSubmitTimesheet_View,
@@ -889,6 +895,8 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_AutoLockTimesheet_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Auto lock timesheet setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_SercurityCode, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Sercurity code setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_SercurityCode_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Sercurity code setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LogoutAllUser, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Logout all user setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LogoutAllUser_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Logout all user setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_EmailSaoDo, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Email Sao Do setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_EmailSaoDo_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Email Sao Do setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LogTimesheetInFuture, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Log timesheet in future" },
@@ -900,6 +908,7 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_GoogleSignOn_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit Google single sign on setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_AutoLockTimesheet_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit Auto lock timesheet setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_SercurityCode_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit Sercurity code setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LogoutAllUser_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit Logout all user setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_EmailSaoDo_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit Email Sao Do setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LogTimesheetInFuture_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit Log timesheet in future" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_AutoSubmitTimesheet_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit Auto submit timesheet" },
@@ -1254,6 +1263,13 @@ namespace Ncc.Authorization
                                 {
                                       new SystemPermission{ Name =  PermissionNames.Admin_Configuration_SercurityCode_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View" },
                                       new SystemPermission{ Name =  PermissionNames.Admin_Configuration_SercurityCode_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit" },
+                                }
+                            },
+                                new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LogoutAllUser, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Logout all user Setting",
+                                Childrens = new List<SystemPermission>()
+                                {
+                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LogoutAllUser_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View" },
+                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LogoutAllUser_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit" },
                                 }
                             },
                                 new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LogTimesheetInFuture, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Log Timesheet Setting",

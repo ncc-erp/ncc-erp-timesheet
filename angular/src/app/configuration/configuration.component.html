@@ -1993,6 +1993,71 @@
 
         </mat-expansion-panel>
       </div>
+      <!-- Logout All User -->
+      <div class="card main-content">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header class="panel-header">
+            <mat-panel-title>
+              <p class="title">Logout all user</p>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_LOGOUT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowLogoutAllUserSetting">
+            <mat-expansion-panel-header class="panel-header"
+              (click)="isShowLogoutAllUserSetting = !isShowLogoutAllUserSetting">
+              <mat-panel-title>
+                <p class="title">Logout all user settings</p>
+                <div *ngIf="permission.isGranted(EDIT_LOGOUT_SETTING) && isShowLogoutAllUserSetting">
+                  <div>
+                    <div class="edit-save">
+                      <button *ngIf="!isEditLogoutAllUser" large mat-raised-button color="primary"
+                        (click)="editLogoutAllUser();$event.stopPropagation()">
+                        <mat-icon>edit</mat-icon>Edit
+                      </button>
+                      <button *ngIf="isEditLogoutAllUser" large mat-raised-button color="primary"
+                        (click)="SaveLogoutAllUser();$event.stopPropagation()">
+                        <mat-icon>save</mat-icon>Save
+                      </button>
+                      <button *ngIf="isEditLogoutAllUser" large mat-raised-button color="primary"
+                        (click)="refreshLogoutAllUser();$event.stopPropagation()">
+                        <mat-icon>cancel</mat-icon>Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </mat-panel-title>
+
+              <ul class="header-dropdown m-r--5" *ngIf="isShowLogoutAllUserSetting">
+                <li>
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenu3" (click)="$event.stopPropagation()"
+                    class="header-dropdown-mat-icon-button">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #headerMenu3="matMenu">
+                    <button mat-menu-item (click)="refreshLogoutAllUser();$event.stopPropagation()">
+                      <mat-icon>refresh</mat-icon>
+                      <span>{{ "Refresh" | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </li>
+              </ul>
+            </mat-expansion-panel-header>
+            <div class="body">
+              <form>
+                <div class="row">
+                  <div class="col-md-12">
+                    <mat-form-field style="max-width: 880px;">
+                      <input type="datetime-local" matInput name="loginBefore" placeholder="Logout all user is logined before:"
+                        [(ngModel)]="loginBefore.loginBefore" [readonly]="!isEditLogoutAllUser" />
+                    </mat-form-field>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </mat-expansion-panel>
+
+        </mat-expansion-panel>
+      </div>
     </div>
   </mat-tab>
 
