@@ -129,6 +129,11 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.ResetDataTeamBuildingEnableWorker, "false", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ResetDataTeamBuildingAtHour, "1", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ResetDataTeamBuildingOnDateAndMonth, "1/1", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AddDataToOpenTalkEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AddDataToOpenTalkAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AddDataToOpenTalkAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.MezonBaseAddress, "http://timejoinopentalk.nccsoft.vn", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.MezonSecurityCode, "12345678", scopes: SettingScopes.Application|SettingScopes.Tenant),
 
                 new SettingDefinition(AppSettingNames.SecretRegisterCode, Configuration["DefaultSettings:SecretRegisterCode"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),

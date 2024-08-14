@@ -57,6 +57,8 @@ export const PERMISSIONS_CONSTANT = {
     EditEmailSaoDo: "Admin.Configuration.EmailSaoDo.EditEmailSaoDo",
     ViewCheckInSetting: "Admin.Configuration.CheckInSetting.ViewCheckInSetting",
     UpdateCheckInSetting: "Admin.Configuration.CheckInSetting.UpdateCheckInSetting",
+    ViewMezonSetting: "Admin.Configuration.MezonSetting.ViewMezonSetting",
+    EditMezonSetting: "Admin.Configuration.MezonSetting.EditMezonSetting",
     ViewNRITSetting: "Admin.Configuration.NRITConfig.ViewNRITConfig",
     EditNRITSetting: "Admin.Configuration.NRITConfig.UpdateNRITConfig",
     ViewUnlockTimesheetSetting: "Admin.Configuration.UnlockTimesheetSetting.ViewUnlockTimesheetSetting",
