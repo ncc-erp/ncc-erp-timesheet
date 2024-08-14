@@ -62,7 +62,11 @@ export class LoginComponent extends AppComponentBase implements OnInit {
   signInWithGoogle(): void {
     //alert(GoogleLoginProvider.PROVIDER_ID);
     //console.log('signInWithGoogle', GoogleLoginProvider.PROVIDER_ID)
-    this.authService.signIn(GoogleLoginProvider.PROVIDER_ID)
+    this.authService.signIn(GoogleLoginProvider.PROVIDER_ID).then((user) => {
+      if (user) {
+        this.loginService.authenticateGoogle(user.idToken, this.nccCode);
+      }
+    });
   }
 
   signOut(): void {
