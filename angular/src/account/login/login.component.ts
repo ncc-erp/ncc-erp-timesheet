@@ -31,11 +31,12 @@ export class LoginComponent extends AppComponentBase implements OnInit {
 
   ngOnInit() {
     this.enableNormalLogin = AppConsts.enableNormalLogin;
-    this.authService.authState.subscribe((user) => {
-      if (user) {
-        this.loginService.authenticateGoogle(user.idToken, this.nccCode);
-      }
-    }, err => this.authService.signOut());
+    // Disable Auto Login By Google
+    // this.authService.authState.subscribe((user) => {
+    //   if (user) {
+    //     this.loginService.authenticateGoogle(user.idToken, this.nccCode);
+    //   }
+    // }, err => this.authService.signOut());
   }
 
   checkShowpass() {

@@ -12,8 +12,7 @@ namespace Timesheet.Entities
         public long UserId { get; set; }
         [ForeignKey(nameof(UserId))]
         public User User { get; set; }
-        public DateTime startTime { get; set; }
-        public DateTime endTime { get; set; }
+        public DateTime DateAt { get; set; }
         public int totalTime {  get; set; }
     }
 }

@@ -23,6 +23,7 @@ import * as _ from 'lodash';
 import { SendKomuPunishedCheckInService } from '@app/service/api/send-komu-punished-check-in.service';
 import * as moment from 'moment';
 import { type } from 'os';
+import { MezonSettingService } from '@app/service/api/mezon-setting.service';
 import { LogoutAllUserService } from '@app/service/api/logout-all-user.service';
 
 
@@ -68,6 +69,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_EMAIL_SAO_DO_SETTING= PERMISSIONS_CONSTANT.EditEmailSaoDo
   VIEW_CHECKIN_SETTING= PERMISSIONS_CONSTANT.ViewCheckInSetting
   EDIT_CHECKIN_SETTNG = PERMISSIONS_CONSTANT. UpdateCheckInSetting
+  VIEW_MEZON_SETTING= PERMISSIONS_CONSTANT.ViewMezonSetting
+  EDIT_MEZON_SETTNG = PERMISSIONS_CONSTANT. EditMezonSetting
   VIEW_NRIT_CONFIG = PERMISSIONS_CONSTANT.ViewNRITSetting;
   EDIT_NRIT_CONFIG = PERMISSIONS_CONSTANT.EditNRITSetting;
   VIEW_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.ViewUnlockTimesheetSetting;
@@ -126,6 +129,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditLogTimesheetInFuture: boolean = false;
   isEditAutoSubmitTimesheet: boolean = false;
   isEditGetDataFromFaceID: boolean = false;
+  isEditMezonSetting: boolean = false;
   isEditingKomu: boolean = false;
   isEditHRMConfig: boolean = false;
   isEditNotificationSetting: boolean = false;
@@ -142,6 +146,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   workingTime = {} as WorkingTimeDTO;
   autoSubmitTimesheet = {} as AutoSubmitTimesheetDto;
   getDataFaceID = {} as GetDataFromFaceIDDto;
+  mezonSetting = {} as MezonSetting;
   HRMConfig = {} as HRMConfigDto;
   notificationSetting = {} as NotificationSettingDto;
   ProjectConfig = {} as ProjectConfigDto;
@@ -165,6 +170,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isShowLogTSInFuture: boolean = false;
   isShowAutoSubmitTS: boolean= false;
   isShowFaceIDSetting: boolean = false;
+  isShowMezonSetting: boolean = false;
   isShowHRMSetting: boolean = false;
   isShowProjectSetting: boolean = false;
   isShowEmailSaodoSetting: boolean = false;
@@ -243,6 +249,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     private wfhService: WfhSettingService,
     private autoSubmitService: AutoSubmitTimesheetSettingService,
     private getDataFromFaceIdService: GetDataFromFaceIdSettingService,
+    private mezonSettingService : MezonSettingService,
     private emailSaoDoSerivice: EmailSaoDoSettingService,
     private specialProjectTaskService: SpecialProjectTaskSettingService,
     private sendKomuPunishedCheckInService: SendKomuPunishedCheckInService,
@@ -265,6 +272,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getLogTimesheetInFuture();
     this.getAutoSubmitTimesheet();
     this.getDataFromFaceID();
+    this.getMezonSetting()
     this.getHRMConfig();
     this.getEmailSaoDoSetting();
     this.getProjectConfig();
@@ -460,6 +468,13 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       })
     }
   }
+  getMezonSetting() {
+    if (this.permission.isGranted(this.VIEW_MEZON_SETTING)) {
+      this.mezonSettingService.get().subscribe(res => {
+        this.mezonSetting = res.result;
+      })
+    }
+  }
   getTimesCanLateAndEarlyInMonthSetting() {
     if (this.permission.isGranted(this.VIEW_TIMECANLATEANDEARLY_CONFIG)) {
       this.timesCanLateAndEarlyInMonthSettingService.getTimesCanLateAndEarlyInMonthSetting().subscribe((res: any) => {
@@ -545,7 +560,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   editGetDataFromFaceID() {
     this.isEditGetDataFromFaceID = true;
   }
-
+  editMezonSetting() {
+    this.isEditMezonSetting = true;
+  }
   SaveSercurityCode() {
     this.sercurityCodeService.change(this.sercurityCode).subscribe((res: any) => {
       this.isEditSercurityCode = !this.editSercurityCode;
@@ -769,6 +786,14 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       this.isEditGetDataFromFaceID = !this.isEditGetDataFromFaceID;
     })
   }
+  SaveMezonSetting() {
+    this.mezonSettingService.change(this.mezonSetting).subscribe((res) => {
+      this.isEditMezonSetting = !this.isEditMezonSetting;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
 
   checkShowpass() {
     this.isShowPassword = !this.isShowPassword;
@@ -836,7 +861,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getDataFromFaceID();
     this.isEditGetDataFromFaceID = false;
   }
-
+  refreshMezonSetting() {
+    this.getMezonSetting();
+    this.isEditMezonSetting = false;
+  }
   onChange(value) {
     this.logTimesheetInFuture.canLogTimesheetInFuture = value.toString();
   }
@@ -1692,6 +1720,14 @@ export class AutoSubmitTimesheetDto {
 export class GetDataFromFaceIDDto {
   getDataAt: string;
   accountID: string;
+  secretCode: string;
+  uri: string;
+}
+
+export class MezonSetting {
+  enable: boolean;
+  hour: number;
+  dayofweek: string;
   secretCode: string;
   uri: string;
 }
