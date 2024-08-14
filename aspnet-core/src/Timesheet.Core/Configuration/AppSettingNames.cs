@@ -46,6 +46,7 @@
         public const string SendEmailToSaoDo = "App.SendEmailToSaoDo";
         public const string ProjectTaskId = "App.ProjectTaskId";
         public const string SecurityCode = "App.SecurityCode";
+        public const string LogoutAllUser = "App.LogoutAllUser";
         public const string LockDayOfUser = "App.LockDayOfUser";
         public const string LockHourOfUser = "App.LockHourOfUser";
         public const string LockMinuteOfUser = "App.LockMinuteOfUser";
@@ -117,6 +118,12 @@
         public const string ResetDataTeamBuildingEnableWorker = "Abp.ResetDataTeamBuildingEnableWorker";
         public const string ResetDataTeamBuildingAtHour = "Abp.ResetDataTeamBuildingAtHour";
         public const string ResetDataTeamBuildingOnDateAndMonth = "Abp.ResetDataTeamBuildingOnDateAndMonth";
+
+        public const string AddDataToOpenTalkEnable = "Abp.AddDataToOpenTalkEnable";
+        public const string AddDataToOpenTalkAtHour = "Abp.AddDataToOpenTalkAtHour";
+        public const string AddDataToOpenTalkAtDayOfWeek = "Abp.AddDataToOpenTalkAtDayOfWeek";
+        public const string MezonBaseAddress = "Abp.MezonBaseAddress";
+        public const string MezonSecurityCode = "Abp.MezonSecurityCode";
 
         public const string TimeStartChangingCheckinToCheckout = "App.TimeStartChangingCheckinToCheckout";
         public const string TimeStartChangingCheckinToCheckoutEnable = "App.TimeStartChangingCheckinToCheckoutEnable";

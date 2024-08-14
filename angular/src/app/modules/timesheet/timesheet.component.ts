@@ -283,7 +283,12 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
       isLogTsWorkNormalOnOffDay =  true;
     }
 
-    if(isLogTsWorkNormalOnOffDay ||
+    let isOpenTalkWarning = false;
+    if(value.find(s => s.taskId === 12 && s.openTalkTime < 60)){
+      isOpenTalkWarning =  true;
+    }
+
+    if(isOpenTalkWarning || isLogTsWorkNormalOnOffDay ||
         totalWorkingTime > this.defaultWorkingHourPerDay ||
         (moment(value[0].dateAt, 'YYYY-MM-DD').toDate().getDay() == this.APP_CONSTANT.EnumDayOfWeekByGetDay.Saturday &&
           totalWorkingTime > this.defaultWorkingHourPerSaturday

@@ -7,6 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Abp.Runtime.Security;
+using Abp.Configuration;
+using Abp.Dependency;
+using Ncc.Configuration;
 
 namespace Ncc.Web.Host.Startup
 {
@@ -39,6 +42,15 @@ namespace Ncc.Web.Host.Startup
 
                         // Validate the token expiry
                         ValidateLifetime = true,
+                        LifetimeValidator = (notBefore, expires, securityToken, validationParameters) =>
+                        {
+                            if (IocManager.Instance.IsRegistered<ISettingManager>())
+                            {
+                                var loginBefore = IocManager.Instance.Resolve<ISettingManager>().GetSettingValueForApplication(AppSettingNames.LogoutAllUser);
+                                return expires != null && expires > DateTime.UtcNow && notBefore != null && notBefore > DateTime.Parse(loginBefore).ToUniversalTime();
+                            }
+                            return expires != null && expires > DateTime.UtcNow;
+                        },
 
                         // If you want to allow a certain amount of clock drift, set that here
                         ClockSkew = TimeSpan.Zero

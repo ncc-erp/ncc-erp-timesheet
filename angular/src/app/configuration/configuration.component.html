@@ -1993,6 +1993,71 @@
 
         </mat-expansion-panel>
       </div>
+      <!-- Logout All User -->
+      <div class="card main-content">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header class="panel-header">
+            <mat-panel-title>
+              <p class="title">Logout all user</p>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_LOGOUT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowLogoutAllUserSetting">
+            <mat-expansion-panel-header class="panel-header"
+              (click)="isShowLogoutAllUserSetting = !isShowLogoutAllUserSetting">
+              <mat-panel-title>
+                <p class="title">Logout all user settings</p>
+                <div *ngIf="permission.isGranted(EDIT_LOGOUT_SETTING) && isShowLogoutAllUserSetting">
+                  <div>
+                    <div class="edit-save">
+                      <button *ngIf="!isEditLogoutAllUser" large mat-raised-button color="primary"
+                        (click)="editLogoutAllUser();$event.stopPropagation()">
+                        <mat-icon>edit</mat-icon>Edit
+                      </button>
+                      <button *ngIf="isEditLogoutAllUser" large mat-raised-button color="primary"
+                        (click)="SaveLogoutAllUser();$event.stopPropagation()">
+                        <mat-icon>save</mat-icon>Save
+                      </button>
+                      <button *ngIf="isEditLogoutAllUser" large mat-raised-button color="primary"
+                        (click)="refreshLogoutAllUser();$event.stopPropagation()">
+                        <mat-icon>cancel</mat-icon>Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </mat-panel-title>
+
+              <ul class="header-dropdown m-r--5" *ngIf="isShowLogoutAllUserSetting">
+                <li>
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenu3" (click)="$event.stopPropagation()"
+                    class="header-dropdown-mat-icon-button">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #headerMenu3="matMenu">
+                    <button mat-menu-item (click)="refreshLogoutAllUser();$event.stopPropagation()">
+                      <mat-icon>refresh</mat-icon>
+                      <span>{{ "Refresh" | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </li>
+              </ul>
+            </mat-expansion-panel-header>
+            <div class="body">
+              <form>
+                <div class="row">
+                  <div class="col-md-12">
+                    <mat-form-field style="max-width: 880px;">
+                      <input type="datetime-local" matInput name="loginBefore" placeholder="Logout all user is logined before:"
+                        [(ngModel)]="loginBefore.loginBefore" [readonly]="!isEditLogoutAllUser" />
+                    </mat-form-field>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </mat-expansion-panel>
+
+        </mat-expansion-panel>
+      </div>
     </div>
   </mat-tab>
 
@@ -2265,6 +2330,97 @@
                     <mat-label>secretCode</mat-label>
                     <input type="text" matInput name="projectSecretCode" [(ngModel)]="ProjectConfig.secretCode" required
                       [disabled]="!isEditProjectSetting" />
+                  </mat-form-field>
+                </div>
+              </div>
+            </form>
+          </div>
+        </mat-expansion-panel>
+      </div>
+
+      <!-- Mezon Setting -->
+      <div class="card main-content" *ngIf="permission.isGranted(VIEW_MEZON_SETTING)">
+        <mat-expansion-panel [expanded]="isShowMezonSetting">
+          <mat-expansion-panel-header (click)="isShowMezonSetting = !isShowMezonSetting" class="panel-header">
+            <mat-panel-title>
+              <p class="title">{{"Mezon setting"}}</p>
+              <div *ngIf="permission.isGranted(EDIT_MEZON_SETTNG) && isShowMezonSetting">
+                <div class="edit-save">
+                  <button *ngIf="!isEditMezonSetting" large mat-raised-button color="primary"
+                    (click)="editMezonSetting();$event.stopPropagation()">
+                    <mat-icon>edit</mat-icon>Edit
+                  </button>
+                  <button *ngIf="isEditMezonSetting" large mat-raised-button color="primary"
+                    (click)="SaveMezonSetting();$event.stopPropagation()">
+                    <mat-icon>save</mat-icon>Save
+                  </button>
+                  <button *ngIf="isEditMezonSetting" large mat-raised-button color="primary"
+                    (click)="refreshMezonSetting();$event.stopPropagation()">
+                    <mat-icon>cancel</mat-icon>Cancel
+                  </button>
+                </div>
+              </div>
+            </mat-panel-title>
+
+            <ul class="header-dropdown m-r--5" *ngIf="isShowMezonSetting">
+              <li>
+                <button mat-icon-button [matMenuTriggerFor]="headerMenu3" (click)="$event.stopPropagation()"
+                  class="header-dropdown-mat-icon-button">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #headerMenu3="matMenu">
+                  <button mat-menu-item (click)="refreshMezonSetting();$event.stopPropagation()">
+                    <mat-icon>refresh</mat-icon>
+                    <span>{{ "Refresh" | localize }}</span>
+                  </button>
+                </mat-menu>
+              </li>
+            </ul>
+          </mat-expansion-panel-header>
+          <div class="body">
+            <form>
+              <div class="row">
+                <div class="col-md-12">
+                  <mat-checkbox class="example-margin" (change)="mezonSetting.enable = !mezonSetting.enable;"
+                    [checked]="mezonSetting.enable"
+                    [disabled]="!isEditMezonSetting">
+                    Enable
+                  </mat-checkbox>
+                </div>
+                <div class="col-md-6">
+                  <mat-form-field style="width: 300px;">
+                    <mat-label>Get data OpenTalk from Mezon at (Hour)</mat-label>
+                    <input type="number" matInput name="addDataToOpenTalkAtHour" [(ngModel)]="mezonSetting.hour" required
+                      [disabled]="!isEditMezonSetting" min="0" max="23" />
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                  <mat-form-field style="width: 300px;">
+                    <mat-label>Get data OpenTalk from Mezon at</mat-label>
+                    <mat-select [disabled]="!isEditMezonSetting" name="addDataToOpenTalkAtDayOfWeek"
+                      [(ngModel)]="mezonSetting.dayofweek">
+                      <mat-option value="Monday">Monday</mat-option>
+                      <mat-option value="Tuesday">Tuesday</mat-option>
+                      <mat-option value="Wednesday">Wednesday</mat-option>
+                      <mat-option value="Thursday">Thursday</mat-option>
+                      <mat-option value="Friday">Friday</mat-option>
+                      <mat-option value="Saturday">Saturday</mat-option>
+                      <mat-option value="Sunday">Sunday</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-12" style="max-width: 880px;">
+                  <mat-form-field>
+                    <mat-label>Security Code</mat-label>
+                    <input type="text" matInput name="secretCode" [(ngModel)]="mezonSetting.secretCode" required
+                      [disabled]="!isEditMezonSetting" />
+                  </mat-form-field>
+                </div>
+                <div class="col-md-12" style="max-width: 880px;">
+                  <mat-form-field>
+                    <mat-label>Uri</mat-label>
+                    <input type="text" matInput name="uri" [(ngModel)]="mezonSetting.uri" required
+                      [disabled]="!isEditMezonSetting" />
                   </mat-form-field>
                 </div>
               </div>

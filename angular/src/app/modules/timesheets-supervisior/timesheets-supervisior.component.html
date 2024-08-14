@@ -171,6 +171,10 @@
                                           <th>PROJECT</th>
                                           <th>TASK NAME</th>
                                           <th>TIME</th>
+                                            <ng-container *ngIf="dt.tasks[0].taskId != 12;else isOpenTalk"></ng-container>
+                                            <ng-template #isOpenTalk>
+                                                <th>JOIN TIME</th>
+                                            </ng-template>
                                           <th>STATUS</th>
                                             <ng-container *ngIf="!dt.tasks[0].projectTargetUser;else isShadow"></ng-container>
                                             <ng-template #isShadow>
@@ -191,6 +195,10 @@
                                           </td>
                                           <td><span>{{ t.taskName }}</span></td>
                                           <td><span>{{ convertMinuteToHour(t.workingTime) }}</span></td>
+                                          <ng-container *ngIf="dt.tasks[0].taskId != 12;else isOpenTalk"></ng-container>
+                                          <ng-template #isOpenTalk>
+                                            <td><span>{{ convertMinuteToHour(t.openTalkTime)}}</span></td>
+                                          </ng-template>
                                           <td>
                                             <span [innerHtml]="convertNumberOfStringStatus(t.status)"></span>
                                             <span class="label status-label bg-red status"

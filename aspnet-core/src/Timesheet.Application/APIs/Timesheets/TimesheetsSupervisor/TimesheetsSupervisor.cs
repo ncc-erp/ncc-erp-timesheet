@@ -70,6 +70,7 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                               IsUnlockedByEmployee = a.IsUnlockedByEmployee,
                               projectTargetUser = a.ProjectTargetUser.User.FullName,
                               workingTimeTargetUser = a.TargetUserWorkingTime,
+                              openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s=>s.UserId == a.User.Id && a.DateAt == s.DateAt.Date).Select(s=>s.totalTime).FirstOrDefault(),
                               LastModifierUser = qUsers.Where(x => x.Id == a.LastModifierUserId).Select(x => x.EmailAddress).FirstOrDefault()
                           })
                            .WhereIf(status.HasValue && status >= 0, s => s.Status == status)

@@ -37,6 +37,7 @@ using Microsoft.AspNetCore.Http;
 using Abp.Runtime.Security;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http.Connections;
+using Timesheet.Services.Mezon;
 
 namespace Ncc.Web.Host.Startup
 {
@@ -115,6 +116,7 @@ namespace Ncc.Web.Host.Startup
             services.AddHttpClient<ProjectService>();
             services.AddHttpClient<HRMService>();
             services.AddHttpClient<HRMv2Service>();
+            services.AddHttpClient<MezonService>();
             //services.AddTransient<TimekeepingHub>();
 
 

@@ -123,6 +123,7 @@ namespace Timesheet.Timesheets.Timesheets
                         IsUnlockedByEmployee = a.IsUnlockedByEmployee,
                         projectTargetUser = a.ProjectTargetUser.User.FullName,
                         workingTimeTargetUser = a.TargetUserWorkingTime,
+                        openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == a.User.Id && a.DateAt == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
                     };
             var query = await q.OrderBy(i => i.EmailAddress).ThenByDescending(s => s.DateAt).ToListAsync();
             var listTimekeeping = WorkScope.GetAll<Timekeeping>()
@@ -606,7 +607,6 @@ namespace Timesheet.Timesheets.Timesheets
                 LockDate = isUnlockPM ? string.Format(" - Unlock timesheet is valid from {0} to {1}.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy")) : string.Format(" - Locked date: {0}.", lockDate.ToString("dd'-'MM'-'yyyy")),
             };
         }
-
         public async System.Threading.Tasks.Task NotifyApproveOrRejectTimesheet(List<MyTimesheet> myTimesheets, bool isApprove)
         {
             var dicTimesheet = myTimesheets
