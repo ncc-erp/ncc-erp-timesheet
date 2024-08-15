@@ -59,7 +59,7 @@
                   <span align="start" style="line-height: 3; padding-left: 5px;">
                     {{project.name}} [{{project.code}}]
                   </span>
-                  <span class="pm">{{project.pms.join(', ')}} </span>
+                  <span class="pm">{{project.pms.length ? project.pms.join(', ') : 'null'}} </span>
                   <span class="member">{{project.activeMember}} members</span>
                   <span *ngIf="project.projectType == 3" class="pType">ODC</span>
                   <span *ngIf="project.projectType == 2" class="pType">NB</span>
