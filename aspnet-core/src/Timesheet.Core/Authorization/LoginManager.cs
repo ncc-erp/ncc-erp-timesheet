@@ -163,11 +163,11 @@ namespace Ncc.Authorization
                             throw new UserFriendlyException(string.Format("Login Fail - Account does not exist"));
                         }
 
-                        if(user.GoogleId == null)
-                        {
-                            user.GoogleId = payload.Subject;
-                            await UserManager.UpdateAsync(user);
-                        }
+                        //if(user.GoogleId == null)
+                        //{
+                        //    user.GoogleId = payload.Subject;
+                        //    await UserManager.UpdateAsync(user);
+                        //}
 
                         if (await UserManager.IsLockedOutAsync(user))
                         {
