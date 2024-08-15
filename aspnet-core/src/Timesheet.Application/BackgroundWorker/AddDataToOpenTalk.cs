@@ -60,7 +60,7 @@ namespace Timesheet.BackgroundWorker
                 Logger.Error("AddDataToOpenTalkBackground() stop: addDataToOpenTalkAtDayOfWeek = " + addDataToOpenTalkAtDayOfWeek);
                 return;
             }
-            var OpenTalkListDto = _mezonService.GetOpenTalkLog().Result;
+            var OpenTalkListDto = _mezonService.GetOpenTalkLog();
             if (OpenTalkListDto != null)
             {
                 var userDict = OpenTalkListDto.ToDictionary(s => s.googleId, s => s);

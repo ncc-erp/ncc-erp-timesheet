@@ -2339,7 +2339,7 @@
       </div>
 
       <!-- Mezon Setting -->
-      <div class="card main-content" *ngIf="permission.isGranted(VIEW_MEZON_SETTING)">
+      <div class="card main-content" *ngIf="permission.isGranted(VIEW_MEZON_SETTING)" [busy]="isMezonLoading">
         <mat-expansion-panel [expanded]="isShowMezonSetting">
           <mat-expansion-panel-header (click)="isShowMezonSetting = !isShowMezonSetting" class="panel-header">
             <mat-panel-title>
@@ -2422,6 +2422,18 @@
                     <input type="text" matInput name="uri" [(ngModel)]="mezonSetting.uri" required
                       [disabled]="!isEditMezonSetting" />
                   </mat-form-field>
+                </div>
+              </div>
+            </form>
+            <form (ngSubmit)="ManualGetOpenTalk()">
+              <div class="row">
+                <div class="col-md-3">
+                  <mat-form-field>
+                    <input matInput type="date" name="ManualGetOpenTalkAtDate" placeholder="Manual Get Time Joined OpenTalk" [(ngModel)]="manualOpenTalk">
+                  </mat-form-field>
+                  <div mat-dialog-actions>
+                    <button mat-flat-button type="submit" color="primary">GET</button> 
+                  </div>
                 </div>
               </div>
             </form>
