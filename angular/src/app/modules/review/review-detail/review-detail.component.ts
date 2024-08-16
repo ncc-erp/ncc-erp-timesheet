@@ -1093,6 +1093,7 @@ export class ReviewDetailDto {
   hidePrivateNote: boolean;
   reviewInternCommentDto: reviewInternCommentDto[];
   id?: number;
+  mostLoggedProject?: string;
   countMonthLevelMax: number;
   maxLevel:number;
   selected?: boolean;
