@@ -156,6 +156,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   specialProjectTask = {} as SpecialProjectTaskSettingDTO;
   isEditEmailSaodo: boolean = false;
   public isLoading: boolean = false;
+  public isMezonLoading: boolean = false;
   public isEditProjectSetting: boolean = false;
   public isEditSpecialProjectTaskSetting: boolean = false;
   isShowEmailSetting: boolean = false;
@@ -236,6 +237,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isShowSendMessageToPunishUserSetting: boolean = false;
   isEditSendMessageToPunishUserConfig: boolean = false;
   sendMessageToPunishUserConfig: SendMessageToPunishUserConfigDto = {};
+
+  manualOpenTalk = new Date().toISOString().substring(0,10);
 
   constructor(
     private logTimesheetService: LogTimesheetInFutureSettingService,
@@ -470,7 +473,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   }
   getMezonSetting() {
     if (this.permission.isGranted(this.VIEW_MEZON_SETTING)) {
+      this.isMezonLoading = true;
       this.mezonSettingService.get().subscribe(res => {
+        this.isMezonLoading = false;
         this.mezonSetting = res.result;
       })
     }
@@ -787,7 +792,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     })
   }
   SaveMezonSetting() {
+    this.isMezonLoading = true;
     this.mezonSettingService.change(this.mezonSetting).subscribe((res) => {
+      this.isMezonLoading = false;
       this.isEditMezonSetting = !this.isEditMezonSetting;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1620,6 +1627,15 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.configurationService.setConfigGenerateRetroResult(this.GenerateRetroResultConfig).subscribe((res: any) => {
       this.isEditGenerateRetroResult = !this.isEditGenerateRetroResult;
       if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
+  ManualGetOpenTalk(){
+    this.isMezonLoading = true;
+    this.mezonSettingService.manualGetTimeJoinedOpenTalk(this.manualOpenTalk).subscribe(data => {
+      this.isMezonLoading = false;
+      if(data.success){
         this.notify.success(this.l('Update Successfully!'));
       }
     })
