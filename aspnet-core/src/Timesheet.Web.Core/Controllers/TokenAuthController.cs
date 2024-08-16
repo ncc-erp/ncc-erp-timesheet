@@ -18,6 +18,8 @@ using Ncc.Authorization.Users;
 using Ncc.Models.TokenAuth;
 using Ncc.MultiTenancy;
 using Timesheet.Controllers.Dto;
+using Abp.Configuration;
+using Ncc.Configuration;
 
 namespace Ncc.Controllers
 {
@@ -31,7 +33,7 @@ namespace Ncc.Controllers
         private readonly IExternalAuthConfiguration _externalAuthConfiguration;
         private readonly IExternalAuthManager _externalAuthManager;
         private readonly UserRegistrationManager _userRegistrationManager;
-
+        private readonly ISettingManager _settingManager;
         public TokenAuthController(
             LogInManager logInManager,
             ITenantCache tenantCache,
@@ -39,7 +41,8 @@ namespace Ncc.Controllers
             TokenAuthConfiguration configuration,
             IExternalAuthConfiguration externalAuthConfiguration,
             IExternalAuthManager externalAuthManager,
-            UserRegistrationManager userRegistrationManager)
+            UserRegistrationManager userRegistrationManager,
+            ISettingManager settingManager)
         {
             _logInManager = logInManager;
             _tenantCache = tenantCache;
@@ -48,6 +51,7 @@ namespace Ncc.Controllers
             _externalAuthConfiguration = externalAuthConfiguration;
             _externalAuthManager = externalAuthManager;
             _userRegistrationManager = userRegistrationManager;
+            _settingManager = settingManager;
         }
 
         [HttpPost]
@@ -73,6 +77,11 @@ namespace Ncc.Controllers
         [HttpPost]
         public async Task<AuthenticateResultModel> GoogleAuthenticate([FromBody] TokenDto model)
         {
+            var loginBefore = DateTime.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.LogoutAllUser));
+            if(DateTime.UtcNow < loginBefore.ToUniversalTime())
+            {
+                throw new UserFriendlyException($"Hệ thống từ chối đăng nhập trước {loginBefore.ToString("HH:mm dd-MM-yyyy")}. Vui lòng chờ!");
+            }
             var loginResult = await GetLoginResultGoogleAsync(
                 model.googleToken,
                 GetTenancyNameOrNull(),
