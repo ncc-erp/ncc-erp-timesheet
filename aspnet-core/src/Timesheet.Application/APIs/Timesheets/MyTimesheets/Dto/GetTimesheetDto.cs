@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Timesheet.Uitls;
@@ -22,8 +23,9 @@ namespace Timesheet.Timesheets.MyTimesheets.Dto
         public bool IsCharged { get; set; }
         public bool Billable { get; set; }
         public bool IsTemp { get; set; }
-        public string projectTargetUser { get; set; }
-        public int? workingTimeTargetUser { get; set; }
+        public string ProjectTargetUser { get; set; }
+        public int? WorkingTimeTargetUser { get; set; }
+        public int? OpenTalkJoinTime { get; set; }
         public string WorkType
         {
             get

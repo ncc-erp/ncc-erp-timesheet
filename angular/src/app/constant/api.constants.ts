@@ -180,7 +180,7 @@ export const APP_CONSTANT = {
   FILTER_DEFAULT: {
     'All': -1,
   },
-
+  DEFAULT_OPENTALK_TASK_NAME: 'Open Talk',
   EnumUserStatus: {
     Active: true,
     InActive: false
