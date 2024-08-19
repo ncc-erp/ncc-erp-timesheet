@@ -220,31 +220,42 @@ namespace Timesheet.Timesheets.MyTimesheets
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimesheet_View)]
         public async Task<List<GetTimesheetDto>> GetAllTimesheetOfUser(DateTime startDate, DateTime endDate)
         {
-            return await (from myTimesheet in WorkScope.All<MyTimesheet>()
-                          join ptask in WorkScope.All<ProjectTask>() on myTimesheet.ProjectTaskId equals ptask.Id
-                          join project in WorkScope.All<Project>() on ptask.ProjectId equals project.Id
-                          join task in WorkScope.All<Ncc.Entities.Task>() on ptask.TaskId equals task.Id
-                          join cus in WorkScope.All<Customer>() on project.CustomerId equals cus.Id
-                          where (myTimesheet.UserId == AbpSession.UserId.Value && myTimesheet.DateAt >= startDate && myTimesheet.DateAt <= endDate)
-                          select new GetTimesheetDto
-                          {
-                              Id = myTimesheet.Id,
-                              CustomerName = cus.Name,
-                              DateAt = myTimesheet.DateAt,
-                              ProjectCode = project.Code,
-                              ProjectName = project.Name,
-                              Status = myTimesheet.Status,
-                              TaskName = task.Name,
-                              WorkingTime = myTimesheet.WorkingTime,
-                              ProjectTaskId = ptask.Id,
-                              Note = myTimesheet.Note,
-                              TypeOfWork = myTimesheet.TypeOfWork,
-                              IsCharged = myTimesheet.IsCharged,
-                              Billable = ptask.Billable,
-                              IsTemp = myTimesheet.IsTemp,
-                              projectTargetUser = myTimesheet.ProjectTargetUser.User.FullName,
-                              workingTimeTargetUser = myTimesheet.TargetUserWorkingTime
-                          }).ToListAsync();
+            var userId = AbpSession.UserId.Value;
+
+            var openTalkTimes = WorkScope.GetAll<OpenTalk>()
+                .Where(x => x.UserId == userId)
+                .ToList()
+                .GroupBy(x => x.DateAt.Date)
+                .ToDictionary(g => g.Key, g => g.Sum(x => x.totalTime));
+
+            var timesheets = await (from myTimesheet in WorkScope.All<MyTimesheet>().AsNoTracking()
+                                    join ptask in WorkScope.All<ProjectTask>().AsNoTracking() on myTimesheet.ProjectTaskId equals ptask.Id
+                                    join project in WorkScope.All<Project>().AsNoTracking() on ptask.ProjectId equals project.Id
+                                    join task in WorkScope.All<Ncc.Entities.Task>().AsNoTracking() on ptask.TaskId equals task.Id
+                                    join cus in WorkScope.All<Customer>().AsNoTracking() on project.CustomerId equals cus.Id
+                                    where myTimesheet.UserId == userId && myTimesheet.DateAt >= startDate && myTimesheet.DateAt <= endDate
+                                    select new GetTimesheetDto
+                                    {
+                                        Id = myTimesheet.Id,
+                                        CustomerName = cus.Name,
+                                        DateAt = myTimesheet.DateAt,
+                                        ProjectCode = project.Code,
+                                        ProjectName = project.Name,
+                                        Status = myTimesheet.Status,
+                                        TaskName = task.Name,
+                                        WorkingTime = myTimesheet.WorkingTime,
+                                        ProjectTaskId = ptask.Id,
+                                        Note = myTimesheet.Note,
+                                        TypeOfWork = myTimesheet.TypeOfWork,
+                                        IsCharged = myTimesheet.IsCharged,
+                                        Billable = ptask.Billable,
+                                        IsTemp = myTimesheet.IsTemp,
+                                        ProjectTargetUser = myTimesheet.ProjectTargetUser.User.FullName,
+                                        WorkingTimeTargetUser = myTimesheet.TargetUserWorkingTime,
+                                        OpenTalkJoinTime = task.Name == "Open Talk" && openTalkTimes.ContainsKey(myTimesheet.DateAt.Date) ? openTalkTimes[myTimesheet.DateAt.Date] : 0
+                                    }).ToListAsync();
+
+            return timesheets;
         }
 
         private async System.Threading.Tasks.Task<bool> validUnLockTimsheet(MyTimesheetDto input)
@@ -286,13 +297,13 @@ namespace Timesheet.Timesheets.MyTimesheets
 
         private void CheckValidCreateUpdateTimesheet(MyTimesheetDto input, bool isUnlocked)
         {
-           
+
             var firstDateCanUnlock = GetFirstDateToLockTS(AbpSession.UserId.Value, isUnlocked).Result;
             if (input.DateAt.Date < firstDateCanUnlock)
             {
                 throw new UserFriendlyException("Timesheet was locked! You can log timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
             }
-           
+
         }
         public async Task<DateTime> GetFirstDateToLockTS(long userId, bool isUnlocked)
         {
@@ -515,13 +526,13 @@ namespace Timesheet.Timesheets.MyTimesheets
             //var isUnlock = await validUnLockTimsheet(input);
             var isUnlocked = IsUserUnlockedToLogTS(AbpSession.UserId.Value);
             DateTime lockDate = _commonService.getlockDateUser();
-            
+
             if (!isUnlocked && input.DateAt.Date < lockDate)
             {
                 throw new UserFriendlyException("You can't update this Timesheet. Go to ims.nccsoft.vn > Unlock timesheet");
             }
             CheckValidCreateUpdateTimesheet(input, isUnlocked);
-            
+
 
             var item = await WorkScope.GetAsync<MyTimesheet>(input.Id);
             if (item == null)
@@ -952,7 +963,7 @@ namespace Timesheet.Timesheets.MyTimesheets
 
 
             var lastWorkingDate = today.AddDays(-1);
-            while(count >=0)
+            while (count >= 0)
             {
                 if (!exceptDates.Contains(lastWorkingDate)
                     && lastWorkingDate.DayOfWeek != DayOfWeek.Sunday
@@ -1041,7 +1052,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                 .Where(s => s.TypeOfWork == TypeOfWork.NormalWorkingHours)
                 .FirstOrDefault();
 
-            if(myTS == null || myTS == default)
+            if (myTS == null || myTS == default)
             {
                 myTS = new MyTimesheet
                 {
@@ -1161,7 +1172,7 @@ namespace Timesheet.Timesheets.MyTimesheets
         }
 
         [HttpGet]
-        public WarningMyTimesheetDto WarningMyTimesheet(DateTime dateAt, int workingTime,int? timesheetId)
+        public WarningMyTimesheetDto WarningMyTimesheet(DateTime dateAt, int workingTime, int? timesheetId)
         {
             var userId = AbpSession.UserId.Value;
             var timekeepings = WorkScope.GetAll<Timekeeping>()
@@ -1194,7 +1205,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                  AbsenceTime = s.AbsenceTime
              }).ToList();
 
-            var isDayOffSetting =  WorkScope.GetAll<DayOffSetting>()
+            var isDayOffSetting = WorkScope.GetAll<DayOffSetting>()
                      .Where(s => s.DayOff.Date == dateAt.Date)
                      .Select(s => s.DayOff.Date).Any();
 

@@ -60,6 +60,7 @@
                     <td>
                       <span> <b>[{{ item.projectName }}]</b> {{ item.taskName }} - </span>
                         <span [ngClass]="item.isTemp? 'temp': 'official'">{{item.workType}}</span>
+                        <span *ngIf="item.taskName==APP_CONSTANT.DEFAULT_OPENTALK_TASK_NAME"> - Join Time: {{item.openTalkJoinTime || 0}} mins</span>
                         <span *ngIf="item.projectTargetUser"> TargetUser: {{item.projectTargetUser}} - TargetTime: {{convertMinuteToFloat(item.workingTimeTargetUser)}}h</span>
                       <span><textarea matInput [readonly]="!item.isEditing">{{item.note}}</textarea></span>
                     </td>
