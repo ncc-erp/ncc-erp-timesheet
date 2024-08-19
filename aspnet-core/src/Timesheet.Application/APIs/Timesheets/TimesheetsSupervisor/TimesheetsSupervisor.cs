@@ -104,6 +104,7 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                                  .Where(x => userIds.Contains(x.UserId))
                                  .Where(x => projectIds.Contains(x.ProjectTask.ProjectId))
                                  .WhereIf(opentalkTime.HasValue, x => x.ProjectTaskId == OpenTalkID)
+                                 .WhereIf(userId.HasValue, x => x.UserId == userId)
                                  .Select (x => new
                                  {
                                      Status = x.Status,
