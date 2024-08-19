@@ -1,3 +1,21 @@
+.ms-off::after {
+  display: none;
+}
+.ms-on::after {
+  display: inline-block;
+}
+.ms-on::after, .ms-off::after {
+  content: 'minute(s)';
+  position: absolute;
+  right: 0px;
+  transition: all .05s ease-in-out;
+}
+.ms-off:focus-within::after {
+  display: inline-block;
+}
+.opentalkFiler:focus-within{
+  padding-right: 65px;
+}
 .heading-checkbox {
     position: absolute;
     right: 20px;
