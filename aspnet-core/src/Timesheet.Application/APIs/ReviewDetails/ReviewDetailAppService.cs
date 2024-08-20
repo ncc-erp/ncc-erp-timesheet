@@ -64,7 +64,10 @@ namespace Timesheet.APIs.ReviewDetails
         [HttpPost]
         public async Task<PagedResultDto<ReviewDetailDto>> GetAllDetails(GridParam input, long reviewId, long? branchId)
         {
-            var levelChange = input.FilterItems?.FirstOrDefault(x => x.PropertyName == "levelChange");
+
+            #region OldCode
+            /*
+             * var levelChange = input.FilterItems?.FirstOrDefault(x => x.PropertyName == "levelChange");
             int valueLevelChange = -1;
             if (levelChange != null)
             {
@@ -155,7 +158,101 @@ namespace Timesheet.APIs.ReviewDetails
             var result = await reviewDetails.OrderBy(x => x.InternshipId).GetGridResult(reviewDetails, input);
             //return await Result.ToListAsync();
             return new PagedResultDto<ReviewDetailDto>(result.TotalCount, result.Items);
+             */
+            #endregion
+            #region New Code
+            //Use AsNoTracking to improve performance, change tracker wont track 
+
+            // Handle the level change filter
+            var levelChange = input.FilterItems?.FirstOrDefault(x => x.PropertyName == "levelChange");
+            int valueLevelChange = -1;  // Initialize with default value
+            if (levelChange != null)
+            {
+                if (int.TryParse((string)levelChange.Value, out int parsedValue))
+                {
+                    valueLevelChange = parsedValue;
+                }
+                input.FilterItems.Remove(levelChange);
+            }
+
+            // Combine retrieval of current review and previous reviews' data
+            var reviewsQuery = await WorkScope.GetAll<ReviewDetail>().AsNoTracking()
+                .Include(x => x.Review)
+                .Include(r => r.Reviewer)
+                .Include(r => r.InterShip).ThenInclude(i => i.Branch)
+                .Include(r => r.InterShip).ThenInclude(i => i.Position)
+                 .Where(x => x.ReviewId == reviewId && (!branchId.HasValue || x.InterShip.BranchId == branchId))
+                .Where(x => valueLevelChange == -1 || x.NewLevel == x.CurrentLevel)
+                .ToListAsync();
+
+            var currentReview = reviewsQuery
+                .Where(x => x.ReviewId == reviewId)
+                .Select(x => new { x.Review.Month, x.Review.Year })
+                .FirstOrDefault();
+            var internshipIds = reviewsQuery.Select(x => x.InternshipId).ToList();
+            if (currentReview == null)
+            {
+                return new PagedResultDto<ReviewDetailDto> { Items = new List<ReviewDetailDto>(), TotalCount = 0 };
+            }
+
+            var previousReviewData = await WorkScope.GetAll<ReviewDetail>().AsNoTracking()
+                                                      .Where(x => internshipIds.Contains(x.InternshipId))
+                                                 .Where(x => x.Review.Month <= (currentReview.Month != 1 ? currentReview.Month - 1 : 12)
+                                                          && x.Review.Year <= (currentReview.Month != 1 ? currentReview.Year : currentReview.Year - 1))
+                                                 .OrderByDescending(x => x.Review.Year).OrderByDescending(x => x.Review.Month)
+                                                 .Select(x => new { x.InternshipId, x.RateStar })
+                                                 .ToListAsync();
+
+
+
+
+            var reviewDetails = reviewsQuery
+                .Select(rv => new ReviewDetailDto
+                {
+                    Id = rv.Id,
+                    InternshipId = rv.InternshipId,
+                    InternName = rv.InterShip.FullName,
+                    InternEmail = rv.InterShip.EmailAddress,
+                    InternAvatar = rv.InterShip.AvatarPath,
+                    Branch = rv.InterShip.BranchOld,
+                    ReviewerId = rv.ReviewerId,
+                    ReviewerName = rv.Reviewer.FullName,
+                    ReviewerEmail = rv.Reviewer.EmailAddress,
+                    ReviewerAvatar = rv.Reviewer.AvatarPath,
+                    CurrentLevel = rv.CurrentLevel,
+                    NewLevel = rv.NewLevel,
+                    UserLevel = rv.InterShip.Level,
+                    Status = rv.Status,
+                    UpdatedAt = rv.LastModificationTime ?? rv.CreationTime,
+                    ReviewId = rv.ReviewId,
+                    Note = rv.Note.IsEmpty() ? "" : rv.Note.Replace("<strong>", "").Replace("</strong>", ""),
+                    UpdatedId = rv.LastModifierUserId,
+                    UpdatedName = rv.LastModifierUserId.HasValue ? WorkScope.GetAll<User>().FirstOrDefault(u => u.Id == rv.LastModifierUserId)?.FullName : null,
+                    Type = (rv.NewLevel >= UserLevel.FresherMinus) ? rv.Type : Usertype.Internship,
+                    IsFullSalary = rv.IsFullSalary,
+                    SubLevel = rv.SubLevel,
+                    RateStar = rv.RateStar,
+                    PreviousRateStar = previousReviewData.FirstOrDefault(p => p.InternshipId == rv.InternshipId)?.RateStar,
+                    BranchColor = rv.InterShip.Branch?.Color,
+                    BranchDisplayName = rv.InterShip.Branch?.DisplayName,
+                    BranchId = rv.InterShip.Branch?.Id,
+                    PositionShortName = rv.InterShip.Position?.ShortName,
+                    PositionId = rv.InterShip.Position?.Id,
+                    PositionColor = rv.InterShip.Position?.Color,
+                    Average = rv.RateStar,
+                    PreviousAverage = previousReviewData.FirstOrDefault(p => p.InternshipId == rv.InternshipId)?.RateStar,
+                    ReviewInternPrivateNoteDtos = new List<ReviewInternPrivateNoteDto>()// the note unused
+                }).ToList()
+                ;
+
+            return new PagedResultDto<ReviewDetailDto>
+            {
+                Items = reviewDetails,
+                TotalCount = reviewDetails.Count
+            };
+            #endregion
         }
+
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AddNew)]
         [HttpPost]
@@ -636,7 +733,7 @@ namespace Timesheet.APIs.ReviewDetails
             if (detail.Status == ReviewInternStatus.Approved || detail.Status == ReviewInternStatus.Reviewed)
             {
                 detail.Status = ReviewInternStatus.Rejected;
-                if(detail.Status == ReviewInternStatus.Rejected)
+                if (detail.Status == ReviewInternStatus.Rejected)
                 {
                     detail.NewLevel = detail.CurrentLevel;
                 }
@@ -968,8 +1065,8 @@ namespace Timesheet.APIs.ReviewDetails
             reviewDetail.NewLevel = input.NewLevel;
             reviewDetail.Type = input.Type.Value;
             reviewDetail.SubLevel = input.SubLevel;
-            reviewDetail.IsFullSalary = input.IsFullSalary;            
-            reviewDetail.Note = input.Note;            
+            reviewDetail.IsFullSalary = input.IsFullSalary;
+            reviewDetail.Note = input.Note;
             reviewDetail.Salary = input.Salary;
 
             await WorkScope.UpdateAsync(reviewDetail);
@@ -1202,12 +1299,13 @@ namespace Timesheet.APIs.ReviewDetails
             detail.Note = sbNote.ToString();
 
             //add PM comment
-            if (input.PrivateNote != null){
+            if (input.PrivateNote != null)
+            {
                 var reviewInternComment = new ReviewInternPrivateNote
                 {
                     ReviewDetailId = input.Id,
                     NoteByUserId = AbpSession.UserId.Value,
-                    PrivateNote = input.PrivateNote.Trim()   
+                    PrivateNote = input.PrivateNote.Trim()
                 };
                 await WorkScope.InsertAsync(reviewInternComment);
             }
@@ -1302,7 +1400,7 @@ namespace Timesheet.APIs.ReviewDetails
 
             await WorkScope.UpdateAsync(reviewDetail);
         }
-       
+
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern)]
         [HttpPost]
         public async Task HeadPmVerify(HeadPmVerifyDto input)
@@ -1389,7 +1487,7 @@ namespace Timesheet.APIs.ReviewDetails
                 throw new UserFriendlyException("Status can only be Reviewed or Rejected.");
             }
         }
-            
+
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern)]
         [HttpPost]
         public async Task HeadPmVerifyOrRejectAll(List<HeadPmVerifyDto> input)
@@ -1422,12 +1520,12 @@ namespace Timesheet.APIs.ReviewDetails
         {
             long userId = AbpSession.UserId.Value;
             var listInternshipMaxLevelMonths = await WorkScope.GetAll<ReviewDetail>()
-                        .Where(x =>  x.IsDeleted == false && x.NewLevel != null && x.NewLevel.Value < UserLevel.FresherMinus && x.Status != ReviewInternStatus.Draft)
+                        .Where(x => x.IsDeleted == false && x.NewLevel != null && x.NewLevel.Value < UserLevel.FresherMinus && x.Status != ReviewInternStatus.Draft)
                         .GroupBy(x => x.InternshipId)
                         .Select(gp => new InternshipMaxLevelMonthsDto
                         {
                             internshipId = gp.Key,
-                            maxLevel = gp.Max(y=> y.NewLevel).Value,
+                            maxLevel = gp.Max(y => y.NewLevel).Value,
                             countMonthLevelMax = gp.Count(rd => rd.NewLevel == gp.Max(y => y.NewLevel))
                         })
                         .ToListAsync();
