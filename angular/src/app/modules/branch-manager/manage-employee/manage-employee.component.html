@@ -81,6 +81,24 @@
                 <th class="text-center col-lg-3">Users</th>
                 <th class="text-center" style="width: 25px">Position</th>
                 <th class="text-center col-lg-2">
+                   <div class="level_sort">
+                        <span>Level</span>
+                        <span (click)="toggleLevelSortOrder()">
+                            <i
+                                class="pi pi-sort-amount-up text-primary p-l-5"
+                                role="button"
+                                *ngIf="sortLevel === sortProjectUserNumber.UP_LEVEL"
+                            ></i>
+                            <i
+                                class="pi pi-sort-amount-down text-primary p-l-5"
+                                role="button"
+                                *ngIf="sortLevel === sortProjectUserNumber.DOWN_LEVEL"
+                            ></i>
+                        </span>
+                   </div>
+                  </th>
+                
+                <th class="text-center col-lg-2">
                    <div class="project_sort">
                        <span>Number of Project</span>
                        <span (click)="toggleSortOrder(true)">
@@ -156,6 +174,9 @@
                 </td>
                 <!-- position -->
                 <td class="text-center col-lg-2">{{user.positionName}}</td>
+                <!-- level -->
+                <td class="text-center col-lg-2">
+                  <span class="label" [ngStyle]="userLevels[user.level]?.style">{{userLevels[user.level]?.name}}</span>
                 <td class="text-center col-lg-1">{{user.projectCount}}</td>
                 <td class="col-lg-5" style="padding: 0;" (click)="togglePrivateNote(user)">
                   <div class="project_list mb-0 custom-scrollbar" [ngClass]="user.hideProjectName === false ? 'preReview' : 'review'"

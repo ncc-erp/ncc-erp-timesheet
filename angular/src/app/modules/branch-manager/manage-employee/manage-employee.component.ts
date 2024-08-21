@@ -32,6 +32,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   sortProject: number = ESortProjectUserNumber.DOWN_PROJECT;
   sortNumberOfProject: number  = ESortProjectUserNumber.DOWN_NUMBER;
   sortProjectUserNumber = ESortProjectUserNumber;
+  sortLevel: number = ESortProjectUserNumber.DOWN_LEVEL;
   currentComparision = ESortProjectUserNumber.DOWN_NUMBER;
 
   @Input() listPosition: PositionDto[];
@@ -63,7 +64,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     { value: 1, label: 'Internship' },
     { value: 2, label: 'Collaborator' }
   ];
-
+ 
   ngOnInit() {
   }
   filterPosition(): void{
@@ -189,7 +190,15 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     this.endDate=dateInfo.endDate;
     this.refresh();
   }
+  toggleLevelSortOrder() {
+    this.sortLevel = this.sortLevel === ESortProjectUserNumber.UP_LEVEL 
+        ? ESortProjectUserNumber.DOWN_LEVEL 
+        : ESortProjectUserNumber.UP_LEVEL;
 
+    this.currentComparision = this.sortLevel;
+    this.sortType = ESortType.LEVEL;
+    this.refresh();
+}
   toggleSortOrder(click: boolean) {
       if (click === true) {
           if (this.sortNumberOfProject === ESortProjectUserNumber.UP_NUMBER) {
