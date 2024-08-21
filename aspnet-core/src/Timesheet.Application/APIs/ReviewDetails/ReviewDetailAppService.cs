@@ -202,7 +202,7 @@ namespace Timesheet.APIs.ReviewDetails
                                                  .Select(x => new { x.InternshipId, x.RateStar }).ToListAsync();
                                                  ;
             var rvQuery = reviewsQuery.AsQueryable();
-            var reviewDetails =  rvQuery.GetGridResultSync(rvQuery, input);
+            var reviewDetails =rvQuery.GetGridResultSync(rvQuery, input);
             var result = reviewDetails.Items
                 .Select(rv => new ReviewDetailDto
                 {
