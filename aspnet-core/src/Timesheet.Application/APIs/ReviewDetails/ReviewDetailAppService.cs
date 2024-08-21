@@ -176,37 +176,34 @@ namespace Timesheet.APIs.ReviewDetails
             }
 
             // Combine retrieval of current review and previous reviews' data
-            var reviewsQuery = await WorkScope.GetAll<ReviewDetail>().AsNoTracking()
+            var reviewsQuery =  WorkScope.GetAll<ReviewDetail>().AsNoTracking()
                 .Include(x => x.Review)
                 .Include(r => r.Reviewer)
                 .Include(r => r.InterShip).ThenInclude(i => i.Branch)
                 .Include(r => r.InterShip).ThenInclude(i => i.Position)
                  .Where(x => x.ReviewId == reviewId && (!branchId.HasValue || x.InterShip.BranchId == branchId))
-                .Where(x => valueLevelChange == -1 || x.NewLevel == x.CurrentLevel)
-                .ToListAsync();
-
+                .Where(x => valueLevelChange == -1 || x.NewLevel == x.CurrentLevel);
+          
             var currentReview = reviewsQuery
                 .Where(x => x.ReviewId == reviewId)
                 .Select(x => new { x.Review.Month, x.Review.Year })
                 .FirstOrDefault();
-            var internshipIds = reviewsQuery.Select(x => x.InternshipId).ToList();
+            var internshipIds = reviewsQuery.Select(x => x.InternshipId);
             if (currentReview == null)
             {
                 return new PagedResultDto<ReviewDetailDto> { Items = new List<ReviewDetailDto>(), TotalCount = 0 };
             }
 
-            var previousReviewData = await WorkScope.GetAll<ReviewDetail>().AsNoTracking()
+            var previousReviewData =  WorkScope.GetAll<ReviewDetail>().AsNoTracking()
                                                       .Where(x => internshipIds.Contains(x.InternshipId))
                                                  .Where(x => x.Review.Month <= (currentReview.Month != 1 ? currentReview.Month - 1 : 12)
                                                           && x.Review.Year <= (currentReview.Month != 1 ? currentReview.Year : currentReview.Year - 1))
                                                  .OrderByDescending(x => x.Review.Year).OrderByDescending(x => x.Review.Month)
                                                  .Select(x => new { x.InternshipId, x.RateStar })
-                                                 .ToListAsync();
+                                                 ;
 
-
-
-
-            var reviewDetails = reviewsQuery
+            var reviewDetails = await reviewsQuery.GetGridResult(reviewsQuery, input);
+            var result = reviewDetails.Items
                 .Select(rv => new ReviewDetailDto
                 {
                     Id = rv.Id,
@@ -244,11 +241,10 @@ namespace Timesheet.APIs.ReviewDetails
                     ReviewInternPrivateNoteDtos = new List<ReviewInternPrivateNoteDto>()// the note unused
                 }).ToList()
                 ;
-
             return new PagedResultDto<ReviewDetailDto>
             {
-                Items = reviewDetails,
-                TotalCount = reviewDetails.Count
+                Items = result,
+                TotalCount = reviewDetails.TotalCount
             };
             #endregion
         }
