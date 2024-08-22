@@ -64,103 +64,6 @@ namespace Timesheet.APIs.ReviewDetails
         [HttpPost]
         public async Task<PagedResultDto<ReviewDetailDto>> GetAllDetails(GridParam input, long reviewId, long? branchId)
         {
-
-            #region OldCode
-            /*
-             * var levelChange = input.FilterItems?.FirstOrDefault(x => x.PropertyName == "levelChange");
-            int valueLevelChange = -1;
-            if (levelChange != null)
-            {
-                valueLevelChange = Convert.ToInt32(levelChange.Value);
-                input.FilterItems.Remove(levelChange);
-            }
-            var currentReview = await WorkScope.GetAll<ReviewDetail>().Where(x => x.ReviewId == reviewId).Select(x => new { x.Review.Month, x.Review.Year }).FirstOrDefaultAsync();
-            if (currentReview == null)
-            {
-                return null;
-            }
-            var previousReview = await WorkScope.GetAll<ReviewDetail>()
-                                                .Where(x => x.Review.Month <= (currentReview.Month != 1 ? currentReview.Month - 1 : 12)
-                                                         && x.Review.Year <= (currentReview.Month != 1 ? currentReview.Year : currentReview.Year - 1))
-                                                .OrderByDescending(x => x.Review.Year).OrderByDescending(x => x.Review.Month)
-                                                .Select(x => new { x.InternshipId, x.RateStar })
-                                                .ToListAsync();
-
-            var qnote = from c in WorkScope.GetAll<ReviewInternPrivateNote>()
-                           join r in WorkScope.GetAll<ReviewDetail>() on c.ReviewDetailId equals r.Id
-                           join u in WorkScope.GetAll<User>() on c.NoteByUserId equals u.Id
-                           select new ReviewInternPrivateNoteDto
-                           {
-                               Id = c.Id,
-                               ReviewDetailId = c.ReviewDetailId,
-                               NoteByUserId = c.NoteByUserId,
-                               NoteByUserName = u.Name,
-                               PrivateNote = c.PrivateNote,
-                               Created = c.CreationTime,
-                               ReviewInternNoteType = c.ReviewInternNoteType
-                           };
-            var listNote = qnote.ToList();
-            var reviewDetails = from rv in WorkScope.GetAll<ReviewDetail>()
-                                //Tạm thời chưa sửa, chờ thêm thông tin
-                                //.Where(s => s.InterShip.Level <= UserLevel.Intern_3 || s.Status == ReviewInternStatus.SentEmail)
-                                        .Where(s => !branchId.HasValue || s.InterShip.BranchId == branchId)
-                                     .Where(x => x.ReviewId == reviewId
-                                     && (levelChange != null && valueLevelChange > -1 ? (valueLevelChange == 2 ? x.NewLevel == x.CurrentLevel : x.NewLevel != x.CurrentLevel) : true))
-                                    //join u in WorkScope.GetAll<User>()
-                                join u in WorkScope.GetAll<User>() on rv.LastModifierUserId equals u.Id into uu
-                                join c in listNote on rv.Id equals c.ReviewDetailId into cmt
-                                //on rv.InternshipId equals u.Id
-                                select new ReviewDetailDto
-                                {
-                                    Id = rv.Id,
-                                    InternshipId = rv.InternshipId,
-                                    InternName = rv.InterShip.FullName,
-                                    InternEmail = rv.InterShip.EmailAddress,
-                                    InternAvatar = rv.InterShip.AvatarPath,
-                                    Branch = rv.InterShip.BranchOld,
-                                    ReviewerId = rv.ReviewerId,
-                                    ReviewerName = rv.Reviewer.FullName,
-                                    ReviewerEmail = rv.Reviewer.EmailAddress,
-                                    ReviewerAvatar = rv.Reviewer.AvatarPath,
-                                    CurrentLevel = rv.CurrentLevel,
-                                    NewLevel = rv.NewLevel,
-                                    UserLevel = rv.InterShip.Level,
-                                    Status = rv.Status,
-                                    UpdatedAt = !rv.LastModificationTime.HasValue ? rv.CreationTime : rv.LastModificationTime.Value,
-                                    ReviewId = rv.ReviewId,
-                                    Note = rv.Note.IsEmpty() ? "" : rv.Note.Replace("<strong>", "").Replace("</strong>", ""),
-                                    UpdatedId = rv.LastModifierUserId,
-                                    UpdatedName = uu.FirstOrDefault().FullName,
-                                    Type = (rv.NewLevel >= UserLevel.FresherMinus) ? rv.Type : Usertype.Internship,
-                                    IsFullSalary = rv.IsFullSalary,
-                                    SubLevel = rv.SubLevel,
-                                    RateStar = rv.RateStar,
-                                    PreviousRateStar = previousReview.Where(x => x.InternshipId == rv.InternshipId).Select(x => x.RateStar).FirstOrDefault(),
-                                    BranchColor = rv.InterShip.Branch.Color,
-                                    BranchDisplayName = rv.InterShip.Branch.DisplayName,
-                                    BranchId = rv.InterShip.Branch.Id,
-                                    PositionShortName = rv.InterShip.Position.ShortName,
-                                    PositionId = rv.InterShip.Position.Id,
-                                    PositionColor = rv.InterShip.Position.Color,
-                                    Average = rv.RateStar,
-                                    PreviousAverage = previousReview.Where(x => x.InternshipId == rv.InternshipId).Select(x => x.RateStar).FirstOrDefault(),
-                                    ReviewInternPrivateNoteDtos = cmt.Select(s => new ReviewInternPrivateNoteDto
-                                    {
-                                        Id = s.Id,
-                                        ReviewDetailId = s.ReviewDetailId,
-                                        NoteByUserId = s.NoteByUserId,
-                                        NoteByUserName = s.NoteByUserName,
-                                        PrivateNote = s.PrivateNote,
-                                        Created = s.Created,
-                                        ReviewInternNoteType = s.ReviewInternNoteType
-                                    }).OrderByDescending(s => s.Created).ToList(),
-                                };
-            var result = await reviewDetails.OrderBy(x => x.InternshipId).GetGridResult(reviewDetails, input);
-            //return await Result.ToListAsync();
-            return new PagedResultDto<ReviewDetailDto>(result.TotalCount, result.Items);
-             */
-            #endregion
-            #region New Code
             //Use AsNoTracking to improve performance, change tracker wont track 
 
             // Handle the level change filter
@@ -176,6 +79,7 @@ namespace Timesheet.APIs.ReviewDetails
             }
 
             // Combine retrieval of current review and previous reviews' data
+            // use eagerloading to load all related data in one query
             var reviewsQuery =await  WorkScope.GetAll<ReviewDetail>().AsNoTracking()
                 .Include(x => x.Review)
                 .Include(r => r.Reviewer)
@@ -183,70 +87,65 @@ namespace Timesheet.APIs.ReviewDetails
                 .Include(r => r.InterShip).ThenInclude(i => i.Position)
                 .Where(x => x.ReviewId == reviewId && (!branchId.HasValue || x.InterShip.BranchId == branchId))
                 .Where(x => valueLevelChange == -1 || x.NewLevel == x.CurrentLevel).ToListAsync();
-          
             var currentReview = reviewsQuery
                 .Where(x => x.ReviewId == reviewId)
                 .Select(x => new { x.Review.Month, x.Review.Year })
                 .FirstOrDefault();
-            var internshipIds = reviewsQuery.Select(x => x.InternshipId).ToList();
             if (currentReview == null)
             {
                 return new PagedResultDto<ReviewDetailDto> { Items = new List<ReviewDetailDto>(), TotalCount = 0 };
             }
-
+            var internshipIds = reviewsQuery.Select(x => x.InternshipId).ToList();
             var previousReviewData =await WorkScope.GetAll<ReviewDetail>().AsNoTracking()
-                                                      .Where(x => internshipIds.Contains(x.InternshipId))
+                                                 .Where(x => internshipIds.Contains(x.InternshipId))
                                                  .Where(x => x.Review.Month <= (currentReview.Month != 1 ? currentReview.Month - 1 : 12)
                                                           && x.Review.Year <= (currentReview.Month != 1 ? currentReview.Year : currentReview.Year - 1))
                                                  .OrderByDescending(x => x.Review.Year).OrderByDescending(x => x.Review.Month)
                                                  .Select(x => new { x.InternshipId, x.RateStar }).ToListAsync();
-                                                 ;
+                                      
             var rvQuery = reviewsQuery.AsQueryable();
             var reviewDetails =rvQuery.GetGridResultSync(rvQuery, input);
-            var result = reviewDetails.Items
-                .Select(rv => new ReviewDetailDto
-                {
-                    Id = rv.Id,
-                    InternshipId = rv.InternshipId,
-                    InternName = rv.InterShip.FullName,
-                    InternEmail = rv.InterShip.EmailAddress,
-                    InternAvatar = rv.InterShip.AvatarPath,
-                    Branch = rv.InterShip.BranchOld,
-                    ReviewerId = rv.ReviewerId,
-                    ReviewerName = rv.Reviewer.FullName,
-                    ReviewerEmail = rv.Reviewer.EmailAddress,
-                    ReviewerAvatar = rv.Reviewer.AvatarPath,
-                    CurrentLevel = rv.CurrentLevel,
-                    NewLevel = rv.NewLevel,
-                    UserLevel = rv.InterShip.Level,
-                    Status = rv.Status,
-                    UpdatedAt = rv.LastModificationTime ?? rv.CreationTime,
-                    ReviewId = rv.ReviewId,
-                    Note = rv.Note.IsEmpty() ? "" : rv.Note.Replace("<strong>", "").Replace("</strong>", ""),
-                    UpdatedId = rv.LastModifierUserId,
-                    UpdatedName = rv.LastModifierUserId.HasValue ? WorkScope.GetAll<User>().FirstOrDefault(u => u.Id == rv.LastModifierUserId)?.FullName : null,
-                    Type = (rv.NewLevel >= UserLevel.FresherMinus) ? rv.Type : Usertype.Internship,
-                    IsFullSalary = rv.IsFullSalary,
-                    SubLevel = rv.SubLevel,
-                    RateStar = rv.RateStar,
-                    PreviousRateStar = previousReviewData.FirstOrDefault(p => p.InternshipId == rv.InternshipId)?.RateStar,
-                    BranchColor = rv.InterShip.Branch?.Color,
-                    BranchDisplayName = rv.InterShip.Branch?.DisplayName,
-                    BranchId = rv.InterShip.Branch?.Id,
-                    PositionShortName = rv.InterShip.Position?.ShortName,
-                    PositionId = rv.InterShip.Position?.Id,
-                    PositionColor = rv.InterShip.Position?.Color,
-                    Average = rv.RateStar,
-                    PreviousAverage = previousReviewData.FirstOrDefault(p => p.InternshipId == rv.InternshipId)?.RateStar,
-                    ReviewInternPrivateNoteDtos = new List<ReviewInternPrivateNoteDto>()// the note unused
-                }).ToList()
-                ;
+            var result = reviewDetails.Items.Select(rv => new ReviewDetailDto
+                            {
+                                Id = rv.Id,
+                                InternshipId = rv.InternshipId,
+                                InternName = rv.InterShip.FullName,
+                                InternEmail = rv.InterShip.EmailAddress,
+                                InternAvatar = rv.InterShip.AvatarPath,
+                                Branch = rv.InterShip.BranchOld,
+                                ReviewerId = rv.ReviewerId,
+                                ReviewerName = rv.Reviewer.FullName,
+                                ReviewerEmail = rv.Reviewer.EmailAddress,
+                                ReviewerAvatar = rv.Reviewer.AvatarPath,
+                                CurrentLevel = rv.CurrentLevel,
+                                NewLevel = rv.NewLevel,
+                                UserLevel = rv.InterShip.Level,
+                                Status = rv.Status,
+                                UpdatedAt = rv.LastModificationTime ?? rv.CreationTime,
+                                ReviewId = rv.ReviewId,
+                                Note = rv.Note.IsEmpty() ? "" : rv.Note.Replace("<strong>", "").Replace("</strong>", ""),
+                                UpdatedId = rv.LastModifierUserId,
+                                UpdatedName = rv.LastModifierUserId.HasValue ? WorkScope.GetAll<User>().FirstOrDefault(u => u.Id == rv.LastModifierUserId)?.FullName : null,
+                                Type = (rv.NewLevel >= UserLevel.FresherMinus) ? rv.Type : Usertype.Internship,
+                                IsFullSalary = rv.IsFullSalary,
+                                SubLevel = rv.SubLevel,
+                                RateStar = rv.RateStar,
+                                PreviousRateStar = previousReviewData.FirstOrDefault(p => p.InternshipId == rv.InternshipId)?.RateStar,
+                                BranchColor = rv.InterShip.Branch?.Color,
+                                BranchDisplayName = rv.InterShip.Branch?.DisplayName,
+                                BranchId = rv.InterShip.Branch?.Id,
+                                PositionShortName = rv.InterShip.Position?.ShortName,
+                                PositionId = rv.InterShip.Position?.Id,
+                                PositionColor = rv.InterShip.Position?.Color,
+                                Average = rv.RateStar,
+                                PreviousAverage = previousReviewData.FirstOrDefault(p => p.InternshipId == rv.InternshipId)?.RateStar,
+                                ReviewInternPrivateNoteDtos = new List<ReviewInternPrivateNoteDto>()// the note unused
+                            }).ToList();
             return new PagedResultDto<ReviewDetailDto>
             {
                 Items = result,
                 TotalCount = reviewDetails.TotalCount
             };
-            #endregion
         }
 
 
