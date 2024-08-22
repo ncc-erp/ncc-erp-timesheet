@@ -1569,7 +1569,7 @@ namespace Timesheet.APIs.RequestDays
                 throw;
             }            
         }
-        private async Task<Expression<Func<AbsenceDayDetail, bool>>> GetPredicate(List<long> projectIds)
+        private async Task<Expression<Func<AbsenceDayDetail, bool>>> GetWithBranchAndActiveMembersPredicate(List<long> projectIds)
         {
             // Check for permission and get branchId from current user
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
@@ -1610,7 +1610,7 @@ namespace Timesheet.APIs.RequestDays
         public async Task<List<CountRequestDto>> GetCountRequestForUser(InputRequestDto input)
         {
             RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
-            var predicate = await GetPredicate(input.projectIds);
+            var predicate = await GetWithBranchAndActiveMembersPredicate(input.projectIds);
 
             if (input.type.Value == RequestType.Remote && input.remoteOfWeek.HasValue)
             {
@@ -1697,7 +1697,7 @@ namespace Timesheet.APIs.RequestDays
             });
 
             RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
-            var predicate = await GetPredicate(input.projectIds);
+            var predicate = await GetWithBranchAndActiveMembersPredicate(input.projectIds);
 
             // Adjust start and end dates to ensure proper week calculations
             var startDate = DateTimeUtils.FirstDayOfWeek(input.date);
@@ -1743,12 +1743,7 @@ namespace Timesheet.APIs.RequestDays
             if(input.type.Value == RequestType.Remote && input.remoteOfWeek.HasValue && input.remoteOfWeek.Value > 0)
             {
                 // Group elements by CreatorUserId
-                // & the first date of DateAt's week (to determine which week this DateAt falls in)
-                result = result.GroupBy(s => new
-                {
-                    WeekStartDate = DateTimeUtils.FirstDayOfWeek(s.DateAt),
-                    CreatorUserId = s.UserId
-                })
+                result = result.GroupBy(s => s.UserId)
                     .Where(g => g.Count() == input.remoteOfWeek.Value)
                     .SelectMany(g => g) // Flatten groups
                     .Where(s => s.DateAt == input.date)
