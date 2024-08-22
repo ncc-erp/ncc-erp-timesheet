@@ -1700,8 +1700,8 @@ namespace Timesheet.APIs.RequestDays
             var predicate = await GetPredicate(input.projectIds);
 
             // Adjust start and end dates to ensure proper week calculations
-            var startDate = DateTimeUtils.FirstDayOfWeek(DateTimeUtils.FirstDayOfMonth(input.date));
-            var endDate = DateTimeUtils.LastDayOfWeek(DateTimeUtils.LastDayOfMonth(input.date));
+            var startDate = DateTimeUtils.FirstDayOfWeek(input.date);
+            var endDate = DateTimeUtils.LastDayOfWeek(input.date);
 
             var result = await (from s in WorkScope.GetAll<AbsenceDayDetail>()
                   .Where(s => s.DateAt >= startDate && s.DateAt <= endDate)
