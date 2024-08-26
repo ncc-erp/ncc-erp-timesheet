@@ -88,7 +88,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                 userIds.Add(jq.UserId);
                 projectIds.Add(jq.ProjectId);
             }
-            var projects = WorkScope.GetAll<ProjectUser>()
+            var projects = WorkScope.GetAll<ProjectUser>().AsNoTracking()
                             .Where(s => projectIds.Contains(s.ProjectId) && s.Type == ProjectUserType.PM)
                             .Select(s => new { s.ProjectId, s.User.FullName })
                             .GroupBy(s => s.ProjectId)
@@ -152,6 +152,18 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                         break;
                 }
             }
+            else if (sortType == (int)ESortType.LEVEL)
+            {
+                switch (compare)
+                {
+                    case (int)ESortProjectUserNumber.UP_LEVEL:
+                        query = query.OrderBy(user => user.Level);
+                        break;
+                    case (int)ESortProjectUserNumber.DOWN_LEVEL:
+                        query = query.OrderByDescending(user => user.Level);
+                        break;
+                }
+            }
             var queryRes = query.Select(u => new UserProjectsDto
             {
                 Id = u.Id,
@@ -168,6 +180,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                 PositionName = u.PositionName,
                 ProjectUsers = u.ProjectUsers,
                 ProjectCount = u.ProjectCount,
+                
             });
             var temp = await queryRes.GetGridResult(queryRes, input);
             return new PagedResultDto<UserProjectsDto>(temp.TotalCount, temp.Items);

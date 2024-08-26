@@ -15,6 +15,7 @@ namespace Timesheet.Timesheets.Timesheets.Dto
         public long ProjectId { get; set; }
         public string User { get; set; }
         public long UserId { get; set; }
+        public long ProjectTaskId { get; set; }
         public long TaskId { get; set; }
         public string TaskName { get; set; }
         public string MytimesheetNote { get; set; }

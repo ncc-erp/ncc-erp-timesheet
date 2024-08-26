@@ -29,11 +29,7 @@ pre {
     text-overflow: ellipsis;
     max-width: 30px;
 }
-@media screen and (max-width: 500px) {
-    .flex {
-        display: block;
-    }
-}
+
 .day-chip-full-day {
     background-color: #db0000  !important;
 }
@@ -107,18 +103,38 @@ pre {
 }
 .group{
     display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap-reverse;
+    flex-direction: column-reverse;
 }
 .group-btn{
     display: flex;
 }
+
+.group-btn> * + * {
+    margin-left: 8px;
+}
+
 .group-filter{
     display: flex;
 }
 
-.item{
-    margin-right: 17px;
+.group-filter > * + * {
+    margin-left: 8px;
+}
+
+@media only screen and (max-width: 750px) {
+    .group-filter{
+        display: flex;
+        flex-direction: column;
+    }
+    .group-filter > * + * {
+        margin-left: 0;
+    }
+}
+
+@media only screen and (max-width: 482px) {
+    .request-text {
+        display: none;
+    }
 }
 .view-detail{
     position: absolute;

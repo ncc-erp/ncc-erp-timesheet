@@ -397,21 +397,25 @@ namespace Timesheet.Timesheets.Projects
             var projects = qproject.Where(s => projectIds.Contains(s.Id)).AsNoTracking().AsEnumerable();
 
             var results = (from p in projects
-                           join members in projectMembers on p.Id equals members.ProjectId
-                           join pm in PMs on p.Id equals pm.ProjectId
-                           select new GetProjectDto
-                           {
-                               CustomerName = p.CustomerName,
-                               Id = p.Id,
-                               Name = p.Name,
-                               Code = p.Code,
-                               Status = p.Status,
-                               ProjectType = p.ProjectType,
-                               Pms = pm.PMs,
-                               ActiveMember = members.Count,
-                               TimeStart = p.TimeStart,
-                               TimeEnd = p.TimeEnd
-                           }).ToList();
+                          join members in projectMembers 
+                                on p.Id equals members.ProjectId into projectMembersGj
+                          from projectMembersSubGroup in projectMembersGj.DefaultIfEmpty()
+                          join pms in PMs
+                                on p.Id equals pms.ProjectId into projectPmsGj
+                          from projectPms in projectPmsGj.DefaultIfEmpty()
+                          select new GetProjectDto
+                          {
+                              CustomerName = p.CustomerName,
+                              Id = p.Id,
+                              Name = p.Name,
+                              Code = p.Code,
+                              Status = p.Status,
+                              ProjectType = p.ProjectType,
+                              Pms = projectPms?.PMs ?? new List<string>(),
+                              ActiveMember = projectMembersSubGroup?.Count ?? 0,
+                              TimeStart = p.TimeStart,
+                              TimeEnd = p.TimeEnd
+                          }).ToList();
             return results;
         }
 

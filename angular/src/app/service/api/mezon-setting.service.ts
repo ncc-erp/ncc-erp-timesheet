@@ -25,4 +25,8 @@ export class MezonSettingService extends BaseApiService {
   change(input: Object): Observable<any> {
     return this.http.post(this.rootUrl + '/Change', input);
   }
+
+  manualGetTimeJoinedOpenTalk(date: string): Observable<any> {
+    return this.http.get(this.rootUrl + `/createOpentalkLog?date=${date}`);
+  }
 }

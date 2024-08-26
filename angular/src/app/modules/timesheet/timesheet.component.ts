@@ -124,6 +124,8 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
   checkInFilterList = Object.keys(this.APP_CONSTANT.HaveCheckInFilter)
 
   public searchText: string = "";
+  public OpenTalkJoinTime: number;
+  public OpenTalkJoinTimeType: string;
 
   public listBranch: BranchDto[] = [];
   public branchId: number = 0;
@@ -200,7 +202,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
 
   getTimesheets() {
     this.isLoading = true;
-    this.timesheetService.getAllTimesheets(this.fromDate, this.toDate, this.filterStatus, Number(this.projectId),Number(this.checkInFilter), this.searchText, Number(this.branchId)).subscribe(obj => {
+    this.timesheetService.getAllTimesheets(this.fromDate, this.toDate, this.filterStatus, Number(this.projectId),Number(this.checkInFilter), this.searchText, Number(this.branchId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType).subscribe(obj => {
       //this.timesheets = obj.result;
       this.rawData = obj.result;
       this.totalCount = this.rawData.filter(ts => ts.isUserInProject).length;
@@ -213,7 +215,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
 
   }
   getQuantiyTimesheetStatus() {
-    this.timesheetService.getQuantiyTimesheetStatus(this.fromDate, this.toDate, Number(this.projectId), Number(this.checkInFilter), this.searchText, this.branchId).subscribe((obj: any) => {
+    this.timesheetService.getQuantiyTimesheetStatus(this.fromDate, this.toDate, Number(this.projectId), Number(this.checkInFilter), this.searchText, this.branchId, this.OpenTalkJoinTime, this.OpenTalkJoinTimeType).subscribe((obj: any) => {
       this.Timesheet_Statuses.forEach(item => {
         if(item.value === this.APP_CONSTANT.TimesheetStatus.All) {
           item.count = obj.result.reduce((previousValue, currentValue) => previousValue + currentValue.quantity, 0);
@@ -633,6 +635,16 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     if (type == 1) this.exportService.exportLogTimeSheetDay(data, fileName);
     else this.exportService.exportRemoteRequestDay(data, fileName);
     $('#modalSelectDay').modal('hide');
+  }
+
+  filterOpenTalk(type:string){
+    this.OpenTalkJoinTimeType = type;
+    this.refresh();
+  }
+  resetFilterOpenTalk(value: string): void {
+    if (value == "") {
+      this.refresh();
+    }
   }
 }
 
