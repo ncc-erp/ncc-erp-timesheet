@@ -111,6 +111,7 @@ namespace Timesheet.APIs.ReviewDetails
                               .Where(s => s.Status == TimesheetStatus.Approve)
                               .Where(s => !s.ProjectTask.Project.isAllUserBelongTo)
                               .Where(s => s.ProjectTask.Project.Status == ProjectStatus.Active)
+                              .Where(s => s.DateAt.Month == currentReview.Month && s.DateAt.Year == currentReview.Year)
                               .Where(s => internInMonthAndYear.Contains(s.UserId))
                                 select new
                                 {
