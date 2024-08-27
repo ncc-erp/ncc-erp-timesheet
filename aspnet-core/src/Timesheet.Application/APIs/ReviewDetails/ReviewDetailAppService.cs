@@ -64,38 +64,33 @@ namespace Timesheet.APIs.ReviewDetails
         [HttpPost]
         public async Task<PagedResultDto<ReviewDetailDto>> GetAllDetails(GridParam input, long reviewId, long? branchId)
         {
-            //Use AsNoTracking to improve performance, change tracker wont track 
 
-            // Handle the level change filter
             var levelChange = input.FilterItems?.FirstOrDefault(x => x.PropertyName == "levelChange");
-            int valueLevelChange = -1;  // Initialize with default value
+            int valueLevelChange = -1; 
             if (levelChange != null)
             {
-                if (int.TryParse((string)levelChange.Value, out int parsedValue))
-                {
-                    valueLevelChange = parsedValue;
-                }
+                valueLevelChange = Convert.ToInt32(levelChange.Value);
                 input.FilterItems.Remove(levelChange);
             }
-
-            // Combine retrieval of current review and previous reviews' data
-            // use eagerloading to load all related data in one query
-            var reviewsQuery = await WorkScope.GetAll<ReviewDetail>().AsNoTracking()
+            var reviewsQuery = WorkScope.GetAll<ReviewDetail>().AsNoTracking()
                 .Include(x => x.Review)
                 .Include(r => r.Reviewer)
                 .Include(r => r.InterShip).ThenInclude(i => i.Branch)
                 .Include(r => r.InterShip).ThenInclude(i => i.Position)
+                .Where(x => x.InterShip.UserName != null && x.InterShip.UserName.Contains(input.SearchText))
                 .Where(x => x.ReviewId == reviewId && (!branchId.HasValue || x.InterShip.BranchId == branchId))
-                .Where(x => valueLevelChange == -1 || x.NewLevel == x.CurrentLevel).ToListAsync();
-            var currentReview = reviewsQuery
-                .Where(x => x.ReviewId == reviewId)
+                .Where(x=>levelChange != null && valueLevelChange > -1 ? (valueLevelChange == 2 ? x.NewLevel == x.CurrentLevel : x.NewLevel != x.CurrentLevel) : true);
+
+            var reviewDetails = await reviewsQuery.GetGridResult(reviewsQuery, input);
+
+            var currentReview = reviewDetails.Items
                 .Select(x => new { x.Review.Month, x.Review.Year })
                 .FirstOrDefault();
             if (currentReview == null)
             {
                 return new PagedResultDto<ReviewDetailDto> { Items = new List<ReviewDetailDto>(), TotalCount = 0 };
             }
-            var internshipIds = reviewsQuery.Select(x => x.InternshipId).ToList();
+            var internshipIds = reviewDetails.Items.Select(x => x.InternshipId).ToList();
             var previousReviewData = await WorkScope.GetAll<ReviewDetail>().AsNoTracking()
                                                  .Where(x => internshipIds.Contains(x.InternshipId))
                                                  .Where(x => x.Review.Month <= (currentReview.Month != 1 ? currentReview.Month - 1 : 12)
@@ -103,8 +98,6 @@ namespace Timesheet.APIs.ReviewDetails
                                                  .OrderByDescending(x => x.Review.Year).OrderByDescending(x => x.Review.Month)
                                                  .Select(x => new { x.InternshipId, x.RateStar }).ToListAsync();
 
-            var rvQuery = reviewsQuery.AsQueryable();
-            var reviewDetails = rvQuery.GetGridResultSync(rvQuery, input);
             var result = reviewDetails.Items.Select(rv => new ReviewDetailDto
             {
                 Id = rv.Id,
@@ -125,7 +118,7 @@ namespace Timesheet.APIs.ReviewDetails
                 ReviewId = rv.ReviewId,
                 Note = rv.Note.IsEmpty() ? "" : rv.Note.Replace("<strong>", "").Replace("</strong>", ""),
                 UpdatedId = rv.LastModifierUserId,
-                UpdatedName = rv.LastModifierUserId.HasValue ? WorkScope.GetAll<User>().FirstOrDefault(u => u.Id == rv.LastModifierUserId)?.FullName : null,
+                UpdatedName = rv.LastModifierUserId.HasValue ? WorkScope.GetAll<User>().Where(u=>u.Id==rv.LastModifierUserId).Select(x=>new {FullName=x.Name+" "+x.Surname}).FirstOrDefault().FullName : null,
                 Type = (rv.NewLevel >= UserLevel.FresherMinus) ? rv.Type : Usertype.Internship,
                 IsFullSalary = rv.IsFullSalary,
                 SubLevel = rv.SubLevel,
