@@ -136,7 +136,7 @@ namespace Timesheet.APIs.ReviewDetails
             }).ToList();
             return new PagedResultDto<ReviewDetailDto>
             {
-                Items = result,
+                Items = result.OrderBy(x=>x.InternshipId),
                 TotalCount = reviewDetails.TotalCount
             };
         }
