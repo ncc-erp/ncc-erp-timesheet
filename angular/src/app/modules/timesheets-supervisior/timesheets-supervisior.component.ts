@@ -58,7 +58,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   users = [];
 
   public OpenTalkJoinTime: number;
-  public OpenTalkJoinTimeType: string;
+  public OpenTalkJoinTimeType: boolean = true;
 
   Timesheet_TypeOfWorks = [
     {
@@ -282,7 +282,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     this.OpenTalkJoinTime = void 0;
     this.getData();
   }
-  filterOpenTalk(type:string){
+  filterOpenTalk(type:boolean){
     this.OpenTalkJoinTimeType = type;
     this.getData();
   }

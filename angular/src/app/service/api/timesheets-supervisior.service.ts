@@ -16,7 +16,7 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     return 'TimesheetsSupervisor';
   }
 
-  getAll(startDate: string, endDate: string, status: number, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: string): Observable<any> {
+  getAll(startDate: string, endDate: string, status: number, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean): Observable<any> {
     let params : HttpParams = new HttpParams();
     params = params.append("startDate", startDate);
     params = params.append("endDate", endDate);
@@ -33,7 +33,7 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     return value
   }
 
-  GetQuantityTimesheetSupervisorStatus(startDate: string, endDate: string, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: string){
+  GetQuantityTimesheetSupervisorStatus(startDate: string, endDate: string, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean){
     let params : HttpParams = new HttpParams();
     params = params.append("startDate", startDate);
     params = params.append("endDate", endDate);
