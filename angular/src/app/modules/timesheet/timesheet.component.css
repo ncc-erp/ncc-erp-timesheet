@@ -107,6 +107,17 @@
   margin-top: 6px;
 }
 
+.actions-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  column-gap: 30px;
+}
+
+.actions-wrapper .action {
+  flex: 1;
+}
+
 @media screen and (max-width: 768px) {
   .header {
     flex-direction: column;
@@ -123,6 +134,24 @@
     margin-left: 0;
     width: 100%;
   }
+
+  .open-talk-type,
+  .open-talk-join-time,
+  .open-talk-type .form-group,
+  .open-talk-join-time .form-group {
+    margin-bottom: 0 !important;
+  }
+
+  .checkbox-all .form-group .text-center {
+    text-align: unset;
+    display: flex;
+    align-items: center;
+    column-gap: 8px;
+  }
+
+  .actions-wrapper {
+    column-gap: 20px;
+  }
 }
 
 @media screen and (max-width: 576px) {
@@ -131,12 +160,16 @@
   }
 
   ::ng-deep .body.table-responsive date-selector .wrapper .info {
-    column-gap: 20px;
+    width: 100%;
+    column-gap: 8px;
+    flex-direction: row-reverse;
+    justify-content: space-between;
   }
 
   ::ng-deep .body.table-responsive date-selector .wrapper .info h2 {
+    flex: 1;
+    font-size: 14px;
     padding: 0px !important;
-    font-size: 18px;
   }
 
   ::ng-deep .body.table-responsive date-selector .wrapper .select-date-type {

@@ -125,7 +125,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
 
   public searchText: string = "";
   public OpenTalkJoinTime: number;
-  public OpenTalkJoinTimeType: string;
+  public OpenTalkJoinTimeType: boolean = true;
 
   public listBranch: BranchDto[] = [];
   public branchId: number = 0;
@@ -637,7 +637,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     $('#modalSelectDay').modal('hide');
   }
 
-  filterOpenTalk(type:string){
+  filterOpenTalk(type : boolean){
     this.OpenTalkJoinTimeType = type;
     this.refresh();
   }
