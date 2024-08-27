@@ -66,7 +66,7 @@ namespace Timesheet.APIs.ReviewDetails
         {
 
             var levelChange = input.FilterItems?.FirstOrDefault(x => x.PropertyName == "levelChange");
-            int valueLevelChange = -1; 
+            int valueLevelChange = -1;
             if (levelChange != null)
             {
                 valueLevelChange = Convert.ToInt32(levelChange.Value);
@@ -77,10 +77,12 @@ namespace Timesheet.APIs.ReviewDetails
                 .Include(r => r.Reviewer)
                 .Include(r => r.InterShip).ThenInclude(i => i.Branch)
                 .Include(r => r.InterShip).ThenInclude(i => i.Position)
-                .Where(x => x.InterShip.UserName != null && x.InterShip.UserName.Contains(input.SearchText))
                 .Where(x => x.ReviewId == reviewId && (!branchId.HasValue || x.InterShip.BranchId == branchId))
-                .Where(x=>levelChange != null && valueLevelChange > -1 ? (valueLevelChange == 2 ? x.NewLevel == x.CurrentLevel : x.NewLevel != x.CurrentLevel) : true);
-
+                .Where(x => levelChange != null && valueLevelChange > -1 ? (valueLevelChange == 2 ? x.NewLevel == x.CurrentLevel : x.NewLevel != x.CurrentLevel) : true);
+            if (!input.SearchText.IsNullOrEmpty())
+            {
+                reviewsQuery = reviewsQuery.Where(x => x.InterShip.UserName != null && x.InterShip.UserName.Contains(input.SearchText));
+            }
             var reviewDetails = await reviewsQuery.GetGridResult(reviewsQuery, input);
 
             var currentReview = reviewDetails.Items
@@ -118,7 +120,7 @@ namespace Timesheet.APIs.ReviewDetails
                 ReviewId = rv.ReviewId,
                 Note = rv.Note.IsEmpty() ? "" : rv.Note.Replace("<strong>", "").Replace("</strong>", ""),
                 UpdatedId = rv.LastModifierUserId,
-                UpdatedName = rv.LastModifierUserId.HasValue ? WorkScope.GetAll<User>().Where(u=>u.Id==rv.LastModifierUserId).Select(x=>new {FullName=x.Name+" "+x.Surname}).FirstOrDefault().FullName : null,
+                UpdatedName = rv.LastModifierUserId.HasValue ? WorkScope.GetAll<User>().Where(u => u.Id == rv.LastModifierUserId).Select(x => new { FullName = x.Name + " " + x.Surname }).FirstOrDefault().FullName : null,
                 Type = (rv.NewLevel >= UserLevel.FresherMinus) ? rv.Type : Usertype.Internship,
                 IsFullSalary = rv.IsFullSalary,
                 SubLevel = rv.SubLevel,
@@ -133,10 +135,10 @@ namespace Timesheet.APIs.ReviewDetails
                 Average = rv.RateStar,
                 PreviousAverage = previousReviewData.FirstOrDefault(p => p.InternshipId == rv.InternshipId)?.RateStar,
                 ReviewInternPrivateNoteDtos = new List<ReviewInternPrivateNoteDto>()// the note unused
-            }).ToList();
+            }).OrderByDescending(s => s.InternshipId).ToList();
             return new PagedResultDto<ReviewDetailDto>
             {
-                Items = result.OrderBy(x=>x.InternshipId),
+                Items = result,
                 TotalCount = reviewDetails.TotalCount
             };
         }
