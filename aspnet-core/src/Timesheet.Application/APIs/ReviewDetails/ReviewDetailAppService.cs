@@ -1,7 +1,9 @@
 ﻿using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.BackgroundJobs;
+using Abp.Collections.Extensions;
 using Abp.Configuration;
+using Abp.Linq.Extensions;
 using Abp.UI;
 using Castle.Core.Internal;
 using Microsoft.AspNetCore.Hosting;
@@ -77,12 +79,10 @@ namespace Timesheet.APIs.ReviewDetails
                 .Include(r => r.Reviewer)
                 .Include(r => r.InterShip).ThenInclude(i => i.Branch)
                 .Include(r => r.InterShip).ThenInclude(i => i.Position)
+                .WhereIf(!input.SearchText.IsNullOrEmpty(), x => x.InterShip.UserName != null && x.InterShip.UserName.Contains(input.SearchText))
                 .Where(x => x.ReviewId == reviewId && (!branchId.HasValue || x.InterShip.BranchId == branchId))
                 .Where(x => levelChange != null && valueLevelChange > -1 ? (valueLevelChange == 2 ? x.NewLevel == x.CurrentLevel : x.NewLevel != x.CurrentLevel) : true);
-            if (!input.SearchText.IsNullOrEmpty())
-            {
-                reviewsQuery = reviewsQuery.Where(x => x.InterShip.UserName != null && x.InterShip.UserName.Contains(input.SearchText));
-            }
+
             var reviewDetails = await reviewsQuery.GetGridResult(reviewsQuery, input);
 
             var currentReview = reviewDetails.Items
