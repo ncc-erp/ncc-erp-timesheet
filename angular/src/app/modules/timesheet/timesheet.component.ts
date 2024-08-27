@@ -125,7 +125,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
 
   public searchText: string = "";
   public OpenTalkJoinTime: number;
-  public OpenTalkJoinTimeType: string;
+  public OpenTalkJoinTimeType: string = "true";
 
   public listBranch: BranchDto[] = [];
   public branchId: number = 0;

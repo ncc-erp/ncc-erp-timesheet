@@ -58,7 +58,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   users = [];
 
   public OpenTalkJoinTime: number;
-  public OpenTalkJoinTimeType: string;
+  public OpenTalkJoinTimeType: string = "true";
 
   Timesheet_TypeOfWorks = [
     {
