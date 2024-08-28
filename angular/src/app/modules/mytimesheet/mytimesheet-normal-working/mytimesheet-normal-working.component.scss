@@ -201,3 +201,25 @@ $name-col-width: 0;
 #normal-working table{
   margin-bottom: 0;
 }
+@media (min-width:320px) and (max-width:480px){
+  .year-month {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .header{
+    display: flex;
+    flex-direction: column;
+  }
+  .header-filter .header .filter-date .item {
+    margin-left: 0px;
+    margin-top: 1rem;
+  }
+  .header-filter .header .filter-date {
+    display: flex;
+    flex-direction: column;
+  }
+  .month{
+    margin-left: 0.5rem;
+  }
+}

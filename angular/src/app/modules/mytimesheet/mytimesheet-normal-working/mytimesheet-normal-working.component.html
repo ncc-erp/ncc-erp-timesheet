@@ -4,6 +4,7 @@
         <div class="header">
           <h2 class="title">{{ "Summary" | localize }}</h2> 
           <div class="filter-date">
+            <div class="year-month">
             <div class="item">
               <label class="mt-20">Year: </label>
               <mat-form-field appearance="outline">
@@ -15,7 +16,7 @@
               </mat-form-field>
             </div>
             <div class="item">
-              <label class="mt-20">Month: </label>
+              <label class="mt-20 month">Month: </label>
               <mat-form-field appearance="outline">
                 <mat-select name="monthSummarySelect" [(value)]="month" (selectionChange)="onDateChange()">
                   <mat-option *ngFor="let item of months" [value]='item'>
@@ -24,6 +25,7 @@
                 </mat-select>
               </mat-form-field>
             </div>
+          </div>
             <div class="item" >
               <label class="mt-20">Status: </label>
               <mat-form-field appearance="outline" style="width: 170px;">

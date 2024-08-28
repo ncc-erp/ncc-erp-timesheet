@@ -77,3 +77,27 @@
     text-align: left;
     margin: 0;
 }
+@media (min-width:320px) and (max-width:480px){
+    .header{
+        display: flex;
+        flex-direction: column;
+    }
+    .year-month{
+        display: flex;
+        gap: 0.5rem;
+    }
+  .filter-date{
+        margin-top: 1.5rem;
+        gap: 10px;
+    }
+    .header-filter .header .filter-date .item{
+        margin-left: 0px;
+    }
+    .filter-date{
+        display: flex;
+        flex-direction: column;
+    }
+    .month{
+        margin-left: 0.5rem;
+    }
+}
