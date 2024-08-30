@@ -11,6 +11,8 @@ namespace Timesheet.APIs.MyAbsenceDays.Dto
     public class ProjectPMDto
     {
         public long ProjectId { get; set; }
+        public NotifyChannel notifyChannel {  get; set; }
+        public string mezonUrl { get; set; }
         public string KomuChannelId { get; set; }
         public bool IsNotifyEmail { get; set; }
         public bool IsNotifyKomu { get; set; }
@@ -24,7 +26,7 @@ namespace Timesheet.APIs.MyAbsenceDays.Dto
 
         public string KomuPMsTag()
         {
-            return PMs.Select(s => s.KomuAccountTag()).ToList().Join(", ");
+            return PMs.Select(s => s.KomuAccountTag(this.notifyChannel)).ToList().Join(", ");
         }
 
         public string KomuPMsTag(HashSet<long> alreadySentToPMIds)
@@ -34,7 +36,7 @@ namespace Timesheet.APIs.MyAbsenceDays.Dto
                 .Select(s => $"**{s.FullName}**");
 
             var PMsTag = PMs.Where(s => !alreadySentToPMIds.Contains(s.UserId))
-                .Select(s => s.KomuAccountTag());
+                .Select(s => s.KomuAccountTag(this.notifyChannel));
 
             return PMsTag.Union(PMsNoTag).ToList().Join(", ");
         }

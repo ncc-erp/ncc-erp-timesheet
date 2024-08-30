@@ -24,6 +24,12 @@ namespace Ncc.Entities.Enum
             NoSalary = 6
         }
 
+        public enum NotifyChannel
+        {
+            KOMU = 0,
+            Mezon = 1
+        }
+
         public enum TaskType
         {
             CommonTask = 0,

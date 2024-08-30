@@ -17,7 +17,7 @@ namespace Timesheet.APIs.Timesheets.MyTimesheets.Dto
 
         public string   ProjectCode { get; set; }
         public string ProjectName { get; set; }
-        public List<string> Emails { get; set; }
+        //public List<string> Emails { get; set; }
 
         public string TimesheetsKomuMsg() { 
             var sb = new StringBuilder();

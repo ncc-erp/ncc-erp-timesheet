@@ -26,6 +26,7 @@ using Ncc.Entities;
 using Microsoft.EntityFrameworkCore;
 using Ncc.IoC;
 using Timesheet.Services.Komu;
+using Timesheet.Services.Mezon;
 
 namespace Timesheet.APIs.MyWorkingTimes
 {
@@ -34,11 +35,12 @@ namespace Timesheet.APIs.MyWorkingTimes
     {
         private readonly IBackgroundJobManager _backgroundJobManager;
         private readonly KomuService _komuService;
-
-        public MyWorkingTimeAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService, IWorkScope workScope) : base(workScope)
+        private readonly MezonService _mezonService;
+        public MyWorkingTimeAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService, IWorkScope workScope, MezonService mezonService) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _komuService = komuService;
+            _mezonService = mezonService;
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyWorkingTime_View)]
@@ -226,20 +228,29 @@ namespace Timesheet.APIs.MyWorkingTimes
             var alreadySentToPMIds = new HashSet<long>();
             foreach (var project in receivers)
             {
-                if (!project.IsNotifyKomu)
+                if (!project.IsNoticeKMRequestChangeWorkingTime)
                 {
-                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNoticeKMRequestChangeWorkingTime}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
-                    var komuMessage = $"PM {project.KomuPMsTag(alreadySentToPMIds)}: {requester.KomuAccountInfo} " +
+                    var Message = $"PM {project.KomuPMsTag(alreadySentToPMIds)}: {requester.KomuAccountInfo(project.notifyChannel)} " +
                         $"has sent a request to change working time:" +
                         $"\n ```RequestId: #{input.Id}" +
                         $"\nMorning: {input.MorningStartTime} - {input.MorningEndTime}" +
                         $"\nAfternoon: {input.AfternoonStartTime} - {input.AfternoonEndTime}" +
                         $"\nApply date: {input.ApplyDate.ToString("dd/MM/yyyy")}```";
 
-                    _komuService.NotifyToChannel(komuMessage, project.KomuChannelId);
+                    switch (project.notifyChannel)
+                    {
+                        case NotifyChannel.KOMU:
+                            _komuService.NotifyToChannel(Message, project.KomuChannelId);
+                            break;
+                        case NotifyChannel.Mezon:
+                            _mezonService.NotifyToChannel(project.mezonUrl, Message);
+                            break;
+                    }
+                    
                     processAlreadySentToPMs(alreadySentToPMIds, project.PMs);
                 }
             }
@@ -258,46 +269,32 @@ namespace Timesheet.APIs.MyWorkingTimes
 
         public async Task<List<ProjectPMDto>> getReceiverListSubmit(long requesterId)
         {
-            var qrequesterInProjectIds = WorkScope.GetAll<ProjectUser>()
+            var queryPMs = WorkScope.GetAll<ProjectUser>().Include(s => s.User)
+            .Where(s => s.Project.Status == ProjectStatus.Active)
+            .Where(s => s.Type == ProjectUserType.PM)
+            .GroupBy(s => s.ProjectId)
+            .ToDictionary(g => g.Key, g => g.Select(s => new NotifyUserInfoDto
+            {
+                EmailAddress = s.User.EmailAddress,
+                FullName = s.User.FullName,
+                KomuUserId = s.User.KomuUserId,
+                UserId = s.UserId
+            }).ToList());
+
+            var result = await WorkScope.GetAll<ProjectUser>()
             .Where(s => s.UserId == requesterId)
             .Where(s => s.Project.Status == ProjectStatus.Active)
             .Where(s => s.Type != ProjectUserType.DeActive)
-            .Select(s => s.ProjectId)
-            .Distinct();
-
-            var queryPMs = WorkScope.GetAll<ProjectUser>()
-            .Where(s => s.Project.Status == ProjectStatus.Active)
-            .Where(s => s.Type == ProjectUserType.PM)
-            .Select(s => new
+            .Select(s => new ProjectPMDto
             {
-                s.User.KomuUserId,
-                s.User.FullName,
-                s.User.EmailAddress,
-                s.UserId,
-                s.ProjectId,
-                s.Project.KomuChannelId,
-                s.Project.IsNotifyToKomu,
-                s.Project.IsNoticeKMRequestChangeWorkingTime,
-            });
-
-            var result = await (from projectId in qrequesterInProjectIds
-                                join pm in queryPMs on projectId equals pm.ProjectId
-                                select pm)
-                              .GroupBy(s => new { s.ProjectId, s.KomuChannelId, s.IsNoticeKMRequestChangeWorkingTime })
-                              .Select(s => new ProjectPMDto
-                              {
-                                  ProjectId = s.Key.ProjectId,
-                                  KomuChannelId = s.Key.KomuChannelId,
-                                  IsNotifyKomu = s.Key.IsNoticeKMRequestChangeWorkingTime,
-                                  IsNotifyEmail = false,
-                                  PMs = s.Select(x => new NotifyUserInfoDto
-                                  {
-                                      EmailAddress = x.EmailAddress,
-                                      FullName = x.FullName,
-                                      KomuUserId = x.KomuUserId,
-                                      UserId = x.UserId
-                                  }).ToList()
-                              }).ToListAsync();
+                ProjectId = s.ProjectId,
+                notifyChannel = s.Project.notifyChannel,
+                mezonUrl = s.Project.mezonUrl,
+                KomuChannelId = s.Project.KomuChannelId,
+                IsNoticeKMRequestChangeWorkingTime = s.Project.IsNoticeKMRequestChangeWorkingTime,
+                IsNotifyEmail = false,
+                PMs = queryPMs.ContainsKey(s.ProjectId) ? queryPMs[s.ProjectId] : new List<NotifyUserInfoDto>(),
+            }).ToListAsync();
             return result;
         }
     }

@@ -489,6 +489,8 @@ namespace Timesheet.Timesheets.Projects
                                   Status = p.Status,
                                   ProjectType = p.ProjectType,
                                   CustomerId = p.CustomerId,
+                                  notifyChannel = p.notifyChannel,
+                                  mezonUrl = p.mezonUrl,
                                   KomuChannelId = p.KomuChannelId,
                                   IsNotifyToKomu = p.IsNotifyToKomu,
                                   IsNoticeKMSubmitTS = p.IsNoticeKMSubmitTS,

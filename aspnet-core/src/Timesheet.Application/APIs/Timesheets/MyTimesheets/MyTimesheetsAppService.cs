@@ -29,6 +29,7 @@ using Ncc.IoC;
 using Timesheet.NCCAuthen;
 using Timesheet.Services.Komu;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Timesheet.Services.Mezon;
 
 namespace Timesheet.Timesheets.MyTimesheets
 {
@@ -39,13 +40,14 @@ namespace Timesheet.Timesheets.MyTimesheets
         private readonly IBackgroundJobManager _backgroundJobManager;
         private readonly ICommonServices _commonService;
         private readonly KomuService _komuService;
-
+        private readonly MezonService _mezonService;
         public MyTimesheetsAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
-            ICommonServices commonService, IWorkScope workScope) : base(workScope)
+            ICommonServices commonService, IWorkScope workScope, MezonService mezonService) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _commonService = commonService;
             _komuService = komuService;
+            _mezonService = mezonService;
         }
         [HttpGet]
         //[AbpAuthorize(Ncc.Authorization.PermissionNames.Home)]
@@ -699,7 +701,7 @@ namespace Timesheet.Timesheets.MyTimesheets
 
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
-                        TargetEmails = project.Emails,
+                        TargetEmails = project.PMs.Select(s => s.EmailAddress).ToList(),
                         Body = emailBody,
                         Subject = emailSubject
                     });
@@ -725,17 +727,41 @@ namespace Timesheet.Timesheets.MyTimesheets
 
         public async Task<List<NotifyKomuTimesheetDto>> getReceiverList(List<MyTimesheet> mytimesheets)
         {
+            var queryPMs = WorkScope.GetAll<ProjectUser>().Include(s => s.User)
+           .Where(s => s.Project.Status == ProjectStatus.Active)
+           .Where(s => s.Type == ProjectUserType.PM)
+           .GroupBy(s => s.ProjectId)
+           .ToDictionary(g => g.Key, g => g.Select(s => new NotifyUserInfoDto
+           {
+               EmailAddress = s.User.EmailAddress,
+               FullName = s.User.FullName,
+               KomuUserId = s.User.KomuUserId,
+               UserId = s.UserId
+           }).ToList());
+
             var mytimesheetIds = mytimesheets.Select(s => s.Id).ToList();
 
-            var projectTimesheets = await WorkScope.GetRepo<MyTimesheet>().GetAllIncluding(s => s.ProjectTask, s => s.ProjectTask.Project, s => s.ProjectTask.Task, s => s.User)
+            var result = await WorkScope.GetRepo<MyTimesheet>().GetAllIncluding(s => s.ProjectTask, s => s.ProjectTask.Project, s => s.ProjectTask.Task, s => s.User)
                 .Where(s => mytimesheetIds.Contains(s.Id))
-                .GroupBy(s => new { s.ProjectTask.ProjectId, s.ProjectTask.Project.Code, s.ProjectTask.Project.Name })
-                .Select(s => new
+                .GroupBy(s => new {
+                    s.ProjectTask.ProjectId,
+                    s.ProjectTask.Project.Code,
+                    s.ProjectTask.Project.Name,
+                    s.ProjectTask.Project.notifyChannel,
+                    s.ProjectTask.Project.mezonUrl,
+                    s.ProjectTask.Project.KomuChannelId,
+                    s.ProjectTask.Project.IsNoticeKMSubmitTS
+                })
+                .Select(s => new NotifyKomuTimesheetDto
                 {
-                    s.Key.ProjectId,
-                    s.Key.Code,
-                    s.Key.Name,
-                    TimeSheets = s.Select(x => new TimesheetKomuDto
+                    ProjectId = s.Key.ProjectId,
+                    notifyChannel = s.Key.notifyChannel,
+                    mezonUrl = s.Key.mezonUrl,
+                    KomuChannelId = s.Key.KomuChannelId,
+                    IsNoticeKMSubmitTS = s.Key.IsNoticeKMSubmitTS,
+                    ProjectCode = s.Key.Code,
+                    ProjectName = s.Key.Name,
+                    Timesheets = s.Select(x => new TimesheetKomuDto
                     {
                         Id = x.Id,
                         DateAt = x.DateAt,
@@ -745,48 +771,9 @@ namespace Timesheet.Timesheets.MyTimesheets
                         Note = x.Note,
                         TaskName = x.ProjectTask.Task.Name,
                         IsUnlockedByEmployee = x.IsUnlockedByEmployee
-                    }).ToList()
+                    }).ToList(),
+                    PMs = queryPMs.ContainsKey(s.Key.ProjectId) ? queryPMs[s.Key.ProjectId] : new List<NotifyUserInfoDto>()
                 }).ToListAsync();
-
-            var projectIds = projectTimesheets.Select(s => s.ProjectId).ToList();
-
-
-            var pms = await WorkScope.GetAll<ProjectUser>()
-            .Where(s => s.Project.Status == ProjectStatus.Active)
-            .Where(s => s.Type == ProjectUserType.PM)
-            .Where(s => projectIds.Contains(s.ProjectId))
-            .GroupBy(s => new { s.ProjectId, s.Project.KomuChannelId, IsNotifyToKomu = s.Project.IsNoticeKMSubmitTS })
-            .Select(s => new
-            {
-                ProjectId = s.Key.ProjectId,
-                KomuChannelId = s.Key.KomuChannelId,
-                IsNotifyToKomu = s.Key.IsNotifyToKomu,
-                Emails = s.Select(x => x.User.EmailAddress),
-
-                PMs = s.Select(x => new NotifyUserInfoDto
-                {
-                    EmailAddress = x.User.EmailAddress,
-                    FullName = x.User.FullName,
-                    KomuUserId = x.User.KomuUserId,
-                    UserId = x.UserId
-                }).ToList()
-
-            }).ToListAsync();
-
-            var result = (from pt in projectTimesheets
-                          join pm in pms on pt.ProjectId equals pm.ProjectId
-                          select new NotifyKomuTimesheetDto
-                          {
-                              KomuChannelId = pm.KomuChannelId,
-                              IsNotifyKomu = pm.IsNotifyToKomu,
-                              ProjectId = pt.ProjectId,
-                              Timesheets = pt.TimeSheets,
-                              ProjectCode = pt.Code,
-                              ProjectName = pt.Name,
-                              Emails = pm.Emails.ToList(),
-                              PMs = pm.PMs
-
-                          }).ToList();
 
             return result;
         }
@@ -820,18 +807,26 @@ namespace Timesheet.Timesheets.MyTimesheets
             var sb = new StringBuilder();
             foreach (var project in receivers)
             {
-                if (!project.IsNotifyKomu)
+                if (!project.IsNoticeKMSubmitTS)
                 {
-                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNoticeKMSubmitTS}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
                     sb.Clear();
-                    sb.AppendLine($"PM {project.KomuPMsTag()}: {requester.KomuAccountInfo} has submitted following timesheets:");
+                    sb.AppendLine($"PM {project.KomuPMsTag()}: {requester.KomuAccountInfo(project.notifyChannel)} has submitted following timesheets:");
                     sb.AppendLine("```");
                     sb.Append(project.TimesheetsKomuMsg());
                     sb.AppendLine("```");
-                    _komuService.NotifyToChannel(sb.ToString(), project.KomuChannelId);
+                    switch (project.notifyChannel)
+                    {
+                        case NotifyChannel.KOMU:
+                            _komuService.NotifyToChannel(sb.ToString(), project.KomuChannelId);
+                            break;
+                        case NotifyChannel.Mezon:
+                            _mezonService.NotifyToChannel(project.mezonUrl, sb.ToString());
+                            break;
+                    }
                     Logger.Info(sb.ToString());
 
                 }

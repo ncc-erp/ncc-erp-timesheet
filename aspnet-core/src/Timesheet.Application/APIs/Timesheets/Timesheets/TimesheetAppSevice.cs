@@ -30,6 +30,7 @@ using Abp.Configuration;
 using Timesheet.Services.Komu;
 using Timesheet.Timesheets.MyTimesheets;
 using Abp.Collections.Extensions;
+using Timesheet.Services.Mezon;
 
 namespace Timesheet.Timesheets.Timesheets
 {
@@ -40,12 +41,14 @@ namespace Timesheet.Timesheets.Timesheets
         private readonly IBackgroundJobManager _backgroundJobManager;
         private readonly ICommonServices _commonService;
         private readonly KomuService _komuService;
+        private readonly MezonService _mezonService;
 
-        public TimesheetAppService(IBackgroundJobManager backgroundJobManager, ICommonServices commonService, IWorkScope workScope, KomuService komuService) : base(workScope)
+        public TimesheetAppService(IBackgroundJobManager backgroundJobManager, ICommonServices commonService, IWorkScope workScope, KomuService komuService, MezonService mezonService) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _commonService = commonService;
             _komuService = komuService;
+            _mezonService = mezonService;
         }
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_View)]
@@ -653,18 +656,26 @@ namespace Timesheet.Timesheets.Timesheets
 
             foreach (var project in receivers)
             {
-                if (!project.IsNotifyKomu)
+                if (!project.IsNoticeKMApproveRejectTimesheet)
                 {
-                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNoticeKMApproveRejectTimesheet}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
                     channelMessage.Clear();
-                    channelMessage.AppendLine($"PM {approver.KomuAccountTag()}" + $" has **{(isApprove ? "approved" : "rejected")}** the following timesheets submitted by: {requesters.KomuAccountInfo}");
+                    channelMessage.AppendLine($"PM {approver.KomuAccountTag(project.notifyChannel)}" + $" has **{(isApprove ? "approved" : "rejected")}** the following timesheets submitted by: {requesters.KomuAccountInfo(project.notifyChannel)}");
                     channelMessage.AppendLine("```");
                     channelMessage.Append(project.TimesheetsKomuMsg());
                     channelMessage.AppendLine("```");
-                    _komuService.NotifyToChannel(channelMessage.ToString(), project.KomuChannelId);
+                    switch (project.notifyChannel)
+                    {
+                        case NotifyChannel.KOMU:
+                            _komuService.NotifyToChannel(channelMessage.ToString(), project.KomuChannelId);
+                            break;
+                        case NotifyChannel.Mezon:
+                            _mezonService.NotifyToChannel(project.mezonUrl, channelMessage.ToString());
+                            break;
+                    }
                     Logger.Info(channelMessage.ToString());
                 }
             }
@@ -684,9 +695,9 @@ namespace Timesheet.Timesheets.Timesheets
 
             foreach (var project in receivers)
             {
-                if (!project.IsNotifyKomu)
+                if (!project.IsNoticeKMApproveRejectTimesheet)
                 {
-                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNoticeKMApproveRejectTimesheet}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
@@ -911,17 +922,41 @@ namespace Timesheet.Timesheets.Timesheets
 
         public async Task<List<NotifyKomuTimesheetDto>> getReceiverList(List<MyTimesheet> mytimesheets)
         {
+            var queryPMs = WorkScope.GetAll<ProjectUser>().Include(s => s.User)
+           .Where(s => s.Project.Status == ProjectStatus.Active)
+           .Where(s => s.Type == ProjectUserType.PM)
+           .GroupBy(s => s.ProjectId)
+           .ToDictionary(g => g.Key, g => g.Select(s => new NotifyUserInfoDto
+           {
+               EmailAddress = s.User.EmailAddress,
+               FullName = s.User.FullName,
+               KomuUserId = s.User.KomuUserId,
+               UserId = s.UserId
+           }).ToList());
+
             var mytimesheetIds = mytimesheets.Select(s => s.Id).ToList();
 
-            var projectTimesheets = await WorkScope.GetRepo<MyTimesheet>().GetAllIncluding(s => s.ProjectTask, s => s.ProjectTask.Project, s => s.ProjectTask.Task, s => s.User)
+            var result = await WorkScope.GetRepo<MyTimesheet>().GetAllIncluding(s => s.ProjectTask, s => s.ProjectTask.Project, s => s.ProjectTask.Task, s => s.User)
                 .Where(s => mytimesheetIds.Contains(s.Id))
-                .GroupBy(s => new { s.ProjectTask.ProjectId, s.ProjectTask.Project.Code, s.ProjectTask.Project.Name })
-                .Select(s => new
+                .GroupBy(s => new {
+                    s.ProjectTask.ProjectId,
+                    s.ProjectTask.Project.Code,
+                    s.ProjectTask.Project.Name,
+                    s.ProjectTask.Project.notifyChannel,
+                    s.ProjectTask.Project.mezonUrl,
+                    s.ProjectTask.Project.KomuChannelId,
+                    s.ProjectTask.Project.IsNoticeKMApproveRejectTimesheet
+                })
+                .Select(s => new NotifyKomuTimesheetDto
                 {
-                    s.Key.ProjectId,
-                    s.Key.Code,
-                    s.Key.Name,
-                    TimeSheets = s.Select(x => new TimesheetKomuDto
+                    ProjectId = s.Key.ProjectId,
+                    notifyChannel = s.Key.notifyChannel,
+                    mezonUrl = s.Key.mezonUrl,
+                    KomuChannelId = s.Key.KomuChannelId,
+                    IsNoticeKMApproveRejectTimesheet = s.Key.IsNoticeKMApproveRejectTimesheet,
+                    ProjectCode = s.Key.Code,
+                    ProjectName = s.Key.Name,
+                    Timesheets = s.Select(x => new TimesheetKomuDto
                     {
                         Id = x.Id,
                         DateAt = x.DateAt,
@@ -931,48 +966,9 @@ namespace Timesheet.Timesheets.Timesheets
                         Note = x.Note,
                         TaskName = x.ProjectTask.Task.Name,
                         IsUnlockedByEmployee = x.IsUnlockedByEmployee
-                    }).ToList()
+                    }).ToList(),
+                    PMs = queryPMs.ContainsKey(s.Key.ProjectId) ? queryPMs[s.Key.ProjectId] : new List<NotifyUserInfoDto>()
                 }).ToListAsync();
-
-            var projectIds = projectTimesheets.Select(s => s.ProjectId).ToList();
-
-
-            var pms = await WorkScope.GetAll<ProjectUser>()
-            .Where(s => s.Project.Status == ProjectStatus.Active)
-            .Where(s => s.Type == ProjectUserType.PM)
-            .Where(s => projectIds.Contains(s.ProjectId))
-            .GroupBy(s => new { s.ProjectId, s.Project.KomuChannelId, IsNotifyToKomu = s.Project.IsNoticeKMApproveRejectTimesheet })
-            .Select(s => new
-            {
-                ProjectId = s.Key.ProjectId,
-                KomuChannelId = s.Key.KomuChannelId,
-                IsNotifyToKomu = s.Key.IsNotifyToKomu,
-                Emails = s.Select(x => x.User.EmailAddress),
-
-                PMs = s.Select(x => new NotifyUserInfoDto
-                {
-                    EmailAddress = x.User.EmailAddress,
-                    FullName = x.User.FullName,
-                    KomuUserId = x.User.KomuUserId,
-                    UserId = x.UserId
-                }).ToList()
-
-            }).ToListAsync();
-
-            var result = (from pt in projectTimesheets
-                          join pm in pms on pt.ProjectId equals pm.ProjectId
-                          select new NotifyKomuTimesheetDto
-                          {
-                              KomuChannelId = pm.KomuChannelId,
-                              IsNotifyKomu = pm.IsNotifyToKomu,
-                              ProjectId = pt.ProjectId,
-                              Timesheets = pt.TimeSheets,
-                              ProjectCode = pt.Code,
-                              ProjectName = pt.Name,
-                              Emails = pm.Emails.ToList(),
-                              PMs = pm.PMs
-
-                          }).ToList();
 
             return result;
         }

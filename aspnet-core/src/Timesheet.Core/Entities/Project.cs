@@ -26,6 +26,8 @@ namespace Ncc.Entities
         [ForeignKey(nameof(CustomerId))]
         public Customer Customer { get; set; }
         public long CustomerId { get; set; }
+        public NotifyChannel notifyChannel { get; set; }
+        public string mezonUrl { get; set; }
         public string KomuChannelId { get; set; }
         [DefaultValue(false)]
         public bool IsNotifyToKomu { get; set; }
