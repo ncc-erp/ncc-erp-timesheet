@@ -79,7 +79,7 @@ export class WeekByTask {
   isEditable: boolean;
   isEditing: boolean;
   isAddNew :boolean = false;
- 
+  isExpanded?: boolean;
 }
 export class PTaskDto {
   projectTaskId: number;
