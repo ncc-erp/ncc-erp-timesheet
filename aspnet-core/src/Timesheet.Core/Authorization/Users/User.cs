@@ -69,6 +69,7 @@ namespace Ncc.Authorization.Users
         public DateTime? EndDateAt { get; set; }
         public long? BranchId { get; set; }
         public long? PositionId { get; set; }
+        public string GoogleId { get; set; }
 
         #region Foreign Keys
 

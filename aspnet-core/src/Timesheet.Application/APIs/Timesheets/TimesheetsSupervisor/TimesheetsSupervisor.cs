@@ -15,6 +15,7 @@ using Ncc.Entities;
 using Ncc.Authorization.Users;
 using Ncc.IoC;
 using Timesheet.Timesheets.Projects.Dto;
+using Ncc.Configuration;
 
 namespace Timesheet.Timesheets.TimesheetsSupervisor
 {
@@ -28,8 +29,9 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
 
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.TimesheetSupervision_View)]
-        public async Task<List<MyTimeSheetDto>> GetAll(DateTime? startDate, DateTime? endDate, TimesheetStatus? status, long? ProjectId, long? UserId)
+        public async Task<List<MyTimeSheetDto>> GetAll(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, TimesheetStatus? status, long? ProjectId, long? UserId)
         {
+            var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
             var qUsers = WorkScope.GetAll<User>()
              .Select(x => new
              {
@@ -57,6 +59,7 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                               UserId = a.User.Id,
                               TaskName = a.ProjectTask.Task.Name,
                               TaskId = a.ProjectTask.TaskId,
+                              ProjectTaskId = a.ProjectTaskId,
                               CustomerName = a.ProjectTask.Project.Customer.Name,
                               ProjectName = a.ProjectTask.Project.Name,
                               MytimesheetNote = a.Note,
@@ -70,22 +73,26 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                               IsUnlockedByEmployee = a.IsUnlockedByEmployee,
                               projectTargetUser = a.ProjectTargetUser.User.FullName,
                               workingTimeTargetUser = a.TargetUserWorkingTime,
-                              openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s=>s.UserId == a.User.Id && a.DateAt == s.startTime.Date).Select(s=>s.totalTime).FirstOrDefault(),
+                              openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s=>s.UserId == a.User.Id && a.DateAt == s.DateAt.Date).Select(s=>s.totalTime).FirstOrDefault(),
                               LastModifierUser = qUsers.Where(x => x.Id == a.LastModifierUserId).Select(x => x.EmailAddress).FirstOrDefault()
                           })
                            .WhereIf(status.HasValue && status >= 0, s => s.Status == status)
                            .WhereIf(startDate != null, s => s.DateAt >= startDate)
                            .WhereIf(endDate != null, s => s.DateAt.Date <= endDate)
                            .WhereIf(ProjectId != null, s => s.ProjectId == ProjectId)
+                           .WhereIf(opentalkTime.HasValue, s => s.ProjectTaskId == OpenTalkID)
+                           .WhereIf(opentalkTime.HasValue, s => opentalkTimeType.Value ? s.openTalkTime >= opentalkTime : s.openTalkTime < opentalkTime)
                            .WhereIf(UserId != null, s => s.UserId == UserId)
                            .ToListAsync();
         }
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.TimesheetSupervision_View)]
-        public async Task<object> GetQuantityTimesheetSupervisorStatus(DateTime? startDate, DateTime? endDate)
+        public async Task<object> GetQuantityTimesheetSupervisorStatus(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, long? projectId, long? userId)
         {
+            var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
             var projectIds = await WorkScope.GetAll<ProjectUser>()
-                .Where(s => s.Type == ProjectUserType.PM)
+                .Where(s => s.UserId == AbpSession.UserId.Value && s.Type == ProjectUserType.PM)
+                .Where(s => !projectId.HasValue || s.ProjectId == projectId)
                 .Select(s => s.ProjectId).ToListAsync();
 
             var userIds = await WorkScope.GetAll<ProjectUser>()
@@ -93,9 +100,17 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                 .Select(s => s.UserId).Distinct().ToListAsync();
             var query = WorkScope.GetAll<MyTimesheet>()
                                  .Where(x => !startDate.HasValue || x.DateAt >= startDate)
-                                 .Where(X => !endDate.HasValue || X.DateAt <= endDate)
+                                 .Where(x => !endDate.HasValue || x.DateAt.Date <= endDate)
                                  .Where(x => userIds.Contains(x.UserId))
                                  .Where(x => projectIds.Contains(x.ProjectTask.ProjectId))
+                                 .WhereIf(opentalkTime.HasValue, x => x.ProjectTaskId == OpenTalkID)
+                                 .WhereIf(userId.HasValue, x => x.UserId == userId)
+                                 .Select (x => new
+                                 {
+                                     Status = x.Status,
+                                     openTalkTime = !opentalkTime.HasValue ? 0 : WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == x.UserId && x.DateAt.Date == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
+                                 })
+                                 .WhereIf(opentalkTime.HasValue, x => opentalkTimeType.Value ? x.openTalkTime >= opentalkTime : x.openTalkTime < opentalkTime)
                                  .GroupBy(x => x.Status).Select(x => new
                                  {
                                      Status = x.Key,

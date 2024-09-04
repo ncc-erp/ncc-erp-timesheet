@@ -122,6 +122,33 @@
                 </div>
               </div>
             </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group form-float">
+                  <div class="example-form">
+                    <mat-form-field appearance="outline" style="width: 100%;">
+                      <mat-label>OpenTalk JoinTime Filter</mat-label>
+                      <div [class]="!OpenTalkJoinTime ? 'ms-off' : 'ms-on'">
+                        <input type="number" class="opentalkFiler" [(ngModel)]="OpenTalkJoinTime" name="OpenTalkJoinTime" min="0" matInput (input)="resetFilterOpenTalk($event.target.value)">
+                      </div>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group form-float">
+                  <div class="example-form">
+                    <mat-form-field *ngIf="OpenTalkJoinTime" appearance="outline" style="width: 100%;">
+                      <mat-label>Type</mat-label>
+                      <mat-select name="FilterOpenTalk" (selectionChange)="filterOpenTalk($event.value)">
+                        <mat-option value=true>Higher</mat-option>
+                        <mat-option value=false>Lower</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="col-sm-2">

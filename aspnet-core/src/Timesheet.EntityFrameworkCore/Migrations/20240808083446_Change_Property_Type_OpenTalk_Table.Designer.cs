@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ncc.EntityFrameworkCore;
 
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    partial class TimesheetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240808083446_Change_Property_Type_OpenTalk_Table")]
+    partial class Change_Property_Type_OpenTalk_Table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2353,8 +2355,6 @@ namespace Timesheet.Migrations
                     b.Property<long?>("UserId");
 
                     b.Property<string>("UserNote");
-
-                    b.Property<bool?>("warningCheckInFromPersonalDevice");
 
                     b.HasKey("Id");
 

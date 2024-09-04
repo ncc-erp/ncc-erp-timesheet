@@ -62,7 +62,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     { value: 1, label: 'Internship' },
     { value: 2, label: 'Collaborator' }
   ];
-
+ 
   ngOnInit() {
   }
   filterPosition(): void{

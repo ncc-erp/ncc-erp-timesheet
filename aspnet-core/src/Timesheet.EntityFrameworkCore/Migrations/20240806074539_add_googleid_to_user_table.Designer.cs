@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ncc.EntityFrameworkCore;
 
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    partial class TimesheetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240806074539_add_googleid_to_user_table")]
+    partial class add_googleid_to_user_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1824,8 +1826,6 @@ namespace Timesheet.Migrations
 
                     b.Property<long?>("CreatorUserId");
 
-                    b.Property<DateTime>("DateAt");
-
                     b.Property<long?>("DeleterUserId");
 
                     b.Property<DateTime?>("DeletionTime");
@@ -1837,6 +1837,10 @@ namespace Timesheet.Migrations
                     b.Property<long?>("LastModifierUserId");
 
                     b.Property<long>("UserId");
+
+                    b.Property<DateTime>("endTime");
+
+                    b.Property<DateTime>("startTime");
 
                     b.Property<int>("totalTime");
 
@@ -2353,8 +2357,6 @@ namespace Timesheet.Migrations
                     b.Property<long?>("UserId");
 
                     b.Property<string>("UserNote");
-
-                    b.Property<bool?>("warningCheckInFromPersonalDevice");
 
                     b.HasKey("Id");
 

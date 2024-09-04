@@ -29,6 +29,7 @@ using Timesheet.DomainServices.Dto;
 using Abp.Configuration;
 using Timesheet.Services.Komu;
 using Timesheet.Timesheets.MyTimesheets;
+using Abp.Collections.Extensions;
 
 namespace Timesheet.Timesheets.Timesheets
 {
@@ -48,8 +49,9 @@ namespace Timesheet.Timesheets.Timesheets
         }
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_View)]
-        public async Task<List<MyTimeSheetDto>> GetAll(DateTime? startDate, DateTime? endDate, TimesheetStatus status, long? projectId, HaveCheckInFilter? checkInFilter, long? branchId = null, string searchText = "")
+        public async Task<List<MyTimeSheetDto>> GetAll(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, TimesheetStatus status, long? projectId, HaveCheckInFilter? checkInFilter, long? branchId = null, string searchText = "")
         {
+            var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
             var dayOffSettings = await WorkScope.GetAll<DayOffSetting>()
              .Where(s => s.DayOff.Date >= startDate && s.DayOff.Date <= endDate)
              .Select(s => s.DayOff).ToListAsync();
@@ -90,8 +92,9 @@ namespace Timesheet.Timesheets.Timesheets
                     where (!startDate.HasValue || a.DateAt >= startDate)
                     where (!endDate.HasValue || a.DateAt.Date <= endDate)
                     where (projectIds.Contains(a.ProjectTask.ProjectId))
+                    where (!opentalkTime.HasValue || a.ProjectTaskId == OpenTalkID)
                     where (searchText == null || a.User.EmailAddress.Contains(searchText) || a.User.UserName.Contains(searchText) || a.User.FullName.Contains(searchText))
-                    where (branchId == null || a.User.BranchId ==  branchId)
+                    where (branchId == null || a.User.BranchId == branchId)
                     select new MyTimeSheetDto
                     {
                         Id = a.Id,
@@ -123,16 +126,9 @@ namespace Timesheet.Timesheets.Timesheets
                         IsUnlockedByEmployee = a.IsUnlockedByEmployee,
                         projectTargetUser = a.ProjectTargetUser.User.FullName,
                         workingTimeTargetUser = a.TargetUserWorkingTime,
-                        openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == a.User.Id && a.DateAt == s.startTime.Date).Select(s => s.totalTime).FirstOrDefault()
+                        openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == a.User.Id && a.DateAt == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
                     };
-            List<MyTimeSheetDto> query = null;
-            try
-            {
-                query = await q.OrderBy(i => i.EmailAddress).ThenByDescending(s => s.DateAt).ToListAsync();
-            } catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            var query = q.WhereIf(opentalkTime.HasValue, s => opentalkTimeType.Value ? s.openTalkTime >= opentalkTime : s.openTalkTime < opentalkTime).OrderBy(i => i.EmailAddress).ThenByDescending(s => s.DateAt).ToList();
             var listTimekeeping = WorkScope.GetAll<Timekeeping>()
             .Select(s => new
             {
@@ -599,11 +595,11 @@ namespace Timesheet.Timesheets.Timesheets
                 }
                 await WorkScope.UpdateRangeAsync(listReject);
 
-                await NotifyApproveOrRejectTimesheet(listReject, false); 
+                await NotifyApproveOrRejectTimesheet(listReject, false);
             }
             else if (failTS > 0)
             {
-                if (isUnlockPM) throw new UserFriendlyException(string.Format("Unlock timesheet chỉ có hiệu lực từ {0} đến {1}. Vui lòng liên hệ admin để được hỗ trợ.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy"))); 
+                if (isUnlockPM) throw new UserFriendlyException(string.Format("Unlock timesheet chỉ có hiệu lực từ {0} đến {1}. Vui lòng liên hệ admin để được hỗ trợ.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy")));
                 throw new UserFriendlyException("PM hãy vào ims.nccsoft.vn để unlock timesheet");
             }
 
@@ -795,8 +791,9 @@ namespace Timesheet.Timesheets.Timesheets
 
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_ViewStatus)]
-        public async Task<object> GetQuantiyTimesheetStatus(DateTime? startDate, DateTime? endDate, long? projectId, HaveCheckInFilter? checkInFilter, string searchText, long? branchId = 0)
+        public async Task<object> GetQuantiyTimesheetStatus(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, long? projectId, HaveCheckInFilter? checkInFilter, string searchText, long? branchId = 0)
         {
+            var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
             var projectIds = await WorkScope.GetAll<ProjectUser>()
                 .Where(s => s.UserId == AbpSession.UserId.Value && s.Type == ProjectUserType.PM)
                 .Where(s => !projectId.HasValue || s.ProjectId == projectId)
@@ -807,18 +804,22 @@ namespace Timesheet.Timesheets.Timesheets
                 .Select(s => s.UserId).Distinct().ToListAsync();
 
             var query = WorkScope.GetAll<MyTimesheet>()
+                                 .Include(x => x.User)
                                  .Where(x => !startDate.HasValue || x.DateAt >= startDate)
                                  .Where(x => !endDate.HasValue || x.DateAt.Date <= endDate)
                                  .Where(x => userIds.Contains(x.UserId))
                                  .Where(x => projectIds.Contains(x.ProjectTask.ProjectId))
+                                 .WhereIf(opentalkTime.HasValue, x => x.ProjectTaskId == OpenTalkID)
                                  .Where(x => string.IsNullOrEmpty(searchText) || x.User.EmailAddress.Contains(searchText) || x.User.UserName.Contains(searchText) || x.User.FullName.Contains(searchText))
                                  .Where(x => !branchId.HasValue || branchId == 0 || x.User.BranchId == branchId)
-                                 .Select(x => new QuantiyTimesheetStatusDto
+                                 .Select(x => new
                                  {
                                      UserId = x.UserId,
                                      Status = x.Status,
-                                     DateAt = x.DateAt.Date
-                                 });
+                                     DateAt = x.DateAt.Date,
+                                     openTalkTime = !opentalkTime.HasValue ? 0 : WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == x.UserId && x.DateAt.Date == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
+                                 })
+                                 .WhereIf(opentalkTime.HasValue, x => opentalkTimeType.Value ? x.openTalkTime >= opentalkTime : x.openTalkTime < opentalkTime);
 
             var listMyTimesheet = new List<QuantiyTimesheetStatusDto>();
 
@@ -841,9 +842,14 @@ namespace Timesheet.Timesheets.Timesheets
                     .Where(s => s.UserId == item.UserId)
                     .Where(s => s.DateAt.Date == item.DateAt.Date)
                     .FirstOrDefault();
-                item.CheckIn = timekeepingByUserAtDate?.CheckIn;
-                item.CheckOut = timekeepingByUserAtDate?.CheckOut;
-                listMyTimesheet.Add(item);
+                listMyTimesheet.Add(new QuantiyTimesheetStatusDto
+                {
+                    UserId = item.UserId,
+                    Status = item.Status,
+                    DateAt = item.DateAt.Date,
+                    CheckIn = timekeepingByUserAtDate?.CheckIn,
+                    CheckOut = timekeepingByUserAtDate?.CheckOut
+                });
             }
 
             if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.HaveCheckIn)

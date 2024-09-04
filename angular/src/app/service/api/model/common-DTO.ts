@@ -35,7 +35,7 @@ export class GetTimeSheetDto {
   billable: boolean;
   workType: string;
   isTemp: boolean;
-
+  openTalkJoinTime:number;
 }
 export enum TimeSheetStatus {
   New = 0,

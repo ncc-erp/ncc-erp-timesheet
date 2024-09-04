@@ -24,12 +24,14 @@ using Timesheet.Helper;
 using Abp.BackgroundJobs;
 using Timesheet.BackgroundJob;
 using Abp.UI;
+using Ncc.IoC;
 
 namespace Ncc.Authorization
 {
     public class LogInManager : AbpLogInManager<Tenant, Role, User>
     {
         private readonly IBackgroundJobManager _backgroundJobManager;
+        private readonly IWorkScope _workScope;
         public LogInManager(
             UserManager userManager,
             IMultiTenancyConfig multiTenancyConfig,
@@ -42,7 +44,8 @@ namespace Ncc.Authorization
             IPasswordHasher<User> passwordHasher,
             RoleManager roleManager,
             UserClaimsPrincipalFactory claimsPrincipalFactory,
-            IBackgroundJobManager backgroundJobManager)
+            IBackgroundJobManager backgroundJobManager,
+            IWorkScope workScope)
             : base(
                   userManager,
                   multiTenancyConfig,
@@ -57,6 +60,7 @@ namespace Ncc.Authorization
                   claimsPrincipalFactory)
         {
             _backgroundJobManager = backgroundJobManager;
+            _workScope = workScope;
         }
         [UnitOfWork]
         public async Task<AbpLoginResult<Tenant, User>> LoginAsyncNoPass(string token, string secretCode = "", string tenancyName = null, bool shouldLockout = true)
@@ -161,6 +165,13 @@ namespace Ncc.Authorization
                             //await UserManager.ResetAccessFailedCountAsync(userCreate);
                             //return await CreateLoginResultAsync(userCreate, tenant);
                             throw new UserFriendlyException(string.Format("Login Fail - Account does not exist"));
+                        }
+
+                        if (user.GoogleId == null)
+                        {
+                            user.GoogleId = payload.Subject;
+                            await _workScope.UpdateAsync(user);
+                            //await UserManager.UpdateAsync(user);
                         }
 
                         if (await UserManager.IsLockedOutAsync(user))
