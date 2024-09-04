@@ -1,0 +1,30 @@
+.manage-absence-type-wrapper  .manage-absence-type-button-create button{
+    margin:  0px;
+}
+::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .dialog-manage-absence-types{
+    width: 40% !important;
+}
+.manage-absence-types-table-column-action_response{
+    display: none;
+}
+@media screen and (max-width: 600px) { 
+    ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .dialog-manage-absence-types{
+        width: 90% !important;
+    }
+    .manage-absence-type-wrapper .manage-absence-type-table thead tr th{
+        white-space: nowrap;
+    }
+    .manage-absence-type-wrapper .manage-absence-type-table tbody tr td{
+        white-space: nowrap;
+    }
+    .manage-absence-type-wrapper .manage-absence-type-table{
+        width: 100%;
+        overflow-x: auto;
+    }
+    .manage-absence-types-table-column-action{
+        display: none;
+    }
+    .manage-absence-types-table-column-action_response{
+        display: flex;
+    }
+}
