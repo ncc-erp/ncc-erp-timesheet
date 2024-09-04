@@ -125,7 +125,14 @@ namespace Timesheet.Timesheets.Timesheets
                         workingTimeTargetUser = a.TargetUserWorkingTime,
                         openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == a.User.Id && a.DateAt == s.startTime.Date).Select(s => s.totalTime).FirstOrDefault()
                     };
-            var query = await q.OrderBy(i => i.EmailAddress).ThenByDescending(s => s.DateAt).ToListAsync();
+            List<MyTimeSheetDto> query = null;
+            try
+            {
+                query = await q.OrderBy(i => i.EmailAddress).ThenByDescending(s => s.DateAt).ToListAsync();
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             var listTimekeeping = WorkScope.GetAll<Timekeeping>()
             .Select(s => new
             {

@@ -20,6 +20,7 @@ namespace Timesheet.Entities
         public string CheckIn { get; set; }//from faceId
         [MaxLength(5)]
         public string CheckOut { get; set; }//from faceId
+        public bool? warningCheckInFromPersonalDevice { get; set; }
         [MaxLength(5)]
         public string RegisterCheckIn { get; set; }
         [MaxLength(5)]

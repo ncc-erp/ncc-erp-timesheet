@@ -158,6 +158,7 @@ namespace Timesheet.DomainServices
                     var checkInUser = mapCheckInUsers[user.EmailAddress];
                     t.CheckIn = checkInUser?.VerifyStartTimeStr;
                     t.CheckOut = checkInUser?.VerifyEndTimeStr;
+                    t.warningCheckInFromPersonalDevice = checkInUser.warningCheckInFromPersonalDevice;
                     if (registerCheckInOut.AbsenceDayType == DayType.Afternoon)
                     {
                         ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(t);

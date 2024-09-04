@@ -12,8 +12,6 @@ import { ManageUserDto } from '../Dto/branch-manage-dto';
 import { DetailParticipatingProjectsComponent } from './detail-participating-projects/detail-participating-projects.component';
 import { MatDialog } from '@angular/material';
 import { DateInfo } from '../date-filter/date-filter.component';
-import {ESortProjectUserNumber, ESortType} from '@app/modules/branch-manager/manage-employee/enum/sort-project-user-number.enum';
-
 @Component({
   selector: 'app-manage-employee',
   templateUrl: './manage-employee.component.html',
@@ -28,11 +26,12 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
 
   startDate: string;
   endDate: string;
-  sortType = ESortType.NUMBER;
-  sortProject: number = ESortProjectUserNumber.DOWN_PROJECT;
-  sortNumberOfProject: number  = ESortProjectUserNumber.DOWN_NUMBER;
-  sortProjectUserNumber = ESortProjectUserNumber;
-  currentComparision = ESortProjectUserNumber.DOWN_NUMBER;
+  sortProperty = "ProjectCount";
+  ProjectCountSortDirection = this.sortDirectionEnum.Ascending;
+  WorkingTimePercentSortDirection = this.sortDirectionEnum.Ascending;
+  WOAPercentSortDirection = this.sortDirectionEnum.Ascending;
+  WFHPercentSortDirection = this.sortDirectionEnum.Ascending;
+  LevelSortDirection = this.sortDirectionEnum.Ascending;
 
   @Input() listPosition: PositionDto[];
   @Input() listPositionFilter: PositionDto[];
@@ -98,7 +97,25 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       this.addFilterItem('positionId', this.positionId);
     }
     request.filterItems = this.filterItems;
-    this.manageUserForBranchService.getAllUserPagging(request, this.startDate, this.endDate, this.sortType, this.currentComparision)
+    request.sort = this.sortProperty;
+    switch(this.sortProperty){
+      case "ProjectCount":
+        request.sortDirection = this.ProjectCountSortDirection;
+        break;
+      case "ProjectUsers.WorkingTimePercent":
+        request.sortDirection = this.WorkingTimePercentSortDirection;
+        break;
+      case "WOAPercent": 
+        request.sortDirection = this.WOAPercentSortDirection;
+        break;
+      case "WFHPercent":
+        request.sortDirection = this.WFHPercentSortDirection;
+        break;
+      case "Level":
+        request.sortDirection = this.LevelSortDirection;
+        break;
+    }
+    this.manageUserForBranchService.getAllUserPagging(request, this.startDate, this.endDate)
     .pipe(
       finalize(() => {
         finishedCallback()
@@ -187,27 +204,34 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   onDateSelected(dateInfo: DateInfo) {
     this.startDate=dateInfo.startDate;
     this.endDate=dateInfo.endDate;
+    this.sortProperty = "ProjectCount";
+    this.ProjectCountSortDirection = this.sortDirectionEnum.Ascending;
+    this.WorkingTimePercentSortDirection = this.sortDirectionEnum.Ascending;
+    this.WOAPercentSortDirection = this.sortDirectionEnum.Ascending;
+    this.WFHPercentSortDirection = this.sortDirectionEnum.Ascending;
+    this.LevelSortDirection = this.sortDirectionEnum.Ascending;
     this.refresh();
   }
 
-  toggleSortOrder(click: boolean) {
-      if (click === true) {
-          if (this.sortNumberOfProject === ESortProjectUserNumber.UP_NUMBER) {
-              this.sortNumberOfProject = ESortProjectUserNumber.DOWN_NUMBER;
-          } else {
-              this.sortNumberOfProject = ESortProjectUserNumber.UP_NUMBER;
-          }
-          this.currentComparision = this.sortNumberOfProject;
-          this.sortType = ESortType.NUMBER;
-      } else  {
-          if (this.sortProject === ESortProjectUserNumber.UP_PROJECT) {
-              this.sortProject = ESortProjectUserNumber.DOWN_PROJECT;
-          } else {
-              this.sortProject = ESortProjectUserNumber.UP_PROJECT;
-          }
-          this.currentComparision = this.sortProject;
-          this.sortType = ESortType.PROJECT;
+  toggleSortOrder(sortProperty : string) {
+      switch(sortProperty){
+        case "ProjectCount":
+          this.ProjectCountSortDirection = this.ProjectCountSortDirection == this.sortDirectionEnum.Ascending ? this.sortDirectionEnum.Descending : this.sortDirectionEnum.Ascending;
+          break;
+        case "ProjectUsers.WorkingTimePercent":
+          this.WorkingTimePercentSortDirection = this.WorkingTimePercentSortDirection == this.sortDirectionEnum.Ascending ? this.sortDirectionEnum.Descending : this.sortDirectionEnum.Ascending;
+          break;
+        case "WOAPercent": 
+          this.WOAPercentSortDirection = this.WOAPercentSortDirection == this.sortDirectionEnum.Ascending ? this.sortDirectionEnum.Descending : this.sortDirectionEnum.Ascending;
+          break;
+        case "WFHPercent":
+          this.WFHPercentSortDirection = this.WFHPercentSortDirection == this.sortDirectionEnum.Ascending ? this.sortDirectionEnum.Descending : this.sortDirectionEnum.Ascending;
+          break;
+        case "Level":
+          this.LevelSortDirection = this.LevelSortDirection == this.sortDirectionEnum.Ascending ? this.sortDirectionEnum.Descending : this.sortDirectionEnum.Ascending;
+          break;
       }
+      this.sortProperty = sortProperty;
       this.refresh();
   }
 }

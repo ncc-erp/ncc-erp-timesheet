@@ -30,6 +30,8 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
         public long? PositionId { get; set; }
         public string PositionName { get; set; }
         public long? ProjectCount { get; set; }
+        public double WOAPercent {  get; set; }
+        public double WFHPercent { get; set; }
     }
 
     public class UserValueProjectDto
