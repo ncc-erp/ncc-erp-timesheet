@@ -123,7 +123,7 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-sm-6">
+              <div class="open-talk-join-time col-sm-6">
                 <div class="form-group form-float">
                   <div class="example-form">
                     <mat-form-field appearance="outline" style="width: 100%;">
@@ -135,7 +135,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-sm-3">
+              <div class="open-talk-type col-sm-3">
                 <div class="form-group form-float">
                   <div class="example-form">
                     <mat-form-field *ngIf="OpenTalkJoinTime" appearance="outline" style="width: 100%;">
@@ -151,50 +151,52 @@
             </div>
           </div>
 
-          <div class="col-sm-2">
-            <div class="form-group form-float">
-              <div>
-                <button name="approveBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
-                  style="width: 100%" class="btn btn-success waves-effect" (click)="btnApprove()">
-                  Approve
-                </button>
+          <div class="col-sm-6 actions-wrapper">
+            <div class="action">
+              <div class="form-group form-float">
+                <div>
+                  <button name="approveBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
+                    style="width: 100%" class="btn btn-success waves-effect" (click)="btnApprove()">
+                    Approve
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="col-sm-2">
-            <div class="form-group form-float">
-              <div>
-                <button name="rejectBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
-                  style="width: 100%" class="btn bg-grey waves-effect" (click)="btnReject()">
-                  Reject
-                </button>
+            <div class="action">
+              <div class="form-group form-float">
+                <div>
+                  <button name="rejectBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
+                    style="width: 100%" class="btn bg-grey waves-effect" (click)="btnReject()">
+                    Reject
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="col-sm-2">
-            <div class="form-group form-float">
-              <button name="exportMenuBtn" *ngIf="permission.isGranted(EXPORT_EXCEL_TIMESHEET)" class="text-center m-t-10" type="submit"
-                style="width: 100%" class="btn bg-red waves-effect" [matMenuTriggerFor]="actionsMenu"
-                [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
-                Export
-              </button>
+            <div class="action">
+              <div class="form-group form-float">
+                <button name="exportMenuBtn" *ngIf="permission.isGranted(EXPORT_EXCEL_TIMESHEET)" class="text-center m-t-10" type="submit"
+                  style="width: 100%" class="btn bg-red waves-effect" [matMenuTriggerFor]="actionsMenu"
+                  [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
+                  Export
+                </button>
+              </div>
+              <mat-menu #actionsMenu="matMenu">
+                <button mat-menu-item (click)="btnExport('timesheet')">
+                  Export by timesheet
+                </button>
+                <button mat-menu-item (click)="btnExport('day')">
+                  Export by day
+                </button>
+                <button mat-menu-item (click)="dialogSelectDay(1)">
+                  Export TimeSheet
+                </button>
+                <button mat-menu-item (click)="dialogSelectDay(2)">
+                  Export Remote Request
+                </button>
+              </mat-menu>
             </div>
-            <mat-menu #actionsMenu="matMenu">
-              <button mat-menu-item (click)="btnExport('timesheet')">
-                Export by timesheet
-              </button>
-              <button mat-menu-item (click)="btnExport('day')">
-                Export by day
-              </button>
-              <button mat-menu-item (click)="dialogSelectDay(1)">
-                Export TimeSheet
-              </button>
-              <button mat-menu-item (click)="dialogSelectDay(2)">
-                Export Remote Request
-              </button>
-            </mat-menu>
           </div>
-          <div class="col-sm-1">
+          <div class="col-sm-1 checkbox-all">
             <div class="form-group form-float">
               <div class="example-form m-t-10" class="text-center">
                 <mat-checkbox name="isCheckAll" color="primary" [checked]="checkedCount == totalCount && checkedCount != 0"

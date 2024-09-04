@@ -1,6 +1,5 @@
-<div style="display:flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap">
-  <div style="display:flex; align-items: center; flex-wrap: wrap">
-
+<div class="wrapper" style="display:flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap">
+  <div class="info" style="display:flex; align-items: center; flex-wrap: wrap">
     <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
       <mat-button-toggle (click)="nextOrPre('pre')">
         <mat-icon>chevron_left</mat-icon>
@@ -11,7 +10,7 @@
     </mat-button-toggle-group>
     <h2 style="padding: 0 20px">{{ distanceFromAndToDate }}</h2>
   </div>
-  <div>
+  <div class="select-date-type">
     <mat-form-field appearance="outline">
       <mat-select [formControl]="viewChange" (selectionChange)="changeView(true)">
         <mat-option *ngFor="let item of APP_CONFIG.TypeViewHomePage" [value]="item.value">
