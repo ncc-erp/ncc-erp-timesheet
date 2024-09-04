@@ -7,6 +7,9 @@ mat-form-field{
 mat-button-toggle-group{
     height:50px ;
 }
+.main-timesheet{
+    min-width: 800px;
+}
 
     .date{
         font-size:12px;
@@ -20,4 +23,25 @@ mat-button-toggle-group{
 .official{
     color: #3186ff;
     font-weight: 900;
+}
+@media (min-width:320px) and (max-width:480px){
+    .note{
+        display: none;
+    }
+    .main-timesheet{
+        min-width: 0px;
+    }
+   .card .main-content{
+    min-width: 0px;
+   }
+   .scrollable-content{
+    overflow-x: auto;
+   }
+   .text-left-responsive{
+    text-align: left;
+   }
+   .datetime-button-responsive{
+    margin-top: 1rem;
+   }
+   
 }
