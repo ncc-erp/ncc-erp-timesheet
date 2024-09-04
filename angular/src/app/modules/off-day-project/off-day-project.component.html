@@ -205,28 +205,26 @@
         </div>
       </div>
       <br />
-      <div style="padding: 0px 20px 20px; overflow-x: scroll">
-        <div [ngSwitch]="view">
-          <mwl-calendar-month-view
-            class="spe-wrap"
-            *ngSwitchCase="CalendarView.Month"
-            [cellTemplate]="customCellTemplate"
-            [viewDate]="viewDate"
-            [events]="events"
-            [refresh]="refresh"
-            [activeDayIsOpen]="activeDayIsOpen"
-            (beforeViewRender)="getData($event)"
-            (dayClicked)="dayClicked($event.day)"
-          >
-          </mwl-calendar-month-view>
-        </div>
+      <div [ngSwitch]="view" class="cal-month-view-container">
+        <mwl-calendar-month-view
+          class="spe-wrap"
+          *ngSwitchCase="CalendarView.Month"
+          [cellTemplate]="customCellTemplate"
+          [viewDate]="viewDate"
+          [events]="events"
+          [refresh]="refresh"
+          [activeDayIsOpen]="activeDayIsOpen"
+          (beforeViewRender)="getData($event)"
+          (dayClicked)="dayClicked($event.day)"
+        >
+        </mwl-calendar-month-view>
       </div>
     </div>
   </div>
 </div>
 
 <ng-template #customCellTemplate let-day="day" let-locale="locale">
-  <div class="cal-cell-top position-relative" [attr.name]="'daySelectBtn-'+(day.date | date:'dd-MM-yyyy')" style="overflow: hidden">
+  <div class="cal-cell-top position-relative cal-cell-container" [attr.name]="'daySelectBtn-'+(day.date | date:'dd-MM-yyyy')">
     <span class="cal-day-badge" *ngIf="day.cssClass == 'back-red'">Off</span>
     <!-- <span class="cal-day-badge" *ngIf="day.badgeTotal > 0 && day.cssClass != 'back-red'">{{day.badgeTotal}}</span> -->
     <span class="cal-day-number">{{
