@@ -373,20 +373,21 @@ namespace Timesheet.APIs.Info
             {
                 return 0;
             }
-            var lockDate = _commonServices.getlockDatePM();
-            var qprojectIds = WorkScope.GetAll<ProjectUser>().Where(s => s.UserId == userId && s.Type == ProjectUserType.PM).Select(s => s.ProjectId).Distinct();
+            //var lockDate = _commonServices.getlockDatePM();
+            //var qprojectIds = WorkScope.GetAll<ProjectUser>().Where(s => s.UserId == userId && s.Type == ProjectUserType.PM).Select(s => s.ProjectId).Distinct();
 
-            var qtimesheets = WorkScope.GetAll<MyTimesheet>()
-                .Where(s => s.Status == TimesheetStatus.Pending)
-                .Where(s => s.IsUnlockedByEmployee != true)
-                .Where(s => s.DateAt >= lockDate.AddDays(-6).Date && s.DateAt.Date <= lockDate)
-                .Select(s => new { s.ProjectTask.ProjectId, DateAt = s.DateAt.Date });
+            //var qtimesheets = WorkScope.GetAll<MyTimesheet>()
+            //    .Where(s => s.Status == TimesheetStatus.Pending)
+            //    .Where(s => s.IsUnlockedByEmployee != true)
+            //    .Where(s => s.DateAt >= lockDate.AddDays(-6).Date && s.DateAt.Date <= lockDate)
+            //    .Select(s => new { s.ProjectTask.ProjectId, DateAt = s.DateAt.Date });
 
-            var timesheets = await (from projectId in qprojectIds
-                                    join ts in qtimesheets on projectId equals ts.ProjectId
-                                    group ts by ts.DateAt.Date into gr
-                                    select gr.Key).ToListAsync();
-            return timesheets.Any()?1:0;
+            //var timesheets = await (from projectId in qprojectIds
+            //                        join ts in qtimesheets on projectId equals ts.ProjectId
+            //                        group ts by ts.DateAt.Date into gr
+            //                        select gr.Key).ToListAsync();
+            //return timesheets.Any()?1:0;
+            return 1;
         }
         private async Task<Dictionary<DateTime, List<DateTime>>> getMapWorkingDateByWeek(DateTime startMonth, DateTime lockDate, long userId)
         {
