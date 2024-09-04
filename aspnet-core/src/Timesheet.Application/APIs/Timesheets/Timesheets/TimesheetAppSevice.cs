@@ -804,6 +804,7 @@ namespace Timesheet.Timesheets.Timesheets
                 .Select(s => s.UserId).Distinct().ToListAsync();
 
             var query = WorkScope.GetAll<MyTimesheet>()
+                                 .Include(x => x.User)
                                  .Where(x => !startDate.HasValue || x.DateAt >= startDate)
                                  .Where(x => !endDate.HasValue || x.DateAt.Date <= endDate)
                                  .Where(x => userIds.Contains(x.UserId))

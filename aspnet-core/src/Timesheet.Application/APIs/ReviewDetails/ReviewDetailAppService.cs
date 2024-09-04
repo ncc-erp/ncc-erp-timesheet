@@ -100,6 +100,31 @@ namespace Timesheet.APIs.ReviewDetails
                                                  .OrderByDescending(x => x.Review.Year).OrderByDescending(x => x.Review.Month)
                                                  .Select(x => new { x.InternshipId, x.RateStar }).ToListAsync();
 
+            var internInMonthAndYear = reviewDetails.Items.Select(s => s.InternshipId).ToHashSet();
+            var qMyTimeSheet = (from th in WorkScope.GetAll<MyTimesheet>()
+                              .Where(s => s.Status == TimesheetStatus.Approve)
+                              .Where(s => !s.ProjectTask.Project.isAllUserBelongTo)
+                              .Where(s => s.ProjectTask.Project.Status == ProjectStatus.Active)
+                              .Where(s => s.DateAt.Month == currentReview.Month && s.DateAt.Year == currentReview.Year)
+                              .Where(s => internInMonthAndYear.Contains(s.UserId))
+                                select new
+                                {
+                                    UserId = th.UserId,
+                                    ProjectId = th.ProjectTask.ProjectId,
+                                    ProjectName = th.ProjectTask.Project.Name,
+                                    WorkingTime = th.WorkingTime
+                                }).AsNoTracking();
+            var mostWorkingTimeUserProject = qMyTimeSheet.GroupBy(s => new { s.UserId, s.ProjectId, s.ProjectName })
+                                                .Select(g => new
+                                                {
+                                                    UserId = g.Key.UserId,
+                                                    ProjectName = g.Key.ProjectName,
+                                                    TotalTime = g.Sum(x => x.WorkingTime)
+                                                }).AsNoTracking()
+                                                .ToList() // Chuyển kết quả vào bộ nhớ để xử lý
+                                                .GroupBy(x => x.UserId)
+                                                .Select(g => g.OrderByDescending(x => x.TotalTime).FirstOrDefault()) // Lấy project có thời gian làm việc nhiều nhất
+                                                .ToDictionary(k => k.UserId, v => v.ProjectName); // UserId là key, ProjectName là value
             var result = reviewDetails.Items.Select(rv => new ReviewDetailDto
             {
                 Id = rv.Id,
@@ -133,6 +158,7 @@ namespace Timesheet.APIs.ReviewDetails
                 PositionId = rv.InterShip.Position?.Id,
                 PositionColor = rv.InterShip.Position?.Color,
                 Average = rv.RateStar,
+                MostLoggedProject = mostWorkingTimeUserProject.ContainsKey(rv.InternshipId) ? mostWorkingTimeUserProject[rv.InternshipId] : null,
                 PreviousAverage = previousReviewData.FirstOrDefault(p => p.InternshipId == rv.InternshipId)?.RateStar,
                 ReviewInternPrivateNoteDtos = new List<ReviewInternPrivateNoteDto>()// the note unused
             }).OrderByDescending(s => s.InternshipId).ToList();
@@ -142,7 +168,6 @@ namespace Timesheet.APIs.ReviewDetails
                 TotalCount = reviewDetails.TotalCount
             };
         }
-
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AddNew)]
         [HttpPost]
