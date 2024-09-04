@@ -117,16 +117,16 @@
                 <th class="text-center col-lg-1" matTooltip="Work At Office" matTooltipPosition="above">
                   <div class="project_sort">
                     <span>WAO</span>
-                    <span (click)="toggleSortOrder('WOAPercent')">
+                    <span (click)="toggleSortOrder('WAOPercent')">
                         <i
                            class="pi pi-sort-amount-up text-primary p-l-5"
                            role="button"
-                           *ngIf="WOAPercentSortDirection === sortDirectionEnum.Ascending"
+                           *ngIf="WAOPercentSortDirection === sortDirectionEnum.Ascending"
                         ></i>
                         <i
                            class="pi pi-sort-amount-down text-primary p-l-5"
                            role="button"
-                           *ngIf="WOAPercentSortDirection === sortDirectionEnum.Descending"
+                           *ngIf="WAOPercentSortDirection === sortDirectionEnum.Descending"
                         ></i>
                     </span>
                   </div>
@@ -212,7 +212,7 @@
                   <span class="label" [ngStyle]="userLevels[user.level]?.style">{{userLevels[user.level]?.name}}</span>
                 </td>
                 <td class="text-center col-lg-1">{{user.projectCount}}</td>
-                <td class="text-center col-lg-1">{{user.woaPercent == 100 ? user.woaPercent : user.woaPercent.toFixed(2)}}%</td>
+                <td class="text-center col-lg-1">{{user.waoPercent == 100 ? user.waoPercent : user.waoPercent.toFixed(2)}}%</td>
                 <td class="text-center col-lg-1">{{user.wfhPercent == 100 ? user.wfhPercent : user.wfhPercent.toFixed(2)}}%</td>
                 <td class="col-lg-5" style="padding: 0;" (click)="togglePrivateNote(user)">
                   <div class="project_list mb-0 custom-scrollbar" [ngClass]="user.hideProjectName === false ? 'preReview' : 'review'"

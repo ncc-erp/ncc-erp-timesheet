@@ -29,7 +29,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   sortProperty = "ProjectCount";
   ProjectCountSortDirection = this.sortDirectionEnum.Ascending;
   WorkingTimePercentSortDirection = this.sortDirectionEnum.Ascending;
-  WOAPercentSortDirection = this.sortDirectionEnum.Ascending;
+  WAOPercentSortDirection = this.sortDirectionEnum.Ascending;
   WFHPercentSortDirection = this.sortDirectionEnum.Ascending;
   LevelSortDirection = this.sortDirectionEnum.Ascending;
 
@@ -105,8 +105,8 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       case "ProjectUsers.WorkingTimePercent":
         request.sortDirection = this.WorkingTimePercentSortDirection;
         break;
-      case "WOAPercent": 
-        request.sortDirection = this.WOAPercentSortDirection;
+      case "WAOPercent": 
+        request.sortDirection = this.WAOPercentSortDirection;
         break;
       case "WFHPercent":
         request.sortDirection = this.WFHPercentSortDirection;
@@ -207,7 +207,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     this.sortProperty = "ProjectCount";
     this.ProjectCountSortDirection = this.sortDirectionEnum.Ascending;
     this.WorkingTimePercentSortDirection = this.sortDirectionEnum.Ascending;
-    this.WOAPercentSortDirection = this.sortDirectionEnum.Ascending;
+    this.WAOPercentSortDirection = this.sortDirectionEnum.Ascending;
     this.WFHPercentSortDirection = this.sortDirectionEnum.Ascending;
     this.LevelSortDirection = this.sortDirectionEnum.Ascending;
     this.refresh();
@@ -221,8 +221,8 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
         case "ProjectUsers.WorkingTimePercent":
           this.WorkingTimePercentSortDirection = this.WorkingTimePercentSortDirection == this.sortDirectionEnum.Ascending ? this.sortDirectionEnum.Descending : this.sortDirectionEnum.Ascending;
           break;
-        case "WOAPercent": 
-          this.WOAPercentSortDirection = this.WOAPercentSortDirection == this.sortDirectionEnum.Ascending ? this.sortDirectionEnum.Descending : this.sortDirectionEnum.Ascending;
+        case "WAOPercent": 
+          this.WAOPercentSortDirection = this.WAOPercentSortDirection == this.sortDirectionEnum.Ascending ? this.sortDirectionEnum.Descending : this.sortDirectionEnum.Ascending;
           break;
         case "WFHPercent":
           this.WFHPercentSortDirection = this.WFHPercentSortDirection == this.sortDirectionEnum.Ascending ? this.sortDirectionEnum.Descending : this.sortDirectionEnum.Ascending;

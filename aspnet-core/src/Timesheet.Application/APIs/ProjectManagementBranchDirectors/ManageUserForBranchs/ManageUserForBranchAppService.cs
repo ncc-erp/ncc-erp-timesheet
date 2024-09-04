@@ -97,7 +97,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                                    wawarningCheckInFromPersonalDevice = th.warningCheckInFromPersonalDevice
                                };
 
-            var WOATime = qTimeKeeping.Where(s => s.wawarningCheckInFromPersonalDevice.HasValue && !s.wawarningCheckInFromPersonalDevice.Value).GroupBy(s => s.UserId)
+            var WAOTime = qTimeKeeping.Where(s => s.wawarningCheckInFromPersonalDevice.HasValue && !s.wawarningCheckInFromPersonalDevice.Value).GroupBy(s => s.UserId)
                                     .ToDictionary(g => g.Key, g => g.Sum(i => i.WorkingTime));
             var WFHTime = qTimeKeeping.Where(s => s.wawarningCheckInFromPersonalDevice.HasValue && s.wawarningCheckInFromPersonalDevice.Value).GroupBy(s => s.UserId)
                                     .ToDictionary(g => g.Key, g => g.Sum(i => i.WorkingTime));
@@ -141,7 +141,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
                                 WorkingTimePercent = p.WorkingTimePercent
                             }).ToList(),
                             ProjectCount = pud.Where(p => p.UserId == u.Id).Count(),
-                            WOAPercent = WOATime.ContainsKey(u.Id) && TotalWorkingTime[u.Id] != 0 ? WOATime[u.Id] * 100 / TotalWorkingTime[u.Id] : 0,
+                            WAOPercent = WAOTime.ContainsKey(u.Id) && TotalWorkingTime[u.Id] != 0 ? WAOTime[u.Id] * 100 / TotalWorkingTime[u.Id] : 0,
                             WFHPercent = WFHTime.ContainsKey(u.Id) && TotalWorkingTime[u.Id] != 0 ? WFHTime[u.Id] * 100 / TotalWorkingTime[u.Id] : 0,
                         };
             var temp = await query.GetGridResult(query, input);
