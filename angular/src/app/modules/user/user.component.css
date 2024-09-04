@@ -217,6 +217,10 @@ file-upload>span {
     .user-wrapper .user-table-button{
         display: none;
     }
+    
+    ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .user-custom-dialog-container{
+        width: 90% !important;
+    }
 }
 
 @media (min-width: 768px) {
