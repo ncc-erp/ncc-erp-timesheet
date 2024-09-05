@@ -153,7 +153,7 @@
       <span class="cal-day-badge">Off</span>
     </div>
     <div *ngFor="let item of day.events">
-      <div *ngIf="day.badgeTotal <= 0">
+      <div *ngIf="day.badgeTotal <= 0" class="day">
         <span
           class="cal-day-badge text-primary day-chip-full-day"
           *ngIf="item.type === 0 && item.absenceTime == null"

@@ -12,6 +12,11 @@
     margin-top: 20px;
 }
 
+.pin {
+    margin-right: 40px;
+    margin-top: 0;
+}
+
 .pin span {
     display: inline-block;
     min-width: 10px;
@@ -28,11 +33,11 @@
 
 ::ng-deep #frm_create_group .mat-icon {
     position: absolute;
-    top: -20px;
+    top: -15px;
     right: 0;
     cursor: pointer;
     height: 50px;
-    width: 50px;
+    width: 27px;
     text-align: center;
     align-items: center;
     line-height: 50px;

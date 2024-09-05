@@ -48,3 +48,10 @@ thead th:nth-child(2) {
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 }
+
+.card .header .header-dropdown {
+  position: absolute;
+  top: 15px;
+  right: 5px;
+  list-style: none;
+}

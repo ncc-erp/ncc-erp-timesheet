@@ -78,6 +78,7 @@ body{
 .box-menu-right{
     display: flex;
     padding: 3px 0px;
+    flex-wrap: wrap;
 }
 .square{
     border-radius: 0px !important;

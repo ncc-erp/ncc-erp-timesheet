@@ -94,3 +94,43 @@
 .orange {
   color: orange;
 }
+
+@media (max-width: 715px) {
+
+.format-col {
+  flex-direction: column;
+      align-items: start;
+      margin-left: 0;
+  }
+  .col-form-label {
+    padding-left: 0;
+    width: 100%;
+  }
+  .col-form-label-note {
+    width: 100%;
+    padding-left: 0;
+  }
+  .col-form-mb {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .row-item-rest {
+      width: 100%;
+      padding-right: 0;
+      padding-left: 0;
+      margin-left: 0;
+  }
+}
+
+@media (max-width: 455px) {
+  .rating-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .feedback {
+    width: 100%;
+  }
+}

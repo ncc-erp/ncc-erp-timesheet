@@ -27,7 +27,7 @@
 }
 
 .deadline-wrapper {
-    width: 36%;
+    width: 45%;
 }
 
 .status-wrapper {
@@ -46,3 +46,73 @@
 .text-spacing {
     padding-bottom: 19px;
 }
+
+.deadline-list {
+    display: flex;
+}
+
+.to {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+@media screen and (max-width: 876px) {
+    .date-list {
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .deadline-list {
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .form-control-wrapper {
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .to {
+        width: 100%;
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .input-wrapper {
+        width: 100%;
+    }
+
+    .date-list {
+        width: 100%;
+    }
+
+    .date-item {
+        width: 100%;
+    }
+
+    .mat-form-field {
+        width: 100%;
+    }
+
+    .deadline-list {
+        width: 100%;
+    }
+
+    .deadline-wrapper{
+        width: 100%;
+    }
+
+    .status-wrapper {
+        padding-left: 0;
+        align-items: start;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .label-status {
+        padding-bottom: 0;
+    }
+}
+
+

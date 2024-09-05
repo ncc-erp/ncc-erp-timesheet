@@ -121,6 +121,10 @@ pre {
     margin-left: 8px;
 }
 
+.day {
+    display: table-caption;
+}
+
 @media only screen and (max-width: 750px) {
     .group-filter{
         display: flex;

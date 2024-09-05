@@ -1,5 +1,5 @@
 <form style="position: relative" novalidate  [formGroup]="retroResultFormGroup">
-  <h1 style="cursor: grab">
+  <h1 style="cursor: grab; margin-right: 5px;">
     {{ "Add multiple retro result" | localize }} :
   </h1>
   <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0; cursor: pointer">close</mat-icon>
@@ -43,7 +43,7 @@
           </mat-form-field>
         </div>
       </div>
-      <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+      <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12 m-b-20">
         <button style="margin-top: 11px;" mat-raised-button color="primary" type="button" name="addUserButton"
           (click)="toggleShowAddUserDialog(); $event.stopPropagation()">
           Add users

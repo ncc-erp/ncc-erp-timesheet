@@ -24,3 +24,39 @@
 .m-b-0 {
   margin-bottom: 0 !important;
 }
+
+.pb-0 {
+  padding-bottom: 0;
+}
+
+@media screen and (max-width: 810px) {
+ .title {
+  flex-direction: column;
+  align-items: start;
+ }
+
+ .mb {
+  flex-direction: column !important;
+  align-items: start !important;
+ }
+
+ .pf-0 {
+  padding-left: 0;
+ }
+ .ml-0 {
+  margin-left: 0;
+ }
+
+ .mat-dialog-actions {
+  flex-wrap: nowrap;
+ }
+}
+
+@media screen and (max-width: 600px) {
+  .title {
+    font-size: 17px;
+   }
+}
+
+
+

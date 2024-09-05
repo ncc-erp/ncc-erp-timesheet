@@ -5,3 +5,9 @@
     background-color: white;
     padding-left: 15px;
 }
+
+@media screen and (max-width: 600px) {
+    ::ng-deep .table-team-select {
+        width: 80%;
+    }
+}
