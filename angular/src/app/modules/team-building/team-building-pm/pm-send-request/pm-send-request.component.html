@@ -274,7 +274,7 @@
                         <br>
                         <label>Has VAT</label>
                       </td>
-                      <td>
+                      <td style="min-width: 100px;">
                         <div style="display: flex;">
                           <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ', placement: 'prefix'}" class="form-control" formControlName="amount" [name]="'amountInput-' + (i + 1)"
                           (ngModelChange)="calculateTotalInvoiceAmount()">
