@@ -1,0 +1,9 @@
+.mat-dialog-container {
+  padding: 24px;
+}
+
+@media screen and (max-width: 600px) {
+  .mat-dialog-container {
+    padding: 20px;
+  }
+}

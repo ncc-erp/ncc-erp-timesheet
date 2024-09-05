@@ -76,8 +76,8 @@ export class MyWorkingTimeComponent extends AppComponentBase implements OnInit {
       status: infor.status
     } as RegisterInforDto;
     const dialogRef = this.dialog.open(RegisterWorkingTimeComponent, {
-      width: '40%',
-      data: item
+      data: item,
+      panelClass: 'custom-dialog-container'
     });
 
     dialogRef.afterClosed().subscribe(result => {

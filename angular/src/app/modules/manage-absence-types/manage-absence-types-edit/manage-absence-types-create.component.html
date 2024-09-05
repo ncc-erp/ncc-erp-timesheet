@@ -1,7 +1,9 @@
 <form #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate 
 >
+<div class="manage-absence-types-create-tilte">
     <h1 style="cursor:grab;" mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>New Absence Types</h1>
-  <mat-dialog-content class="mat-typography" style="width:450px; height: 200px;">
+  </div>
+  <div class="manage-absence-types-create-form">
     <mat-form-field>
       <mat-label>Tên loại</mat-label>
       <input matInput name="name" [(ngModel)]="absenceTypes.name" required maxlength="255">
@@ -9,7 +11,7 @@
    
     <mat-form-field>
       <mat-label>Kiểu nghỉ</mat-label>
-      <mat-select [(ngModel)]="absenceTypes.status" (ngModelChange)="check(absenceTypes)" name="absenceTypesStatus">
+      <mat-select [(ngModel)]="absenceTypes.status" (ngModelChange)="check(absenceTypes)" name="absenceTypesStatus" [disableOptionCentering]="true">
         <mat-option [value]="2">Mất ngày phép</mat-option>
         <mat-option [value]="1">Không mất ngày phép</mat-option>
       </mat-select>
@@ -18,9 +20,9 @@
       <mat-label>Số ngày phép KHÔNG bị trừ</mat-label>
         <input name="absenceTypesLength" matInput [(value)]="absenceTypes.length" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" [(ngModel)] = "absenceTypes.length" [ngModelOptions]="{standalone: true}" [disabled]="day">
     </mat-form-field>
-  </mat-dialog-content>
+  </div>
   <mat-dialog-actions align="end">
     <button class="btn btn-default " name="cancelBtn" mat-raised-button mat-dialog-close>Cancel</button>
-    <button mat-raised-button color="primary" name="saveBtn" mat-button [mat-dialog-close]="absenceTypes" cdkFocusInitial [disabled]="!createForm.form.valid || saving">{{l('Save')}}</button>
+    <button class="save-btn" mat-raised-button color="primary" name="saveBtn" mat-button [mat-dialog-close]="absenceTypes" cdkFocusInitial [disabled]="!createForm.form.valid || saving">{{l('Save')}}</button>
   </mat-dialog-actions>
 </form>

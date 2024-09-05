@@ -1,7 +1,84 @@
 
+.my-working-time-wrapper{
+    height: 100%;
+    overflow-y: auto;
+}
+.my-working-time-title{
+    padding : 10px 0 0 0;
+    text-align: center;
+}
+.my-working-time-table{
+    width: 100%;
+    overflow-x: auto;
+}
+
 table th, td {
     text-align: center;
 }
 .edit-save {
     margin: 20px 0;
+}
+.custom-dialog-container{
+    width: 40% !important;
+}
+.my-working-time-wrapper .edit-save{
+    display: flex;
+    align-items: center;
+}
+.my-working-time-wrapper .edit-save .edit-save-subtitle{
+    padding-left: 0px !important;
+    font-size: 14px;
+}
+.my-working-time-wrapper .edit-save .edit-save-subtitle mat-icon{
+    font-size: 16px;
+    width: unset;
+    height: unset;
+}
+::ng-deep .edit-save-button .mat-button-wrapper{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+@media screen and (max-width: 600px) { 
+    .my-working-time-wrapper{
+        padding: 0px !important;
+        margin: 0px !important;
+    }
+    .my-working-time-wrapper .main-content{
+        margin-bottom: 0px;
+    }
+    .my-working-time-wrapper .my-working-time-title{
+        padding: 0px !important;
+        text-align: start;
+    }
+    .my-working-time-wrapper .edit-save .edit-save-button{
+        padding-left: 0px !important;
+    }
+    .my-working-time-wrapper .edit-save .edit-save-subtitle{
+        padding-left: 0px !important;
+        font-size: 14px;
+    }
+    .my-working-time-wrapper .edit-save{
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
+    .my-working-time-wrapper .edit-save .edit-save-subtitle mat-icon{
+        padding-top: 2px;
+        font-size: 16px;
+        width: unset;
+        height: unset;
+    }
+    .my-working-time-wrapper .my-working-time-table thead tr th {
+        white-space: nowrap;
+    }
+    .my-working-time-wrapper .my-working-time-table tbody tr td {
+        white-space: nowrap;
+    }
+
+    ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .custom-dialog-container{
+        width: 90% !important;
+        max-height: 90% !important;
+        height: 84% !important;
+    }
 }

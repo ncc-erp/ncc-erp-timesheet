@@ -247,7 +247,6 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
         (res) => {
           this.isLoading = false;
           this.countRequestList = res.result;
-          console.log(this.countRequestList, 'countRequestList')
           this.countRequestList.forEach((item) => {
             this.events.push({
               count: item.count,

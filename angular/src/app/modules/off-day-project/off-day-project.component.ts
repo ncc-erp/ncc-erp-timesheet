@@ -246,7 +246,6 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     this.absenceService.getAllRequestAbsence(startDate, endDate, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
       this.isLoading = false;
       this.absenceRequestList = res.result;
-      console.log(this.absenceRequestList, 'absenceRequestList')
       this.absenceRequestList.forEach(item => {
         if (!(this.absentDayType === 0 && item.dateType === 4)) {
           this.events.push({

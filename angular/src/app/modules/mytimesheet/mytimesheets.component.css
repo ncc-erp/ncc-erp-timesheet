@@ -21,3 +21,223 @@ mat-button-toggle-group{
     color: #3186ff;
     font-weight: 900;
 }
+
+.main-content {
+    min-width: 800px;
+  }
+  
+  .btn-wapper {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .table-responsive {
+    overflow: hidden;
+  }
+  
+  .view-mobile {
+    display: none;
+  }
+  
+  @media screen and (max-width: 600px) {
+    :host {
+      mat-tab-header {
+        display: none !important;
+      }
+  
+      .hidden-padding {
+        padding-left: 0;
+        padding-right: 0;
+        overflow-x: hidden;
+      }
+  
+      .view-mobile {
+        display: block;
+      }
+  
+      .view-web {
+        display: none;
+      }
+  
+      .hidden-date-input {
+        visibility: hidden;
+        width: 0;
+        height: 0;
+      }
+  
+      .date-view {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 14.52px;
+        color: #000000;
+      }
+  
+      .non-padding-mobile {
+        padding-left: 0;
+        padding-right: 0;
+      }
+      .table-timesheets {
+        padding: 8px;
+        background-color: #f3f3f3;
+        border-radius: 4px;
+      }
+      .card-wrapper,
+      .btn-wapper-date {
+        padding: 0;
+        display: flex;
+        gap: 4px;
+        margin-bottom: 0;
+      }
+  
+      .card {
+        margin-bottom: 12px;
+      }
+  
+      .card .body {
+        padding: 0;
+      }
+      .mobile {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 12px;
+        padding-bottom: 16px;
+      }
+  
+      .mat-button-toggle-label-content {
+        line-height: 40px !important;
+      }
+  
+      .card-wrapper {
+        display: flex;
+        flex-direction: column;
+      }
+  
+      mat-button-toggle-group,
+      .btn-refresh,
+      .btn-today,
+      .btn-save-week {
+        height: 38px;
+      }
+  
+      .main-content {
+        min-width: auto;
+        flex-direction: column;
+        padding: 12px;
+      }
+  
+      mat-button-toggle {
+        width: 100%;
+      }
+  
+      .table-responsive {
+        border: none;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .table {
+        margin-bottom: 12px;
+      }
+      .table-week-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-bottom: 8px;
+      }
+      .table-week {
+        padding: 8px;
+        border-radius: 4px;
+        background-color: #f3f3f3;
+      }
+      .previousBtn,
+      .nextBtn {
+        width: 48px;
+      }
+  
+      .time-and-status {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        width: 100%;
+        justify-content: space-between;
+        padding-top: 6px;
+      }
+  
+      .working-time-wrapper {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .over-time-type {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+  
+      .btn-delete,
+      .btn-edit {
+        width: 30px;
+        height: 30px;
+      }
+  
+      .btn-action-wrapper {
+        display: flex;
+        gap: 4px;
+      }
+  
+      .table-version-mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding-top: 12px;
+      }
+      .table-version-pc {
+        display: none;
+      }
+      .text-area {
+        min-height: 50px;
+        overflow-y: auto;
+      }
+      .break-line {
+        border: 0;
+        border-top: 1px solid #eee;
+      }
+      .day-of-week {
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+      }
+      .detail-time {
+        padding-top: 12px;
+      }
+      .detail-time-wrapper {
+        width: 100%;
+      }
+      .project-name-header {
+        display: flex;
+        gap: 4px;
+        justify-content: space-between;
+      }
+      .total-workingtime {
+        display: flex;
+        justify-content: flex-end;
+      }
+      .project-name-title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 70%;
+        margin: 0;
+      }
+      .label-status {
+        margin-top: -10px;
+        padding: 6px 15px;
+        min-width: 90px;
+        border-radius: 10px;
+        float: right;
+      }
+    }
+}
