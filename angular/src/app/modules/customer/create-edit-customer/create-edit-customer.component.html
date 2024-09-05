@@ -1,7 +1,7 @@
 
 <form *ngIf="active" #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
   <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane"  cdkDragHandle mat-dialog-title>{{title}} {{customer.id > 0 ? customer.name : ''}}</h2>
-  <mat-dialog-content class="mat-typography" style="min-width: 400px">
+  <mat-dialog-content class="mat-typography">
     <div class="example-container">
       <mat-form-field >
         <input matInput name="name" placeholder="{{l('Name')}}" [(ngModel)]="customer.name" required maxlength="255">

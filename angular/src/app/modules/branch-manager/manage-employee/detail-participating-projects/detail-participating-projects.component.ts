@@ -165,8 +165,9 @@ export class DetailParticipatingProjectsComponent extends AppComponentBase imple
     }
     const dialogRef = this._dialog.open(PopupUpdateProjectComponent, {
       disableClose : true,
-      width : "450px",
-      data : data
+      width: "450px",
+      panelClass: 'detail-participating-projects',
+      data: data,
     });
     dialogRef.afterClosed().subscribe(result => {
       if(result) {

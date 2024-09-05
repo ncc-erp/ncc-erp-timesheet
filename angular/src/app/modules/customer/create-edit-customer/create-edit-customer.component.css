@@ -1,0 +1,11 @@
+@media screen and (min-width: 509px) {
+    .mat-typography {
+        min-width: 400px;
+    }
+}
+
+@media (min-width: 410px) and (max-width: 510px) {
+    .mat-typography {
+        min-width: 300px;
+    }
+}

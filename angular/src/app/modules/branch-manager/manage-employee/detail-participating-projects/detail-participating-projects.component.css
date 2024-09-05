@@ -7,3 +7,15 @@
 .detailParticipatingProject .row div{
     padding: 0 24px 10px;
 }
+
+@media screen and (max-width: 600px) {
+    .detailParticipatingProject .row div{
+        flex-wrap: wrap;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .detail-participating-projects {
+        padding: 15px;
+    }
+}

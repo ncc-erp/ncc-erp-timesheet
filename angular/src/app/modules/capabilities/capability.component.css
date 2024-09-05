@@ -47,3 +47,13 @@ thead th {
   gap: 5px;
   flex-wrap: wrap;
 }
+
+@media screen and (max-width: 600px) {
+  .clearfix {
+    padding: 0 15px;
+  }
+
+  .action-capability {
+    color: #3f51b5;
+  }
+}

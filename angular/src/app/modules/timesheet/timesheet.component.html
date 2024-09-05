@@ -3,8 +3,8 @@
     <div class="card main-content">
       <div class="header">
         <h2 class="title">{{ "Timesheets" | localize }}</h2>
-        <div class="gr-filter">
-          <div class="item">
+        <!-- <div class="gr-filter"> -->
+          <div class="item col-sm-3 col-xs-12">
             <mat-form-field appearance="outline">
               <mat-label>Project</mat-label>
               <mat-select name="projectId" [(value)]="projectId" (selectionChange)="getTimesheets()">
@@ -19,7 +19,7 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="item">
+          <div class="item col-sm-3 col-xs-12">
             <mat-form-field appearance="outline">
               <mat-label>Branch</mat-label>
               <mat-select name="branchId" [(value)]="branchId" (selectionChange)="getTimesheets()">
@@ -34,7 +34,7 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="item">
+          <div class="item col-sm-3 col-xs-12">
             <mat-form-field appearance="outline">
               <mat-label>Check In</mat-label>
               <mat-select name="checkIn" [(value)]='checkInFilter' (selectionChange)='getTimesheets()'>
@@ -44,14 +44,14 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="item">
+          <div class="item search col-sm-3 col-xs-12">
             <mat-form-field appearance="outline" style="margin-top: 0px; width: 100%;">
               <mat-label>Search by UserName</mat-label>
               <input type="search" [(ngModel)]="searchText" name="searchText" (keyup.enter)="refresh()" matInput>
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
           </div>
-        </div>
+        <!-- </div> -->
         <ul class="header-dropdown m-r--5">
           <li>
             <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
@@ -66,7 +66,7 @@
           </li>
         </ul>
       </div>
-      <div class="body table-responsive" [busy]="isLoading">
+      <div class="body table-responsive" style="border: 0;" [busy]="isLoading">
         <date-selector name="customTimeSelect" [type]="APP_CONSTANT.TypeViewHomePage.CustomTime"
           [defaultFromDate] = "defaultFromDate"
           [defaultToDate] = "defaultToDate"
@@ -135,7 +135,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-sm-3">
+              <div class="col-sm-3" *ngIf="OpenTalkJoinTime">
                 <div class="form-group form-float">
                   <div class="example-form">
                     <mat-form-field *ngIf="OpenTalkJoinTime" appearance="outline" style="width: 100%;">
@@ -151,58 +151,62 @@
             </div>
           </div>
 
-          <div class="col-sm-2">
-            <div class="form-group form-float">
-              <div>
-                <button name="approveBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
-                  style="width: 100%" class="btn btn-success waves-effect" (click)="btnApprove()">
-                  Approve
-                </button>
+          <div class="action-timesheet-overview">
+            <div class="action-timesheet">
+              <div class="col-sm-2 status-timesheet">
+                <div class="form-group form-float">
+                  <div>
+                    <button name="approveBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
+                      style="width: 100%" class="btn btn-success waves-effect" (click)="btnApprove()">
+                      Approve
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-2 status-timesheet">
+                <div class="form-group form-float">
+                  <div>
+                    <button name="rejectBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
+                      style="width: 100%" class="btn bg-grey waves-effect" (click)="btnReject()">
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-2 status-timesheet">
+                <div class="form-group form-float">
+                  <button name="exportMenuBtn" *ngIf="permission.isGranted(EXPORT_EXCEL_TIMESHEET)" class="text-center m-t-10" type="submit"
+                    style="width: 100%" class="btn bg-red waves-effect" [matMenuTriggerFor]="actionsMenu"
+                    [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
+                    Export
+                  </button>
+                </div>
+                <mat-menu #actionsMenu="matMenu">
+                  <button mat-menu-item (click)="btnExport('timesheet')">
+                    Export by timesheet
+                  </button>
+                  <button mat-menu-item (click)="btnExport('day')">
+                    Export by day
+                  </button>
+                  <button mat-menu-item (click)="dialogSelectDay(1)">
+                    Export TimeSheet
+                  </button>
+                  <button mat-menu-item (click)="dialogSelectDay(2)">
+                    Export Remote Request
+                  </button>
+                </mat-menu>
               </div>
             </div>
-          </div>
-          <div class="col-sm-2">
-            <div class="form-group form-float">
-              <div>
-                <button name="rejectBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
-                  style="width: 100%" class="btn bg-grey waves-effect" (click)="btnReject()">
-                  Reject
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-2">
-            <div class="form-group form-float">
-              <button name="exportMenuBtn" *ngIf="permission.isGranted(EXPORT_EXCEL_TIMESHEET)" class="text-center m-t-10" type="submit"
-                style="width: 100%" class="btn bg-red waves-effect" [matMenuTriggerFor]="actionsMenu"
-                [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
-                Export
-              </button>
-            </div>
-            <mat-menu #actionsMenu="matMenu">
-              <button mat-menu-item (click)="btnExport('timesheet')">
-                Export by timesheet
-              </button>
-              <button mat-menu-item (click)="btnExport('day')">
-                Export by day
-              </button>
-              <button mat-menu-item (click)="dialogSelectDay(1)">
-                Export TimeSheet
-              </button>
-              <button mat-menu-item (click)="dialogSelectDay(2)">
-                Export Remote Request
-              </button>
-            </mat-menu>
-          </div>
-          <div class="col-sm-1">
-            <div class="form-group form-float">
-              <div class="example-form m-t-10" class="text-center">
-                <mat-checkbox name="isCheckAll" color="primary" [checked]="checkedCount == totalCount && checkedCount != 0"
-                  [indeterminate]="
-                    checkedCount < totalCount && checkedCount > 0
-                  " (change)="onTotalCheckedChange($event)"></mat-checkbox>
-                <div style="color: #000">
-                  {{ checkedCount }}/{{ totalCount }}
+            <div class="col-sm-1 status-timesheet">
+              <div class="form-group form-float">
+                <div class="example-form m-t-10" class="text-center">
+                  <mat-checkbox name="isCheckAll" color="primary" [checked]="checkedCount == totalCount && checkedCount != 0"
+                    [indeterminate]="
+                      checkedCount < totalCount && checkedCount > 0
+                    " (change)="onTotalCheckedChange($event)"></mat-checkbox>
+                  <div style="color: #000">
+                    {{ checkedCount }}/{{ totalCount }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -220,7 +224,9 @@
                   <a role="button" data-toggle="collapse" [attr.href]="'#collapseProject-' + project.projectId"
                     aria-expanded="true" aria-controls="'collapseProject-' + project.projectId">
                     <i class="material-icons">folder</i>
-                    <span class="object-name" title="{{ project.projectName }}">{{ project.projectName }}</span>
+                    <span class="object-name" title="{{ project.projectName }}">
+                      <span class="label-title">{{ project.projectName }} </span>
+                    </span>
                   </a>
                 </h4>
                 <div class="heading-checkbox">
@@ -262,8 +268,8 @@
                             <div style="display: flex; align-items: center">
                               <img [src]="getAvatar(ut)" width="40" height="40" alt="Member"
                                 style="border-radius: 50%; margin-right: 5px" />
-                              <span class="object-name" title="{{ ut.userName }}" style="height: 20px">
-                                {{ ut.userName }}
+                              <span class="object-name" title="{{ ut.userName }}">
+                                <span class="label-title">{{ ut.userName }} </span>
                                 <span *ngIf="ut.type == 0" class="label status-label bg-red">{{ userTypes[ut.type].label
                                   }}</span>
                                 <span *ngIf="ut.type == 1" class="label status-label bg-green">{{
@@ -276,7 +282,7 @@
                                 </span>
                                 <span class="label status-label" [style.backgroundColor]="ut.branchColor">{{
                                   ut.branchDisplayName}}</span>
-                                <span class="ml-1" *ngIf="ut.isThanDefaultWorkingHourPerDay">
+                                <span class="warning-timesheet" *ngIf="ut.isThanDefaultWorkingHourPerDay">
                                   <img src="../../assets/images/icon-warning.gif" width="20" style="display: inline">
                                 </span>
                               </span>
@@ -335,7 +341,7 @@
                                       i
                                     " class="collapsed">
                                     <i class="material-icons">timelapse</i>
-                                    <span>
+                                    <span class="dateAt">
                                       {{ dt.dateAt | date: "yyyy/MM/dd" }}
                                     </span>
                                   </a>
@@ -387,7 +393,7 @@
                                   i
                                 " aria-expanded="false" style="height: 0px">
                                 <div class="panel-body">
-                                  <div class="body table-responsive">
+                                  <div class="body table-responsive table-timesheet">
                                     <table class="table table-hover">
                                       <thead>
                                         <tr>
@@ -514,8 +520,8 @@
                     <div style="display: flex; align-items: center">
                       <img [src]="getAvatar(ut)" width="40" height="40" alt="Member"
                         style="border-radius: 50%; margin-right: 5px" />
-                      <span class="object-name" title="{{ ut.userName }}" style="height: 20px">
-                        {{ ut.userName }}
+                      <span class="object-name" title="{{ ut.userName }}">
+                        <span class="label-title">{{ ut.userName }} </span>
                         <span *ngIf="ut.type == 0" class="label status-label bg-red">{{ userTypes[ut.type].label
                           }}</span>
                         <span *ngIf="ut.type == 1" class="label status-label bg-green">{{ userTypes[ut.type].label
@@ -528,7 +534,7 @@
                         </span>
                         <span class="label status-label" [style.backgroundColor]="ut.branchColor">{{
                           ut.branchDisplayName}}</span>
-                        <span class="ml-1" *ngIf="ut.isThanDefaultWorkingHourPerDay">
+                        <span class="warning-timesheet" *ngIf="ut.isThanDefaultWorkingHourPerDay">
                           <img src="../../assets/images/icon-warning.gif" width="20" style="display: inline">
                         </span>
                       </span>
@@ -563,7 +569,7 @@
                               'collapseDayTask-' + ut.userId + '-' + i
                             " class="collapsed">
                             <i class="material-icons">timelapse</i>
-                            <span>
+                            <span  class="dateAt">
                               {{ dt.dateAt | date: "yyyy/MM/dd" }}
                             </span>
                           </a>
@@ -592,7 +598,7 @@
                           'headingDayTask-' + ut.userId + '-' + i
                         " aria-expanded="false" style="height: 0px">
                         <div class="panel-body">
-                          <div class="body table-responsive">
+                          <div class="body table-responsive table-timesheet">
                             <table class="table table-hover">
                               <thead>
                                 <tr>

@@ -268,5 +268,16 @@ pre {
         width: 150px;
         flex: none;
     }
+
+    .row1 {
+        display: flex;
+        gap: 15px;
+        padding: 0 15px;
+    }
+
+    .row1-child {
+        padding: 0;
+    }
 }
+
 

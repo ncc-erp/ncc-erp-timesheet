@@ -65,7 +65,7 @@
             </div>
             <div
               name="createBtn"
-              class="col-md-4 col-sm-4 col-md-4 col-lg-4"
+              class="col-md-4 col-sm-4 col-md-4 col-lg-4 btn-new-client"
               style="margin-top: 5px"
             >
               <button
@@ -214,10 +214,10 @@
             </div>
           </div>
           <div class="row row-mar-0">
-            <div class="col-md-2 col-sm-2 col-xl-2 col-lg-2">
+            <div class="col-md-2 col-sm-2 col-xl-2 col-lg-2 label-checkbox-user">
               <label>All User</label>
             </div>
-            <div class="col-md-10 col-sm-10 col-lg-10 col-xl-10">
+            <div class="col-md-10 col-sm-10 col-lg-10 col-xl-10 note-user">
               <mat-checkbox name="isAll" [(ngModel)]="project.isAllUserBelongTo"
                 >Auto add user as a member of this project when creating new
                 user</mat-checkbox
@@ -230,8 +230,8 @@
             </div>
 
             <div class="col-md-10 col-sm-10 col-lg-10 col-xl-10">
-              <div class="row">
-                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
+              <div class="row btn-allow-teambuilding">
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 btn-allow-teambuilding-yes">
                   <label class="i-check">
                     <input
                       type="radio"
@@ -243,7 +243,7 @@
                     <span>Yes</span>
                   </label>
                 </div>
-                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 btn-allow-teambuilding-no">
                   <label class="i-check">
                     <input
                       type="radio"
@@ -273,8 +273,8 @@
               <label>Project Type*</label>
             </div>
             <div class="col-md-10 col-sm-10 col-lg-10 col-xl-10">
-              <div class="row">
-                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
+              <div class="row btn-allow-teambuilding">
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 btn-allow-teambuilding-yes">
                   <label class="i-check">
                     <input
                       type="radio"
@@ -285,7 +285,7 @@
                     <span>T&M</span>
                   </label>
                 </div>
-                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 btn-allow-teambuilding-yes">
                   <label class="i-check">
                     <input
                       type="radio"
@@ -296,7 +296,7 @@
                     <span>Fixed Frice</span>
                   </label>
                 </div>
-                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 btn-allow-teambuilding-yes">
                   <label class="i-check">
                     <input
                       type="radio"
@@ -307,7 +307,7 @@
                     <span>Non-Bill</span>
                   </label>
                 </div>
-                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3">
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 btn-allow-teambuilding-yes">
                   <label class="i-check">
                     <input
                       type="radio"
@@ -318,7 +318,7 @@
                     <span>ODC</span>
                   </label>
                 </div>
-                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 mr-top-20">
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 mr-top-20 btn-allow-teambuilding-yes">
                   <label class="i-check">
                     <input
                       type="radio"
@@ -329,7 +329,7 @@
                     <span>Product</span>
                   </label>
                 </div>
-                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 mr-top-20">
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 mr-top-20 btn-allow-teambuilding-yes">
                   <label class="i-check">
                     <input
                       type="radio"
@@ -340,7 +340,7 @@
                     <span>Training</span>
                   </label>
                 </div>
-                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 mr-top-20">
+                <div class="col-md-3 col-sm-3 col-lg-3 col-xl-3 mr-top-20 btn-allow-teambuilding-yes">
                   <label class="i-check">
                     <input
                       type="radio"
@@ -357,9 +357,10 @@
         </div>
       </mat-tab>
       <mat-tab label="Team">
-        <div style="display: flex">
+        <div style="display: flex; flex-wrap: wrap;">
           <div
             [ngClass]="isShowTeamMember ? 'table-team-selected' : 'full-width'"
+            class="table-team-select-wrapper"
           >
             <mat-expansion-panel [expanded]="true">
               <mat-expansion-panel-header style="height: 50px">
@@ -414,7 +415,7 @@
                 </div>
               </div>
 
-              <div class="mat-dialog-content list-project-member">
+              <div *ngIf="displayProjectMembers.length" class="mat-dialog-content list-project-member">
                 <table class="table table-hover table-striped list-user">
                   <tr
                     *ngFor="let member of displayProjectMembers; let i = index"
@@ -734,77 +735,80 @@
               </td>
             </tr>
           </table>
-          <mat-expansion-panel [expanded]="true">
+          </div>
+          <mat-expansion-panel [expanded]="true" class="table-select-task">
             <mat-expansion-panel-header>
               <mat-panel-title align="center"> Select task </mat-panel-title>
             </mat-expansion-panel-header>
-            <table class="table table-hover table-striped">
-              <tr *ngFor="let task of availableTask; index as i">
-                <td (click)="selectTask(task, i)">
-                  <button
-                    [name]="'addTaskBtn-' + task.id"
-                    type="button"
-                    mat-icon-button
-                  >
-                    <i class="material-icons"> add_circle_outline </i>
-                  </button>
-                  {{ task.name }}
-                </td>
-                <td>
-                  <p *ngIf="task.type == 0">Common Task</p>
-                  <p *ngIf="task.type == 1">Other Task</p>
-                </td>
-              </tr>
-            </table>
+            <div class="table-responsive">
+              <table class="table table-hover table-striped">
+                <tr *ngFor="let task of availableTask; index as i">
+                  <td (click)="selectTask(task, i)">
+                    <button
+                      [name]="'addTaskBtn-' + task.id"
+                      type="button"
+                      mat-icon-button
+                    >
+                      <i class="material-icons"> add_circle_outline </i>
+                    </button>
+                    {{ task.name }}
+                  </td>
+                  <td>
+                    <p *ngIf="task.type == 0">Common Task</p>
+                    <p *ngIf="task.type == 1">Other Task</p>
+                  </td>
+                </tr>
+              </table>
+            </div>
           </mat-expansion-panel>
-        </div>
+        <!-- </div> -->
       </mat-tab>
       <!-- #Tasks Tab -->
 
       <!-- Target User-->
       <mat-tab label="Target User" *ngIf="isExistShadow()">
-        <div class="body table-responsive">
-          <table class="table table-hover table-striped">
-            <tr>
-              <th>Target User Name</th>
-              <th>Role Name</th>
-            </tr>
-            <tr *ngFor="let targetUser of projectTargetUsers; let i = index">
-              <td class="d-flex">
-                <button
-                  [name]="'removeBtn-' + targetUser.userId"
-                  type="button"
-                  (click)="removeFromTargetUsers(targetUser, i)"
-                  mat-icon-button
-                >
-                  <mat-icon>clear</mat-icon>
-                </button>
-                <div>
-                  <div>
-                    {{ targetUser.name }}
-                  </div>
-                  {{ targetUser.emailAddress }}
-                  <span
-                    style="margin-left: 10px; font-weight: bold"
-                    *ngIf="targetUser.isActive == false"
+        <div class="body table-responsive table-target-user">
+            <table class="table table-hover table-striped">
+              <tr>
+                <th>Target User Name</th>
+                <th>Role Name</th>
+              </tr>
+              <tr *ngFor="let targetUser of projectTargetUsers; let i = index">
+                <td class="d-flex">
+                  <button
+                    [name]="'removeBtn-' + targetUser.userId"
+                    type="button"
+                    (click)="removeFromTargetUsers(targetUser, i)"
+                    mat-icon-button
                   >
-                    [Inactive]
-                  </span>
-                </div>
-              </td>
-              <td class="w-40vw">
-                <mat-form-field class="example-full-width">
-                  <input
-                    [name]="'roleName-' + targetUser.userId"
-                    matInput
-                    placeholder="Role name"
-                    [(ngModel)]="targetUser.roleName"
-                    [ngModelOptions]="{ standalone: true }"
-                  />
-                </mat-form-field>
-              </td>
-            </tr>
-          </table>
+                    <mat-icon>clear</mat-icon>
+                  </button>
+                  <div>
+                    <div>
+                      {{ targetUser.name }}
+                    </div>
+                    {{ targetUser.emailAddress }}
+                    <span
+                      style="margin-left: 10px; font-weight: bold"
+                      *ngIf="targetUser.isActive == false"
+                    >
+                      [Inactive]
+                    </span>
+                  </div>
+                </td>
+                <td class="w-40vw">
+                  <mat-form-field class="example-full-width">
+                    <input
+                      [name]="'roleName-' + targetUser.userId"
+                      matInput
+                      placeholder="Role name"
+                      [(ngModel)]="targetUser.roleName"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+                  </mat-form-field>
+                </td>
+              </tr>
+            </table>
           <mat-expansion-panel [expanded]="true">
             <mat-expansion-panel-header>
               <mat-panel-title align="center">
@@ -845,29 +849,29 @@
               </div>
             </div>
 
-            <table class="table table-hover table-striped">
-              <tr
-                *ngFor="let member of displayAvailableTargetUsers; index as i"
-              >
-                <td class="d-flex" (click)="selectTargetUser(member, i)">
-                  <button type="button" mat-icon-button>
-                    <i class="material-icons">add_circle_outline</i>
-                  </button>
-                  <div>
+              <table class="table table-hover table-striped">
+                <tr
+                  *ngFor="let member of displayAvailableTargetUsers; index as i"
+                >
+                  <td class="d-flex" (click)="selectTargetUser(member, i)">
+                    <button type="button" mat-icon-button>
+                      <i class="material-icons">add_circle_outline</i>
+                    </button>
                     <div>
-                      {{ member.name }}
+                      <div>
+                        {{ member.name }}
+                      </div>
+                      {{ member.emailAddress }}
+                      <span
+                        style="margin-left: 10px; font-weight: bold"
+                        *ngIf="member.isActive == false"
+                      >
+                        [Inactive]
+                      </span>
                     </div>
-                    {{ member.emailAddress }}
-                    <span
-                      style="margin-left: 10px; font-weight: bold"
-                      *ngIf="member.isActive == false"
-                    >
-                      [Inactive]
-                    </span>
-                  </div>
-                </td>
-              </tr>
-            </table>
+                  </td>
+                </tr>
+              </table>
           </mat-expansion-panel>
         </div>
       </mat-tab>
@@ -875,7 +879,7 @@
 
       <!-- Notification -->
       <mat-tab label="Notification">
-        <div class="body table-responsive" style="margin-top: 18px">
+        <div class="body table-responsive" style="margin-top: 18px; border: 0;">
           <mat-form-field class="example-full-width">
             <input
               matInput

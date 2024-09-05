@@ -6,3 +6,58 @@
     text-align: right;
     padding-right: 30px;
 }
+
+.select-week {
+    margin-top: -20px;
+}
+
+.select-week-container {
+    margin-top: 13px;
+}
+
+.btn-export {
+    margin-top: 3px; 
+    margin-bottom: 6px;
+}
+
+@media screen and (max-width: 767px) {
+    :host ::ng-deep .main-content .body .mat-button-toggle-label-content {
+      line-height: 40px;
+      padding: 0 6px;
+      width: 40px;
+    }
+
+    .select-week {
+        margin-top: 0;
+        width: fit-content;
+    }
+
+    .actions {
+        display: flex;
+        padding: 0;
+        padding-top: 10px;
+        width: 100%;
+    }
+
+    .select-week-container {
+        margin-top: 0;
+    }
+
+    .btn-export { 
+        margin-top: 10px;
+    }
+
+    .table-responsive {
+        overflow: auto;
+    }
+}
+
+@media screen and (max-width: 425px) {
+    .actions {
+        flex-wrap: wrap;
+    }
+
+    .btn-export { 
+        margin-top: 0px;
+    }
+}
