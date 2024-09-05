@@ -68,6 +68,8 @@ ul {
     margin-bottom: 0px;
 }
 .panel-header{
+    height: auto !important;
+    min-height: 48px !important;
     margin: 10px 0px;
     padding-left: 12px !important;
     padding-right: 8px;
@@ -110,8 +112,33 @@ ul {
 }
 
 @media screen and (max-width: 600px) {
-    .title{
+    .title {
         line-height: 20px;
         font-size: 16px;
+    }
+
+    .configuration-tab-content {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    ::ng-deep .mat-content {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        height: 100%;
+    }
+
+    ::ng-deep .mat-expansion-panel-header-title {
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+    }
+    
+    .header-dropdown {
+        display: none;
+    }
+    .edit-save {
+        display: flex;
+        margin-left: 0px;
     }
 }
