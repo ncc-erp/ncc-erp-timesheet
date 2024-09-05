@@ -97,7 +97,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field class="col-sm-2 col-lg-2" appearance="outline">
+                    <mat-form-field class="col-sm-2 col-lg-1" appearance="outline">
                         <mat-label>Check In</mat-label>
                         <mat-select name="checkIn" [(value)]='checkInFilter' (selectionChange)='searchOrFilter()'>
                             <mat-option *ngFor="let item of checkInFilterList" [value]='APP_CONSTANT.CheckInFilter[item]'>
@@ -113,7 +113,15 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field class="col-sm-6 col-lg-3" appearance="outline">
+                    <mat-form-field class="col-sm-4 col-lg-2" appearance="outline">
+                        <mat-label>User Status</mat-label>
+                        <mat-select name="userStatus" [(value)]='userStatus' (selectionChange)='searchOrFilter()'>
+                            <mat-option *ngFor="let item of userStatusList" [value]='APP_CONSTANT.UserStatusFilter[item]'>
+                                {{item}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field class="col-sm-6 col-lg-2" appearance="outline">
                         <mat-icon style="color: #9E9E9E" matPrefix>search</mat-icon>
                         <mat-label>Search by name, surname, email, username</mat-label>
                         <input name="searchText" matInput [(ngModel)]="searchText" (keyup.enter)="searchOrFilter()">

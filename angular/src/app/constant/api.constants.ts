@@ -203,6 +203,11 @@ export const APP_CONSTANT = {
     'Approved': 1,
     'Pending and Approved': 2,
   },
+  UserStatusFilter: {
+    'All': 0,
+    'Active': 1,
+    'Deactive': 2,
+  },
   CheckInFilter: {
     'All': -1,
     'No Check In': 1,
