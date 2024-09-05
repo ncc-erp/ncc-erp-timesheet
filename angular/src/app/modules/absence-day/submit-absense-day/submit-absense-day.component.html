@@ -1,6 +1,6 @@
 <form #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
   <h1 mat-dialog-title style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>{{title}}</h1>
-  <mat-dialog-content style="width: 400px">
+  <mat-dialog-content style="width: 400px; max-width: 80vw;">
     <mat-form-field appearance="outline" *ngIf="data.type == 0 && data.absenceTime == 0">
       <mat-label>Absence Type</mat-label>
       <mat-select name="absenceType" [(value)]="absenceDayReq.dayOffTypeId">

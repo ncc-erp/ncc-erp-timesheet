@@ -5,10 +5,10 @@
   <hr>
   <mat-dialog-content class="mat-typography">
     <div *ngIf="!disableSelect" class="format-col form-group row required">
-      <label class="col-md-3 col-form-label" for="connectionString">
+      <label class="col-md-3 col-sm-4 col-xs-4 col-form-label" for="connectionString">
         {{ "Internship:" | localize }}
         </label>
-      <mat-form-field class="edit-form row-item-rest col-xl-9 col-lg-9 col-md-9 col-xs-9" appearance="outline">
+      <mat-form-field class="edit-form row-item-rest col-xl-9 col-lg-9 col-md-9 col-sm-8 col-xs-8" appearance="outline">
         <mat-label> {{ "Internship:" | localize }}</mat-label>
         <mat-select [(ngModel)]="review.internshipId" (selectionChange)="changeCurrentLevel(review.internshipId)" name="Internship">
           <mat-option>
@@ -22,10 +22,10 @@
       </mat-form-field>
     </div>
     <div class="format-col form-group row required">
-      <label class="col-md-3 col-form-label" for="connectionString">
+      <label class="col-md-3  col-sm-4 col-xs-4 col-form-label" for="connectionString">
         {{ "Reviewer:" | localize }}
         </label>
-        <mat-form-field class="edit-form row-item-rest col-xl-9 col-lg-9 col-md-9 col-xs-9" appearance="outline">
+        <mat-form-field class="edit-form row-item-rest col-xl-9 col-lg-9 col-md-9 col-sm-8 col-xs-8" appearance="outline">
           <mat-label> {{ "Reviewer:" | localize }}</mat-label>
           <mat-select [(ngModel)]="review.reviewerId" name="Reviewer">
             <mat-option>
@@ -39,10 +39,10 @@
         </mat-form-field>
     </div>
     <div class="format-col form-group row required">
-      <label class="col-md-3 col-form-label" for="connectionString">
+      <label class="col-md-3  col-sm-4 col-xs-4 col-form-label" for="connectionString">
         {{ "Current Level:" | localize }}
         </label>
-        <mat-form-field class="edit-form row-item-rest col-xl-9 col-lg-9 col-md-9 col-xs-9" appearance="outline">
+        <mat-form-field class="edit-form row-item-rest col-xl-9 col-lg-9 col-md-9 col-sm-8 col-xs-8" appearance="outline">
           <mat-label> {{ "Current Level:" | localize }}</mat-label>
           <mat-select [(value)]="review.currentLevel" name="CurrentLevel">
             <mat-option *ngFor="let level of listLevel" [value]="APP_CONSTANT.LEVEL[level]">{{level}}

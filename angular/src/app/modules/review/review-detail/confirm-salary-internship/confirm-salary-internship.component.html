@@ -6,11 +6,10 @@
   <mat-dialog-content class="mat-typography">
       
       <div class="format-col form-group row required newLevel">
-          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 col-form-label" for="connectionString">
+          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-xs-4 col-form-label" for="connectionString">
       {{ "New Level:" | localize }}
     </label>
-          <mat-form-field class="edit-form row-item-rest col-xl-9 col-lg-9 col-md-9
-      col-xs-9" appearance="outline">
+          <mat-form-field class="edit-form row-item-rest col-xl-9 col-lg-9 col-md-9 col-sm-8 col-xs-8" appearance="outline">
               <mat-label> {{ "New Level:" | localize }}</mat-label>
               <mat-select [(value)]="review.newLevel" (selectionChange)="checkNewLevel(review)" name="NewLevel">
                   <mat-option *ngFor="let level of listLevel" [value]="APP_CONSTANT.LEVEL[level]">{{level}}
@@ -19,11 +18,11 @@
           </mat-form-field>
       </div>
       <div *ngIf="review.newLevel >= 4" class="format-col form-group row required">
-          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 col-form-label" for="connectionString">
+          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-xs-4 col-form-label" for="connectionString">
       {{ "Type:" | localize }}
     </label>
           <mat-form-field class="edit-form row-item-rest col-xl-9 col-lg-9 col-md-9
-      col-xs-9" appearance="outline">
+      col-sm-8 col-xs-8" appearance="outline">
               <mat-label> {{ "Type:" | localize }}</mat-label>
               <mat-select [(value)]="review.type" name="Type">
                   <mat-option *ngFor="let type of listType" [value]="APP_CONSTANT.TYPE[type]">{{type}}
@@ -32,10 +31,10 @@
           </mat-form-field>
       </div>
       <div *ngIf="review.newLevel >= 4" class="format-col form-group row required">
-          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 col-form-label">
+          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-xs-4 col-form-label">
       {{ "Select:" | localize }}
     </label>
-          <div class="edit-form row-item-rest select-form col-xl-9 col-lg-9 col-md-9 col-xs-9">
+          <div class="edit-form row-item-rest select-form col-xl-9 col-lg-9 col-md-9 col-sm-8 col-xs-8">
               <mat-checkbox class="col-xl-6 col-lg-6 col-md-6 col-xs-6" name="IsFullSalary"  [checked]="review.isFullSalary" (change)="changeFullSalary($event.value)">
                   {{ "Full lương:" | localize }}
               </mat-checkbox>
@@ -56,20 +55,20 @@
           </div>
       </div>
       <div *ngIf="review.newLevel >= 4" class="format-col form-group row required">
-          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 col-form-label">
+          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-xs-4 col-form-label">
               {{ "Salary:" | localize }}
           </label>
-          <mat-form-field class="edit-form row-item-rest select-form col-xl-9 col-lg-9 col-md-9 col-xs-9" appearance="outline">
+          <mat-form-field class="edit-form row-item-rest select-form col-xl-9 col-lg-9 col-md-9 col-sm-8 col-xs-8" appearance="outline">
               <mat-label> {{"Salary" | localize}}</mat-label>
               <input currencyMask [options]="{prefix: '', align: 'left', thousands: '.', precision: '0'}"  matInput="matInput" [(ngModel)]="review.salary" name="salary" />
           </mat-form-field>
       </div>
-      <div class="format-col form-group row required">
-          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 col-form-label-note" for="connectionString">
+      <div class="format-col form-group row note required">
+          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-xs-4 col-form-label-note" for="connectionString">
       {{ "Note:" | localize }}
     </label>
-          <mat-form-field class="example-full-width edit-form row-item-rest col-xl-9
-      col-lg-9 col-md-9 col-xs-9" appearance="outline">
+          <mat-form-field class="example-full-width edit-form row-item-rest  col-xl-9
+      col-lg-9 col-md-9 col-sm-8 col-xs-8" appearance="outline">
               <mat-label>Note</mat-label>
               <textarea matInput rows="4" [(ngModel)]="review.note" name="content"></textarea>
           </mat-form-field>

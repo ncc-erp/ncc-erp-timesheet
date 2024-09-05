@@ -20,7 +20,7 @@
       </div>
       <div class="body table-responsive">
         <div class="row clearfix">
-          <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9" style="font-size: 13px;">
+          <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12" style="font-size: 13px;">
             <mat-form-field appearance="outline" id="retro-detail-seach-email">
               <mat-label>Search by Email</mat-label>
               <input name="searchText" matInput [(ngModel)]="searchText" placeholder="Search by Email" (keyup.enter)="searchOrFilter()"
@@ -28,7 +28,7 @@
               <i class="icon-32 material-icons" matPrefix>search</i>
             </mat-form-field>
           </div>
-          <div class="col-md-3 list-button">
+          <div class="col-md-3 col-sm-3 col-xs-6 list-button">
             <button name="clearBtn" mat-raised-button (click)="handleClear()">Clear</button>
             <button name="searchBtn" mat-raised-button color="primary" (click)="onFilter()">Search</button>
           </div>
@@ -69,29 +69,29 @@
           <div class="gr-btn-action">
             <button name="createBtn" class="btn  btn-add" (click)="create()" [disabled]="status === 1"
               *ngIf="permission.isGranted(ADD) || permission.isGranted(ADDTEAM)">
-              <i class="fa-solid fa-square-plus"></i>
+              <i class="fa-solid fa-square-plus"></i>&nbsp;
               Add Employee
             </button>
             <button name="createBtn" class="btn  btn-add" (click)="addMulti()" [disabled]="status === 1"
               *ngIf="permission.isGranted(ADD) || permission.isGranted(ADDTEAM)">
-              <i class="fa-solid fa-square-plus"></i>
+              <i class="fa-solid fa-square-plus"></i>&nbsp;
               Add Multiple Employee
             </button>
             <button name="downloadTemplateBtn" class="btn btn-download" (click)="downloadTemplate()"
               *ngIf="permission.isGranted(DOWNLOADTEMPLATE)">
-              <i class="fa-solid fa-download"></i>
+              <i class="fa-solid fa-download"></i>&nbsp;
               Download Template
             </button>
             <button name="ImportBtn" class="btn btn-import" (click)="onImportFile()" [disabled]="status === 1"
               *ngIf="permission.isGranted(IMPORT)">
-              <i class="fas fa-upload"></i>
+              <i class="fas fa-upload"></i>&nbsp;
               Import</button>
             <button name="exportBtn" class="btn  btn-export" (click)="handleExport()" *ngIf="permission.isGranted(EXPORT)">
-              <i class="fa-solid fa-download"></i>
+              <i class="fa-solid fa-download"></i>&nbsp;
               Export
             </button>
             <button name="generateDataBtn" mat-raised-button color="primary" class="btn btn-border btn-generate" (click) = "generateData()">
-              <i class="fa fa-database" style="margin-left: -8px; top: 0px;"></i>
+              <i class="fa fa-database" style="margin-left: -8px; top: 0px;"></i>&nbsp;
               Generate Data
             </button>
           </div>
@@ -149,7 +149,7 @@
                   <td style="padding: 0px">
                     <div class="info-name">
                       <div>
-                        <img class="avatar" [src]="getAvatar(item)" alt="avatar" />
+                        <!-- <img class="avatar" [src]="getAvatar(item)" alt="avatar" /> -->
                       </div>
                       <div class="info-name-box">
                         <div class="full-name">{{item.fullName}} </div>

@@ -43,3 +43,8 @@
     height: 5px !important;
     left: 0.5px !important;
 }
+
+.fullName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

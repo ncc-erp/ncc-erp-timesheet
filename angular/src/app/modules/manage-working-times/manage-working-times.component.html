@@ -76,7 +76,7 @@
                           [src]='getAvatar(u)' alt="avatar">
                       </div>
                       <div style="margin-left: 3px; width: 135px; text-align: left;">
-                        <div>{{u.fullName}}</div>
+                        <div class="fullName">{{u.fullName}}</div>
                         <div>
                           <ng-container *ngIf="u.type || u.type == 0">
                             <span class="label status-label"
