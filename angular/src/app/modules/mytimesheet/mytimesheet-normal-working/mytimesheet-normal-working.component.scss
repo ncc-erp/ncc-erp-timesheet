@@ -198,6 +198,151 @@ $name-col-width: 0;
   font-size: 12px;
 }
 
-#normal-working table{
+#normal-working table {
   margin-bottom: 0;
+}
+
+.view-mobile {
+  display: none;
+}
+
+.view-web {
+  display: block;
+}
+
+@media screen and (max-width: 600px) {
+  :host {
+
+    .view-mobile {
+      display: block;
+    }
+
+    .view-web {
+      display: none;
+    }
+
+    .title-header {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 19.36px;
+      color: black;
+    }
+
+    .header-normal-workingtime {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .wrap-table-working {
+      height: 280px;
+      overflow-y: auto;
+      border-radius: 4px;
+    }
+
+    .table-normal-working {
+      width: 100%;
+      border-collapse: collapse;
+
+      th,
+      td {
+        border: 1px solid #E0E0E0;
+        padding: 8px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 19.5px;
+        letter-spacing: -0.011em;
+        color: #000000;
+      }
+
+      th {
+        background-color: #BCBCBC;
+      }
+
+      .working-day {
+        background-color: #9BC6DC;
+      }
+
+      .holiday-day {
+        background-color: #FDB6B6;
+      }
+
+      .actual-time {
+        color: black;
+      }
+
+      th {
+        min-width: 70px;
+      }
+
+      .date-col {
+        width: 25%;
+      }
+
+      .log-time-col {
+        width: 50%;
+      }
+
+      .actual-time-col {
+        width: 25%;
+      }
+    }
+
+    .card .header {
+      border-bottom: none;
+    }
+
+    .header-filter .header {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-filter .header .filter-date {
+      flex-direction: column;
+      gap: 12px;
+
+      .item {
+        margin-left: 0;
+      }
+    }
+
+    .filter-month-year {
+      display: flex;
+      gap: 16px;
+    }
+
+    .total-working-hour,
+    .total-opentalk {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 19.5px;
+      color: #000000;
+      padding-bottom: 12px;
+    }
+
+    .onsite,
+    .remote,
+    .absence {
+      color: #fff;
+      display: inline-block;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 500;
+      line-height: 13px;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    .logs-times,
+    .absenceDetaiInDay {
+      display: flex;
+      gap: 4px;
+      margin: 0
+    }
+  }
 }

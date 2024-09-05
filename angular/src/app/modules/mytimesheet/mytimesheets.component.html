@@ -1,6 +1,6 @@
 <div class="row">
-  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-    <div class="card main-content" style="min-width:800px">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 hidden-padding">
+    <div class="card main-content view-web" style="min-width: 800px">
       <div class="body" [busy]="isTableLoading">
         <div class="row">
           <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
@@ -55,7 +55,6 @@
             <div class="table-responsive" style="overflow: hidden">
               <table class="table table-hover table-striped">
                 <tbody>
-
                   <tr *ngFor="let item of day.timesheets">
                     <td>
                       <span> <b>[{{ item.projectName }}]</b> {{ item.taskName }} - </span>
@@ -216,10 +215,469 @@
         </div>
       </div>
     </div>
+
+    <div class="view-mobile">
+      <ng-container *ngTemplateOutlet="myTimesheetDaily"></ng-container>
+    </div>
+
     <app-mytimesheet-normal-working [isRefresh]="isRefresh" (refreshEvent)="receiveRefresh($event)"></app-mytimesheet-normal-working>
     <app-mytimesheet-tardiness></app-mytimesheet-tardiness>
-
-
   </div>
-
 </div>
+
+<ng-template #myTimesheetDaily>
+  <div class="card main-content">
+    <div class="body" [busy]="isTableLoading">
+      <div class="row">
+        <div class="mobile">
+          <div class="">
+            <mat-button-toggle-group
+              name="fontStyle"
+              aria-label="Font Style"
+              #group="matButtonToggleGroup"
+              value="day"
+            >
+              <mat-button-toggle
+                class="btn-view-day"
+                name="dayBtnToggle"
+                value="day"
+                (click)="viewBy(APP_CONSTANT.MyTimesheetView.Day)"
+                >Day</mat-button-toggle
+              >
+              <mat-button-toggle
+                class="btn-view-week"
+                name="weekBtnToggle"
+                value="week"
+                (click)="viewBy(APP_CONSTANT.MyTimesheetView.Week)"
+                >Week
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+          <button
+            class="btn-refresh"
+            name="refreshTimesheetsBtn"
+            mat-flat-button
+            (click)="refreshData()"
+            color="primary"
+          >
+            Refresh
+          </button>
+        </div>
+        <div
+          class="col-lg-9 col-md-9 col-sm-12 col-xs-12 text-right card-wrapper"
+        >
+          <div class="btn-wapper-date">
+            <div class="">
+              <mat-button-toggle
+                class="hidden-date-input"
+                matTooltip="Today"
+                matTooltipPosition="above"
+              >
+                <mat-form-field>
+                  <input
+                    matInput
+                    [readonly]="true"
+                    [matDatepicker]="picker1"
+                    [(ngModel)]="displayDay"
+                    (dateInput)="customDate()"
+                  />
+                </mat-form-field>
+              </mat-button-toggle>
+              <mat-datepicker-toggle
+                name="datePicker"
+                matSuffix
+                [for]="picker1"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #picker1></mat-datepicker>
+            </div>
+
+            <div class="date-view">
+              {{ displayDay | date : "EEE, dd MMM, yyyy" }}
+            </div>
+            <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+              <mat-button-toggle
+                class="previousBtn"
+                name="previousBtn"
+                matTooltip="Previous"
+                matTooltipPosition="above"
+                (click)="back()"
+              >
+                <mat-icon>keyboard_arrow_left</mat-icon>
+              </mat-button-toggle>
+
+              <mat-button-toggle
+                class="nextBtn"
+                name="nextBtn"
+                matTooltip="Next"
+                matTooltipPosition="above"
+                (click)="next()"
+              >
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+            <button
+              name="currentDayBtn"
+              mat-flat-button
+              (click)="today()"
+              class="btn bg-green btn-today"
+            >
+              Today
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- By Day -->
+      <mat-tab-group
+        *ngIf="typeOfView == APP_CONSTANT.MyTimesheetView.Day"
+        [selectedIndex]="activeDay"
+        (selectedTabChange)="tabChanged($event)"
+      >
+        <mat-tab *ngFor="let day of mapDayOfWeek">
+          <ng-template mat-tab-label>
+            <div>
+              <div style="height: 20px">{{ day.name }}</div>
+              <div style="height: 20px">
+                {{ convertMinuteToHour(day.totalTime) }}
+              </div>
+            </div>
+          </ng-template>
+
+          <div class="table-responsive">
+            <ng-container>
+              <div class="table-timesheets" *ngFor="let item of day.timesheets">
+                <div>
+                  <span>
+                    <b>[{{ item.projectCode }}] [{{ item.projectName }}] </b>
+                    ({{ item.customerName }}) {{ item.taskName }} -
+                  </span>
+                  <span [ngClass]="item.isTemp ? 'temp' : 'official'">{{
+                    item.workType
+                  }}</span>
+                </div>
+                <div *ngIf="item?.note" class="text-area-wrapper">
+                  <textarea
+                    class="text-area"
+                    matInput
+                    [readonly]="!item.isEditing"
+                    >{{ item.note }}</textarea
+                  >
+                </div>
+                <div class="time-and-status">
+                  <div class="working-time-wrapper">
+                    <div>{{ convertMinuteToHour(item.workingTime) }}</div>
+                    <div>
+                      <h4 *ngFor="let i of statusList">
+                        <span
+                          *ngIf="item.status === i.status"
+                          class="label label-status"
+                          [ngClass]="i.class"
+                        >
+                          {{ i.label }}
+                        </span>
+                      </h4>
+                    </div>
+                    <div class="over-time-type">
+                      <span
+                        *ngIf="item.typeOfWork == '1'"
+                        class="label status-label bg-red"
+                        >OT</span
+                      >
+                      <span
+                        *ngIf="item.isCharged"
+                        class="label status-label bg-green"
+                        >Charged</span
+                      >
+                    </div>
+                  </div>
+                  <div class="btn-action-wrapper">
+                    <button
+                      *ngIf="
+                        item.status != APP_CONSTANT.TimesheetStatus.Approve &&
+                        permission.isGranted(EDIT_MY_TIMESHEET)
+                      "
+                      [name]="'editBtn-' + item.id"
+                      (click)="editTimesheetItem(item)"
+                      mat-icon-button
+                      color="primary"
+                      class="btn-edit"
+                    >
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    
+                    <button
+                      *ngIf="
+                        item.status != APP_CONSTANT.TimesheetStatus.Approve &&
+                        permission.isGranted(DELETE_MY_TIMESHEET)
+                      "
+                      [name]="'deleteBtn-' + item.id"
+                      (click)="delete(item)"
+                      mat-icon-button
+                      color="primary"
+                      class="btn-delete"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+
+            <div style="display: flex; justify-content: space-between">
+              <button
+                name="addByDay"
+                *ngIf="
+                  activeDay != 7 &&
+                  typeOfView == APP_CONSTANT.MyTimesheetView.Day &&
+                  permission.isGranted(ADD_MY_TIMESHEET)
+                "
+                mat-flat-button
+                color="primary"
+                (click)="createTimesheetItem()"
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+              <button
+                name="submit"
+                *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
+                (click)="submitTimesheet()"
+                mat-flat-button
+                color="primary"
+              >
+                Submit Week for Approval
+              </button>
+            </div>
+          </div>
+        </mat-tab>
+        <mat-tab *ngIf="isMapDayOfWeekLoaded">
+          <ng-template mat-tab-label>
+            <div>
+              <div style="color: black"><b>Total</b></div>
+              <div style="height: 20px; color: black">
+                <b> {{ convertMinuteToHour(totalWorkingTimeByDay) }} </b>
+              </div>
+            </div>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+
+      <!-- By Week -->
+      <div *ngIf="typeOfView == APP_CONSTANT.MyTimesheetView.Week">
+        <!--  -->
+        <ng-container>
+          <div class="table-week-wrapper">
+            <div class="table-week" *ngFor="let item of mapWeekByTask">
+              <div (click)="handleExpand(item)">
+                <div class="project-name-header">
+                  <p class="project-name-title">
+                    <b>[{{ item.projectCode }}] [{{ item.projectName }}]</b
+                    ><span> ({{ item.customerName }})</span>
+                  </p>
+                  <span class=""
+                    ><b
+                      >Total: <br />
+                      {{ convertMinuteToHour(item.totalTime) }}</b
+                    ></span
+                  >
+                </div>
+                <div class="project-name-header">
+                  <p>{{ item.taskName }}</p>
+                  <button
+                    class="btn-save-week"
+                    name="saveWeek"
+                    mat-flat-button
+                    *ngIf="item.isAddNew"
+                    (click)="SaveList(item)"
+                    color="primary"
+                    [disabled]="isSaving"
+                  >
+                    <mat-icon>done</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <div *ngIf="item.isExpanded" class="d-flex detail-time">
+                <div class="detail-time-wrapper">
+                  <div
+                    class="day-of-week"
+                    *ngFor="let day of mapDayOfWeek; let i = index"
+                  >
+                    <div>
+                      <b>{{ day.name }}</b>
+                      <p class="date">
+                        <small> {{ day.dateAt | date : "yyyy-MM-dd" }} </small>
+                      </p>
+                    </div>
+                    <ng-container [ngSwitch]="day.name">
+                      <ng-container *ngSwitchCase="'Monday'">
+                        <div *ngIf="!item.isEditing">
+                          <input
+                            style="width: 50px"
+                            [readonly]="!item.isEditing"
+                            [(ngModel)]="item.monWorkingTime"
+                            placeholder="00:00"
+                            [textMask]="mask1"
+                          />
+                        </div>
+                        <div *ngIf="item.isEditing">
+                          <input
+                            name="monWorkingTime"
+                            style="width: 50px"
+                            [(ngModel)]="item.monWorkingTime"
+                            [textMask]="mask2"
+                          />
+                        </div>
+                      </ng-container>
+
+                      <ng-container *ngSwitchCase="'Tuesday'">
+                        <div *ngIf="!item.isEditing">
+                          <input
+                            style="width: 50px"
+                            [readonly]="!item.isEditing"
+                            [(ngModel)]="item.tueWorkingTime"
+                            placeholder="00:00"
+                            [textMask]="mask1"
+                          />
+                        </div>
+                        <div *ngIf="item.isEditing">
+                          <input
+                            name="tueWorkingTime"
+                            style="width: 50px"
+                            [(ngModel)]="item.tueWorkingTime"
+                            [textMask]="mask2"
+                          />
+                        </div>
+                      </ng-container>
+
+                      <ng-container *ngSwitchCase="'Wednesday'">
+                        <div *ngIf="!item.isEditing">
+                          <input
+                            style="width: 50px"
+                            [readonly]="!item.isEditing"
+                            [(ngModel)]="item.wedWorkingTime"
+                            placeholder="00:00"
+                            [textMask]="mask1"
+                          />
+                        </div>
+                        <div *ngIf="item.isEditing">
+                          <input
+                            name="wedWorkingTime"
+                            style="width: 50px"
+                            [(ngModel)]="item.wedWorkingTime"
+                            [textMask]="mask2"
+                          />
+                        </div>
+                      </ng-container>
+
+                      <ng-container *ngSwitchCase="'Thursday'">
+                        <div *ngIf="!item.isEditing">
+                          <input
+                            style="width: 50px"
+                            [readonly]="!item.isEditing"
+                            [(ngModel)]="item.thuWorkingTime"
+                            placeholder="00:00"
+                            [textMask]="mask1"
+                          />
+                        </div>
+                        <div *ngIf="item.isEditing">
+                          <input
+                            name="thuWorkingTime"
+                            style="width: 50px"
+                            [(ngModel)]="item.thuWorkingTime"
+                            [textMask]="mask2"
+                          />
+                        </div>
+                      </ng-container>
+
+                      <ng-container *ngSwitchCase="'Friday'">
+                        <div *ngIf="!item.isEditing">
+                          <input
+                            style="width: 50px"
+                            [readonly]="!item.isEditing"
+                            [(ngModel)]="item.friWorkingTime"
+                            placeholder="00:00"
+                            [textMask]="mask1"
+                          />
+                        </div>
+                        <div *ngIf="item.isEditing">
+                          <input
+                            name="friWorkingTime"
+                            style="width: 50px"
+                            [(ngModel)]="item.friWorkingTime"
+                            [textMask]="mask2"
+                          />
+                        </div>
+                      </ng-container>
+
+                      <ng-container *ngSwitchCase="'Saturday'">
+                        <div *ngIf="!item.isEditing">
+                          <input
+                            style="width: 50px"
+                            [readonly]="!item.isEditing"
+                            [(ngModel)]="item.satWorkingTime"
+                            placeholder="00:00"
+                            [textMask]="mask1"
+                          />
+                        </div>
+                        <div *ngIf="item.isEditing">
+                          <input
+                            name="satWorkingTime"
+                            style="width: 50px"
+                            [(ngModel)]="item.satWorkingTime"
+                            [textMask]="mask2"
+                          />
+                        </div>
+                      </ng-container>
+
+                      <ng-container *ngSwitchCase="'Sunday'">
+                        <div *ngIf="!item.isEditing">
+                          <input
+                            style="width: 50px"
+                            [readonly]="!item.isEditing"
+                            [(ngModel)]="item.sunWorkingTime"
+                            placeholder="00:00"
+                            [textMask]="mask1"
+                          />
+                        </div>
+                        <div *ngIf="item.isEditing">
+                          <input
+                            name="sunWorkingTime"
+                            style="width: 50px"
+                            [(ngModel)]="item.sunWorkingTime"
+                            [textMask]="mask2"
+                          />
+                        </div>
+                      </ng-container>
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <button
+          name="addByWeek"
+          *ngIf="
+            activeDay != 7 &&
+            typeOfView == APP_CONSTANT.MyTimesheetView.Week &&
+            permission.isGranted(ADD_MY_TIMESHEET)
+          "
+          mat-flat-button
+          color="primary"
+          (click)="createTimesheet()"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+        <button
+          name="submit"
+          style="float: right"
+          *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
+          (click)="submitTimesheet()"
+          mat-flat-button
+          color="primary"
+        >
+          Submit Week for Approval
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>

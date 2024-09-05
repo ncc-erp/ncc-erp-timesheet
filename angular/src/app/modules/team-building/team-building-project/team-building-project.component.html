@@ -3,8 +3,8 @@
     <div class="card">
       <div class="header">
         <h2>{{ "Select project team building" | localize }}</h2>
-        <button name="saveBtn" *ngIf="permission.isGranted(TeamBuilding_Project_SelectProjectTeamBuilding)" style="position: absolute;right: 50px;top: 7px;margin: 0px;" mat-raised-button color="primary"
-          class="btn btn-border btn-add" (click)="onClickBtnSave()" [disabled]="!(listItemChange?.length > 0)">
+        <button name="saveBtn" *ngIf="permission.isGranted(TeamBuilding_Project_SelectProjectTeamBuilding)" mat-raised-button color="primary"
+          class="btn btn-border btn-add save-btn" (click)="onClickBtnSave()" [disabled]="!(listItemChange?.length > 0)">
           <mat-icon style="margin-right: 8px">save</mat-icon>Save change
         </button>
         <ul class="header-dropdown m-r--5">

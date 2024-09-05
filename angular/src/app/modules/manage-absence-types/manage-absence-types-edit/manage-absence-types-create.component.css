@@ -4,3 +4,28 @@
 .mat-dialog-container {
     padding: 0px !important;
 }
+.manage-absence-types-create-tilte{
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.manage-absence-types-create-tilte h1{
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+::ng-deep .save-btn .mat-button-wrapper{
+    color: white !important;
+}
+@media screen and (max-width: 600px) { 
+    .manage-absence-types-create-form{
+        width: 100%;
+    }
+}

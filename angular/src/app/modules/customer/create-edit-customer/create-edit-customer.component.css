@@ -1,0 +1,44 @@
+.create-edit-customer {
+    min-width: 400px;
+}
+
+.customer-create-dialog-container {
+    width: 40% !important;
+}
+
+.create-edit-customer-tilte{
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.create-edit-customer-tilte h2{
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+::ng-deep .save-btn .mat-button-wrapper{
+    color: white !important;
+}
+
+@media screen and (max-width: 600px) { 
+    .create-edit-customer {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .customer-create-dialog-container {
+        width: 90% !important;
+    }
+
+    .customer-create-dialog-container {
+        width: 90% !important;
+    }
+}

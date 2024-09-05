@@ -69,7 +69,10 @@ export class RolesComponent extends PagedListingComponentBase<RoleDto> {
 
     showCreateOrEditRoleDialog(id?: number): void {
         let createOrEditRoleDialog;
-        createOrEditRoleDialog = this._dialog.open(CreateRoleDialogComponent);
+        createOrEditRoleDialog = this._dialog.open(CreateRoleDialogComponent, {
+            width: `calc(100% - 24px)`,
+            maxWidth: '400px',
+        });
         createOrEditRoleDialog.afterClosed().subscribe(result => {
             if (result) {
                 this.refresh();

@@ -1,7 +1,7 @@
 <form autocomplete="off" #createUserModal="ngForm" [busy]="isSaving">
   <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>{{l(title)}}
   </h1>
-  <mat-dialog-content style="width:700px;height:auto">
+  <mat-dialog-content style="height:auto">
   
         <div class="row row-fluid">
           <div class="col-md-6">
@@ -45,7 +45,7 @@
           <div class="col-md-6">
             <mat-form-field>
               <mat-label>Sex</mat-label>
-              <mat-select name="Sex" [(value)]="user.sex">
+              <mat-select [disableOptionCentering]="true" name="Sex" [(value)]="user.sex">
                 <mat-option *ngFor="let item of sexes" [value]="item.value">
                   {{item.label}}
                 </mat-option>
@@ -60,7 +60,7 @@
           <div class="col-md-6">
             <mat-form-field>
               <mat-label>Position</mat-label>
-              <mat-select matInput name="positionId" placeholder="Choose a position..." [(ngModel)]="user.positionId"
+              <mat-select [disableOptionCentering]="true" matInput name="positionId" placeholder="Choose a position..." [(ngModel)]="user.positionId"
                 #positionId="ngModel" required>
                 <mat-option>
                   <ngx-mat-select-search placeholderLabel="Search" [formControl]="positionSearch"></ngx-mat-select-search>
@@ -134,7 +134,7 @@
           <div class="col-md-6">
             <mat-form-field>
               <mat-label>Branch</mat-label>
-              <mat-select matInput name="branchId" (selectionChange)="onChangeBranch()" placeholder="Choose a branch..." [(ngModel)]="user.branchId"
+              <mat-select [disableOptionCentering]="true" matInput name="branchId" (selectionChange)="onChangeBranch()" placeholder="Choose a branch..." [(ngModel)]="user.branchId"
                 #branchId="ngModel" required>
                 <mat-option>
                   <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"></ngx-mat-select-search>
@@ -148,7 +148,7 @@
           <div class="col-md-6">
             <mat-form-field>
               <mat-label>Basic Tranner</mat-label>
-              <mat-select [(value)]='user.managerId' name="basicTranner">
+              <mat-select [disableOptionCentering]="true" [(value)]='user.managerId' name="basicTranner">
                 <mat-option>
                   <ngx-mat-select-search [formControl]="managerSearch" placeholderLabel="Search by Name"
                   noEntriesFoundLabel= "No matching found">
@@ -167,7 +167,7 @@
           <div class="col-md-6">
             <mat-form-field>
               <mat-label>Type</mat-label>
-              <mat-select name="userType" [(value)]='user.type' (selectionChange)="onUserTypeChange()">
+              <mat-select [disableOptionCentering]="true" name="userType" [(value)]='user.type' (selectionChange)="onUserTypeChange()">
                 <mat-option [value]='null'>None</mat-option>
                 <mat-option [value]='0'>Staff</mat-option>
                 <mat-option [value]='1'>Internship</mat-option>
@@ -178,7 +178,7 @@
           <div class="col-md-6">
             <mat-form-field>
               <mat-label>Level</mat-label>
-              <mat-select name="userLevel" [(value)]='user.level' (selectionChange)="onLevelChange()">
+              <mat-select [disableOptionCentering]="true" name="userLevel" [(value)]='user.level' (selectionChange)="onLevelChange()">
                 <mat-option [value]='null'>None</mat-option>
                 <mat-option *ngFor="let item of listLevelFiltered" [value]='item.value'>
                   {{item.name}}
@@ -241,7 +241,7 @@
           <div class="col-md-6">
             <mat-form-field>
               <mat-label>Position</mat-label>
-              <mat-select matInput name="positionId" placeholder="Choose a position..." [(ngModel)]="user.positionId"
+              <mat-select [disableOptionCentering]="true" matInput name="positionId" placeholder="Choose a position..." [(ngModel)]="user.positionId"
                 #positionId="ngModel" >
                 <mat-option>
                   <ngx-mat-select-search placeholderLabel="Search" [formControl]="positionSearch"></ngx-mat-select-search>
@@ -257,7 +257,7 @@
           <div class="col-md-6">
              <mat-form-field>
                <mat-label>Begin Level</mat-label>
-               <mat-select [(value)]='user.beginLevel' [disabled]="true">
+               <mat-select [disableOptionCentering]="true" [(value)]='user.beginLevel' [disabled]="true">
                  <mat-option [value]='null'>None</mat-option>
                  <mat-option *ngFor="let item of listLevelFiltered" [value]='item.value'>
                    {{item.name}}

@@ -235,3 +235,24 @@ margin-top: 7px;
 ::ng-deep #intern-info .mat-form-field-appearance-legacy .mat-form-field-underline{
   bottom: 0;
 }
+
+@media screen and (max-width: 600px) {
+  .button-filter {
+    margin-left: 0;
+  }
+
+  ::ng-deep #intern-info .row  {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .margin-r5 {
+    margin: 0px;
+  }
+
+  .report {
+    padding: 0;
+  }
+}

@@ -6,3 +6,31 @@
     margin-right: 35px;
     z-index: 1;
 }
+
+.save-btn {
+    position: absolute;
+    right: 50px;
+    top: 7px;
+    margin: 0px;
+}
+
+@media screen and (max-width: 600px) {
+    :host {
+       .card .header {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+       }
+
+       .card .header .header-dropdown {
+        top: 15px;
+       }
+
+       .save-btn{
+        position: revert;
+        right: 0px;
+        top: 0px;
+        margin: 0px;
+       }
+    }
+  }

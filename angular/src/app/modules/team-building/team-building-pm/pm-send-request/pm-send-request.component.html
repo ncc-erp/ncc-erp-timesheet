@@ -228,7 +228,7 @@
       </mat-tab>
       <mat-tab label="Invoice">
         <div class="table-responsive">
-            <div class="fixedHeader" style="min-height: 400px; max-height: 400px;">
+            <div class="fixedHeader table-invoice" style="min-height: 400px; max-height: 400px;">
               <ng-container *ngFor="let invoiceForm of invoiceFormGroup.get('invoiceFormArray')['controls'];  let i = index"
                   [formGroup]="invoiceForm">
                 <h4>Invoice Request #{{i + 1}}</h4>
@@ -259,12 +259,12 @@
                           <mat-radio-button [value]="false" [name]="'isChoosingUrlBtn-' + (i + 1)">Invoice Url</mat-radio-button>
                         </mat-radio-group>
                       </td>
-                      <td>
+                      <td style="min-width: 150px;">
                         <input class="form-control" type="file" (change)="onFileChange($event, i)" formControlName="invoiceFileName" [name]="'invoiceFileNameInput-' + (i + 1)">
                         <br>
                         <input class="form-control" type="url" formControlName="invoiceUrl" [name]="'invoiceUrlInput-' + (i + 1)">
                       </td>
-                      <td>
+                      <td style="min-width: 100px;">
                         <div class="required" style="display: flex; align-items: center;">
                           <label class="col-form-label" style="margin-bottom: -10px;">
                           {{ "Amount:" | localize }}
@@ -274,7 +274,7 @@
                         <br>
                         <label>Has VAT</label>
                       </td>
-                      <td>
+                      <td style="min-width: 100px;">
                         <div style="display: flex;">
                           <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ', placement: 'prefix'}" class="form-control" formControlName="amount" [name]="'amountInput-' + (i + 1)"
                           (ngModelChange)="calculateTotalInvoiceAmount()">
