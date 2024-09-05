@@ -15,7 +15,6 @@
 }
 
 @media screen and (max-width: 600px) {
-    :host {
        .card .header {
         display: flex;
         flex-direction: column;
@@ -32,5 +31,4 @@
         top: 0px;
         margin: 0px;
        }
-    }
   }

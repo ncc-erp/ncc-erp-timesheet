@@ -16,3 +16,16 @@
     max-width: 400px;
     overflow: hidden;
 }
+.table-td {
+    min-width: 100px
+}
+@media screen and (max-width: 600px) {
+    .table-responsive > .table > thead > tr > th,
+    .table-responsive > .table > tbody > tr > th,
+    .table-responsive > .table > tfoot > tr > th,
+    .table-responsive > .table > thead > tr > td,
+    .table-responsive > .table > tbody > tr > td,
+    .table-responsive > .table > tfoot > tr > td {
+      white-space: nowrap;
+    }
+}

@@ -91,7 +91,6 @@
   }
   
   @media screen and (max-width: 600px) {
-    :host {
       .view-mobile {
         display: block;
       }
@@ -156,5 +155,4 @@
         flex-direction: column;
         gap: 4px;
       }
-    }
 }
