@@ -380,6 +380,8 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     let userId = editUser ? editUser.id : null;
     let diaLogRef = this.dialog.open(CreateUserComponent, {
       disableClose: true,
+      width: `calc(100% - 24px)`,
+      maxWidth: '400px',
       data: { userId: userId, userss: this.usersNotPagging, sexes: this.sexes },
       panelClass: 'user-custom-dialog-container'
     });

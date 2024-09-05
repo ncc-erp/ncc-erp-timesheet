@@ -68,7 +68,6 @@ mat-button-toggle-group{
       .date-view {
         display: flex;
         align-items: center;
-        font-family: Inter;
         font-size: 12px;
         font-weight: 600;
         line-height: 14.52px;

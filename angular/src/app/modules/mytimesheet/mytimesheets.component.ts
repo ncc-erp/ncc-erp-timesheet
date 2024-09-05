@@ -275,6 +275,8 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
   showCreateOrEditTimesheetItemDialog(item?) {
     const dialogRef = this._dialog.open(CreateEditTimesheetItemComponent, {
       disableClose: true,
+      width: `calc(100% - 24px)`,
+      maxWidth: '400px',
       data: {
         dateAt: this.displayDay,
         projectIncludingTasks: this.projectIncludingTasks,
@@ -296,6 +298,8 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
 
   showCreateOrEditTimesheetByWeek(item?) {
     const dialogRef = this._dialog.open(CreateEditTimesheetByWeekComponent, {
+      width: `calc(100% - 24px)`,
+      maxWidth: '400px',
       disableClose: true,
       data: {
         projectIncludingTasks: this.projectIncludingTasks,

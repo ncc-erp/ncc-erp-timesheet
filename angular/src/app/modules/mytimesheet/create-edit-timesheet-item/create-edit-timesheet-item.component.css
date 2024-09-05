@@ -2,9 +2,6 @@
   display: flex;
   justify-content: center;
 }
-.mat-typography {
-    width: 400px;
-}
 
 @media screen and (max-width: 600px) {
   .title-modal {
@@ -16,7 +13,6 @@
     margin-bottom: 0;
   }
   .date-time {
-    font-family: Inter;
     font-size: 14px;
     font-weight: 600;
     line-height: 21px;
@@ -24,14 +20,7 @@
     margin-top: 0;
     margin-bottom: 0;
   }
-  ::ng-deep .cdk-overlay-pane{
-    max-width: 400px !important;
-    width: 90vw !important;
-  }
   .mat-dialog-container {
     padding: 20px;
-  }
-  .mat-typography{
-    width: auto
   }
 }

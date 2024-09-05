@@ -195,13 +195,30 @@ file-upload>span {
     margin: 0px !important;
 }
 
+.table-user-wrapper {
+    position: relative; 
+    padding: 20px;
+}
+
 @media screen and (max-width: 600px) {
 
+    .table-user-wrapper {
+        padding: 12px;
+    }
+    
     .user-wrapper .user-header-wrapper {
         display: flex;
         flex-direction: column-reverse;
         padding: 10px;
         gap: 10px;
+        width: 100%;
+    }
+
+    .user-wrapper .user-header-wrapper .user-header-wrapper_action {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        width: 100%;
     }
     .user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper{
         width: 100%;
@@ -213,6 +230,8 @@ file-upload>span {
 
     ::ng-deep .user-list-select-wrapper .mat-form-field{
         width: 100%;
+        padding-left: 8px;
+        padding-right: 8px;
     }
     .user-wrapper .user-table-button{
         display: none;
@@ -220,6 +239,13 @@ file-upload>span {
     
     ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .user-custom-dialog-container{
         width: 90% !important;
+    }
+
+    .styleUser>thead>tr>th {
+        min-width: 100px;
+    }
+    .arrow-down {
+        font-size: 20px;
     }
 }
 

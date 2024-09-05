@@ -111,7 +111,7 @@
                     </mat-select>
                 </mat-form-field>   
             </div>
-            <div style="position: relative; padding: 20px;">
+            <div class="table-user-wrapper">
                 <div class="table-responsive" style="border: 0;" id="tbl">
                     <table class="table table-hover table-striped styleUser" [busy]="isTableLoading">
                         <thead>
@@ -155,7 +155,7 @@
                                 <th>
                                     {{ "Actions" | localize }}
                                     <span class="pointer" style="float: right; height: 20px;">
-                                        <i class="icon-32 material-icons pointer"
+                                        <i class="icon-32 material-icons pointer arrow-down"
                                             (click)='showOrHideHeader()'>arrow_drop_down</i>
                                         <div class="dropdown-content" [ngClass]="showHeader ? 'block' : 'none'"
                                             (clickOutside)="turnOff()">

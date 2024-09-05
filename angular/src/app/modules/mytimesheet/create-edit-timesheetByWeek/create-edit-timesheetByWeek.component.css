@@ -1,15 +1,9 @@
-.mat-typography {
-  width: 400px;
+.mat-dialog-container {
+  padding: 24px;
 }
 
 @media screen and (max-width: 600px) {
-  .mat-typography {
-    width: auto;
-  }
   .mat-dialog-container {
     padding: 20px;
-  }
-  ::ng-deep .cdk-overlay-pane{
-    max-width: 400px !important;
   }
 }
