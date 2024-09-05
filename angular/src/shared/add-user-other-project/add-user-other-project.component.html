@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col-md-4 fixedHeader">
+  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 fixedHeader">
       <div>
         <mat-form-field appearance="outline">
           <mat-label>Branch</mat-label>
@@ -23,10 +23,10 @@
         </mat-form-field>
       </div>
   </div>
-  <div class="col-md-8">
+  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
     <mat-form-field appearance="outline" style="margin-top: 0px; width: 100%;">
       <mat-label>Search by UserName</mat-label>
-      <input type="search" [(ngModel)]="searchText" name="Search" (keyup.enter)="getAllUser()" matInput>
+      <input type="search" [(ngModel)]="searchText" name="Search" (keydown.enter)="getAllUser()" matInput>
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
   </div>

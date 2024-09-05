@@ -22,11 +22,11 @@
           <div class="col-lg-6">
             <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Search by Email Requester, Title</mat-label>
-              <input type="search" [(ngModel)]="searchText" name="Search" (keyup.enter)="refresh()" matInput />
+              <input type="search" [(ngModel)]="searchText" name="Search" (keydown.enter)="refresh()" matInput />
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
           </div>
-          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-6">
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Month</mat-label>
@@ -41,7 +41,7 @@
               </mat-form-field>
             </div>
           </div>
-          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-6">
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Year</mat-label>
@@ -71,7 +71,7 @@
           </div>
         </div>
         <div class="table-responsive">
-          <table class="table table-bordered">
+          <table class="table table-bordered" [busy]="isTableLoading">
             <thead>
               <tr>
                 <th style="max-width: 32px" class="text-center">No</th>
@@ -81,22 +81,22 @@
                 <th style="width: 250px" class="text-center">Title</th>
                 <th class="text-center">Month</th>
                 <th class="text-center">Year</th>
-                <th style="max-width: 70px" class="text-center">
+                <th class="text-center">
                   Request Money
                 </th>
-                <th style="max-width: 70px" class="text-center">
+                <th class="text-center">
                   Total Invoice Money
                 </th>
-                <th style="max-width: 70px" class="text-center">
+                <th class="text-center">
                   VAT Money
                 </th>
-                <th style="max-width: 70px" class="text-center">
+                <th class="text-center">
                   Disbursed Money
                 </th>
-                <th style="max-width: 74px" class="text-center">
+                <th class="text-center">
                   Remaining Money
                 </th>
-                <th style="max-width: 50px" class="text-center">
+                <th class="text-center">
                   Remaining Money Status
                 </th>
                 <th style="max-width: 50px" class="text-center">Status</th>

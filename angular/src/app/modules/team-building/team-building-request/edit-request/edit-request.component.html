@@ -28,7 +28,7 @@
           </mat-form-field>
         </div>
       </div>
-      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
         <div>
           <mat-form-field appearance="outline">
             <mat-label>Branch</mat-label>
@@ -51,7 +51,7 @@
           </mat-form-field>
         </div>
       </div>
-      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
         <div>
           <mat-form-field appearance="outline">
             <mat-label>Month</mat-label>
@@ -168,7 +168,7 @@
           </tbody>
         </table>
       </div>
-      <div *ngIf="isShowBtnAddUser" class="table-team-select">
+      <div *ngIf="isShowBtnAddUser" class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
         <mat-expansion-panel [expanded]="true">
           <app-add-user-other-project *ngIf="isShowBtnAddUser"
           [isCreateRequest]="false"

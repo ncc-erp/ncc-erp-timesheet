@@ -4,11 +4,9 @@
   cursor: pointer;">close</mat-icon>
   <hr>
   <div>
-    <div style="display: flex; justify-content: space-between;">
-      <p mat-dialog-title>Requester : {{this.disburseTeambuildingRequestInfoDto.requesterName}}</p>
-      <p mat-dialog-title>Total Request Money : {{this.disburseTeambuildingRequestInfoDto.requestMoney | number : "1.0" : "en-US"}} VNĐ</p>
-    </div>
-    <p mat-dialog-title>Email : {{this.disburseTeambuildingRequestInfoDto.requesterEmail}}</p>
+    <p class="col-lg-6 col-md-6 col-sm-6 col-xs-12" mat-dialog-title>Requester : {{this.disburseTeambuildingRequestInfoDto.requesterName}}</p>
+    <p class="col-lg-6 col-md-6 col-sm-6 col-xs-12" mat-dialog-title>Total Request Money : {{this.disburseTeambuildingRequestInfoDto.requestMoney | number : "1.0" : "en-US"}} VNĐ</p>
+    <p class="col-lg-12 col-md-12 col-sm-12 col-xs-12" mat-dialog-title>Email : {{this.disburseTeambuildingRequestInfoDto.requesterEmail}}</p>
   </div>
   <hr>
   <mat-dialog-content class="mat-typography">
@@ -17,84 +15,86 @@
           Invoice Request List
         </mat-card-title>
           <mat-card-content>
-            <table class="table table-striped table-hover table-responsive">
-              <thead>
-                <tr>
-                  <th style="width: 10%">
-                    No
-                  </th>
-                  <th style="width: 15%">
-                    Invoice Amount
-                  </th>
-                  <th style="width: 30%">
-                    Invoice Bill Resource
-                  </th> 
-                  <th style="width: 10%">
-                    Included VAT
-                  </th>
-                  <th style="width: 10%">
-                     VAT
-                  </th>
-                  <th style="width: 40%;">
-                    Invoice Amount After Taxing
-                  </th>
-                  <th>
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let invoice of this.disburseTeambuildingRequestInfoDto.invoiceRequests; let i = index">
-                  <td>
-                    <span> #{{i + 1}}</span>
-                  </td>
-                  <td>
-                    <span>{{invoice.invoiceMoney | number : "1.0" : "en-US"}} VNĐ</span>
-                  </td>
-                  <td>
-                    <a target="_blank" href="{{invoice.invoiceResourceUrl}}">{{invoice.invoiceResourceName}}</a>
-                  </td>
-                  <td>
-                    <mat-icon *ngIf="invoice.hasVAT">done</mat-icon>
-                    <mat-icon *ngIf="!invoice.hasVAT"></mat-icon>
-                  </td>
-                  <td>
-                    <span *ngIf="invoice.hasVAT">0</span>
-                    <span *ngIf="!invoice.hasVAT">{{calculateVAT(invoice.invoiceMoney) | number : "1.0" : "en-US"}}</span>
-                    
-                  </td>
-                  <td>
-                    <p>{{calculateInvoiceAmountAfterTaxing(invoice.invoiceMoney, invoice.hasVAT) | number : "1.0" : "en-US"}} VNĐ</p>
-                  </td>
-                  <td>
-                    <mat-icon color="primary" style="cursor: pointer; margin-left: 10px; font-size: 24px;"
-                    (click)="editOneInvoice(invoice.invoiceId);$event.stopPropagation()">edit</mat-icon>
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="5">
-                    <p style="float: right;"><b>{{ "Suggest Disburse Money:" | localize }}</b> {{calculateTotalSuggestedDisburseMoney() | number : "1.0" : "en-US"}} VNĐ</p>
-                    <b style="float: left; color: red; margin-top: 35px;" *ngIf="this.disburseTeambuildingRequestInfoDto.requestMoney < calculateTotalSuggestedDisburseMoney()">*The total requested amount is less than the total invoice amount, only {{this.disburseTeambuildingRequestInfoDto.requestMoney | number : "1.0" : "en-US"}} VNĐ can be disbursed</b>
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover table-responsive">
+                <thead>
+                  <tr>
+                    <th style="width: 10%">
+                      No
+                    </th>
+                    <th style="width: 15%">
+                      Invoice Amount
+                    </th>
+                    <th style="width: 30%">
+                      Invoice Bill Resource
+                    </th> 
+                    <th style="width: 10%">
+                      Included VAT
+                    </th>
+                    <th style="width: 10%">
+                      VAT
+                    </th>
+                    <th style="width: 40%;">
+                      Invoice Amount After Taxing
+                    </th>
+                    <th>
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let invoice of this.disburseTeambuildingRequestInfoDto.invoiceRequests; let i = index">
+                    <td>
+                      <span> #{{i + 1}}</span>
+                    </td>
+                    <td>
+                      <span>{{invoice.invoiceMoney | number : "1.0" : "en-US"}} VNĐ</span>
+                    </td>
+                    <td>
+                      <a target="_blank" href="{{invoice.invoiceResourceUrl}}">{{invoice.invoiceResourceName}}</a>
+                    </td>
+                    <td>
+                      <mat-icon *ngIf="invoice.hasVAT">done</mat-icon>
+                      <mat-icon *ngIf="!invoice.hasVAT"></mat-icon>
+                    </td>
+                    <td>
+                      <span *ngIf="invoice.hasVAT">0</span>
+                      <span *ngIf="!invoice.hasVAT">{{calculateVAT(invoice.invoiceMoney) | number : "1.0" : "en-US"}}</span>
+                      
+                    </td>
+                    <td>
+                      <p>{{calculateInvoiceAmountAfterTaxing(invoice.invoiceMoney, invoice.hasVAT) | number : "1.0" : "en-US"}} VNĐ</p>
+                    </td>
+                    <td>
+                      <mat-icon color="primary" style="cursor: pointer; margin-left: 10px; font-size: 24px;"
+                      (click)="editOneInvoice(invoice.invoiceId);$event.stopPropagation()">edit</mat-icon>
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="5">
+                      <p style="float: right;"><b>{{ "Suggest Disburse Money:" | localize }}</b> {{calculateTotalSuggestedDisburseMoney() | number : "1.0" : "en-US"}} VNĐ</p>
+                      <b style="float: left; color: red; margin-top: 35px;" *ngIf="this.disburseTeambuildingRequestInfoDto.requestMoney < calculateTotalSuggestedDisburseMoney()">*The total requested amount is less than the total invoice amount, only {{this.disburseTeambuildingRequestInfoDto.requestMoney | number : "1.0" : "en-US"}} VNĐ can be disbursed</b>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           </mat-card-content>
         </mat-card>
         <br>
 
-        <div class="align-item format-col form-group row required">
-          <label class="col-md-4 col-form-label" for="connectionString">
+        <div class="required">
+          <label class="col-md-3 col-xs-12 col-form-label" for="connectionString">
             {{ "Disburse money:" | localize }}
           </label>
-          <div class="d-flex" style="flex-direction: column; width: 100%;">
-            <mat-form-field class="col-xl-8 col-lg-8 col-md-8 col-xs-8" appearance="outline">
+          <div class="col-md-9 col-xs-12">
+            <mat-form-field appearance="outline">
               <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ'}"
               matInput="matInput" [(ngModel)]="disburseMoney" name="money" required/>
             </mat-form-field>
-          <p style="float: right; margin-left: 15px;"><b>{{ "Suggest Remaining Money:" | localize }}</b> {{calculateTotalSuggestedRemainingMoney() | number : "1.0" : "en-US"}} VNĐ</p>
+            <p><b>{{ "Suggest Remaining Money:" | localize }}</b> {{calculateTotalSuggestedRemainingMoney() | number : "1.0" : "en-US"}} VNĐ</p>
           </div>
         </div>
   </mat-dialog-content>
