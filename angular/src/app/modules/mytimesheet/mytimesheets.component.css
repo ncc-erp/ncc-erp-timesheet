@@ -40,7 +40,6 @@ mat-button-toggle-group{
   }
   
   @media screen and (max-width: 600px) {
-    :host {
       mat-tab-header {
         display: none !important;
       }
@@ -106,7 +105,7 @@ mat-button-toggle-group{
         padding-bottom: 16px;
       }
   
-      .mat-button-toggle-label-content {
+      ::ng-deep .mat-button-toggle-label-content {
         line-height: 40px !important;
       }
   
@@ -239,5 +238,4 @@ mat-button-toggle-group{
         border-radius: 10px;
         float: right;
       }
-    }
 }

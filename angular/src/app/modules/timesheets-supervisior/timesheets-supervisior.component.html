@@ -105,7 +105,7 @@
               </div>
             </div>
           </div>
-          <div class="col-sm-2">
+          <div class="col-sm-2" *ngIf="OpenTalkJoinTime">
             <div class="form-group form-float">
               <div class="example-form">
                 <mat-form-field *ngIf="OpenTalkJoinTime" appearance="outline" style="width: 100%;">
@@ -127,12 +127,14 @@
               <div class="panel-heading" role="tab" [attr.id]="'headingProject-' + ut.projectId">
                 <h4 class="panel-title">
                   <a role="button" data-toggle="collapse" [attr.href]="'#collapseProject-' + ut.projectId"
-                    aria-expanded="true" aria-controls="'collapseProject-' + ut.projectId">
-                    <i class="material-icons">folder</i>
-                    <span>{{ut.projectName}}</span>
-                    <span class="pType">{{ut.listPM}}</span>
+                    aria-expanded="true" aria-controls="'collapseProject-' + ut.projectId" class="panel-user">
+                    <div>
+                      <i class="material-icons">folder</i>
+                      <span>{{ut.projectName}}</span>
+                      <span *ngIf="ut.listPM.length" class="pType">{{ut.listPM}}</span>
+                    </div>
 
-                    <span class="pull-right">
+                    <span class="pull-right total-work-time">
                       {{ convertMinuteToHour(ut.totalProjectWorkingTime) }}
                     </span>
                   </a>
@@ -283,10 +285,12 @@
               <div class="panel-heading" role="tab" [attr.id]="'headingUser-' + ts.userId">
                 <h4 class="panel-title">
                   <a role="button" data-toggle="collapse" [attr.href]="'#collapseUser-' + ts.userId"
-                    aria-expanded="false" [attr.aria-controls]="'collapseUser-' + ts.userId" class="collapsed">
-                    <i class="material-icons">folder_shared</i>
-                    <span> {{ ts.userName }}</span>
-                    <span class="pull-right">
+                    aria-expanded="false" [attr.aria-controls]="'collapseUser-' + ts.userId" class="collapsed panel-user">
+                    <div>
+                      <i class="material-icons">folder_shared</i>
+                      <span> {{ ts.userName }}</span>
+                    </div>
+                    <span class="pull-right total-work-time">
                       {{ convertMinuteToHour(ts.totalUserWorkingTime) }}
                     </span>
                   </a>

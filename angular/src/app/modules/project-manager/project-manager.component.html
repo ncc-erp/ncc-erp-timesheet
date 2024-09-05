@@ -17,14 +17,14 @@
           </li>
         </ul>
       </div>
-      <div class="body table-responsive">
+      <div class="body">
         <div class="row clearfix">
-          <div class="col-lg-3 col-md-3 col-sm-3 col-sx-3" *ngIf="isAdmin">
+          <div class="col-lg-3 col-md-3 col-sm-3 col-sx-3 btn-project" *ngIf="isAdmin">
             <button name="createBtn" *ngIf="permission.isGranted(ADD_PROJECT)" mat-raised-button color="primary" class="btn--add" (click)="createProject()">
               <mat-icon>add</mat-icon>New Project
             </button>
           </div>
-          <div class="col-lg-3 col-md-3 col-sm-3 col-sx-3">
+          <div class="col-lg-3 col-md-3 col-sm-3 col-sx-3 btn-project">
             <mat-form-field appearance="outline" class="select--status">
               <mat-select [(value)]="status" name="Project Status" (selectionChange)=getProjects()>
                 <mat-option *ngFor="let pStatus of APP_CONFIG.EnumProjectStatus" [value]="pStatus.value">
@@ -42,7 +42,7 @@
             </mat-form-field>
           </div>
         </div>
-        <div [busy]="isTableLoading">
+        <div [busy]="isTableLoading" class="table-responsive" style="border: 0;">
           <table *ngFor="let customer of mapProjects; index as i" class="table table-hover table-stripped">
             <thead>
               <th colspan="4"
@@ -53,27 +53,29 @@
             <tbody>
               <tr *ngFor="let project of customer.items; index as i" (contextmenu)="onContextMenu($event, menuTrigger)">
                 <td class="td--project">
-                  <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
+                  <div>
+                    <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
                     [style.top]="contextMenuPosition.y" #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionsMenu">
+                    </div>
+                    <span align="start" style="line-height: 3; padding-left: 5px;">
+                      {{project.name}} [{{project.code}}]
+                    </span>
+                    <span class="pm">{{project.pms.length ? project.pms.join(', ') : 'null'}} </span>
+                    <span class="member">{{project.activeMember}} members</span>
+                    <span *ngIf="project.projectType == 3" class="pType">ODC</span>
+                    <span *ngIf="project.projectType == 2" class="pType">NB</span>
+                    <span *ngIf="project.projectType == 1" class="pType">FF</span>
+                    <span *ngIf="project.projectType == 0" class="pType">T&M</span>
+                    <span class="pTime">
+                      <span align="start">
+                        {{formatDate(project.timeStart)}}
+                      </span>
+                      <span *ngIf="project.timeEnd">
+                        - {{formatDate(project.timeEnd)}}
+                      </span>
+                    </span>
                   </div>
-                  <span align="start" style="line-height: 3; padding-left: 5px;">
-                    {{project.name}} [{{project.code}}]
-                  </span>
-                  <span class="pm">{{project.pms.length ? project.pms.join(', ') : 'null'}} </span>
-                  <span class="member">{{project.activeMember}} members</span>
-                  <span *ngIf="project.projectType == 3" class="pType">ODC</span>
-                  <span *ngIf="project.projectType == 2" class="pType">NB</span>
-                  <span *ngIf="project.projectType == 1" class="pType">FF</span>
-                  <span *ngIf="project.projectType == 0" class="pType">T&M</span>
-                  <span class="pTime">
-                    <span align="start">
-                      {{formatDate(project.timeStart)}}
-                    </span>
-                    <span *ngIf="project.timeEnd">
-                      - {{formatDate(project.timeEnd)}}
-                    </span>
-                  </span>
-                  <div class="pull-right" id="btnAction">
+                  <div class="pull-right btn-action" id="btnAction">
                     <div class="project-label" *ngIf="status == 2">
                       <h6 class="project-status-label bg-green" *ngIf="project.status == 0">Active</h6>
                       <h6 class="project-status-label bg-grey" *ngIf="project.status == 1">Inactive</h6>

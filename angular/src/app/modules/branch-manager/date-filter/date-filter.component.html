@@ -1,4 +1,4 @@
-<div class="col-lg-4 mb-0">
+<div class="col-lg-4 mb-0 date-filter">
   <mat-form-field class="w-100" appearance="outline">
     <mat-label> {{ "Time Type" | localize }}</mat-label>
     <mat-select name="typeOfView" [(value)]="typeOfView" (selectionChange)="FilterByTime()">
@@ -8,7 +8,7 @@
     </mat-select>
   </mat-form-field>
 </div>
-<div class="col-lg-4 mb-0" *ngIf="typeOfView != APP_CONSTANT.TypeViewBranchManager.All">
+<div class="col-lg-4 mb-0 date-filter" *ngIf="typeOfView != APP_CONSTANT.TypeViewBranchManager.All">
   <mat-form-field class="w-100" appearance="outline">
     <mat-label> {{ "Time Range" | localize }}</mat-label>
     <span>{{displayDay}}</span>

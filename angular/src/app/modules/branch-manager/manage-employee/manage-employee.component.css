@@ -87,5 +87,39 @@
    right: 0;
 }
 
+@media screen and (max-width: 600px) {
+    .group {
+        flex-wrap: wrap;
+    }
+
+    .group > div {
+        padding: 0;
+    }
+
+    :host ::ng-deep .app-date-filter .date-filter {
+        padding: 0;
+        margin-bottom: 0 !important;
+    }
+
+    .row-btn {
+        padding: 0 15px;
+    }
+
+    .row-item {
+        margin-bottom: 0 !important;
+    }
+
+    .manager-employee {
+        padding: 15px;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .manager-employee {
+        min-width: 450px;
+        width: 800px;
+    }
+}
+
 
 

@@ -10606,3 +10606,34 @@ thead{
   background-color: #cecece;
   border: 2px solid #cecece;
 }
+
+.mat-select-panel {
+  min-width: 100% !important;
+  position: absolute;
+  top: 35px !important;
+}
+
+.cdk-overlay-pane {
+  transform: none !important;
+}
+
+@media screen and (max-width: 600px) {
+  section.content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 86px !important;
+    overflow-x: hidden;
+  }
+
+  .container-wrapper {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
+  .cdk-overlay-container:has(.new-branch-dialog) {
+    .cdk-overlay-pane {
+      max-width: 100% !important;
+      min-width: 80vw;
+    }
+  }
+}

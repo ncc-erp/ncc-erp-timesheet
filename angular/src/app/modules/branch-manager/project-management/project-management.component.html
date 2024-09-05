@@ -19,10 +19,10 @@
       </div>
 
       <div class="body">
-        <div class="group d-flex align-items-start justify-content-between">
+        <div class="group">
           <div class="col-lg-10">
             <div class="row">
-              <div class="col-lg-4 col-md-8 col-sm-6 col-xs-12 mb-0">
+              <div class="col-lg-4 col-md-8 col-sm-6 col-xs-12 mb-0 row-item">
                 <ng-container>
                   <mat-form-field class="w-100" appearance="outline">
                     <mat-label> {{ "Branch" | localize }}</mat-label>
@@ -39,7 +39,7 @@
                   </mat-form-field>
                 </ng-container>
               </div>
-              <app-date-filter (dateSelected)="onDateSelected($event)"></app-date-filter>
+              <app-date-filter (dateSelected)="onDateSelected($event)" class="app-date-filter"></app-date-filter>
             </div>
           </div>
           <!-- <div class="col-lg-2">

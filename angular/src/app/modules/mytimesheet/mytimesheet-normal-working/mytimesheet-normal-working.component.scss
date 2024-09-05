@@ -211,7 +211,12 @@ $name-col-width: 0;
 }
 
 @media screen and (max-width: 600px) {
-  :host {
+
+    .main-content {
+      min-width: auto;
+      flex-direction: column;
+      padding: 12px;
+    }
 
     .view-mobile {
       display: block;
@@ -344,5 +349,4 @@ $name-col-width: 0;
       gap: 4px;
       margin: 0
     }
-  }
 }

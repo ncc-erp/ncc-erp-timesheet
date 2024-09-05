@@ -36,3 +36,9 @@
         padding-top: 15px;
     }
 }
+
+@media screen and (max-width: 767px) {
+    ::ng-deep .mat-select-panel {
+      position: relative !important;
+    }
+}

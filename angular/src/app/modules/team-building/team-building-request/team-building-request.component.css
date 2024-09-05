@@ -37,7 +37,6 @@
 }
 
 @media screen and (max-width: 600px) {
-  :host{
     .table-responsive > .table > tbody > tr > td,
     .table-responsive > .table > tbody > tr > th,
     .table-responsive > .table > tfoot > tr > td,
@@ -46,5 +45,4 @@
     .table-responsive > .table > thead > tr > th {
       white-space: pre-wrap;
     }
-  }
 }

@@ -11,7 +11,7 @@
         {{ "Employee:" | localize }}
       </label>
       <mat-form-field class="row-item-rest col-xl-9 col-lg-9 col-md-9
-      col-xs-9" appearance="outline">
+      col-xs-12" appearance="outline">
         <mat-label> {{ "Select employee:" | localize }}</mat-label>
         <mat-select [(ngModel)]="inputToCreate.employeeId" [disabled]="disableSelect" name="projectUser" required>
           <mat-form-field class="p-2 input-wrapper" style="
@@ -42,7 +42,7 @@
       <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 col-form-label">
         {{ "Time:" | localize }}
       </label>
-        <mat-form-field class="row-item-rest col-xl-9 col-lg-9 col-md-9  col-xs-9" appearance="outline" data-toggle="tooltip" data-placement="right" title="Bấm vào lịch để chọn ngày!">
+        <mat-form-field class="row-item-rest col-xl-9 col-lg-9 col-md-9  col-xs-12" appearance="outline" data-toggle="tooltip" data-placement="right" title="Bấm vào lịch để chọn ngày!">
         <mat-label>Month and Year</mat-label>
         <input name="datePicker" #input matInput readonly [matDatepicker]="dp" [formControl]="date">
         <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>

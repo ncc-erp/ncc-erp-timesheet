@@ -42,3 +42,9 @@
         width: 90% !important;
     }
 }
+
+@media (min-width: 410px) and (max-width: 510px) {
+    .create-edit-customer {
+        min-width: 300px;
+    }
+}

@@ -223,3 +223,74 @@ th {
     color: #3186ff !important;
     font-weight: 900;
 }
+
+@media screen and (max-width: 600px) {
+    .table-team-selected, .table-team-select {
+        width: 100%;
+    }
+
+    .list-project-member table {
+        margin-top: 20px;
+    }
+
+    :host ::ng-deep .table-select-task .mat-expansion-panel-header {
+        padding-right: 5px;
+        padding-left: 0;
+    }
+    
+    :host ::ng-deep .table-target-user .mat-expansion-panel-body,
+    :host ::ng-deep .table-select-task .mat-expansion-panel-body,
+    :host ::ng-deep .table-team-select .mat-expansion-panel-body > div > div,
+    .label-select-member,
+    .list-project-member,
+    .list-member {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    :host ::ng-deep .table-team-select-wrapper .mat-expansion-panel-header,
+    :host ::ng-deep .table-team-select-wrapper .mat-expansion-panel-body,
+    :host ::ng-deep .table-team-select .mat-expansion-panel-header,
+    :host ::ng-deep .table-team-select .mat-expansion-panel-body,
+    .table-target-user mat-expansion-panel-header {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .table tbody tr td {
+        padding-right: 10px !important;
+    }
+
+    .project-create-edit {
+        h2 {
+            font-size: 26px;
+            padding-right: 20px;
+        }
+    }
+}
+
+@media screen and (max-width: 628px) {
+    :host ::ng-deep .note-user .mat-checkbox-layout {
+        display: block;
+        white-space: break-spaces;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .project-create-edit {
+        .btn-new-client {
+            padding-bottom: 20px;
+        }
+
+        .btn-allow-teambuilding {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .btn-allow-teambuilding-yes, .btn-allow-teambuilding-no {
+            width: 50%;
+            padding: 5px 15px;
+            margin-top: 0;
+        }
+    }
+}

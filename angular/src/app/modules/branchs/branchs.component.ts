@@ -100,7 +100,8 @@ export class BranchsComponent extends PagedListingComponentBase<BranchDto> imple
     } as BranchCreateEditDto;
     const dialogRef = this.dialog.open(CreateEditBranchComponent, {
       data: item,
-      disableClose: true
+      disableClose: true,
+      panelClass: 'new-branch-dialog'
     });
 
     dialogRef.afterClosed().subscribe((res) => {
