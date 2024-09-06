@@ -1,10 +1,10 @@
 <form #createTimesheetForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
   <div>
-    <h3 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>{{title}} <h5
-        class="pull-right" style="display: inline-block">{{day}} </h5>
+    <h3 class="title-modal" style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>{{title}} <h5
+        class="pull-right date-time" style="display: inline-block">{{day}} </h5>
     </h3>
   </div>
-  <mat-dialog-content class="mat-typography" style="width:400px">
+  <mat-dialog-content class="mat-typography" style="width: fit-content">
 
     <mat-form-field>
       <mat-label>Project</mat-label>

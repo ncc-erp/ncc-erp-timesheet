@@ -1,0 +1,20 @@
+.action-wrapper {
+    display: none
+}
+
+@media screen and (max-width: 768px) {
+    .action-wrapper {
+        display: flex;
+        flex-flow: row-reverse;
+    }
+
+    .full-view {
+        display: none;
+    }
+}
+
+
+
+.card .header .header-dropdown {
+    top: 15px;
+}

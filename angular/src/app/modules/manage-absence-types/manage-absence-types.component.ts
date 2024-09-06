@@ -57,7 +57,8 @@ export class ManageAbsenceTypesComponent extends PagedListingComponentBase<Absen
     let item = { id: absenceTypes.id, name: absenceTypes.name, length: absenceTypes.length, status: absenceTypes.status } as AbsenceTypesDTO;
     const dialogRef = this._dialog.open(ManageAbsenceTypesCreateComponent, {
       disableClose : true,
-      data: item
+      data: item,
+      panelClass: 'dialog-manage-absence-types',
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result) {

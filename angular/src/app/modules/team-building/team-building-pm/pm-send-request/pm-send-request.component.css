@@ -37,3 +37,10 @@ table tr td {
   background: 0 0;
   color: inherit;
 }
+
+
+@media screen and (max-width: 600px) { 
+  .table-invoice {
+    min-width: 400px;
+  }
+}

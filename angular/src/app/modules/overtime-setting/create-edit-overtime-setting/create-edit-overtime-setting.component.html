@@ -41,7 +41,7 @@
         Coefficient is required!
       </div>
     </div>
-    <mat-dialog-content class="mat-typography" style="min-width: 400px">
+    <mat-dialog-content class="mat-typography" style="width: 400px; max-width: 80vw;">
       <div class="example-container">
         <mat-form-field >
           <input type="number" matInput name="coefficient" placeholder="{{l('Coefficient OT')}}" [(ngModel)]="overtimeSetting.coefficient" 
@@ -51,7 +51,7 @@
     </mat-dialog-content>
   </div>
 
-  <mat-dialog-content class="mat-typography" style="min-width: 400px">
+  <mat-dialog-content class="mat-typography" style="width: 400px; max-width: 80vw;">
     <div class="example-container">
       <mat-form-field >
         <input matInput name="note" placeholder="{{l('Note')}}" [(ngModel)]="overtimeSetting.note" maxlength="255">

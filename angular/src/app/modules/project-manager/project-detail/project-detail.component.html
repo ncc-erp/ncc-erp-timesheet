@@ -15,48 +15,49 @@
         >
       </div>
 
-      <div class="col-md-3 col-sm-3 col-xs-12" style="margin-top: 13px">
-        <mat-form-field appearance="outline" style="margin-top: -20px;">
-          <mat-select
-            [formControl]="viewChange"
-            (selectionChange)="changeView(true)"
-          >
-            <mat-option
-              *ngFor="let item of APP_CONFIG.TypeViewHomePage"
-              [value]="item.value"
+      <div class="actions">
+        <div class="col-md-3 col-sm-3 col-xs-12 select-week-container">
+          <mat-form-field appearance="outline" class="select-week">
+            <mat-select
+              [formControl]="viewChange"
+              (selectionChange)="changeView(true)"
             >
-              <p *ngIf="item.value != APP_CONSTANT.TypeViewHomePage.CustomTime">
-                {{ item.name }}
-              </p>
-              <p
-                *ngIf="item.value == APP_CONSTANT.TypeViewHomePage.CustomTime"
-                (click)="showPopup()"
+              <mat-option
+                *ngFor="let item of APP_CONFIG.TypeViewHomePage"
+                [value]="item.value"
               >
-                {{ item.name }}
-              </p>
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <!-- <button
-          class="text-danger"
-          mat-menu-item
-          (click)="exportProject(project)"
+                <p *ngIf="item.value != APP_CONSTANT.TypeViewHomePage.CustomTime">
+                  {{ item.name }}
+                </p>
+                <p
+                  *ngIf="item.value == APP_CONSTANT.TypeViewHomePage.CustomTime"
+                  (click)="showPopup()"
+                >
+                  {{ item.name }}
+                </p>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <!-- <button
+            class="text-danger"
+            mat-menu-item
+            (click)="exportProject(project)"
+          >
+            Export
+          </button> -->
+        </div>
+        <div
+        class="col-md-2 col-sm-2 col-xs-12 btn-export"
         >
-          Export
-        </button> -->
-      </div>
-      <div
-        class="col-md-2 col-sm-2 col-xs-12"
-        style="margin-top: 3px; margin-bottom: 6px"
-      >
-        <button *ngIf="permission.isGranted(EXPORT_EXCEL_PROJECT)"
-          mat-raised-button
-          color="primary"
-          class="pull-left"
-          (click)="exportProject()"
-        >
-          Export
-        </button>
+          <button *ngIf="permission.isGranted(EXPORT_EXCEL_PROJECT)"
+            mat-raised-button
+            color="primary"
+            class="pull-left"
+            (click)="exportProject()"
+          >
+            Export
+          </button>
+        </div>
       </div>
     </div>
     <div

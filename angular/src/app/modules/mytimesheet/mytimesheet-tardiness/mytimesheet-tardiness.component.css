@@ -77,3 +77,82 @@
     text-align: left;
     margin: 0;
 }
+
+.table-padding{
+    padding: 20px;
+  }
+  
+  .view-mobile {
+    display: none;
+  }
+  
+  .view-web {
+    display: block;
+  }
+  
+  @media screen and (max-width: 600px) {
+      .view-mobile {
+        display: block;
+      }
+
+      .main-content {
+        padding: 0;
+      }
+  
+      .view-web {
+        display: none;
+      }
+  
+      .header {
+        flex-direction: column;
+        gap: 16px;
+        padding: 12px;
+      }
+      .table-padding{
+        padding: 12px;
+      }
+      .header-tardiness {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .filter-date {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .header-filter .header .filter-date .item {
+        margin-left: 0;
+      }
+      .filter-date .item label {
+        width: 40px;
+      }
+      .filer-month-year {
+        display: flex;
+        gap: 16px;
+      }
+      .title-header {
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 19.36px;
+        color: black;
+      }
+      .total-punished {
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 19.5px;
+        letter-spacing: -0.011em;
+        color: black;
+      }
+      .text-note-complain {
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 16.9px;
+        letter-spacing: -0.011em;
+        color: #646464;
+      }
+      .punished {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+}

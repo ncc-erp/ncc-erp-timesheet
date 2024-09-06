@@ -172,8 +172,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
 
   showProjectDetailDialog(user): void{
     let dialogRef = this._dialog.open(DetailParticipatingProjectsComponent, {
-      minWidth: '450px',
-      width: '800px',
+      panelClass: 'manager-employee',
       data: {
         user: user,
         startDate: this.startDate,

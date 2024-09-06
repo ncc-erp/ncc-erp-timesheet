@@ -1,9 +1,9 @@
-<form #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
+<form #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate class="form-create-edit-position">
   <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title
     [innerHTML]="title">
   </h2>
     
-    
+  <mat-dialog-content class="content-position">
   <div class="row body-position">
     <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper">
       <label>Name *</label>
@@ -63,7 +63,7 @@
       </div>
     </div>
   </div>
-  
+  </mat-dialog-content>   
 
 
   <mat-dialog-actions align="end">

@@ -17,7 +17,7 @@
           </li>
         </ul>
       </div>
-      <div class="body" style="height: 100%">
+      <div class="body select-wrapper" style="height: 100%">
         <div class="row">
           <div class="col-lg-4">
             <mat-form-field class="example-full-width" appearance="outline">
@@ -41,7 +41,7 @@
             <button mat-raised-button color="primary" *ngIf="permission.isGranted(ADD)" class="btn"
               name="createBtn" (click)="onCreate()">
               <mat-icon style="color: white" matPrefix>add</mat-icon>
-              <span>
+              <span style="color: white">
                 Create
               </span>
             </button>
@@ -83,10 +83,10 @@
                 </td>
                 <td class="text-center">
                   <button [name]="'editBtn-'+item.id" *ngIf="permission.isGranted(EDIT)" mat-icon-button (click)="onEdit(item)">
-                    <mat-icon>edit</mat-icon>
+                    <mat-icon class="action-capability">edit</mat-icon>
                   </button>
                   <button [name]="'deleteBtn-'+item.id" *ngIf="permission.isGranted(DELETE)" mat-icon-button (click)="onDelete(item)">
-                    <mat-icon>delete</mat-icon>
+                    <mat-icon class="action-capability">delete</mat-icon>
                   </button>
                 </td>
               </tr>

@@ -3,6 +3,7 @@
     margin: 0px 15px 30px 15px;
     gap: 8px;
     flex: 1;
+    flex-wrap: wrap;
 }
 
 .gr-btn-action>.btn {
@@ -12,31 +13,25 @@
 .gr-btn-action>.btn-add {
     background-color: #F56958;
     color: white;
-    width: 20%;
 }
 .gr-btn-action>.btn-download{
     background-color: #014C6E;
     color: white;
-    width: 28%;
 }
 .gr-btn-action>.btn-import  {
     background-color: #F56958;
     color: white;
-    width: 15%;
 }
 
 .gr-btn-action>.btn-export {
     background-color: #014C6E;
     color: white;
-    width: 15%;
     margin-right: 6px;
 }
 
 .gr-btn-action>.btn-generate{
     background-color: #014C6E;
     color: white;
-    width: 22%;
-    margin-left: -7px;
 }
 
 .select-wrapper>div {
@@ -132,7 +127,7 @@
 
 .updated-at {
     min-width: 154px;
-    max-width: 154px;
+    /* max-width: 154px; */
 }
 
 .spacing-center {

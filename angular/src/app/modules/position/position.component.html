@@ -18,7 +18,7 @@
         </ul>
       </div>
 
-      <div class="body table-responsive">
+      <div class="body">
         <div class="row clearfix">
           <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
             <button name="createBtn" *ngIf="permission.isGranted(ADD)" mat-raised-button color="primary" class="pull-left"
@@ -27,7 +27,7 @@
             </button>
           </div>
 
-          <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 pull-right">
+          <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 pull-right">
             <mat-form-field appearance="outline">
               <mat-label>Search by name, short name, code</mat-label>
               <input matInput [(ngModel)]="searchText" name="searchText" placeholder="Search by name, short name, code"
@@ -37,37 +37,51 @@
           </div>
 
         </div>
-        <table class="table table-hover table-striped">
-          <thead class="bg-light">
-            <tr>
-              <th class="order" style="text-align: center;">#</th>
-              <th>Name</th>
-              <th>Short Name</th>
-              <th>Code</th>
-              <th>Color</th>
-              <th *ngIf="permission.isGranted(DELETE) || permission.isGranted(EDIT)" style="text-align:center">Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              *ngFor="let position of listPosition | paginate: { id: 'server', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems };index as i ">
-              <td style="text-align: center;">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
-              <td>{{ position.name }}</td>
-              <td>{{ position.shortName }}</td>
-              <td>{{ position.code }}</td>
-              <td>
-                <span class="label status-label" [style.backgroundColor]="position.color"> {{ position.color }}</span>
-              </td>
-              <td class="action-wrapper">
-                <button [name]="'deleteBtn-'+position.id" *ngIf="permission.isGranted(DELETE)" mat-raised-button (click)="delete(position)"
-                  class="btn btn-danger waves-effect pull-right">Delete</button>
-                <button [name]="'editBtn-'+position.id" *ngIf="permission.isGranted(EDIT)" mat-raised-button (click)="edit(position)"
-                  class="btn btn-primary waves-effect pull-right" style="margin-right: 12px;">Edit</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-responsive" style="border: 0;">
+          <table class="table table-hover table-striped">
+            <thead class="bg-light">
+              <tr>
+                <th class="order" style="text-align: center;">#</th>
+                <th>Name</th>
+                <th>Short Name</th>
+                <th>Code</th>
+                <th>Color</th>
+                <th *ngIf="permission.isGranted(DELETE) || permission.isGranted(EDIT)" style="text-align:center">Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let position of listPosition | paginate: { id: 'server', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems };index as i ">
+                <td style="text-align: center;">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
+                <td>{{ position.name }}</td>
+                <td>{{ position.shortName }}</td>
+                <td>{{ position.code }}</td>
+                <td>
+                  <span class="label status-label" [style.backgroundColor]="position.color"> {{ position.color }}</span>
+                </td>
+                <td class="action-wrapper">
+                  <button [name]="'deleteBtn-'+position.id" *ngIf="permission.isGranted(DELETE)" mat-raised-button (click)="delete(position)"
+                    class="btn btn-danger waves-effect pull-right btn-action-desktop">Delete</button>
+                  <button [name]="'editBtn-'+position.id" *ngIf="permission.isGranted(EDIT)" mat-raised-button (click)="edit(position)"
+                    class="btn btn-primary waves-effect pull-right btn-action-desktop" style="margin-right: 12px;">Edit</button>
+                  <button
+                    *ngIf="permission.isGranted(EDIT)"
+                    [name]="'editBtn-'+position.id" (click)="edit(position)" mat-icon-button color="primary"
+                    class="btn-action-mobile">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    *ngIf="permission.isGranted(DELETE)"
+                    [name]="'deleteBtn-'+position.id" (click)="delete(position)" mat-icon-button color="primary"
+                    class="btn-action-mobile">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <div class="abp-pagination-controls-wrapper">
           <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
               (pageChange)="getDataPage($event)" id="server">

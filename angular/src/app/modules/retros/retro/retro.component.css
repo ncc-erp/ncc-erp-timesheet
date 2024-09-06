@@ -11,3 +11,7 @@
 .row-table-retro {
     height: 56px;
 }
+
+.responsive {
+    overflow-x: auto;
+}

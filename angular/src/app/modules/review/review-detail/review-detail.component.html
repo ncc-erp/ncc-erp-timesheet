@@ -187,9 +187,10 @@
                                 <mat-checkbox *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" name="selectAll" (change)="setAll($event.checked)" matTooltip="Select/DeSelect all"
                                   [checked]="allComplete" [indeterminate]="someComplete()" [color]="'primary'"
                                   style="display: flex; justify-content: center;">
+                                {{ "STT" | localize }}
+
                                 </mat-checkbox>
                               </th>
-                            <th>{{ "STT" | localize }}</th>
                             <th>{{ "Action" | localize }}</th>
                             <th (click)="toggleSort('internName')">
                                 <span>
@@ -234,7 +235,13 @@
                                 </span>
                             </th>
                             <!-- <th>{{ "PM/ Loren Note" | localize }}</th> -->
-                            <th>{{ "Note" | localize }}</th>
+                             <!-- Hide Note -->
+
+
+                            <!-- <th>{{ "Note" | localize }}</th> -->
+
+
+
                             <th>{{ "Updated Info" | localize }}</th>
                         </tr>
                     </thead>
@@ -250,15 +257,25 @@
                       };
                 index as i
               ">            
-                            <td class="text-center">
-                                <mat-checkbox *ngIf="item.status === 4 && permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" [name]="'selected-' + item.id" [checked]="getIsSelected(item)"
-                                [color]="'primary'" (change)="handleSelectlistReviewInternItem(i, $event)">
-                                </mat-checkbox>
-                            </td>
+              <td class="text-center flex">
+                <mat-checkbox *ngIf="item.status === 4 && permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" 
+                              [name]="'selected-' + item.id" 
+                              [checked]="getIsSelected(item)"
+                              [color]="'primary'" 
+                              (change)="handleSelectlistReviewInternItem(i, $event)">
+                    {{ (pageNumber - 1) * pageSize + i + 1 }}
+                </mat-checkbox>
+            
+                <!-- Chỉ hiển thị số nếu mat-checkbox không hiển thị -->
+                <span *ngIf="!(item.status === 4 && permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern))">
+                    {{ (pageNumber - 1) * pageSize + i + 1 }}
+                </span>
+            </td>
+            
+            
                             <!-- STT -->
-                            <td style="text-align: center">
-                                {{ (pageNumber - 1) * pageSize + i + 1 }}
-                            </td>
+                            <!-- <td style="text-align: center">
+                            </td> -->
                             <!-- button -->
                             <td class="action btn-menu">
                                 <button [name]="'actionMenuBtn-'+item.id"  class="menu" mat-stroked-button="mat-stroked-button" [matMenuTriggerFor]="menu">
@@ -404,7 +421,7 @@
                                 </div>
                             </td>
                             <!-- Reviewer -->
-                            <td style="padding: 0px">
+                            <td style="padding:0px">
                                 <div class="info-intern">
                                     <div>
                                         <img class="avatar" [src]="getAvatarReviewer(item)" alt="avatar" />
@@ -413,13 +430,18 @@
                                         <div class="full-name" *ngIf="item.reviewerName">
                                             {{ item.reviewerName }}
                                         </div>
-                                        <div class="full-name" *ngIf="item.reviewerName == null">
+                                        <div class="full-name" *ngIf="!item.reviewerName">
                                             No Reviewer
                                         </div>
                                         <div class="email">{{ item.reviewerEmail.split('@')[0] }}</div>
                                     </div>
                                 </div>
+                                <div class="most-logged-project" *ngIf="item.mostLoggedProject" style="color: red; font-weight: bold; text-align: center;">
+                                    {{ item.mostLoggedProject }}
+                                </div>
                             </td>
+                            
+                            
                             <!-- History -->
                             <td>
                                 <div style="text-align: center">
@@ -524,7 +546,10 @@
                                     </mat-icon> 
                                 </div>
                             </td> -->
-                            <td (click)="togglePrivateNote(item)" style="cursor: pointer;">
+
+                            <!-- Hide Note td-->
+                             
+                            <!-- <td (click)="togglePrivateNote(item)" style="cursor: pointer;">
                                 <div>
                                     <p [ngClass]="item.hidePrivateNote == false ? 'preReview' : 'review'"
                                     title="Cuộn chuột hoặc Click để mở rộng nội dung" name="interviewNote">
@@ -539,7 +564,7 @@
                                     <mat-icon *ngIf="getLineReviewContentsCount(item.reviewInternPrivateNoteDtos)> 3" style="padding: 5px 0px 0px 10px; cursor: pointer">more_horiz
                                     </mat-icon> 
                                 </div>
-                            </td>
+                            </td> -->
                             <!-- Updated At -->
                             <td style="padding: 0px">
                                 <div class="info-undated-info">

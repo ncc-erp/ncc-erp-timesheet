@@ -29,13 +29,18 @@ pre {
 }
 .btn-group{
     display: inline-flex;
+    margin-right: 20px !important;
 }
 
 .m-5{
     margin: 5px;
 }
 .header{
-    display: flex;;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    position: relative;
+    align-items: center;
 }
 
 .header .filter-date{
@@ -51,6 +56,16 @@ pre {
     line-height: 46px;
 }
 
+.header .date {
+    display: flex;
+}
+
+.refresh {
+    position: absolute;
+    top: 10px;
+    right: 0
+}
+
 ::ng-deep li .mat-icon {
     margin-top: 15px !important;
 }
@@ -58,5 +73,33 @@ pre {
 @media screen and (max-width: 768px) {
     .flex div {
         margin-top: 15px;
+    }
+
+    .card .header .header-dropdown {
+        position: relative;
+        padding: 0;
+        margin-top: 10px;
+        top: 0;
+        right: 0;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .header {
+
+        align-items: start;
+        flex-direction: column;
+    }
+
+    .date {
+        flex-direction: column;
+    }
+    .btn-group {
+        width: fit-content;
+        margin-top: 15px;
+    }
+
+    .header .filter-date .item:first-child{
+        margin-left: 0
     }
 }

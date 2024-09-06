@@ -147,3 +147,25 @@ table thead th {
 .font-size-13{
   font-size: 13px;
 }
+
+.title {
+  display: flex;
+  align-items: center;
+}
+
+@media screen and (max-width: 566px) {
+  .title {
+    font-size: 16px !important;
+    display: block;
+  }
+
+  .btn-back {
+    right: 40px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .info-user {
+    padding: 5px 15px 10px 15px;
+  }
+}

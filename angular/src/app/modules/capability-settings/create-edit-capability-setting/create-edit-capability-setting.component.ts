@@ -138,7 +138,7 @@ export class CreateEditCapabilitySettingComponent extends AppComponentBase imple
   public onEditCapabilitySetting(item: CapabilitySettingDto) {
     const dialog = this._dialog.open(UpdateCapabilitySettingComponent, {
       data: { ...item,  action: ActionDialog.EDIT },
-      width: '50vw',
+      width: '750px',
       height:'69vh'
     })
     dialog.afterClosed().subscribe((rs) => {

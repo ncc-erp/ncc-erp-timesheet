@@ -77,7 +77,8 @@ export class CustomerComponent extends PagedListingComponentBase<CustomerDto> im
     let item = { id: customer.id, name: customer.name, code: customer.code, address: customer.address } as CustomerDto;
     const dialogRef = this.dialog.open(CreateEditCustomerComponent, {
       data: item,
-      disableClose : true
+      disableClose : true,
+      panelClass: 'customer-dialog-container'
     });
 
     dialogRef.afterClosed().subscribe((res) => {

@@ -55,3 +55,35 @@
   color: #9e9e9e;
   font-weight: 900;
 }
+
+.panel-user {
+  display: flex !important;
+  position: relative;
+}
+
+.total-work-time {
+  margin-left: auto;
+}
+
+@media screen and (max-width: 500px) {
+  :host ::ng-deep .body date-selector h2 {
+    padding: 0 10px !important;
+    font-size: 18px;
+    margin-top: 15px;
+  }
+
+  :host ::ng-deep .body date-selector .mat-button-toggle-label-content {
+    line-height: 40px;
+    padding: 0 6px;
+    width: 40px;
+  }
+
+  :host ::ng-deep .body date-selector mat-form-field {
+    padding-top: 15px;
+  }
+
+  .pType {
+    display: inline-block;
+    margin: 5px;
+  }
+}

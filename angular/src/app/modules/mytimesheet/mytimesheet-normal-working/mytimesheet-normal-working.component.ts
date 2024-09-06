@@ -143,4 +143,34 @@ export class MytimesheetNormalWorkingComponent extends AppComponentBase implemen
     }
     return "VS " + absenceDetaiInDay.hour;
   }
+
+  showContentCellMobile(absenceDetaiInDay: AbsenceDetaiInDay) {
+    if (!absenceDetaiInDay) return null;
+    let result = 'O-';
+    switch (absenceDetaiInDay.type) {
+      case this.ONSITE:
+        result = 'Onsite-';
+        break;
+      case this.REMOTE:
+        result = 'Remote-';
+        break;
+      default:
+        result = 'Off-';
+    }
+
+    if (absenceDetaiInDay.absenceType === this.FULLDAY) {
+      return result += 'Full day';
+    }
+    if (absenceDetaiInDay.absenceType === this.MORMING) {
+      return result += 'Morning';
+    }
+    if (absenceDetaiInDay.absenceType === this.AFTERNOON) {
+      return result += 'After noon';
+    }
+    if (absenceDetaiInDay.absenceType === this.CUSTOM &&
+      absenceDetaiInDay.absenceTime === this.DI_MUON) {
+      return `Đi Muộn ${absenceDetaiInDay.hour}h`;
+    }
+    return `Về Sớm ${absenceDetaiInDay.hour}h`;
+  }
 }

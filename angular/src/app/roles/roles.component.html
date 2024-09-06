@@ -30,53 +30,55 @@
           </form>
         </div>
         <!--query end-->
-        <table class="table table-hover table-striped" [busy]="isTableLoading">
-          <thead>
-            <tr>
-              <th>{{ "RoleName" | localize }}</th>
-              <th>{{ "DisplayName" | localize }}</th>
-              <th>{{ "Actions" | localize }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="
-                let role of (roles
-                  | paginate
-                    : {
-                        id: 'server',
-                        itemsPerPage: pageSize,
-                        currentPage: pageNumber,
-                        totalItems: totalItems
-                      })
-              ">
-              <td>{{ role.name }}</td>
-              <td>{{ role.displayName }}</td>
-              <td>
-                <button
-                  *ngIf="permission.isGranted(VIEW_DETAIL_ROLE) || permission.isGranted(EDIT_ROLE) || permission.isGranted(DELETE_ROLE)"
-                  class="action-button" mat-icon-button [matMenuTriggerFor]="actionsMenu" [name]="'actionMenuBtn-'+role.id">
-                  <mat-icon>menu</mat-icon>
-                </button>
-                <mat-menu #actionsMenu="matMenu">
-                  <a *ngIf="permission.isGranted(VIEW_DETAIL_ROLE)" style="text-decoration: none; color:#000000DE;"
-                    mat-menu-item [routerLink]="['view-detail/', role.id]" [name]="'viewDetailBtn-'+role.id">
-                    <mat-icon>remove_red_eye</mat-icon>
-                    <span>{{ "View detail" | localize }}</span>
-                  </a>
-                  <a *ngIf="permission.isGranted(EDIT_ROLE)" style="text-decoration: none; color:#000000DE;"
-                    mat-menu-item [routerLink]="['edit/', role.id]" [name]="'editBtn-'+role.id">
-                    <mat-icon>edit</mat-icon>
-                    <span>{{ "Edit" | localize }}</span>
-                  </a>
-                  <button *ngIf="permission.isGranted(DELETE_ROLE)" mat-menu-item (click)="delete(role)" [name]="'deleteBtn-'+role.id">
-                    <mat-icon>delete</mat-icon>
-                    <span>{{ "Delete" | localize }}</span>
+        <div style="width: 100%; overflow-x: auto;">
+          <table class="table table-hover table-striped" [busy]="isTableLoading">
+            <thead>
+              <tr>
+                <th>{{ "RoleName" | localize }}</th>
+                <th>{{ "DisplayName" | localize }}</th>
+                <th>{{ "Actions" | localize }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="
+                  let role of (roles
+                    | paginate
+                      : {
+                          id: 'server',
+                          itemsPerPage: pageSize,
+                          currentPage: pageNumber,
+                          totalItems: totalItems
+                        })
+                ">
+                <td>{{ role.name }}</td>
+                <td>{{ role.displayName }}</td>
+                <td>
+                  <button
+                    *ngIf="permission.isGranted(VIEW_DETAIL_ROLE) || permission.isGranted(EDIT_ROLE) || permission.isGranted(DELETE_ROLE)"
+                    class="action-button" mat-icon-button [matMenuTriggerFor]="actionsMenu" [name]="'actionMenuBtn-'+role.id">
+                    <mat-icon>menu</mat-icon>
                   </button>
-                </mat-menu>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <mat-menu #actionsMenu="matMenu">
+                    <a *ngIf="permission.isGranted(VIEW_DETAIL_ROLE)" style="text-decoration: none; color:#000000DE;"
+                      mat-menu-item [routerLink]="['view-detail/', role.id]" [name]="'viewDetailBtn-'+role.id">
+                      <mat-icon>remove_red_eye</mat-icon>
+                      <span>{{ "View detail" | localize }}</span>
+                    </a>
+                    <a *ngIf="permission.isGranted(EDIT_ROLE)" style="text-decoration: none; color:#000000DE;"
+                      mat-menu-item [routerLink]="['edit/', role.id]" [name]="'editBtn-'+role.id">
+                      <mat-icon>edit</mat-icon>
+                      <span>{{ "Edit" | localize }}</span>
+                    </a>
+                    <button *ngIf="permission.isGranted(DELETE_ROLE)" mat-menu-item (click)="delete(role)" [name]="'deleteBtn-'+role.id">
+                      <mat-icon>delete</mat-icon>
+                      <span>{{ "Delete" | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <div class="abp-pagination-controls-wrapper">
           <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"
             (pageChange)="getDataPage($event)" id="server">

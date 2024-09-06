@@ -4,3 +4,41 @@
   padding: 0.2rem;
   border: 1px solid #ddd;
 }
+
+.action-capability {
+  flex-wrap: nowrap;
+}
+
+@media screen and (max-width: 600px) {
+  .icon-close-capability {
+    line-height: 1.4;
+  }
+
+  ::ng-deep .edit-form .mat-form-field-wrapper {
+    padding-bottom: 0;
+  }
+
+  .mat-typography {
+    max-height: 60vh;
+  }
+}
+
+.input-field {
+  display: none !important;
+}
+
+@media screen and (max-width: 390px) {
+  .cancel-btn {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .text-editor-field {
+    display: none;
+  }
+
+  .input-field {
+    display: block !important;
+  }
+}

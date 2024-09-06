@@ -176,7 +176,6 @@ export class ProjectManagerComponent extends AppComponentBase implements OnInit 
   showProjectDetailDialog(project): void {
     // let item = project.
     let dialogRef = this._dialog.open(ProjectDetailComponent, {
-      minWidth: '450px',
       width: '800px',
       data: project
     })
