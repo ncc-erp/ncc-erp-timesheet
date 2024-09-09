@@ -112,6 +112,10 @@
     .manager-employee {
         padding: 15px;
     }
+
+    .project_sort span {
+        padding-right: 10px;
+    }
 }
 
 @media screen and (min-width: 768px) {

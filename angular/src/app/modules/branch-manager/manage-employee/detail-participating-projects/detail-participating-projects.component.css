@@ -8,6 +8,10 @@
     padding: 0 24px 10px;
 }
 
+.mat-button-mobile {
+    display: none;
+}
+
 @media screen and (max-width: 600px) {
     .detailParticipatingProject .row div{
         flex-wrap: wrap;
@@ -15,7 +19,30 @@
         padding-right: 15px;
     }
 
-    .detail-participating-projects {
-        padding: 15px;
+    ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .detail-participating-projects {
+        padding: 0px 15px;
+    }
+
+    .mat-button-desktop {
+        display: none;
+    }
+
+    .mat-button-mobile {
+        display: inline-flex;
+        height: fit-content;
+    }
+
+    .select-week-container {
+        display: flex;
+        align-items: baseline;
+    }
+
+    .select-week-container .select-week {
+        max-width: 55%;
+        margin-left: auto;
+    }
+
+    .table-responsive {
+        overflow-y: auto;
     }
 }
