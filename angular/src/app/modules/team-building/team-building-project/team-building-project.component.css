@@ -20,6 +20,7 @@
         flex-direction: column;
         gap: 12px;
        }
+       
 
        .card .header .header-dropdown {
         top: 15px;
@@ -31,4 +32,13 @@
         top: 0px;
         margin: 0px;
        }
+
+       .row {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .padding-0 {
+        padding: 0 !important;
+      }
   }
