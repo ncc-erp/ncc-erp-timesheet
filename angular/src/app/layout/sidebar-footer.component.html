@@ -1,8 +1,13 @@
-﻿<div class="legal">
-    <div class="copyright">
-        &copy; {{currentYear}} <a href="javascript:void(0);">Timesheet</a>.
+﻿<div class="sidebar-footer">
+    <div class="logout">
+        <a (click)="logout()"><i class="material-icons">input</i>{{ 'Logout' | localize }}</a>
     </div>
-    <div class="version">
-        <b>Version </b> {{versionText}}
+    <div class="legal">
+        <div class="copyright">
+            &copy; {{currentYear}} <a href="javascript:void(0);">Timesheet</a>.
+        </div>
+        <div class="version">
+            <b>Version </b> {{versionText}}
+        </div>
     </div>
 </div>

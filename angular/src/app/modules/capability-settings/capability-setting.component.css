@@ -55,3 +55,11 @@ thead th:nth-child(2) {
   right: 5px;
   list-style: none;
 }
+
+
+@media screen and (max-width: 600px) {
+  .clearfix {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}

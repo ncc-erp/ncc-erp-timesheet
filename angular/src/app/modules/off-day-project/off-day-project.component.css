@@ -280,4 +280,43 @@ pre {
     }
 }
 
+.icon-refresh-mobile {
+    display: none;
+}
+
+@media screen and (max-width: 600px) {
+    .icon-refresh-mobile {
+        display: block;
+        position: absolute;
+        right: 0;
+        top: 20px;
+    }
+
+    .icon-refresh-desktop {
+        display: none;
+    }
+
+    .item2 {
+        order: 1;
+        margin-top: 10px;
+        width: 100% !important;
+    }
+
+    .header .title { 
+        margin-bottom: 25px;
+    }
+
+    .filter-work-calendar {
+        display: flex;
+        gap: 10px;
+    }
+
+    .option-off-type {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+}
+
+
+
 

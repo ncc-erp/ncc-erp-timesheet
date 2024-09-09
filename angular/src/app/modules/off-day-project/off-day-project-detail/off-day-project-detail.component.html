@@ -15,7 +15,7 @@
           <th>STT</th>
           <th style="width: 190px; min-width: 190px;">User</th>
           <!-- <th>Sex</th> -->
-          <th style="width: 300px; min-width: 300px;">Project/PM</th>
+          <th style="width: 300px; min-width: 300px;" class="col-projectPm">Project/PM</th>
           <th style="min-width: 120px;">Request</th>
           <th style="width: 136px; min-width: 136px;">Off Type</th>
           <th style="width: 160px; min-width: 160px;">Note</th>
@@ -69,7 +69,7 @@
               </div>
             </div>
           </td>
-          <td style="text-align: left; padding: 8px 20px;">
+          <td style="text-align: left; padding: 8px 20px;" class="col-projectPm">
             <div *ngFor="let projectItem of item.projectInfos">
               <div class="row" style="margin-top: 5px;">
                 <b>{{projectItem.projectName}}</b>

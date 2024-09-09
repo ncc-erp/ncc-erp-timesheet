@@ -9643,8 +9643,7 @@ section.content {
 }
 
 .sidebar .legal {
-  position: absolute;
-  bottom: 0;
+
   width: 100%;
   border-top: 1px solid #eee;
   padding: 15px;
@@ -9856,7 +9855,7 @@ section.content {
   padding: 10px 13px;
 }
 
-.sidebar .menu .list a:hover, .sidebar .menu .list a:active, .sidebar .menu .list a:focus {
+.sidebar .menu .list a:hover, .sidebar .menu .list a:active, .sidebar .menu .list a:focus, .sidebar-footer .logout a:active, .sidebar-footer .logout a:focus {
   text-decoration: none !important;
 }
 
@@ -10609,12 +10608,21 @@ thead{
 
 .mat-select-panel {
   min-width: 100% !important;
-  position: absolute;
-  top: 35px !important;
 }
 
 .cdk-overlay-pane {
   transform: none !important;
+}
+
+.sidebar-footer {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.logout {
+  display: none;
 }
 
 @media screen and (max-width: 600px) {
@@ -10635,5 +10643,37 @@ thead{
       max-width: 100% !important;
       min-width: 80vw;
     }
+  }
+
+  .user-info .user-helper-dropdown { 
+    display: none !important;
+  }
+
+  .logout {
+    display: block;
+    width: 100%;
+    border-top: 1px solid #eee;
+    padding: 15px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .logout>a {
+    padding: 7px 0;
+    color: #666;
+    transition: all 0.5s;
+    font-size: 14px;
+    line-height: 25px;
+  }
+
+  .logout>a i.material-icons {
+    float: left;
+    margin-right: 7px;
+    margin-top: 2px;
+    font-size: 20px;
+  }
+
+  .sidebar .menu {
+    height: 66.5vh;
   }
 }

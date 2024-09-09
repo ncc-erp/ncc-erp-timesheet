@@ -126,6 +126,16 @@ td.note {
   width: 40px;
 }
 
+@media screen and (max-width: 600px){
+  .pin {
+    margin-right: 22px;
+  }
+
+  .col-projectPm {
+    display: none;
+  }
+}
+
 @media screen and (max-width: 767px){
   .table-responsive {
       overflow-y: auto;

@@ -6,7 +6,7 @@
         <p class="m-0">({{data.user.emailAddress}})</p>
       </div>
       <div class="col-md-8 col-sm-7 col-xs-12">
-        <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+        <mat-button-toggle-group name="fontStyle" aria-label="Font Style" class="mat-button-desktop">
           <mat-button-toggle (click)="nextOrPre('pre')">
             <mat-icon>chevron_left</mat-icon>
           </mat-button-toggle>
@@ -19,8 +19,17 @@
         </span>
       </div>
 
-      <div class="col-md-4 col-sm-3 col-xs-12" style="margin-top: 13px">
-        <mat-form-field appearance="outline" style="margin-top: -20px;">
+      <div class="col-md-4 col-sm-3 col-xs-12 select-week-container" style="margin-top: 13px">
+        <mat-button-toggle-group name="fontStyle" aria-label="Font Style" class="mat-button-mobile">
+          <mat-button-toggle (click)="nextOrPre('pre')">
+            <mat-icon>chevron_left</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle (click)="nextOrPre('next')">
+            <mat-icon>chevron_right</mat-icon>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <mat-form-field appearance="outline" style="margin-top: -20px;" class="select-week">
           <mat-select [formControl]="viewChange" (selectionChange)="changeView(true)">
             <mat-option *ngFor="let item of APP_CONFIG.TypeViewHomePage" [value]="item.value">
               <p *ngIf="item.value != APP_CONSTANT.TypeViewHomePage.CustomTime">

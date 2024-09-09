@@ -2,7 +2,7 @@
   <div class="body">
     <div class="row">
       <div class="col-md-7 col-sm-7 col-xs-12">
-        <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+        <mat-button-toggle-group name="fontStyle" aria-label="Font Style" class="button-toggle-project-desktop">
           <mat-button-toggle (click)="nextOrPre('pre')">
             <mat-icon>chevron_left</mat-icon>
           </mat-button-toggle>
@@ -17,6 +17,15 @@
 
       <div class="actions">
         <div class="col-md-3 col-sm-3 col-xs-12 select-week-container">
+          <mat-button-toggle-group name="fontStyle" aria-label="Font Style" class="button-toggle-project-mobile">
+            <mat-button-toggle (click)="nextOrPre('pre')">
+              <mat-icon>chevron_left</mat-icon>
+            </mat-button-toggle>
+            <mat-button-toggle (click)="nextOrPre('next')">
+              <mat-icon>chevron_right</mat-icon>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+          
           <mat-form-field appearance="outline" class="select-week">
             <mat-select
               [formControl]="viewChange"
