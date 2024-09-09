@@ -48,3 +48,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+@media screen and (max-width: 600px) {
+    .mb-15-mb {
+        margin-bottom: 15px;
+    }
+}

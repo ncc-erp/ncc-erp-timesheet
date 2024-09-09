@@ -226,7 +226,7 @@ export class ReviewComponent extends AppComponentBase implements OnInit {
         reviewId: reviewId
       },
       width: '100vw',
-      minHeight:'90vh',
+      maxHeight:'90vh',
       maxWidth: '90vw',
       panelClass: 'full-width-dialog'
     },

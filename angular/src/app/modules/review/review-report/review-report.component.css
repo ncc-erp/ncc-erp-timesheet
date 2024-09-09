@@ -129,6 +129,7 @@ table thead th {
 @media screen and (max-width: 600px) {
   .report {
     display: block;
+    padding: 0 !important;
   }
   .report .item.dropdown{
     width: 100%
@@ -139,9 +140,17 @@ table thead th {
   .report .report-left{
     width: 100%;
     display: block;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
   .report .report-right {
     display: block;
-    width: 100%
+    width: 100%;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .review {
+    touch-action: inherit !important;
   }
 }
