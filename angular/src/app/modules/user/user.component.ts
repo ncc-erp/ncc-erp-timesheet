@@ -425,7 +425,9 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
 
   showResetPasswordUserDialog(user?: number): void {
     this.dialog.open(ResetPasswordDialogComponent, {
-      data: user
+      data: user,
+      width: '400px',
+      maxWidth: 'calc(100% - 12px)'
     });
   }
 

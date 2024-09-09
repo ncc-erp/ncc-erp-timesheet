@@ -208,7 +208,7 @@ file-upload>span {
     
     .user-wrapper .user-header-wrapper {
         display: flex;
-        flex-direction: column-reverse;
+        flex-direction: column;
         padding: 10px;
         gap: 10px;
         width: 100%;
