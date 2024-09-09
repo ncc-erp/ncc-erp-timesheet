@@ -55,6 +55,7 @@
 @media screen and (max-width: 600px) {
   .title {
     font-size: 17px;
+    margin-right: 20px;
    }
 }
 

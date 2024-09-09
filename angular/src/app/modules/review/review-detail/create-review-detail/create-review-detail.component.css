@@ -60,4 +60,7 @@
  .col-form-label {
     width: 100%;
  }
+ .title {
+    margin-right: 5px;
+ }
 }

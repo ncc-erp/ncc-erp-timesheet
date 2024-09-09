@@ -4,9 +4,9 @@
 ::ng-deep .mat-form-field-wrapper {
     padding-bottom: 0px;
 }
-::ng-deep .swal-modal{
+/* ::ng-deep .swal-modal{
     width: 550px;
-}
+} */
 body{
     padding-bottom: 0px !important;
 }
@@ -79,6 +79,7 @@ body{
     display: flex;
     padding: 3px 0px;
     flex-wrap: wrap;
+    width: 100%;
 }
 .square{
     border-radius: 0px !important;
@@ -321,10 +322,15 @@ th>span {
 }
 @media only screen and (max-width: 600px) {
     .box-menu-right{
-        display: block;
+        /* display: block; */
+        padding: 0 15px;
     }
     .new-level{
         margin: 20px 0px;
+    }
+
+    .pd-0-mb {
+        padding: 0;
     }
 }
 
