@@ -374,7 +374,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     } as InputToUpdateSettingDto;
     const dg = this.dialog.open(UpdatePunishMoneyComponent, {
       data: input,
-      width: "500px"
+      width: '400px',
+      maxWidth: 'calc(100% - 12px)'
     });
     dg.afterClosed().subscribe((rs) => {
       if (rs) {

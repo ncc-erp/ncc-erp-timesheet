@@ -47,3 +47,24 @@
 table th{
     text-align: center;
 }
+
+@media screen and (max-width: 600px) {
+    .header-dropdown {
+        top: 15px;
+    }
+    .wrap-form-field{
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    ::ng-deep .mat-form-field-appearance-outline .mat-form-field-wrapper {
+        margin: 0;
+    }
+    ::ng-deep .mat-form-field-wrapper {
+        padding-bottom: 0;
+    }
+    .search-by {
+        margin-bottom: 0 !important;
+        width: 100%;
+    }
+}

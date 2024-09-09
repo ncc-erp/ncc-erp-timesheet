@@ -58,6 +58,10 @@
         align-items: center;
         justify-content: center;
     }
+    
+    .white-color {
+        color: #3f51b5;
+    }
 
     ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .dialog-edit-task{
         width: 90% !important;
@@ -70,7 +74,7 @@
     }
     .task-wrapper .task-header-menu{
         display: flex;
-        flex-direction: column-reverse;
+        flex-direction: column;
         align-items: start;
         gap: 10px;
     }
