@@ -49,8 +49,8 @@ table th{
 }
 
 @media screen and (max-width: 600px) {
-    .header-dropdown {
-        top: 15px;
+    .card .header .header-dropdown {
+        top: 15px !important;
     }
     .wrap-form-field{
         display: flex;
