@@ -533,7 +533,8 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
   showDialog(customer: CustomerDto): void {
     let item = { id: customer.id, name: customer.name, address: customer.address } as CustomerDto;
     const showCreateOrEditProjectDialog = this._dialog.open(CreateEditCustomerComponent, {
-      data: item
+      data: item,
+      panelClass: 'create-project-dialog'
     });
 
     showCreateOrEditProjectDialog.afterClosed().subscribe(result => {

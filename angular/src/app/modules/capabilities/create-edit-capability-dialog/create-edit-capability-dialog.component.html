@@ -40,14 +40,10 @@
       <label class="col-md-2 col-xs-3 col-form-label p-l-0 p-r-0" for="connectionString">
         {{ "Note:" | localize }}
       </label>
-      <div class="edit-form row-item-rest text-editor-field col-xl-10 col-lg-10 col-md-10 col-xs-9 p-l-0 p-r-0" appearance="outline">
+      <div class="edit-form row-item-rest col-xl-10 col-lg-10 col-md-10 col-xs-9 p-l-0 p-r-0" appearance="outline">
         <angular-editor id="note" [config]="config" [placeholder]="'Enter text here...'"
           [(ngModel)]="capabilityDto.note" [ngModelOptions]="{ standalone: true }"></angular-editor>
       </div>
-      <mat-form-field class="edit-form row-item-rest input-field  col-xl-10 col-lg-10 col-md-10 col-xs-9 p-l-0 p-r-0"
-        appearance="outline">
-        <input [(ngModel)]="capabilityDto.note" matInput cdkFocusInitial name="capabilityNote" />
-      </mat-form-field>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end" class="action-capability">

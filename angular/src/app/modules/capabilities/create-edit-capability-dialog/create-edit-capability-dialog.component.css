@@ -12,6 +12,7 @@
 @media screen and (max-width: 600px) {
   .icon-close-capability {
     line-height: 1.4;
+    right: -10px !important;
   }
 
   ::ng-deep .edit-form .mat-form-field-wrapper {
@@ -23,22 +24,8 @@
   }
 }
 
-.input-field {
-  display: none !important;
-}
-
 @media screen and (max-width: 390px) {
   .cancel-btn {
     display: none;
-  }
-}
-
-@media screen and (max-width: 600px) {
-  .text-editor-field {
-    display: none;
-  }
-
-  .input-field {
-    display: block !important;
   }
 }

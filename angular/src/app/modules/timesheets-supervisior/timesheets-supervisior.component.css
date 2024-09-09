@@ -81,9 +81,22 @@
   :host ::ng-deep .body date-selector mat-form-field {
     padding-top: 15px;
   }
+}
 
+@media screen and (max-width: 600px) {
   .pType {
-    display: inline-block;
-    margin: 5px;
+    line-height: 20px;
+  }
+
+  .list-timesheet {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-radius: 10px;
+    margin-right: 5px;
+  }
+
+  .card .table-timesheet {
+    padding: 0;
   }
 }

@@ -22,14 +22,7 @@
 
 @media screen and (max-width: 767px) {
     :host ::ng-deep .main-content .body .mat-button-toggle-label-content {
-      line-height: 40px;
-      padding: 0 6px;
-      width: 40px;
-    }
-
-    .select-week {
-        margin-top: 0;
-        width: fit-content;
+      line-height: 42px;
     }
 
     .actions {
@@ -37,14 +30,7 @@
         padding: 0;
         padding-top: 10px;
         width: 100%;
-    }
-
-    .select-week-container {
-        margin-top: 0;
-    }
-
-    .btn-export { 
-        margin-top: 10px;
+        flex-wrap: wrap;
     }
 
     .table-responsive {
@@ -52,12 +38,42 @@
     }
 }
 
-@media screen and (max-width: 425px) {
-    .actions {
-        flex-wrap: wrap;
+.button-toggle-project-mobile {
+    display: none;
+}
+
+@media screen and (max-width: 600px) {
+    .button-toggle-project-desktop {
+        display: none;
     }
 
-    .btn-export { 
-        margin-top: 0px;
+    .button-toggle-project-mobile {
+        display: inline-flex;
+        height: fit-content;
+    }
+
+    .select-week-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-top: 0;
+    }
+
+    .select-week-container .select-week {
+        width: 50%;
+        margin-top: 0;
+    }
+
+    .title-date {
+        margin-left: 0 !important;
+    }
+
+    .btn-export {
+        margin-top: 0;
+    }
+
+    .tab-content {
+        padding-right: 0px !important;
+        margin-right: -8px;
     }
 }

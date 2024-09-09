@@ -238,4 +238,9 @@ mat-button-toggle-group{
         border-radius: 10px;
         float: right;
       }
+
+    .my-timesheets {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
 }

@@ -53,7 +53,7 @@
             <tbody>
               <tr *ngFor="let project of customer.items; index as i" (contextmenu)="onContextMenu($event, menuTrigger)">
                 <td class="td--project">
-                  <div>
+                  <div class="td--project-info">
                     <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
                     [style.top]="contextMenuPosition.y" #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionsMenu">
                     </div>

@@ -127,6 +127,7 @@
 
   .header .title {
     margin-top: 0;
+    margin-bottom: 15px;
   }
 
   :host ::ng-deep .body date-selector mat-form-field {
