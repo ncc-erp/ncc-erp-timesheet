@@ -40,4 +40,8 @@
     gap: 10px !important;
     justify-content: end;
   }
+
+  :ng-deep .mat-dialog-container {
+    padding: 16px !important;
+  }
 }

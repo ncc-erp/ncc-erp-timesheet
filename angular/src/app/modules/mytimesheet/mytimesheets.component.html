@@ -268,61 +268,67 @@
         >
           <div class="btn-wapper-date">
             <div class="">
-              <mat-button-toggle
-                class="hidden-date-input"
-                matTooltip="Today"
-                matTooltipPosition="above"
-              >
-                <mat-form-field>
-                  <input
-                    matInput
-                    [readonly]="true"
-                    [matDatepicker]="picker1"
-                    [(ngModel)]="displayDay"
-                    (dateInput)="customDate()"
-                  />
-                </mat-form-field>
-              </mat-button-toggle>
-              <mat-datepicker-toggle
-                name="datePicker"
-                matSuffix
-                [for]="picker1"
-              ></mat-datepicker-toggle>
-              <mat-datepicker #picker1></mat-datepicker>
+              <div class="d-flex">
+                <mat-button-toggle
+                  class="hidden-date-input"
+                  matTooltip="Today"
+                  matTooltipPosition="above"
+                >
+                  <mat-form-field>
+                    <input
+                      matInput
+                      [readonly]="true"
+                      [matDatepicker]="picker1"
+                      [(ngModel)]="displayDay"
+                      (dateInput)="customDate()"
+                    />
+                  </mat-form-field>
+                </mat-button-toggle>
+                <mat-datepicker-toggle
+                  name="datePicker"
+                  matSuffix
+                  [for]="picker1"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #picker1></mat-datepicker>
+                <div *ngIf="typeOfView == APP_CONSTANT.MyTimesheetView.Day" class="date-view">
+                  {{ displayDay | date : "EEE, dd MMM, yyyy" }}
+                </div>
+                <div *ngIf="typeOfView == APP_CONSTANT.MyTimesheetView.Week" class="date-view">
+                  {{ startDate | date: 'dd/MM/yyyy' }} - {{ endDate | date: 'dd/MM/yyyy' }}
+                </div>
+              </div>
             </div>
-
-            <div class="date-view">
-              {{ displayDay | date : "EEE, dd MMM, yyyy" }}
-            </div>
-            <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
-              <mat-button-toggle
-                class="previousBtn"
-                name="previousBtn"
-                matTooltip="Previous"
-                matTooltipPosition="above"
-                (click)="back()"
+            <div class="wrap-btn-toggle">
+              <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+                <mat-button-toggle
+                  class="previousBtn"
+                  name="previousBtn"
+                  matTooltip="Previous"
+                  matTooltipPosition="above"
+                  (click)="back()"
+                >
+                  <mat-icon>keyboard_arrow_left</mat-icon>
+                </mat-button-toggle>
+  
+                <mat-button-toggle
+                  class="nextBtn"
+                  name="nextBtn"
+                  matTooltip="Next"
+                  matTooltipPosition="above"
+                  (click)="next()"
+                >
+                  <mat-icon>keyboard_arrow_right</mat-icon>
+                </mat-button-toggle>
+              </mat-button-toggle-group>
+              <button
+                name="currentDayBtn"
+                mat-flat-button
+                (click)="today()"
+                class="btn bg-green btn-today"
               >
-                <mat-icon>keyboard_arrow_left</mat-icon>
-              </mat-button-toggle>
-
-              <mat-button-toggle
-                class="nextBtn"
-                name="nextBtn"
-                matTooltip="Next"
-                matTooltipPosition="above"
-                (click)="next()"
-              >
-                <mat-icon>keyboard_arrow_right</mat-icon>
-              </mat-button-toggle>
-            </mat-button-toggle-group>
-            <button
-              name="currentDayBtn"
-              mat-flat-button
-              (click)="today()"
-              class="btn bg-green btn-today"
-            >
-              Today
-            </button>
+                Today
+              </button>
+            </div>          
           </div>
         </div>
       </div>

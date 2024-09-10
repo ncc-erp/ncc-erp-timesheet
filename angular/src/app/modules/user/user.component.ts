@@ -412,6 +412,7 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
   editRole(editUser?): void {
     let userId = editUser ? editUser.id : null;
     let diaLogRef = this.dialog.open(RoleUserComponent, {
+      width: 'calc(100% - 16px)',
       disableClose: true,
       data: { userId: userId}
     });

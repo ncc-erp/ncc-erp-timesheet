@@ -434,7 +434,7 @@ tbody td:nth-child(4) {
 
   #table-detail {
     td:nth-child(2) {
-      left: 0;
+      left: 0 !important;
     }
   
     thead th {
@@ -442,7 +442,7 @@ tbody td:nth-child(4) {
   
       &.sticky-left {
         &:nth-child(2) {
-          left: 0;
+          left: 0 !important;
         }
       }
     }
@@ -450,6 +450,14 @@ tbody td:nth-child(4) {
 
   .sticky-left {
     position: relative;
-    left: 0;
+    left: 0 !important;
+  }
+
+  .btn-view-action {
+    display: none !important;
+  }
+
+  .left, .right {
+    display: none;
   }
 }

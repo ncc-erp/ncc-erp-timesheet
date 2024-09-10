@@ -9618,7 +9618,7 @@ section.content {
 
 .overlay-open .sidebar {
   margin-left: 0;
-  z-index: 99999999;
+  z-index: 9999 !important
 }
 
 .sidebar {
@@ -9639,7 +9639,7 @@ section.content {
   -moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   -ms-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-  z-index: 11 !important;
+  z-index: 11 
 }
 
 .sidebar .legal {
@@ -10626,6 +10626,13 @@ thead{
 }
 
 @media screen and (max-width: 600px) {
+  .right-sidebar {
+    top: 118px;
+    height: calc(100vh - 118px);
+  }
+  .demo-choose-skin {
+    height: 80vh !important;
+  }
   section.content {
     margin-left: 0 !important;
     margin-right: 0 !important;
@@ -10674,6 +10681,6 @@ thead{
   }
 
   .sidebar .menu {
-    height: 66.5vh;
+    height: 100%
   }
 }

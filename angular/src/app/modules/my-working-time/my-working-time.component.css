@@ -75,10 +75,4 @@ table th, td {
     .my-working-time-wrapper .my-working-time-table tbody tr td {
         white-space: nowrap;
     }
-
-    ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .custom-dialog-container{
-        width: 90% !important;
-        max-height: 90% !important;
-        height: 84% !important;
-    }
 }

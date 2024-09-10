@@ -77,14 +77,14 @@
               <tr>
                 <th *ngFor="let thead of theadTable; let i = index" [ngStyle]="styleThead(thead)" class="ng-star-inserted">
                   <div class="sortHeader">
-                      <div class="col-md-8 rsp-th-name text-left">
-                          {{thead.name}}
-                      </div>
-                      <div class="col-md-4 rsp-th-sort text-right" *ngIf="i != 0 && thead.sortName" style="vertical-align: middle;">
-                          <ng-container>
-                              <app-sortable #sortThead [data]="{sort: thead.sortName, typeSort: thead.defaultSort}" (sortEvent)="sortTable($event)"></app-sortable>
-                          </ng-container>
-                      </div>
+                    <span class="col-md-8 rsp-th-name text-left">
+                      {{thead.name}}
+                    </span>
+                    <span class="col-md-4 rsp-th-sort text-right" *ngIf="i != 0 && thead.sortName">
+                      <ng-container>
+                          <app-sortable #sortThead [data]="{sort: thead.sortName, typeSort: thead.defaultSort}" (sortEvent)="sortTable($event)"></app-sortable>
+                      </ng-container>
+                    </span>
                   </div>
                 </th>
               </tr>

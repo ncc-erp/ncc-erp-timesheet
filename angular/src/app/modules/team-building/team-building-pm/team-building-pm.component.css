@@ -19,7 +19,20 @@
 .table-td {
     min-width: 100px
 }
+
+.btn-new-request{
+    display: flex;
+    justify-content: center;
+}
 @media screen and (max-width: 600px) {
+    ::ng-deep .mat-form-field-wrapper {
+        padding-bottom: 0;
+    }
+
+    .margin-b-0 {
+        margin-bottom: 0 !important;
+    }
+
     .table-responsive > .table > thead > tr > th,
     .table-responsive > .table > tbody > tr > th,
     .table-responsive > .table > tfoot > tr > th,
@@ -28,4 +41,36 @@
     .table-responsive > .table > tfoot > tr > td {
       white-space: pre-wrap;
     }
+    .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .card .body {
+        padding: 12px;
+    }
+    .padding-item {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .table-responsive {
+        border: none;
+    }
+
+    :host .table-responsive>.table-bordered {
+        border: 1px solid #eee;
+    }
+
+    .btn-new-request{
+        justify-content: flex-start;
+    }
+
+    .search-wrapper {
+        margin-bottom: 0 !important;
+    }
+
+    :host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-wrapper {
+        margin: 0 !important;
+    }
+
 }

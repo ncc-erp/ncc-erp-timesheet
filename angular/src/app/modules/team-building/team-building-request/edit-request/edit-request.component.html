@@ -67,14 +67,14 @@
         </div>
       </div>
       <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
-        <button name="addUserBtn" style="margin-top: 11px;" *ngIf="!isShowBtnAddUser" mat-raised-button color="primary" type="button" (click)="toggleShowAddUserDialog(); $event.stopPropagation()">
+        <button class="add-user-btn" name="addUserBtn" style="margin-top: 11px;" *ngIf="!isShowBtnAddUser" mat-raised-button color="primary" type="button" (click)="toggleShowAddUserDialog(); $event.stopPropagation()">
           Add users
         </button>
       </div>
   </div>
   <div *ngIf="requestInfo.length == 0">No data</div>
   <div *ngIf="requestInfo.length > 0">
-    <div class="table-responsive d-flex">
+    <div class="table-responsive d-flex table-request">
       <div class="fixedHeader" style="max-height: calc(100vh - 450px);" [ngClass]="isShowBtnAddUser ? 'table-team-selected' : 'full-width'">
         <table class="table table-striped table-hover" [busy]="isLoading">
           <thead>
@@ -93,25 +93,25 @@
                 <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'employeeFullName'"></i>
                 <i *ngIf="currentSortColumn !== 'employeeFullName'" class="fas fa-sort"></i>
               </th>
-              <th (click)="handleSortByColumn('branch')" style="cursor: pointer">
+              <th (click)="handleSortByColumn('branch')" class="min-w-100" style="cursor: pointer">
                 <span>Branch </span>
                 <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'branch'"></i>
                 <i *ngIf="currentSortColumn !== 'branch'" class="fas fa-sort"></i>
               </th>
-              <th (click)="handleSortByColumn('project')" style="cursor: pointer">
+              <th (click)="handleSortByColumn('project')" class="min-w-100" style="cursor: pointer">
                 <span>Project </span>
                 <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'project'"></i>
                 <i *ngIf="currentSortColumn !== 'project'" class="fas fa-sort"></i>
               </th>
               <th>Money</th>
               <th>Requester</th>
-              <th (click)="handleSortByColumn('month')" style="cursor: pointer">
+              <th (click)="handleSortByColumn('month')" class="min-w-100" style="cursor: pointer">
                 <span>Month </span>
                 <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'month'"></i>
                 <i *ngIf="currentSortColumn !== 'month'" class="fas fa-sort"></i>
               </th>
               <th>Year</th>
-              <th (click)="handleSortByColumn('status')" style="cursor: pointer">
+              <th (click)="handleSortByColumn('status')" class="min-w-100" style="cursor: pointer">
                 <span>Status </span>
                 <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'status'"></i>
                 <i *ngIf="currentSortColumn !== 'status'" class="fas fa-sort"></i>

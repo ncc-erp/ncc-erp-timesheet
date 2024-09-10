@@ -38,9 +38,109 @@ table tr td {
   color: inherit;
 }
 
+.note-field, .invoice-field {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0px;
+  padding-left: 16px;
+}
+
+.btn-add-invoice {
+  display: flex;
+  justify-content: center;
+}
+
+.table-invoice {
+  min-height: 400px;
+  max-height: 400px;
+}
+
 
 @media screen and (max-width: 600px) { 
+
+  :host ::ng-deep .mat-tab-body-content {
+    overflow: hidden;
+  }
+
+  :host ::ng-deep .mat-tab-body {
+    top: 16px;
+  }
+
   .table-invoice {
-    min-width: 400px;
+    min-height: 485px;
+    max-height: 485px;
+  }
+
+  .wrapper-field {
+    gap: 6px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0 !important;
+  }
+
+  .note-field,
+  .invoice-field,  
+  .invoice-title {
+    padding-right: 0;
+    flex-direction: column;
+    text-align: start;
+    align-items: flex-start;
+  }
+  
+  :host ::ng-deep .mat-form-field {
+    padding-right: 0;
+    width: 100%;
+  }
+
+  .note-title {
+    white-space: nowrap;
+    padding-right: 0;
+  }
+
+  .btn-add-user {
+    margin-bottom: 12px;
+  }
+
+  .wrap-btn-action{
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 16px;
+  }
+  
+  .min-width-100 {
+    min-width: 100px;
+  }
+
+  .invoice-tab-title {
+    margin-left: 8px;
+  }
+
+  .btn-add-invoice {
+    display: flex;
+    justify-content: start;
+    margin-left: 8px;
+    margin-bottom: 20px;
+  }
+
+  .table-request {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+
+  .table-team-selected {
+    width: 100% !important;
+  }
+  
+  .table-team-select {
+    width: 100% !important;
+  }
+
+  ::ng-deep .mat-expansion-panel-body {
+    padding: 16px !important;
+  }
+
+  ::ng-deep .mat-expansion-panel {
+    display: unset !important;
   }
 }
