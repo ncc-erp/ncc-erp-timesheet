@@ -67,8 +67,8 @@ table tr td {
   }
 
   .table-invoice {
-    min-height: 475px;
-    max-height: 475px;
+    min-height: 485px;
+    max-height: 485px;
   }
 
   .wrapper-field {
@@ -121,5 +121,22 @@ table tr td {
     justify-content: start;
     margin-left: 8px;
     margin-bottom: 20px;
+  }
+
+  .table-request {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+
+  .table-team-selected {
+    width: 100% !important;
+  }
+  
+  .table-team-select {
+    width: 100% !important;
+  }
+
+  ::ng-deep .mat-expansion-panel-body {
+    padding: 16px !important;
   }
 }

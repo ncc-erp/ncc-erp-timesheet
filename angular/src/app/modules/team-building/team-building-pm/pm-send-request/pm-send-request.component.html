@@ -118,7 +118,7 @@
         </div>
       </div>
         <div *ngIf="requestInfo.length > 0">
-          <div class="table-responsive d-flex">
+          <div class="table-responsive d-flex table-request">
             <div class="fixedHeader" style="max-height: calc(100vh - 450px);" [ngClass]="isShowBtnAddUser ? 'table-team-selected' : 'full-width'">
               <table class="table table-striped table-hover" [busy]="isLoading">
                 <thead>
@@ -228,7 +228,7 @@
       </mat-tab>
       <mat-tab label="Invoice">
         <div class="table-responsive">
-            <div class="fixedHeader table-invoice table-invoice">
+            <div class="fixedHeader table-invoice">
               <ng-container *ngFor="let invoiceForm of invoiceFormGroup.get('invoiceFormArray')['controls'];  let i = index"
                   [formGroup]="invoiceForm">
                 <h4 class="invoice-tab-title">Invoice Request #{{i + 1}}</h4>

@@ -19,6 +19,11 @@
 .table-td {
     min-width: 100px
 }
+
+.btn-new-request{
+    display: flex;
+    justify-content: center;
+}
 @media screen and (max-width: 600px) {
     .table-responsive > .table > thead > tr > th,
     .table-responsive > .table > tbody > tr > th,
@@ -46,6 +51,18 @@
 
     :host .table-responsive>.table-bordered {
         border: 1px solid #eee;
+    }
+
+    .btn-new-request{
+        justify-content: flex-start;
+    }
+
+    .search-wrapper {
+        margin-bottom: 0 !important;
+    }
+
+    :host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-wrapper {
+        margin: 0 !important;
     }
 
 }
