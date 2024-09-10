@@ -1,7 +1,7 @@
 <form autocomplete="off" #createUserModal="ngForm" [busy]="isSaving">
   <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>{{l(title)}}
   </h1>
-  <mat-dialog-content style="width:700px;height:auto">
+  <mat-dialog-content style="height:auto">
     <div class="row row-fluid">
       <ng-template ngFor let-role [ngForOf]="roles">
         <div class="col-sm-12 col-md-12">

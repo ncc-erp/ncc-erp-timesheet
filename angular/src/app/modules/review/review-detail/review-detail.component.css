@@ -1,6 +1,6 @@
-::ng-deep .container-fluid {
+/* ::ng-deep .container-fluid {
     padding-left: 0px !important;
-}
+} */
 ::ng-deep .mat-form-field-wrapper {
     padding-bottom: 0px;
 }

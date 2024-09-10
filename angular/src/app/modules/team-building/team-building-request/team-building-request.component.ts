@@ -157,7 +157,6 @@ export class TeamBuildingRequestComponent
     const dialogRef = this._dialog.open(DisburseRequestComponent, {
       disableClose: true,
       width: "1200px",
-      height: "80vh",
       maxWidth: 'calc(100% - 12px)',
       data: {
         id: item.id,

@@ -9618,7 +9618,7 @@ section.content {
 
 .overlay-open .sidebar {
   margin-left: 0;
-  z-index: 9999999999999 !important;
+  z-index: 9999 !important
 }
 
 .sidebar {

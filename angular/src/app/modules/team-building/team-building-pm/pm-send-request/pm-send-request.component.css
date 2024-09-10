@@ -139,4 +139,8 @@ table tr td {
   ::ng-deep .mat-expansion-panel-body {
     padding: 16px !important;
   }
+
+  ::ng-deep .mat-expansion-panel {
+    display: unset !important;
+  }
 }
