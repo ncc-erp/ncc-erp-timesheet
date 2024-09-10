@@ -9,6 +9,7 @@ import { CreateEditRequestComponentBase } from '../../CreateEditRequest/CreateEd
 @Component({
   selector: 'app-edit-request',
   templateUrl: './edit-request.component.html',
+  styleUrls: ['./edit-request.component.css']
 })
 export class EditRequestComponent extends CreateEditRequestComponentBase implements OnInit {
    public selectedProjectId: number = null;

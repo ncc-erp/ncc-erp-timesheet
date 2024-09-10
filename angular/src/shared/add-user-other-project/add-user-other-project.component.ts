@@ -7,7 +7,8 @@ import * as _ from 'lodash';
 
 @Component({
   selector: 'app-add-user-other-project',
-  templateUrl: './add-user-other-project.component.html'
+  templateUrl: './add-user-other-project.component.html',
+  styleUrls: ['./add-user-other-project.component.css']
 })
 export class AddUserOtherProjectComponent implements OnInit {
 

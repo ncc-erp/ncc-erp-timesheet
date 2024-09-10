@@ -48,13 +48,13 @@
           <table class="table table-bordered">
             <thead>
               <tr>
-                <th style="max-width: 10px" class="text-center">No</th>
+                <th class="text-center">No</th>
                 <th class="text-center">PM</th>
                 <th class="text-center">Project Name</th>
-                <th style="max-width: 70px" class="text-center">
+                <th class="text-center">
                   Project Type
                 </th>
-                <th style="max-width: 50px" class="text-center">
+                <th class="text-center">
                   IsAllowTeamBuilding
                   <mat-checkbox name="selectAllBtn" (change)="setAll($event.checked)" matTooltip="Select/DeSelect all"
                     [checked]="allComplete" [indeterminate]="someComplete()" [color]="'primary'"

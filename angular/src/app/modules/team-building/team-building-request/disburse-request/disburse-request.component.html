@@ -4,7 +4,7 @@
   cursor: pointer;">close</mat-icon>
   <hr>
   <div>
-    <div style="display: flex; justify-content: space-between;">
+    <div class="header-title">
       <p mat-dialog-title>Requester : {{this.disburseTeambuildingRequestInfoDto.requesterName}}</p>
       <p mat-dialog-title>Total Request Money : {{this.disburseTeambuildingRequestInfoDto.requestMoney | number : "1.0" : "en-US"}} VNĐ</p>
     </div>
@@ -85,7 +85,7 @@
         </mat-card>
         <br>
 
-        <div class="align-item format-col form-group row required">
+        <div class="align-item format-col form-group row required wrapper-disburse-money">
           <label class="col-md-4 col-form-label" for="connectionString">
             {{ "Disburse money:" | localize }}
           </label>

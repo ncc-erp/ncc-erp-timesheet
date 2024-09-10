@@ -8,18 +8,18 @@
     <mat-tab-group>
       <mat-tab label="General">
         <div class="row">
-          <div class="format-col form-group row">
-            <div class="required col-md-6" style="display: flex; align-items: center; margin-bottom: 0px; padding-left: 16px;">
-              <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-form-label" style="width: 77px">
+          <div class="format-col form-group row wrapper-field">
+            <div class="required col-md-6 note-field">
+              <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-form-label note-title">
               {{ "Note:" | localize }}
             </label>
-            <mat-form-field class="edit-form row-item-rest select-form col-xl-9 col-lg-9 col-md-9 col-xs-9"
+            <mat-form-field class="edit-form row-item-rest select-form col-xl-9 col-lg-9 col-md-9 col-xs-9 padding-item"
               appearance="outline">
               <input type="text" matInput="matInput" formControlName="note" name="noteInput" />
             </mat-form-field>
           </div>
-          <div class="col-md-6" style="display: flex; align-items: center; margin-bottom: 0px; padding-left: 16px;">
-            <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-form-label" style="width: 142px;">
+          <div class="col-md-6 invoice-field">
+            <label class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-form-label invoice-title">
               {{ "Invoice amount:" | localize }}
             </label>
             <mat-form-field class="col-xl-9 col-lg-9 col-md-9 col-xs-9" appearance="outline" style="padding-right: 0px;">
@@ -94,7 +94,7 @@
             </div>
           </div>
           <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
-            <button style="margin-top: 11px;" mat-raised-button color="primary" type="button" name="addUserButton" (click)="toggleShowAddUserDialog(); $event.stopPropagation()">
+            <button class="btn-add-user" style="margin-top: 11px;" mat-raised-button color="primary" type="button" name="addUserButton" (click)="toggleShowAddUserDialog(); $event.stopPropagation()">
               Add users
             </button>
           </div>
@@ -137,25 +137,25 @@
                       <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'employeeFullName'"></i>
                       <i *ngIf="currentSortColumn !== 'employeeFullName'" class="fas fa-sort"></i>
                     </th>
-                    <th (click)="handleSortByColumn('branch')" style="cursor: pointer" name="branchSortButton">
+                    <th (click)="handleSortByColumn('branch')" class="min-width-100" style="cursor: pointer" name="branchSortButton">
                       <span>Branch </span>
                       <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'branch'"></i>
                       <i *ngIf="currentSortColumn !== 'branch'" class="fas fa-sort"></i>
                     </th>
-                    <th (click)="handleSortByColumn('project')" style="cursor: pointer" name="projectSortButton">
+                    <th (click)="handleSortByColumn('project')" class="min-width-100" style="cursor: pointer" name="projectSortButton">
                       <span>Project </span>
                       <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'project'"></i>
                       <i *ngIf="currentSortColumn !== 'project'" class="fas fa-sort"></i>
                     </th>
                     <th>Money</th>
                     <th>Requester</th>
-                    <th (click)="handleSortByColumn('month')" style="cursor: pointer" name="monthSortButton">
+                    <th (click)="handleSortByColumn('month')" class="min-width-100" style="cursor: pointer" name="monthSortButton">
                       <span>Month </span>
                       <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'month'"></i>
                       <i *ngIf="currentSortColumn !== 'month'" class="fas fa-sort"></i>
                     </th>
                     <th>Year</th>
-                    <th (click)="handleSortByColumn('status')" style="cursor: pointer" name="statusSortButton">
+                    <th (click)="handleSortByColumn('status')" class="min-width-100" style="cursor: pointer" name="statusSortButton">
                       <span>Status </span>
                       <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'status'"></i>
                       <i *ngIf="currentSortColumn !== 'status'" class="fas fa-sort"></i>
@@ -228,10 +228,10 @@
       </mat-tab>
       <mat-tab label="Invoice">
         <div class="table-responsive">
-            <div class="fixedHeader table-invoice" style="min-height: 400px; max-height: 400px;">
+            <div class="fixedHeader table-invoice table-invoice">
               <ng-container *ngFor="let invoiceForm of invoiceFormGroup.get('invoiceFormArray')['controls'];  let i = index"
                   [formGroup]="invoiceForm">
-                <h4>Invoice Request #{{i + 1}}</h4>
+                <h4 class="invoice-tab-title">Invoice Request #{{i + 1}}</h4>
                 <table id="request-teambuilding" class="table table-striped table-hover" [busy]="isLoading">
                   <thead>
                     <tr>
@@ -296,7 +296,7 @@
                   </tbody>
                 </table>
               </ng-container>
-              <div style="display: flex; justify-content: center;">
+              <div class="btn-add-invoice">
                 <button name="AddInvoiceFormButton" mat-mini-fab color="primary" matTooltip="Add new Invoice Request" (click)="addNewInvoiceForm()">
                   <mat-icon>
                     add
@@ -313,7 +313,7 @@
       <span>Remain money: <b>{{ lastRemainMoney | currency : "VND" : "" }}</b></span>
       <span style="margin-left: 100px;">Total money: <b>{{ getTotalMoney() + lastRemainMoney | currency : "VND" : ""}}</b></span>
     </div>
-    <div>
+    <div class="wrap-btn-action">
       <button class="btn btn-default" mat-raised-button mat-dialog-close name="cancelButton">
         {{ l("Cancel") }}
       </button>

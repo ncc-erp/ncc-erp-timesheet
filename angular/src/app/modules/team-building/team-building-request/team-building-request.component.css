@@ -45,4 +45,21 @@
     .table-responsive > .table > thead > tr > th {
       white-space: pre-wrap;
     }
+
+    ::ng-deep .mat-form-field-wrapper {
+      padding-bottom: 0;
+    }
+
+    .row {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .padding-0 {
+      padding: 0;
+    }
+
+    ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .custom-pm-edit-dialog {
+      margin: auto !important;
+    }
 }

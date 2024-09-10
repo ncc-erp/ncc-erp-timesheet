@@ -1,0 +1,30 @@
+@media screen and (max-width: 600px) {
+  ::ng-deep .mat-dialog-container {
+    padding: 16px !important;
+  }
+
+  ::ng-deep .mat-expansion-panel-body {
+    padding: 16px !important;
+  }
+  .add-user-btn {
+    margin: 12px 0;
+  }
+
+  .min-w-100 {
+    min-width: 100px;
+  }
+
+  .table-request {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+
+  .table-team-selected {
+    width: 100% !important;
+  }
+  
+  .table-team-select {
+    width: 100% !important;
+  }
+
+}

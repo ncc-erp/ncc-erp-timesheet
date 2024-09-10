@@ -28,4 +28,24 @@
     .table-responsive > .table > tfoot > tr > td {
       white-space: pre-wrap;
     }
+    .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .card .body {
+        padding: 12px;
+    }
+    .padding-item {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .table-responsive {
+        border: none;
+    }
+
+    :host .table-responsive>.table-bordered {
+        border: 1px solid #eee;
+    }
+
 }
