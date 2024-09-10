@@ -128,7 +128,7 @@
               </app-multiple-select>
             </div>
               <div class="row1">
-              <div class="col-md-2 row1-child">
+              <div class="col-md-2 row1-child item-first">
                 <mat-form-field appearance="outline">
                   <mat-label>Status</mat-label>
                   <mat-select
@@ -145,7 +145,7 @@
                   </mat-select>
                 </mat-form-field>
               </div>
-              <div class="col-md-2 row1-child">
+              <div class="col-md-2 row1-child item-second">
                 <mat-form-field appearance="outline">
                   <mat-label>Request Type</mat-label>
                   <mat-select
@@ -163,14 +163,14 @@
                   </mat-select>
                 </mat-form-field>
               </div>
-              <div class="col-md-2 row1-child" style="margin-top: 7px;" *ngIf="absentDayType !== 0" >
+              <div class="col-md-2 row1-child item-filter" style="margin-top: 7px;" *ngIf="absentDayType !== 0" >
                 <button name="filterBtn" mat-flat-button (click)="onFilter()" color="primary">
                   Filter
                 </button>
               </div>
             </div>
             <div class="row1">
-              <div class="col-md-2 row1-child" *ngIf="absentDayType === 0">
+              <div class="col-md-2 row1-child item-first" *ngIf="absentDayType === 0">
                 <mat-form-field appearance="outline">
                   <mat-label>Type Of Request Type</mat-label>
                   <mat-select
@@ -188,7 +188,7 @@
                   </mat-select>
                 </mat-form-field>
               </div>
-              <div class="col-md-2 row1-child" *ngIf="absentDayType === 0">
+              <div class="col-md-2 row1-child item-second" *ngIf="absentDayType === 0">
                 <mat-form-field appearance="outline">
                   <mat-label>Off Type</mat-label>
                   <mat-select
@@ -207,7 +207,7 @@
                   </mat-select>
                 </mat-form-field>
               </div>
-              <div class="col-md-2 row1-child" style="margin-top: 7px;" *ngIf="absentDayType === 0">
+              <div class="col-md-2 row1-child item-filter" style="margin-top: 7px;" *ngIf="absentDayType === 0">
                 <button name="filterBtn" mat-flat-button (click)="onFilter()" color="primary">
                   Filter
                 </button>

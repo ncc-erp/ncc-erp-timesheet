@@ -315,6 +315,25 @@ pre {
         padding-left: 8px;
         padding-right: 8px;
     }
+
+    .item-first {
+        width: 27%;
+    }
+
+    .item-second {
+        width: 68%;
+    }
+
+    .item-filter {
+        width: 100%;
+        text-align: left;
+        margin-top: 0 !important;
+    }
+
+    .row1 {
+        flex-wrap: wrap;
+        row-gap: 0;
+    }
 }
 
 

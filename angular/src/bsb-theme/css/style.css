@@ -10676,4 +10676,8 @@ thead{
   .sidebar .menu {
     height: 66.5vh;
   }
+
+  .overflow-hidden {
+    overflow: hidden;
+  }
 }
