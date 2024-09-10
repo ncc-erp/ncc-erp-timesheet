@@ -211,6 +211,10 @@ $name-col-width: 0;
 }
 
 @media screen and (max-width: 600px) {
+    
+    .card {
+      margin-bottom: 12px;
+    }
 
     .main-content {
       min-width: auto;
@@ -349,4 +353,5 @@ $name-col-width: 0;
       gap: 4px;
       margin: 0
     }
+
 }

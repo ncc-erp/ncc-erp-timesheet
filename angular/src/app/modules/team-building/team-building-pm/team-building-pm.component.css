@@ -25,6 +25,14 @@
     justify-content: center;
 }
 @media screen and (max-width: 600px) {
+    ::ng-deep .mat-form-field-wrapper {
+        padding-bottom: 0;
+    }
+
+    .margin-b-0 {
+        margin-bottom: 0 !important;
+    }
+
     .table-responsive > .table > thead > tr > th,
     .table-responsive > .table > tbody > tr > th,
     .table-responsive > .table > tfoot > tr > th,

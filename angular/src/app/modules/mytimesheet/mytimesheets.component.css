@@ -43,6 +43,15 @@ mat-button-toggle-group{
       mat-tab-header {
         display: none !important;
       }
+
+      ::ng-deep .mat-tab-group {
+        gap: 12px;
+      }
+
+      .wrap-btn-toggle {
+        display: flex;
+        gap: 12px;
+      }
   
       .hidden-padding {
         padding-left: 0;
@@ -86,7 +95,7 @@ mat-button-toggle-group{
       .btn-wapper-date {
         padding: 0;
         display: flex;
-        gap: 4px;
+        gap: 12px;
         margin-bottom: 0;
       }
   
@@ -180,6 +189,7 @@ mat-button-toggle-group{
       .btn-edit {
         width: 30px;
         height: 30px;
+        line-height: 30px;
       }
   
       .btn-action-wrapper {
