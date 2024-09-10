@@ -145,6 +145,11 @@
   .table-timesheet {
     padding: 0;
   }
+
+  .text-note {
+    min-width: 100px;
+    display: inline-block;
+  }
 }
 
 @media screen and (max-width: 767px) {

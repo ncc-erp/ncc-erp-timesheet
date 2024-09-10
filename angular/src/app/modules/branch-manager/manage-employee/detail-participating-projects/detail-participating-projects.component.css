@@ -45,4 +45,12 @@
     .table-responsive {
         overflow-y: auto;
     }
+
+    .title-date {
+        margin-left: 0 !important;
+    }
+
+    :host ::ng-deep .mat-button-mobile .mat-button-toggle-label-content {
+        line-height: 43px;
+    }
 }
