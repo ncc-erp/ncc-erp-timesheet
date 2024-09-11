@@ -10623,6 +10623,7 @@ thead{
 
 .logout {
   display: none;
+  height: 0;
 }
 
 @media screen and (max-width: 600px) {
@@ -10663,6 +10664,7 @@ thead{
     padding: 15px;
     overflow: hidden;
     background: #fff;
+    height: auto;
   }
 
   .logout>a {
