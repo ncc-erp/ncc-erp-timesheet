@@ -164,6 +164,14 @@ table thead th {
   }
 }
 
+@media screen and (max-width: 600px) { 
+  .item-tardiness {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+}
+
 @media screen and (max-width: 767px) {
   .info-user {
     padding: 5px 15px 10px 15px;

@@ -122,7 +122,7 @@
                   Project code is required!
                 </div>
               </div>
-              <mat-form-field class="inline" appearance="outline">
+              <mat-form-field class="inline field-project-code" appearance="outline">
                 <input
                   matInput
                   name="code"
@@ -179,7 +179,7 @@
                 </mat-form-field>
               </div>
               <span> to </span>
-              <div class="inline">
+              <div class="inline end-date">
                 <mat-form-field appearance="outline">
                   <input
                     matInput
@@ -218,7 +218,7 @@
               <label>All User</label>
             </div>
             <div class="col-md-10 col-sm-10 col-lg-10 col-xl-10 note-user">
-              <mat-checkbox name="isAll" [(ngModel)]="project.isAllUserBelongTo"
+              <mat-checkbox name="isAll" class="checkbox-user" [(ngModel)]="project.isAllUserBelongTo"
                 >Auto add user as a member of this project when creating new
                 user</mat-checkbox
               >

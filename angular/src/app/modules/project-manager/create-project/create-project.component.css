@@ -276,12 +276,23 @@ th {
     :host ::ng-deep .start-date mat-form-field .mat-form-field-wrapper {
         padding-bottom: 0 !important;
     }
-}
 
-@media screen and (max-width: 628px) {
+    .start-date, .end-date, .field-project-code {
+        display: block !important;
+    }
+
+    .btn-new-client {
+        padding-bottom: 20px;
+    }
+
     :host ::ng-deep .note-user .mat-checkbox-layout {
         display: block;
         white-space: break-spaces;
+        margin-bottom: 15px;
+    }
+
+    :host ::ng-deep .checkbox-user .mat-checkbox-inner-container {
+        margin-bottom: 4px;
     }
 }
 

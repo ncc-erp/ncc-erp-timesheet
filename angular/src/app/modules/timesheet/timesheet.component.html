@@ -461,7 +461,7 @@
                                             </ng-template>
                                           <td><span [ngClass]="t.isTemp?'temp':'official'">{{t.workType}}</span></td>
                                           <td>
-                                            <span>
+                                            <span [ngClass]="{'text-note': t.mytimesheetNote?.length > 15}">
                                               <textarea matInput readonly>{{
                                                 t.mytimesheetNote
                                               }}</textarea>
