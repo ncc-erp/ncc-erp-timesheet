@@ -156,3 +156,9 @@
   text-overflow: ellipsis;
 }
 
+@media (max-width: 475px) {
+  .picklist-table {
+    width: 400px;
+  }
+}
+
