@@ -39,11 +39,17 @@
     .row-item-rest {
         width: 100%;
         margin-left: 0;
+        padding: 0;
     }
     .format-col {
         display: block;
+        margin: 0;
+        padding: 0;
     }
     .title {
         margin-right: 8px;
+     }
+     .col-form-label {
+        padding: 0;
      }
 }
