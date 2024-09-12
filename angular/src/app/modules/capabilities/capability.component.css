@@ -56,4 +56,12 @@ thead th {
   .action-capability {
     color: #3f51b5;
   }
+
+  .item-note {
+    width: 100px;
+  }
+
+  .col-apply_settings {
+    display: none;
+  }
 }
