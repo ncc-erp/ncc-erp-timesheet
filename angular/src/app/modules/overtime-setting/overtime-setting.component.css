@@ -2,6 +2,10 @@
     display: none
 }
 
+.pd-20 {
+    padding: 20px;
+}
+
 @media screen and (max-width: 768px) {
     .action-wrapper {
         display: flex;
@@ -10,6 +14,10 @@
 
     .full-view {
         display: none;
+    }
+
+    .mb-20 {
+        margin-bottom: 20px;
     }
 }
 

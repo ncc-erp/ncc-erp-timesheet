@@ -15,3 +15,11 @@
 .responsive {
     overflow-x: auto;
 }
+
+.p-20 {
+    padding: 20px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}

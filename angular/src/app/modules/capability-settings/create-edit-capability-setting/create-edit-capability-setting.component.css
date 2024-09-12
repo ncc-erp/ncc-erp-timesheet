@@ -156,6 +156,16 @@
   text-overflow: ellipsis;
 }
 
+.item-note {
+  white-space: pre-line;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  width: 100px;
+}
+.item-note:hover {
+  cursor: pointer;
+}
+
 @media (max-width: 475px) {
   .picklist-table {
     width: 400px;

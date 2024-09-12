@@ -57,6 +57,9 @@
     font-size: 17px;
     margin-right: 20px;
    }
+   .mat-dialog-content {
+    overflow: hidden;
+   }
 }
 
 

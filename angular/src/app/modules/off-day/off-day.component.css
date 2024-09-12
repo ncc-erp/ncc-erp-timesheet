@@ -66,6 +66,10 @@ pre {
     right: 0
 }
 
+.header-dropdown-mat-icon-button {
+    margin-top: 20px;
+}
+
 ::ng-deep li .mat-icon {
     margin-top: 15px !important;
 }
