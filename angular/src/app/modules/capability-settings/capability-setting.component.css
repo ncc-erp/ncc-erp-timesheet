@@ -57,6 +57,16 @@ thead th:nth-child(2) {
 }
 
 
+.item-note {
+  white-space: pre-line;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  width: 100px;
+}
+.item-note:hover {
+  cursor: pointer;
+}
+
 @media screen and (max-width: 600px) {
   .clearfix {
     padding-left: 15px;

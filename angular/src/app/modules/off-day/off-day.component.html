@@ -73,13 +73,13 @@
             name="menuBtn"
             mat-icon-button
             [matMenuTriggerFor]="headerMenu123"
-            class="header-dropdown-mat-icon-button refresh"
+            class="header-dropdown-mat-icon-button"
           >
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #headerMenu123="matMenu">
             <button name="refreshBtn" mat-menu-item (click)="ngOnInit()">
-              <mat-icon class="icon-refresh">refresh</mat-icon>
+              <mat-icon class="m-t-0">refresh</mat-icon>
               <span>{{ "Refresh" | localize }}</span>
             </button>
           </mat-menu>
