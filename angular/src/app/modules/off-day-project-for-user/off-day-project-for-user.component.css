@@ -187,7 +187,7 @@ flex-direction: column;
 }
 }
 
-::ng-deep .item .mat-form-field-appearance-outline .mat-form-field-wrapper {
+:host ::ng-deep .item .mat-form-field-appearance-outline .mat-form-field-wrapper {
 margin: 0;
 padding: 0;
 }

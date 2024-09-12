@@ -53,4 +53,8 @@
     :host ::ng-deep .mat-button-mobile .mat-button-toggle-label-content {
         line-height: 43px;
     }
+
+    .table-responsive {
+        height: 300px !important;
+    }
 }

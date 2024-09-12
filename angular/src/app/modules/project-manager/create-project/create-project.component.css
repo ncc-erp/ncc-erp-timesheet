@@ -297,6 +297,10 @@ th {
     :host ::ng-deep .checkbox-user .mat-checkbox-inner-container {
         margin-bottom: 4px;
     }
+
+    .mat-dialog-content {
+        max-height: 50vh;
+    }
 }
 
 @media screen and (max-width: 767px) {

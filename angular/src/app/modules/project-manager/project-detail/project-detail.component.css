@@ -76,4 +76,8 @@
         padding-right: 0px !important;
         margin-right: -8px;
     }
+
+    .table-responsive {
+        height: 275px !important;
+    }
 }

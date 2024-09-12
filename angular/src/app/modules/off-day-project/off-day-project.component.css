@@ -292,7 +292,7 @@ pre {
         top: 20px;
     }
 
-    .icon-refresh-desktop {
+    .icon-refresh-desktop, .avatar-user-request, .badge-time-request {
         display: none;
     }
 
@@ -333,6 +333,10 @@ pre {
     .row1 {
         flex-wrap: wrap;
         row-gap: 0;
+    }
+
+    .cal-cell-top {
+        min-width: 135px;
     }
 }
 
