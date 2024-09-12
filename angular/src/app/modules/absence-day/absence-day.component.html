@@ -146,7 +146,7 @@
 </div>
 <ng-template #customCellTemplate let-day="day" let-locale="locale">
   <div
-    class="cal-cell-top position-relative"
+    class="cal-cell-top position-relative cell"
     [attr.name]="'daySelectBtn-' + (day.date | date : 'dd-MM-yyyy')"
   >
     <div style="height: 100%" class="back-red" *ngIf="day.badgeTotal > 0">

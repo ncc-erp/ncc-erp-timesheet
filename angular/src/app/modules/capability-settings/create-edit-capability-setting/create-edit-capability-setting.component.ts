@@ -202,7 +202,7 @@ export class CreateEditCapabilitySettingComponent extends AppComponentBase imple
         },
         width: '800px',
         panelClass: '',
-        maxHeight: '90vh'
+        maxHeight: '80vh'
       }
     )
     cloneCapabilitySettingDialogComponent.afterClosed().subscribe(() => {
