@@ -334,6 +334,10 @@ pre {
         flex-wrap: wrap;
         row-gap: 0;
     }
+
+    .cal-cell-top {
+        min-width: 135px;
+    }
 }
 
 

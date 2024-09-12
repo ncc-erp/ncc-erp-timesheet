@@ -125,12 +125,6 @@ pre {
     display: table-caption;
 }
 
-@media only screen and (max-width: 600px) {
-    .cell {
-        min-width: 120px !important;
-    }
-}
-
 @media only screen and (max-width: 750px) {
     .group-filter{
         display: flex;

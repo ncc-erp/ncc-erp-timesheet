@@ -10653,7 +10653,7 @@ thead{
     }
   }
 
-  /* .user-info .user-helper-dropdown { 
+  .user-info .user-helper-dropdown { 
     display: none !important;
   }
 
@@ -10680,7 +10680,7 @@ thead{
     margin-right: 7px;
     margin-top: 2px;
     font-size: 20px;
-  } */
+  }
 
   .sidebar .menu {
     height: 100%
