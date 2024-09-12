@@ -259,6 +259,7 @@
               style="border-radius: 50%"
               [src]="getAvatar(item)"
               alt="avatar"
+              class="avatar-user-request"
             />
           </div>
           <div>
@@ -300,7 +301,7 @@
             >
 
             <span
-              class="mt-1"
+              class="mt-1 badge-time-request"
               [ngClass]="getAbsenceClasses(item.color.primary.split(' | ')[0])"
               >{{
                 getAbsenceText(

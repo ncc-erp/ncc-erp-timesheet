@@ -134,6 +134,10 @@ td.note {
   .col-projectPm {
     display: none;
   }
+
+  .note {
+    white-space: normal !important;
+  }
 }
 
 @media screen and (max-width: 767px){

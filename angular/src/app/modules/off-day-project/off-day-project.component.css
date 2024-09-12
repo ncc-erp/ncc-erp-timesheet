@@ -292,7 +292,7 @@ pre {
         top: 20px;
     }
 
-    .icon-refresh-desktop {
+    .icon-refresh-desktop, .avatar-user-request, .badge-time-request {
         display: none;
     }
 
