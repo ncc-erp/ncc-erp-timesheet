@@ -107,6 +107,12 @@
     .pin {
       margin-right: 22px;
     }
+    td.note {
+      text-align: justify;
+      white-space: pre-line !important;
+      word-break: break-word;
+      -webkit-box-orient: vertical;
+    }
   }
 
   @media screen and (max-width: 767px) {
