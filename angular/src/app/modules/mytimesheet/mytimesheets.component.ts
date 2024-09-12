@@ -320,6 +320,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
         a.isEditable = true;
         a.isEditing = true;
         a.isAddNew = true;
+        a.isExpanded = true;
         this.mapWeekByTask.push(a);
       }
     }

@@ -10628,12 +10628,28 @@ thead{
 
 @media screen and (max-width: 600px) {
   .right-sidebar {
-    top: 118px;
-    height: calc(100vh - 118px);
+    height: calc(100vh - 116px);
+    top: 116px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
+
+  .right-sidebar .nav-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 99;
+    background-color: white;
+  }
+
   .demo-choose-skin {
-    height: 80vh !important;
+    overflow: hidden !important;
   }
+
+  .sidebar .menu {
+    max-height: calc(100% - 215px);
+    overflow-y: auto;
+  }
+
   section.content {
     margin-left: 0 !important;
     margin-right: 0 !important;
@@ -10680,10 +10696,6 @@ thead{
     margin-right: 7px;
     margin-top: 2px;
     font-size: 20px;
-  }
-
-  .sidebar .menu {
-    height: 100%
   }
 
   .overflow-hidden {

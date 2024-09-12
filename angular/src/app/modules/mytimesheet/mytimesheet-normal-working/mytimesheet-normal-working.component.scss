@@ -202,7 +202,12 @@ $name-col-width: 0;
   margin-bottom: 0;
 }
 
-.view-mobile {
+.table-working {
+  position: relative;
+  padding: 20px;
+}
+
+.view-mobile, .refresh-btn-mobile {
   display: none;
 }
 
@@ -212,17 +217,25 @@ $name-col-width: 0;
 
 @media screen and (max-width: 600px) {
     
+  .header-filter .header .header-dropdown {
+    display: none;
+    padding: 0;
+    margin: 0;
+  }
+
     .card {
       margin-bottom: 12px;
     }
 
     .main-content {
+      display: flex;
       min-width: auto;
       flex-direction: column;
       padding: 12px;
+      gap: 12px;
     }
-
-    .view-mobile {
+    
+    .view-mobile, .refresh-btn-mobile {
       display: block;
     }
 
@@ -231,10 +244,10 @@ $name-col-width: 0;
     }
 
     .title-header {
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 19.36px;
-      color: black;
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      line-height: 19.36px !important;
+      color: black !important;
     }
 
     .header-normal-workingtime {
@@ -247,6 +260,9 @@ $name-col-width: 0;
       height: 280px;
       overflow-y: auto;
       border-radius: 4px;
+    }
+    .table-working {
+      padding: 0;      
     }
 
     .table-normal-working {
@@ -306,11 +322,12 @@ $name-col-width: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
     }
 
     .header-filter .header .filter-date {
-      flex-direction: column;
+      // flex-direction: column;
+      flex-wrap: wrap;
       gap: 12px;
 
       .item {

@@ -144,7 +144,7 @@
                 <!-- <td style="text-align: center;">
                   <span *ngIf="!item.statusPunish == 0">{{item.statusPunish | punishName}}</span>
                 </td> -->
-                <td class="text-center">
+                <td class="text-center" style="word-wrap: break-word; overflow: hidden; max-width: 300px;">
                   <span *ngIf="!item.isComplain">{{item.userNote}}</span>
                   <mat-form-field class="example-full-width mt-2 bg-white " appearance="outline"
                     *ngIf=" item.isComplain">
@@ -152,7 +152,7 @@
                     <textarea name="comment" style="color: black;" matInput #textArea1 [(ngModel)]="item.userNote"></textarea>
                   </mat-form-field>
                 </td>
-                <td class="text-center">
+                <td class="text-center" style="word-wrap: break-word; overflow: hidden; max-width: 300px;">
                   <p style="white-space: pre-line;">{{item.noteReply}}</p>
                 </td>
                 <td class="text-center">

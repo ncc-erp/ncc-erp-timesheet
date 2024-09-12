@@ -32,6 +32,10 @@
     margin: 0px !important;
 }
 
+.btn-new-client {
+    margin: 12px 0;
+}
+
 @media screen and (max-width: 600px) { 
 
     ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .customer-dialog-container{

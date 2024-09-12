@@ -85,19 +85,19 @@
         </mat-card>
         <br>
 
-        <div class="align-item format-col form-group row required wrapper-disburse-money">
-          <label class="col-md-4 col-form-label" for="connectionString">
-            {{ "Disburse money:" | localize }}
-          </label>
-          <div class="d-flex" style="flex-direction: column; width: 100%;">
-            <mat-form-field class="col-xl-8 col-lg-8 col-md-8 col-xs-8" appearance="outline">
-              <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ'}"
-              matInput="matInput" [(ngModel)]="disburseMoney" name="money" required/>
-            </mat-form-field>
-          <p style="float: right; margin-left: 15px;"><b>{{ "Suggest Remaining Money:" | localize }}</b> {{calculateTotalSuggestedRemainingMoney() | number : "1.0" : "en-US"}} VNĐ</p>
-          </div>
+      </mat-dialog-content>
+      <div class="align-item format-col form-group row required wrapper-disburse-money">
+        <label class="col-md-4 col-form-label" for="connectionString">
+          {{ "Disburse money:" | localize }}
+        </label>
+        <div class="d-flex" style="flex-direction: column; width: 100%;">
+          <mat-form-field class="col-xl-8 col-lg-8 col-md-8 col-xs-8" appearance="outline">
+            <input currencyMask [options]="{prefix: '', align: 'left', thousands: ',', precision: '0', suffix: ' VNĐ'}"
+            matInput="matInput" [(ngModel)]="disburseMoney" name="money" required/>
+          </mat-form-field>
+        <p style="float: right; margin-left: 15px;"><b>{{ "Suggest Remaining Money:" | localize }}</b> {{calculateTotalSuggestedRemainingMoney() | number : "1.0" : "en-US"}} VNĐ</p>
         </div>
-  </mat-dialog-content>
+      </div>
   <mat-dialog-actions align="end">
       <button name="cancelButton" class="btn btn-default" mat-raised-button mat-dialog-close (click)="close(0)">{{l('Cancel')}}</button>
       <button name="saveButton" mat-raised-button color="primary" (click)="onSaveAndClose()"  cdkFocusInitial>{{l('Save')}}</button>
