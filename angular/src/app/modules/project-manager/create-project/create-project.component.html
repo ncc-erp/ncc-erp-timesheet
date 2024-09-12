@@ -880,12 +880,25 @@
       <!-- Notification -->
       <mat-tab label="Notification">
         <div class="body table-responsive" style="margin-top: 18px; border: 0;">
-          <mat-form-field class="example-full-width">
+          <mat-radio-group [value]="project.notifyChannel">
+            <mat-radio-button [value]="APP_CONSTANT.NotifyChannel.KOMU" (click)="project.notifyChannel = APP_CONSTANT.NotifyChannel.KOMU">KOMU</mat-radio-button>
+            <mat-radio-button [value]="APP_CONSTANT.NotifyChannel.Mezon" (click)="project.notifyChannel = APP_CONSTANT.NotifyChannel.Mezon">Mezon</mat-radio-button>
+          </mat-radio-group>
+          <br />
+          <mat-form-field class="example-full-width" *ngIf="project.notifyChannel == APP_CONSTANT.NotifyChannel.KOMU">
             <input
               matInput
               placeholder="Komu Channel Id"
               name="channelId"
               [(ngModel)]="project.komuChannelId"
+            />
+          </mat-form-field>
+          <mat-form-field class="example-full-width" *ngIf="project.notifyChannel == APP_CONSTANT.NotifyChannel.Mezon">
+            <input
+              matInput
+              placeholder="Payload URL"
+              name="mezonUrl"
+              [(ngModel)]="project.mezonUrl"
             />
           </mat-form-field>
           <mat-checkbox

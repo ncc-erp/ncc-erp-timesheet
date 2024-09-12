@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Ncc.Configuration;
 using System.Net.Http.Headers;
+using System.Text;
 
 namespace Timesheet.Services.Mezon
 {
@@ -66,6 +67,38 @@ namespace Timesheet.Services.Mezon
 
             return default;
 
+        }
+        public void NotifyToChannel(string MezonUrl, string MezonMessage)
+        {
+            Post(MezonUrl, new { type = "TIMESHEET", message = new { t = MezonMessage } });
+        }
+        public void Post(string url, object input)
+        {
+            string strInput = JsonConvert.SerializeObject(input);
+            try
+            {
+                // Bypass the certificate
+                HttpClientHandler clientHandler = new HttpClientHandler();
+                clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+                //Gọi api bên Mezon
+                using (var client = new HttpClient(clientHandler))
+                {
+
+                    client.BaseAddress = new Uri(url);
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    logger.LogInformation($"Post: {url} input: {strInput}");
+
+                    var contentString = new StringContent(strInput, Encoding.UTF8, "application/json");
+
+                    var test = client.PostAsync(url, contentString).Result;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"MezonService Post: {url} input: {strInput} Error: {ex.Message}");
+            }
         }
     }
 }

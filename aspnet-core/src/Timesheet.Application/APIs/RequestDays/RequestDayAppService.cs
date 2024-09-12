@@ -33,6 +33,7 @@ using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Extension;
 using Timesheet.Services.Komu;
+using Timesheet.Services.Mezon;
 using Timesheet.Services.W2;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
@@ -48,16 +49,17 @@ namespace Timesheet.APIs.RequestDays
         public readonly IApproveRequestOffServices _approveRequestOffServices;
         private readonly IW2Service _w2Service;
         private readonly string TemplateFolder = Path.Combine("wwwroot", "template");
-
+        private readonly MezonService _mezonService;
         public RequestDayAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
             ITimekeepingServices timeKeepingService, IWorkScope workScope, IApproveRequestOffServices approveRequestOffServices,
-            IW2Service w2Service) : base(workScope)
+            IW2Service w2Service, MezonService mezonService) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _timeKeepingService = timeKeepingService;
             _komuService = komuService;
             _approveRequestOffServices = approveRequestOffServices;
             _w2Service = w2Service;
+            _mezonService = mezonService;
         }
 
         [HttpPost]
@@ -880,18 +882,26 @@ namespace Timesheet.APIs.RequestDays
             var alreadySentToPMIds = new HashSet<long>();
             foreach (var project in receivers)
             {
-                if (!project.IsNotifyKomu)
+                if (!project.IsNoticeKMRequestOffDate)
                 {
-                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNoticeKMRequestOffDate}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
-                    var komuMessage = $"PM {project.KomuPMsTag(alreadySentToPMIds)}: {requester.KomuAccountInfo} " +
+                    var Message = $"PM {project.KomuPMsTag(alreadySentToPMIds)}: {requester.KomuAccountInfo(project.notifyChannel)} " +
                         $"has sent a request **{input.GetRequestName(offTypeName)}** " +
                         $"for following dates:\n ```{input.ToKomuStringRequestDates()}```" +
                         $"Reason: ```{input.Reason}```";
 
-                    _komuService.NotifyToChannel(komuMessage, project.KomuChannelId);
+                    switch (project.notifyChannel)
+                    {
+                        case NotifyChannel.KOMU:
+                            _komuService.NotifyToChannel(Message, project.KomuChannelId);
+                            break;
+                        case NotifyChannel.Mezon:
+                            _mezonService.NotifyToChannel(project.mezonUrl, Message);
+                            break;
+                    }
                     processAlreadySentToPMs(alreadySentToPMIds, project.PMs);
                 }
             }
@@ -961,91 +971,63 @@ namespace Timesheet.APIs.RequestDays
 
         public async Task<List<ProjectPMDto>> getReceiverSendRequestList(long requesterId)
         {
-            var qrequesterInProjectIds = WorkScope.GetAll<ProjectUser>()
+            var queryPMs = WorkScope.GetAll<ProjectUser>().Include(s => s.User)
+            .Where(s => s.Project.Status == ProjectStatus.Active)
+            .Where(s => s.Type == ProjectUserType.PM)
+            .GroupBy(s => s.ProjectId)
+            .ToDictionary(g => g.Key, g => g.Select(s => new NotifyUserInfoDto
+            {
+                EmailAddress = s.User.EmailAddress,
+                FullName = s.User.FullName,
+                KomuUserId = s.User.KomuUserId,
+                UserId = s.UserId
+            }).ToList());
+
+            var result = await WorkScope.GetAll<ProjectUser>()
             .Where(s => s.UserId == requesterId)
             .Where(s => s.Project.Status == ProjectStatus.Active)
             .Where(s => s.Type != ProjectUserType.DeActive)
-            .Select(s => s.ProjectId)
-            .Distinct();
-
-            var queryPMs = WorkScope.GetAll<ProjectUser>()
-            .Where(s => s.Project.Status == ProjectStatus.Active)
-            .Where(s => s.Type == ProjectUserType.PM)
-            .Select(s => new
+            .Select(s => new ProjectPMDto
             {
-                s.User.KomuUserId,
-                s.User.FullName,
-                s.User.EmailAddress,
-                s.UserId,
-                s.ProjectId,
-                s.Project.KomuChannelId,
-                s.Project.IsNotifyToKomu,
-                s.Project.IsNoticeKMRequestOffDate,
-            });
-
-            var result = await (from projectId in qrequesterInProjectIds
-                                join pm in queryPMs on projectId equals pm.ProjectId
-                                select pm)
-                              .GroupBy(s => new { s.ProjectId, s.KomuChannelId, s.IsNoticeKMRequestOffDate })
-                              .Select(s => new ProjectPMDto
-                              {
-                                  ProjectId = s.Key.ProjectId,
-                                  KomuChannelId = s.Key.KomuChannelId,
-                                  IsNotifyKomu = s.Key.IsNoticeKMRequestOffDate,
-                                  IsNotifyEmail = false,
-                                  PMs = s.Select(x => new NotifyUserInfoDto
-                                  {
-                                      EmailAddress = x.EmailAddress,
-                                      FullName = x.FullName,
-                                      KomuUserId = x.KomuUserId,
-                                      UserId = x.UserId
-                                  }).ToList()
-                              }).ToListAsync();
+                ProjectId = s.ProjectId,
+                notifyChannel = s.Project.notifyChannel,
+                mezonUrl = s.Project.mezonUrl,
+                KomuChannelId = s.Project.KomuChannelId,
+                IsNoticeKMRequestOffDate = s.Project.IsNoticeKMRequestOffDate,
+                IsNotifyEmail = false,
+                PMs = queryPMs.ContainsKey(s.ProjectId) ? queryPMs[s.ProjectId] : new List<NotifyUserInfoDto>(),
+            }).ToListAsync();
             return result;
         }
 
         public async Task<List<ProjectPMDto>> getReceiverApproveRejectList(long requesterId)
         {
-            var qrequesterInProjectIds = WorkScope.GetAll<ProjectUser>()
+            var queryPMs = WorkScope.GetAll<ProjectUser>().Include(s => s.User)
+            .Where(s => s.Project.Status == ProjectStatus.Active)
+            .Where(s => s.Type == ProjectUserType.PM)
+            .GroupBy(s => s.ProjectId)
+            .ToDictionary(g => g.Key, g => g.Select(s => new NotifyUserInfoDto
+            {
+                EmailAddress = s.User.EmailAddress,
+                FullName = s.User.FullName,
+                KomuUserId = s.User.KomuUserId,
+                UserId = s.UserId
+            }).ToList());
+
+            var result = await WorkScope.GetAll<ProjectUser>()
             .Where(s => s.UserId == requesterId)
             .Where(s => s.Project.Status == ProjectStatus.Active)
             .Where(s => s.Type != ProjectUserType.DeActive)
-            .Select(s => s.ProjectId)
-            .Distinct();
-
-            var queryPMs = WorkScope.GetAll<ProjectUser>()
-            .Where(s => s.Project.Status == ProjectStatus.Active)
-            .Where(s => s.Type == ProjectUserType.PM)
-            .Select(s => new
+            .Select(s => new ProjectPMDto
             {
-                s.User.KomuUserId,
-                s.User.FullName,
-                s.User.EmailAddress,
-                s.UserId,
-                s.ProjectId,
-                s.Project.KomuChannelId,
-                s.Project.IsNotifyToKomu,
-                s.Project.IsNoticeKMApproveRequestOffDate,
-            });
-
-            var result = await (from projectId in qrequesterInProjectIds
-                                join pm in queryPMs on projectId equals pm.ProjectId
-                                select pm)
-                              .GroupBy(s => new { s.ProjectId, s.KomuChannelId, s.IsNoticeKMApproveRequestOffDate })
-                              .Select(s => new ProjectPMDto
-                              {
-                                  ProjectId = s.Key.ProjectId,
-                                  KomuChannelId = s.Key.KomuChannelId,
-                                  IsNotifyKomu = s.Key.IsNoticeKMApproveRequestOffDate,
-                                  IsNotifyEmail = false,
-                                  PMs = s.Select(x => new NotifyUserInfoDto
-                                  {
-                                      EmailAddress = x.EmailAddress,
-                                      FullName = x.FullName,
-                                      KomuUserId = x.KomuUserId,
-                                      UserId = x.UserId
-                                  }).ToList()
-                              }).ToListAsync();
+                ProjectId = s.ProjectId,
+                notifyChannel = s.Project.notifyChannel,
+                mezonUrl = s.Project.mezonUrl,
+                KomuChannelId = s.Project.KomuChannelId,
+                IsNoticeKMApproveRequestOffDate = s.Project.IsNoticeKMApproveRequestOffDate,
+                IsNotifyEmail = false,
+                PMs = queryPMs.ContainsKey(s.ProjectId) ? queryPMs[s.ProjectId] : new List<NotifyUserInfoDto>(),
+            }).ToListAsync();
             return result;
         }
 
@@ -1169,20 +1151,28 @@ namespace Timesheet.APIs.RequestDays
 
             foreach (var project in receivers)
             {
-                if (!project.IsNotifyKomu)
+                if (!project.IsNoticeKMRequestOffDate)
                 {
-                    Logger.Info($"notifyKomuWhenCancelMyRequest(): {project.ProjectId}: IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenCancelMyRequest(): {project.ProjectId}: IsNotifyKomu={project.IsNoticeKMRequestOffDate}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
                     var pmsTag = project.KomuPMsTag(alreadySentToPMIds);
                     pmsTag = string.IsNullOrEmpty(pmsTag) ? "" : $"PM {pmsTag}: ";
 
-                    var komuMessage = $"{pmsTag}{requester.KomuAccountInfo} " +
+                    var Message = $"{pmsTag}{requester.KomuAccountInfo(project.notifyChannel)} " +
                         $"has **cancelled** the request: **{CommonUtils.RequestTypeToString(requestDetail.Request.Type, offTypeName)}** " +
                         $"on {DateTimeUtils.ToString(requestDetail.DateAt)}";
 
-                    _komuService.NotifyToChannel(komuMessage, project.KomuChannelId);
+                    switch (project.notifyChannel)
+                    {
+                        case NotifyChannel.KOMU:
+                            _komuService.NotifyToChannel(Message, project.KomuChannelId);
+                            break;
+                        case NotifyChannel.Mezon:
+                            _mezonService.NotifyToChannel(project.mezonUrl, Message);
+                            break;
+                    }
                 }
                 processAlreadySentToPMs(alreadySentToPMIds, project.PMs);
             }
@@ -1309,20 +1299,28 @@ namespace Timesheet.APIs.RequestDays
             var alreadySentToPMIds = new HashSet<long>();
             foreach (var project in receivers)
             {
-                if (!project.IsNotifyKomu)
+                if (!project.IsNoticeKMApproveRequestOffDate)
                 {
-                    Logger.Info($"notifyKomuWhenApproveRequest() projectId={project.ProjectId}: IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenApproveRequest() projectId={project.ProjectId}: IsNotifyKomu={project.IsNoticeKMApproveRequestOffDate}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
                     var pmsTag = project.KomuPMsTag(alreadySentToPMIds);
                     pmsTag = string.IsNullOrEmpty(pmsTag) ? "" : $"PM {pmsTag}:";
 
-                    var komuMessage = $"{pmsTag} **{approver.FullName}** " +
-                        $"has **{(isApprove ? "approved" : "rejected")}** the request: {requester.KomuAccountInfo} " +
+                    var Message = $"{pmsTag} **{approver.FullName}** " +
+                        $"has **{(isApprove ? "approved" : "rejected")}** the request: {requester.KomuAccountInfo(project.notifyChannel)} " +
                         $"**{GetRequestName(request, requestDetail, offTypeName)}** {requestDetail.ToKomuString()}";
 
-                    _komuService.NotifyToChannel(komuMessage, project.KomuChannelId);
+                    switch (project.notifyChannel)
+                    {
+                        case NotifyChannel.KOMU:
+                            _komuService.NotifyToChannel(Message, project.KomuChannelId);
+                            break;
+                        case NotifyChannel.Mezon:
+                            _mezonService.NotifyToChannel(project.mezonUrl, Message);
+                            break;
+                    }
                     processAlreadySentToPMs(alreadySentToPMIds, project.PMs);
                 }
 

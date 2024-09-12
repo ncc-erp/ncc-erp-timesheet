@@ -232,4 +232,8 @@ export const APP_CONSTANT = {
     Expose: 1,
     Shadow: 2
   },
+  NotifyChannel: {
+    KOMU : 0,
+    Mezon : 1
+  }
 };

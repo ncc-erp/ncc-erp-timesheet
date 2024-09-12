@@ -24,6 +24,8 @@ namespace Timesheet.Timesheets.Projects.Dto
         public List<ProjectTaskDto> Tasks { get; set; }
         public List<ProjectUsersDto> Users { get; set; }
         public List<ProjectTargetUserDto> ProjectTargetUsers { get; set; }
+        public NotifyChannel notifyChannel { get; set; }
+        public string mezonUrl { get; set; }
         public string KomuChannelId { get; set; }
         public bool IsNotifyToKomu { get; set; }
         public bool IsNoticeKMSubmitTS { get; set; } = false;
