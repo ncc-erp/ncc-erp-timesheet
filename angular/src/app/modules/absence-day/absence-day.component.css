@@ -12,9 +12,22 @@ pre {
     justify-content: center;
     align-items: center;
 }
+
 .cal-month-view .cal-cell-top {
     max-width: 100px !important;
 }
+
+.cal-cell-container {
+    min-width: 214px !important;
+}
+
+.cal-month-view-container {
+    display: flex;
+    padding: 0 20px 20px;
+    overflow-x: scroll;
+    flex-grow: 1;
+}
+
 .flex-between {
     display: flex;
     justify-content: space-between;
