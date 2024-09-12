@@ -130,7 +130,7 @@
         top: 4px;
     }
 
-    .col-project {
+    .col-project, .col-created-at, .col-last-modified-at {
         display: none;
     }
 
