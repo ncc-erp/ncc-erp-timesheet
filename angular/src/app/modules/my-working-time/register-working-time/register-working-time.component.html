@@ -1,5 +1,5 @@
 <form class="example-form">
-  <h3 class="register-working-time-title">{{ title }}</h3>
+  <h4 class="register-working-time-title">{{ title }}</h4>
   <div class="register-working-time-content">
     <div>
       <div>
@@ -103,6 +103,7 @@
             #applyDate="ngModel"
             [matDatepicker]="picker"
             [readonly]="true"
+            (click)="picker.open()"
             required
           />
           <mat-datepicker-toggle

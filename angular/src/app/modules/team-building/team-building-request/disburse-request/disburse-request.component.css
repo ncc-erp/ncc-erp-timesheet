@@ -9,21 +9,22 @@
 }
 
 @media screen and (max-width: 600px) {
-  ::ng-deep .mat-dialog-container {
+  :host ::ng-deep .mat-dialog-container {
     padding: 16px;
-  }
-  ::ng-deep .mat-dialog-content {
-    padding: 0;
-    margin: 0;
-    max-height: 465px !important;
     overflow: hidden;
   }
-  ::ng-deep .mat-card {
+  :host ::ng-deep .mat-dialog-content {
+    padding: 0;
+    margin: 0;
+    max-height: 300px !important;
+    overflow: auto;
+  }
+  :host ::ng-deep .mat-card {
     box-shadow: none !important;
     padding: 0 !important;
     margin-top: 8px;
   }
-  ::ng-deep .mat-card-content {
+  :host ::ng-deep .mat-card-content {
     overflow: auto;
     max-height: 300px;
   }
@@ -41,6 +42,7 @@
     line-height: 24px;
   }
   .wrapper-disburse-money {
+    margin-top: 12px;
     flex-direction: column;
     align-items: flex-start;
   }

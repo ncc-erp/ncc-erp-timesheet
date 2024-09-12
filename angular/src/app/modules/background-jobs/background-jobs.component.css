@@ -48,10 +48,21 @@ table th{
     text-align: center;
 }
 
+.wrap-form-field {
+    margin-left: 0;
+    margin-right: 0;
+    padding-top: 20px;
+}
+
 @media screen and (max-width: 600px) {
     .card .header .header-dropdown {
         top: 15px !important;
     }
+
+    .card .body {
+        padding: 0;
+    }
+
     .wrap-form-field{
         display: flex;
         flex-direction: column;

@@ -17,25 +17,25 @@
           </li>
         </ul>
       </div>
-      <div class="body table-responsive">
-        <div class="row clearfix wrap-form-field">
-          <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 pull-left search-by">
-            <mat-form-field appearance="outline">
-              <mat-label>Search by job type, job agrs</mat-label>
-              <input matInput [(ngModel)]="searchText" placeholder="{{l('Search by job type, job agrs')}}" name="search"
-                (keyup.enter)="searchOrFilter()" type="text" maxlength="128">
-              <i class="icon-32 material-icons" matPrefix>search</i>
-            </mat-form-field>
-          </div>
-          <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 pull-left search-by">
-            <mat-form-field appearance="outline">
-              <mat-label>Search by id</mat-label>
-              <input matInput [(ngModel)]="searchById" placeholder="{{l('Search by id')}}" name="searchById"
-                (keyup.enter)="onSearchById()" type="text" maxlength="128">
-              <i class="icon-32 material-icons" matPrefix>search</i>
-            </mat-form-field>
-          </div>
+      <div class="row clearfix wrap-form-field">
+        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 pull-left search-by">
+          <mat-form-field appearance="outline">
+            <mat-label>Search by job type, job agrs</mat-label>
+            <input matInput [(ngModel)]="searchText" placeholder="{{l('Search by job type, job agrs')}}" name="search"
+              (keyup.enter)="searchOrFilter()" type="text" maxlength="128">
+            <i class="icon-32 material-icons" matPrefix>search</i>
+          </mat-form-field>
         </div>
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 pull-left search-by">
+          <mat-form-field appearance="outline">
+            <mat-label>Search by id</mat-label>
+            <input matInput [(ngModel)]="searchById" placeholder="{{l('Search by id')}}" name="searchById"
+              (keyup.enter)="onSearchById()" type="text" maxlength="128">
+            <i class="icon-32 material-icons" matPrefix>search</i>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="body table-responsive">
         <table class="table table-hover table-bordered table-striped" [busy]="isTableLoading">
           <thead class="bg-light">
             <tr>

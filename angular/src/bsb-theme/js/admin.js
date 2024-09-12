@@ -110,6 +110,9 @@
             Waves.init();
         },
         setMenuHeight: function (isFirstTime) {
+            let calcWidth = $(window).width() > 600;
+            // calc width for screen mobile
+            if (!calcWidth) return;
             if (typeof $.fn.slimScroll != 'undefined') {
                 var configs = $.AdminBSB.options.leftSideBar;
                 var height = ($(window).height() - ($('.legal').outerHeight() + $('.user-info').outerHeight() + $('.navbar').innerHeight()));

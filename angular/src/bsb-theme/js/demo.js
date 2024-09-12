@@ -11,6 +11,9 @@ $.AdminBSB.activateDemo = function () {
 
 //Skin tab content set height and show scroll
 function setSkinListHeightAndScroll() {
+    let calcWidth = $(window).width() > 600;
+    // calc width for screen mobile
+    if (!calcWidth) return;
     var height = $(window).height() - ($('.navbar').innerHeight() + $('.right-sidebar .nav-tabs').outerHeight());
     var $el = $('.demo-choose-skin');
 
@@ -29,6 +32,9 @@ function setSkinListHeightAndScroll() {
 
 //Setting tab content set height and show scroll
 function setSettingListHeightAndScroll() {
+    let calcWidth = $(window).width() > 600;
+    // calc width for screen mobile
+    if (!calcWidth) return;
     var height = $(window).height() - ($('.navbar').innerHeight() + $('.right-sidebar .nav-tabs').outerHeight());
     var $el = $('.right-sidebar .demo-settings');
 

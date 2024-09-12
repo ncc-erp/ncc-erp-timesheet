@@ -66,7 +66,7 @@ export class MyWorkingTimeComponent extends AppComponentBase implements OnInit {
     let item = {
       id: infor.id,
       reqestTime: moment().format('L') + " " + moment().format('LT'),
-      applyDate: infor.applyDate,
+      applyDate: infor.applyDate || new Date(),
       morningStartTime: infor.morningStartTime,
       morningEndTime: infor.morningEndTime,
       morningWorkingTime: infor.morningWorkingTime,

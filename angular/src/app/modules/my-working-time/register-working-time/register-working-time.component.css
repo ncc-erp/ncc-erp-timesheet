@@ -24,7 +24,7 @@
   .example-form {
     display: flex !important;
     flex-direction: column !important;
-    gap: 10px !important;
+    gap: 16px !important;
   }
   .register-working-time-title {
     margin: 0px !important;

@@ -4,7 +4,7 @@
   </h1>
   <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0; cursor: pointer">close</mat-icon>
   <hr />
-  <mat-dialog-content class="tab-modal" style="max-height: 100%;">
+  <mat-dialog-content class="tab-modal content-body">
     <mat-tab-group>
       <mat-tab label="General">
         <div class="row">
@@ -307,12 +307,12 @@
         </div>
       </mat-tab>
     </mat-tab-group>
-  </mat-dialog-content>
-  <mat-dialog-actions style="margin-top: 0px; display: flex; justify-content: space-between;">
-    <div>
+    <div style="margin-top: 12px">
       <span>Remain money: <b>{{ lastRemainMoney | currency : "VND" : "" }}</b></span>
       <span style="margin-left: 100px;">Total money: <b>{{ getTotalMoney() + lastRemainMoney | currency : "VND" : ""}}</b></span>
     </div>
+  </mat-dialog-content>
+  <mat-dialog-actions style="margin-top: 0px; display: flex; justify-content: space-between;">
     <div class="wrap-btn-action">
       <button class="btn btn-default" mat-raised-button mat-dialog-close name="cancelButton">
         {{ l("Cancel") }}
