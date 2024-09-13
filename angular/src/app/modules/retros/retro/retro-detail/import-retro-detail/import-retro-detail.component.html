@@ -2,8 +2,8 @@
     <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>
         Import user to retro
     </h1>
-    <mat-dialog-content class="mat-typography" style="width:450px; height: 140px;">
-      <div class="col-md-6">
+    <mat-dialog-content class="mat-typography" style="width: 400px; max-width: 80vw;">
+      <div class="col-md-6 padding-0">
             <mat-form-field appearance="outline">
               <mat-label>Project</mat-label>
               <mat-select (openedChange)="handleOpenSelectProject()" (selectionChange)="projectChange($event)" required>
@@ -27,7 +27,7 @@
               </mat-select>
             </mat-form-field>
           </div>
-            <div class="col-md-6">
+            <div class="col-md-6 pd-mb">
               <mat-form-field appearance="outline">
                 <mat-label>PM</mat-label>
                 <mat-select  (openedChange)="handleOpenSelectPm()" #select="matSelect" (selectionChange)="pmChange($event)" [(ngModel)]="pmId" name="pmId" required>

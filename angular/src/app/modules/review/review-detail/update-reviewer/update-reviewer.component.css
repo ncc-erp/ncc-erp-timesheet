@@ -13,7 +13,6 @@
     height: 51px;
 } */
 .row-item-rest{
-    width: 430px;
     margin-left: -15px;
 }
 .form-group{
@@ -34,4 +33,23 @@
 .form-group.required .col-form-label-note:after {
     position: absolute;
     margin-left: 3px;
+}
+
+@media (max-width: 600px) {
+    .row-item-rest {
+        width: 100%;
+        margin-left: 0;
+        padding: 0;
+    }
+    .format-col {
+        display: block;
+        margin: 0;
+        padding: 0;
+    }
+    .title {
+        margin-right: 8px;
+     }
+     .col-form-label {
+        padding: 0;
+     }
 }

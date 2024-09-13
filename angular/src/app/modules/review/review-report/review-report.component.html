@@ -30,7 +30,7 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="item">
+    <mat-form-field appearance="outline" class="item search">
       <mat-label>Search Intern</mat-label>
       <input name="searchText" matInput type="text" [(ngModel)]="searchText" (keyup.enter)="searchIntern()" placeholder="intern email">
     </mat-form-field>
@@ -100,7 +100,7 @@
               <td *ngFor="let detail of item.reviewDetailForMonths; let j=index"
               [matTooltip]="detail.reviewerName!=null ? 'Reviewer: ' + detail.reviewerName : null"  
               [ngClass]="getClassWarningType(detail.warningType,detail.hasReview)"
-              class="text-center month-level">
+              class="text-center month-level review">
               {{detail.newLevel | level}}
             </td>
             

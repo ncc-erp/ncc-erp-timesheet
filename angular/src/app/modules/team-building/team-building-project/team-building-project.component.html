@@ -3,8 +3,8 @@
     <div class="card">
       <div class="header">
         <h2>{{ "Select project team building" | localize }}</h2>
-        <button name="saveBtn" *ngIf="permission.isGranted(TeamBuilding_Project_SelectProjectTeamBuilding)" style="position: absolute;right: 50px;top: 7px;margin: 0px;" mat-raised-button color="primary"
-          class="btn btn-border btn-add" (click)="onClickBtnSave()" [disabled]="!(listItemChange?.length > 0)">
+        <button name="saveBtn" *ngIf="permission.isGranted(TeamBuilding_Project_SelectProjectTeamBuilding)" mat-raised-button color="primary"
+          class="btn btn-border btn-add save-btn" (click)="onClickBtnSave()" [disabled]="!(listItemChange?.length > 0)">
           <mat-icon style="margin-right: 8px">save</mat-icon>Save change
         </button>
         <ul class="header-dropdown m-r--5">
@@ -23,7 +23,7 @@
       </div>
       <div class="body" style="height: 100%">
         <div class="row">
-          <div class="col-lg-10">
+          <div class="col-lg-10 padding-0">
             <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Search by Project Name</mat-label>
               <input type="search" [(ngModel)]="searchText" name="capabilitySearch" (keyup.enter)="refresh()"
@@ -31,7 +31,7 @@
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
           </div>
-          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12 padding-0">
             <mat-form-field appearance="outline">
               <mat-label>Project Type</mat-label>
               <mat-select (selectionChange)="handleChangeProjectType($event)" [(value)]="projectType">
@@ -48,13 +48,13 @@
           <table class="table table-bordered">
             <thead>
               <tr>
-                <th style="max-width: 10px" class="text-center">No</th>
+                <th class="text-center">No</th>
                 <th class="text-center">PM</th>
                 <th class="text-center">Project Name</th>
-                <th style="max-width: 70px" class="text-center">
+                <th class="text-center">
                   Project Type
                 </th>
-                <th style="max-width: 50px" class="text-center">
+                <th class="text-center">
                   IsAllowTeamBuilding
                   <mat-checkbox name="selectAllBtn" (change)="setAll($event.checked)" matTooltip="Select/DeSelect all"
                     [checked]="allComplete" [indeterminate]="someComplete()" [color]="'primary'"

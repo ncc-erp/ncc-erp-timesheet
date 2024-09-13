@@ -9618,7 +9618,7 @@ section.content {
 
 .overlay-open .sidebar {
   margin-left: 0;
-  z-index: 99999999;
+  z-index: 9999 !important
 }
 
 .sidebar {
@@ -9639,12 +9639,11 @@ section.content {
   -moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   -ms-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-  z-index: 11 !important;
+  z-index: 11 
 }
 
 .sidebar .legal {
-  position: absolute;
-  bottom: 0;
+  
   width: 100%;
   border-top: 1px solid #eee;
   padding: 15px;
@@ -9856,7 +9855,7 @@ section.content {
   padding: 10px 13px;
 }
 
-.sidebar .menu .list a:hover, .sidebar .menu .list a:active, .sidebar .menu .list a:focus {
+.sidebar .menu .list a:hover, .sidebar .menu .list a:active, .sidebar .menu .list a:focus, .sidebar-footer .logout a:active, .sidebar-footer .logout a:focus {
   text-decoration: none !important;
 }
 
@@ -10605,4 +10604,101 @@ thead{
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #cecece;
   border: 2px solid #cecece;
+}
+
+.mat-select-panel {
+  min-width: 100% !important;
+}
+
+.cdk-overlay-pane {
+  transform: none !important;
+}
+
+.sidebar-footer {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.logout {
+  display: none;
+  height: 0;
+}
+
+@media screen and (max-width: 600px) {
+  .right-sidebar {
+    height: calc(100vh - 116px);
+    top: 116px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .right-sidebar .nav-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 99;
+    background-color: white;
+  }
+
+  .demo-choose-skin {
+    overflow: hidden !important;
+  }
+
+  .sidebar .menu {
+    max-height: calc(100% - 215px);
+    overflow-y: auto;
+  }
+
+  section.content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 86px !important;
+    overflow-x: hidden;
+  }
+
+  .container-wrapper {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
+  .cdk-overlay-container:has(.new-branch-dialog) {
+    .cdk-overlay-pane {
+      max-width: 100% !important;
+      min-width: 80vw;
+    }
+  }
+
+  .user-info .user-helper-dropdown { 
+    display: none !important;
+  }
+
+  .logout {
+    display: block;
+    width: 100%;
+    border-top: 1px solid #eee;
+    padding: 15px;
+    overflow: hidden;
+    background: #fff;
+    height: auto;
+  }
+
+  .logout>a {
+    padding: 7px 0;
+    color: #666;
+    transition: all 0.5s;
+    font-size: 14px;
+    line-height: 25px;
+  }
+
+  .logout>a i.material-icons {
+    float: left;
+    margin-right: 7px;
+    margin-top: 2px;
+    font-size: 20px;
+  }
+
+  .overflow-hidden {
+    overflow: hidden;
+  }
 }

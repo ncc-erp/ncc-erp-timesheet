@@ -26,7 +26,7 @@ import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 })
 export class CreateProjectComponent extends AppComponentBase implements OnInit {
 
-  project = { users: [], tasks: [], projectTargetUsers: [], isAllUserBelongTo: true } as ProjectDto;
+  project = { users: [], tasks: [], projectTargetUsers: [], isAllUserBelongTo: true, notifyChannel : this.APP_CONSTANT.NotifyChannel.KOMU} as ProjectDto;
   // formCreateEdit: FormGroup;
   title: string;
 
@@ -107,7 +107,7 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
     });
   }
   ngOnInit() {
-    this.project = this.data.project;
+    if(Object.keys(this.data.project).length != 0) this.project = this.data.project;
     //this.listCustomer = this.data.customers;
     this.getTasks();
     this.getAllMember();
@@ -533,7 +533,8 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
   showDialog(customer: CustomerDto): void {
     let item = { id: customer.id, name: customer.name, address: customer.address } as CustomerDto;
     const showCreateOrEditProjectDialog = this._dialog.open(CreateEditCustomerComponent, {
-      data: item
+      data: item,
+      panelClass: 'create-project-dialog'
     });
 
     showCreateOrEditProjectDialog.afterClosed().subscribe(result => {

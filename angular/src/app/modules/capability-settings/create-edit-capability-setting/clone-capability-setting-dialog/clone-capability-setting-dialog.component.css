@@ -5,3 +5,35 @@
   color: #ff8800;
   font-weight: 600;
 }
+
+
+.form-group {
+  gap: 20px;
+}
+
+@media screen and (max-width: 992px) {
+  .pf-10 {
+    padding-left: 10px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .form-group {
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 10px;
+    
+  }
+
+  .clone-input {
+    padding-left: 0;
+  }
+
+  .p-t-20 {
+    padding-top: 0;
+  }
+
+  .mat-dialog-actions {
+    flex-wrap: nowrap;
+  }
+}

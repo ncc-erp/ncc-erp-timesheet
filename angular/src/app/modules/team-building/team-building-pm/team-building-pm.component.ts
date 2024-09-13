@@ -145,6 +145,7 @@ export class TeamBuildingPmComponent
     const dialogRef = this._dialog.open(PmSendRequestComponent, {
       disableClose: true,
       width: window.innerWidth >= 1000 ? "1000px" : "90%",
+      maxWidth: "calc(100% - 12px)",
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {

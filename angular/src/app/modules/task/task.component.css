@@ -11,3 +11,105 @@
 .white-color{
     color: #fff;
 }
+.task-wrapper .task-header-menu{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.task-wrapper .task-header-menu .task-header-menu-search-wrapper{
+    display: flex;
+    flex: 1;
+    padding: 0px;
+    max-width: 450px;
+}
+.task-wrapper .task-body{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+::ng-deep .task-wrapper .task-header-menu .task-header-menu-search-wrapper .mat-form-field-appearance-outline .mat-form-field-wrapper{
+    padding: 0px !important;
+    margin: 0px !important;
+}
+.task-table-wrapper .task-table-action{
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
+.task-table-wrapper .task-table-action_response{
+    display: none;
+}
+.task-table-wrapper .task-table-action-label{
+    text-align: end;
+    padding-right: 20px;
+}
+.task-wrapper .task-header-menu button{
+    margin: 0px;
+}
+::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .dialog-edit-task{
+    width: 40% !important;
+}
+.task-table-wrapper .task-table-action .task-table-action-label{
+    padding-right: 0px !important;
+}
+@media screen and (max-width: 600px) { 
+    ::ng-deep .mat-button-wrapper{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .white-color {
+        color: #3f51b5;
+    }
+
+    ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .dialog-edit-task{
+        width: 90% !important;
+    }
+    .task-table-wrapper .task-table-action{
+        display: none;
+    }
+    .task-table-wrapper .task-table-action_response{
+        display: flex;
+    }
+    .task-wrapper .task-header-menu{
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        gap: 12px;
+    }
+    .task-wrapper .table-responsive{
+        margin-bottom: 0px !important;
+    }
+    .task-wrapper .main-content{
+        margin-bottom: 0px !important;
+    }
+    .task-wrapper .task-header-menu button{
+        margin: 0px;
+    }
+    .task-wrapper .task-header-menu .task-header-menu-search-wrapper{
+        max-width: unset;
+        width: 100%;
+    }
+    .task-table-label{
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .task-table-action{
+        display: flex;
+        gap: 5px;
+    }
+    .task-table-action button{
+        padding: 0px;
+        margin: 2px 0px;
+    }
+    .task-table-action .task-table-action_common{
+        display: flex;
+        gap: 5px;
+    }
+    .task-table-wrapper .task-table-content{
+        width: 100%;
+        overflow-x: auto;
+    }
+}

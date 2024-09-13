@@ -11,3 +11,15 @@
 .row-table-retro {
     height: 56px;
 }
+
+.responsive {
+    overflow-x: auto;
+}
+
+.p-20 {
+    padding: 20px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}

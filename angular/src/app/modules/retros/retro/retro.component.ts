@@ -202,6 +202,7 @@ export class RetroComponent
       } as RetroActionDialogData,
       disableClose: true,
       width: "700px",
+      maxHeight: "80vh"
     });
 
     dialogRef.afterClosed().subscribe((res) => {

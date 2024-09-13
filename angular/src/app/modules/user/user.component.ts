@@ -380,7 +380,10 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     let userId = editUser ? editUser.id : null;
     let diaLogRef = this.dialog.open(CreateUserComponent, {
       disableClose: true,
-      data: { userId: userId, userss: this.usersNotPagging, sexes: this.sexes }
+      width: `calc(100% - 24px)`,
+      maxWidth: '400px',
+      data: { userId: userId, userss: this.usersNotPagging, sexes: this.sexes },
+      panelClass: 'user-custom-dialog-container'
     });
 
     diaLogRef.afterClosed().subscribe(res => {
@@ -395,7 +398,8 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     let userId = editUser ? editUser.id : null;
     let diaLogRef = this.dialog.open(UpdateUserComponent, {
       disableClose: true,
-      data: { userId: userId, userss: this.usersNotPagging, sexes: this.sexes }
+      data: { userId: userId, userss: this.usersNotPagging, sexes: this.sexes },
+      panelClass: 'user-custom-dialog-container'
     });
 
     diaLogRef.afterClosed().subscribe(res => {
@@ -408,6 +412,7 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
   editRole(editUser?): void {
     let userId = editUser ? editUser.id : null;
     let diaLogRef = this.dialog.open(RoleUserComponent, {
+      width: 'calc(100% - 16px)',
       disableClose: true,
       data: { userId: userId}
     });
@@ -421,7 +426,9 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
 
   showResetPasswordUserDialog(user?: number): void {
     this.dialog.open(ResetPasswordDialogComponent, {
-      data: user
+      data: user,
+      width: '400px',
+      maxWidth: 'calc(100% - 12px)'
     });
   }
 

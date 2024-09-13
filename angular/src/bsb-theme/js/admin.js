@@ -61,6 +61,7 @@
                 if (!$target.hasClass('bars') && _this.isOpen() && $target.parents('#leftsidebar').length === 0) {
                     if (!$target.hasClass('js-right-sidebar')) $overlay.fadeOut();
                     $body.removeClass('overlay-open');
+                    $body.removeClass('overflow-hidden');
                 }
             });
 
@@ -109,6 +110,9 @@
             Waves.init();
         },
         setMenuHeight: function (isFirstTime) {
+            let calcWidth = $(window).width() > 600;
+            // calc width for screen mobile
+            if (!calcWidth) return;
             if (typeof $.fn.slimScroll != 'undefined') {
                 var configs = $.AdminBSB.options.leftSideBar;
                 var height = ($(window).height() - ($('.legal').outerHeight() + $('.user-info').outerHeight() + $('.navbar').innerHeight()));
@@ -171,6 +175,7 @@
             var _this = this;
             var $sidebar = $('#rightsidebar');
             var $overlay = $('.overlay');
+            var $body = $('body');
 
             //Close sidebar
             $(window).click(function (e) {
@@ -180,11 +185,13 @@
                 if (!$target.hasClass('js-right-sidebar') && _this.isOpen() && $target.parents('#rightsidebar').length === 0) {
                     if (!$target.hasClass('bars')) $overlay.fadeOut();
                     $sidebar.removeClass('open');
+                    $body.removeClass('overflow-hidden');
                 }
             });
 
             $('.js-right-sidebar').on('click', function () {
                 $sidebar.toggleClass('open');
+                $body.addClass('overflow-hidden');
                 if (_this.isOpen()) { $overlay.fadeIn(); } else { $overlay.fadeOut(); }
             });
         },
@@ -246,6 +253,7 @@
             //Open left sidebar panel
             $('.bars').on('click', function () {
                 $body.toggleClass('overlay-open');
+                $body.addClass('overflow-hidden');
                 if ($body.hasClass('overlay-open')) { $overlay.fadeIn(); } else { $overlay.fadeOut(); }
             });
 

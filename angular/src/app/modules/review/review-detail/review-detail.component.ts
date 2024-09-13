@@ -685,6 +685,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     const dialogRef = this._dialog.open(NewReviewInternshipComponent, {
       disableClose : true,
       width : "900px",
+      maxHeight: '80vh',
       data : item
     });
     dialogRef.afterClosed().subscribe(result => {

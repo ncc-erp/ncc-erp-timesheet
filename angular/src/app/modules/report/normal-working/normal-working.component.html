@@ -41,7 +41,7 @@
                     No checkin/checkout & No request off fullday
                 </mat-checkbox> -->
                 <ul class="header-dropdown m-r--5">
-                    <li>
+                    <li class="btn-view-action">
                         <mat-slide-toggle name="isViewFullBtn" (change)="onResize()">{{show ? "View Normal" : "View Full"}}
                         </mat-slide-toggle>
                     </li>
@@ -123,7 +123,7 @@
                         <button name="exportBtn" (click)="exportExcel()" mat-flat-button color="primary" [disabled]="isDisabled">Export</button>
                     </div>
                 </div>
-                <div id="table-detail" *ngIf="workingReports">
+                <div id="table-detail" *ngIf="workingReports" class="table-responsive">
                     <table *ngIf="workingReports.length > 0" class="table table-responsive" id="normal-working-table"
                         style="margin:0" [busy]="isTableLoading">
                         <thead>

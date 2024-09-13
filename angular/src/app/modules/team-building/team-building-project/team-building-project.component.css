@@ -1,8 +1,50 @@
 .fixed-bottom-button {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    margin-bottom: 144px;
-    margin-right: 35px;
-    z-index: 1;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin-bottom: 144px;
+  margin-right: 35px;
+  z-index: 1;
+}
+
+.save-btn {
+  position: absolute;
+  right: 50px;
+  top: 7px;
+  margin: 0px;
+}
+
+@media screen and (max-width: 600px) {
+  .card .header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .table-responsive {
+    border: none;
+  }
+
+  .table-responsive > .table-bordered {
+    border: 1px solid #eee;
+  }
+  .card .header .header-dropdown {
+    top: 15px;
+  }
+
+  .save-btn {
+    position: revert;
+    right: 0px;
+    top: 0px;
+    margin: 0px;
+  }
+
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .padding-0 {
+    padding: 0 !important;
+  }
 }

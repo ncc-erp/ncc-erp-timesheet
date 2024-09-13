@@ -29,6 +29,7 @@ using Ncc.IoC;
 using Timesheet.NCCAuthen;
 using Timesheet.Services.Komu;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Timesheet.Services.Mezon;
 
 namespace Timesheet.Timesheets.MyTimesheets
 {
@@ -39,13 +40,14 @@ namespace Timesheet.Timesheets.MyTimesheets
         private readonly IBackgroundJobManager _backgroundJobManager;
         private readonly ICommonServices _commonService;
         private readonly KomuService _komuService;
-
+        private readonly MezonService _mezonService;
         public MyTimesheetsAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
-            ICommonServices commonService, IWorkScope workScope) : base(workScope)
+            ICommonServices commonService, IWorkScope workScope, MezonService mezonService) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _commonService = commonService;
             _komuService = komuService;
+            _mezonService = mezonService;
         }
         [HttpGet]
         //[AbpAuthorize(Ncc.Authorization.PermissionNames.Home)]
@@ -220,31 +222,42 @@ namespace Timesheet.Timesheets.MyTimesheets
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimesheet_View)]
         public async Task<List<GetTimesheetDto>> GetAllTimesheetOfUser(DateTime startDate, DateTime endDate)
         {
-            return await (from myTimesheet in WorkScope.All<MyTimesheet>()
-                          join ptask in WorkScope.All<ProjectTask>() on myTimesheet.ProjectTaskId equals ptask.Id
-                          join project in WorkScope.All<Project>() on ptask.ProjectId equals project.Id
-                          join task in WorkScope.All<Ncc.Entities.Task>() on ptask.TaskId equals task.Id
-                          join cus in WorkScope.All<Customer>() on project.CustomerId equals cus.Id
-                          where (myTimesheet.UserId == AbpSession.UserId.Value && myTimesheet.DateAt >= startDate && myTimesheet.DateAt <= endDate)
-                          select new GetTimesheetDto
-                          {
-                              Id = myTimesheet.Id,
-                              CustomerName = cus.Name,
-                              DateAt = myTimesheet.DateAt,
-                              ProjectCode = project.Code,
-                              ProjectName = project.Name,
-                              Status = myTimesheet.Status,
-                              TaskName = task.Name,
-                              WorkingTime = myTimesheet.WorkingTime,
-                              ProjectTaskId = ptask.Id,
-                              Note = myTimesheet.Note,
-                              TypeOfWork = myTimesheet.TypeOfWork,
-                              IsCharged = myTimesheet.IsCharged,
-                              Billable = ptask.Billable,
-                              IsTemp = myTimesheet.IsTemp,
-                              projectTargetUser = myTimesheet.ProjectTargetUser.User.FullName,
-                              workingTimeTargetUser = myTimesheet.TargetUserWorkingTime
-                          }).ToListAsync();
+            var userId = AbpSession.UserId.Value;
+
+            var openTalkTimes = WorkScope.GetAll<OpenTalk>()
+                .Where(x => x.UserId == userId)
+                .ToList()
+                .GroupBy(x => x.DateAt.Date)
+                .ToDictionary(g => g.Key, g => g.Sum(x => x.totalTime));
+
+            var timesheets = await (from myTimesheet in WorkScope.All<MyTimesheet>().AsNoTracking()
+                                    join ptask in WorkScope.All<ProjectTask>().AsNoTracking() on myTimesheet.ProjectTaskId equals ptask.Id
+                                    join project in WorkScope.All<Project>().AsNoTracking() on ptask.ProjectId equals project.Id
+                                    join task in WorkScope.All<Ncc.Entities.Task>().AsNoTracking() on ptask.TaskId equals task.Id
+                                    join cus in WorkScope.All<Customer>().AsNoTracking() on project.CustomerId equals cus.Id
+                                    where myTimesheet.UserId == userId && myTimesheet.DateAt >= startDate && myTimesheet.DateAt <= endDate
+                                    select new GetTimesheetDto
+                                    {
+                                        Id = myTimesheet.Id,
+                                        CustomerName = cus.Name,
+                                        DateAt = myTimesheet.DateAt,
+                                        ProjectCode = project.Code,
+                                        ProjectName = project.Name,
+                                        Status = myTimesheet.Status,
+                                        TaskName = task.Name,
+                                        WorkingTime = myTimesheet.WorkingTime,
+                                        ProjectTaskId = ptask.Id,
+                                        Note = myTimesheet.Note,
+                                        TypeOfWork = myTimesheet.TypeOfWork,
+                                        IsCharged = myTimesheet.IsCharged,
+                                        Billable = ptask.Billable,
+                                        IsTemp = myTimesheet.IsTemp,
+                                        ProjectTargetUser = myTimesheet.ProjectTargetUser.User.FullName,
+                                        WorkingTimeTargetUser = myTimesheet.TargetUserWorkingTime,
+                                        OpenTalkJoinTime = task.Name == "Open Talk" && openTalkTimes.ContainsKey(myTimesheet.DateAt.Date) ? openTalkTimes[myTimesheet.DateAt.Date] : 0
+                                    }).ToListAsync();
+
+            return timesheets;
         }
 
         private async System.Threading.Tasks.Task<bool> validUnLockTimsheet(MyTimesheetDto input)
@@ -286,13 +299,13 @@ namespace Timesheet.Timesheets.MyTimesheets
 
         private void CheckValidCreateUpdateTimesheet(MyTimesheetDto input, bool isUnlocked)
         {
-           
+
             var firstDateCanUnlock = GetFirstDateToLockTS(AbpSession.UserId.Value, isUnlocked).Result;
             if (input.DateAt.Date < firstDateCanUnlock)
             {
                 throw new UserFriendlyException("Timesheet was locked! You can log timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
             }
-           
+
         }
         public async Task<DateTime> GetFirstDateToLockTS(long userId, bool isUnlocked)
         {
@@ -515,13 +528,13 @@ namespace Timesheet.Timesheets.MyTimesheets
             //var isUnlock = await validUnLockTimsheet(input);
             var isUnlocked = IsUserUnlockedToLogTS(AbpSession.UserId.Value);
             DateTime lockDate = _commonService.getlockDateUser();
-            
+
             if (!isUnlocked && input.DateAt.Date < lockDate)
             {
                 throw new UserFriendlyException("You can't update this Timesheet. Go to ims.nccsoft.vn > Unlock timesheet");
             }
             CheckValidCreateUpdateTimesheet(input, isUnlocked);
-            
+
 
             var item = await WorkScope.GetAsync<MyTimesheet>(input.Id);
             if (item == null)
@@ -688,7 +701,7 @@ namespace Timesheet.Timesheets.MyTimesheets
 
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
-                        TargetEmails = project.Emails,
+                        TargetEmails = project.PMs.Select(s => s.EmailAddress).ToList(),
                         Body = emailBody,
                         Subject = emailSubject
                     });
@@ -714,17 +727,41 @@ namespace Timesheet.Timesheets.MyTimesheets
 
         public async Task<List<NotifyKomuTimesheetDto>> getReceiverList(List<MyTimesheet> mytimesheets)
         {
+            var queryPMs = WorkScope.GetAll<ProjectUser>().Include(s => s.User)
+           .Where(s => s.Project.Status == ProjectStatus.Active)
+           .Where(s => s.Type == ProjectUserType.PM)
+           .GroupBy(s => s.ProjectId)
+           .ToDictionary(g => g.Key, g => g.Select(s => new NotifyUserInfoDto
+           {
+               EmailAddress = s.User.EmailAddress,
+               FullName = s.User.FullName,
+               KomuUserId = s.User.KomuUserId,
+               UserId = s.UserId
+           }).ToList());
+
             var mytimesheetIds = mytimesheets.Select(s => s.Id).ToList();
 
-            var projectTimesheets = await WorkScope.GetRepo<MyTimesheet>().GetAllIncluding(s => s.ProjectTask, s => s.ProjectTask.Project, s => s.ProjectTask.Task, s => s.User)
+            var result = await WorkScope.GetRepo<MyTimesheet>().GetAllIncluding(s => s.ProjectTask, s => s.ProjectTask.Project, s => s.ProjectTask.Task, s => s.User)
                 .Where(s => mytimesheetIds.Contains(s.Id))
-                .GroupBy(s => new { s.ProjectTask.ProjectId, s.ProjectTask.Project.Code, s.ProjectTask.Project.Name })
-                .Select(s => new
+                .GroupBy(s => new {
+                    s.ProjectTask.ProjectId,
+                    s.ProjectTask.Project.Code,
+                    s.ProjectTask.Project.Name,
+                    s.ProjectTask.Project.notifyChannel,
+                    s.ProjectTask.Project.mezonUrl,
+                    s.ProjectTask.Project.KomuChannelId,
+                    s.ProjectTask.Project.IsNoticeKMSubmitTS
+                })
+                .Select(s => new NotifyKomuTimesheetDto
                 {
-                    s.Key.ProjectId,
-                    s.Key.Code,
-                    s.Key.Name,
-                    TimeSheets = s.Select(x => new TimesheetKomuDto
+                    ProjectId = s.Key.ProjectId,
+                    notifyChannel = s.Key.notifyChannel,
+                    mezonUrl = s.Key.mezonUrl,
+                    KomuChannelId = s.Key.KomuChannelId,
+                    IsNoticeKMSubmitTS = s.Key.IsNoticeKMSubmitTS,
+                    ProjectCode = s.Key.Code,
+                    ProjectName = s.Key.Name,
+                    Timesheets = s.Select(x => new TimesheetKomuDto
                     {
                         Id = x.Id,
                         DateAt = x.DateAt,
@@ -734,48 +771,9 @@ namespace Timesheet.Timesheets.MyTimesheets
                         Note = x.Note,
                         TaskName = x.ProjectTask.Task.Name,
                         IsUnlockedByEmployee = x.IsUnlockedByEmployee
-                    }).ToList()
+                    }).ToList(),
+                    PMs = queryPMs.ContainsKey(s.Key.ProjectId) ? queryPMs[s.Key.ProjectId] : new List<NotifyUserInfoDto>()
                 }).ToListAsync();
-
-            var projectIds = projectTimesheets.Select(s => s.ProjectId).ToList();
-
-
-            var pms = await WorkScope.GetAll<ProjectUser>()
-            .Where(s => s.Project.Status == ProjectStatus.Active)
-            .Where(s => s.Type == ProjectUserType.PM)
-            .Where(s => projectIds.Contains(s.ProjectId))
-            .GroupBy(s => new { s.ProjectId, s.Project.KomuChannelId, IsNotifyToKomu = s.Project.IsNoticeKMSubmitTS })
-            .Select(s => new
-            {
-                ProjectId = s.Key.ProjectId,
-                KomuChannelId = s.Key.KomuChannelId,
-                IsNotifyToKomu = s.Key.IsNotifyToKomu,
-                Emails = s.Select(x => x.User.EmailAddress),
-
-                PMs = s.Select(x => new NotifyUserInfoDto
-                {
-                    EmailAddress = x.User.EmailAddress,
-                    FullName = x.User.FullName,
-                    KomuUserId = x.User.KomuUserId,
-                    UserId = x.UserId
-                }).ToList()
-
-            }).ToListAsync();
-
-            var result = (from pt in projectTimesheets
-                          join pm in pms on pt.ProjectId equals pm.ProjectId
-                          select new NotifyKomuTimesheetDto
-                          {
-                              KomuChannelId = pm.KomuChannelId,
-                              IsNotifyKomu = pm.IsNotifyToKomu,
-                              ProjectId = pt.ProjectId,
-                              Timesheets = pt.TimeSheets,
-                              ProjectCode = pt.Code,
-                              ProjectName = pt.Name,
-                              Emails = pm.Emails.ToList(),
-                              PMs = pm.PMs
-
-                          }).ToList();
 
             return result;
         }
@@ -809,18 +807,26 @@ namespace Timesheet.Timesheets.MyTimesheets
             var sb = new StringBuilder();
             foreach (var project in receivers)
             {
-                if (!project.IsNotifyKomu)
+                if (!project.IsNoticeKMSubmitTS)
                 {
-                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNoticeKMSubmitTS}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
                     sb.Clear();
-                    sb.AppendLine($"PM {project.KomuPMsTag()}: {requester.KomuAccountInfo} has submitted following timesheets:");
+                    sb.AppendLine($"PM {project.KomuPMsTag()}: {requester.KomuAccountInfo(project.notifyChannel)} has submitted following timesheets:");
                     sb.AppendLine("```");
                     sb.Append(project.TimesheetsKomuMsg());
                     sb.AppendLine("```");
-                    _komuService.NotifyToChannel(sb.ToString(), project.KomuChannelId);
+                    switch (project.notifyChannel)
+                    {
+                        case NotifyChannel.KOMU:
+                            _komuService.NotifyToChannel(sb.ToString(), project.KomuChannelId);
+                            break;
+                        case NotifyChannel.Mezon:
+                            _mezonService.NotifyToChannel(project.mezonUrl, sb.ToString());
+                            break;
+                    }
                     Logger.Info(sb.ToString());
 
                 }
@@ -952,7 +958,7 @@ namespace Timesheet.Timesheets.MyTimesheets
 
 
             var lastWorkingDate = today.AddDays(-1);
-            while(count >=0)
+            while (count >= 0)
             {
                 if (!exceptDates.Contains(lastWorkingDate)
                     && lastWorkingDate.DayOfWeek != DayOfWeek.Sunday
@@ -1041,7 +1047,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                 .Where(s => s.TypeOfWork == TypeOfWork.NormalWorkingHours)
                 .FirstOrDefault();
 
-            if(myTS == null || myTS == default)
+            if (myTS == null || myTS == default)
             {
                 myTS = new MyTimesheet
                 {
@@ -1161,7 +1167,7 @@ namespace Timesheet.Timesheets.MyTimesheets
         }
 
         [HttpGet]
-        public WarningMyTimesheetDto WarningMyTimesheet(DateTime dateAt, int workingTime,int? timesheetId)
+        public WarningMyTimesheetDto WarningMyTimesheet(DateTime dateAt, int workingTime, int? timesheetId)
         {
             var userId = AbpSession.UserId.Value;
             var timekeepings = WorkScope.GetAll<Timekeeping>()
@@ -1194,7 +1200,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                  AbsenceTime = s.AbsenceTime
              }).ToList();
 
-            var isDayOffSetting =  WorkScope.GetAll<DayOffSetting>()
+            var isDayOffSetting = WorkScope.GetAll<DayOffSetting>()
                      .Where(s => s.DayOff.Date == dateAt.Date)
                      .Select(s => s.DayOff.Date).Any();
 

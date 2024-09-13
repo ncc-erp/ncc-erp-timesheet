@@ -6,3 +6,78 @@
     text-align: right;
     padding-right: 30px;
 }
+
+.select-week {
+    margin-top: -20px;
+}
+
+.select-week-container {
+    margin-top: 13px;
+}
+
+.btn-export {
+    margin-top: 3px; 
+    margin-bottom: 6px;
+}
+
+@media screen and (max-width: 767px) {
+    :host ::ng-deep .main-content .body .mat-button-toggle-label-content {
+      line-height: 42px;
+    }
+
+    .actions {
+        display: flex;
+        padding: 0;
+        padding-top: 10px;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .table-responsive {
+        overflow: auto;
+    }
+}
+
+.button-toggle-project-mobile {
+    display: none;
+}
+
+@media screen and (max-width: 600px) {
+    .button-toggle-project-desktop {
+        display: none;
+    }
+
+    .button-toggle-project-mobile {
+        display: inline-flex;
+        height: fit-content;
+    }
+
+    .select-week-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-top: 0;
+    }
+
+    .select-week-container .select-week {
+        max-width: 50%;
+        margin-top: 0;
+    }
+
+    .title-date {
+        margin-left: 0 !important;
+    }
+
+    .btn-export {
+        margin-top: 0;
+    }
+
+    .tab-content {
+        padding-right: 0px !important;
+        margin-right: -8px;
+    }
+
+    .table-responsive {
+        height: 275px !important;
+    }
+}

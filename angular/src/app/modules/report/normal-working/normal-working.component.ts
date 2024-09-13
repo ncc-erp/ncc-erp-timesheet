@@ -459,8 +459,8 @@ export class NormalWorkingComponent extends PagedListingComponentBase<WorkingRep
     // $('#1date').css('height', '60px');
     $('.sticky-left:nth-child(2)').css('left', '0');
     $('.total,.total-column.sticky-left, tbody td:nth-child(3').css('left', '0');
-    $('.total-column.sticky-left:nth-child(2), tbody td:nth-child(4)').attr('style', 'left: 36px !important');
-    $('.total-column.sticky-left:nth-child(3)').attr('style', 'left: 36px !important');
+    $('.total-column.sticky-left:nth-child(2), tbody td:nth-child(4)').attr('style', 'left: 36px');
+    $('.total-column.sticky-left:nth-child(3)').attr('style', 'left: 36px');
     $('.left').css('display', 'none');
     $('.right').css('display', 'none');
 

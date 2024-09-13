@@ -17,15 +17,15 @@
           </li>
         </ul>
       </div>
-      <div class="body table-responsive">
-        <div class="row clearfix">
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+      <div>
+        <div class="row clearfix pd-20">
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mb-20">
             <button name="createBtn" *ngIf="permission.isGranted(ADD)" mat-raised-button color="primary" class="pull-left"
               (click)="create()">
               <mat-icon>add</mat-icon>New
             </button>
           </div>
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
             <mat-form-field appearance="outline">
               <mat-label>Date At</mat-label>
               <input matInput name="dateAt" [placeholder]="'Date At' | localize" 
@@ -34,7 +34,7 @@
               <mat-datepicker #pickerDateAt></mat-datepicker>
             </mat-form-field>
           </div> 
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
             <mat-form-field appearance="outline">
               <mat-label >Project</mat-label>
               <mat-select name="projectId" [(value)]="projectId" (selectionChange)="refresh()">
@@ -48,7 +48,7 @@
               </mat-select>
             </mat-form-field>
           </div> 
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
             <mat-form-field appearance="outline">
               <mat-label>Search by name project</mat-label>
               <input name="searchText" matInput [(ngModel)]="searchText" placeholder="{{l('Search by name project')}}"
@@ -58,6 +58,7 @@
           </div>
 
         </div>
+        <div class="body table-responsive">
         <table class="table table-hover table-striped">
           <thead class="bg-light">
             <tr>
@@ -75,15 +76,38 @@
               <td>{{ formatDate(overtimeSetting.dateAt) }}</td>
               <td class="text-center">{{ overtimeSetting.coefficient }}</td>
               <td>{{ overtimeSetting.note }}</td>
-              <td>
+              <td class="full-view">
                 <button [name]="'deleteBtn-'+overtimeSetting.id" *ngIf="permission.isGranted(DELETE)" mat-raised-button (click)="delete(overtimeSetting)"
                   class="btn btn-danger waves-effect pull-right">Delete</button>
                 <button [name]="'editBtn-'+overtimeSetting.id" *ngIf="permission.isGranted(EDIT)" mat-raised-button (click)="edit(overtimeSetting)"
                   class="btn btn-primary waves-effect pull-right" style="margin-right: 12px;">Edit</button>
               </td>
+              <td class="action-wrapper">
+                <button
+                style="width: 30px; float: right"
+                *ngIf="permission.isGranted(DELETE)"
+                [name]="'deleteBtn-' + overtimeSetting.id"
+                (click)="delete(overtimeSetting)"
+                mat-icon-button
+                color="primary"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+              <button
+                style="float: right"
+                *ngIf="permission.isGranted(EDIT)"
+                [name]="'editBtn-' + overtimeSetting.id"
+                (click)="edit(overtimeSetting)"
+                mat-icon-button
+                color="primary"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              </td>
             </tr>
           </tbody>
         </table>
+      </div>
         <div class="text-align: center;" *ngIf="totalItems > pageSize">
           <pagination-controls (pageChange)="getDataPage($event)" id="server"></pagination-controls>
         </div>

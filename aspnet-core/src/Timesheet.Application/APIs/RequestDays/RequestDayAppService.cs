@@ -1,6 +1,7 @@
 ﻿using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.BackgroundJobs;
+using Abp.Collections.Extensions;
 using Abp.Configuration;
 using Abp.Linq.Extensions;
 using Abp.Logging;
@@ -32,6 +33,7 @@ using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Extension;
 using Timesheet.Services.Komu;
+using Timesheet.Services.Mezon;
 using Timesheet.Services.W2;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
@@ -47,16 +49,17 @@ namespace Timesheet.APIs.RequestDays
         public readonly IApproveRequestOffServices _approveRequestOffServices;
         private readonly IW2Service _w2Service;
         private readonly string TemplateFolder = Path.Combine("wwwroot", "template");
-
+        private readonly MezonService _mezonService;
         public RequestDayAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
             ITimekeepingServices timeKeepingService, IWorkScope workScope, IApproveRequestOffServices approveRequestOffServices,
-            IW2Service w2Service) : base(workScope)
+            IW2Service w2Service, MezonService mezonService) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _timeKeepingService = timeKeepingService;
             _komuService = komuService;
             _approveRequestOffServices = approveRequestOffServices;
             _w2Service = w2Service;
+            _mezonService = mezonService;
         }
 
         [HttpPost]
@@ -879,18 +882,26 @@ namespace Timesheet.APIs.RequestDays
             var alreadySentToPMIds = new HashSet<long>();
             foreach (var project in receivers)
             {
-                if (!project.IsNotifyKomu)
+                if (!project.IsNoticeKMRequestOffDate)
                 {
-                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNoticeKMRequestOffDate}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
-                    var komuMessage = $"PM {project.KomuPMsTag(alreadySentToPMIds)}: {requester.KomuAccountInfo} " +
+                    var Message = $"PM {project.KomuPMsTag(alreadySentToPMIds)}: {requester.KomuAccountInfo(project.notifyChannel)} " +
                         $"has sent a request **{input.GetRequestName(offTypeName)}** " +
                         $"for following dates:\n ```{input.ToKomuStringRequestDates()}```" +
                         $"Reason: ```{input.Reason}```";
 
-                    _komuService.NotifyToChannel(komuMessage, project.KomuChannelId);
+                    switch (project.notifyChannel)
+                    {
+                        case NotifyChannel.KOMU:
+                            _komuService.NotifyToChannel(Message, project.KomuChannelId);
+                            break;
+                        case NotifyChannel.Mezon:
+                            _mezonService.NotifyToChannel(project.mezonUrl, Message);
+                            break;
+                    }
                     processAlreadySentToPMs(alreadySentToPMIds, project.PMs);
                 }
             }
@@ -960,91 +971,63 @@ namespace Timesheet.APIs.RequestDays
 
         public async Task<List<ProjectPMDto>> getReceiverSendRequestList(long requesterId)
         {
-            var qrequesterInProjectIds = WorkScope.GetAll<ProjectUser>()
+            var queryPMs = WorkScope.GetAll<ProjectUser>().Include(s => s.User)
+            .Where(s => s.Project.Status == ProjectStatus.Active)
+            .Where(s => s.Type == ProjectUserType.PM)
+            .GroupBy(s => s.ProjectId)
+            .ToDictionary(g => g.Key, g => g.Select(s => new NotifyUserInfoDto
+            {
+                EmailAddress = s.User.EmailAddress,
+                FullName = s.User.FullName,
+                KomuUserId = s.User.KomuUserId,
+                UserId = s.UserId
+            }).ToList());
+
+            var result = await WorkScope.GetAll<ProjectUser>()
             .Where(s => s.UserId == requesterId)
             .Where(s => s.Project.Status == ProjectStatus.Active)
             .Where(s => s.Type != ProjectUserType.DeActive)
-            .Select(s => s.ProjectId)
-            .Distinct();
-
-            var queryPMs = WorkScope.GetAll<ProjectUser>()
-            .Where(s => s.Project.Status == ProjectStatus.Active)
-            .Where(s => s.Type == ProjectUserType.PM)
-            .Select(s => new
+            .Select(s => new ProjectPMDto
             {
-                s.User.KomuUserId,
-                s.User.FullName,
-                s.User.EmailAddress,
-                s.UserId,
-                s.ProjectId,
-                s.Project.KomuChannelId,
-                s.Project.IsNotifyToKomu,
-                s.Project.IsNoticeKMRequestOffDate,
-            });
-
-            var result = await (from projectId in qrequesterInProjectIds
-                                join pm in queryPMs on projectId equals pm.ProjectId
-                                select pm)
-                              .GroupBy(s => new { s.ProjectId, s.KomuChannelId, s.IsNoticeKMRequestOffDate })
-                              .Select(s => new ProjectPMDto
-                              {
-                                  ProjectId = s.Key.ProjectId,
-                                  KomuChannelId = s.Key.KomuChannelId,
-                                  IsNotifyKomu = s.Key.IsNoticeKMRequestOffDate,
-                                  IsNotifyEmail = false,
-                                  PMs = s.Select(x => new NotifyUserInfoDto
-                                  {
-                                      EmailAddress = x.EmailAddress,
-                                      FullName = x.FullName,
-                                      KomuUserId = x.KomuUserId,
-                                      UserId = x.UserId
-                                  }).ToList()
-                              }).ToListAsync();
+                ProjectId = s.ProjectId,
+                notifyChannel = s.Project.notifyChannel,
+                mezonUrl = s.Project.mezonUrl,
+                KomuChannelId = s.Project.KomuChannelId,
+                IsNoticeKMRequestOffDate = s.Project.IsNoticeKMRequestOffDate,
+                IsNotifyEmail = false,
+                PMs = queryPMs.ContainsKey(s.ProjectId) ? queryPMs[s.ProjectId] : new List<NotifyUserInfoDto>(),
+            }).ToListAsync();
             return result;
         }
 
         public async Task<List<ProjectPMDto>> getReceiverApproveRejectList(long requesterId)
         {
-            var qrequesterInProjectIds = WorkScope.GetAll<ProjectUser>()
+            var queryPMs = WorkScope.GetAll<ProjectUser>().Include(s => s.User)
+            .Where(s => s.Project.Status == ProjectStatus.Active)
+            .Where(s => s.Type == ProjectUserType.PM)
+            .GroupBy(s => s.ProjectId)
+            .ToDictionary(g => g.Key, g => g.Select(s => new NotifyUserInfoDto
+            {
+                EmailAddress = s.User.EmailAddress,
+                FullName = s.User.FullName,
+                KomuUserId = s.User.KomuUserId,
+                UserId = s.UserId
+            }).ToList());
+
+            var result = await WorkScope.GetAll<ProjectUser>()
             .Where(s => s.UserId == requesterId)
             .Where(s => s.Project.Status == ProjectStatus.Active)
             .Where(s => s.Type != ProjectUserType.DeActive)
-            .Select(s => s.ProjectId)
-            .Distinct();
-
-            var queryPMs = WorkScope.GetAll<ProjectUser>()
-            .Where(s => s.Project.Status == ProjectStatus.Active)
-            .Where(s => s.Type == ProjectUserType.PM)
-            .Select(s => new
+            .Select(s => new ProjectPMDto
             {
-                s.User.KomuUserId,
-                s.User.FullName,
-                s.User.EmailAddress,
-                s.UserId,
-                s.ProjectId,
-                s.Project.KomuChannelId,
-                s.Project.IsNotifyToKomu,
-                s.Project.IsNoticeKMApproveRequestOffDate,
-            });
-
-            var result = await (from projectId in qrequesterInProjectIds
-                                join pm in queryPMs on projectId equals pm.ProjectId
-                                select pm)
-                              .GroupBy(s => new { s.ProjectId, s.KomuChannelId, s.IsNoticeKMApproveRequestOffDate })
-                              .Select(s => new ProjectPMDto
-                              {
-                                  ProjectId = s.Key.ProjectId,
-                                  KomuChannelId = s.Key.KomuChannelId,
-                                  IsNotifyKomu = s.Key.IsNoticeKMApproveRequestOffDate,
-                                  IsNotifyEmail = false,
-                                  PMs = s.Select(x => new NotifyUserInfoDto
-                                  {
-                                      EmailAddress = x.EmailAddress,
-                                      FullName = x.FullName,
-                                      KomuUserId = x.KomuUserId,
-                                      UserId = x.UserId
-                                  }).ToList()
-                              }).ToListAsync();
+                ProjectId = s.ProjectId,
+                notifyChannel = s.Project.notifyChannel,
+                mezonUrl = s.Project.mezonUrl,
+                KomuChannelId = s.Project.KomuChannelId,
+                IsNoticeKMApproveRequestOffDate = s.Project.IsNoticeKMApproveRequestOffDate,
+                IsNotifyEmail = false,
+                PMs = queryPMs.ContainsKey(s.ProjectId) ? queryPMs[s.ProjectId] : new List<NotifyUserInfoDto>(),
+            }).ToListAsync();
             return result;
         }
 
@@ -1168,20 +1151,28 @@ namespace Timesheet.APIs.RequestDays
 
             foreach (var project in receivers)
             {
-                if (!project.IsNotifyKomu)
+                if (!project.IsNoticeKMRequestOffDate)
                 {
-                    Logger.Info($"notifyKomuWhenCancelMyRequest(): {project.ProjectId}: IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenCancelMyRequest(): {project.ProjectId}: IsNotifyKomu={project.IsNoticeKMRequestOffDate}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
                     var pmsTag = project.KomuPMsTag(alreadySentToPMIds);
                     pmsTag = string.IsNullOrEmpty(pmsTag) ? "" : $"PM {pmsTag}: ";
 
-                    var komuMessage = $"{pmsTag}{requester.KomuAccountInfo} " +
+                    var Message = $"{pmsTag}{requester.KomuAccountInfo(project.notifyChannel)} " +
                         $"has **cancelled** the request: **{CommonUtils.RequestTypeToString(requestDetail.Request.Type, offTypeName)}** " +
                         $"on {DateTimeUtils.ToString(requestDetail.DateAt)}";
 
-                    _komuService.NotifyToChannel(komuMessage, project.KomuChannelId);
+                    switch (project.notifyChannel)
+                    {
+                        case NotifyChannel.KOMU:
+                            _komuService.NotifyToChannel(Message, project.KomuChannelId);
+                            break;
+                        case NotifyChannel.Mezon:
+                            _mezonService.NotifyToChannel(project.mezonUrl, Message);
+                            break;
+                    }
                 }
                 processAlreadySentToPMs(alreadySentToPMIds, project.PMs);
             }
@@ -1308,20 +1299,28 @@ namespace Timesheet.APIs.RequestDays
             var alreadySentToPMIds = new HashSet<long>();
             foreach (var project in receivers)
             {
-                if (!project.IsNotifyKomu)
+                if (!project.IsNoticeKMApproveRequestOffDate)
                 {
-                    Logger.Info($"notifyKomuWhenApproveRequest() projectId={project.ProjectId}: IsNotifyKomu={project.IsNotifyKomu}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenApproveRequest() projectId={project.ProjectId}: IsNotifyKomu={project.IsNoticeKMApproveRequestOffDate}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
                     var pmsTag = project.KomuPMsTag(alreadySentToPMIds);
                     pmsTag = string.IsNullOrEmpty(pmsTag) ? "" : $"PM {pmsTag}:";
 
-                    var komuMessage = $"{pmsTag} **{approver.FullName}** " +
-                        $"has **{(isApprove ? "approved" : "rejected")}** the request: {requester.KomuAccountInfo} " +
+                    var Message = $"{pmsTag} **{approver.FullName}** " +
+                        $"has **{(isApprove ? "approved" : "rejected")}** the request: {requester.KomuAccountInfo(project.notifyChannel)} " +
                         $"**{GetRequestName(request, requestDetail, offTypeName)}** {requestDetail.ToKomuString()}";
 
-                    _komuService.NotifyToChannel(komuMessage, project.KomuChannelId);
+                    switch (project.notifyChannel)
+                    {
+                        case NotifyChannel.KOMU:
+                            _komuService.NotifyToChannel(Message, project.KomuChannelId);
+                            break;
+                        case NotifyChannel.Mezon:
+                            _mezonService.NotifyToChannel(project.mezonUrl, Message);
+                            break;
+                    }
                     processAlreadySentToPMs(alreadySentToPMIds, project.PMs);
                 }
 
@@ -1568,26 +1567,34 @@ namespace Timesheet.APIs.RequestDays
                 throw;
             }            
         }
-        private async Task<Expression<Func<AbsenceDayDetail, bool>>> GetPredicate(List<long> projectIds)
+        private async Task<Expression<Func<AbsenceDayDetail, bool>>> GetWithBranchAndActiveMembersPredicate(List<long> projectIds)
         {
+            // Check for permission and get branchId from current user
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
 
             var branchIdByPM = await WorkScope.GetAll<User>()
                 .Where(s => s.Id == AbpSession.UserId)
                 .Select(s => s.BranchId).FirstOrDefaultAsync();
 
+            var predicate = PredicateBuilder.New<AbsenceDayDetail>();
+
+            // Early return if no projectId provided
+            if (!projectIds.Any())
+            {
+                // Add filter for absence detail with the same current user branch
+                if (isViewBranch)
+                    return predicate.And(s => s.Request.User.BranchId == branchIdByPM);
+                return predicate;
+            }
+
             var activeMemberIds = await WorkScope.GetAll<ProjectUser>()
                 .Where(s => projectIds.Contains(s.ProjectId))
                 .Where(s => s.Type != ProjectUserType.DeActive)
                 .Select(s => s.UserId).Distinct().ToListAsync();
 
-            var predicate = PredicateBuilder.New<AbsenceDayDetail>();
             if (isViewBranch)
             {
-                if (projectIds.Count() > 0)
-                    predicate.And(s => (s.Request.User.BranchId == branchIdByPM && activeMemberIds.Contains(s.Request.UserId)) || activeMemberIds.Contains(s.Request.UserId));
-                else
-                    predicate.And(s => s.Request.User.BranchId == branchIdByPM || activeMemberIds.Contains(s.Request.UserId));
+                predicate.And(s => s.Request.User.BranchId == branchIdByPM || activeMemberIds.Contains(s.Request.UserId));
             }
             else
             {
@@ -1601,30 +1608,12 @@ namespace Timesheet.APIs.RequestDays
         public async Task<List<CountRequestDto>> GetCountRequestForUser(InputRequestDto input)
         {
             RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
-            var predicate = await GetPredicate(input.projectIds);
+            var predicate = await GetWithBranchAndActiveMembersPredicate(input.projectIds);
 
             if (input.type.Value == RequestType.Remote && input.remoteOfWeek.HasValue)
             {
-                List<DateTime> weeks = new List<DateTime>();
-
-                DateTime current = input.startDate;
-                while (current <= input.endDate)
-                {
-                    if (current.DayOfWeek == DayOfWeek.Monday)
-                    {
-                        weeks.Add(current);
-                        current = current.AddDays(7);
-                    }
-                    else current = current.AddDays(-1);
-                }
-
-                var result = new List<CountRequestDto>();
-
-                foreach(DateTime monday in weeks)
-                {
-                    var query = from s in WorkScope.GetAll<AbsenceDayDetail>()
-                    .Where(s => s.DateAt >= monday)
-                    .Where(s => s.DateAt.Date <= monday.AddDays(6))
+                var query = WorkScope.GetAll<AbsenceDayDetail>()
+                    .Where(s => s.DateAt >= input.startDate && s.DateAt <= input.endDate)
                     .Where(predicate)
                     .Where(s => !input.status.HasValue || input.status.Value < 0 ||
                             (input.status.Value == 0 ? (s.Request.Status == RequestStatus.Pending || s.Request.Status == RequestStatus.Approved) :
@@ -1633,22 +1622,40 @@ namespace Timesheet.APIs.RequestDays
                     .WhereIf(input.dayType.HasValue && input.dayType.Value > 0, s => s.DateType == input.dayType.Value)
                     .WhereIf(input.BranchId.HasValue, s => s.Request.User.BranchId == input.BranchId)
                     .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
-                    .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
-                                select s;
+                    .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId);
 
-                    var queryFilterByRemoteOfWeek = query.WhereIf(input.remoteOfWeek.Value > 0, s => query.Count(s1 => s1.CreatorUserId == s.CreatorUserId) == input.remoteOfWeek.Value)
-                        .GroupBy(s => new { s.DateAt, s.Request.Type, AbsenceType = s.AbsenceTime ?? OnDayType.None }).Select(s => new CountRequestDto
-                        {
-                            Date = s.Key.DateAt,
-                            Type = s.Key.Type,
-                            Count = s.Count(),
-                            AbsenceType = s.Key.AbsenceType
-                        });
+                var absenceDetails = await query
+                    .Select(s => new
+                    {
+                        s.DateAt,
+                        s.CreatorUserId,
+                        s.Request.Type,
+                        AbsenceType = s.AbsenceTime ?? OnDayType.None
+                    })
+                    .ToListAsync();
 
-                    var queryResult = queryFilterByRemoteOfWeek.ToList();
+                // Group elements by CreatorUserId
+                // & the first date of DateAt's week (to determine which week this DateAt falls in)
+                var weeklyAbsences = absenceDetails
+                    .GroupBy(s => new
+                    {
+                        WeekStartDate = DateTimeUtils.FirstDayOfWeek(s.DateAt),
+                        s.CreatorUserId
+                    })
+                    .Where(g => g.Count() == input.remoteOfWeek.Value)
+                    .SelectMany(g => g) // Flatten groups
+                    .ToList();
 
-                    result = result.Concat(queryResult).ToList();
-                }
+                var result = weeklyAbsences
+                    .GroupBy(s => new { s.DateAt, s.Type, s.AbsenceType })
+                    .Select(g => new CountRequestDto
+                    {
+                        Date = g.Key.DateAt,
+                        Type = g.Key.Type,
+                        Count = g.Count(),
+                        AbsenceType = g.Key.AbsenceType
+                    })
+                    .ToList();
 
                 return result;
             } else {
@@ -1688,10 +1695,14 @@ namespace Timesheet.APIs.RequestDays
             });
 
             RequestStatus[] arrayAbsenceStatus = new RequestStatus[] { RequestStatus.Pending, RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Rejected };
-            var predicate = await GetPredicate(input.projectIds);
+            var predicate = await GetWithBranchAndActiveMembersPredicate(input.projectIds);
 
-            IQueryable<GetRequestDto> query = from s in WorkScope.GetAll<AbsenceDayDetail>()
-                  //.Where(s => s.DateAt == input.date)
+            // Adjust start and end dates to ensure proper week calculations
+            var startDate = DateTimeUtils.FirstDayOfWeek(input.date);
+            var endDate = DateTimeUtils.LastDayOfWeek(input.date);
+
+            var result = await (from s in WorkScope.GetAll<AbsenceDayDetail>()
+                  .Where(s => s.DateAt >= startDate && s.DateAt <= endDate)
                   .Where(predicate)
                   .Where(s => !input.status.HasValue || input.status.Value < 0 ||
                            (input.status.Value == 0 ? (s.Request.Status == RequestStatus.Pending || s.Request.Status == RequestStatus.Approved) :
@@ -1701,54 +1712,54 @@ namespace Timesheet.APIs.RequestDays
                   .WhereIf(input.BranchId.HasValue, s => s.Request.User.BranchId == input.BranchId)
                   .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
                   .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
-                        join u in qUser on s.Request.LastModifierUserId equals u.Id into updatedUser
-                        join cu in qUser on s.CreatorUserId equals cu.Id into cuu
-                        select new GetRequestDto
-                        {
-                            Id = s.Request.Id,
-                            UserId = s.Request.UserId,
-                            AvatarPath = s.Request.User.AvatarPath,
-                            Sex = s.Request.User.Sex,
-                            FullName = s.Request.User.FullName,
-                            Name = s.Request.User.Name,
-                            Type = s.Request.User.Type,
-                            DateAt = s.DateAt,
-                            DateType = s.DateType,
-                            DayOffName = s.Request.DayOffType.Name,
-                            Hour = s.Hour,
-                            Status = s.Request.Status,
-                            ShortName = s.Request.User.Name,
-                            LeavedayType = s.Request.Type,
-                            BranchDisplayName = s.Request.User.Branch.DisplayName,
-                            BranchColor = s.Request.User.Branch.Color,
-                            AbsenceTime = s.AbsenceTime,
-                            CreateTime = s.CreationTime,
-                            CreateBy = cuu.Select(x => x.FullName).FirstOrDefault(),
-                            LastModificationTime = s.Request.LastModificationTime,
-                            LastModifierUserName = updatedUser.Select(x => x.FullName).FirstOrDefault(),
-                        };
+                               join u in qUser on s.Request.LastModifierUserId equals u.Id into updatedUser
+                               join cu in qUser on s.CreatorUserId equals cu.Id into cuu
+                               select new GetRequestDto
+                               {
+                                   Id = s.Request.Id,
+                                   UserId = s.Request.UserId,
+                                   AvatarPath = s.Request.User.AvatarPath,
+                                   Sex = s.Request.User.Sex,
+                                   FullName = s.Request.User.FullName,
+                                   Name = s.Request.User.Name,
+                                   Type = s.Request.User.Type,
+                                   DateAt = s.DateAt,
+                                   DateType = s.DateType,
+                                   DayOffName = s.Request.DayOffType.Name,
+                                   Hour = s.Hour,
+                                   Status = s.Request.Status,
+                                   ShortName = s.Request.User.Name,
+                                   LeavedayType = s.Request.Type,
+                                   BranchDisplayName = s.Request.User.Branch.DisplayName,
+                                   BranchColor = s.Request.User.Branch.Color,
+                                   AbsenceTime = s.AbsenceTime,
+                                   CreateTime = s.CreationTime,
+                                   CreateBy = cuu.Select(x => x.FullName).FirstOrDefault(),
+                                   LastModificationTime = s.Request.LastModificationTime,
+                                   LastModifierUserName = updatedUser.Select(x => x.FullName).FirstOrDefault(),
+                               }).ToListAsync();
             if(input.type.Value == RequestType.Remote && input.remoteOfWeek.HasValue && input.remoteOfWeek.Value > 0)
             {
-                DateTime monday = input.date;
-                while (monday.DayOfWeek != DayOfWeek.Monday)
-                    monday = monday.AddDays(-1);
-
-                var queryCount = query.Where(s => monday <= s.DateAt && s.DateAt <= monday.AddDays(6)).Select(s => s);
-
-                query = query.Where(s => s.DateAt == input.date).Where(s => queryCount.Count(s1 => s1.UserId == s.UserId) == input.remoteOfWeek.Value).Select(s => s);
-            } else {
-                query = query.Where(s => s.DateAt == input.date).Select(s => s);
+                // Group elements by CreatorUserId
+                result = result.GroupBy(s => s.UserId)
+                    .Where(g => g.Count() == input.remoteOfWeek.Value)
+                    .SelectMany(g => g) // Flatten groups
+                    .Where(s => s.DateAt == input.date)
+                    .ToList();
             }
-            var res = query.ToList();
+            else
+            {
+                result = result.Where(s => s.DateAt == input.date).ToList();
+            }
+            
+            var dictUserProjectInfos = await DictUserProjectInfos(result.Select(s => s.UserId));
 
-            var dictUserProjectInfos = await DictUserProjectInfos(res.Select(s => s.UserId));
-
-            res.ForEach(s =>
+            result.ForEach(s =>
             {
                 s.ProjectInfos = dictUserProjectInfos.ContainsKey(s.UserId) ? dictUserProjectInfos[s.UserId] : default;
             });
 
-            return res;
+            return result;
         }
     } 
 }

@@ -48,3 +48,28 @@ thead th:nth-child(2) {
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 }
+
+.card .header .header-dropdown {
+  position: absolute;
+  top: 15px;
+  right: 5px;
+  list-style: none;
+}
+
+
+.item-note {
+  white-space: pre-line;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  width: 100px;
+}
+.item-note:hover {
+  cursor: pointer;
+}
+
+@media screen and (max-width: 600px) {
+  .clearfix {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}

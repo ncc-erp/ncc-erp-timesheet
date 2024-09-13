@@ -2,3 +2,9 @@
 p{
     text-align: center;
 }
+
+@media screen and (min-width: 767px) {
+    .mat-typography {
+        min-width: 400px;
+    }
+}

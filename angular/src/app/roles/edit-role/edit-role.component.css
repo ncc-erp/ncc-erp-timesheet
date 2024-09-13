@@ -128,4 +128,7 @@
     .table-responsive .mat-expansion-panel {
         width: 550px;
     }
+    .role-name {
+        max-width: 80%;
+    }
 }

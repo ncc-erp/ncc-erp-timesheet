@@ -19,18 +19,18 @@
       </div>
 
 
-      <div class="body responsive">
-        <div class="row clearfix">
-          <div class="col-lg-3 col-md-2 col-sm-2 col-xs-2">
+      <div>
+        <div class="row clearfix p-20">
+          <div class="col-lg-3 col-md-2 col-sm-2 col-xs-12 mb-20">
             <button name="createBtn" mat-raised-button color="primary" class="pull-left" (click)="create()"
               *ngIf="permission.isGranted(ADD)">
               <mat-icon>add</mat-icon>New Retro
             </button>
           </div>
 
-          <div class="col-lg-8 col-md-8 pull-right">
+          <div class="col-lg-9 col-md-8 col-xs-12 pull-right">
             <div class="row clearfix">
-              <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+              <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 m-b-0">
                 <div>
                   <mat-form-field appearance="outline">
                     <mat-label>Status</mat-label>
@@ -45,7 +45,7 @@
                 </div>
               </div>
 
-              <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 pull-right">
+              <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 pull-right">
                 <mat-form-field appearance="outline">
                   <mat-label>Search by name</mat-label>
                   <input name="searchText" matInput [(ngModel)]="searchText" placeholder="Search by name" (keyup.enter)="searchOrFilter()"
@@ -58,6 +58,7 @@
 
 
         </div>
+        <div class="body responsive">
         <table class="table table-hover table-striped">
           <thead class="bg-light">
             <tr>
@@ -142,6 +143,7 @@
 
           </tbody>
         </table>
+      </div>
         <h4 class="text-center" *ngIf="listRetro.length === 0"> No data!</h4>
         <div class="abp-pagination-controls-wrapper">
           <abp-pagination-controls [totalNumber]="totalItems" (selectionChange)="getPageSize($event)"

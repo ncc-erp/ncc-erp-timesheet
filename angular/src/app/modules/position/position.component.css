@@ -3,3 +3,46 @@
     justify-content: center;
     gap: 16px;
 }
+
+.btn-action-desktop {
+    display: block;
+}
+
+.btn-action-mobile {
+    display: none;
+}
+
+@media screen and (max-width: 600px) { 
+    .action-wrapper {
+        gap: 10px;
+    }
+    
+    .btn-action-mobile {
+        display: block;
+        box-shadow: none;
+        background: transparent;
+        min-width: auto;
+        padding: 0 10px;
+    }
+
+    .btn-action-desktop {
+        display: none;
+    }
+
+    .col-action {
+        display: flex;
+        justify-content: flex-end;
+        border-bottom: 0;
+    }
+
+    tr:first-child {
+        .col-action {
+            border-top: 0;
+        }
+    }
+
+    
+    tr:last-child {
+        border-bottom: 1px solid #eee;
+    }
+}

@@ -1192,6 +1192,10 @@ namespace Timesheet.Migrations
 
                     b.Property<bool>("isAllUserBelongTo");
 
+                    b.Property<string>("mezonUrl");
+
+                    b.Property<int>("notifyChannel");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");

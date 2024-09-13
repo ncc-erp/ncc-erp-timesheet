@@ -1,3 +1,21 @@
+.ms-off::after {
+  display: none;
+}
+.ms-on::after {
+  display: inline-block;
+}
+.ms-on::after, .ms-off::after {
+  content: 'minute(s)';
+  position: absolute;
+  right: 0px;
+  transition: all .05s ease-in-out;
+}
+.ms-off:focus-within::after {
+  display: inline-block;
+}
+.opentalkFiler:focus-within{
+  padding-right: 65px;
+}
 .title-date{
     display: inline-block;
     margin-left: 20px;
@@ -36,4 +54,49 @@
 .temp{
   color: #9e9e9e;
   font-weight: 900;
+}
+
+.panel-user {
+  display: flex !important;
+  position: relative;
+}
+
+.total-work-time {
+  margin-left: auto;
+}
+
+@media screen and (max-width: 500px) {
+  :host ::ng-deep .body date-selector h2 {
+    padding: 0 10px !important;
+    font-size: 18px;
+    margin-top: 15px;
+  }
+
+  :host ::ng-deep .body date-selector .mat-button-toggle-label-content {
+    line-height: 40px;
+    padding: 0 6px;
+    width: 40px;
+  }
+
+  :host ::ng-deep .body date-selector mat-form-field {
+    padding-top: 15px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .pType {
+    line-height: 20px;
+  }
+
+  .list-timesheet {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-radius: 10px;
+    margin-right: 5px;
+  }
+
+  .card .table-timesheet {
+    padding: 0;
+  }
 }

@@ -57,6 +57,9 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   userId = this.APP_CONSTANT.FILTER_DEFAULT.All;
   users = [];
 
+  public OpenTalkJoinTime: number;
+  public OpenTalkJoinTimeType: boolean = true;
+
   Timesheet_TypeOfWorks = [
     {
       value: this.APP_CONSTANT.EnumTypeOfWork.All,
@@ -131,7 +134,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
 
   getData() {
     this.isLoading = true;
-    this.timesheetSupervisiorService.getAll(this.fromDate, this.toDate, this.filterStatus, Number(this.projectId), Number(this.userId)).subscribe(obj => {
+    this.timesheetSupervisiorService.getAll(this.fromDate, this.toDate, this.filterStatus, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType).subscribe(obj => {
       // After the supervisior choose another date, status or view.
       this.rawData = obj.result;
       // this.convertData(obj.result);
@@ -141,25 +144,17 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     });
   }
   getQuantityTimesheetSupervisorStatus(){
-    this.timesheetSupervisiorService.GetQuantityTimesheetSupervisorStatus(this.fromDate, this.toDate).subscribe((obj:any)=>{
-      let statusAll = this.Timesheet_Statuses.find(s => s.value == this.APP_CONSTANT.TimesheetStatus.All);
-        statusAll.count = obj.result.reduce((previousValue, currentValue) => previousValue + currentValue.quantity,0);
-        let statusDraft = this.Timesheet_Statuses.find(s => s.value == this.APP_CONSTANT.TimesheetStatus.Draft);
-        if(obj.result.filter(s => s.status == this.APP_CONSTANT.TimesheetStatus.Draft).length >0){
-          statusDraft.count  = obj.result.filter(s => s.status == this.APP_CONSTANT.TimesheetStatus.Draft)[0].quantity;
+    this.timesheetSupervisiorService.GetQuantityTimesheetSupervisorStatus(this.fromDate, this.toDate, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType).subscribe((obj:any)=>{
+      this.Timesheet_Statuses.forEach(item => {
+        if(item.value === this.APP_CONSTANT.TimesheetStatus.All) {
+          item.count = obj.result.reduce((previousValue, currentValue) => previousValue + currentValue.quantity, 0);
+        } else {
+          const resultListByStatus = obj.result.filter(s => s.status === item.value);
+          if (resultListByStatus.length > 0) {
+            item.count = resultListByStatus[0].quantity;
+          }
         }
-        let statusPending = this.Timesheet_Statuses.find(s => s.value == this.APP_CONSTANT.TimesheetStatus.Pending);
-        if(obj.result.filter(s => s.status == this.APP_CONSTANT.TimesheetStatus.Pending).length > 0){
-          statusPending.count = obj.result.filter(s => s.status == this.APP_CONSTANT.TimesheetStatus.Pending)[0].quantity;
-        }
-        let statusApprove = this.Timesheet_Statuses.find(s => s.value == this.APP_CONSTANT.TimesheetStatus.Approve);
-        if(obj.result.filter(s => s.status == this.APP_CONSTANT.TimesheetStatus.Approve).length >0){
-          statusApprove.count = obj.result.filter(s => s.status == this.APP_CONSTANT.TimesheetStatus.Approve)[0].quantity;
-        }
-        let statusReject = this.Timesheet_Statuses.find(s => s.value == this.APP_CONSTANT.TimesheetStatus.Reject);
-        if(obj.result.filter(s => s.status == this.APP_CONSTANT.TimesheetStatus.Reject)[0].quantity){
-          statusReject.count = obj.result.filter(s => s.status == this.APP_CONSTANT.TimesheetStatus.Reject)[0].quantity;
-        }
+      })
     })
   }
 
@@ -283,7 +278,19 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
       this.users = this.userFilter.slice();
     }
   }
-
+  filterByProject(){
+    this.OpenTalkJoinTime = void 0;
+    this.getData();
+  }
+  filterOpenTalk(type:boolean){
+    this.OpenTalkJoinTimeType = type;
+    this.getData();
+  }
+  resetFilterOpenTalk(value: string): void {
+    if (value == "") {
+      this.getData();
+    }
+  }
 }
 
 export class TimesheetGroupByDayDto {

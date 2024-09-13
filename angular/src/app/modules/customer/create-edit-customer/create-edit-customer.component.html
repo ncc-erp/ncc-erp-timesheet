@@ -1,7 +1,9 @@
 
 <form *ngIf="active" #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
-  <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane"  cdkDragHandle mat-dialog-title>{{title}} {{customer.id > 0 ? customer.name : ''}}</h2>
-  <mat-dialog-content class="mat-typography" style="min-width: 400px">
+ <div class="create-edit-customer-tilte">
+  <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane"  mat-dialog-title>{{title}} {{customer.id > 0 ? customer.name : ''}}</h2>
+ </div>
+  <div class="mat-typography" class="create-edit-customer">
     <div class="example-container">
       <mat-form-field >
         <input matInput name="name" placeholder="{{l('Name')}}" [(ngModel)]="customer.name" required maxlength="255">
@@ -13,12 +15,12 @@
         <textarea matInput name="address" placeholder="{{l('Address')}}" [(ngModel)]="customer.address"></textarea>
       </mat-form-field>
     </div>
-  </mat-dialog-content>
+  </div>
   <mat-dialog-actions align="end">
     <button name="cancelBtn" class="btn btn-default" mat-raised-button type="button" (click)="close(0)">
       {{l('Cancel')}}
     </button>
-    <button name="saveBtn" mat-raised-button color="primary" [disabled]="!createForm.form.valid || isSaving" type="submit" flex="15"
+    <button class="save-btn" name="saveBtn" mat-raised-button color="primary" [disabled]="!createForm.form.valid || isSaving" type="submit" flex="15"
       (click)="save()">
       {{l('Save')}}
     </button>

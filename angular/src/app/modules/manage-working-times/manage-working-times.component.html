@@ -42,7 +42,7 @@
             <mat-label>Search by name</mat-label>
             <input name="userName" matInput [(ngModel)]="userName" (keyup.enter)="refresh()">
           </mat-form-field>
-          <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12">
+          <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12 mb-15-mb">
             <button name="filterBtn" style="height:51px;margin-top:3px" mat-flat-button (click)="onFilter()" color="primary">
               Filter
             </button>
@@ -50,13 +50,13 @@
         </div>
         <div style="position: relative; padding: 10px 20px;">
           <div class="table-responsive" style="border: 0;" id="tbl">
-            <table class="table table-responsive customTable">
+            <table class="table table-hover table-striped">
               <thead>
                 <tr style="margin-bottom:20px">
                   <th style="text-align: center; min-width: 35px !important;">STT</th>
                   <th style="padding-left: 20px;">Name user</th>
                   <th style="text-align: center;">Create at</th>
-                  <th style="text-align: center;">Update at</th>
+                  <th style="text-align: center;" class="update-at">Update at</th>
                   <th style="text-align : center">Apply date</th>
                   <th style="text-align : center">Details</th>
                   <th style="text-align : center">Total time</th>
@@ -76,7 +76,7 @@
                           [src]='getAvatar(u)' alt="avatar">
                       </div>
                       <div style="margin-left: 3px; width: 135px; text-align: left;">
-                        <div>{{u.fullName}}</div>
+                        <div class="fullName">{{u.fullName}}</div>
                         <div>
                           <ng-container *ngIf="u.type || u.type == 0">
                             <span class="label status-label"
@@ -101,7 +101,7 @@
                   <td class="table-content">
                     {{u.reqestTime | date: 'dd/MM/yyyy HH:mm'}}
                   </td>
-                  <td class="table-content">
+                  <td class="table-content update-at">
                     {{u.lastModificationTime | date: 'dd/MM/yyyy HH:mm'}} <span *ngIf="u.lastModifierUser" class="display-block">by {{u.lastModifierUser}}</span>
                   </td>
                   <td class="table-content">

@@ -99,3 +99,30 @@
     width: 210px;
   }
   
+  .btn-dialog-close {
+    width: 40px;
+  }
+
+  @media screen and (max-width: 600px){
+    .pin {
+      margin-right: 22px;
+    }
+    td.note {
+      text-align: justify;
+      white-space: pre-line !important;
+      word-break: break-word;
+      -webkit-box-orient: vertical;
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    .pin {
+        font-size: 16px;
+    }
+
+    .btn-dialog-close {
+        width: 20px !important;
+        top: 4px;
+    }
+  }
+  

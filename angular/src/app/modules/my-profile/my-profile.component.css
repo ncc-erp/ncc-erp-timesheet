@@ -82,9 +82,9 @@ p{
     display: none;
 }
 @media (max-width: 767px){
-    ::ng-deep .container-fluid{
+    /* ::ng-deep .container-fluid{
         padding: 0px;
-    }
+    } */
     #profile{
         padding: 0px;
     }
@@ -130,3 +130,19 @@ p{
         min-width: 300px;
     }
 } 
+
+@media (max-width: 600px) {
+    .mg-0 {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .btn-right {
+        text-align: left;
+        display: flex;
+        flex-direction: row-reverse;
+        padding: 0;
+        gap: 15px;
+        width: fit-content;
+    }
+}

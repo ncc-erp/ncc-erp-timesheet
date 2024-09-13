@@ -1,7 +1,7 @@
 <div class="row clearfix" id="mytimesheettardiness">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="card main-content header-filter">
-      <div class="header">
+      <div class="header view-web">
         <h2 class="title">{{ "Check in punishments" | localize }}</h2>
         <div class="filter-date">
           <div class="item">
@@ -49,10 +49,11 @@
           </li>
         </ul>
       </div>
+      <div class="view-mobile">
+        <ng-container *ngTemplateOutlet="headerTardinessMobile"></ng-container>
+      </div>
 
-
-
-      <div style="position: relative; padding: 20px;" [busy]="isTableLoading">
+      <div class="table-padding" style="position: relative;" [busy]="isTableLoading">
         <div class="table-responsive">
           <table class="table table-hover table-striped styleUser">
             <thead>
@@ -143,7 +144,7 @@
                 <!-- <td style="text-align: center;">
                   <span *ngIf="!item.statusPunish == 0">{{item.statusPunish | punishName}}</span>
                 </td> -->
-                <td class="text-center">
+                <td class="text-center" style="word-wrap: break-word; overflow: hidden; max-width: 300px;">
                   <span *ngIf="!item.isComplain">{{item.userNote}}</span>
                   <mat-form-field class="example-full-width mt-2 bg-white " appearance="outline"
                     *ngIf=" item.isComplain">
@@ -151,7 +152,7 @@
                     <textarea name="comment" style="color: black;" matInput #textArea1 [(ngModel)]="item.userNote"></textarea>
                   </mat-form-field>
                 </td>
-                <td class="text-center">
+                <td class="text-center" style="word-wrap: break-word; overflow: hidden; max-width: 300px;">
                   <p style="white-space: pre-line;">{{item.noteReply}}</p>
                 </td>
                 <td class="text-center">
@@ -178,3 +179,65 @@
     </div>
   </div>
 </div>
+
+<ng-template #headerTardinessMobile>
+  <div class="header">
+    <div class="header-tardiness">
+      <div class="title-header">{{ "Check in punishments" | localize }}</div>
+      <button
+        name="refreshTardinessBtn"
+        style="height: 40px"
+        mat-flat-button
+        (click)="getData()"
+        color="primary"
+      >
+        Refresh
+      </button>
+    </div>
+    <div class="filter-date">
+      <div class="filer-month-year">
+        <div class="item">
+          <label>Year: </label>
+          <mat-form-field appearance="outline">
+            <mat-select
+              name="yearTardinessSelect"
+              [(value)]="year"
+              (selectionChange)="onDateChange()"
+            >
+              <mat-option *ngFor="let item of years" [value]="item">
+                {{ item }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="item">
+          <label>Month: </label>
+          <mat-form-field appearance="outline">
+            <mat-select
+              name="monthTardinessSelect"
+              [(value)]="month"
+              (selectionChange)="onDateChange()"
+            >
+              <mat-option *ngFor="let item of months" [value]="item">
+                {{ item + 1 }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="punished">
+        <div class="item">
+          <div class="total-punished">
+            {{ "Total Punished: " | localize }} {{ countLate }}
+          </div>
+        </div>
+        <div class="item">
+          <p class="text-note-complain">
+            Click vào button Complain và nhập nội dung khiếu nại nếu bạn thấy
+            không đúng.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

@@ -180,7 +180,7 @@ export const APP_CONSTANT = {
   FILTER_DEFAULT: {
     'All': -1,
   },
-
+  DEFAULT_OPENTALK_TASK_NAME: 'Open Talk',
   EnumUserStatus: {
     Active: true,
     InActive: false
@@ -232,4 +232,8 @@ export const APP_CONSTANT = {
     Expose: 1,
     Shadow: 2
   },
+  NotifyChannel: {
+    KOMU : 0,
+    Mezon : 1
+  }
 };

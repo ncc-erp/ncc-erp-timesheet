@@ -463,6 +463,7 @@ export class RetroDetailComponent
       } as RetroDetailDialogData,
       disableClose: true,
       width: "900px",
+      maxHeight: "80vh"
     });
     dialogRef.afterClosed().subscribe((res) => {
       if (res) {

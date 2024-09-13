@@ -96,7 +96,7 @@ table thead th {
 
 .report .report-right{
   justify-content: end; 
-  width: 10%;
+  width: 20%;
 }
 
 .month-level{
@@ -108,4 +108,49 @@ table thead th {
 }
 .styleUser .label{
   padding: .3em .6em .2em .6em;
+}
+
+
+
+@media screen and (max-width: 900px) {
+  .report .item.dropdown{
+    width: calc(30% - 15px);
+    margin-bottom: 20px;
+  }
+  .report .item.search{
+    width: calc(65% - 65px);
+  }
+
+  .report-right {
+    flex-wrap: nowrap;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .report {
+    display: block;
+    padding: 0 !important;
+  }
+  .report .item.dropdown{
+    width: 100%
+  }
+  .report .item.search{
+    width: 100%
+  }
+  .report .report-left{
+    width: 100%;
+    display: block;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .report .report-right {
+    display: block;
+    width: 100%;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .review {
+    touch-action: inherit !important;
+  }
 }

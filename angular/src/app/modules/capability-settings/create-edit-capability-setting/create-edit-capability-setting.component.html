@@ -30,7 +30,7 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 p-r-0 p-l-2" style="margin-bottom: 0;">
+          <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 p-r-0 p-l-2 position" style="margin-bottom: 0;">
             <mat-form-field class="w-100" appearance="outline">
               <mat-label> {{ "Position" | localize }}</mat-label>
               <mat-select name="position" [disableOptionCentering]="true" [(ngModel)]="positionId"
@@ -67,45 +67,44 @@
             </div>
             <div class="body">
               <div class="row p-l-2 p-r-2">
+                <!-- Có thể thêm nội dung ở đây nếu cần -->
               </div>
               <div class="picklist-header">
-                <div class="picklist-header_info">
-                  <div>
-                    Capability Name
-                  </div>
-                  <div class="text-center">
-                    Coefficient
-                  </div>
-                  <div class="text-center">
-                    GuildLine
-                  </div>
-                  <div class="text-center">
-                    Action
-                  </div>
-                </div>
-              </div>
-              <div cdkDropList #selectedList="cdkDropList" [cdkDropListData]="tempCapabilityList"
-                [cdkDropListConnectedTo]="[remainList]" id="selectedList" class="drop-area"
-                (cdkDropListDropped)="drop($event)">
-                <div class="picklist-item selected" *ngFor="let item of tempCapabilityList" cdkDrag>
-                  <div>
-                    {{item.capabilityName}}
-                  </div>
-                  <div style="text-align: center;">
-                    <span *ngIf="item.type == CAPABILITY_TYPE.Point">{{item.coefficient}}</span>
-                  </div>
-                  <div class="max-line-content-1" resizeCell [maxLine]="1" [innerHtml]="item.guildeLine | safeHtml">
-                  </div>
-                  <div style="display: flex;">
-                    <button [name]="'editBtn-'+item.capabilityId" type="button" mat-icon-button (click)="onEditCapabilitySetting(item)"><i
-                        class="fa-solid fa-edit" style="font-size: 20px;"></i></button>
-                    <button [name]="'removeBtn-'+item.capabilityId" (click)="deleteCapabilitySettingForUserTypePosition(item)" type="button" mat-icon-button>
-                      <i class="fa-solid fa-angle-right" style="font-size: 20px;"></i>
-                    </button>
-                  </div>
-                </div>
+                <table class="picklist-table">
+                  <thead>
+                    <tr>
+                      <th>Capability Name</th>
+                      <th class="text-center">Coefficient</th>
+                      <th class="text-center">GuildLine</th>
+                      <th class="text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of tempCapabilityList">
+                      <td>
+                        {{item.capabilityName}}
+                      </td>
+                      <td class="text-center">
+                        <span *ngIf="item.type == CAPABILITY_TYPE.Point">{{item.coefficient}}</span>
+                      </td>
+                      <td class="max-line-content-1 item-note" resizeCell [maxLine]="1" [innerHtml]="item.guildeLine | safeHtml">
+                      </td>
+                      <td>
+                        <div style="display: flex; justify-content: center;">
+                          <button [name]="'editBtn-'+item.capabilityId" type="button" mat-icon-button (click)="onEditCapabilitySetting(item)">
+                            <i class="fa-solid fa-edit" style="font-size: 20px;"></i>
+                          </button>
+                          <button [name]="'removeBtn-'+item.capabilityId" (click)="deleteCapabilitySettingForUserTypePosition(item)" type="button" mat-icon-button>
+                            <i class="fa-solid fa-angle-right" style="font-size: 20px;"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
+            
           </div>
         </div>
         <div class="picklist picklist-avai col-md-5">

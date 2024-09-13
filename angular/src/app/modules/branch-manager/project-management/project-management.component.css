@@ -1,0 +1,11 @@
+@media screen and (max-width: 600px) {
+    :host ::ng-deep .app-date-filter .date-filter {
+        padding: 0;
+        margin-bottom: 0 !important;
+    }
+
+    .row-item {
+        padding: 0;
+        margin-bottom: 0 !important;
+    }
+}

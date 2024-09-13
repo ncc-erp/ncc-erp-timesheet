@@ -1,5 +1,5 @@
 <div class="row select-row">
-    <div class="">
+    <div class="date-select">
       <mat-form-field class="w-100" appearance="outline">
         <mat-label>{{ label }}</mat-label>
         <mat-select
@@ -23,9 +23,8 @@
       style="white-space: nowrap;"
     >
       <button
-        class="h-inherit btn btn-danger btn-sl-date"
+        class="h-inherit btn btn-danger btn-sl-date btn-pre"
         (click)="nextOrPre('pre')"
-        style="margin-left: 15px;"
       >
         <i class="fas fa-chevron-left"></i>
       </button>

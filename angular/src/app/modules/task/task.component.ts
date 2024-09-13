@@ -67,7 +67,8 @@ export class TaskComponent extends AppComponentBase implements OnInit {
     let item = { id: task.id, name: task.name, type: task.type } as TaskDto;
     const dialogRef = this._dialog.open(CreateEditTaskComponent, {
       disableClose : true,
-      data: item
+      data: item,
+      panelClass: 'dialog-edit-task'
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result) {

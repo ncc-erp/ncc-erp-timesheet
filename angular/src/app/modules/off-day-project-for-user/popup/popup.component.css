@@ -106,8 +106,41 @@
     background-color: #f27024 !important;
 }
 
+.btn-dialog-close {
+    width: 40px;
+}
+
+@media screen and (max-width: 600px) {
+    .pin {
+      margin-right: 22px;
+    }
+}
+
 @media screen and (max-width:767px){
     .table-responsive {
         overflow-y: auto;
     }
+
+    .pin {
+        font-size: 16px;
+    }
+
+    .btn-dialog-close {
+        width: 20px !important;
+        top: 4px;
+    }
+
+    .col-project, .col-created-at, .col-last-modified-at {
+        display: none;
+    }
+
+    .mat-dialog-content {
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-y: auto;
+    }
 }
+
+

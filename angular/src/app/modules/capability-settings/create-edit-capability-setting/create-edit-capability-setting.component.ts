@@ -138,8 +138,8 @@ export class CreateEditCapabilitySettingComponent extends AppComponentBase imple
   public onEditCapabilitySetting(item: CapabilitySettingDto) {
     const dialog = this._dialog.open(UpdateCapabilitySettingComponent, {
       data: { ...item,  action: ActionDialog.EDIT },
-      width: '50vw',
-      height:'69vh'
+      width: '750px',
+      maxHeight: '80vh'
     })
     dialog.afterClosed().subscribe((rs) => {
       if (rs) {
@@ -201,7 +201,8 @@ export class CreateEditCapabilitySettingComponent extends AppComponentBase imple
           fromPositionId: this.positionId
         },
         width: '800px',
-        panelClass: ''
+        panelClass: '',
+        maxHeight: '80vh'
       }
     )
     cloneCapabilitySettingDialogComponent.afterClosed().subscribe(() => {

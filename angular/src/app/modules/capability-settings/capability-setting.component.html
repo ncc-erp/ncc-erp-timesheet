@@ -10,7 +10,7 @@
             </button>
             <mat-menu #headerMenu="matMenu">
               <button name="refreshBtn" mat-menu-item (click)="refresh()">
-                <mat-icon>refresh</mat-icon>
+                <mat-icon class="m-t-0">refresh</mat-icon>
                 <span>{{ "Refresh" | localize }}</span>
               </button>
             </mat-menu>
@@ -79,7 +79,7 @@
                 <th>Name</th>
                 <th class="col-type">Type</th>
                 <th class="col-coefficient">Coefficient</th>
-                <th class="col-guildLine">GuildLine</th>
+                <th class="col-guildLine">Guideline</th>
                 <th class="col-action">Action</th>
               </tr>
             </thead>
@@ -122,7 +122,7 @@
                       </ng-container>
                     </td>
                     <td>
-                      <div class="max-line-content-1" resizeCell [maxLine]="1"
+                      <div class="item-note max-line-content-1" resizeCell [maxLine]="1"
                         [innerHtml]="capability.guildeLine | safeHtml"></div>
                     </td>
                     <td class="text-center">

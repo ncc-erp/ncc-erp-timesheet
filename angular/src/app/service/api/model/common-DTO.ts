@@ -35,7 +35,7 @@ export class GetTimeSheetDto {
   billable: boolean;
   workType: string;
   isTemp: boolean;
-
+  openTalkJoinTime:number;
 }
 export enum TimeSheetStatus {
   New = 0,
@@ -79,7 +79,7 @@ export class WeekByTask {
   isEditable: boolean;
   isEditing: boolean;
   isAddNew :boolean = false;
- 
+  isExpanded?: boolean;
 }
 export class PTaskDto {
   projectTaskId: number;

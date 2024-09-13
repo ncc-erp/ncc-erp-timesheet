@@ -19,14 +19,14 @@
       </div>
       <div class="body" style="height: 100%">
         <div class="row">
-          <div class="col-lg-10">
+          <div class="col-lg-10 padding-item margin-b-0 search-wrapper">
             <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Search by User Name</mat-label>
               <input type="search" [(ngModel)]="searchText" name="Search" (keyup.enter)="refresh()" matInput>
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
           </div>
-          <div class="col-lg-2" style="justify-content: center; display: flex;">
+          <div class="col-lg-2 padding-item btn-new-request" style="display: flex;">
             <div class="gr-btn-action">
               <button name="createBtn" *ngIf="permission.isGranted(TeamBuilding_DetailPM_CreateRequest)" style="margin-top: 10px" mat-raised-button color="primary" class="btn btn-border btn-add" (click) = "pmSendReQuest()" >
                 <div>
@@ -38,7 +38,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+          <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 padding-item">
             <div>
               <mat-form-field appearance="outline">
                 <mat-label >Projects</mat-label>
@@ -61,7 +61,7 @@
               </mat-form-field>
             </div>
           </div>
-          <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+          <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 padding-item">
             <div>
               <mat-form-field appearance="outline">
                 <mat-label >Requester Email Address</mat-label>
@@ -84,7 +84,7 @@
               </mat-form-field>
             </div>
           </div>
-          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12 padding-item">
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Month</mat-label>
@@ -99,7 +99,7 @@
               </mat-form-field>
             </div>
           </div>
-          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12 padding-item">
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Year</mat-label>
@@ -113,7 +113,7 @@
               </mat-form-field>
             </div>
           </div>
-          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12 padding-item">
             <div>
               <mat-form-field appearance="outline">
                 <mat-label>Status</mat-label>
@@ -147,12 +147,12 @@
             </thead>
             <tbody>
               <tr *ngFor="let item of listDetail | paginate: { id: 'listDetail', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems };index as i ">
-                <td class="text-center">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
-                <td class="text-center">{{item.applyMonth | date: 'MM' }}</td>
-                <td class="text-center">{{item.applyMonth | date: 'yyyy' }}</td>
-                <td class="text-center">{{item.projectName}}</td>
-                <td class="text-center">{{item.pmEmailAddress}}</td>
-                <td style="padding: 0px">
+                <td class="text-center table-td">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
+                <td class="text-center table-td">{{item.applyMonth | date: 'MM' }}</td>
+                <td class="text-center table-td">{{item.applyMonth | date: 'yyyy' }}</td>
+                <td class="text-center table-td">{{item.projectName}}</td>
+                <td class="text-center table-td">{{item.pmEmailAddress}}</td>
+                <td class="table-td" style="padding: 0px">
                   <div class="info-name">
                     <div class="info-name-box">
                       <div class="full-name">{{item.employeeFullName}} </div>
@@ -160,8 +160,8 @@
                     </div>
                   </div>
                 </td>
-                <td class="text-center">{{item.money | currency:'VND':''}}</td>
-                <td style="padding: 0px">
+                <td class="text-center table-td">{{item.money | currency:'VND':''}}</td>
+                <td class="table-td" style="padding: 0px">
                   <div class="info-name">
                     <div class="info-name-box">
                       <div class="full-name">{{item.requesterFullName}} </div>
@@ -169,11 +169,11 @@
                     </div>
                   </div>
                 </td>
-                <td class="updated-at text-center">{{item.creationTime | date: 'dd/MM/yyyy HH:mm:ss'}} <span
+                <td class="updated-at text-center table-td">{{item.creationTime | date: 'dd/MM/yyyy HH:mm:ss'}} <span
                   *ngIf="item.lastModifierUserName">by</span> {{item.lastModifierUserName}}</td>
-                <td class="updated-at text-center">{{item.updatedAt | date: 'dd/MM/yyyy HH:mm:ss'}} <span
+                <td class="updated-at text-center table-td">{{item.updatedAt | date: 'dd/MM/yyyy HH:mm:ss'}} <span
                   *ngIf="item.updatedName">by</span> {{item.updatedName}}</td>
-                <td class="text-center">
+                <td class="text-center table-td">
                   <span [ngClass]="{'bg-grey': item.status === 0, 'bg-yellow': item.status === 1, 'bg-blue': item.status === 2}"
                     class="label status-label">
                     {{listStatus[item.status + 1].title}}

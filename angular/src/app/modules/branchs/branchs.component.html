@@ -17,7 +17,7 @@
           </li>
         </ul>
       </div>
-      <div class="body table-responsive">
+      <div class="body">
         <div class="row clearfix">
           <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
             <button name="createBtn" *ngIf="permission.isGranted(ADD)" mat-raised-button color="primary" class="pull-left"
@@ -27,7 +27,7 @@
           </div>
 
 
-          <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 pull-right">
+          <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 pull-right">
             <mat-form-field appearance="outline">
               <mat-label>Search by name, code, display name of branch</mat-label>
               <input matInput [(ngModel)]="searchText" name="searchText" placeholder="{{l('Search by name, code, display name of branch')}}"
@@ -37,42 +37,56 @@
           </div>
 
         </div>
-        <table class="table table-hover table-striped">
-          <thead class="bg-light">
-            <tr>
-              <th class="order">#</th>
-              <th>Name</th>
-              <th>Display Name</th>
-              <th>Code</th>
-              <th>Color</th>
-              <th>Working Time</th>
-              <th *ngIf="permission.isGranted(DELETE) || permission.isGranted(EDIT)" style="text-align:right">Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              *ngFor="let branch of branchs | paginate: { id: 'server', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems };index as i ">
-              <td style="text-align: center;">{{ i+1 }}</td>
-              <td>{{ branch.name }}</td>
-              <td>{{ branch.displayName }}</td>
-              <td>{{ branch.code }}</td>
-              <td>
-                <span class="label status-label" [style.backgroundColor]="branch.color"> {{ branch.color }}</span>
-              </td>
-              <td>
-                <p>M: {{ branch.morningStartAt }} - {{ branch.morningEndAt }} [{{ branch.morningWorking }}]</p>
-                <p>A: {{ branch.afternoonStartAt }} - {{ branch.afternoonEndAt }} [{{ branch.afternoonWorking }}]</p>
-              </td>
-              <td>
-                <button [name]="'deleteBtn-'+branch.id" *ngIf="permission.isGranted(DELETE)" mat-raised-button (click)="delete(branch)"
-                  class="btn btn-danger waves-effect pull-right">Delete</button>
-                <button [name]="'editBtn-'+branch.id" *ngIf="permission.isGranted(EDIT)" mat-raised-button (click)="edit(branch)"
-                  class="btn btn-primary waves-effect pull-right" style="margin-right: 12px;">Edit</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-responsive" style="border: 0;">
+          <table class="table table-hover table-striped">
+            <thead class="bg-light">
+              <tr>
+                <th class="order">#</th>
+                <th>Name</th>
+                <th>Display Name</th>
+                <th>Code</th>
+                <th>Color</th>
+                <th>Working Time</th>
+                <th *ngIf="permission.isGranted(DELETE) || permission.isGranted(EDIT)" style="text-align:right">Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let branch of branchs | paginate: { id: 'server', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems };index as i ">
+                <td style="text-align: center;">{{ i+1 }}</td>
+                <td>{{ branch.name }}</td>
+                <td>{{ branch.displayName }}</td>
+                <td>{{ branch.code }}</td>
+                <td>
+                  <span class="label status-label" [style.backgroundColor]="branch.color"> {{ branch.color }}</span>
+                </td>
+                <td>
+                  <p>M: {{ branch.morningStartAt }} - {{ branch.morningEndAt }} [{{ branch.morningWorking }}]</p>
+                  <p>A: {{ branch.afternoonStartAt }} - {{ branch.afternoonEndAt }} [{{ branch.afternoonWorking }}]</p>
+                </td>
+                <td class="col-action">
+                  <button [name]="'deleteBtn-'+branch.id" *ngIf="permission.isGranted(DELETE)" mat-raised-button (click)="delete(branch)"
+                    class="btn btn-danger waves-effect pull-right btn-action-desktop">Delete</button>
+                  <button [name]="'editBtn-'+branch.id" *ngIf="permission.isGranted(EDIT)" mat-raised-button (click)="edit(branch)"
+                    class="btn btn-primary waves-effect pull-right btn-action-desktop" style="margin-right: 12px;">Edit</button>
+                  <button
+                    *ngIf="permission.isGranted(EDIT)"
+                    [name]="'editBtn-'+branch.id" (click)="edit(branch)" mat-icon-button color="primary"
+                    class="btn-action-mobile">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    *ngIf="permission.isGranted(DELETE)"
+                    [name]="'deleteBtn-'+branch.id" (click)="delete(branch)" mat-icon-button color="primary"
+                    class="btn-action-mobile">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <div class="text-align: center;" *ngIf="totalItems > pageSize">
           <pagination-controls (pageChange)="getDataPage($event)" id="server"></pagination-controls>
         </div>

@@ -268,5 +268,78 @@ pre {
         width: 150px;
         flex: none;
     }
+
+    .row1 {
+        display: flex;
+        gap: 15px;
+        padding: 0 15px;
+    }
+
+    .row1-child {
+        padding: 0;
+    }
 }
+
+.icon-refresh-mobile {
+    display: none;
+}
+
+@media screen and (max-width: 600px) {
+    .icon-refresh-mobile {
+        display: block;
+        position: absolute;
+        right: 0;
+        top: 20px;
+    }
+
+    .icon-refresh-desktop, .avatar-user-request, .badge-time-request {
+        display: none;
+    }
+
+    .item2 {
+        order: 1;
+        margin-top: 10px;
+        width: 100% !important;
+    }
+
+    .header .title { 
+        margin-bottom: 25px;
+    }
+
+    .filter-work-calendar {
+        display: flex;
+        gap: 10px;
+    }
+
+    .option-off-type {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .item-first {
+        width: 27%;
+    }
+
+    .item-second {
+        width: 68%;
+    }
+
+    .item-filter {
+        width: 100%;
+        text-align: left;
+        margin-top: 0 !important;
+    }
+
+    .row1 {
+        flex-wrap: wrap;
+        row-gap: 0;
+    }
+
+    .cal-cell-top {
+        min-width: 135px;
+    }
+}
+
+
+
 

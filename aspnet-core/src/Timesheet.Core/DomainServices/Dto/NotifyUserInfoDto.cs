@@ -20,9 +20,16 @@ namespace Timesheet.DomainServices.Dto
         public double AfternoonWorking { get; set; }
         public string UserName => EmailAddress.Split('@')[0];
 
-        public string KomuAccountTag()
+        public string KomuAccountTag(NotifyChannel notifyChannel)
         {
-            return KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
+            switch (notifyChannel)
+            {
+                case NotifyChannel.KOMU:
+                    return KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
+                case NotifyChannel.Mezon:
+                    return $"@{UserName}";
+            }
+            return default;
         }
 
         public string KomuAccountNoTag()
@@ -30,13 +37,19 @@ namespace Timesheet.DomainServices.Dto
             return $"**{FullName}** [{CommonUtils.BranchName(Branch)} - {CommonUtils.UserTypeName(Type)}]";
         }
 
-        public string KomuAccountInfo
+        public string KomuAccountInfo(NotifyChannel notifyChannel)
         {
-            get
+            var user=FullName;
+            switch (notifyChannel)
             {
-                var user = KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
-                return $"{user} [{ BranchDisplayName } - { CommonUtils.UserTypeName(Type)}]";
+                case NotifyChannel.KOMU:
+                    user = KomuUserId.HasValue ? $"<@{KomuUserId}>" : $"{{{UserName}}}";
+                    break;
+                case NotifyChannel.Mezon:
+                    user = $"@{UserName}";
+                    break;
             }
+            return $"{user} [{ BranchDisplayName } - { CommonUtils.UserTypeName(Type)}]";
         }
 
         public string ToEmailString()

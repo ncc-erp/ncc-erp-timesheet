@@ -121,8 +121,39 @@ td.note {
 .day-chip-tardiness-leave-early {
   background-color: #f27024 !important;
 }
-@media screen and (max-width:767px){
+
+.btn-dialog-close {
+  width: 40px;
+}
+
+@media screen and (max-width: 600px){
+  .pin {
+    margin-right: 22px;
+  }
+
+  .col-projectPm {
+    display: none;
+  }
+
+  .note {
+    white-space: normal !important;
+  }
+}
+
+@media screen and (max-width: 767px){
   .table-responsive {
       overflow-y: auto;
+  }
+
+  .btn-dialog-close {
+    width: 20px;
+  }
+
+  .pin {
+    font-size: 16px;
+  }
+
+  .btn-dialog-close {
+    top: 5px;
   }
 }

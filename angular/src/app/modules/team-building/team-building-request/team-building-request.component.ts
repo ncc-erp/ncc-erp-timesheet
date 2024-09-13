@@ -157,7 +157,7 @@ export class TeamBuildingRequestComponent
     const dialogRef = this._dialog.open(DisburseRequestComponent, {
       disableClose: true,
       width: "1200px",
-      height: "80vh",
+      maxWidth: 'calc(100% - 12px)',
       data: {
         id: item.id,
         requesterId: item.requesterId,
@@ -178,6 +178,7 @@ export class TeamBuildingRequestComponent
     const dialogRef = this._dialog.open(RequestDetailComponent, {
       disableClose: true,
       width: "900px",
+      maxWidth:'calc(100% - 16px)',
       data: id,
     });
     dialogRef.afterClosed().subscribe((result) => {
@@ -190,7 +191,10 @@ export class TeamBuildingRequestComponent
   pmEditRequest(id: number): void {
     const dialogRef = this._dialog.open(EditRequestComponent, {
       disableClose: true,
-      width: window.innerWidth >= 1000 ? "1000px" : "90%",
+      width: window.innerWidth >= 1000 ? "1000px" : "100%",
+      maxWidth: 'calc(100% - 16px)',
+      height: "80vh",
+      panelClass: 'custom-pm-edit-dialog',
       data: id,
     });
     dialogRef.afterClosed().subscribe((result) => {

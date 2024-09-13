@@ -73,6 +73,12 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
   autoSubmitAt: string;
   specialProjectTask = {} as SpecialProjectTaskSettingDTO;
   isRefresh: boolean = false;
+  statusList = [
+    { status: 1, label: 'Pending', class: 'bg-teal' },
+    { status: 2, label: 'Approved', class: 'bg-green' },
+    { status: 3, label: 'Rejected', class: 'bg-grey' },
+    { status: 0, label: 'New', class: 'bg-light-green' },
+  ];
   constructor(
     @Optional() @Inject(MAT_DIALOG_DATA) private data: any,
     injector: Injector,
@@ -233,7 +239,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
           typeOfWork: obj.typeOfWork,
           isCharged: obj.isCharged,
           totalTime: 0,
-
+          isExpanded: false,
 
           monWorkingTime: that.convertMinuteToHour(monWorkingTime),
           tueWorkingTime: that.convertMinuteToHour(tueWorkingTime),
@@ -269,6 +275,8 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
   showCreateOrEditTimesheetItemDialog(item?) {
     const dialogRef = this._dialog.open(CreateEditTimesheetItemComponent, {
       disableClose: true,
+      width: `calc(100% - 24px)`,
+      maxWidth: '400px',
       data: {
         dateAt: this.displayDay,
         projectIncludingTasks: this.projectIncludingTasks,
@@ -290,6 +298,8 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
 
   showCreateOrEditTimesheetByWeek(item?) {
     const dialogRef = this._dialog.open(CreateEditTimesheetByWeekComponent, {
+      width: `calc(100% - 24px)`,
+      maxWidth: '400px',
       disableClose: true,
       data: {
         projectIncludingTasks: this.projectIncludingTasks,
@@ -310,6 +320,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
         a.isEditable = true;
         a.isEditing = true;
         a.isAddNew = true;
+        a.isExpanded = true;
         this.mapWeekByTask.push(a);
       }
     }
@@ -602,6 +613,10 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
         }
       }
     );
+  }
+
+  handleExpand(item): void {
+    item.isExpanded = !item.isExpanded;
   }
 
   public mask1 = {

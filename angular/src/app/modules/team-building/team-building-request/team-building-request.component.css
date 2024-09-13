@@ -1,37 +1,65 @@
 .align-item{
-    display: flex;
-    align-items: center;
-    height: 32px;
+  display: flex;
+  align-items: center;
+  height: 32px;
 }
 .margin{
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 .info-name-box{
-    margin: 5px 10px 0px 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+  margin: 5px 10px 0px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .info-name{
-    display: flex;
-    align-items: center;
-    max-width: 400px;
-    overflow: hidden;
+  display: flex;
+  align-items: center;
+  max-width: 400px;
+  overflow: hidden;
 }
 .email:hover {
-    text-decoration: underline;
-    cursor: pointer;
-    color: #41a0e4;
+  text-decoration: underline;
+  cursor: pointer;
+  color: #41a0e4;
 }
 
 .red {
-    color: red;
-    font-weight: bold;
+  color: red;
+  font-weight: bold;
 }
 
 .green {
-    color: green;
-    font-weight: bold;
+  color: green;
+  font-weight: bold;
+}
+
+@media screen and (max-width: 600px) {
+    .table-responsive > .table > tbody > tr > td,
+    .table-responsive > .table > tbody > tr > th,
+    .table-responsive > .table > tfoot > tr > td,
+    .table-responsive > .table > tfoot > tr > th,
+    .table-responsive > .table > thead > tr > td,
+    .table-responsive > .table > thead > tr > th {
+      white-space: pre-wrap;
+    }
+
+    ::ng-deep .mat-form-field-wrapper {
+      padding-bottom: 0;
+    }
+
+    .row {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .padding-0 {
+      padding: 0;
+    }
+
+    ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .custom-pm-edit-dialog {
+      margin: auto !important;
+    }
 }

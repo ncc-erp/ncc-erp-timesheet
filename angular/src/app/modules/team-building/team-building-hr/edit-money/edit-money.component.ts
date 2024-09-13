@@ -8,6 +8,7 @@ import { TeamBuildingHRService } from '@app/service/api/team-building-hr.service
 @Component({
   selector: 'app-edit-money',
   templateUrl: './edit-money.component.html',
+  styleUrls: ['./edit-money.component.css']
 })
 export class EditMoneyComponent
 extends AppComponentBase

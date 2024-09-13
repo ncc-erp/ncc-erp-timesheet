@@ -1,4 +1,49 @@
 .align-item {
+  display: flex;
+  align-items: center;
+}
+
+.header-title {
+  display: flex;
+  justify-content: space-between;
+}
+
+@media screen and (max-width: 600px) {
+  :host ::ng-deep .mat-dialog-container {
+    padding: 16px;
+    overflow: hidden;
+  }
+  :host ::ng-deep .mat-dialog-content {
+    padding: 0;
+    margin: 0;
+    max-height: 300px !important;
+    overflow: auto;
+  }
+  :host ::ng-deep .mat-card {
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin-top: 8px;
+  }
+  :host ::ng-deep .mat-card-content {
+    overflow: auto;
+    max-height: 300px;
+  }
+  hr {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+  .header-title {
     display: flex;
-    align-items: center
+    flex-direction: column;
+  }
+  .mat-dialog-title {
+    margin: 0;
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .wrapper-disburse-money {
+    margin-top: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

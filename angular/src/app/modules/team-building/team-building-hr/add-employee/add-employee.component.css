@@ -2,3 +2,14 @@
     align-items: center;
     display: flex;
 }
+
+@media screen and (max-width: 600px) {
+    .align-item {
+        display: block;
+    }
+
+    .form-group {
+        width: auto;
+        margin-bottom: 0px;
+    }
+}

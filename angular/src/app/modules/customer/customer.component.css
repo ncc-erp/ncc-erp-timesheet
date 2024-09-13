@@ -1,0 +1,105 @@
+.customer-wrapper .customer-table-column-action-label {
+    text-align: right;
+}
+
+.custom-dialog-container {
+    width: 40% !important;
+    background-color: aqua;
+}
+
+.customer-wrapper .customer-header-menu{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.customer-wrapper .customer-header-menu .customer-header-search-wrapper{
+    display: flex;
+    flex: 1;
+    padding: 0px;
+    max-width: 450px;
+}
+.customer-wrapper .customer-table-column-action{
+    display: flex;
+    gap: 10px;
+    justify-content: end;
+}
+.customer-wrapper .customer-table-column-action_response{
+    display: none;
+}
+::ng-deep .customer-wrapper .customer-header-menu .customer-header-search-wrapper .mat-form-field-appearance-outline .mat-form-field-wrapper{
+    padding: 0px !important;
+    margin: 0px !important;
+}
+
+.btn-new-client {
+    margin: 12px 0;
+}
+
+@media screen and (max-width: 600px) { 
+
+    ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .customer-dialog-container{
+        width: 90% !important;
+    }
+
+    .customer-wrapper .customer-header-menu .customer-header-search-wrapper{
+        max-width: unset;
+        width: 100%;
+    }
+    
+    ::ng-deep .mat-button-wrapper{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .customer-table-column-action .customer-table-action-icon {
+        display: block;
+    }
+
+    .customer-wrapper .customer-table-column-action{
+        display: none;
+    }
+
+    .customer-wrapper .customer-table-column-action_response{
+        display: flex;
+    }
+
+    .customer-table-column-action .customer-table-action-label{
+        display: none !important;
+    }
+
+    .customer-wrapper .customer-header-menu{
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: start;
+        gap: 10px;
+    }
+
+    .customer-header-menu {
+        display: flex;
+        flex-direction: column-reverse;
+
+    }
+    .customer-header-menu .customer-header-search-wrapper {
+        width: 100%;
+        margin-bottom: 0px;
+    }
+
+    .customer-table-column-action {
+        display: flex;
+        gap: 10px;
+    }
+
+    .customer-wrapper .customer-table-column-action-label {
+        text-align: left;
+    }
+
+    .customer-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+    ::ng-deep .customer-pagination-controls .ngx-pagination{
+        padding: 0px !important;
+    }
+}

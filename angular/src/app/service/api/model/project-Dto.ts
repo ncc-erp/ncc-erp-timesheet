@@ -20,6 +20,8 @@ export interface ProjectDto {
     tasks: TaskProjectDto[];
     users: UserProjectDto[];
     projectTargetUsers: ProjectTargetUsersDto[];
+    notifyChannel : number;
+    mezonUrl : string;
     komuChannelId: string;
     isNotifyToKomu: boolean;
     isNoticeKMSubmitTS: boolean;

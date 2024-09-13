@@ -84,6 +84,26 @@
    width: 100%;
 }
 
+@media screen and (max-width: 767px) {
+   .btn-project {
+      margin-bottom: 0 !important;
+   }
+
+   .pm {
+      white-space: nowrap;
+      overflow: hidden; 
+      text-overflow: ellipsis;
+      max-width: 200px;
+   }
+
+   .td--project-info {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      width: 100%;
+   }
+}
+
 @media screen and (max-width: 990px) {
    .btn--add{
       min-width: 170px;
@@ -112,4 +132,20 @@
    }
 
 }
+
+.td--project {
+   padding-bottom: 10px !important;
+   display: flex;
+   white-space: break-spaces !important;
+}
+
+.btn-action {
+   margin-left: auto;
+}
+
+.pm, .member, .pType, .pTime {
+   display: inline-block;
+   margin: 2px;
+}
+
 

@@ -13,7 +13,7 @@
 <div *ngIf="requestDetailInfo?.teamBuildingDetailDtos.length == 0">This status of detail is cancelled or rejected</div>
   <div *ngIf="requestDetailInfo?.teamBuildingDetailDtos.length > 0">
     <div class="table-responsive">
-        <div class="fixedHeader" style="max-height: 507px;">
+        <div class="fixedHeader max-h-table">
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
@@ -57,7 +57,7 @@
       <!-- <div><span>Remain money: </span><b>{{lastRemainMoney |  currency:'VND':'' }}</b></div> -->
 
 
-           <div style="max-width: 850px; overflow-x: auto; margin-top: 10px;" *ngIf="file.length > 0" class="d-flex">
+           <div style="max-width: 850px; overflow-x: auto; margin-top: 10px; flex-wrap: wrap; gap: 4px;" *ngIf="file.length > 0" class="d-flex">
             <label style="margin-right: 10px;">Invoice Image/URL:</label>
             <span *ngFor="let files of file">
               <button style="margin-right: 10px;" [name]="'imgBtn-'+file.id" (click)="openUrl(files.url)">{{ files.fileName }}</button>

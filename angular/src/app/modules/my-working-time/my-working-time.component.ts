@@ -66,7 +66,7 @@ export class MyWorkingTimeComponent extends AppComponentBase implements OnInit {
     let item = {
       id: infor.id,
       reqestTime: moment().format('L') + " " + moment().format('LT'),
-      applyDate: infor.applyDate,
+      applyDate: infor.applyDate || new Date(),
       morningStartTime: infor.morningStartTime,
       morningEndTime: infor.morningEndTime,
       morningWorkingTime: infor.morningWorkingTime,
@@ -76,8 +76,11 @@ export class MyWorkingTimeComponent extends AppComponentBase implements OnInit {
       status: infor.status
     } as RegisterInforDto;
     const dialogRef = this.dialog.open(RegisterWorkingTimeComponent, {
-      width: '40%',
-      data: item
+      width:'calc(100% - 16px)',
+      maxWidth: '400px',
+      maxHeight: '80vh',
+      data: item,
+      panelClass: 'custom-dialog-container'
     });
 
     dialogRef.afterClosed().subscribe(result => {

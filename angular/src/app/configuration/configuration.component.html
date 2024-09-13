@@ -1678,13 +1678,13 @@
                     <mat-checkbox style="padding: 0;" class="autoSubmit"
                       [checked]="notificationSetting.sendKomuSubmitTimesheet == 'true'" name="sendKomuSubmitTimesheet"
                       (change)="onSendKomuSubmitTimesheet($event.checked)" [disabled]="!isEditNotificationSetting">
-                      Enable Komu notification for timesheet</mat-checkbox>
+                      Enable Komu/Mezon notification for timesheet</mat-checkbox>
                   </div>
                   <div class="col-md-12">
                     <mat-checkbox style="padding: 0;" class="autoSubmit"
                       [checked]="notificationSetting.sendKomuRequest == 'true'" name="sendKomuRequest"
                       (change)="onSendKomuRequest($event.checked)" [disabled]="!isEditNotificationSetting">
-                      Enable Komu notification for request</mat-checkbox>
+                      Enable Komu/Mezon notification for request</mat-checkbox>
                   </div>
                 </div>
               </form>

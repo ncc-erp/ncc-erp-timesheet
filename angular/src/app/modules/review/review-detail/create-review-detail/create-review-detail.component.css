@@ -35,3 +35,36 @@
     position: absolute;
     margin-left: 3px;
 }
+
+@media (max-width: 600px) {
+ .format-col {
+    flex-direction: column;
+ }
+
+ .mat-dialog-content {
+    display: block;
+    margin: 0;
+    padding: 0;
+ }
+
+ .format-col {
+    flex-direction: column;
+    align-items: start;
+    margin: 0;
+    padding: 0;
+ }
+
+ .row-item-rest {
+    width: 100%;
+    margin-left: 0;
+    padding: 0;
+ }
+
+ .col-form-label {
+    width: 100%;
+    padding: 0;
+ }
+ .title {
+    margin-right: 5px;
+ }
+}
