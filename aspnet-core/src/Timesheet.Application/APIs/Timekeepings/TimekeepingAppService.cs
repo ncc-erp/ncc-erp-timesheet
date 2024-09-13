@@ -161,6 +161,62 @@ namespace Timesheet.APIs.Timekeepings
                           }).OrderByDescending(t => t.Date).ToListAsync();
         }
 
+        private async Task<CheckInOutTimeDto> CaculateRemoteInfo(Timekeeping timekeeping)
+        {
+            var t = new CheckInOutTimeDto { };
+            t.isRemote = false;
+            // Mốc phạt KomuTracker: 0-2h, 2-4h, 4-6h, 6-7h
+            t.TrackerTimeLevel = new List<float>() { 2 * 60, 4 * 60, 6 * 60, 7 * 60 }; ;
+
+            var AbsenceUsers = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request)
+                .Where(s => s.DateAt.Date == timekeeping.DateAt.Date
+                && s.Request.Status == RequestStatus.Approved
+                && s.Request.UserId == timekeeping.UserId)
+                .Select(s => new MapAbsenceUserDto
+                {
+                    UserId = s.Request.UserId,
+                    DateType = s.DateType,//morning, afternoon, fullday, custom
+                    AbsenceTime = s.AbsenceTime,//dau. giua, cuoi
+                    Hour = s.Hour,
+                    Type = s.Request.Type,
+                }).OrderBy(s=>s.Type).ToList();
+
+            var user = WorkScope.Get<User>(timekeeping.UserId.Value);
+
+            foreach (var absenceUser in AbsenceUsers)
+            {
+                if(absenceUser.Type == RequestType.Off && absenceUser.DateType == DayType.Custom)
+                {
+                    // Mốc phạt KomuTracker: 0-2h, 2-3h, 3-4h, 4 -> (7 - Thời gian DM/VS)h
+                    t.TrackerTimeLevel = new List<float>() { 2 * 60, 3 * 60, 4 * 60, (7 - (float)absenceUser.Hour) * 60 };
+                }
+                else if(absenceUser.Type == RequestType.Remote)
+                {
+                    t.isRemote = true;
+                    switch (absenceUser.DateType)
+                    {
+                        case DayType.Fullday:
+                            {
+                                break;
+                            }
+                        case DayType.Morning:
+                            {
+                                // Mốc phạt KomuTracker: 0-1h, 1-2h, 2-3h, 3-4h
+                                t.TrackerTimeLevel = new List<float>() { 1 * 60, 2 * 60, 3 * 60, 4 * 60 };
+                                break;
+                            }
+                        case DayType.Afternoon:
+                            {
+                                // Mốc phạt KomuTracker: 0-1h, 1-2h, 2-2.5h, 2.5-3h
+                                t.TrackerTimeLevel = new List<float>() { 1 * 60, 2 * 60, 2.5f * 60, 3 * 60 };
+                                break;
+                            }
+                    }
+                }
+            }
+            return t;
+        }
+
         private async Task SetMoneyPunishByType(Timekeeping timekeeping)
         {
             var checkInCheckOutPunishmentSetting = await SettingManager.GetSettingValueAsync(AppSettingNames.CheckInCheckOutPunishmentSetting);
@@ -168,7 +224,32 @@ namespace Timesheet.APIs.Timekeepings
             var MoneyPunish = rs.Where(x => x.Id == timekeeping.StatusPunish).Select(x => x.Money).FirstOrDefault();
             if (timekeeping.CountPunishDaily > 0) MoneyPunish += rs.Where(x => x.Id == CheckInCheckOutPunishmentType.NoDaily).Select(x => x.Money).FirstOrDefault() * timekeeping.CountPunishDaily;
             if (timekeeping.CountPunishMention > 0) MoneyPunish += rs.Where(x => x.Id == CheckInCheckOutPunishmentType.NoReplyMention).Select(x => x.Money).FirstOrDefault() * timekeeping.CountPunishMention;
-            timekeeping.MoneyPunish = MoneyPunish;
+
+            var AbsenceUsers = await CaculateRemoteInfo(timekeeping);
+            var trackerTime = DateTimeUtils.ConvertHHmmssToMinutes(timekeeping.TrackerTime);
+            if (AbsenceUsers != null && AbsenceUsers.isRemote)
+            {
+                if (trackerTime <= AbsenceUsers.TrackerTimeLevel[0])
+                {
+                    timekeeping.MoneyPunish = rs.Where(x => x.Id == CheckInCheckOutPunishmentType.TrackerTime0).Select(x => x.Money).FirstOrDefault();
+                }
+                else if (trackerTime <= AbsenceUsers.TrackerTimeLevel[1])
+                {
+                    timekeeping.MoneyPunish = rs.Where(x => x.Id == CheckInCheckOutPunishmentType.TrackerTime1).Select(x => x.Money).FirstOrDefault();
+                }
+                else if (trackerTime <= AbsenceUsers.TrackerTimeLevel[2])
+                {
+                    timekeeping.MoneyPunish = rs.Where(x => x.Id == CheckInCheckOutPunishmentType.TrackerTime2).Select(x => x.Money).FirstOrDefault();
+                }
+                else if (trackerTime <= AbsenceUsers.TrackerTimeLevel[3])
+                {
+                    timekeeping.MoneyPunish = rs.Where(x => x.Id == CheckInCheckOutPunishmentType.TrackerTime3).Select(x => x.Money).FirstOrDefault();
+                }
+                else timekeeping.MoneyPunish = 0;
+            }
+            else timekeeping.MoneyPunish = 0;
+
+            timekeeping.MoneyPunish += MoneyPunish;
         }
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_Edit)]
         [HttpPost]
@@ -196,8 +277,11 @@ namespace Timesheet.APIs.Timekeepings
             t.RegisterCheckIn = input.RegisterCheckIn;
             t.RegisterCheckOut = input.RegisterCheckOut;
             t.TrackerTime = input.TrackerTime;
+
+            var AbsenceUsers = await CaculateRemoteInfo(t);
+
             await timekeepingServices.CheckIsPunished(t);
-            await timekeepingServices.CheckIsPunishedByRule(t, LimitedMinute, DateTimeUtils.ConvertHHmmssToMinutes(input.TrackerTime));
+            await timekeepingServices.CheckIsPunishedByRule(t, LimitedMinute, DateTimeUtils.ConvertHHmmssToMinutes(input.TrackerTime), AbsenceUsers);
             await WorkScope.GetRepo<Timekeeping>().UpdateAsync(t);
             return t;
         }

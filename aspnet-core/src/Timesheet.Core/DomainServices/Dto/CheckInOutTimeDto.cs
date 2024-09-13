@@ -11,6 +11,8 @@ namespace Timesheet.DomainServices.Dto
         public string CheckIn { get; set; }
         public string CheckOut { get; set; }
         public string Note { get; set; }
+        public bool isRemote { get; set; }
+        public List<float> TrackerTimeLevel { get; set; }
         public DayType AbsenceDayType { get; set; }
     }
 }

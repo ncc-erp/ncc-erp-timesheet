@@ -9,9 +9,23 @@ import { TimekeepingDto } from '@app/service/api/model/report-timesheet-Dto';
 export class PunishNamePipe implements PipeTransform {
     transform(data: TimekeepingDto, PunishSetting): string | undefined {
         let PunishString = "";
-        if(data.statusPunish != APP_CONSTANT.PunishType.NoPunish)PunishString+=APP_CONSTANT.PunishRules.find(rule => rule.value === data.statusPunish).name + ": "+ this.MoneyToK(PunishSetting.find(rule => rule.id === data.statusPunish).money);
-        if(data.dailyPunish != null && data.dailyPunish > 0) PunishString+="\n Daily: " + this.MoneyToK(PunishSetting.find(rule => rule.id === APP_CONSTANT.PunishType.NoDaily).money * data.dailyPunish);
-        if(data.mentionPunish != null && data.mentionPunish > 0) PunishString+="\n Mention: " + this.MoneyToK(PunishSetting.find(rule => rule.id === APP_CONSTANT.PunishType.NoReplyMention).money  * data.mentionPunish);
+        let remainingAmount = data.moneyPunish;
+        if(data.statusPunish != APP_CONSTANT.PunishType.NoPunish){
+          let checkInOutPunish = PunishSetting.find(rule => rule.id === data.statusPunish).money;
+          remainingAmount-=checkInOutPunish;
+          PunishString+=APP_CONSTANT.PunishRules.find(rule => rule.value === data.statusPunish).name + ": "+ this.MoneyToK(checkInOutPunish);
+        }
+        if(data.dailyPunish != null && data.dailyPunish > 0){
+          let dailyPunish = PunishSetting.find(rule => rule.id === APP_CONSTANT.PunishType.NoDaily).money * data.dailyPunish;
+          remainingAmount-=dailyPunish;
+          PunishString+="\n Daily: " + this.MoneyToK(dailyPunish);
+        }
+        if(data.mentionPunish != null && data.mentionPunish > 0){
+          let mentionPunish = PunishSetting.find(rule => rule.id === APP_CONSTANT.PunishType.NoReplyMention).money  * data.mentionPunish;
+          remainingAmount-=mentionPunish;
+          PunishString+="\n Mention: " + this.MoneyToK(mentionPunish);
+        }
+        if(remainingAmount != 0) PunishString+="\n Tracker: " + this.MoneyToK(remainingAmount);
         return PunishString;
     }
     MoneyToK(num: number): string {
