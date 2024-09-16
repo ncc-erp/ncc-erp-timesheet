@@ -76,4 +76,14 @@
     .note {
         margin-top: 24px;
     }
+    .full-salary {
+        flex-direction: column;
+    }
+    .form-salary {
+        padding: 0;
+        width: 100%;
+    }
+    .label-title {
+        padding: 0;
+    }
 }

@@ -1,5 +1,5 @@
 <form style="position: relative" novalidate  [formGroup]="retroResultFormGroup">
-  <h1 style="cursor: grab; margin-right: 5px;">
+  <h1 style="cursor: grab; margin-right: 5px;" class="title">
     {{ "Add multiple retro result" | localize }} :
   </h1>
   <mat-icon (click)="close(0)" style="position: absolute; top: 0; right: 0; cursor: pointer">close</mat-icon>
@@ -51,12 +51,12 @@
       </div>
     </div>
     <div *ngIf="requestInfo.length == 0">
-      <div class="table-responsive d-flex">
-        <div class="fixedHeader" style="max-height: calc(100vh - 450px); text-align: center;" [ngClass]="isShowBtnAddUser ? 'table-team-selected' : 'full-width'">
+      <div class="table-responsive d-flex" style="border: none;">
+        <div class="fixedHeader" style="width: 100%; max-height: calc(100vh - 450px); text-align: center;" [ngClass]="isShowBtnAddUser ? 'table-team-selected' : 'full-width'">
         No Data
         </div>
          <!-- Add Users -->
-         <div *ngIf="isShowBtnAddUser" class="table-team-select">
+         <div *ngIf="isShowBtnAddUser" class="table-team-select desktop">
           <mat-expansion-panel [expanded]="true">
             <app-add-user-other-project-retro-result *ngIf="isShowBtnAddUser"
               [retroResultAdding]="retroResultAdding"
@@ -66,6 +66,17 @@
             </app-add-user-other-project-retro-result>
           </mat-expansion-panel>
         </div>
+         
+      </div>
+      <div *ngIf="isShowBtnAddUser" class="table-team-select mobile">
+        <mat-expansion-panel [expanded]="true">
+          <app-add-user-other-project-retro-result *ngIf="isShowBtnAddUser"
+            [retroResultAdding]="retroResultAdding"
+            [retroId]="retroId"
+            (onAddUsers)="getSelectedUserOtherProjectRetro($event)"
+            (onCancel)="closePopup($event)">
+          </app-add-user-other-project-retro-result>
+        </mat-expansion-panel>
       </div>
     </div>
     <div *ngIf="requestInfo.length > 0">

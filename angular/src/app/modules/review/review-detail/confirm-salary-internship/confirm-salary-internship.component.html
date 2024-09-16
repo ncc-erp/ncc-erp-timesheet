@@ -34,12 +34,12 @@
           <label class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-xs-4 col-form-label">
       {{ "Select:" | localize }}
     </label>
-          <div class="edit-form row-item-rest select-form col-xl-9 col-lg-9 col-md-9 col-sm-8 col-xs-8">
-              <mat-checkbox class="col-xl-6 col-lg-6 col-md-6 col-xs-6" name="IsFullSalary"  [checked]="review.isFullSalary" (change)="changeFullSalary($event.value)">
+          <div class="edit-form row-item-rest select-form col-xl-9 col-lg-9 col-md-9 col-sm-8 col-xs-8 full-salary">
+              <mat-checkbox class="col-xl-6 col-lg-6 col-md-6 col-xs-6 label-title" name="IsFullSalary"  [checked]="review.isFullSalary" (change)="changeFullSalary($event.value)">
                   {{ "Full lương:" | localize }}
               </mat-checkbox>
 
-              <div class="col-xl-6 col-lg-6 col-md-6 col-xs-6">
+              <div class="col-xl-6 col-lg-6 col-md-6 col-xs-6 form-salary">
                   <mat-form-field class="edit-form row-item-rest " appearance="outline">
                       <mat-label> {{"Sub Level" | localize}}</mat-label>
                       <mat-select [(ngModel)]="review.subLevel" name="SubLevel" (selectionChange)="changeSubLevel($event.value)">
@@ -64,7 +64,7 @@
           </mat-form-field>
       </div>
       <div class="format-col form-group row note required">
-          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-xs-4 col-form-label-note" for="connectionString">
+          <label class="col-xl-3 col-lg-3 col-md-3 col-sm-4 col-xs-4 col-form-label-note label-title" for="connectionString">
       {{ "Note:" | localize }}
     </label>
           <mat-form-field class="example-full-width edit-form row-item-rest  col-xl-9

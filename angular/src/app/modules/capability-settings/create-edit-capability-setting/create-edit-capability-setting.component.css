@@ -160,7 +160,8 @@
   white-space: pre-line;
   word-break: break-word;
   -webkit-box-orient: vertical;
-  width: 100px;
+  width: 150px;
+  height: 33px;
 }
 .item-note:hover {
   cursor: pointer;

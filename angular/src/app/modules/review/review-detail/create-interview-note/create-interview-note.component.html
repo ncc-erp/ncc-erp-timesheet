@@ -1,16 +1,15 @@
-<form *ngIf="active" style="position: relative;" #verifyForm="ngForm">
+ <form *ngIf="active" style="position: relative;" #verifyForm="ngForm">
   <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>
     {{"Interview Note" | localize}}
   </h1>
   <mat-icon (click)="close(0)" name="closeBtn" style="position: absolute; top: 0; right: 0;
   cursor: pointer;">close</mat-icon>
-  <hr>
   <mat-dialog-content class="mat-typography">
-    <label class="col-xl-3 col-lg-2 col-md-3 col-sm-3 col-3 col-form-label">
+    <label class="col-xl-3 col-lg-2 col-md-3 col-sm-3 col-3 col-form-label pd-0">
       {{ "Note:" | localize }}
     </label>
     <mat-form-field class="example-full-width row-item-rest col-xl-9
-        col-lg-9 col-md-9 col-xs-9" appearance="outline">
+        col-lg-9 col-md-9 col-xs-9 pd-0 w-100" appearance="outline">
       <mat-label>Note</mat-label>
       <textarea matInput rows="4" name="interviewNote" [(ngModel)]="interviewNote" required></textarea>
     </mat-form-field>
