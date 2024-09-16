@@ -9643,7 +9643,8 @@ section.content {
 }
 
 .sidebar .legal {
-  
+  position: absolute;
+  bottom: 0;
   width: 100%;
   border-top: 1px solid #eee;
   padding: 15px;
@@ -9794,6 +9795,24 @@ section.content {
   transition: all 0.3s;
 }
 
+.sidebar .menu .list .menu-toggle.collapse:before {
+  content: '+' !important;
+  -moz-transform: scale(1);
+  -ms-transform: scale(1);
+  -o-transform: scale(1);
+  -webkit-transform: scale(1);
+  transform: scale(1);
+}
+
+.sidebar .menu .list .menu-toggle.expand:before {
+  content: '\2013' !important;
+  -moz-transform: scale(0);
+  -ms-transform: scale(0);
+  -o-transform: scale(0);
+  -webkit-transform: scale(0);
+  transform: scale(0);
+}
+
 .sidebar .menu .list .menu-toggle:before {
   content: '+';
   -moz-transform: scale(1);
@@ -9855,7 +9874,7 @@ section.content {
   padding: 10px 13px;
 }
 
-.sidebar .menu .list a:hover, .sidebar .menu .list a:active, .sidebar .menu .list a:focus, .sidebar-footer .logout a:active, .sidebar-footer .logout a:focus {
+.sidebar .menu .list a:hover, .sidebar .menu .list a:active, .sidebar .menu .list a:focus {
   text-decoration: none !important;
 }
 
@@ -10614,18 +10633,6 @@ thead{
   transform: none !important;
 }
 
-.sidebar-footer {
-  display: block;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-}
-
-.logout {
-  display: none;
-  height: 0;
-}
-
 @media screen and (max-width: 600px) {
   .right-sidebar {
     height: calc(100vh - 116px);
@@ -10646,7 +10653,7 @@ thead{
   }
 
   .sidebar .menu {
-    max-height: calc(100% - 215px);
+    max-height: calc(100% - 180px);
     overflow-y: auto;
   }
 
@@ -10665,11 +10672,5 @@ thead{
   .cdk-overlay-container:has(.new-branch-dialog) .cdk-overlay-pane {
     max-width: 100% !important;
     min-width: 80vw;
-}
-
-
-
-  .overflow-hidden {
-    overflow: hidden;
   }
 }
