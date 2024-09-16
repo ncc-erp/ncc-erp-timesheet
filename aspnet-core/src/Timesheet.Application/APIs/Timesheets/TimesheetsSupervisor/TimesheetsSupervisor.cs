@@ -90,20 +90,11 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
         public async Task<object> GetQuantityTimesheetSupervisorStatus(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, long? projectId, long? userId)
         {
             var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
-            var projectIds = await WorkScope.GetAll<ProjectUser>()
-                .Where(s => s.UserId == AbpSession.UserId.Value && s.Type == ProjectUserType.PM)
-                .Where(s => !projectId.HasValue || s.ProjectId == projectId)
-                .Select(s => s.ProjectId).ToListAsync();
-
-            var userIds = await WorkScope.GetAll<ProjectUser>()
-                .Where(s => projectIds.Contains(s.ProjectId))
-                .Select(s => s.UserId).Distinct().ToListAsync();
             var query = WorkScope.GetAll<MyTimesheet>()
-                                 .Where(x => !startDate.HasValue || x.DateAt >= startDate)
+                                 .Where(x => !startDate.HasValue || x.DateAt.Date >= startDate)
                                  .Where(x => !endDate.HasValue || x.DateAt.Date <= endDate)
-                                 .Where(x => userIds.Contains(x.UserId))
-                                 .Where(x => projectIds.Contains(x.ProjectTask.ProjectId))
                                  .WhereIf(opentalkTime.HasValue, x => x.ProjectTaskId == OpenTalkID)
+                                 .WhereIf(projectId.HasValue, x => x.ProjectTask.ProjectId == projectId)
                                  .WhereIf(userId.HasValue, x => x.UserId == userId)
                                  .Select (x => new
                                  {
