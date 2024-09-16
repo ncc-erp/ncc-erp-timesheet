@@ -23,3 +23,13 @@
     align-items: center;
     height: 56px;
 }
+
+@media (max-width: 600px) {
+    :host ::ng-deep .mat-dialog-container {
+        overflow: hidden;
+    }
+    :host ::ng-deep .mat-dialog-content {
+        max-height: 50vh;
+        overflow: auto;
+    }
+}

@@ -86,4 +86,12 @@
     .label-title {
         padding: 0;
     }
+
+    :host ::ng-deep .mat-dialog-container {
+        overflow: hidden;
+    }
+    :host ::ng-deep .mat-dialog-content {
+        max-height: 48vh;
+        overflow: auto;
+    }
 }

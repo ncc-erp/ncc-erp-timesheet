@@ -125,6 +125,14 @@
   .title {
     margin-right: 10px;
   }
+
+  :host ::ng-deep .mat-dialog-container {
+    overflow: hidden;
+  }
+  :host ::ng-deep .mat-dialog-content {
+    max-height: 47vh;
+    overflow: auto;
+  }
 }
 
 @media (max-width: 455px) {

@@ -26,4 +26,12 @@
     .desktop {
         display: none;
     }
+
+    :host ::ng-deep .mat-dialog-container {
+        overflow: hidden;
+    }
+    :host ::ng-deep .mat-dialog-content {
+        max-height: 55vh;
+        overflow: auto;
+    }
 }
