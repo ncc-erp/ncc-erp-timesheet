@@ -81,6 +81,8 @@ export class NormalWorkingComponent extends PagedListingComponentBase<WorkingRep
 
   tsStatusFilter = APP_CONSTANT.TsStatusFilter['Approved'];
   tsStatusFilterList = Object.keys(this.APP_CONSTANT.TsStatusFilter)
+  userStatus = this.APP_CONSTANT.UserStatusFilter.Active;
+  userStatusList = Object.keys(this.APP_CONSTANT.UserStatusFilter)
   checkInFilter = APP_CONSTANT.FILTER_DEFAULT['All'];
   checkInFilterList = Object.keys(this.APP_CONSTANT.CheckInFilter)
   isDisabled: boolean = false;
@@ -175,7 +177,7 @@ export class NormalWorkingComponent extends PagedListingComponentBase<WorkingRep
       });
     }
     this.reportService.getAllPagging(request, Number(this.year), Number(this.month), Number(this.branchId), Number(this.projectId)
-      , this.isThanDefaultWorking, Number(this.checkInFilter), Number(this.tsStatusFilter))
+      , this.isThanDefaultWorking, Number(this.checkInFilter), Number(this.tsStatusFilter), this.userStatus)
       .pipe(finalize(() => {
         finishedCallback();
       }))
@@ -316,7 +318,7 @@ export class NormalWorkingComponent extends PagedListingComponentBase<WorkingRep
       });
     }
     this.reportService.ExportNormalWorking(req, Number(this.year), Number(this.month), Number(this.branchId), Number(this.projectId)
-      , this.isThanDefaultWorking, Number(this.checkInFilter), Number(this.tsStatusFilter)).subscribe(data => {
+      , this.isThanDefaultWorking, Number(this.checkInFilter), Number(this.tsStatusFilter), this.userStatus).subscribe(data => {
         const file = new Blob([this.s2ab(atob(data.result))], {
           type: "application/vnd.ms-excel;charset=utf-8"
         });

@@ -6,11 +6,11 @@
   cursor: pointer;">close</mat-icon>
   <hr>
   <mat-dialog-content class="mat-typography">
-    <label class="col-xl-3 col-lg-2 col-md-3 col-sm-3 col-3 col-form-label">
+    <label class="col-xl-3 col-lg-2 col-md-3 col-sm-3 col-3 col-form-label pd-0">
       {{ "Note:" | localize }}
     </label>
     <mat-form-field class="example-full-width row-item-rest col-xl-9
-        col-lg-9 col-md-9 col-xs-9" appearance="outline">
+        col-lg-9 col-md-9 col-xs-9 w-100 pd-0" appearance="outline">
       <mat-label>Note</mat-label>
       <textarea matInput rows="4" name="pmNote" [(ngModel)]="pmNote" required></textarea>
     </mat-form-field>

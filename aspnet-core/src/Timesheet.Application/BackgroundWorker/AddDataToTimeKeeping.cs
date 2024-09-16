@@ -185,9 +185,7 @@ namespace Timesheet.BackgroundWorker
                 + "| AutoSubmitTSAt = " + AutoSubmitTSAt + " |autoSubmitTimesheet=" + autoSubmitTimesheet
                 + " |monday=" + startDate + " |endDate=" + endDate);
 
-            if (autoSubmitTimesheet == "true"
-                && (now.DayOfWeek.ToString() == AutoSubmitTSAt && now.Hour == int.Parse(autoSubmitTSAtHour))
-                || (now.Day == 1 && now.Hour == 0))
+            if (autoSubmitTimesheet == "true" && now.DayOfWeek.ToString() == AutoSubmitTSAt && now.Hour == int.Parse(autoSubmitTSAtHour))
             {
                 Logger.Info("SubmitTimesheet() started");
                 var timesheetLogs = _myTimesheetRepository

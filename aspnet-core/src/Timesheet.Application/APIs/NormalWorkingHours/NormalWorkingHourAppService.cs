@@ -1,4 +1,5 @@
 ﻿using Abp.Authorization;
+using Abp.Collections.Extensions;
 using Abp.Linq.Extensions;
 using Abp.UI;
 using ClosedXML.Excel;
@@ -48,7 +49,7 @@ namespace Timesheet.APIs.NormalWorkingHours
         [AbpAllowAnonymous]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_NormalWorking,Ncc.Authorization.PermissionNames.Report_NormalWorking_View)]
         public async Task<GridResult<GetNormalWorkingHourDto>> GetAllPagging(GridParam input, int year, int month, long? branchId, long? projectId,
-                                                                            bool isThanDefaultWorking, int? checkInFilter, int tsStatusFilter)
+                                                                            bool isThanDefaultWorking, int? checkInFilter, int tsStatusFilter, bool? userStatus)
         {
             //bool isViewLevel = await this.IsGrantedAsync(Ncc.Authorization.PermissionNames.Report_NormalWorking_ViewLevel);
             byte[] arrDayOfWeek = { 7, 1, 2, 3, 4, 5, 6 };
@@ -130,7 +131,7 @@ namespace Timesheet.APIs.NormalWorkingHours
 
             TimesheetStatus[] listTimesheetStatus = new TimesheetStatus[] { TimesheetStatus.Pending, TimesheetStatus.Approve };
             var query = from u in WorkScope.GetAll<User>()
-                        .Where(s => s.IsActive == true)
+                        .WhereIf(userStatus.HasValue, s => s.IsActive == userStatus.Value)
                         .Where(s => !isThanDefaultWorking || listUserIdWarning.Contains(s.Id))
                         .Where(s => !checkInFilter.HasValue || listUserIdNoCheckIn.Contains(s.Id))
                         .Where(s => !branchId.HasValue || s.BranchId == branchId)
@@ -390,10 +391,10 @@ namespace Timesheet.APIs.NormalWorkingHours
         }
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_NormalWorking)]
         public async Task<Byte[]> ExportNormalWorking(GridParam input, int year, int month, long? branchId, long? projectId,
-                                                                            bool isThanDefaultWorking, int? checkInFilter, int tsStatusFilter)
+                                                                            bool isThanDefaultWorking, int? checkInFilter, int tsStatusFilter, bool? userStatus)
         {
             var normalWorkingHourList = GetAllPagging(input, year, month, branchId, projectId,
-                                                                             isThanDefaultWorking, checkInFilter, tsStatusFilter).Result.Items;
+                                                                             isThanDefaultWorking, checkInFilter, tsStatusFilter, userStatus).Result.Items;
             try
             {
                 int currentRow = 1;

@@ -10662,41 +10662,12 @@ thead{
     padding-right: 0px;
   }
 
-  .cdk-overlay-container:has(.new-branch-dialog) {
-    .cdk-overlay-pane {
-      max-width: 100% !important;
-      min-width: 80vw;
-    }
-  }
+  .cdk-overlay-container:has(.new-branch-dialog) .cdk-overlay-pane {
+    max-width: 100% !important;
+    min-width: 80vw;
+}
 
-  .user-info .user-helper-dropdown { 
-    display: none !important;
-  }
 
-  .logout {
-    display: block;
-    width: 100%;
-    border-top: 1px solid #eee;
-    padding: 15px;
-    overflow: hidden;
-    background: #fff;
-    height: auto;
-  }
-
-  .logout>a {
-    padding: 7px 0;
-    color: #666;
-    transition: all 0.5s;
-    font-size: 14px;
-    line-height: 25px;
-  }
-
-  .logout>a i.material-icons {
-    float: left;
-    margin-right: 7px;
-    margin-top: 2px;
-    font-size: 20px;
-  }
 
   .overflow-hidden {
     overflow: hidden;

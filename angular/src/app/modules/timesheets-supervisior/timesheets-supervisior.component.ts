@@ -46,7 +46,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   isLoading: boolean;
   rawData: TimeSheetDto[] = [];
   filteredTimesheets: TimeSheetDto[] = [];
-  
+
   projectSearch: FormControl = new FormControl("");
   projectFilter = []
   projectId = this.APP_CONSTANT.FILTER_DEFAULT.All;
@@ -139,9 +139,9 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
       this.rawData = obj.result;
       // this.convertData(obj.result);
       this.onWorkingTypeChange();
-      this.getQuantityTimesheetSupervisorStatus();
       this.isLoading = false;
     });
+    this.getQuantityTimesheetSupervisorStatus();
   }
   getQuantityTimesheetSupervisorStatus(){
     this.timesheetSupervisiorService.GetQuantityTimesheetSupervisorStatus(this.fromDate, this.toDate, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType).subscribe((obj:any)=>{
