@@ -94,6 +94,7 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                                  .Where(x => !startDate.HasValue || x.DateAt.Date >= startDate)
                                  .Where(x => !endDate.HasValue || x.DateAt.Date <= endDate)
                                  .WhereIf(opentalkTime.HasValue, x => x.ProjectTaskId == OpenTalkID)
+                                 .WhereIf(projectId.HasValue, x => x.ProjectTask.ProjectId == projectId)
                                  .WhereIf(userId.HasValue, x => x.UserId == userId)
                                  .Select (x => new
                                  {

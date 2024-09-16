@@ -44,6 +44,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   toDate: any;
   typeDate: any;
   isLoading: boolean;
+  isCountLoading: boolean;
   rawData: TimeSheetDto[] = [];
   filteredTimesheets: TimeSheetDto[] = [];
 
@@ -144,6 +145,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     this.getQuantityTimesheetSupervisorStatus();
   }
   getQuantityTimesheetSupervisorStatus(){
+    this.isCountLoading = true;
     this.timesheetSupervisiorService.GetQuantityTimesheetSupervisorStatus(this.fromDate, this.toDate, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType).subscribe((obj:any)=>{
       this.Timesheet_Statuses.forEach(item => {
         if(item.value === this.APP_CONSTANT.TimesheetStatus.All) {
@@ -154,7 +156,8 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
             item.count = resultListByStatus[0].quantity;
           }
         }
-      })
+      });
+      this.isCountLoading = false;
     })
   }
 
