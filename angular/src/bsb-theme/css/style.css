@@ -10673,4 +10673,8 @@ thead{
     max-width: 100% !important;
     min-width: 80vw;
   }
+
+  .overflow-hidden {
+    overflow: hidden;
+  }
 }
