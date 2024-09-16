@@ -82,9 +82,6 @@ p{
     display: none;
 }
 @media (max-width: 767px){
-    /* ::ng-deep .container-fluid{
-        padding: 0px;
-    } */
     #profile{
         padding: 0px;
     }
