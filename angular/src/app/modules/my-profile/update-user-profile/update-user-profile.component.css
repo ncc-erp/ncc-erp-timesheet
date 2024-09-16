@@ -13,9 +13,9 @@
     margin: 0px;
     padding-bottom: 0px;
 }
-::ng-deep #frm_update_user_info .mat-typography.mat-dialog-content{
+/* ::ng-deep #frm_update_user_info .mat-typography.mat-dialog-content{
     max-height: 78vh;
-}
+} */
 ::ng-deep #frm_update_user_info .mat-form-field-infix{
     padding: 8px 0px;
 }

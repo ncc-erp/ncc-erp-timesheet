@@ -485,6 +485,7 @@ export class RetroDetailComponent
       } as RetroDetailDialogData,
       disableClose: true,
       width: "1000px",
+      maxHeight: '80vh'
     });
     dialogRef.afterClosed().subscribe((res) => {
       if (res) {

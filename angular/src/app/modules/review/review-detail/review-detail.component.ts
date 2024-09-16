@@ -699,6 +699,7 @@ export class ReviewDetailComponent extends PagedListingComponentBase<ReviewDetai
     const dialogRef = this._dialog.open(ConfirmSalaryInternshipComponent, {
       disableClose : true,
       width : "600px",
+      maxHeight: '80vh',
       data : item
     });
     dialogRef.afterClosed().subscribe(result => {

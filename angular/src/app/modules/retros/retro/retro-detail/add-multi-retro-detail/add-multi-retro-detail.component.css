@@ -6,8 +6,24 @@
     padding-left: 15px;
 }
 
+.desktop {
+    display: block;
+}
+.mobile {
+    display: none;
+}
+
 @media screen and (max-width: 600px) {
     ::ng-deep .table-team-select {
-        width: 80%;
+        width: 100%;
+    }
+    .title {
+        font-size: 20px;
+    }
+    .mobile {
+        display: block;
+    }
+    .desktop {
+        display: none;
     }
 }

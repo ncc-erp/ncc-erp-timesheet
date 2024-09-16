@@ -10,7 +10,7 @@
     {{ title }}: {{ retroDetail.userName }} <span *ngIf="!isShowSelectorMember()">[{{retroDetail.projectName}}]</span>
   </h2>
   <mat-divider></mat-divider>
-
+  <mat-dialog-content class="mat-typography">
   <div class="row body-retro-detail" >
     <div class="col-md-2 col-sm-2 col-md-2 col-lg-2 label-wrapper" *ngIf="isShowSelectorMember()">
       <label>Project *</label>
@@ -243,6 +243,7 @@
       </mat-form-field>
     </div>
   </div>
+</mat-dialog-content>
 
   <mat-dialog-actions align="end">
     <button
