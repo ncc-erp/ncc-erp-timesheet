@@ -114,7 +114,6 @@ background-color: #0c51a0;
 .header {
 display: flex;
 width: 100%;
-justify-content: space-between;
 }
 
 .header .title {
@@ -125,6 +124,21 @@ margin-top: 16px;
 display: flex;
 justify-content: end;
 align-items: center;
+gap: 0.5rem;
+flex-grow: 1;
+}
+
+.extra-action-group .filter-date-group {
+display: flex;
+margin-left: 0.75rem;
+}
+
+.extra-action-group .date-and-button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    flex-grow: 1;
 }
 
 .label-button-group {
@@ -140,7 +154,7 @@ display: none;
 margin-left: 8px;
 }
 
-@media screen and (max-width: 490px) {
+@media screen and (max-width: 768px) {
 .label-button-group {
     display: none;
 }
@@ -154,26 +168,25 @@ margin-left: 8px;
 margin-left: 8px;
 }
 
-.filter-group {
-display: flex;
-flex-direction: column;
-padding: 20px;
+.extra-action-group .filter-date-group {
+    display: flex;
+    gap: 8px;
 }
 
-.filter-date-group {
-display: flex;
-}
-.filter-date-group > * + * {
-margin-left: 8px;
-}
 
-.filter-item {
-min-width: 80px;
+.extra-action-group .filter-date-group .filter-item {
+    width: 80px;
+    margin-bottom: -1.25em;
 }
 
 .filter-non-date-group {
 display: flex;
 flex-direction: column;
+padding: 20px;
+}
+
+.filter-non-date-group .filter-item {
+    min-width: 80px;
 }
 
 @media screen and (min-width: 670px) {
