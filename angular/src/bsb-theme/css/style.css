@@ -10662,12 +10662,11 @@ thead{
     padding-right: 0px;
   }
 
-  .cdk-overlay-container:has(.new-branch-dialog) {
-    .cdk-overlay-pane {
-      max-width: 100% !important;
-      min-width: 80vw;
-    }
-  }
+  .cdk-overlay-container:has(.new-branch-dialog) .cdk-overlay-pane {
+    max-width: 100% !important;
+    min-width: 80vw;
+}
+
 
 
   .overflow-hidden {
