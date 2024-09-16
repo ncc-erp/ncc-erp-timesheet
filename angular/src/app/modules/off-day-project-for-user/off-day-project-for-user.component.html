@@ -3,6 +3,34 @@
     <div class="header">
       <h2 class="title">{{ "Team working calendar" | localize }}</h2>
       <div class="extra-action-group">
+        <div class="date-and-button-group">
+          <div class="filter-date-group">
+            <mat-form-field appearance="outline" class="filter-item">
+              <mat-label>Year</mat-label>
+              <mat-select
+                name="yearSelect"
+                [(value)]="year"
+                (selectionChange)="selectionChange()"
+              >
+                <mat-option *ngFor="let item of listYear" [value]="item">
+                  {{ item }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="filter-item">
+              <mat-label>Month</mat-label>
+              <mat-select
+                name="monthSelect"
+                [(value)]="month"
+                (selectionChange)="selectionChange($event)"
+              >
+                <mat-option *ngFor="let item of listMonth" [value]="item">
+                  {{ item + 1 }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
         <div class="label-button-group">
           <div style="width: auto">
             <button
@@ -84,149 +112,120 @@
         </div>
       </div>
     </div>
-    <div class="filter-group">
-      <div class="filter-date-group">
-        <mat-form-field appearance="outline" class="filter-item">
-          <mat-label>Year</mat-label>
-          <mat-select
-            name="yearSelect"
-            [(value)]="year"
-            (selectionChange)="selectionChange()"
-          >
-            <mat-option *ngFor="let item of listYear" [value]="item">
-              {{ item }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="filter-item">
-          <mat-label>Month</mat-label>
-          <mat-select
-            name="monthSelect"
-            [(value)]="month"
-            (selectionChange)="selectionChange($event)"
-          >
-            <mat-option *ngFor="let item of listMonth" [value]="item">
-              {{ item + 1 }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-      <div class="filter-non-date-group">
-        <mat-form-field appearance="outline" class="filter-item">
-          <mat-label>Status</mat-label>
-          <mat-select
-            name="dayAbsentStatus"
-            [(value)]="dayAbsentStatus"
-            (selectionChange)="selectionChange()"
-          >
-            <mat-option
-              *ngFor="let item of dayAbsentStatusList"
-              [value]="APP_CONSTANT.AbsenceStatusFilter[item]"
-            >
-              {{ item }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <app-multiple-select
-          name="listProject"
-          labelName="Project"
-          [listOption]="listProject"
-          (onChange)="onChangeListProjectIdSelected($event)"
-          [defaultValue]="listProjectSelected"
-          [disabled]="isLoading"
+    <div class="filter-non-date-group">
+      <mat-form-field appearance="outline" class="filter-item">
+        <mat-label>Search by email</mat-label>
+        <input
+          name="searchText"
+          matInput
+          [(ngModel)]="searchText"
+          (keyup.enter)="refreshData()"
+        />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="filter-item">
+        <mat-label>Status</mat-label>
+        <mat-select
+          name="dayAbsentStatus"
+          [(value)]="dayAbsentStatus"
+          (selectionChange)="selectionChange()"
         >
-        </app-multiple-select>
-        <mat-form-field appearance="outline" class="filter-item">
-          <mat-label>Request Type</mat-label>
-          <mat-select
-            name="absentDayType"
-            [(value)]="absentDayType"
-            (selectionChange)="selectionChange()"
+          <mat-option
+            *ngFor="let item of dayAbsentStatusList"
+            [value]="APP_CONSTANT.AbsenceStatusFilter[item]"
           >
-            <mat-option [value]="-1">All</mat-option>
-            <mat-option
-              *ngFor="let item of dayAbsentTypeList"
-              [value]="APP_CONSTANT.DayAbsenceType[item]"
-            >
-              {{ item }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field
-          *ngIf="absentDayType === 2"
-          appearance="outline"
-          class="filter-item"
+            {{ item }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <app-multiple-select
+        name="listProject"
+        labelName="Project"
+        [listOption]="listProject"
+        (onChange)="onChangeListProjectIdSelected($event)"
+        [defaultValue]="listProjectSelected"
+        [disabled]="isLoading"
+      >
+      </app-multiple-select>
+      <mat-form-field appearance="outline" class="filter-item">
+        <mat-label>Request Type</mat-label>
+        <mat-select
+          name="absentDayType"
+          [(value)]="absentDayType"
+          (selectionChange)="selectionChange()"
         >
-          <mat-label>Remote of week</mat-label>
-          <mat-select
-            name="remoteOfWeek"
-            [(value)]="remoteOfWeek"
-            (selectionChange)="onRemoteOfWeekChange()"
+          <mat-option [value]="-1">All</mat-option>
+          <mat-option
+            *ngFor="let item of dayAbsentTypeList"
+            [value]="APP_CONSTANT.DayAbsenceType[item]"
           >
-            <mat-option [value]="-1">All</mat-option>
-            <mat-option *ngFor="let item of remoteOfWeekList" [value]="item">
-              {{ item }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field
-          *ngIf="absentDayType === 0"
-          appearance="outline"
-          class="filter-item"
+            {{ item }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field
+        *ngIf="absentDayType === 2"
+        appearance="outline"
+        class="filter-item"
+      >
+        <mat-label>Remote of week</mat-label>
+        <mat-select
+          name="remoteOfWeek"
+          [(value)]="remoteOfWeek"
+          (selectionChange)="onRemoteOfWeekChange()"
         >
-          <mat-label>Type Of Request Type</mat-label>
-          <mat-select
-            name="dayType"
-            [(value)]="dayType"
-            (selectionChange)="onDayTypeChange()"
+          <mat-option [value]="-1">All</mat-option>
+          <mat-option *ngFor="let item of remoteOfWeekList" [value]="item">
+            {{ item }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field
+        *ngIf="absentDayType === 0"
+        appearance="outline"
+        class="filter-item"
+      >
+        <mat-label>Type Of Request Type</mat-label>
+        <mat-select
+          name="dayType"
+          [(value)]="dayType"
+          (selectionChange)="onDayTypeChange()"
+        >
+          <mat-option [value]="-1">All</mat-option>
+          <mat-option
+            *ngFor="let item of dayTypeList"
+            [value]="APP_CONSTANT.AbsenceType[item]"
           >
-            <mat-option [value]="-1">All</mat-option>
-            <mat-option
-              *ngFor="let item of dayTypeList"
-              [value]="APP_CONSTANT.AbsenceType[item]"
-            >
-              {{ item | dayType }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field
-          *ngIf="absentDayType === 0"
-          appearance="outline"
-          class="filter-item"
+            {{ item | dayType }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field
+        *ngIf="absentDayType === 0"
+        appearance="outline"
+        class="filter-item"
+      >
+        <mat-label>Absence Type</mat-label>
+        <mat-select
+          name="dayOffType"
+          [(value)]="dayOffType"
+          (selectionChange)="onDayOffTypeChange()"
         >
-          <mat-label>Absence Type</mat-label>
-          <mat-select
-            name="dayOffType"
-            [(value)]="dayOffType"
-            (selectionChange)="onDayOffTypeChange()"
-          >
-            <mat-option [value]="-1">All</mat-option>
-            <mat-option *ngFor="let type of dayOffTypes" [value]="type.id">{{
-              type.name
-            }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-      <div class="filter-non-date-group">
-        <mat-form-field appearance="outline" class="filter-item">
-          <mat-label>Search by email</mat-label>
-          <input
-            name="searchText"
-            matInput
-            [(ngModel)]="searchText"
-            (keyup.enter)="refreshData()"
-          />
-        </mat-form-field>
-        <button
-          name="filterBtn"
-          style="height: 44px; width: 40px; margin-top: 4px"
-          mat-flat-button
-          (click)="onFilter()"
-          color="primary"
-        >
-          Filter
-        </button>
-      </div>
+          <mat-option [value]="-1">All</mat-option>
+          <mat-option *ngFor="let type of dayOffTypes" [value]="type.id">{{
+            type.name
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button
+        name="filterBtn"
+        style="height: 44px; width: 40px; margin-top: 4px"
+        mat-flat-button
+        (click)="onFilter()"
+        color="primary"
+      >
+        Filter
+      </button>
     </div>
     <br />
     <div style="padding: 0px 20px 20px; overflow-x: scroll">
