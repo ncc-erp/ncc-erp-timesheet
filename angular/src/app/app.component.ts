@@ -1,4 +1,4 @@
-import { Component, ViewContainerRef, Injector, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewContainerRef, Injector, OnInit, AfterViewInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { AppComponentBase } from '@shared/app-component-base';
 
 import { SignalRAspNetCoreHelper } from '@shared/helpers/SignalRAspNetCoreHelper';
@@ -11,7 +11,8 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
     private viewContainerRef: ViewContainerRef;
 
     constructor(
-        injector: Injector
+        injector: Injector,
+        private ngZone: NgZone
     ) {
         super(injector);
     }
@@ -42,12 +43,14 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
     }
 
     onResize(event) {
-        // exported from $.AdminBSB.activateAll
-        $.AdminBSB.leftSideBar.setMenuHeight();
-        $.AdminBSB.leftSideBar.checkStatuForResize(false);
+        this.ngZone.runOutsideAngular(() => {
+            // exported from $.AdminBSB.activateAll
+            $.AdminBSB.leftSideBar.setMenuHeight();
+            $.AdminBSB.leftSideBar.checkStatuForResize(false);
 
-        // exported from $.AdminBSB.activateDemo
-        $.AdminBSB.demo.setSkinListHeightAndScroll();
-        $.AdminBSB.demo.setSettingListHeightAndScroll();
+            // exported from $.AdminBSB.activateDemo
+            $.AdminBSB.demo.setSkinListHeightAndScroll();
+            $.AdminBSB.demo.setSettingListHeightAndScroll();
+        })
     }
 }
