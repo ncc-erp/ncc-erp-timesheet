@@ -200,16 +200,10 @@
                                           <th>PROJECT</th>
                                           <th>TASK NAME</th>
                                           <th>TIME</th>
-                                            <ng-container *ngIf="dt.tasks[0].taskId != 12;else isOpenTalk"></ng-container>
-                                            <ng-template #isOpenTalk>
-                                                <th>JOIN TIME</th>
-                                            </ng-template>
+                                          <th class="text-center" *ngIf="isOpenTalk(dt.tasks)">JOIN TIME</th>
                                           <th>STATUS</th>
-                                            <ng-container *ngIf="!dt.tasks[0].projectTargetUser;else isShadow"></ng-container>
-                                            <ng-template #isShadow>
-                                                <th>TARGET USER</th>
-                                                <th>TARGET TIME</th>
-                                            </ng-template>
+                                          <th *ngIf="isShadow(dt.tasks)">TARGET USER</th>
+                                          <th *ngIf="isShadow(dt.tasks)">TARGET TIME</th>
                                           <th class="text-center">WORK TYPE</th>
                                           <th>NOTE</th>
                                           <th>L.M TIME</th>
@@ -224,10 +218,8 @@
                                           </td>
                                           <td><span>{{ t.taskName }}</span></td>
                                           <td><span>{{ convertMinuteToHour(t.workingTime) }}</span></td>
-                                          <ng-container *ngIf="dt.tasks[0].taskId != 12;else isOpenTalk"></ng-container>
-                                          <ng-template #isOpenTalk>
-                                            <td><span>{{ convertMinuteToHour(t.openTalkTime)}}</span></td>
-                                          </ng-template>
+                                          <td class="text-center" *ngIf="t.taskName == 'Open Talk'"><span>{{ convertMinuteToHour(t.openTalkTime)}}</span></td>
+                                          <td class="text-center" *ngIf="t.taskName != 'Open Talk' && isOpenTalk(dt.tasks)">---</td>
                                           <td>
                                             <span [innerHtml]="convertNumberOfStringStatus(t.status)"></span>
                                             <span class="label status-label bg-red status"
@@ -237,15 +229,8 @@
                                               {{t.isCharged?'Charged':'Non-charged'}}
                                             </span>
                                           </td>
-                                            <ng-container *ngIf="!dt.tasks[0].projectTargetUser;else isShadow"></ng-container>
-                                            <ng-template #isShadow>
-                                                <td>
-                                                    {{t.projectTargetUser || ''}}
-                                                </td>
-                                                <td>
-                                                    {{convertMinuteToFloat(t.workingTimeTargetUser) || ''}}h
-                                                </td>
-                                            </ng-template>
+                                          <td *ngIf="t.projectTargetUser">{{t.projectTargetUser || ''}}</td>
+                                          <td *ngIf="t.projectTargetUser">{{convertMinuteToFloat(t.workingTimeTargetUser) || ''}}h</td>
                                           <td class="text-center"><span [ngClass]="t.isTemp? 'temp':'official'">{{ t.workType }}</span></td>
                                           <td><span>{{ t.mytimesheetNote }}</span></td>
                                           <td>
@@ -331,7 +316,10 @@
                                   <th>PROJECT</th>
                                   <th>TASK NAME</th>
                                   <th>TIME</th>
+                                  <th class="text-center" *ngIf="isOpenTalk(dt.tasks)">JOIN TIME</th>
                                   <th>STATUS</th>
+                                  <th *ngIf="isShadow(dt.tasks)">TARGET USER</th>
+                                  <th *ngIf="isShadow(dt.tasks)">TARGET TIME</th>
                                   <th class="text-center">WORK TYPE</th>
                                   <th>NOTE</th>
                                   <th>L.M Time</th>
@@ -346,8 +334,12 @@
                                   </td>
                                   <td><span>{{ t.taskName }}</span></td>
                                   <td><span>{{ convertMinuteToHour(t.workingTime) }}</span></td>
+                                  <td class="text-center" *ngIf="t.taskName == 'Open Talk'"><span>{{ convertMinuteToHour(t.openTalkTime)}}</span></td>
+                                  <td class="text-center" *ngIf="t.taskName != 'Open Talk' && isOpenTalk(dt.tasks)">---</td>
                                   <td [innerHtml]="convertNumberOfStringStatus(t.status, t.typeOfWork)">
                                   </td>
+                                  <td *ngIf="t.projectTargetUser">{{t.projectTargetUser || ''}}</td>
+                                  <td *ngIf="t.projectTargetUser">{{convertMinuteToFloat(t.workingTimeTargetUser) || ''}}h</td>
                                   <td class="text-center"><span [ngClass]="t.isTemp? 'temp':'official'">{{ t.workType }}</span></td>
                                   <td><span>{{ t.mytimesheetNote }}</span></td>
                                   <td>{{t.lastModificationTime | date:"dd/MM/yyyy HH:mm"}}</td>
