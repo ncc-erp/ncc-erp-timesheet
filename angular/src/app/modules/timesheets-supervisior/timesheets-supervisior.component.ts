@@ -201,22 +201,28 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   }
 
   buildDataByUser(data: Array<TimeSheetDto>) {
-    return _.chain(data).groupBy('userId').map((value, key) => ({
-      userId: key,
-      userName: value[0].user,
-      totalUserWorkingTime: this.buildDataByDate(value).map(s => s.totalWorkingTime).reduce((a, b) => a + b, 0),
-      dayTasks: this.buildDataByDate(value)
-    })).value();
+    return _.chain(data).groupBy('userId').map((value, key) => {
+        let dataByDate = this.buildDataByDate(value);
+        return {
+          userId: key,
+          userName: value[0].user,
+          totalUserWorkingTime: dataByDate.map(s => s.totalWorkingTime).reduce((a, b) => a + b, 0),
+          dayTasks: dataByDate
+        };
+    }).value();
   }
 
   buildDataByProject(data: Array<TimeSheetDto>) {
-    return _.chain(data).groupBy('projectId').map((value, key) => ({
-      projectId: key,
-      listPM: value[0].listPM,
-      projectName: value[0].projectName,
-      totalProjectWorkingTime: this.buildDataByUser(value).map(s => s.totalUserWorkingTime).reduce((a, b) => a + b, 0),
-      userTasks: this.buildDataByUser(value)
-    })).value();
+    return _.chain(data).groupBy('projectId').map((value, key) => {
+      let dataByUser = this.buildDataByUser(value);
+      return {
+        projectId: key,
+        listPM: value[0].listPM,
+        projectName: value[0].projectName,
+        totalProjectWorkingTime: dataByUser.map(s => s.totalUserWorkingTime).reduce((a, b) => a + b, 0),
+        userTasks: dataByUser
+      };
+    }).value();
   }
 
   convertNumberOfStringStatus(status: number, typeOfWork: number) {
@@ -293,6 +299,12 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     if (value == "") {
       this.getData();
     }
+  }
+  isOpenTalk(tasks){
+    return tasks.some(task => task.taskName == "Open Talk");
+  }
+  isShadow(tasks){
+    return tasks.some(task => task.projectTargetUser != null);
   }
 }
 
