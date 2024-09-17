@@ -50,3 +50,13 @@ label{
 ::ng-deep .mat-tooltip {
     font-size: 13px;
 }
+
+@media (max-width: 600px) {
+    ::ng-deep.my-dialog .mat-dialog-container {
+      overflow: hidden;
+    }
+    :host ::ng-deep .mat-dialog-content {
+      max-height: 56vh;
+      overflow: auto;
+    }
+}
