@@ -646,6 +646,12 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
       this.refresh();
     }
   }
+  isOpenTalk(tasks){
+    return tasks.some(task => task.taskName == "Open Talk");
+  }
+  isShadow(tasks){
+    return tasks.some(task => task.projectTargetUser != null);
+  }
 }
 
 // export interface DataDTO {
