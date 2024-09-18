@@ -95,6 +95,11 @@ $name-col-width: 0;
       }
     }
   }
+  td {
+    touch-action: auto !important;
+    user-select: auto !important;
+    -webkit-user-drag: auto !important;
+  }
 }
 
 .sticky-left {
