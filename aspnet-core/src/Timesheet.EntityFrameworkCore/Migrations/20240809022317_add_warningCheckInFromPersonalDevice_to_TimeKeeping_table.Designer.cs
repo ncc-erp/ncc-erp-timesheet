@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ncc.EntityFrameworkCore;
 
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    partial class TimesheetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240809022317_add_warningCheckInFromPersonalDevice_to_TimeKeeping_table")]
+    partial class add_warningCheckInFromPersonalDevice_to_TimeKeeping_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -990,8 +992,6 @@ namespace Timesheet.Migrations
 
                     b.Property<DateTime?>("EndDateAt");
 
-                    b.Property<string>("GoogleId");
-
                     b.Property<bool>("IsActive");
 
                     b.Property<bool>("IsDeleted");
@@ -1191,10 +1191,6 @@ namespace Timesheet.Migrations
                     b.Property<DateTime>("TimeStart");
 
                     b.Property<bool>("isAllUserBelongTo");
-
-                    b.Property<string>("mezonUrl");
-
-                    b.Property<int>("notifyChannel");
 
                     b.HasKey("Id");
 
@@ -1828,8 +1824,6 @@ namespace Timesheet.Migrations
 
                     b.Property<long?>("CreatorUserId");
 
-                    b.Property<DateTime>("DateAt");
-
                     b.Property<long?>("DeleterUserId");
 
                     b.Property<DateTime?>("DeletionTime");
@@ -1841,6 +1835,10 @@ namespace Timesheet.Migrations
                     b.Property<long?>("LastModifierUserId");
 
                     b.Property<long>("UserId");
+
+                    b.Property<DateTime>("endTime");
+
+                    b.Property<DateTime>("startTime");
 
                     b.Property<int>("totalTime");
 

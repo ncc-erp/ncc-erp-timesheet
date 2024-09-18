@@ -75,10 +75,8 @@ export const APP_CONSTANT = {
   },
   TypeViewBranchManager: {
     All : -1,
-    Day : 0,
-    Week: 1,
-    Month: 2,
-    Year: 3
+    Month: 0,
+    Year: 1
   },
   MyTimesheetView: {
     Day: 0,

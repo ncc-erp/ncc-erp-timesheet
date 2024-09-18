@@ -79,54 +79,87 @@
               <tr>
                 <th class="text-center col-lg-1">No</th>
                 <th class="text-center col-lg-3">Users</th>
-                <th class="text-center" style="width: 25px">Position</th>
-                <th class="text-center col-lg-2">
-                   <div class="level_sort">
-                        <span>Level</span>
-                        <span (click)="toggleLevelSortOrder()">
-                            <i
-                                class="pi pi-sort-amount-up text-primary p-l-5"
-                                role="button"
-                                *ngIf="sortLevel === sortProjectUserNumber.UP_LEVEL"
-                            ></i>
-                            <i
-                                class="pi pi-sort-amount-down text-primary p-l-5"
-                                role="button"
-                                *ngIf="sortLevel === sortProjectUserNumber.DOWN_LEVEL"
-                            ></i>
-                        </span>
-                   </div>
-                  </th>
-                
-                <th class="text-center col-lg-2">
+                <th class="text-center col-lg-1">Position</th>
+                <th class="text-center col-lg-1">
+                  <div class="level_sort">
+                       <span>Level</span>
+                       <span (click)="toggleSortOrder('Level')">
+                           <i
+                               class="pi pi-sort-amount-up text-primary p-l-5"
+                               role="button"
+                               *ngIf="LevelSortDirection === sortDirectionEnum.Ascending"
+                           ></i>
+                           <i
+                               class="pi pi-sort-amount-down text-primary p-l-5"
+                               role="button"
+                               *ngIf="LevelSortDirection === sortDirectionEnum.Descending"
+                           ></i>
+                       </span>
+                  </div>
+                </th>
+                <th class="text-center col-lg-1" matTooltip="Number of Project" matTooltipPosition="above">
                    <div class="project_sort">
-                       <span>Number of Project</span>
-                       <span (click)="toggleSortOrder(true)">
+                       <span>NoP</span>
+                       <span (click)="toggleSortOrder('ProjectCount')">
                            <i
                               class="pi pi-sort-amount-up text-primary p-l-5"
                               role="button"
-                              *ngIf="sortNumberOfProject === sortProjectUserNumber.UP_NUMBER"
+                              *ngIf="ProjectCountSortDirection === sortDirectionEnum.Ascending"
                            ></i>
                            <i
                               class="pi pi-sort-amount-down text-primary p-l-5"
                               role="button"
-                              *ngIf="sortNumberOfProject === sortProjectUserNumber.DOWN_NUMBER"
+                              *ngIf="ProjectCountSortDirection === sortDirectionEnum.Descending"
                            ></i>
                        </span>
                    </div>
                 </th>
+                <th class="text-center col-lg-1" matTooltip="Work At Office" matTooltipPosition="above">
+                  <div class="project_sort">
+                    <span>WAO</span>
+                    <span (click)="toggleSortOrder('WAOPercent')">
+                        <i
+                           class="pi pi-sort-amount-up text-primary p-l-5"
+                           role="button"
+                           *ngIf="WAOPercentSortDirection === sortDirectionEnum.Ascending"
+                        ></i>
+                        <i
+                           class="pi pi-sort-amount-down text-primary p-l-5"
+                           role="button"
+                           *ngIf="WAOPercentSortDirection === sortDirectionEnum.Descending"
+                        ></i>
+                    </span>
+                  </div>
+                </th>
+                <th class="text-center col-lg-1" matTooltip="Work From Home" matTooltipPosition="above">
+                  <div class="project_sort">
+                    <span>WFH</span>
+                    <span (click)="toggleSortOrder('WFHPercent')">
+                        <i
+                           class="pi pi-sort-amount-up text-primary p-l-5"
+                           role="button"
+                           *ngIf="WFHPercentSortDirection === sortDirectionEnum.Ascending"
+                        ></i>
+                        <i
+                           class="pi pi-sort-amount-down text-primary p-l-5"
+                           role="button"
+                           *ngIf="WFHPercentSortDirection === sortDirectionEnum.Descending"
+                        ></i>
+                    </span>
+                  </div>
+                </th>
                 <th class="text-center col-lg-4">
                     <div class="project_sort">
                         <span>Projects</span>
-                        <span (click)="toggleSortOrder(false)">
+                        <!-- <span (click)="toggleSortOrder('ProjectUsers.WorkingTimePercent')">
                             <i
                                class="pi pi-sort-amount-up text-primary p-l-5"
                                role="button"
-                               *ngIf="sortProject === sortProjectUserNumber.UP_PROJECT"></i>
+                               *ngIf="WorkingTimePercentSortDirection === sortDirectionEnum.Ascending"></i>
                             <i
                                class="pi pi-sort-amount-down text-primary p-l-5" role="button"
-                               *ngIf="sortProject === sortProjectUserNumber.DOWN_PROJECT"></i>
-                        </span>
+                               *ngIf="WorkingTimePercentSortDirection === sortDirectionEnum.Descending"></i>
+                        </span> -->
                     </div>
                 </th>
               </tr>
@@ -173,11 +206,14 @@
                   </div>
                 </td>
                 <!-- position -->
-                <td class="text-center col-lg-2">{{user.positionName}}</td>
+                <td class="text-center col-lg-1">{{user.positionName}}</td>
                 <!-- level -->
-                <td class="text-center col-lg-2">
+                <td class="text-center col-lg-1">
                   <span class="label" [ngStyle]="userLevels[user.level]?.style">{{userLevels[user.level]?.name}}</span>
+                </td>
                 <td class="text-center col-lg-1">{{user.projectCount}}</td>
+                <td class="text-center col-lg-1">{{user.waoPercent == 100 ? user.waoPercent : user.waoPercent.toFixed(2)}}%</td>
+                <td class="text-center col-lg-1">{{user.wfhPercent == 100 ? user.wfhPercent : user.wfhPercent.toFixed(2)}}%</td>
                 <td class="col-lg-5" style="padding: 0;" (click)="togglePrivateNote(user)">
                   <div class="project_list mb-0 custom-scrollbar" [ngClass]="user.hideProjectName === false ? 'preReview' : 'review'"
                   title="Cuộn chuột hoặc Click để mở rộng nội dung">

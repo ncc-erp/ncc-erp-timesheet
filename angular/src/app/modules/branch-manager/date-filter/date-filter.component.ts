@@ -38,19 +38,6 @@ export class DateFilterComponent extends AppComponentBase implements OnInit {
 
   customDate() {
     switch(this.typeOfView){
-      case this.APP_CONSTANT.TypeViewBranchManager.Day:
-        this.displayDay = moment(this.activeDay).format('YYYY-MM-DD');
-        this.startDate = this.displayDay;
-        this.endDate = this.displayDay;
-        this.startView = "month";
-        break;
-      case this.APP_CONSTANT.TypeViewBranchManager.Week:
-        this.startDate = moment(this.activeDay).startOf('isoWeek').format('YYYY-MM-DD');
-        this.endDate = moment(this.activeDay).endOf('isoWeek').format('YYYY-MM-DD');
-        this.activeDay = this.startDate;
-        this.displayDay = this.startDate + " - " + this.endDate;
-        this.startView = "month";
-        break;
       case this.APP_CONSTANT.TypeViewBranchManager.Month:
         this.startDate = moment(this.activeDay).startOf('M').format('YYYY-MM-DD');
         this.endDate = moment(this.activeDay).endOf('M').format('YYYY-MM-DD');

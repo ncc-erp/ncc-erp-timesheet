@@ -15,5 +15,6 @@ namespace Timesheet.DomainServices.Dto
         public string VerifyStartTimeStr { get; set; }
         [JsonProperty("verifyEndTimeStr")]
         public string VerifyEndTimeStr { get; set; }
+        public bool warningCheckInFromPersonalDevice { get; set; }
     }
 }
