@@ -1,7 +1,40 @@
 file-upload>span {
     width: 100px;
 }
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
+thead th {
+    position: sticky;
+    top: 0; /* Cố định header ở đầu bảng */
+    background-color: #f1f1f1;
+    z-index: 1;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+    padding: 0;
+    margin: 0; /* Tạo bóng cho header */
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+   
+}
+th{
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Đảm bảo bảng hiển thị đẹp khi cuộn */
+.table-hover tbody tr:hover {
+    background-color: #eaeaea;
+}
 .bag-yellow {
     background-color: #ffff0078 !important;
     color: black !important;
@@ -16,7 +49,9 @@ file-upload>span {
     text-overflow: ellipsis;
 
 }
-
+.main-content {
+    height: 100vh;
+}
 .fit {
     width: fit-content;
 }
@@ -57,6 +92,7 @@ file-upload>span {
     min-width: 50px;
     text-align: center;
     border: 0.2px solid rgba(204, 204, 204, 0.35);
+    vertical-align: middle;
 }
 
 .styleUser>tbody>tr>td {
@@ -198,6 +234,10 @@ file-upload>span {
 .table-user-wrapper {
     position: relative; 
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 50%;
+    overflow-y: scroll;
 }
 
 @media screen and (max-width: 600px) {
@@ -212,6 +252,7 @@ file-upload>span {
         padding: 10px;
         gap: 10px;
         width: 100%;
+        
     }
 
     .user-wrapper .user-header-wrapper .user-header-wrapper_action {
