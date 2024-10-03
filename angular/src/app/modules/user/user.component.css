@@ -8,17 +8,16 @@ table {
 
 thead th {
     position: sticky;
-    top: 0; /* Cố định header ở đầu bảng */
+    top: 0; 
     background-color: #f1f1f1;
     z-index: 1;
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
     padding: 0;
-    margin: 0; /* Tạo bóng cho header */
+    margin: 0;
 }
 
 th, td {
     padding: 10px;
-    border: 1px solid #ccc;
    
 }
 th{
@@ -31,7 +30,7 @@ tbody tr:hover {
     background-color: #f5f5f5;
 }
 
-/* Đảm bảo bảng hiển thị đẹp khi cuộn */
+
 .table-hover tbody tr:hover {
     background-color: #eaeaea;
 }
@@ -48,9 +47,6 @@ tbody tr:hover {
     overflow: hidden;
     text-overflow: ellipsis;
 
-}
-.main-content {
-    height: 100vh;
 }
 .fit {
     width: fit-content;
@@ -88,20 +84,19 @@ tbody tr:hover {
 }
 
 .styleUser>thead>tr>th {
-    padding: 4px 4px !important;
     min-width: 50px;
     text-align: center;
-    border: 0.2px solid rgba(204, 204, 204, 0.35);
+
     vertical-align: middle;
+
 }
 
 .styleUser>tbody>tr>td {
     padding: 4px 4px !important;
-    border: 0.2px solid rgba(204, 204, 204, 0.35);
 }
 
 .styleUser {
-    border-collapse: collapse !important;
+    border-collapse: unset;
 }
 
 .avatar {
@@ -120,7 +115,7 @@ tbody tr:hover {
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     padding: 12px 16px;
-    z-index: 1;
+    z-index: 2;
     right: 50px;
 }
 
@@ -149,7 +144,7 @@ tbody tr:hover {
 .col-md-5ths,
 .col-lg-5ths {
     position: relative;
-    min-height: 1px;
+    /* min-height: 1px; */
     padding-right: 15px;
     padding-left: 15px;
     width: 555px;
@@ -232,20 +227,33 @@ tbody tr:hover {
 }
 
 .table-user-wrapper {
-    position: relative; 
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    height: 50%;
+        position: relative; 
+        padding: 20px;
+}
+.table-responsive {
     overflow-y: scroll;
+    height: 50rem;
+    scroll-snap-type:y mandatory;
 }
 
+table{
+    border-collapse:unset ;
+}
+thead{
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: white;
+    transform:translateY(-2px);
+}
 @media screen and (max-width: 600px) {
 
     .table-user-wrapper {
         padding: 12px;
     }
-    
+    .table-responsive {
+        height: 30rem;
+    }
     .user-wrapper .user-header-wrapper {
         display: flex;
         flex-direction: column;
@@ -295,6 +303,7 @@ tbody tr:hover {
         width: 28%;
         float: left;
     }
+   
 }
 
 @media (min-width: 992px) {
@@ -302,6 +311,7 @@ tbody tr:hover {
         width: 20%;
         float: left;
     }
+   
 }
 
 @media (min-width: 1200px) {
@@ -309,4 +319,5 @@ tbody tr:hover {
         width: 20%;
         float: left;
     }
+  
 }
