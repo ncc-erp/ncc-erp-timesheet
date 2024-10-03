@@ -46,26 +46,26 @@ file-upload>span {
 }
 
 .overflow-y {
-    max-height: 80px;
+    /* max-height: 90px; */
     white-space: nowrap;
     overflow-y: hidden;
     text-overflow: ellipsis;
 }
 
 .styleUser>thead>tr>th {
-    padding: 4px 4px !important;
     min-width: 50px;
     text-align: center;
-    border: 0.2px solid rgba(204, 204, 204, 0.35);
+
+    vertical-align: middle;
+
 }
 
 .styleUser>tbody>tr>td {
     padding: 4px 4px !important;
-    border: 0.2px solid rgba(204, 204, 204, 0.35);
 }
 
 .styleUser {
-    border-collapse: collapse !important;
+    border-collapse: unset;
 }
 
 .avatar {
@@ -84,7 +84,7 @@ file-upload>span {
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     padding: 12px 16px;
-    z-index: 1;
+    z-index: 2;
     right: 50px;
 }
 
@@ -113,7 +113,7 @@ file-upload>span {
 .col-md-5ths,
 .col-lg-5ths {
     position: relative;
-    min-height: 1px;
+    /* min-height: 1px; */
     padding-right: 15px;
     padding-left: 15px;
     width: 555px;
@@ -196,16 +196,33 @@ file-upload>span {
 }
 
 .table-user-wrapper {
-    position: relative; 
-    padding: 20px;
+        position: relative; 
+        padding: 20px;
+}
+.table-responsive {
+    overflow-y: scroll;
+    height: 50rem;
+    scroll-snap-type:y mandatory;
 }
 
+table{
+    border-collapse:unset ;
+}
+thead{
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: white;
+    transform:translateY(-2px);
+}
 @media screen and (max-width: 600px) {
 
     .table-user-wrapper {
         padding: 12px;
     }
-    
+    .table-responsive {
+        height: 30rem;
+    }
     .user-wrapper .user-header-wrapper {
         display: flex;
         flex-direction: column;
@@ -254,6 +271,7 @@ file-upload>span {
         width: 28%;
         float: left;
     }
+   
 }
 
 @media (min-width: 992px) {
@@ -261,6 +279,7 @@ file-upload>span {
         width: 20%;
         float: left;
     }
+   
 }
 
 @media (min-width: 1200px) {
@@ -268,4 +287,5 @@ file-upload>span {
         width: 20%;
         float: left;
     }
+  
 }
