@@ -31,9 +31,10 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
   public filterItems: FilterDto[] = [];
   public projects: ProjectDto[];
   private projectNames: string[] = [];
+  private deactiveCount: number[] = [];
   private memberCount: number[] = [];
-  private exposeCount: number[] = [];
   private shadowCount: number[] = [];
+  private pmCount: number[] = [];
   private filterBranchId: any;
   private chart: Chart;
   constructor(
@@ -42,7 +43,7 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
     private manageUserForBranchService: ManageUserForBranchService,
   ) {
     super(injector);
-    this.branchId = 0;
+    this.branchId = this.appSession.user.branchId;
     this.branchSearch.valueChanges.subscribe(() => {
       this.filterBranch();
     })
@@ -72,18 +73,24 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
             onClick: (event, elements) => {
                 if (elements && elements.length > 0) {
                     const indexData = elements[0]._index;
-                        this.dialog.open(ProjectManagementMemberDetailComponent, {
-                            data: {
-                                projectItem: {
-                                    branchId : this.branchId != 0 ? this.branchId : '',
-                                    projectId: this.projects[indexData].projectId,
-                                    startDate: this.startDate,
-                                    endDate: this.endDate,
-                                    projectName: this.projects[indexData].projectName
-                                },
-                            },
-                            height: 'auto', width: 'auto'
-                        });
+                      const dialogRef = this.dialog.open(ProjectManagementMemberDetailComponent, {
+                          data: {
+                              projectItem: {
+                                  branchId : this.branchId != 0 ? this.branchId : '',
+                                  projectId: this.projects[indexData].projectId,
+                                  startDate: this.startDate,
+                                  endDate: this.endDate,
+                                  projectName: this.projects[indexData].projectName
+                              },
+                          },
+                          height: 'auto', width: 'auto'
+                      });
+                      dialogRef.afterClosed().subscribe(result => {
+                          if (result) {
+                              abp.notify.success('Updated successfully');
+                              this.refresh();
+                          }
+                      });
                 }
             },
             legend: {
@@ -115,13 +122,20 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
               backgroundColor: "rgb(0,143,251)",
               stack: 'total'
             },{
-              label: 'Expose',
-              data: this.exposeCount,
-              backgroundColor: "rgb(0,227,150)",
-              stack: 'total'
-            },{
               label: 'Member',
               data: this.memberCount,
+              backgroundColor: "rgb(0,227,150)",
+              stack: 'total'
+            },
+            {
+              label: 'PM',
+              data: this.pmCount,
+              backgroundColor: "rgb(244, 67, 54)",
+              stack: 'total'
+            },
+            {
+              label: 'Deactive',
+              data: this.deactiveCount,
               backgroundColor: "rgb(254,176,25)",
               stack: 'total'
             }]
@@ -129,7 +143,7 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
         }
       );
     }else{
-      const newData = [this.shadowCount, this.exposeCount, this.memberCount];
+      const newData = [this.shadowCount, this.memberCount, this.pmCount, this.deactiveCount];
       this.chart.data.labels = this.projectNames;
       this.chart.data.datasets.forEach((dataset, index) => {
         dataset.data = newData[index];
@@ -165,20 +179,22 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
         this.showPaging(rs.result, pageNumber);
         this.projects.forEach(project => {
           this.projectNames.push(project.projectName);
+          this.deactiveCount.push(project.deactiveCount);
           this.memberCount.push(project.memberCount);
-          this.exposeCount.push(project.exposeCount);
           this.shadowCount.push(project.shadowCount);
+          this.pmCount.push(project.pmCount);
         })
-      }
+      } 
       this.showChart()
     })
   }
 
   resetDataChart(){
     this.projectNames = [];
+    this.deactiveCount = [];
     this.memberCount = [];
-    this.exposeCount = [];
     this.shadowCount = [];
+    this.pmCount = [];
   }
 
   searchOrFilter(): void{

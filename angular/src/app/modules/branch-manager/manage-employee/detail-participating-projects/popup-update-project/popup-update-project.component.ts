@@ -29,10 +29,10 @@ export class PopupUpdateProjectComponent extends AppComponentBase implements OnI
     const data = {
       userId: this.data.userId,
       projectId: this.project.projectId,
-      type: this.project.valueOfUserType,
-      shadowPercentage: this.project.shadowPercentage,
+      type: this.project.projectUserType,
+      effort: this.project.effort,
     }
-    this.manageUserProjectForBranchService.createValueOfUser(data).subscribe(result => {
+    this.manageUserProjectForBranchService.updateProjectUserEffort(data).subscribe(result => {
       this.close(true);
     })
   }
