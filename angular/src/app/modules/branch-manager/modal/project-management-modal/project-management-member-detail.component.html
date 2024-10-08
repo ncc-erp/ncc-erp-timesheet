@@ -1,6 +1,5 @@
-<div>
-    <h3 class="text-center margin-0 p-b-24">{{ data.projectItem.projectName }}</h3>
-    <div [ngClass]="{'height': projectItem.length > 10}" class="table-responsive">
+<h3 mat-dialog-title class="text-center margin-0 p-b-24">{{ data.projectItem.projectName }}</h3>
+<div mat-dialog-content>
         <table class="table table-bordered">
             <thead>
             <tr>
@@ -28,6 +27,7 @@
                         </div>
                     </div>
                 </th>
+                <th>Total effort</th>
                 <th>Type</th>
             </tr>
             </thead>
@@ -37,10 +37,25 @@
                 <td>{{ m.fullName }}</td>
                 <td>{{ m.emailAddress }}</td>
                 <td>{{ m.workingTime }}</td>
-                <td>{{ m.valueType }}</td>
+                <td>{{convertMinuteToHour( m.totalWorkingTime) }}</td>
+                 <td>
+                    <mat-form-field>
+                        <mat-select 
+                            [value]="m.userType" 
+                            [disabled]="m.userType === APP_CONSTANT.EnumUserType.PM"
+                            (selectionChange)="onProjectItemChange($event.value, i)">
+                            <mat-option *ngFor="let item of APP_CONFIG.EnumUserType" [value]="item.value">
+                                {{item.name}}
+                            </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                 </td>
             </tr>
             </tbody>
         </table>
-    </div>
     <span class="d-block text-right total_item">Total Item: {{totalItems}}</span>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-raised-button (click)="onCancelClick()">Cancel</button>
+    <button mat-raised-button (click)="onSaveClick()" color="primary" [disabled]="isLoading">Save</button>
 </div>

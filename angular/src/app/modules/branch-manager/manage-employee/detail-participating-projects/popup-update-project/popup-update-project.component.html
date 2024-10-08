@@ -6,20 +6,22 @@
   <form (ngSubmit)="submit()" #editForm="ngForm">
     <div class="input d-flex justify-content-between">
       <mat-form-field style="width: 48%;">
-        <mat-label>Value Type</mat-label>
-        <mat-select matInput [(ngModel)]="project.valueOfUserType" name="valueOfUserType">
-          <mat-option *ngFor="let item of APP_CONFIG.EnumValueOfUserType" [value]="item.value">
+        <mat-label>Type</mat-label>
+        <mat-select matInput 
+          [disabled]="project.projectUserType === APP_CONSTANT.EnumUserType.PM" 
+          [(ngModel)]="project.projectUserType" name="projectUserType">
+          <mat-option *ngFor="let item of APP_CONFIG.EnumUserType" [value]="item.value">
             {{item.name}}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
       <mat-form-field style="width: 48%;">
-        <mat-label>Shadow Percentage</mat-label>
+        <mat-label>Effort percentage</mat-label>
         <input 
           matInput 
-          name="shadowPercentage" 
-          [(ngModel)]="project.shadowPercentage" 
+          name="effort" 
+          [(ngModel)]="project.effort" 
           required
           type="number"
           inputmode="numeric"

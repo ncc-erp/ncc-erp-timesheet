@@ -20,6 +20,7 @@ namespace Ncc.Entities
                 
         public ProjectUserType Type { get; set; }
         public bool IsTemp { get; set; }
+        public float Effort { get; set; }
 
     }
 

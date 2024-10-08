@@ -32,7 +32,7 @@ export class ProjectTargetUserPipe implements PipeTransform {
 
         return value.map(user => {
             const percentage = Number(user.workingPercent);
-            const valueTypeTargetUser = ValueTypeTargetUserMap[user.valueType];
+            const valueTypeTargetUser = ValueTypeTargetUserMap[user.userType];
             const workingTimePercentage = percentage === 100 ? '100%' : `${percentage.toFixed(2)}%`;
             return {
                 ...user,

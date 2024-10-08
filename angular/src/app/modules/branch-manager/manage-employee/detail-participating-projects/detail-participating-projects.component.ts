@@ -21,11 +21,6 @@ export class DetailParticipatingProjectsComponent extends AppComponentBase imple
   distanceFromAndToDate = '';
   typeDate: any;
   public totalWorkingHours: string;
-  public valueOfUserType = [
-    { value: 0, label: 'Member' },
-    { value: 1, label: 'Expose' },
-    { value: 2, label: 'Shadow' }
-  ];
   public showInactiveProject: boolean = false;
   userId: number;
   fromDate: any;
@@ -53,7 +48,7 @@ export class DetailParticipatingProjectsComponent extends AppComponentBase imple
     this.manageUserProjectForBranchService
     .getAllValueOfUserInProjectByUserId(this.userId, fromDate, toDate)
     .subscribe(res => {
-      this.projectList = res.result.getAllValueOfUserInProjectByUserIdDtos;
+      this.projectList = res.result.allValueOfUserInProjectDtos;
       this.totalWorkingHours = convertMinuteToHour(res.result.totalWorkingHours);
     })
   }
@@ -157,7 +152,7 @@ export class DetailParticipatingProjectsComponent extends AppComponentBase imple
     });
   }
 
-  updateShadowPercentage(project){
+  updateProjectUser(project){
     let item = Object.assign(JSON.parse(JSON.stringify(project)))
     let data = {
       project: item,
@@ -172,8 +167,20 @@ export class DetailParticipatingProjectsComponent extends AppComponentBase imple
     dialogRef.afterClosed().subscribe(result => {
       if(result) {
         abp.notify.success('Updated Project Success');
-        this.changeView(true)
+        this.changeView(false,moment(this.data.startDate),moment(this.data.endDate));
       }
     });
+  }
+
+  getProjectUserType(userType: number) {
+    let type = this.APP_CONSTANT.EnumUserType;
+    let result = 'Unknown';
+    for (let key in type) {
+      if (type[key] == userType) {
+        result = key;
+        break;
+      }
+    }
+    return result;
   }
 }

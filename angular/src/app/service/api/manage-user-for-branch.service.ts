@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { BaseApiService } from './base-api.service';
 import { PagedRequestDto, PageProjectUserDto } from '@shared/paged-listing-component-base';
+import { UpdateTypeOfUsersInProjectDto } from '@app/modules/branch-manager/Dto/branch-manage-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +27,10 @@ export class ManageUserForBranchService extends BaseApiService {
 
   getAllUserInProject(branchId: number, projectId: number, startDate: string, endDate: string, page: PageProjectUserDto): Observable<any> {
     return this.http.post(this.rootUrl + `/GetAllUserInProject?branchId=${branchId}&projectId=${projectId}&startDate=${startDate}&endDate=${endDate}`, page);
+  }
+
+  updateTypeOfUsersInProject(body: UpdateTypeOfUsersInProjectDto): Observable<any> {
+    return this.http.post(this.rootUrl + '/UpdateTypeOfUsersInProject', body);
   }
 }
 
