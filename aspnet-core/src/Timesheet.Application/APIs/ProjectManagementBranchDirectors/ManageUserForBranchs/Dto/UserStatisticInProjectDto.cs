@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Timesheet.Anotations;
+﻿using Timesheet.Anotations;
 
 namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.Dto
 {
@@ -13,7 +10,7 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
         [ApplySearch]
         public string ProjectName { get; set; }
         public int TotalUser { get; set; }
-        public int DeactiveCount { get; set; } 
+        public int DeactiveCount { get; set; }
         public int MemberCount { get; set; }
         public int ShadowCount { get; set; }
         public int PmCount { get; set; }
