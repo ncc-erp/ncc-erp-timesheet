@@ -41,6 +41,36 @@
               </div>
               <app-date-filter (dateSelected)="onDateSelected($event)" class="app-date-filter"></app-date-filter>
             </div>
+            <div class="row">
+               <div class="col-lg-4 col-md-8 col-sm-6 col-xs-12 mb-0 row-item">
+                <ng-container>
+                  <mat-form-field class="w-100" appearance="outline">
+                    <mat-label>{{ "User Type" | localize }}</mat-label>
+                    <mat-select name="userTypeId" [(value)]="userTypeId" (selectionChange)="searchOrFilter()">
+                      <mat-option>
+                        <ngx-mat-select-search placeholderLabel="Search" [formControl]="UserTypeSearch"
+                          noEntriesFoundLabel="No matching found">
+                        </ngx-mat-select-search>
+                      </mat-option>
+                      <mat-option *ngFor="let userType of filterUserType" [value]="userType.value">
+                        {{ userType.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </ng-container>
+              </div>
+              <div class="col-lg-4 col-md-8 col-sm-6 col-xs-12 mb-0 row-item">
+                <ng-container>
+                  <mat-form-field class="w-100 mt-2" appearance="outline">
+                    <mat-label>{{ "Sort Order" | localize }}</mat-label>
+                    <mat-select [(value)]="sortOrder" (selectionChange)="updateSortOrder()">
+                      <mat-option [value]="SortOrderType.Ascending">{{ "Ascending" | localize }}</mat-option>
+                      <mat-option [value]="SortOrderType.Descending">{{ "Descending" | localize }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </ng-container>
+              </div>
+            </div>
           </div>
           <!-- <div class="col-lg-2">
             <div class="row row-btn">
