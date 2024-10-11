@@ -12,6 +12,8 @@ import { MatDialog } from '@angular/material/dialog';
 import {
     ProjectManagementMemberDetailComponent
 } from '@app/modules/branch-manager/modal/project-management-modal/project-management-member-detail.component';
+import { APP_CONFIG } from '@app/constant/api-config.constant';
+import { SortOrder, ProjectMemberType, UserTypeCount } from '../modal/project-management-modal/enum/sort-member-effort.enum';
 
 @Component({
   selector: 'app-project-management',
@@ -24,17 +26,20 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
   @Input() listBranchFilter: BranchDto[];
   public branchSearch: FormControl = new FormControl("")
   branchId;
-
   startDate: string;
   endDate: string;
-
+  public UserTypeSearch: FormControl = new FormControl("")
+  filterUserType = APP_CONFIG.EnumValueOfUserType
+  userTypeId: ProjectMemberType = ProjectMemberType.All;
+  sortOrder: SortOrder = SortOrder.Descending;
+  userTypeMap = [ UserTypeCount.Expose, UserTypeCount.Shadow,UserTypeCount.Deactive,UserTypeCount.All];
+  protected SortOrderType = SortOrder;
   public filterItems: FilterDto[] = [];
   public projects: ProjectDto[];
   private projectNames: string[] = [];
   private deactiveCount: number[] = [];
-  private memberCount: number[] = [];
+  private exposeCount: number[] = [];
   private shadowCount: number[] = [];
-  private pmCount: number[] = [];
   private filterBranchId: any;
   private chart: Chart;
   constructor(
@@ -122,17 +127,17 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
               backgroundColor: "rgb(0,143,251)",
               stack: 'total'
             },{
-              label: 'Member',
-              data: this.memberCount,
+              label: 'Expose',
+              data: this.exposeCount,
               backgroundColor: "rgb(0,227,150)",
               stack: 'total'
             },
-            {
-              label: 'PM',
-              data: this.pmCount,
-              backgroundColor: "rgb(244, 67, 54)",
-              stack: 'total'
-            },
+            // {
+            //   label: 'PM',
+            //   data: this.pmCount,
+            //   backgroundColor: "rgb(244, 67, 54)",
+            //   stack: 'total'
+            // },
             {
               label: 'Deactive',
               data: this.deactiveCount,
@@ -143,13 +148,41 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
         }
       );
     }else{
-      const newData = [this.shadowCount, this.memberCount, this.pmCount, this.deactiveCount];
+      const newData = [this.shadowCount, this.exposeCount, this.deactiveCount];
       this.chart.data.labels = this.projectNames;
       this.chart.data.datasets.forEach((dataset, index) => {
         dataset.data = newData[index];
       });
       this.chart.update();
     }
+  }
+
+  private loadProjectCountData(){
+    this.projects.forEach(project => {
+      this.projectNames.push(project.projectName);
+      this.deactiveCount.push(project.deactiveCount);
+      this.exposeCount.push(project.memberCount + project.pmCount);
+      this.shadowCount.push(project.shadowCount );
+  })
+}
+  private sortProject() {
+    this.projects.sort((a, b) => {
+      if (this.userTypeId === 0) {
+          const aTotal = a.pmCount + a.memberCount;
+          const bTotal = b.pmCount + b.memberCount;
+          return this.sortOrder === SortOrder.Ascending ? aTotal - bTotal : bTotal - aTotal;
+      }
+      else {
+          const field = this.userTypeMap[this.userTypeId];
+          console.log(field);
+          const aCount = a[field];
+          const bCount = b[field];
+          return this.sortOrder === SortOrder.Ascending ? aCount - bCount : bCount - aCount;
+      }
+    });
+    this.resetDataChart()
+    this.loadProjectCountData()
+    this.showChart()
   }
 
   protected list(
@@ -172,33 +205,32 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
     ).subscribe((rs: any) => {
       this.resetDataChart()
       this.totalItems = rs.result.totalCount;
+
       if (rs.result == null || rs.result.items.length == 0) {
         this.projects = []
       }else{
         this.projects = rs.result.items
         this.showPaging(rs.result, pageNumber);
-        this.projects.forEach(project => {
-          this.projectNames.push(project.projectName);
-          this.deactiveCount.push(project.deactiveCount);
-          this.memberCount.push(project.memberCount);
-          this.shadowCount.push(project.shadowCount);
-          this.pmCount.push(project.pmCount);
-        })
-      } 
+        this.loadProjectCountData()
+      }
       this.showChart()
     })
   }
 
+
   resetDataChart(){
     this.projectNames = [];
     this.deactiveCount = [];
-    this.memberCount = [];
+    this.exposeCount = [];
     this.shadowCount = [];
-    this.pmCount = [];
+    // this.pmCount = [];
   }
 
   searchOrFilter(): void{
-    this.refresh();
+    this.sortProject()
+  }
+  updateSortOrder() {
+    this.sortProject()
   }
 
   // clearSearchAndFilter(){
