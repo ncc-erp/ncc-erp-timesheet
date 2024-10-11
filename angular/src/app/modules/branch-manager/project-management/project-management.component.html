@@ -42,7 +42,12 @@
               <app-date-filter (dateSelected)="onDateSelected($event)" class="app-date-filter"></app-date-filter>
             </div>
             <div class="row">
-               <div class="col-lg-4 col-md-8 col-sm-6 col-xs-12 mb-0 row-item">
+              <div class="col-lg-8 title-sort">
+                <p class="mb-0">{{ "Sort by:" | localize }}</p>
+              </div>
+            </div>
+            <div class="row">
+               <div class="col-lg-4 col-md-8 col-sm-6 col-xs-12 mb-0 row-item ">
                 <ng-container>
                   <mat-form-field class="w-100" appearance="outline">
                     <mat-label>{{ "User Type" | localize }}</mat-label>
@@ -59,7 +64,7 @@
                   </mat-form-field>
                 </ng-container>
               </div>
-              <div class="col-lg-4 col-md-8 col-sm-6 col-xs-12 mb-0 row-item">
+              <div class="col-lg-4 col-md-8 col-sm-6 col-xs-12 mb-0 row-item ">
                 <ng-container>
                   <mat-form-field class="w-100 mt-2" appearance="outline">
                     <mat-label>{{ "Sort Order" | localize }}</mat-label>
