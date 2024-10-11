@@ -33,7 +33,7 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
   userTypeId: ProjectMemberType = ProjectMemberType.All;
   sortOrder: SortOrder = SortOrder.Descending;
   userTypeMap = [ UserTypeCount.Expose, UserTypeCount.Shadow,UserTypeCount.Deactive,UserTypeCount.All];
-  protected SortOrderType = SortOrder;
+  public SortOrderType = SortOrder;
   public filterItems: FilterDto[] = [];
   public projects: ProjectDto[];
   private projectNames: string[] = [];
