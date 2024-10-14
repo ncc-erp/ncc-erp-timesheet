@@ -161,15 +161,15 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
     this.projects.forEach(project => {
       this.projectNames.push(project.projectName);
       this.deactiveCount.push(project.deactiveCount);
-      this.exposeCount.push(project.memberCount + project.pmCount);
+      this.exposeCount.push(project.memberCount);
       this.shadowCount.push(project.shadowCount );
   })
 }
   private sortProject() {
     this.projects.sort((a, b) => {
       if (this.userTypeId === 0) {
-          const aTotal = a.pmCount + a.memberCount;
-          const bTotal = b.pmCount + b.memberCount;
+          const aTotal = a.memberCount;
+          const bTotal = b.memberCount;
           return this.sortOrder === SortOrder.Ascending ? aTotal - bTotal : bTotal - aTotal;
       }
       else {
@@ -180,8 +180,8 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
           return this.sortOrder === SortOrder.Ascending ? aCount - bCount : bCount - aCount;
       }
     });
-    this.resetDataChart()
-    this.loadProjectCountData()
+    // this.resetDataChart()
+    // this.loadProjectCountData()
     this.showChart()
   }
 
@@ -210,6 +210,7 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
         this.projects = []
       }else{
         this.projects = rs.result.items
+        this.sortProject()
         this.showPaging(rs.result, pageNumber);
         this.loadProjectCountData()
       }
@@ -227,10 +228,12 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
   }
 
   searchOrFilter(): void{
-    this.sortProject()
+    this.refresh();
+    // this.sortProject()
   }
   updateSortOrder() {
-    this.sortProject()
+    this.refresh();
+    // this.sortProject()
   }
 
   // clearSearchAndFilter(){
