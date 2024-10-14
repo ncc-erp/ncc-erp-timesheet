@@ -160,16 +160,18 @@
                                 <mat-icon>update</mat-icon>
                                 <span>Update To Project</span>
                             </button>
-                            <button  type="button" *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" 
-                                 (click)="headPmAprroveOrRejectAll(headPmVerifyStatus)" class="btn-pm-head btn approve" [disabled]="!(listSelectedItem?.length > 0)" >
-                                <mat-icon>check</mat-icon>
-                                <span>Head PM Verify All</span> 
-                            </button>
-                            <button  type="button" *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" 
-                                (click)="headPmAprroveOrRejectAll(headPmRejectStatus)" class="btn-pm-head btn reject" [disabled]="!(listSelectedItem?.length > 0)" >
-                                <mat-icon>thumb_down_off_alt</mat-icon>
-                                <span>Head PM Reject All</span> 
-                            </button>
+                        <button type="button" *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)"
+                                (click)="headPmAprroveOrRejectAll(headPmVerifyStatus)" class="btn-pm-head btn approve"
+                                [disabled]="!(listSelectedItem?.length > 0)">
+                        <mat-icon>check</mat-icon>
+                            <span>Head PM approve ({{ listSelectedItem?.length }})</span>
+                        </button>
+                        <button type="button" *ngIf="permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)"
+                                (click)="headPmAprroveOrRejectAll(headPmRejectStatus)" class="btn-pm-head btn reject"
+                                [disabled]="!(listSelectedItem?.length > 0)">
+                            <mat-icon>thumb_down_off_alt</mat-icon>
+                            <span>Head PM reject ({{ listSelectedItem?.length }})</span>
+                        </button>
                         </div>
                     </div>
                 </div>
@@ -210,7 +212,7 @@
                                 <span>
                                     {{ "Level" | localize }}
                                     <mat-icon>unfold_more</mat-icon>
-                                </span> 
+                                </span>
                             </th>
                             <th (click)="toggleSort('newLevel')">
                                 <span>
@@ -256,23 +258,23 @@
                         totalItems: totalItems
                       };
                 index as i
-              ">            
+              ">
               <td class="text-center flex">
-                <mat-checkbox *ngIf="item.status === 4 && permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)" 
-                              [name]="'selected-' + item.id" 
+                <mat-checkbox *ngIf="item.status === 4 && permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern)"
+                              [name]="'selected-' + item.id"
                               [checked]="getIsSelected(item)"
-                              [color]="'primary'" 
+                              [color]="'primary'"
                               (change)="handleSelectlistReviewInternItem(i, $event)">
                     {{ (pageNumber - 1) * pageSize + i + 1 }}
                 </mat-checkbox>
-            
+
                 <!-- Chỉ hiển thị số nếu mat-checkbox không hiển thị -->
                 <span *ngIf="!(item.status === 4 && permission.isGranted(ReviewIntern_ReviewDetail_AcceptPmReviewForAllIntern))">
                     {{ (pageNumber - 1) * pageSize + i + 1 }}
                 </span>
             </td>
-            
-            
+
+
                             <!-- STT -->
                             <!-- <td style="text-align: center">
                             </td> -->
@@ -313,11 +315,11 @@
                                     </button>
                                     <!-- <button *ngIf="isShowBtnHrVerify(item)" mat-menu-item="mat-menu-item" class="choices" name="hrVerifyIntern" (click)="createHrNote(item)">
                                         <mat-icon class="mat-18">verified_user</mat-icon>
-                                        HR Verify  
+                                        HR Verify
                                     </button> -->
                                     <button *ngIf="isShowBtnHeadPm(item)" mat-menu-item="mat-menu-item" class="choices" style="color: green" name="headPmVerifyIntern" (click)="headPmApproveOrReject(item, headPmVerifyStatus)">
                                         <mat-icon class="mat-18" style="color: green">rate_review</mat-icon>
-                                        Head PM Verify 
+                                        Head PM Verify
                                     </button>
                                     <button *ngIf="isShowBtnHeadPm(item)" mat-menu-item="mat-menu-item" class="choices" style="color: red" name="headPmRejectIntern" (click)="headPmApproveOrReject(item, headPmRejectStatus)">
                                         <mat-icon class="mat-18" style="color: red">thumb_down_off_alt</mat-icon>
@@ -331,7 +333,7 @@
                                     </button>
                                     <button *ngIf="isShowBtnPMNote(item)" mat-menu-item="mat-menu-item" class="choices" name="pmNote" (click)="createPMNote(item)">
                                         <mat-icon class="mat-18">verified_user</mat-icon>
-                                        PM / Loren Note  
+                                        PM / Loren Note
                                     </button>
                                     <button *ngIf="isShowBtnInterviewNote(item)" mat-menu-item="mat-menu-item" class="choices" name="interviewNote" (click)="createInterviewNote(item)">
                                         <mat-icon class="mat-18">verified_user</mat-icon>
@@ -440,8 +442,8 @@
                                     {{ item.mostLoggedProject }}
                                 </div>
                             </td>
-                            
-                            
+
+
                             <!-- History -->
                             <td>
                                 <div style="text-align: center">
@@ -538,17 +540,17 @@
                                             <div *ngIf="isShowPmNote(note)" >
                                                 <b class="">{{note.noteByUserName}}:</b>
                                             <p [innerHTML]="formatNoteContent(note.privateNote)"></p>
-                                            <i>{{ note.created | date: "dd/MM/yyyy" }} {{ note.created | date: "hh:mm:ss" }}</i> <br> 
+                                            <i>{{ note.created | date: "dd/MM/yyyy" }} {{ note.created | date: "hh:mm:ss" }}</i> <br>
                                              </div>
-                                        </ng-container>  
+                                        </ng-container>
                                     </p>
                                     <mat-icon *ngIf="getLineReviewContentsCount(item.reviewInternPrivateNoteDtos)> 3" style="padding: 5px 0px 0px 10px; cursor: pointer">more_horiz
-                                    </mat-icon> 
+                                    </mat-icon>
                                 </div>
                             </td> -->
 
                             <!-- Hide Note td-->
-                             
+
                             <!-- <td (click)="togglePrivateNote(item)" style="cursor: pointer;">
                                 <div>
                                     <p [ngClass]="item.hidePrivateNote == false ? 'preReview' : 'review'"
@@ -562,7 +564,7 @@
                                         </ng-container>
                                     </p>
                                     <mat-icon *ngIf="getLineReviewContentsCount(item.reviewInternPrivateNoteDtos)> 3" style="padding: 5px 0px 0px 10px; cursor: pointer">more_horiz
-                                    </mat-icon> 
+                                    </mat-icon>
                                 </div>
                             </td> -->
                             <!-- Updated At -->
