@@ -781,21 +781,10 @@ namespace Ncc.Users
             foreach (var item in listDataCheckpointInput)
             {
                 sheet.Cells[1, 1].Value = item.CheckPointName;
-                sheet.Cells[rowIndex, 1].Value = rowIndex - 3;
-                sheet.Cells[rowIndex, 2].Value = item.UserId;
-                sheet.Cells[rowIndex, 3].Value = item.FullName;
-                sheet.Cells[rowIndex, 4].Value = item.EmailAddress;
-                sheet.Cells[rowIndex, 5].Value = item.Branch;
-                sheet.Cells[rowIndex, 6].Value = (int)item.Type;
-                sheet.Cells[rowIndex, 7].Value = item.TypeName;
-                sheet.Cells[rowIndex, 8].Value = item.WorkingTime;
-                sheet.Cells[rowIndex, 9].Value = item.LevelName;
-                sheet.Cells[rowIndex, 10].Value = item.ProjectNames;
-                sheet.Cells[rowIndex, 11].Value = item.ReviewerId;
-                sheet.Cells[rowIndex, 12].Value = item.ReviewerName;
-                sheet.Cells[rowIndex, 13].Value = item.ReviewerEmail;
-                sheet.Cells[rowIndex, 14].Value = item.ReviewerIsActive;
-
+                sheet.Cells[rowIndex, 1].Value = rowIndex - 3;            
+                sheet.Cells[rowIndex, 2].Value = item.EmailAddress;
+                sheet.Cells[rowIndex, 3].Value = item.ProjectNames;
+                sheet.Cells[rowIndex, 4].Value = item.ReviewerEmail;
                 rowIndex++;
             }
         }

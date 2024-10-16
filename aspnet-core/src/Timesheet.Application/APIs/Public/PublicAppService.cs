@@ -1052,22 +1052,10 @@ namespace Timesheet.APIs.Public
                     var checkPointName = "Data Checkpoint tháng " + startDate.Month + '/' + startDate.Year;
                     var reviewDetail = new DataCheckPointDto
                     {
-                        CheckPointName = checkPointName,
-                        UserId = userId,
-                        FullName = mapUserInfo[userId].FullName,
-                        EmailAddress = mapUserInfo[userId].EmailAddress,
-                        Branch = mapUserInfo[userId].Branch,
-                        //BranchName = mapUserInfo[userId].Branch.ToString(),
-                        Type = mapUserInfo[userId].Type,
-                        TypeName = mapUserInfo[userId].Type.ToString(),
-                        //Level = mapUserInfo[userId].Level,
-                        WorkingTime = workingTime,
-                        LevelName = mapUserInfo[userId].Level.ToString(),
+                        EmailAddress = mapUserInfo[userId].EmailAddress,           
                         ProjectNames = projectName,
-                        ReviewerId = reviewerId,
-                        ReviewerName = mapUserInfo.ContainsKey(reviewerId) ? mapUserInfo[reviewerId].FullName : "",
                         ReviewerEmail = mapUserInfo.ContainsKey(reviewerId) ? mapUserInfo[reviewerId].EmailAddress : "",
-                        ReviewerIsActive = mapUserInfo.ContainsKey(reviewerId) ? mapUserInfo[reviewerId].IsActive.ToString() : "not found",
+               
                     };
 
                     resultList.Add(reviewDetail);
