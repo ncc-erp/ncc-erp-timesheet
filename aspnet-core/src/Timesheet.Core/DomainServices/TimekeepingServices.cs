@@ -96,8 +96,7 @@ namespace Timesheet.DomainServices
 
             var mapAbsenceUsers = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request)
                 .Where(s => s.DateAt.Date == selectedDate.Date
-                && s.Request.Status == RequestStatus.Approved
-                && s.Request.Type != RequestType.Remote)
+                && s.Request.Status == RequestStatus.Approved)
                 .GroupBy(s => s.Request.UserId)
                 .ToDictionary(s => s.Key, s => s.Select(x => new MapAbsenceUserDto
                 {
@@ -108,6 +107,7 @@ namespace Timesheet.DomainServices
                     Type = x.Request.Type,
                 })
                                 .OrderBy(x => x.AbsenceTime)
+                                .ThenBy(x => x.Type)
                                 .ToList());
 
             var rs = new List<Timekeeping>();
@@ -196,7 +196,7 @@ namespace Timesheet.DomainServices
                 t.UserId = user.UserId;
 
                 await CheckIsPunished(t, LimitedMinute);
-                await CheckIsPunishedByRule(t, LimitedMinute, trackerTime);
+                await CheckIsPunishedByRule(t, LimitedMinute, trackerTime, registerCheckInOut);
                 if (user.IsStopWork || (user.StopWorkingDate.HasValue && user.StopWorkingDate.Value.Date < selectedDate))
                 {
                     t.IsPunishedCheckIn = false;
@@ -363,7 +363,7 @@ namespace Timesheet.DomainServices
             var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
             await CheckIsPunished(timekeeping, LimitedMinute);
         }
-        public async System.Threading.Tasks.Task CheckIsPunishedByRule(Timekeeping timekeeping, int limitedMinute, float trackerTime)
+        public async System.Threading.Tasks.Task CheckIsPunishedByRule(Timekeeping timekeeping, int limitedMinute, float trackerTime, CheckInOutTimeDto checkInOutTimeDto)
         {
             var registerWorkingHours = CommonUtils.GetEmployeeWorkingHours(timekeeping.RegisterCheckOut, timekeeping.RegisterCheckIn);
             var NoCheckInAndNoCheckOut = (String.IsNullOrEmpty(timekeeping.CheckOut) && String.IsNullOrEmpty(timekeeping.CheckIn));
@@ -378,73 +378,88 @@ namespace Timesheet.DomainServices
             if (!timekeeping.NoteReply.IsNullOrEmpty() && timekeeping.NoteReply.Contains("Off fullday"))
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (!timekeeping.NoteReply.IsNullOrEmpty() && timekeeping.NoteReply.Contains("Onsite"))
             {
                 if ((CheckIn && CheckOut) || (CheckIn && NoCheckOut) || (CheckInLate && NoCheckOut))
                 {
                     timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                    timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
                 }
                 else if (NoCheckIn && CheckOut)
                 {
                     timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                    timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
                 }
             }
             else if (NoCheckInAndNoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckInAndNoCheckOut;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (NoCheckInAndNoCheckOut && trackerTime >= trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckIn;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckInLate && NoCheckOut && trackerTime >= trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckInLate && timekeeping.CheckOut.HasValue())
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckInLate && NoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.LateAndNoCheckOut;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckIn && NoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckOut;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckIn && CheckOut)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (CheckIn && !timekeeping.CheckOut.HasValue() && trackerTime >= trackerTimeByRegisterWorkingHours)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (NoCheckIn)
             {
                 timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckIn;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
+            await SetMoneyPunishByType(timekeeping, trackerTime, checkInOutTimeDto);
 
         }
-        private async Task<int> GetMoneyPunishByType(CheckInCheckOutPunishmentType StatusPunish)
+        private async Task SetMoneyPunishByType(Timekeeping timekeeping, float trackerTime, CheckInOutTimeDto checkInOutTimeDto)
         {
             var checkInCheckOutPunishmentSetting = await SettingManager.GetSettingValueAsync(AppSettingNames.CheckInCheckOutPunishmentSetting);
             var rs = JsonConvert.DeserializeObject<List<CheckInCheckOutPunishmentSettingDto>>(checkInCheckOutPunishmentSetting);
-            return rs.Where(x => x.Id == StatusPunish).Select(x => x.Money).FirstOrDefault();
+            var MoneyPunish = rs.Where(x => x.Id == timekeeping.StatusPunish).Select(x => x.Money).FirstOrDefault();
+            if (timekeeping.CountPunishDaily > 0) MoneyPunish += rs.Where(x => x.Id == CheckInCheckOutPunishmentType.NoDaily).Select(x => x.Money).FirstOrDefault() * timekeeping.CountPunishDaily;
+            if (timekeeping.CountPunishMention > 0) MoneyPunish += rs.Where(x => x.Id == CheckInCheckOutPunishmentType.NoReplyMention).Select(x => x.Money).FirstOrDefault() * timekeeping.CountPunishMention;
+
+            if (checkInOutTimeDto != null && checkInOutTimeDto.isRemote)
+            {
+                if (trackerTime <= checkInOutTimeDto.TrackerTimeLevel[0])
+                {
+                    timekeeping.MoneyPunish = rs.Where(x => x.Id == CheckInCheckOutPunishmentType.TrackerTime0).Select(x => x.Money).FirstOrDefault();
+                }
+                else if (trackerTime <= checkInOutTimeDto.TrackerTimeLevel[1])
+                {
+                    timekeeping.MoneyPunish = rs.Where(x => x.Id == CheckInCheckOutPunishmentType.TrackerTime1).Select(x => x.Money).FirstOrDefault();
+                }
+                else if (trackerTime <= checkInOutTimeDto.TrackerTimeLevel[2])
+                {
+                    timekeeping.MoneyPunish = rs.Where(x => x.Id == CheckInCheckOutPunishmentType.TrackerTime2).Select(x => x.Money).FirstOrDefault();
+                }
+                else if (trackerTime <= checkInOutTimeDto.TrackerTimeLevel[3])
+                {
+                    timekeeping.MoneyPunish = rs.Where(x => x.Id == CheckInCheckOutPunishmentType.TrackerTime3).Select(x => x.Money).FirstOrDefault();
+                }
+                else timekeeping.MoneyPunish = 0;
+            }
+            else timekeeping.MoneyPunish = 0;
+
+            timekeeping.MoneyPunish += MoneyPunish;
         }
 
 
@@ -512,6 +527,9 @@ namespace Timesheet.DomainServices
         public CheckInOutTimeDto CaculateCheckInOutTimeNew(Dictionary<long, List<MapAbsenceUserDto>> mapAbsenceUsers, TimesheetUserDto user)
         {
             var t = new CheckInOutTimeDto { };
+            t.isRemote = false;
+            // Mốc phạt KomuTracker: 0-2h, 2-4h, 4-6h, 6-7h
+            t.TrackerTimeLevel = new List<float>() { 2 * 60, 4 * 60, 6 * 60, 7 * 60 };
             t.CheckIn = user.MorningStartAt;
             t.CheckOut = user.AfternoonEndAt;
             if (user.IsStopWork)
@@ -550,6 +568,8 @@ namespace Timesheet.DomainServices
                         }
                         else if (absenceUser.DateType == DayType.Custom)
                         {
+                            // Mốc phạt KomuTracker: 0-2h, 2-3h, 3-4h, 4 -> (7 - Thời gian DM/VS)h
+                            t.TrackerTimeLevel = new List<float>(){2 * 60, 3 * 60, 4 * 60, (7 - (float)absenceUser.Hour) * 60};
                             if (absenceUser.AbsenceTime == OnDayType.DiMuon)
                             {
                                 t.CheckIn = CommonUtils.AddMoreHourToHHmm(t.CheckIn, absenceUser.Hour);
@@ -584,6 +604,28 @@ namespace Timesheet.DomainServices
                             t.CheckOut = user.MorningEndAt;
                             t.Note += "Onsite afternoon";
                             t.AbsenceDayType = DayType.Afternoon;
+                        }
+                    } else if (absenceUser.Type == RequestType.Remote)
+                    {
+                        t.isRemote = true;
+                        switch (absenceUser.DateType)
+                        {
+                            case DayType.Fullday:
+                                {
+                                    break;
+                                }
+                            case DayType.Morning:
+                                {
+                                    // Mốc phạt KomuTracker: 0-1h, 1-2h, 2-3h, 3-4h
+                                    t.TrackerTimeLevel = new List<float>() { 1 * 60, 2 * 60, 3 * 60, 4 * 60 };
+                                    break; 
+                                }
+                            case DayType.Afternoon:
+                                {
+                                    // Mốc phạt KomuTracker: 0-1h, 1-2h, 2-2.5h, 2.5-3h
+                                    t.TrackerTimeLevel = new List<float>() { 1 * 60, 2 * 60, 2.5f * 60, 3 * 60 };
+                                    break; 
+                                }
                         }
                     }
                 }

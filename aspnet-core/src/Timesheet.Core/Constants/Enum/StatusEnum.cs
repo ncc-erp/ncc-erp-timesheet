@@ -263,7 +263,13 @@ namespace Ncc.Entities.Enum
             NoCheckIn = 2,
             NoCheckOut = 3,
             LateAndNoCheckOut = 4,
-            NoCheckInAndNoCheckOut = 5
+            NoCheckInAndNoCheckOut = 5,
+            NoDaily = 6,
+            NoReplyMention = 7,
+            TrackerTime0 = 8,
+            TrackerTime1 = 9,
+            TrackerTime2 = 10,
+            TrackerTime3 = 11
         }
         public enum TeamBuildingStatus
         {

@@ -19,6 +19,7 @@ import * as moment from 'moment';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { BranchService } from '@app/service/api/branch.service';
 import { isThisSecond } from 'date-fns';
+import { GetCheckInCheckOutPunishmentSettingDto } from '@app/configuration/configuration.component';
 
 @Component({
   selector: 'app-tardiness-detail',
@@ -66,6 +67,7 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
   listBranch: BranchDto[] = [];
   branchSearch: FormControl = new FormControl("")
   listBranchFilter : BranchDto[];
+  PunishSetting = {} as GetCheckInCheckOutPunishmentSettingDto;
 
   public currentSortColumn: string = "transactionDate";
   public sortDirection: number = 0;
@@ -102,7 +104,6 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
 
   ngOnInit() {
     this.setDataDefaul();
-    this.getData();
     this.getUser();
     this.onUserChange();
     this.getListBranch();
@@ -133,7 +134,7 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
       this.listTimekeeping = res.result;
       this.listTimekeeping = res.result.map(item => {
         item.noteReplyToString = !item.noteReply ? "" : item.noteReply;
-
+        if(item.registrationTimeStart)item.registrationTimeStart = item.registrationTimeStart.length == 4 ? "0"+item.registrationTimeStart : item.registrationTimeStart;
         item.moneyPunishtmp = !item.moneyPunish ? 0 : item.moneyPunish;
         return item
 
@@ -169,8 +170,8 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
     //   this.selectedDay = moment().add(-1, 'd').date()
     // }
     this.viewDetail(this.userId);
-    this.getCurrentUserName()
-    this.getData()
+    this.getCurrentUserName();
+    this.getPunishSetting();
   }
 
   onComplainChange() : void{
@@ -387,5 +388,22 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
       this.iconSort = "fas fa-sort";
       this.listTimekeeping = [...this.originalList];
     }
+  }
+  getCssClassByPunish(value?: number) {
+    if(value != null) {
+      if(value > 0) {
+        return "red";
+      }
+      return "green";
+    }
+    return "";
+  }
+  getPunishSetting(){
+    this.isTableLoading = true;
+    this.punishByRulesService.getCheckInCheckOutPunishmentSetting().subscribe(rs => {
+      this.PunishSetting = rs.result.checkInCheckOutPunishmentSetting;
+      this.isTableLoading = false;
+      this.getData();
+    });
   }
 }

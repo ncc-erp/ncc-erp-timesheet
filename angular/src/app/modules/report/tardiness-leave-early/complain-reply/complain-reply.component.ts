@@ -11,6 +11,8 @@ import { Component, OnInit, Inject, Injector } from '@angular/core';
 })
 export class ComplainReplyComponent extends AppComponentBase implements OnInit {
   complain = {} as complainDto
+  CheckInCheckOutBox : boolean;
+  KOMUBox : boolean;
   constructor(private timekeepingService: TimekeepingService, injector: Injector,
     @Inject(MAT_DIALOG_DATA) public data: any,
     public dialogRef: MatDialogRef<ComplainReplyComponent>) {
@@ -22,6 +24,8 @@ export class ComplainReplyComponent extends AppComponentBase implements OnInit {
     this.complain.noteReply = this.data.noteReply
     this.complain.statusPunish = this.data.statusPunish
     this.complain.isPunishedCheckIn = this.data.status==0?false:true
+    this.complain.CountPunishDaily = this.data.dailyPunish ? this.data.dailyPunish : 0;
+    this.complain.CountPunishMention = this.data.mentionPunish ? this.data.mentionPunish : 0;
   }
   saveAndClose() {
     this.timekeepingService.answerComplain(this.complain).subscribe(data => {
@@ -35,6 +39,8 @@ export class ComplainReplyComponent extends AppComponentBase implements OnInit {
   
 }
 export class complainDto {
+  CountPunishDaily: number;
+  CountPunishMention: number;
   isPunishedCheckIn: boolean;
   noteReply: string;
   statusPunish: number;

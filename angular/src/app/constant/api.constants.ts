@@ -225,13 +225,23 @@ export const APP_CONSTANT = {
     'No Check In & No Check Out': 5
   },
     PunishRules: [
-    { "name": "Không phạt", "value": 0 },
+    { "name": "Không phạt CheckIn/Out", "value": 0 },
     { "name": "Đi muộn", "value": 1 },
     { "name": "Không CheckIn", "value": 2 },
     { "name": "Không CheckOut", "value": 3 },
     { "name": "Đi muộn và Không CheckOut", "value": 4 },
     { "name": "Không CheckIn và không CheckOut", "value": 5 }
   ],
+  PunishType: {
+      NoPunish : 0,
+      Late : 1,
+      NoCheckIn : 2,
+      NoCheckOut : 3,
+      LateAndNoCheckOut : 4,
+      NoCheckInAndNoCheckOut : 5,
+      NoDaily : 6,
+      NoReplyMention : 7
+  },
   ProjectMemberType: {
     Expose: 0,
     Shadow: 1,

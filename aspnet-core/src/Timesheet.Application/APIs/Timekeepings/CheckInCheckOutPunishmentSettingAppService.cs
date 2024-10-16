@@ -24,8 +24,6 @@ namespace Timesheet.APIs.Timekeepings
         {
 
         }
-
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_CheckInCheckOutPunishmentSetting_View)]
         public async Task<CheckInCheckOutPunishmentSettingAndPercentTrackerConfigDto> GetCheckInCheckOutPunishmentSetting()
         {
             var checkInCheckOutPunishmentSetting = await SettingManager.GetSettingValueAsync(AppSettingNames.CheckInCheckOutPunishmentSetting);
