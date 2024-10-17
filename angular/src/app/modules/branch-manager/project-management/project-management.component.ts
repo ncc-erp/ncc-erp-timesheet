@@ -1,38 +1,71 @@
-import { Component, Injector, Input, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { FilterDto, PagedListingComponentBase, PagedRequestDto } from '@shared/paged-listing-component-base';
-import { BranchDto } from '@shared/service-proxies/service-proxies';
-import { ProjectDto } from '../Dto/branch-manage-dto';
-import { ManageUserForBranchService } from '@app/service/api/manage-user-for-branch.service';
-import { Chart } from 'chart.js'
-import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
-import { finalize } from 'rxjs/operators';
-import { DateInfo } from '../date-filter/date-filter.component';
-import { MatDialog } from '@angular/material/dialog';
 import {
-    ProjectManagementMemberDetailComponent
-} from '@app/modules/branch-manager/modal/project-management-modal/project-management-member-detail.component';
-import { APP_CONFIG } from '@app/constant/api-config.constant';
-import { SortOrder, ProjectMemberType, UserTypeCount } from '../modal/project-management-modal/enum/sort-member-effort.enum';
-
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  Injector,
+  Input,
+  OnInit,
+  ViewChild,
+} from "@angular/core";
+import { FormControl } from "@angular/forms";
+import {
+  FilterDto,
+  PagedListingComponentBase,
+  PagedRequestDto,
+} from "@shared/paged-listing-component-base";
+import { BranchDto } from "@shared/service-proxies/service-proxies";
+import { ProjectDto } from "../Dto/branch-manage-dto";
+import { ManageUserForBranchService } from "@app/service/api/manage-user-for-branch.service";
+import { Chart } from "chart.js";
+import { PERMISSIONS_CONSTANT } from "@app/constant/permission.constant";
+import { finalize } from "rxjs/operators";
+import { DateInfo } from "../date-filter/date-filter.component";
+import { MatDialog } from "@angular/material/dialog";
+import { ProjectManagementMemberDetailComponent } from "@app/modules/branch-manager/modal/project-management-modal/project-management-member-detail.component";
+import { APP_CONFIG } from "@app/constant/api-config.constant";
+import {
+  SortOrder,
+  ProjectMemberType,
+  UserTypeCount,
+} from "../modal/project-management-modal/enum/sort-member-effort.enum";
+import { ESortProjectUserNumber } from "../manage-employee/enum/sort-project-user-number.enum";
+interface UserData {
+  no: number;
+  user: string;
+  position: string;
+  level: string;
+  numberOfProjects: number;
+  projects: string[];
+}
 @Component({
-  selector: 'app-project-management',
-  templateUrl: './project-management.component.html',
-  styleUrls: ['./project-management.component.css']
+  selector: "app-project-management",
+  templateUrl: "./project-management.component.html",
+  styleUrls: ["./project-management.component.css"],
 })
-export class ProjectManagementComponent extends PagedListingComponentBase<any> implements OnInit {
-  ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs = PERMISSIONS_CONSTANT.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs
+export class ProjectManagementComponent
+  extends PagedListingComponentBase<any>
+  implements OnInit
+{
+  ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs =
+    PERMISSIONS_CONSTANT.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs;
   @Input() listBranch: BranchDto[];
   @Input() listBranchFilter: BranchDto[];
-  public branchSearch: FormControl = new FormControl("")
+  public branchSearch: FormControl = new FormControl("");
   branchId;
+  isChartView: boolean = true;
   startDate: string;
   endDate: string;
-  public UserTypeSearch: FormControl = new FormControl("")
-  filterUserType = APP_CONFIG.EnumValueOfUserType
+  public UserTypeSearch: FormControl = new FormControl("");
+  filterUserType = APP_CONFIG.EnumValueOfUserType;
   userTypeId: ProjectMemberType = ProjectMemberType.All;
   sortOrder: SortOrder = SortOrder.Descending;
-  userTypeMap = [ UserTypeCount.Expose, UserTypeCount.Shadow,UserTypeCount.Deactive,UserTypeCount.All];
+  // sortProject: number = ESortProjectUserNumber.DOWN_PROJECT;
+  userTypeMap = [
+    UserTypeCount.Expose,
+    UserTypeCount.Shadow,
+    UserTypeCount.Deactive,
+    UserTypeCount.All,
+  ];
   public SortOrderType = SortOrder;
   public filterItems: FilterDto[] = [];
   public projects: ProjectDto[];
@@ -46,91 +79,105 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
     injector: Injector,
     private dialog: MatDialog,
     private manageUserForBranchService: ManageUserForBranchService,
+    private cdr: ChangeDetectorRef
   ) {
     super(injector);
     this.branchId = this.appSession.user.branchId;
     this.branchSearch.valueChanges.subscribe(() => {
       this.filterBranch();
-    })
-    this.chart = null
+    });
+    this.chart = null;
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
-  filterBranch(): void{
+  filterBranch(): void {
     if (this.branchSearch.value) {
-      this.listBranch = this.listBranchFilter.filter(data => data.displayName.toLowerCase().includes(this.branchSearch.value.toLowerCase().trim()));
-    }else{
+      this.listBranch = this.listBranchFilter.filter((data) =>
+        data.displayName
+          .toLowerCase()
+          .includes(this.branchSearch.value.toLowerCase().trim())
+      );
+    } else {
       this.listBranch = this.listBranchFilter.slice();
     }
   }
 
-  showChart(){
-    if(!this.chart){
-      this.chart = new Chart(
-        document.getElementById('myChart'),{
-          type: 'horizontalBar',
-          tooltips: {enabled: true},
-          legend: {display: false},
-          responsive: true,
-          options: {
-            onClick: (event, elements) => {
-                if (elements && elements.length > 0) {
-                    const indexData = elements[0]._index;
-                      const dialogRef = this.dialog.open(ProjectManagementMemberDetailComponent, {
-                          data: {
-                              projectItem: {
-                                  branchId : this.branchId != 0 ? this.branchId : '',
-                                  projectId: this.projects[indexData].projectId,
-                                  startDate: this.startDate,
-                                  endDate: this.endDate,
-                                  projectName: this.projects[indexData].projectName
-                              },
-                          },
-                          height: 'auto', width: 'auto'
-                      });
-                      dialogRef.afterClosed().subscribe(result => {
-                          if (result) {
-                              abp.notify.success('Updated successfully');
-                              this.refresh();
-                          }
-                      });
+  showChart() {
+    if (!this.chart) {
+      // setTimeout(() => {
+
+      // }, 50);
+      this.chart = new Chart(document.getElementById("myChart"), {
+        type: "horizontalBar",
+        tooltips: { enabled: true },
+        legend: { display: false },
+        responsive: true,
+        options: {
+          onClick: (event, elements) => {
+            if (elements && elements.length > 0) {
+              const indexData = elements[0]._index;
+              const dialogRef = this.dialog.open(
+                ProjectManagementMemberDetailComponent,
+                {
+                  data: {
+                    projectItem: {
+                      branchId: this.branchId != 0 ? this.branchId : "",
+                      projectId: this.projects[indexData].projectId,
+                      startDate: this.startDate,
+                      endDate: this.endDate,
+                      projectName: this.projects[indexData].projectName,
+                    },
+                  },
+                  height: "auto",
+                  width: "auto",
                 }
-            },
-            legend: {
-                onHover: (e) => {
-                   e.target.style.cursor = 'pointer';
+              );
+              dialogRef.afterClosed().subscribe((result) => {
+                if (result) {
+                  abp.notify.success("Updated successfully");
+                  this.refresh();
                 }
-            },
-            hover: {
-                onHover: function(e) {
-                   const point = this.getElementAtEvent(e);
-                   if (point.length) {
-                      e.target.style.cursor = 'pointer';
-                   } else {
-                      e.target.style.cursor = 'default';
-                   }
-                }
-            },
-            scales: {
-              xAxes: [{
-                barPercentage: 0.5,
-              }],
+              });
             }
           },
-          data: {
-            labels: this.projectNames,
-            datasets: [{
-              label: 'Shadow',
+          legend: {
+            onHover: (e) => {
+              e.target.style.cursor = "pointer";
+            },
+          },
+          hover: {
+            onHover: function (e) {
+              const point = this.getElementAtEvent(e);
+              if (point.length) {
+                e.target.style.cursor = "pointer";
+              } else {
+                e.target.style.cursor = "default";
+              }
+            },
+          },
+          scales: {
+            xAxes: [
+              {
+                barPercentage: 0.5,
+              },
+            ],
+          },
+        },
+        data: {
+          labels: this.projectNames,
+          datasets: [
+            {
+              label: "Shadow",
               data: this.shadowCount,
               backgroundColor: "rgb(0,143,251)",
-              stack: 'total'
-            },{
-              label: 'Expose',
+              stack: "total",
+            },
+            {
+              label: "Expose",
               data: this.exposeCount,
               backgroundColor: "rgb(0,227,150)",
-              stack: 'total'
+              stack: "total",
             },
             // {
             //   label: 'PM',
@@ -139,15 +186,15 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
             //   stack: 'total'
             // },
             {
-              label: 'Deactive',
+              label: "Deactive",
               data: this.deactiveCount,
               backgroundColor: "rgb(254,176,25)",
-              stack: 'total'
-            }]
-          }
-        }
-      );
-    }else{
+              stack: "total",
+            },
+          ],
+        },
+      });
+    } else {
       const newData = [this.shadowCount, this.exposeCount, this.deactiveCount];
       this.chart.data.labels = this.projectNames;
       this.chart.data.datasets.forEach((dataset, index) => {
@@ -157,32 +204,51 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
     }
   }
 
-  private loadProjectCountData(){
-    this.projects.forEach(project => {
+  private loadProjectCountData() {
+    this.projects.forEach((project) => {
       this.projectNames.push(project.projectName);
       this.deactiveCount.push(project.deactiveCount);
       this.exposeCount.push(project.memberCount + project.pmCount);
-      this.shadowCount.push(project.shadowCount );
-  })
-}
+      this.shadowCount.push(project.shadowCount);
+    });
+  }
   private sortProject() {
     this.projects.sort((a, b) => {
       if (this.userTypeId === 0) {
-          const aTotal = a.pmCount + a.memberCount;
-          const bTotal = b.pmCount + b.memberCount;
-          return this.sortOrder === SortOrder.Ascending ? aTotal - bTotal : bTotal - aTotal;
-      }
-      else {
-          const field = this.userTypeMap[this.userTypeId];
-          console.log(field);
-          const aCount = a[field];
-          const bCount = b[field];
-          return this.sortOrder === SortOrder.Ascending ? aCount - bCount : bCount - aCount;
+        const aTotal = a.pmCount + a.memberCount;
+        const bTotal = b.pmCount + b.memberCount;
+        return this.sortOrder === SortOrder.Ascending
+          ? aTotal - bTotal
+          : bTotal - aTotal;
+      } else {
+        const field = this.userTypeMap[this.userTypeId];
+        console.log(field);
+        const aCount = a[field];
+        const bCount = b[field];
+        return this.sortOrder === SortOrder.Ascending
+          ? aCount - bCount
+          : bCount - aCount;
       }
     });
-    this.resetDataChart()
-    this.loadProjectCountData()
-    this.showChart()
+    this.resetDataChart();
+    this.loadProjectCountData();
+    this.showChart();
+  }
+  toggleSortOrder() {
+    this.projects.sort((a, b) => {
+        const aTotal = a.totalUser;
+        const bTotal = b.totalUser
+        return this.sortOrder === SortOrder.Ascending
+          ? aTotal - bTotal
+          : bTotal - aTotal;
+    });
+    if (this.sortOrder === SortOrder.Ascending) {
+              this.sortOrder = SortOrder.Descending;
+          } else {
+              this.sortOrder = SortOrder.Ascending;
+          }
+    this.resetDataChart();
+    this.loadProjectCountData();
   }
 
   protected list(
@@ -194,31 +260,37 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
     if (this.branchId != 0) {
       this.filterBranchId = this.branchId;
     } else {
-      this.filterBranchId = '';
+      this.filterBranchId = "";
     }
     request.filterItems = this.filterItems;
-    this.manageUserForBranchService.getAllValueOfUserInProjectByUserId(request, this.filterBranchId, this.startDate, this.endDate)
-    .pipe(
-      finalize(() => {
-        finishedCallback()
-      })
-    ).subscribe((rs: any) => {
-      this.resetDataChart()
-      this.totalItems = rs.result.totalCount;
+    this.manageUserForBranchService
+      .getAllValueOfUserInProjectByUserId(
+        request,
+        this.filterBranchId,
+        this.startDate,
+        this.endDate
+      )
+      .pipe(
+        finalize(() => {
+          finishedCallback();
+        })
+      )
+      .subscribe((rs: any) => {
+        this.resetDataChart();
+        this.totalItems = rs.result.totalCount;
 
-      if (rs.result == null || rs.result.items.length == 0) {
-        this.projects = []
-      }else{
-        this.projects = rs.result.items
-        this.showPaging(rs.result, pageNumber);
-        this.loadProjectCountData()
-      }
-      this.showChart()
-    })
+        if (rs.result == null || rs.result.items.length == 0) {
+          this.projects = [];
+        } else {
+          this.projects = rs.result.items;
+          this.showPaging(rs.result, pageNumber);
+          this.loadProjectCountData();
+        }
+        this.showChart();
+      });
   }
 
-
-  resetDataChart(){
+  resetDataChart() {
     this.projectNames = [];
     this.deactiveCount = [];
     this.exposeCount = [];
@@ -226,11 +298,11 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
     // this.pmCount = [];
   }
 
-  searchOrFilter(): void{
-    this.sortProject()
+  searchOrFilter(): void {
+    this.sortProject();
   }
   updateSortOrder() {
-    this.sortProject()
+    this.sortProject();
   }
 
   // clearSearchAndFilter(){
@@ -243,19 +315,32 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
     this.filterItems = [];
   }
 
-  isShowSelectBranch(){
+  isShowSelectBranch() {
     return this.isGranted(
       PERMISSIONS_CONSTANT.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs
-    )
+    );
   }
 
   protected delete(entity: any): void {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 
   onDateSelected(dateInfo: DateInfo) {
-    this.startDate=dateInfo.startDate;
-    this.endDate=dateInfo.endDate;
+    this.startDate = dateInfo.startDate;
+    this.endDate = dateInfo.endDate;
     this.refresh();
+  }
+
+  toggleView(view: string) {
+    debugger;
+    if (view === "chart") {
+      this.isChartView = true;
+      setTimeout(() => {
+      this.showChart();
+    }, 50);
+    } else {
+      this.isChartView = false;
+      this.chart = null;
+    }
   }
 }

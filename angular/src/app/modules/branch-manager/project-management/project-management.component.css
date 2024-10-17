@@ -18,4 +18,15 @@
 .mb-0{
     margin-bottom: 0px;
 }
+.customTable thead tr th{
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+    vertical-align: inherit
+}
+.customTable tbody tr td{
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+}
 
+.customTable tbody tr:nth-child(odd){
+    background: #EEEEEE;
+}
+.group{display: flex;align-items: flex-start;justify-content: space-between;}
