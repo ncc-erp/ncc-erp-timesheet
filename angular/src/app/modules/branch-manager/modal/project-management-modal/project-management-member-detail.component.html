@@ -1,6 +1,7 @@
-<h3 mat-dialog-title class="text-center margin-0 p-b-24">{{ data.projectItem.projectName }}</h3>
-<div mat-dialog-content>
-        <table class="table table-bordered">
+  <h3 mat-dialog-title class="text-center margin-0 ">{{ data.projectItem.projectName }}</h3>
+<div [busy]="isLoading">
+      <div mat-dialog-content  >
+        <table class="table table-bordered" >
             <thead>
             <tr>
                 <th>STT</th>
@@ -40,11 +41,11 @@
                 <td>{{convertMinuteToHour( m.totalWorkingTime) }}</td>
                  <td>
                     <mat-form-field>
-                        <mat-select 
-                            [value]="m.userType" 
+                        <mat-select
+                            [value]="m.userType"
                             [disabled]="m.userType === APP_CONSTANT.EnumUserType.PM"
                             (selectionChange)="onProjectItemChange($event.value, i)">
-                            <mat-option *ngFor="let item of APP_CONFIG.EnumUserType" [value]="item.value">
+                            <mat-option *ngFor="let item of APP_CONFIG.EnumValueViewTableType" [value]="item.value">
                                 {{item.name}}
                             </mat-option>
                         </mat-select>
@@ -57,5 +58,7 @@
 </div>
 <div mat-dialog-actions align="end">
     <button mat-raised-button (click)="onCancelClick()">Cancel</button>
-    <button mat-raised-button (click)="onSaveClick()" color="primary" [disabled]="isLoading">Save</button>
+    <button mat-raised-button (click)="onSaveClick()" color="primary" [disabled]="isShow">Save</button>
 </div>
+</div>
+
