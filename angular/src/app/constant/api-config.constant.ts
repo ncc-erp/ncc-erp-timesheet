@@ -184,5 +184,23 @@ export const APP_CONFIG = {
             name: 'Deactive'
         }
 
+    ],
+    EnumValueViewTableType: [
+        {
+            value: APP_CONSTANT.EnumUserType.Member,
+            name: 'Expose'
+        },
+        {
+            value: APP_CONSTANT.EnumUserType.PM,
+            name: 'PM'
+        },
+        {
+            value: APP_CONSTANT.EnumUserType.Shadow,
+            name: 'Shadow'
+        },
+        {
+            value: APP_CONSTANT.EnumUserType.DeActive,
+            name: 'Deactive'
+        },
     ]
 }
