@@ -55,7 +55,6 @@ file-upload > span {
   padding: 4px 4px !important;
   min-width: 50px;
   text-align: center;
-  border: 0.2px solid rgba(204, 204, 204, 0.35);
 }
 
 .styleUser > tbody > tr > td {
@@ -229,7 +228,8 @@ file-upload > span {
 .table td {
   padding: 8px;
   text-align: left;
-  border: 1px solid #ddd; /* Đường viền cho ô */
+  border: 1px solid #ddd;
+  margin: 0 !important;
 }
 
 @media screen and (max-width: 600px) {
