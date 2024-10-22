@@ -4,96 +4,100 @@
 .ms-on::after {
   display: inline-block;
 }
-.ms-on::after, .ms-off::after {
-  content: 'minute(s)';
+.ms-on::after,
+.ms-off::after {
+  content: "minute(s)";
   position: absolute;
   right: 0px;
-  transition: all .05s ease-in-out;
+  transition: all 0.05s ease-in-out;
 }
 .ms-off:focus-within::after {
   display: inline-block;
 }
-.opentalkFiler:focus-within{
+.opentalkFiler:focus-within {
   padding-right: 65px;
 }
 .heading-checkbox {
-    position: absolute;
-    right: 20px;
-    top: 25%;
-    max-width: 200px;
-    text-align: right;
-    overflow: hidden;
-    white-space: nowrap;
+  position: absolute;
+  right: 20px;
+  top: 25%;
+  max-width: 200px;
+  text-align: right;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
-.heading-checkbox .checkbox-descr, .heading-checkbox .workingtime-text {
-    color: #fff;
-    font-size: 16px;
-    margin-right: 10px;
+.heading-checkbox .checkbox-descr,
+.heading-checkbox .workingtime-text {
+  color: #fff;
+  font-size: 16px;
+  margin-right: 10px;
 }
 
 .panel-heading {
-    position: relative;
-    overflow: hidden;
+  position: relative;
+  overflow: hidden;
 }
 
 .title-date {
-    display: inline-block;
-    margin-left: 20px;
+  display: inline-block;
+  margin-left: 20px;
 }
 
 .object-name {
-    width: calc(100% - 150px);
-    overflow: hidden;
-    display: inline-block;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    height: 20px;
+  width: calc(100% - 150px);
+  overflow: hidden;
+  display: inline-block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  height: 20px;
 }
-.status{
-    padding: 3.5px 6px;
-    font-size: 12px;
-    margin-left: 3px;
+.status {
+  padding: 3.5px 6px;
+  font-size: 12px;
+  margin-left: 3px;
 }
-.official{
-    color: #3186ff;
-    font-weight: 900;
-  }
-  .temp{
-    color: #9e9e9e;
-    font-weight: 900;
-  }
-  .warning-timesheet{
-    margin-left: 10px;
-  }
+.official {
+  color: #3186ff;
+  font-weight: 900;
+}
+.temp {
+  color: #9e9e9e;
+  font-weight: 900;
+}
+.warning-timesheet {
+  margin-left: 10px;
+}
 
-  .header{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-  }
-  .show-than-default{
-    margin-left: 15px;
-    margin-top: 16px;
-  }
-  .header .title{
-    margin-top: 16px;
-  }
-  .header .gr-filter{
-    display: flex;
-    width: 50%;
-  }
-  .header .item{
-    width: 17%;
-    padding: 0;
-  }
-  ::ng-deep  .item .mat-form-field-appearance-outline .mat-form-field-wrapper{
-    margin: 0;
-    padding: 0;
-  }
-  ::ng-deep .m-checkbox .mat-checkbox-inner-container.mat-checkbox-inner-container-no-side-margin{
-    margin-top: 6px;
-  }
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.show-than-default {
+  margin-left: 15px;
+  margin-top: 16px;
+}
+.header .title {
+  margin-top: 16px;
+}
+.header .gr-filter {
+  display: flex;
+  width: 50%;
+}
+.header .item {
+  width: 17%;
+  padding: 0;
+}
+::ng-deep .item .mat-form-field-appearance-outline .mat-form-field-wrapper {
+  margin: 0;
+  padding: 0;
+}
+::ng-deep
+  .m-checkbox
+  .mat-checkbox-inner-container.mat-checkbox-inner-container-no-side-margin {
+  margin-top: 6px;
+}
 
 /* .object-name {
   display: flex;
@@ -114,7 +118,9 @@
     width: 40px;
   }
 
-  .workingtime-text, .checkbox-descr, .dateAt {
+  .workingtime-text,
+  .checkbox-descr,
+  .dateAt {
     font-size: 12px !important;
     margin-right: 5px !important;
   }
@@ -164,7 +170,7 @@
     width: 100%;
   }
 
-  .status-timesheet{
+  .status-timesheet {
     padding: 0;
   }
 
@@ -175,7 +181,7 @@
     padding-right: 30px;
   }
 
-  .warning-timesheet{
+  .warning-timesheet {
     margin-left: 0;
   }
 
@@ -202,6 +208,24 @@
 
 @media screen and (max-width: 955px) {
   .header .search {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .action-timesheet-overview {
+    display: block;
+  }
+
+  .status-timesheet {
+    width: 100%;
+  }
+
+  .action-timesheet {
+    gap: 0;
+  }
+
+  .status-timesheet button {
     width: 100%;
   }
 }
