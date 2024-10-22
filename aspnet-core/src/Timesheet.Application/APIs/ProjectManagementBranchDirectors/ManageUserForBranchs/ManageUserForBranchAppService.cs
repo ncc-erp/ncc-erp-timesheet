@@ -190,36 +190,36 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
         {
             var isViewAll = IsGranted(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs);
 
-            var qUserTimesheet = await WorkScope.GetAll<MyTimesheet>()
-                               .WhereIf(startDate.HasValue && endDate.HasValue, s => startDate <= s.DateAt && s.DateAt <= endDate)
-                               .Where(s => s.User.IsActive)
-                               .WhereIf(isViewAll, s => branchId == null || s.User.BranchId == branchId) // If have ViewAll
-                               .WhereIf(!isViewAll, s => s.User.BranchId == GetBranchByCurrentUser()) // If have no ViewAll
-                               .Where(s => s.Status == TimesheetStatus.Approve)
-                               .Select(ts => string.Format("{0}-{1}", ts.UserId, ts.ProjectTask.ProjectId))
-                               .Distinct()
-                               .ToListAsync();
-                               
+            var query = from ts in WorkScope.GetAll<MyTimesheet>().AsNoTracking()
+                        join pu in WorkScope.GetAll<ProjectUser>().AsNoTracking() on new { ts.UserId, ts.ProjectTask.ProjectId } equals new { pu.UserId, pu.ProjectId }
+                        where ts.Status == TimesheetStatus.Approve
+                        && ts.User.IsActive
+                        && (!startDate.HasValue || ts.DateAt >= startDate)
+                        && (!endDate.HasValue || ts.DateAt <= endDate)
+                        && (isViewAll ? (branchId == null || ts.User.BranchId == branchId) : ts.User.BranchId == GetBranchByCurrentUser())
+                        group pu by new { pu.ProjectId, pu.Project.Name, pu.Project.Code } into g
+                        select new UserStatisticInProjectDto
+                        {
+                            ProjectId = g.Key.ProjectId,
+                            ProjectName = g.Key.Name,
+                            ProjectCode = g.Key.Code,
+                            TotalUser = g.Count(),
+                            MemberCount = g.Count(e => e.Type == ProjectUserType.Member),
+                            DeactiveCount = g.Count(e => e.Type == ProjectUserType.DeActive),
+                            ShadowCount = g.Count(e => e.Type == ProjectUserType.Shadow),
+                            PmCount = g.Count(e => e.Type == ProjectUserType.PM)
+                        };
 
-            // Query the ProjectUser table to get user types, project detail -> result
-            var result = WorkScope.GetAll<ProjectUser>()
-                               .Where(pu => qUserTimesheet.Contains(string.Format("{0}-{1}", pu.UserId, pu.ProjectId)))
-                               .GroupBy(pu => new { pu.ProjectId, ProjectName = pu.Project.Name, ProjectCode = pu.Project.Code })
-                               .Select(g => new UserStatisticInProjectDto
-                               {
-                                   ProjectId = g.Key.ProjectId,
-                                   ProjectName = g.Key.ProjectName,
-                                   ProjectCode = g.Key.ProjectCode,
-                                   TotalUser = g.Count(),
-                                   MemberCount = g.Count(e => e.Type == ProjectUserType.Member),
-                                   DeactiveCount = g.Count(e => e.Type == ProjectUserType.DeActive),
-                                   ShadowCount = g.Count(e => e.Type == ProjectUserType.Shadow),
-                                   PmCount = g.Count(e => e.Type == ProjectUserType.PM)
-                               })
-                               .OrderByDescending(e => e.TotalUser);
+            // Paginate and sort the results before retrieving the list
+            var temp = await query.OrderByDescending(e => e.TotalUser)
+                                  .Skip(input.SkipCount)
+                                  .Take(input.MaxResultCount)
+                                  .ToListAsync();
 
-            var temp = await result.GetGridResult(result, input);
-            return new PagedResultDto<UserStatisticInProjectDto>(temp.TotalCount, temp.Items);
+            // Calculate the total count to return pagination
+            var totalCount = await query.CountAsync();
+
+            return new PagedResultDto<UserStatisticInProjectDto>(totalCount, temp);
         }
 
         [HttpPost]
@@ -266,13 +266,13 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs
         [HttpPost]
         [AbpAuthorize]
         [AbpAuthorize(
-            Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, 
+            Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs,
             Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch,
             Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs)]
         public async System.Threading.Tasks.Task UpdateTypeOfUsersInProject([FromBody] UpdateTypeOfUsersInProjectDto dto)
         {
             var projectUserIds = dto.UserTypes.Select(e => e.ProjectUserId).ToList();
-            
+
             // Get all ProjectUsers from given Id
             var projectUsers = await WorkScope.GetAll<ProjectUser>()
                 .Where(e => projectUserIds.Contains(e.Id))
