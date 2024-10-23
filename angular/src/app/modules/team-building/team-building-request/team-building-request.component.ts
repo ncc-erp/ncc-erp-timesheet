@@ -1,4 +1,4 @@
-import { RequestDetailComponent } from './request-detail/request-detail.component';
+import { RequestDetailComponent } from "./request-detail/request-detail.component";
 import { Component, Injector, OnInit } from "@angular/core";
 import { MatDialog } from "@angular/material";
 import { DomSanitizer } from "@angular/platform-browser";
@@ -11,8 +11,19 @@ import {
 import * as _ from "lodash";
 import { finalize } from "rxjs/operators";
 import { DisburseRequestComponent } from "./disburse-request/disburse-request.component";
-import { ActionRequestHistoryEnum, LIST_MONTHS, PagedRequestHistoryDto, RemainingMoneyEnum, RemainingMoneystatus, StatusTeamBuildingRequest, StatusTeamBuildingRequestEnum, TeamBuildingRequestDto } from '../const/const';
-import { EditRequestComponent } from './edit-request/edit-request.component';
+import {
+  ActionRequestHistoryEnum,
+  LIST_MONTHS,
+  PagedRequestHistoryDto,
+  RemainingMoneyEnum,
+  RemainingMoneystatus,
+  StatusTeamBuildingRequest,
+  StatusTeamBuildingRequestEnum,
+  TeamBuildingRequestDto,
+} from "../const/const";
+import { EditRequestComponent } from "./edit-request/edit-request.component";
+import { Subject } from "rxjs";
+import { debounceTime } from "rxjs/operators";
 
 @Component({
   selector: "app-team-building-request",
@@ -23,17 +34,25 @@ export class TeamBuildingRequestComponent
   extends PagedListingComponentBase<TeamBuildingRequestDto>
   implements OnInit
 {
-  TeamBuilding_ViewDetailRequest = PERMISSIONS_CONSTANT.TeamBuilding_Request_ViewDetailRequest;
-  TeamBuilding_DisburseRequest = PERMISSIONS_CONSTANT.TeamBuilding_Request_DisburseRequest;
-  TeamBuilding_EditRequest = PERMISSIONS_CONSTANT.TeamBuilding_Request_EditRequest;
-  TeamBuilding_ReOpenRequest = PERMISSIONS_CONSTANT.TeamBuilding_Request_ReOpenRequest;
-  TeamBuilding_CancelRequest = PERMISSIONS_CONSTANT.TeamBuilding_Request_CancelRequest;
-  TeamBuilding_RejectRequest = PERMISSIONS_CONSTANT.TeamBuilding_Request_RejectRequest;
+  TeamBuilding_ViewDetailRequest =
+    PERMISSIONS_CONSTANT.TeamBuilding_Request_ViewDetailRequest;
+  TeamBuilding_DisburseRequest =
+    PERMISSIONS_CONSTANT.TeamBuilding_Request_DisburseRequest;
+  TeamBuilding_EditRequest =
+    PERMISSIONS_CONSTANT.TeamBuilding_Request_EditRequest;
+  TeamBuilding_ReOpenRequest =
+    PERMISSIONS_CONSTANT.TeamBuilding_Request_ReOpenRequest;
+  TeamBuilding_CancelRequest =
+    PERMISSIONS_CONSTANT.TeamBuilding_Request_CancelRequest;
+  TeamBuilding_RejectRequest =
+    PERMISSIONS_CONSTANT.TeamBuilding_Request_RejectRequest;
 
-  public searchText: string;
+  public searchText: string = "";
+  private searchTextChanged = new Subject<string>();
   public listYear = [];
   public year: number;
-  public status: StatusTeamBuildingRequestEnum = StatusTeamBuildingRequestEnum.All;
+  public status: StatusTeamBuildingRequestEnum =
+    StatusTeamBuildingRequestEnum.All;
   public listRequest: TeamBuildingRequestDto[] = [];
   public listStatus: StatusTeamBuildingRequest[] = [
     { value: StatusTeamBuildingRequestEnum.All, title: "All" },
@@ -62,6 +81,11 @@ export class TeamBuildingRequestComponent
       this.listYear.push(i);
     }
     this.year = d;
+
+    this.searchTextChanged.pipe(debounceTime(500)).subscribe((search) => {
+      this.searchText = search;
+      this.refresh();
+    });
   }
 
   ngOnInit() {
@@ -100,6 +124,7 @@ export class TeamBuildingRequestComponent
     this.year = new Date().getFullYear();
     this.status = -1;
   }
+
   handleFilterYear(e) {
     this.year = e.value;
     this.refresh();
@@ -174,6 +199,7 @@ export class TeamBuildingRequestComponent
       }
     });
   }
+
   pmSendRequest(id: number): void {
     const dialogRef = this._dialog.open(RequestDetailComponent, {
       disableClose: true,
@@ -219,18 +245,21 @@ export class TeamBuildingRequestComponent
     );
   }
 
-  public handleAction(type: ActionRequestHistoryEnum, item: TeamBuildingRequestDto) {
+  public handleAction(
+    type: ActionRequestHistoryEnum,
+    item: TeamBuildingRequestDto
+  ) {
     if (type === ActionRequestHistoryEnum.Disburse) {
       this.disburse(item);
     } else if (type === ActionRequestHistoryEnum.Reject) {
       this.rejectRequest(item.id);
-    } else if(type === ActionRequestHistoryEnum.Cancel) {
+    } else if (type === ActionRequestHistoryEnum.Cancel) {
       this.cancelRequest(item.id);
-    } else if(type === ActionRequestHistoryEnum.ViewDetail) {
+    } else if (type === ActionRequestHistoryEnum.ViewDetail) {
       this.pmSendRequest(item.id);
-    } else if(type === ActionRequestHistoryEnum.Edit) {
+    } else if (type === ActionRequestHistoryEnum.Edit) {
       this.pmEditRequest(item.id);
-    } else if(type === ActionRequestHistoryEnum.ReOpen) {
+    } else if (type === ActionRequestHistoryEnum.ReOpen) {
       this.reOpenRequest(item.id);
     }
   }
@@ -245,5 +274,9 @@ export class TeamBuildingRequestComponent
       return "red";
     }
     return "green";
+  }
+
+  onSearchTextChanged(search: string) {
+    this.searchTextChanged.next(search);
   }
 }
