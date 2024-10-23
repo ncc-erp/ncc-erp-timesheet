@@ -17,6 +17,7 @@ import {
 } from '@app/modules/branch-manager/modal/project-management-modal/project-management-member-detail.component';
 import {MatDialogModule} from '@node_modules/@angular/material';
 import {ProjectTargetUserPipe} from '@shared/pipes/projectTargetUser.pipe';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 
 @NgModule({
@@ -39,6 +40,7 @@ import {ProjectTargetUserPipe} from '@shared/pipes/projectTargetUser.pipe';
     NgxPaginationModule,
     FormsModule,
     MatDialogModule,
+    DragDropModule
   ],
   entryComponents: [
     DetailParticipatingProjectsComponent,

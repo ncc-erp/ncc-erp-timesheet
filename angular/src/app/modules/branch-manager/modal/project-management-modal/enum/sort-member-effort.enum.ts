@@ -10,8 +10,8 @@ export enum ESortType {
     Effort = 0,
 }
 export enum SortOrder {
-  Ascending = 'ascending',
-  Descending = 'descending',
+  Ascending = 1,
+  Descending = 0
 }
 export enum ProjectMemberType {
     Expose = 0,
