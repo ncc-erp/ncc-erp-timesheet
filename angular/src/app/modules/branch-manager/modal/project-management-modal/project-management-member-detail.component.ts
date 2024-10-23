@@ -7,7 +7,6 @@ import {IProjectTargetUser} from '@app/modules/branch-manager/modal/project-mana
 import {ESortMemberEffort, ESortType} from '@app/modules/branch-manager/modal/project-management-modal/enum/sort-member-effort.enum';
 import { UserTypeDto } from '../../Dto/branch-manage-dto';
 import { AppComponentBase } from '@shared/app-component-base';
-
 @Component({
     selector: 'app-project-management-member-detail',
     templateUrl: './project-management-member-detail.component.html',
@@ -21,6 +20,7 @@ export class ProjectManagementMemberDetailComponent extends AppComponentBase imp
     currentSortMember: ESortMemberEffort = ESortMemberEffort.UP_MEMBER;
     currentSortEffort: ESortMemberEffort = ESortMemberEffort.UP_EFFORT;
     isLoading = true;
+    isShow = false;
     constructor(
         injector: Injector,
         private manageUserForBranchService: ManageUserForBranchService,
@@ -37,6 +37,7 @@ export class ProjectManagementMemberDetailComponent extends AppComponentBase imp
         this.projectItem = res.result;
         this.totalItems = res.result.length;
         this.isLoading = false;
+        this.isShow = true;
       });
     }
 
@@ -56,7 +57,7 @@ export class ProjectManagementMemberDetailComponent extends AppComponentBase imp
 
     onProjectItemChange(value: number, index: number): void {
         this.projectItem[index].userType = value;
-        console.log(this.projectItem);
+        this.isShow = false;
     }
 
     onSaveClick(): void {

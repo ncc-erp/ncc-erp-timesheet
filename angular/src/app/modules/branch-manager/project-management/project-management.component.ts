@@ -54,11 +54,11 @@ export class ProjectManagementComponent
   isChartView: boolean = true;
   startDate: string;
   endDate: string;
+  viewMode: string = 'chart';
   public UserTypeSearch: FormControl = new FormControl("");
   filterUserType = APP_CONFIG.EnumValueOfUserType;
   userTypeId: ProjectMemberType = ProjectMemberType.All;
   sortOrder: SortOrder = SortOrder.Descending;
-  // sortProject: number = ESortProjectUserNumber.DOWN_PROJECT;
   userTypeMap = [
     UserTypeCount.Expose,
     UserTypeCount.Shadow,
@@ -208,49 +208,27 @@ export class ProjectManagementComponent
     this.projects.forEach((project) => {
       this.projectNames.push(project.projectName);
       this.deactiveCount.push(project.deactiveCount);
-      this.exposeCount.push(project.memberCount + project.pmCount);
-      this.shadowCount.push(project.shadowCount);
-    });
-  }
+      this.exposeCount.push(project.memberCount);
+      this.shadowCount.push(project.shadowCount );
+  })
+}
   private sortProject() {
     this.projects.sort((a, b) => {
       if (this.userTypeId === 0) {
-        const aTotal = a.pmCount + a.memberCount;
-        const bTotal = b.pmCount + b.memberCount;
-        return this.sortOrder === SortOrder.Ascending
-          ? aTotal - bTotal
-          : bTotal - aTotal;
-      } else {
-        const field = this.userTypeMap[this.userTypeId];
-        const aCount = a[field];
-        const bCount = b[field];
-        return this.sortOrder === SortOrder.Ascending
-          ? aCount - bCount
-          : bCount - aCount;
+          const aTotal = a.memberCount;
+          const bTotal = b.memberCount;
+          return this.sortOrder === SortOrder.Ascending ? aTotal - bTotal : bTotal - aTotal;
+      }
+      else {
+          const field = this.userTypeMap[this.userTypeId];
+          const aCount = a[field];
+          const bCount = b[field];
+          return this.sortOrder === SortOrder.Ascending ? aCount - bCount : bCount - aCount;
       }
     });
-    this.resetDataChart();
-    this.loadProjectCountData();
-    this.showChart();
-  }
-  toggleSortOrder() {
-    debugger;
-    console.log(this.sortOrder);
-
-    if (this.sortOrder === SortOrder.Ascending) {
-      this.sortOrder = SortOrder.Descending;
-    } else {
-      this.sortOrder = SortOrder.Ascending;
-    }
-    this.projects.sort((a, b) => {
-      const aTotal = a.totalUser;
-      const bTotal = b.totalUser;
-      return this.sortOrder === SortOrder.Ascending
-        ? aTotal - bTotal
-        : bTotal - aTotal;
-    });
-    this.resetDataChart();
-    this.loadProjectCountData();
+    this.resetDataChart()
+    this.loadProjectCountData()
+    this.showChart()
   }
 
   protected list(
@@ -286,7 +264,8 @@ export class ProjectManagementComponent
         } else {
           this.projects = rs.result.items;
           this.showPaging(rs.result, pageNumber);
-          this.loadProjectCountData();
+          // this.loadProjectCountData();
+          this.sortProject();
         }
         this.showChart();
       });
@@ -297,21 +276,14 @@ export class ProjectManagementComponent
     this.deactiveCount = [];
     this.exposeCount = [];
     this.shadowCount = [];
-    // this.pmCount = [];
   }
 
-  searchOrFilter(): void {
-    this.sortProject();
+  searchOrFilter(): void{
+    this.refresh();
   }
   updateSortOrder() {
-    this.sortProject();
+    this.refresh();
   }
-
-  // clearSearchAndFilter(){
-  //   this.resetDataChart()
-  //   this.branchId = 0;
-  //   this.refresh();
-  // }
 
   removeFilterItem(): void {
     this.filterItems = [];
@@ -334,7 +306,6 @@ export class ProjectManagementComponent
   }
 
   toggleView(view: string) {
-    debugger;
     if (view === "chart") {
       this.isChartView = true;
       setTimeout(() => {
@@ -396,10 +367,14 @@ export class ProjectManagementComponent
       this.headerSortMap.set(projectChip.name, undefined);
     }
     this.updateChipPriorities();
-    this.sortProjects();
+    this.sortProjectsTable();
   }
+  removeAllChips(): void {
+  this.projectChips = [];
+  this.headerSortMap.clear();
+  this.sortProjectsTable();
+}
   toggleHeaderSortType(header: string): void {
-    debugger;
     const currentSortOrder = this.headerSortMap.get(header);
     const newSortOrder =
       currentSortOrder === SortOrder.Ascending
@@ -407,13 +382,13 @@ export class ProjectManagementComponent
         : SortOrder.Ascending;
     this.headerSortMap.set(header, newSortOrder);
     this.add(header);
-    this.sortProjects();
+    this.sortProjectsTable();
   }
   //drab and drop
   drop(event: CdkDragDrop<string[]>): void {
     moveItemInArray(this.projectChips, event.previousIndex, event.currentIndex);
     this.updateChipPriorities();
-    this.sortProjects();
+    this.sortProjectsTable();
   }
   cdkDragMoved(event: CdkDragMove) {}
   updateChipPriorities(): void {
@@ -421,7 +396,7 @@ export class ProjectManagementComponent
       chip.priority = index + 1;
     });
   }
-  sortProjects(): void {
+  sortProjectsTable(): void {
     this.projects.sort((a, b) => {
       for (let chip of this.projectChips) {
         const field = this.mapChipToProjectField(chip.name);

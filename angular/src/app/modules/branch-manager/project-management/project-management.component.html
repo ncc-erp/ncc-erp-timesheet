@@ -112,44 +112,19 @@
             </div>
             <div class="row">
               <div class="col-lg-2">
-                <!-- <div class="row row-btn">
-                  <button
-                    class="body-btn"
-                    mat-raised-button
-                    [color]="isChartView ? 'primary' : null"
-                    (click)="toggleView('chart')"
-                  >
-                    Chart
-                  </button>
-                  <button
-                    class="body-btn"
-                    mat-raised-button
-                    [color]="!isChartView ? 'primary' : ''"
-                    name="clearSearchAndFilter"
-                    (click)="toggleView('table')"
-                  >
-                    Table
-                  </button>
-                </div> -->
-                <mat-button-toggle-group
-                  name="fontStyle"
-                  aria-label="Font Style"
-                >
-                  <mat-button-toggle
-                    value="italic"
-                    (click)="toggleView('chart')"
+                <mat-button-toggle-group [(ngModel)]="viewMode">
+                  <mat-button-toggle value="chart" (click)="toggleView('chart')"
                     >Chart</mat-button-toggle
                   >
-                  <mat-button-toggle
-                    value="underline"
-                    (click)="toggleView('table')"
+                  <mat-button-toggle value="table" (click)="toggleView('table')"
                     >Table</mat-button-toggle
                   >
                 </mat-button-toggle-group>
               </div>
               <div class="col-lg-12">
                 <mat-chip-list
-                 class="draggable-list"
+                  *ngIf="!isChartView"
+                  class="draggable-list"
                   cdkDropList
                   cdkDropListOrientation="horizontal"
                   (cdkDropListDropped)="drop($event)"
@@ -178,6 +153,17 @@
                       ></i>
                     </span>
                     <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+                  </mat-chip>
+                  <mat-chip
+                    class="delete-all-chip"
+                    *ngIf="projectChips.length > 0">
+                    <mat-icon
+                      role="button"
+                      (click)="removeAllChips()"
+                      matTooltip="Xóa tất cả các chip"
+                    >
+                      delete
+                    </mat-icon>
                   </mat-chip>
                 </mat-chip-list>
               </div>

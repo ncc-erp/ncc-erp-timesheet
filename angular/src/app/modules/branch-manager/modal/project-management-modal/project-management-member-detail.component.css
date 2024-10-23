@@ -26,3 +26,18 @@ th div.d-flex {
         overflow: auto;
     }
 }
+.customTable thead tr th{
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+    vertical-align: inherit
+}
+.customTable tbody tr td{
+    border: 0.2px solid rgba(204, 204, 204, 0.35);
+}
+
+.customTable tbody tr:nth-child(odd){
+    background: #EEEEEE;
+}
+.p-24{
+    margin-bottom: 6px;
+ }
+
