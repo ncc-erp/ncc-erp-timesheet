@@ -5,7 +5,11 @@
         <h2>{{ "Project Management" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="headerMenu"
+              class="header-dropdown-mat-icon-button"
+            >
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
@@ -26,20 +30,33 @@
                 <ng-container>
                   <mat-form-field class="w-100" appearance="outline">
                     <mat-label> {{ "Branch" | localize }}</mat-label>
-                    <mat-select name="branchId" [(value)]="branchId" (selectionChange)="searchOrFilter()">
+                    <mat-select
+                      name="branchId"
+                      [(value)]="branchId"
+                      (selectionChange)="searchOrFilter()"
+                    >
                       <mat-option>
-                        <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
-                          noEntriesFoundLabel="No matching found">
+                        <ngx-mat-select-search
+                          placeholderLabel="Search"
+                          [formControl]="branchSearch"
+                          noEntriesFoundLabel="No matching found"
+                        >
                         </ngx-mat-select-search>
                       </mat-option>
-                      <mat-option *ngFor="let branch of listBranch" [value]="branch.id">
+                      <mat-option
+                        *ngFor="let branch of listBranch"
+                        [value]="branch.id"
+                      >
                         {{ branch.name }}
                       </mat-option>
                     </mat-select>
                   </mat-form-field>
                 </ng-container>
               </div>
-              <app-date-filter (dateSelected)="onDateSelected($event)" class="app-date-filter"></app-date-filter>
+              <app-date-filter
+                (dateSelected)="onDateSelected($event)"
+                class="app-date-filter"
+              ></app-date-filter>
             </div>
             <div class="row">
               <div class="col-lg-8 title-sort">
@@ -51,13 +68,23 @@
                 <ng-container>
                   <mat-form-field class="w-100" appearance="outline">
                     <mat-label>{{ "User Type" | localize }}</mat-label>
-                    <mat-select name="userTypeId" [(value)]="userTypeId" (selectionChange)="searchOrFilter()">
+                    <mat-select
+                      name="userTypeId"
+                      [(value)]="userTypeId"
+                      (selectionChange)="searchOrFilter()"
+                    >
                       <mat-option>
-                        <ngx-mat-select-search placeholderLabel="Search" [formControl]="UserTypeSearch"
-                          noEntriesFoundLabel="No matching found">
+                        <ngx-mat-select-search
+                          placeholderLabel="Search"
+                          [formControl]="UserTypeSearch"
+                          noEntriesFoundLabel="No matching found"
+                        >
                         </ngx-mat-select-search>
                       </mat-option>
-                      <mat-option *ngFor="let userType of filterUserType" [value]="userType.value">
+                      <mat-option
+                        *ngFor="let userType of filterUserType"
+                        [value]="userType.value"
+                      >
                         {{ userType.name }}
                       </mat-option>
                     </mat-select>
@@ -68,27 +95,92 @@
                 <ng-container>
                   <mat-form-field class="w-100 mt-2" appearance="outline">
                     <mat-label>{{ "Sort Order" | localize }}</mat-label>
-                    <mat-select [(value)]="sortOrder" (selectionChange)="updateSortOrder()">
+                    <mat-select
+                      [(value)]="sortOrder"
+                      (selectionChange)="updateSortOrder()"
+                    >
                       <mat-option [value]="SortOrderType.Ascending">{{
                         "Ascending" | localize
-                        }}</mat-option>
+                      }}</mat-option>
                       <mat-option [value]="SortOrderType.Descending">{{
                         "Descending" | localize
-                        }}</mat-option>
+                      }}</mat-option>
                     </mat-select>
                   </mat-form-field>
                 </ng-container>
               </div>
             </div>
-          </div>
-          <div class="col-lg-2">
-            <div class="row row-btn">
-              <button class="body-btn" mat-raised-button name="clearSearchAndFilter" (click)="toggleView('table')">
-                Table
-              </button>
-              <button class="body-btn" mat-raised-button color="primary" (click)="toggleView('chart')">
-                Chart
-              </button>
+            <div class="row">
+              <div class="col-lg-2">
+                <!-- <div class="row row-btn">
+                  <button
+                    class="body-btn"
+                    mat-raised-button
+                    [color]="isChartView ? 'primary' : null"
+                    (click)="toggleView('chart')"
+                  >
+                    Chart
+                  </button>
+                  <button
+                    class="body-btn"
+                    mat-raised-button
+                    [color]="!isChartView ? 'primary' : ''"
+                    name="clearSearchAndFilter"
+                    (click)="toggleView('table')"
+                  >
+                    Table
+                  </button>
+                </div> -->
+                <mat-button-toggle-group
+                  name="fontStyle"
+                  aria-label="Font Style"
+                >
+                  <mat-button-toggle
+                    value="italic"
+                    (click)="toggleView('chart')"
+                    >Chart</mat-button-toggle
+                  >
+                  <mat-button-toggle
+                    value="underline"
+                    (click)="toggleView('table')"
+                    >Table</mat-button-toggle
+                  >
+                </mat-button-toggle-group>
+              </div>
+              <div class="col-lg-12">
+                <mat-chip-list
+                 class="draggable-list"
+                  cdkDropList
+                  cdkDropListOrientation="horizontal"
+                  (cdkDropListDropped)="drop($event)"
+                >
+                  <mat-chip
+                    *ngFor="let projectChip of projectChips"
+                    cdkDrag
+                    [selectable]="selectable"
+                    [removable]="removable"
+                    (removed)="remove(projectChip)"
+                    class="draggable-chip"
+                  >
+                    {{ projectChip.name }}
+                    <span>
+                      <i
+                        class="pi pi-sort-amount-up text-primary p-l-5"
+                        role="button"
+                        *ngIf="projectChip.sortType === SortOrderType.Ascending"
+                      ></i>
+                      <i
+                        class="pi pi-sort-amount-down text-primary p-l-5"
+                        role="button"
+                        *ngIf="
+                          projectChip.sortType === SortOrderType.Descending
+                        "
+                      ></i>
+                    </span>
+                    <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+                  </mat-chip>
+                </mat-chip-list>
+              </div>
             </div>
           </div>
         </div>
@@ -96,72 +188,184 @@
         <div *ngIf="isChartView" class="chart" [busy]="isTableLoading">
           <canvas id="myChart"></canvas>
         </div>
-        <div *ngIf="!isChartView" class="table-responsive" [busy]="isTableLoading">
+        <div
+          *ngIf="!isChartView"
+          class="table-responsive"
+          [busy]="isTableLoading"
+        >
           <table class="table customTable">
             <thead>
               <tr>
                 <th class="text-center col-lg-1">#</th>
-                <th class="text-center col-lg-3">
-                  <span>Project Name</span>
-                </th>
-                <th class="text-center col-lg-1">Expose</th>
-                <th class="text-center col-lg-1">Shadow</th>
-                <th class="text-center col-lg-2">PM</th>
-                <th class="text-center col-lg-2">Deactive</th>
                 <th class="text-center col-lg-2">
-                   <span>Total</span>
-                    <span (click)="toggleSortOrder()">
-                            <i
-                               class="pi pi-sort-amount-up text-primary p-l-5"
-                               role="button"
-                               *ngIf="sortOrder === SortOrderType.Ascending"></i>
-                            <i
-                               class="pi pi-sort-amount-down text-primary p-l-5" role="button"
-                               *ngIf="sortOrder ===SortOrderType.Descending"></i>
+                  <span (click)="toggleHeaderSortType('Project Name')">
+                    Project Name
+                    <i
+                      class="pi pi-sort-amount-up text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('Project Name') ===
+                        SortOrderType.Ascending
+                      "
+                    ></i>
+                    <i
+                      class="pi pi-sort-amount-down text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('Project Name') ===
+                        SortOrderType.Descending
+                      "
+                    ></i>
+                  </span>
+                </th>
+                <th class="text-center col-lg-2">
+                  <span (click)="toggleHeaderSortType('Expose')">
+                    Expose
+                    <i
+                      class="pi pi-sort-amount-up text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('Expose') === SortOrderType.Ascending
+                      "
+                    ></i>
+                    <i
+                      class="pi pi-sort-amount-down text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('Expose') === SortOrderType.Descending
+                      "
+                    ></i>
+                  </span>
+                </th>
+                <th class="text-center col-lg-2">
+                  <span (click)="toggleHeaderSortType('Shadow')">
+                    Shadow
+                    <i
+                      class="pi pi-sort-amount-up text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('Shadow') === SortOrderType.Ascending
+                      "
+                    ></i>
+                    <i
+                      class="pi pi-sort-amount-down text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('Shadow') === SortOrderType.Descending
+                      "
+                    ></i>
+                  </span>
+                </th>
+                <th class="text-center col-lg-2">
+                  <span (click)="toggleHeaderSortType('PM')">
+                    PM
+                    <i
+                      class="pi pi-sort-amount-up text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('PM') === SortOrderType.Ascending
+                      "
+                    ></i>
+                    <i
+                      class="pi pi-sort-amount-down text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('PM') === SortOrderType.Descending
+                      "
+                    ></i>
+                  </span>
+                </th>
+                <th class="text-center col-lg-2">
+                  <span (click)="toggleHeaderSortType('Deactive')">
+                    Deactive
+                    <i
+                      class="pi pi-sort-amount-up text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('Deactive') ===
+                        SortOrderType.Ascending
+                      "
+                    ></i>
+                    <i
+                      class="pi pi-sort-amount-down text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('Deactive') ===
+                        SortOrderType.Descending
+                      "
+                    ></i>
+                  </span>
+                </th>
+                <th class="text-center col-lg-1">
+                  <span (click)="toggleHeaderSortType('Total')">
+                    Total
+                    <i
+                      class="pi pi-sort-amount-up text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('Total') === SortOrderType.Ascending
+                      "
+                    ></i>
+                    <i
+                      class="pi pi-sort-amount-down text-primary p-l-5"
+                      role="button"
+                      *ngIf="
+                        headerSortMap.get('Total') === SortOrderType.Descending
+                      "
+                    ></i>
                   </span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="
-                  let project of ( projects
+              <tr
+                *ngFor="
+                  let project of projects
                     | paginate
                       : {
                           id: 'server',
                           itemsPerPage: pageSize,
                           currentPage: pageNumber,
                           totalItems: totalItems
-                        });
-                  index as i;
-                ">
-                <td class="text-center">
+                        };
+                  index as i
+                "
+                (click)="openProjectDetail(project)"
+                style="cursor: pointer"
+              >
+                <td class="col-lg-1 text-center">
                   {{ (pageNumber - 1) * pageSize + i + 1 }}
                 </td>
-                <td class="col-lg-3 text-center" >
-                  <div style="cursor: pointer; width: fit-content"  >
+                <td class="col-lg-2 text-center">
+                  <div style="cursor: pointer; width: fit-content">
                     <b>{{ project.projectName }}</b>
                   </div>
                 </td>
-                <td class="text-center col-lg-1">{{ project.memberCount }}</td>
-                <td class="text-center col-lg-1">
+                <td class="text-center col-lg-2">{{ project.memberCount }}</td>
+                <td class="text-center col-lg-2">
                   {{ project.shadowCount }}
                 </td>
                 <td class="text-center col-lg-2">
-                 {{ project.pmCount }}
-                  </td>
+                  {{ project.pmCount }}
+                </td>
                 <td class="text-center col-lg-2">
                   {{ project.deactiveCount }}
                 </td>
-                <td class="text-center col-lg-2">{{ project.totalUser }}</td>
+                <td class="text-center col-lg-1">{{ project.totalUser }}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <div class="abp-pagination-controls-wrapper">
-          <abp-pagination-controls [totalNumber]="totalItems" id="server" (selectionChange)="getPageSize($event)"
-            (pageChange)="getDataPage($event)"></abp-pagination-controls>
-          <div *ngFor="
+          <abp-pagination-controls
+            [totalNumber]="totalItems"
+            id="server"
+            (selectionChange)="getPageSize($event)"
+            (pageChange)="getDataPage($event)"
+          ></abp-pagination-controls>
+          <div
+            *ngFor="
               let item of projects
                 | paginate
                   : {
@@ -170,7 +374,8 @@
                       currentPage: pageNumber,
                       totalItems: totalItems
                     }
-            "></div>
+            "
+          ></div>
         </div>
       </div>
     </div>

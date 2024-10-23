@@ -1,32 +1,89 @@
 @media screen and (max-width: 600px) {
-    :host ::ng-deep .app-date-filter .date-filter {
-        padding: 0;
-        margin-bottom: 0 !important;
-    }
+  :host ::ng-deep .app-date-filter .date-filter {
+    padding: 0;
+    margin-bottom: 0 !important;
+  }
 
-    .row-item {
-        padding: 0;
-        margin-bottom: 0 !important;
-    }
+  .row-item {
+    padding: 0;
+    margin-bottom: 0 !important;
+  }
 }
-.title-sort{
-    border-bottom: 1px solid rgba(204, 204, 204, 0.35);
-    margin-bottom: 0px;
-    font-size: 14px;
-    font-weight: normal;
+.title-sort {
+  border-bottom: 1px solid rgba(204, 204, 204, 0.35);
+  margin-bottom: 0px;
+  font-size: 14px;
+  font-weight: normal;
 }
-.mb-0{
-    margin-bottom: 0px;
+.mb-0 {
+  margin-bottom: 0px;
 }
-.customTable thead tr th{
-    border: 0.2px solid rgba(204, 204, 204, 0.35);
-    vertical-align: inherit
+.customTable thead tr th {
+  border: 0.2px solid rgba(204, 204, 204, 0.35);
+  vertical-align: inherit;
 }
-.customTable tbody tr td{
-    border: 0.2px solid rgba(204, 204, 204, 0.35);
+.customTable tbody tr td {
+  border: 0.2px solid rgba(204, 204, 204, 0.35);
 }
 
-.customTable tbody tr:nth-child(odd){
-    background: #EEEEEE;
+.customTable tbody tr:nth-child(odd) {
+  background: #eeeeee;
 }
-.group{display: flex;align-items: flex-start;justify-content: space-between;}
+.group {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.row-btn {
+  display: flex;
+  gap: 6px;
+}
+.m-l-15 {
+  margin-left: 15px;
+}
+.mat-chip-list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.cdk-drag-preview {
+  background-color: #cce5ff;
+  opacity: 0.9;
+  border: 1px solid #2196f3;
+  box-sizing: border-box;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+              0 8px 10px 1px rgba(0, 0, 0, 0.14),
+              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.cdk-drag-placeholder {
+  background-color: #e0e0e0;
+  border: 2px dashed #b0bec5;
+  border-radius: 5px;
+  margin: 5px 0;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+mat-chip {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+mat-chip:hover {
+  background-color: #f5f5f5;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.draggable-list.cdk-drop-list-dragging .draggable-chip:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}

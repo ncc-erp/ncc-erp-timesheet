@@ -1,11 +1,9 @@
 import {
   ChangeDetectorRef,
   Component,
-  ElementRef,
   Injector,
   Input,
   OnInit,
-  ViewChild,
 } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import {
@@ -28,14 +26,15 @@ import {
   ProjectMemberType,
   UserTypeCount,
 } from "../modal/project-management-modal/enum/sort-member-effort.enum";
-import { ESortProjectUserNumber } from "../manage-employee/enum/sort-project-user-number.enum";
-interface UserData {
-  no: number;
-  user: string;
-  position: string;
-  level: string;
-  numberOfProjects: number;
-  projects: string[];
+import {
+  CdkDragDrop,
+  CdkDragMove,
+  moveItemInArray,
+} from "@angular/cdk/drag-drop";
+export interface ProjectChips {
+  name: string;
+  sortType: SortOrder;
+  priority: number;
 }
 @Component({
   selector: "app-project-management",
@@ -66,6 +65,7 @@ export class ProjectManagementComponent
     UserTypeCount.Deactive,
     UserTypeCount.All,
   ];
+  public headerSortMap: Map<string, SortOrder> = new Map<string, SortOrder>();
   public SortOrderType = SortOrder;
   public filterItems: FilterDto[] = [];
   public projects: ProjectDto[];
@@ -222,7 +222,6 @@ export class ProjectManagementComponent
           : bTotal - aTotal;
       } else {
         const field = this.userTypeMap[this.userTypeId];
-        console.log(field);
         const aCount = a[field];
         const bCount = b[field];
         return this.sortOrder === SortOrder.Ascending
@@ -235,18 +234,21 @@ export class ProjectManagementComponent
     this.showChart();
   }
   toggleSortOrder() {
-    this.projects.sort((a, b) => {
-        const aTotal = a.totalUser;
-        const bTotal = b.totalUser
-        return this.sortOrder === SortOrder.Ascending
-          ? aTotal - bTotal
-          : bTotal - aTotal;
-    });
+    debugger;
+    console.log(this.sortOrder);
+
     if (this.sortOrder === SortOrder.Ascending) {
-              this.sortOrder = SortOrder.Descending;
-          } else {
-              this.sortOrder = SortOrder.Ascending;
-          }
+      this.sortOrder = SortOrder.Descending;
+    } else {
+      this.sortOrder = SortOrder.Ascending;
+    }
+    this.projects.sort((a, b) => {
+      const aTotal = a.totalUser;
+      const bTotal = b.totalUser;
+      return this.sortOrder === SortOrder.Ascending
+        ? aTotal - bTotal
+        : bTotal - aTotal;
+    });
     this.resetDataChart();
     this.loadProjectCountData();
   }
@@ -336,11 +338,132 @@ export class ProjectManagementComponent
     if (view === "chart") {
       this.isChartView = true;
       setTimeout(() => {
-      this.showChart();
-    }, 50);
+        this.showChart();
+      }, 50);
     } else {
       this.isChartView = false;
       this.chart = null;
+    }
+  }
+  openProjectDetail(project: any) {
+    const dialogRef = this.dialog.open(ProjectManagementMemberDetailComponent, {
+      data: {
+        projectItem: {
+          branchId: this.branchId != 0 ? this.branchId : "",
+          projectId: project.projectId,
+          startDate: this.startDate,
+          endDate: this.endDate,
+          projectName: project.projectName,
+        },
+      },
+      height: "auto",
+      width: "auto",
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        abp.notify.success("Updated successfully");
+        this.refresh();
+      }
+    });
+  }
+
+  //Chips
+  selectable = true;
+  removable = true;
+  projectChips: ProjectChips[] = [];
+
+  add(header: string): void {
+    const sortType = this.headerSortMap.get(header);
+    const existingChipIndex = this.projectChips.findIndex(
+      (chip) => chip.name === header
+    );
+    if (existingChipIndex !== -1) {
+      this.projectChips[existingChipIndex].sortType = sortType;
+    } else {
+      this.projectChips.push({
+        name: header,
+        sortType,
+        priority: this.projectChips.length + 1,
+      });
+    }
+  }
+
+  remove(projectChip: ProjectChips): void {
+    const index = this.projectChips.indexOf(projectChip);
+    if (index >= 0) {
+      this.projectChips.splice(index, 1);
+      this.headerSortMap.set(projectChip.name, undefined);
+    }
+    this.updateChipPriorities();
+    this.sortProjects();
+  }
+  toggleHeaderSortType(header: string): void {
+    debugger;
+    const currentSortOrder = this.headerSortMap.get(header);
+    const newSortOrder =
+      currentSortOrder === SortOrder.Ascending
+        ? SortOrder.Descending
+        : SortOrder.Ascending;
+    this.headerSortMap.set(header, newSortOrder);
+    this.add(header);
+    this.sortProjects();
+  }
+  //drab and drop
+  drop(event: CdkDragDrop<string[]>): void {
+    moveItemInArray(this.projectChips, event.previousIndex, event.currentIndex);
+    this.updateChipPriorities();
+    this.sortProjects();
+  }
+  cdkDragMoved(event: CdkDragMove) {}
+  updateChipPriorities(): void {
+    this.projectChips.forEach((chip, index) => {
+      chip.priority = index + 1;
+    });
+  }
+  sortProjects(): void {
+    this.projects.sort((a, b) => {
+      for (let chip of this.projectChips) {
+        const field = this.mapChipToProjectField(chip.name);
+        const sortType = chip.sortType;
+        const comparison = this.compareByField(a, b, field, sortType);
+        if (comparison !== 0) {
+          return comparison;
+        }
+      }
+
+      return 0;
+    });
+  }
+
+  compareByField(a: any, b: any, field: string, sortType: SortOrder): number {
+    const aValue = a[field];
+    const bValue = b[field];
+    if (aValue < bValue) {
+      return sortType === SortOrder.Ascending ? -1 : 1;
+    }
+    if (aValue > bValue) {
+      return sortType === SortOrder.Ascending ? 1 : -1;
+    }
+    return 0;
+  }
+
+  mapChipToProjectField(chipName: string): string {
+    switch (chipName) {
+      case "Project Name":
+        return "projectName";
+      case "Expose":
+        return "memberCount";
+      case "Shadow":
+        return "shadowCount";
+      case "Deactive":
+        return "deactiveCount";
+      case "Total":
+        return "totalUser";
+      case "PM":
+        return "pmCount";
+      default:
+        return "";
     }
   }
 }
