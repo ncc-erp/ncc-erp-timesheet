@@ -54,7 +54,7 @@ export class ProjectManagementComponent
   isChartView: boolean = true;
   startDate: string;
   endDate: string;
-  viewMode: string = 'chart';
+  viewMode: string = "chart";
   public UserTypeSearch: FormControl = new FormControl("");
   filterUserType = APP_CONFIG.EnumValueOfUserType;
   userTypeId: ProjectMemberType = ProjectMemberType.All;
@@ -75,6 +75,10 @@ export class ProjectManagementComponent
   private shadowCount: number[] = [];
   private filterBranchId: any;
   private chart: Chart;
+  selectable = true;
+  removable = true;
+  projectChips: ProjectChips[] = [];
+
   constructor(
     injector: Injector,
     private dialog: MatDialog,
@@ -105,9 +109,6 @@ export class ProjectManagementComponent
 
   showChart() {
     if (!this.chart) {
-      // setTimeout(() => {
-
-      // }, 50);
       this.chart = new Chart(document.getElementById("myChart"), {
         type: "horizontalBar",
         tooltips: { enabled: true },
@@ -209,26 +210,29 @@ export class ProjectManagementComponent
       this.projectNames.push(project.projectName);
       this.deactiveCount.push(project.deactiveCount);
       this.exposeCount.push(project.memberCount);
-      this.shadowCount.push(project.shadowCount );
-  })
-}
+      this.shadowCount.push(project.shadowCount);
+    });
+  }
   private sortProject() {
     this.projects.sort((a, b) => {
       if (this.userTypeId === 0) {
-          const aTotal = a.memberCount;
-          const bTotal = b.memberCount;
-          return this.sortOrder === SortOrder.Ascending ? aTotal - bTotal : bTotal - aTotal;
-      }
-      else {
-          const field = this.userTypeMap[this.userTypeId];
-          const aCount = a[field];
-          const bCount = b[field];
-          return this.sortOrder === SortOrder.Ascending ? aCount - bCount : bCount - aCount;
+        const aTotal = a.memberCount;
+        const bTotal = b.memberCount;
+        return this.sortOrder === SortOrder.Ascending
+          ? aTotal - bTotal
+          : bTotal - aTotal;
+      } else {
+        const field = this.userTypeMap[this.userTypeId];
+        const aCount = a[field];
+        const bCount = b[field];
+        return this.sortOrder === SortOrder.Ascending
+          ? aCount - bCount
+          : bCount - aCount;
       }
     });
-    this.resetDataChart()
-    this.loadProjectCountData()
-    this.showChart()
+    this.resetDataChart();
+    this.loadProjectCountData();
+    this.showChart();
   }
 
   protected list(
@@ -264,7 +268,6 @@ export class ProjectManagementComponent
         } else {
           this.projects = rs.result.items;
           this.showPaging(rs.result, pageNumber);
-          // this.loadProjectCountData();
           this.sortProject();
         }
         this.showChart();
@@ -278,7 +281,7 @@ export class ProjectManagementComponent
     this.shadowCount = [];
   }
 
-  searchOrFilter(): void{
+  searchOrFilter(): void {
     this.refresh();
   }
   updateSortOrder() {
@@ -339,11 +342,6 @@ export class ProjectManagementComponent
     });
   }
 
-  //Chips
-  selectable = true;
-  removable = true;
-  projectChips: ProjectChips[] = [];
-
   add(header: string): void {
     const sortType = this.headerSortMap.get(header);
     const existingChipIndex = this.projectChips.findIndex(
@@ -370,10 +368,10 @@ export class ProjectManagementComponent
     this.sortProjectsTable();
   }
   removeAllChips(): void {
-  this.projectChips = [];
-  this.headerSortMap.clear();
-  this.sortProjectsTable();
-}
+    this.projectChips = [];
+    this.headerSortMap.clear();
+    this.sortProjectsTable();
+  }
   toggleHeaderSortType(header: string): void {
     const currentSortOrder = this.headerSortMap.get(header);
     const newSortOrder =
@@ -384,7 +382,12 @@ export class ProjectManagementComponent
     this.add(header);
     this.sortProjectsTable();
   }
-  //drab and drop
+  onSort(header: string, sortOrder: SortOrder): void {
+    this.headerSortMap.set(header, sortOrder);
+    this.add(header);
+    this.sortProjectsTable();
+  }
+
   drop(event: CdkDragDrop<string[]>): void {
     moveItemInArray(this.projectChips, event.previousIndex, event.currentIndex);
     this.updateChipPriorities();

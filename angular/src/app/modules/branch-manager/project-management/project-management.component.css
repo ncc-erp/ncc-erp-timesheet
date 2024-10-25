@@ -46,6 +46,7 @@
   flex-direction: row;
   align-items: center;
   gap: 10px;
+  white-space: nowrap;
 }
 
 .cdk-drag-preview {
@@ -58,8 +59,7 @@
   text-overflow: ellipsis;
   overflow: hidden;
   box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-              0 8px 10px 1px rgba(0, 0, 0, 0.14),
-              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
 .cdk-drag-placeholder {
@@ -84,6 +84,72 @@ mat-chip:hover {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.draggable-list.cdk-drop-list-dragging .draggable-chip:not(.cdk-drag-placeholder) {
+.draggable-list.cdk-drop-list-dragging
+  .draggable-chip:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .mat-chip-list {
+    gap: 5px;
+    flex-direction: column;
+  }
+
+  .cdk-drag-placeholder {
+    width: 100%;
+    height: 40px;
+  }
+
+  mat-chip {
+    font-size: 12px;
+  }
+}
+
+.menu-dropdown {
+  z-index: 1000;
+}
+
+.filter-icon {
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+}
+.relative {
+  position: relative;
+}
+.size-13 {
+  font-size: 13px;
+}
+
+th,
+td,
+span {
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  .filter-icon {
+    right: 5px;
+  }
+
+  th {
+    padding: 5px;
+  }
+  .col-lg-2 {
+    min-width: 150px;
+  }
+
+  .size-13 {
+    font-size: 10px;
+  }
+
+  .mat-menu {
+    font-size: 12px;
+  }
+  .filter-icon {
+    cursor: pointer;
+    position: relative;
+    float: right;
+    margin-left: 5px;
+  }
 }

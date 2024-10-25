@@ -140,12 +140,12 @@
                     {{ projectChip.name }}
                     <span>
                       <i
-                        class="pi pi-sort-amount-up text-primary p-l-5"
+                        class="pi pi-sort-amount-up text-primary p-l-5 size-13"
                         role="button"
                         *ngIf="projectChip.sortType === SortOrderType.Ascending"
                       ></i>
                       <i
-                        class="pi pi-sort-amount-down text-primary p-l-5"
+                        class="pi pi-sort-amount-down text-primary p-l-5 size-13"
                         role="button"
                         *ngIf="
                           projectChip.sortType === SortOrderType.Descending
@@ -156,13 +156,14 @@
                   </mat-chip>
                   <mat-chip
                     class="delete-all-chip"
-                    *ngIf="projectChips.length > 0">
+                    *ngIf="projectChips.length > 0"
+                  >
                     <mat-icon
                       role="button"
                       (click)="removeAllChips()"
                       matTooltip="Xóa tất cả các chip"
                     >
-                      delete
+                      clear
                     </mat-icon>
                   </mat-chip>
                 </mat-chip-list>
@@ -182,124 +183,247 @@
           <table class="table customTable">
             <thead>
               <tr>
-                <th class="text-center col-lg-1">#</th>
-                <th class="text-center col-lg-2">
-                  <span (click)="toggleHeaderSortType('Project Name')">
+                <th
+                  class="text-center col-lg-2 col-md-2 col-sm-2 relative"
+                  (click)="toggleHeaderSortType('Project Name')"
+                  role="button"
+                >
+                  <span>
                     Project Name
                     <i
-                      class="pi pi-sort-amount-up text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-up text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('Project Name') ===
                         SortOrderType.Ascending
                       "
                     ></i>
                     <i
-                      class="pi pi-sort-amount-down text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-down text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('Project Name') ===
                         SortOrderType.Descending
                       "
                     ></i>
                   </span>
+                  <span
+                    [matMenuTriggerFor]="menuProjectName"
+                    class="filter-icon"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <i class="pi pi-filter text-primary p-l-5 size-13"></i>
+                  </span>
+                  <mat-menu #menuProjectName="matMenu" class="menu-dropdown">
+                    <button
+                      mat-menu-item
+                      (click)="onSort('Project Name', SortOrderType.Ascending)"
+                    >
+                      <i class="pi pi-sort-amount-up"></i> Asc
+                    </button>
+                    <button
+                      mat-menu-item
+                      (click)="onSort('Project Name', SortOrderType.Descending)"
+                    >
+                      <i class="pi pi-sort-amount-down"></i> Desc
+                    </button>
+                  </mat-menu>
                 </th>
-                <th class="text-center col-lg-2">
-                  <span (click)="toggleHeaderSortType('Expose')">
+
+                <th
+                  class="text-center col-lg-2 col-md-2 col-sm-2 relative"
+                  (click)="toggleHeaderSortType('Expose')"
+                  role="button"
+                >
+                  <span>
                     Expose
                     <i
-                      class="pi pi-sort-amount-up text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-up text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('Expose') === SortOrderType.Ascending
                       "
                     ></i>
                     <i
-                      class="pi pi-sort-amount-down text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-down text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('Expose') === SortOrderType.Descending
                       "
                     ></i>
                   </span>
+                  <span [matMenuTriggerFor]="menuExpose" class="filter-icon"  (click)="$event.stopPropagation()">
+                    <i class="pi pi-filter text-primary p-l-5 size-13"></i>
+                  </span>
+                  <mat-menu #menuExpose="matMenu">
+                    <button
+                      mat-menu-item
+                      (click)="onSort('Expose', SortOrderType.Ascending)"
+                    >
+                      <i class="pi pi-sort-amount-up"></i> Asc
+                    </button>
+                    <button
+                      mat-menu-item
+                      (click)="onSort('Expose', SortOrderType.Descending)"
+                    >
+                      <i class="pi pi-sort-amount-down"></i> Desc
+                    </button>
+                  </mat-menu>
                 </th>
-                <th class="text-center col-lg-2">
-                  <span (click)="toggleHeaderSortType('Shadow')">
+
+                <th
+                  class="text-center col-lg-2 col-md-2 col-sm-2 relative"
+                  (click)="toggleHeaderSortType('Shadow')"
+                  role="button"
+                >
+                  <span>
                     Shadow
                     <i
-                      class="pi pi-sort-amount-up text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-up text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('Shadow') === SortOrderType.Ascending
                       "
                     ></i>
                     <i
-                      class="pi pi-sort-amount-down text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-down text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('Shadow') === SortOrderType.Descending
                       "
                     ></i>
                   </span>
+                  <span [matMenuTriggerFor]="menuShadow" class="filter-icon"  (click)="$event.stopPropagation()">
+                    <i class="pi pi-filter text-primary p-l-5 size-13"></i>
+
+                  </span>
+                  <mat-menu #menuShadow="matMenu">
+                    <button
+                      mat-menu-item
+                      (click)="onSort('Shadow', SortOrderType.Ascending)"
+                    >
+                      <i class="pi pi-sort-amount-up"></i> Asc
+                    </button>
+                    <button
+                      mat-menu-item
+                      (click)="onSort('Shadow', SortOrderType.Descending)"
+                    >
+                      <i class="pi pi-sort-amount-down"></i> Desc
+                    </button>
+                  </mat-menu>
                 </th>
-                <th class="text-center col-lg-2">
-                  <span (click)="toggleHeaderSortType('PM')">
+
+                <th
+                  class="text-center col-lg-2 col-md-2 col-sm-2 relative"
+                  (click)="toggleHeaderSortType('PM')"
+                  role="button"
+                >
+                  <span>
                     PM
                     <i
-                      class="pi pi-sort-amount-up text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-up text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('PM') === SortOrderType.Ascending
                       "
                     ></i>
                     <i
-                      class="pi pi-sort-amount-down text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-down text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('PM') === SortOrderType.Descending
                       "
                     ></i>
                   </span>
+                  <span [matMenuTriggerFor]="menuPM" class="filter-icon"  (click)="$event.stopPropagation()">
+                    <i class="pi pi-filter text-primary p-l-5 size-13"></i>
+                  </span>
+                  <mat-menu #menuPM="matMenu">
+                    <button
+                      mat-menu-item
+                      (click)="onSort('PM', SortOrderType.Ascending)"
+                    >
+                      <i class="pi pi-sort-amount-up"></i> Asc
+                    </button>
+                    <button
+                      mat-menu-item
+                      (click)="onSort('PM', SortOrderType.Descending)"
+                    >
+                      <i class="pi pi-sort-amount-down"></i> Desc
+                    </button>
+                  </mat-menu>
                 </th>
-                <th class="text-center col-lg-2">
-                  <span (click)="toggleHeaderSortType('Deactive')">
+
+                <th
+                  class="text-center col-lg-2 col-md-2 col-sm-2 relative"
+                  (click)="toggleHeaderSortType('Deactive')"
+                  role="button"
+                >
+                  <span>
                     Deactive
                     <i
-                      class="pi pi-sort-amount-up text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-up text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('Deactive') ===
                         SortOrderType.Ascending
                       "
                     ></i>
                     <i
-                      class="pi pi-sort-amount-down text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-down text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('Deactive') ===
                         SortOrderType.Descending
                       "
                     ></i>
                   </span>
+                  <span [matMenuTriggerFor]="menuDeactive" class="filter-icon"  (click)="$event.stopPropagation()">
+                    <i class="pi pi-filter text-primary p-l-5 size-13"></i>
+                  </span>
+                  <mat-menu #menuDeactive="matMenu">
+                    <button
+                      mat-menu-item
+                      (click)="onSort('Deactive', SortOrderType.Ascending)"
+                    >
+                      <i class="pi pi-sort-amount-up"></i> Asc
+                    </button>
+                    <button
+                      mat-menu-item
+                      (click)="onSort('Deactive', SortOrderType.Descending)"
+                    >
+                      <i class="pi pi-sort-amount-down"></i> Desc
+                    </button>
+                  </mat-menu>
                 </th>
-                <th class="text-center col-lg-1">
-                  <span (click)="toggleHeaderSortType('Total')">
+
+                <th
+                  class="text-center col-lg-2 col-md-2 col-sm-2 relative"
+                  (click)="toggleHeaderSortType('Total')"
+                  role="button"
+                >
+                  <span>
                     Total
                     <i
-                      class="pi pi-sort-amount-up text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-up text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('Total') === SortOrderType.Ascending
                       "
                     ></i>
                     <i
-                      class="pi pi-sort-amount-down text-primary p-l-5"
-                      role="button"
+                      class="pi pi-sort-amount-down text-primary p-l-5 size-13"
                       *ngIf="
                         headerSortMap.get('Total') === SortOrderType.Descending
                       "
                     ></i>
                   </span>
+                  <span [matMenuTriggerFor]="menuTotal" class="filter-icon"  (click)="$event.stopPropagation()">
+                    <i class="pi pi-filter text-primary p-l-5 size-13"></i>
+                  </span>
+                  <mat-menu #menuTotal="matMenu">
+                    <button
+                      mat-menu-item
+                      (click)="onSort('Total', SortOrderType.Ascending)"
+                    >
+                      <i class="pi pi-sort-amount-up"></i> Asc
+                    </button>
+                    <button
+                      mat-menu-item
+                      (click)="onSort('Total', SortOrderType.Descending)"
+                    >
+                      <i class="pi pi-sort-amount-down"></i> Desc
+                    </button>
+                  </mat-menu>
                 </th>
               </tr>
             </thead>
@@ -319,25 +443,22 @@
                 (click)="openProjectDetail(project)"
                 style="cursor: pointer"
               >
-                <td class="col-lg-1 text-center">
-                  {{ (pageNumber - 1) * pageSize + i + 1 }}
-                </td>
-                <td class="col-lg-2 text-center">
+                <td class="col-lg-2 col-md-2 col-sm-2 text-center">
                   <div style="cursor: pointer; width: fit-content">
                     <b>{{ project.projectName }}</b>
                   </div>
                 </td>
-                <td class="text-center col-lg-2">{{ project.memberCount }}</td>
-                <td class="text-center col-lg-2">
+                <td class="text-center col-lg-2 col-md-2 col-sm-2">{{ project.memberCount }}</td>
+                <td class="text-center col-lg-2 col-md-2 col-sm-2">
                   {{ project.shadowCount }}
                 </td>
-                <td class="text-center col-lg-2">
+                <td class="text-center col-lg-2 col-md-2 col-sm-2">
                   {{ project.pmCount }}
                 </td>
-                <td class="text-center col-lg-2">
+                <td class="text-center col-lg-2 col-md-2 col-sm-2">
                   {{ project.deactiveCount }}
                 </td>
-                <td class="text-center col-lg-1">{{ project.totalUser }}</td>
+                <td class="text-center col-lg-2 col-md-2 col-sm-2">{{ project.totalUser }}</td>
               </tr>
             </tbody>
           </table>
