@@ -1025,5 +1025,25 @@ namespace Timesheet.APIs.RetroDetails
             }
             return input;
         }
+
+        [HttpGet]
+        public async Task<List<SyncRetroPointDto>> SyncRetroPointToCheckpoint(DateTime startTime, DateTime endTime)
+        {
+            var listRetro = await WorkScope.GetAll<Retro>()
+                .Where(r => r.StartDate >= startTime && r.EndDate <= endTime)
+                .Select(t => t.Id)
+                .ToListAsync();
+
+            var syncRetroPoint = await WorkScope.GetAll<RetroResult>()
+                .Where(r => listRetro.Contains(r.RetroId))
+                .GroupBy(r => r.UserId)
+                .Select(s => new SyncRetroPointDto
+                {
+                    UserId = s.Key,
+                    Point = s.Average(p => p.Point),
+
+                }).ToListAsync();
+            return syncRetroPoint;
+        }
     }
 }

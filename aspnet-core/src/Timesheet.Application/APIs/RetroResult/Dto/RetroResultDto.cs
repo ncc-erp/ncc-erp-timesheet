@@ -49,4 +49,10 @@ namespace Timesheet.APIs.RetroDetails.Dto
         [ApplySearch]
         public string PmEmailAddress { get; set; }
     }
+
+    public class SyncRetroPointDto
+    {
+        public long UserId { get; set; }
+        public float Point { get; set; }
+    }
 }
