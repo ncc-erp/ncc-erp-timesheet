@@ -33,6 +33,7 @@ using Ncc.Entities.Enum;
 using Timesheet.APIs.TeamBuildingDetailsPM.dto;
 using Timesheet.APIs.TeamBuildingDetailsPM.Dto;
 using Timesheet.APIs.Positions.Dto;
+using Timesheet.NCCAuthen;
 
 namespace Timesheet.APIs.RetroDetails
 {
@@ -1026,6 +1027,7 @@ namespace Timesheet.APIs.RetroDetails
             return input;
         }
 
+        [NccAuthentication]
         [HttpGet]
         public async Task<List<SyncRetroPointDto>> SyncRetroPointToCheckpoint(DateTime startTime, DateTime endTime)
         {
