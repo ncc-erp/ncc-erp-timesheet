@@ -52,7 +52,7 @@ namespace Timesheet.APIs.RetroDetails.Dto
 
     public class SyncRetroPointDto
     {
-        public long UserId { get; set; }
+        public string EmailAddress { get; set; }
         public float Point { get; set; }
     }
 }

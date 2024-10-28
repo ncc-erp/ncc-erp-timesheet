@@ -1039,13 +1039,13 @@ namespace Timesheet.APIs.RetroDetails
           return WorkScope.GetAll<RetroResult>()
                 .Where(r => listRetroId.Contains(r.RetroId))
                 .Select(s => new {
-                    s.UserId,
+                    s.User.EmailAddress,
                     s.Point
                 }).ToList()
-                .GroupBy(r => r.UserId)
+                .GroupBy(r => r.EmailAddress)
                 .Select(s => new SyncRetroPointDto
                 {
-                    UserId = s.Key,
+                    EmailAddress = s.Key.ToLower().Trim(),
                     Point = s.Average(p => p.Point),
 
                 }).ToList();
