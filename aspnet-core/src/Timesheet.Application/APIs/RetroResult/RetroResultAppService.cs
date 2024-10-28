@@ -1032,7 +1032,7 @@ namespace Timesheet.APIs.RetroDetails
         public async Task<List<SyncRetroPointDto>> SyncRetroPointToCheckpoint(DateTime startTime, DateTime endTime)
         {
             var listRetroId = await WorkScope.GetAll<Retro>()
-                .Where(r => r.StartDate >= startTime && r.EndDate <= endTime)
+                .Where(r => r.StartDate >= startTime.Date && r.EndDate <= endTime.Date)
                 .Select(t => t.Id)
                 .ToListAsync();
 
