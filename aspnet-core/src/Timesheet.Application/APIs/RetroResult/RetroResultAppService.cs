@@ -33,6 +33,7 @@ using Ncc.Entities.Enum;
 using Timesheet.APIs.TeamBuildingDetailsPM.dto;
 using Timesheet.APIs.TeamBuildingDetailsPM.Dto;
 using Timesheet.APIs.Positions.Dto;
+using Timesheet.NCCAuthen;
 
 namespace Timesheet.APIs.RetroDetails
 {
@@ -1024,6 +1025,31 @@ namespace Timesheet.APIs.RetroDetails
                 }
             }
             return input;
+        }
+
+        [NccAuthentication]
+        [HttpGet]
+        public async Task<List<SyncRetroPointDto>> SyncRetroPointToCheckpoint(DateTime startTime, DateTime endTime)
+        {
+            var listRetroId = await WorkScope.GetAll<Retro>()
+                .Where(r => r.StartDate >= startTime && r.EndDate <= endTime)
+                .Select(t => t.Id)
+                .ToListAsync();
+
+          return WorkScope.GetAll<RetroResult>()
+                .Where(r => listRetroId.Contains(r.RetroId))
+                .Select(s => new {
+                    s.UserId,
+                    s.Point
+                }).ToList()
+                .GroupBy(r => r.UserId)
+                .Select(s => new SyncRetroPointDto
+                {
+                    UserId = s.Key,
+                    Point = s.Average(p => p.Point),
+
+                }).ToList();
+           
         }
     }
 }
