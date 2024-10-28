@@ -1032,20 +1032,20 @@ namespace Timesheet.APIs.RetroDetails
         public async Task<List<SyncRetroPointDto>> SyncRetroPointToCheckpoint(DateTime startTime, DateTime endTime)
         {
             var listRetroId = await WorkScope.GetAll<Retro>()
-                .Where(r => r.StartDate >= startTime && r.EndDate <= endTime)
+                .Where(r => r.StartDate >= startTime.Date && r.EndDate <= endTime.Date)
                 .Select(t => t.Id)
                 .ToListAsync();
 
           return WorkScope.GetAll<RetroResult>()
                 .Where(r => listRetroId.Contains(r.RetroId))
                 .Select(s => new {
-                    s.UserId,
+                    s.User.EmailAddress,
                     s.Point
                 }).ToList()
-                .GroupBy(r => r.UserId)
+                .GroupBy(r => r.EmailAddress)
                 .Select(s => new SyncRetroPointDto
                 {
-                    UserId = s.Key,
+                    EmailAddress = s.Key.ToLower().Trim(),
                     Point = s.Average(p => p.Point),
 
                 }).ToList();
