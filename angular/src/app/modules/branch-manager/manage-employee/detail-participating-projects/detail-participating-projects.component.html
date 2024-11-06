@@ -57,9 +57,9 @@
         <thead>
           <tr>
             <th class="col-lg-4">Project</th>
-            <th class="text-center col-lg-2">Value Type</th>
+            <th class="text-center col-lg-2">Type</th>
             <th class="text-center col-lg-2">Hours Working</th>
-            <th class="text-center col-lg-2">Shadow Percentage</th>
+            <th class="text-center col-lg-2">Effort</th>
             <th class="text-center col-lg-1">Action</th>
           </tr>
         </thead>
@@ -70,11 +70,11 @@
               <p class="nameProject">{{item.projectName}}</p>
             </td>
             <!-- position project -->
-            <td class="text-center col-lg-2">{{valueOfUserType[item.valueOfUserType].label}}</td>
+            <td class="text-center col-lg-2">{{getProjectUserType(item.projectUserType)}}</td>
             <!-- project Hours Working -->
             <td class="text-center col-lg-2">{{convertMinuteToHour(item.workingHours)}}</td>
             <!-- % project -->
-            <td class="text-center col-lg-2">{{item.shadowPercentage}}%</td>
+            <td class="text-center col-lg-2">{{item.effort}}%</td>
             <td class="text-center mx-auto btn-menu col-lg-1">
               <button name="actionProject" class="border-0" mat-stroked-button="mat-stroked-button" [matMenuTriggerFor]="menu">
                 <span class="mat-button-wrapper">
@@ -82,7 +82,7 @@
                 </span>
               </button>
               <mat-menu #menu="matMenu">
-                <button class="menu mat-menu-item w-100 bg-transparent" name="actionEditProject" (click)="updateShadowPercentage(item)">
+                <button class="menu mat-menu-item w-100 bg-transparent" name="actionEditProject" (click)="updateProjectUser(item)">
                   <mat-icon class="mat-18 mr-1">edit</mat-icon>
                   Edit
                 </button>

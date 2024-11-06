@@ -50,7 +50,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     private _dialog: MatDialog,
   ) {
     super(injector);
-    this.branchId = 0;
+    this.branchId = this.appSession.user.branchId;
     this.branchSearch.valueChanges.subscribe(() => {
       this.filterBranch();
     })

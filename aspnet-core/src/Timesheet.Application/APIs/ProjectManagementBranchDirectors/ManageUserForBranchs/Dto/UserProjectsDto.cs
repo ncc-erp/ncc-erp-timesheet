@@ -7,6 +7,7 @@ using Timesheet.Anotations;
 using Timesheet.Uitls;
 using Timesheet.Users.Dto;
 using Timesheet.Entities;
+using Ncc.Entities;
 
 namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.Dto
 {
@@ -54,6 +55,8 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
         public string FullName { get; set; }
         public string EmailAddress { get; set; }
         public float WorkingPercent { get; set; }
-        public ValueOfUserType ValueType { get; set; }
+        public int TotalWorkingTime { get; set; }
+        public ProjectUserType UserType { get; set; }
+        public long ProjectUserId { get; set; }
     }
 }

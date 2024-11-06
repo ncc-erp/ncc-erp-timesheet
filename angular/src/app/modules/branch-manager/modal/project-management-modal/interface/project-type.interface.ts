@@ -6,6 +6,8 @@ export interface  IProjectTargetUser {
     projectName: string;
     emailAddress: string;
     fullName: string;
-    valueType: number | string;
+    userType: number | string;
     workingPercent: string | number;
+    totalWorkingTime: number;
+    projectUserId: number;
 }

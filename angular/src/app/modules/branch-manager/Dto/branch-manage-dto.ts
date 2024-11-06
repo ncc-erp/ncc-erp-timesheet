@@ -31,9 +31,10 @@ export class ProjectDto {
     projectCode: string;
     projectName: string;
     totalUser: number;
+    deactiveCount: number;
     memberCount: number;
-    exposeCount: number;
     shadowCount: number;
+    pmCount: number;
 }
 
 export class ProjectTargetUserDto {
@@ -48,7 +49,18 @@ export class ProjectListManagement {
     projectName: string;
     projectCode: string;
     status: number;
-    valueOfUserType: number;
-    shadowPercentage: number;
+    valueOfUserType: number;    // abandoned
+    projectUserType: number;
+    effort: number;
     workingHours: number;
+}
+
+export interface UpdateTypeOfUsersInProjectDto {
+    userTypes: UserTypeDto[];
+    projectId: number;
+}
+
+export interface UserTypeDto {
+    projectUserId: number;
+    userType: number;
 }

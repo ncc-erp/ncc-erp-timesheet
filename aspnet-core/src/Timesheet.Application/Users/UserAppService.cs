@@ -332,10 +332,10 @@ namespace Ncc.Users
             return true;
         }
 
-       
+
         public async Task<List<GetUserDto>> GetUserNotPagging()
         {
-            return await this.Repository.GetAll()                
+            return await this.Repository.GetAll()
                 .Select(s => new GetUserDto
                 {
                     Id = s.Id,
@@ -543,12 +543,12 @@ namespace Ncc.Users
                 EmailAddress = user.EmailAddress
             };
             await _userManager.UpdateAsync(user);
-            if(ConstantUploadFile.Provider != ConstantUploadFile.INTERNAL)
+            if (ConstantUploadFile.Provider != ConstantUploadFile.INTERNAL)
             {
                 _projectService.UpdateAvatarToProject(avartarUserInfo);
                 _hrmService.UpdateAvatarToHRM(avartarUserInfo);
                 _hrmV2Service.UpdateAvatarToHrm(avartarUserInfo);
-            } 
+            }
             return avatarPath;
         }
 
@@ -610,7 +610,7 @@ namespace Ncc.Users
             }
 
         }
-       
+
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_ChangeStatus)]
         public async System.Threading.Tasks.Task ActiveUser(EntityDto<long> input)
@@ -701,22 +701,22 @@ namespace Ncc.Users
             return new { successList, failedList };
         }
 
-   
+
         public async Task<List<GetAllPMDto>> GetAllPM()
         {
-            var Result = from pu in _ws.GetAll<ProjectUser>().Where(x=>x.Type == ProjectUserType.PM)
-                         join u in _ws.GetAll<User>().Where(x=>x.IsActive == true)
+            var Result = from pu in _ws.GetAll<ProjectUser>().Where(x => x.Type == ProjectUserType.PM)
+                         join u in _ws.GetAll<User>().Where(x => x.IsActive == true)
                          on pu.UserId equals u.Id
-                         group pu by new { pu.UserId, u.FullName, u.EmailAddress, u.AvatarPath } into g
-                         select new GetAllPMDto 
+                         group pu by new { pu.UserId, u.UserName, u.EmailAddress, u.AvatarPath } into g
+                         select new GetAllPMDto
                          {
                              PMId = g.Key.UserId,
-                             PMFullName = g.Key.FullName,
+                             PMFullName = g.Key.UserName,
                              PMEmailAddress = g.Key.EmailAddress,
-                             PMAvatarPath = g.Key.AvatarPath != null ?  g.Key.AvatarPath : ""
+                             PMAvatarPath = g.Key.AvatarPath != null ? g.Key.AvatarPath : ""
                          };
 
-            return await Result.Distinct().ToListAsync();  
+            return await Result.Distinct().ToListAsync();
         }
 
         [HttpGet]
@@ -735,7 +735,7 @@ namespace Ncc.Users
         [HttpGet]
         public string GetUserEmailById(long id)
         {
-            var userEmail =  _ws.GetAll<User>()
+            var userEmail = _ws.GetAll<User>()
                 .Where(x => x.Id == id)
                 .Select(x => x.EmailAddress)
                 .FirstOrDefault();

@@ -70,7 +70,8 @@ export class MyProfileComponent extends AppComponentBase implements OnInit {
       data : {email: userProfile.email 
         , bankId : userProfile.bankId},
       width: "750px",
-      maxHeight: "80vh"
+      maxHeight: "80vh",
+      panelClass: 'my-dialog'
     });
     dialog.afterClosed().subscribe((rs)=>{
       if(rs){

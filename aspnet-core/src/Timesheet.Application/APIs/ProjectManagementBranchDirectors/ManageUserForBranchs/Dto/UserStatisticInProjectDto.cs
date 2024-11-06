@@ -13,8 +13,9 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserForBranchs.D
         [ApplySearch]
         public string ProjectName { get; set; }
         public int TotalUser { get; set; }
+        public int DeactiveCount { get; set; } 
         public int MemberCount { get; set; }
-        public int ExposeCount { get; set; }
         public int ShadowCount { get; set; }
+        public int PmCount { get; set; }
     }
 }

@@ -221,3 +221,23 @@ font-size: 15px !important;
 .clearfix {
     padding: 0 15px;
 }
+
+@media screen and (max-width: 600px) {
+    .header {
+        display: block;
+    }
+
+    .header .title {
+        margin-left: 8px;
+    }
+
+    .extra-action-group {
+        padding-top: 20px;
+        margin-left: -3px;
+    }
+
+    .header-dropdown-mat-icon-button {
+        position: absolute;
+        top: 22px;
+    }
+}

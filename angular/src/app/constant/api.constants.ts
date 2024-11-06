@@ -233,9 +233,10 @@ export const APP_CONSTANT = {
     { "name": "Không CheckIn và không CheckOut", "value": 5 }
   ],
   ProjectMemberType: {
-    Member: 0,
-    Expose: 1,
-    Shadow: 2
+    Expose: 0,
+    Shadow: 1,
+    Deactive: 2,
+    All: 3
   },
   NotifyChannel: {
     KOMU : 0,
