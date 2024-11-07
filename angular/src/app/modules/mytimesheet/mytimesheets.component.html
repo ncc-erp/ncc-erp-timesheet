@@ -155,38 +155,38 @@
                   <p><b>[{{ item.projectCode }}] [{{item.projectName}}]</b><span> ({{item.customerName}})</span></p>
                   <p>{{ item.taskName }}
                 </td>
-                <td *ngIf="!item.isEditing "><input style="width: 50px;" [readonly]="!item.isEditing"
+                <td *ngIf="!item.isEditing" style="text-align: center;"><input style="width: 50px; text-align:center;" [readonly]="!item.isEditing"
                     [(ngModel)]="item.monWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
-                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                <td *ngIf="!item.isEditing" style="text-align: center;"><input style="width: 50px; text-align:center;" [readonly]="!item.isEditing"
                     [(ngModel)]="item.tueWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
-                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                <td *ngIf="!item.isEditing" style="text-align: center;"><input style="width: 50px; text-align:center;" [readonly]="!item.isEditing"
                     [(ngModel)]="item.wedWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
-                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                <td *ngIf="!item.isEditing" style="text-align: center;"><input style="width: 50px; text-align:center;" [readonly]="!item.isEditing"
                     [(ngModel)]="item.thuWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
-                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                <td *ngIf="!item.isEditing" style="text-align: center;"><input style="width: 50px; text-align:center;" [readonly]="!item.isEditing"
                     [(ngModel)]="item.friWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
-                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                <td *ngIf="!item.isEditing" style="text-align: center;"><input style="width: 50px; text-align:center;" [readonly]="!item.isEditing"
                     [(ngModel)]="item.satWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
-                <td *ngIf="!item.isEditing"><input style="width: 50px;" [readonly]="!item.isEditing"
+                <td *ngIf="!item.isEditing" style="text-align: center;"><input style="width: 50px; text-align:center;" [readonly]="!item.isEditing"
                     [(ngModel)]="item.sunWorkingTime" placeholder="00:00" [textMask]="mask1"></td>
 
 
-                <td *ngIf="item.isEditing"><input name="monWorkingTime" style="width: 50px;" [(ngModel)]="item.monWorkingTime"
+                <td *ngIf="item.isEditing" style="text-align: center;"><input name="monWorkingTime" style="width: 50px; text-align:center;" [(ngModel)]="item.monWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input name="tueWorkingTime" style="width: 50px;" [(ngModel)]="item.tueWorkingTime"
+                <td *ngIf="item.isEditing" style="text-align: center;"><input name="tueWorkingTime" style="width: 50px; text-align:center;" [(ngModel)]="item.tueWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input name="wedWorkingTime" style="width: 50px;" [(ngModel)]="item.wedWorkingTime"
+                <td *ngIf="item.isEditing" style="text-align: center;"><input name="wedWorkingTime" style="width: 50px; text-align:center;" [(ngModel)]="item.wedWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input name="thuWorkingTime" style="width: 50px;" [(ngModel)]="item.thuWorkingTime"
+                <td *ngIf="item.isEditing" style="text-align: center;"><input name="thuWorkingTime" style="width: 50px; text-align:center;" [(ngModel)]="item.thuWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input name="friWorkingTime" style="width: 50px;" [(ngModel)]="item.friWorkingTime"
+                <td *ngIf="item.isEditing" style="text-align: center;"><input name="friWorkingTime" style="width: 50px; text-align:center;" [(ngModel)]="item.friWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input name="satWorkingTime" style="width: 50px;" [(ngModel)]="item.satWorkingTime"
+                <td *ngIf="item.isEditing" style="text-align: center;"><input name="satWorkingTime" style="width: 50px; text-align:center;" [(ngModel)]="item.satWorkingTime"
                     [textMask]="mask2"></td>
-                <td *ngIf="item.isEditing"><input name="sunWorkingTime" style="width: 50px;" [(ngModel)]="item.sunWorkingTime"
+                <td *ngIf="item.isEditing" style="text-align: center;"><input name="sunWorkingTime" style="width: 50px; text-align:center;" [(ngModel)]="item.sunWorkingTime"
                     [textMask]="mask2"></td>
 
-                <td>{{ convertMinuteToHour(item.totalTime) }}</td>
+                <td style="text-align: center;">{{ convertMinuteToHour(item.totalTime) }}</td>
 
                 <td>
                   <button name="saveWeek" mat-flat-button *ngIf="item.isAddNew" (click)="SaveList(item)" color="primary" [disabled]="isSaving">
@@ -309,7 +309,7 @@
                 >
                   <mat-icon>keyboard_arrow_left</mat-icon>
                 </mat-button-toggle>
-  
+
                 <mat-button-toggle
                   class="nextBtn"
                   name="nextBtn"
@@ -328,7 +328,7 @@
               >
                 Today
               </button>
-            </div>          
+            </div>
           </div>
         </div>
       </div>
@@ -409,7 +409,7 @@
                     >
                       <mat-icon>edit</mat-icon>
                     </button>
-                    
+
                     <button
                       *ngIf="
                         item.status != APP_CONSTANT.TimesheetStatus.Approve &&
@@ -516,7 +516,7 @@
                       <ng-container *ngSwitchCase="'Monday'">
                         <div *ngIf="!item.isEditing">
                           <input
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [readonly]="!item.isEditing"
                             [(ngModel)]="item.monWorkingTime"
                             placeholder="00:00"
@@ -526,7 +526,7 @@
                         <div *ngIf="item.isEditing">
                           <input
                             name="monWorkingTime"
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [(ngModel)]="item.monWorkingTime"
                             [textMask]="mask2"
                           />
@@ -536,7 +536,7 @@
                       <ng-container *ngSwitchCase="'Tuesday'">
                         <div *ngIf="!item.isEditing">
                           <input
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [readonly]="!item.isEditing"
                             [(ngModel)]="item.tueWorkingTime"
                             placeholder="00:00"
@@ -546,7 +546,7 @@
                         <div *ngIf="item.isEditing">
                           <input
                             name="tueWorkingTime"
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [(ngModel)]="item.tueWorkingTime"
                             [textMask]="mask2"
                           />
@@ -556,7 +556,7 @@
                       <ng-container *ngSwitchCase="'Wednesday'">
                         <div *ngIf="!item.isEditing">
                           <input
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [readonly]="!item.isEditing"
                             [(ngModel)]="item.wedWorkingTime"
                             placeholder="00:00"
@@ -566,7 +566,7 @@
                         <div *ngIf="item.isEditing">
                           <input
                             name="wedWorkingTime"
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [(ngModel)]="item.wedWorkingTime"
                             [textMask]="mask2"
                           />
@@ -576,7 +576,7 @@
                       <ng-container *ngSwitchCase="'Thursday'">
                         <div *ngIf="!item.isEditing">
                           <input
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [readonly]="!item.isEditing"
                             [(ngModel)]="item.thuWorkingTime"
                             placeholder="00:00"
@@ -586,7 +586,7 @@
                         <div *ngIf="item.isEditing">
                           <input
                             name="thuWorkingTime"
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [(ngModel)]="item.thuWorkingTime"
                             [textMask]="mask2"
                           />
@@ -596,7 +596,7 @@
                       <ng-container *ngSwitchCase="'Friday'">
                         <div *ngIf="!item.isEditing">
                           <input
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [readonly]="!item.isEditing"
                             [(ngModel)]="item.friWorkingTime"
                             placeholder="00:00"
@@ -606,7 +606,7 @@
                         <div *ngIf="item.isEditing">
                           <input
                             name="friWorkingTime"
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [(ngModel)]="item.friWorkingTime"
                             [textMask]="mask2"
                           />
@@ -616,7 +616,7 @@
                       <ng-container *ngSwitchCase="'Saturday'">
                         <div *ngIf="!item.isEditing">
                           <input
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [readonly]="!item.isEditing"
                             [(ngModel)]="item.satWorkingTime"
                             placeholder="00:00"
@@ -626,7 +626,7 @@
                         <div *ngIf="item.isEditing">
                           <input
                             name="satWorkingTime"
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [(ngModel)]="item.satWorkingTime"
                             [textMask]="mask2"
                           />
@@ -636,7 +636,7 @@
                       <ng-container *ngSwitchCase="'Sunday'">
                         <div *ngIf="!item.isEditing">
                           <input
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [readonly]="!item.isEditing"
                             [(ngModel)]="item.sunWorkingTime"
                             placeholder="00:00"
@@ -646,7 +646,7 @@
                         <div *ngIf="item.isEditing">
                           <input
                             name="sunWorkingTime"
-                            style="width: 50px"
+                            style="width: 50px; text-align: center"
                             [(ngModel)]="item.sunWorkingTime"
                             [textMask]="mask2"
                           />

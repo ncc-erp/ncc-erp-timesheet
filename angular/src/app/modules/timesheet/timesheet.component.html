@@ -67,7 +67,7 @@
         </ul>
       </div>
       <div class="body table-responsive" style="border: 0;" [busy]="isLoading">
-        <date-selector name="customTimeSelect" [type]="APP_CONSTANT.TypeViewHomePage.CustomTime"
+        <date-selector name="customTimeSelect" [type]="APP_CONSTANT.TypeViewHomePage.Month"
           [defaultFromDate] = "defaultFromDate"
           [defaultToDate] = "defaultToDate"
           (onDateSelectorChange)="handleDateSelectorChange($event)">
