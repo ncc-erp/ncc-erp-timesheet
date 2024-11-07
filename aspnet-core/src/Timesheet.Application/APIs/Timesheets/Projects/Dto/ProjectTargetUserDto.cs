@@ -15,5 +15,6 @@ namespace Timesheet.Timesheets.Projects.Dto
     {
         public long UserId { get; set; }
         public string RoleName { get; set; }
+        public bool IsUserActive { get; set; }
     }
 }

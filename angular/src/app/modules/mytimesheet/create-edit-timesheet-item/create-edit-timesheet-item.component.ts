@@ -99,7 +99,7 @@ export class CreateEditTimesheetItemComponent extends AppComponentBase implement
       this.timesheetItemService.getById(myTimesheetID).subscribe(res => {
         this.myTimesheet = res.result;
         this.strWorkingTime = convertMinuteToFloat(this.myTimesheet.workingTime);
-        this.strTargetUserWorkingTime = convertMinuteToFloat(this.myTimesheet.targetUserWorkingTime);        
+        this.strTargetUserWorkingTime = convertMinuteToFloat(this.myTimesheet.targetUserWorkingTime);
         this.onEditTimesheet();
         this.isLoading = false;
       });
@@ -157,6 +157,10 @@ export class CreateEditTimesheetItemComponent extends AppComponentBase implement
       }
     }
   }
+
+  getActiveTargetUsers() {
+  return this.selectedProject.targetUsers.filter(user => user.isUserActive);
+}
 
   isSpecialTask(){
     return this.myTimesheet.projectTaskId == this.data.specialProjectTask.projectTaskId;
@@ -266,7 +270,7 @@ export class CreateEditTimesheetItemComponent extends AppComponentBase implement
     }
 
     this.isLoading = true;
-    this.myTimesheet.projectId = this.selectedProject.id; 
+    this.myTimesheet.projectId = this.selectedProject.id;
     this.myTimesheet.dateAt = this.data.dateAt
     if(this.myTimesheet.typeOfWork == APP_CONSTANT.EnumTypeOfWork.Overtime){
       this.doSaveAndReset();
@@ -313,7 +317,7 @@ export class CreateEditTimesheetItemComponent extends AppComponentBase implement
       this.myTimesheet.isCharged = false;
     }
     this.isLoading = true;
-    this.myTimesheet.projectId = this.selectedProject.id; 
+    this.myTimesheet.projectId = this.selectedProject.id;
     this.myTimesheet.dateAt = this.data.dateAt
     if(this.myTimesheet.typeOfWork == APP_CONSTANT.EnumTypeOfWork.Overtime){
       this.doSave();

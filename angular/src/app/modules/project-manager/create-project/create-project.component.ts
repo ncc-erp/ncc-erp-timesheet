@@ -141,7 +141,7 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
   }
   showTeamMember(){
     this.isShowTeamMember = !this.isShowTeamMember;
-  } 
+  }
 
   getTasks() {
     this.taskService.getAll().subscribe(res => {
@@ -189,7 +189,7 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
         this.availableTargetUsers = allMembers.filter(member => !this.project.projectTargetUsers.some(s => member.id === s.userId));
       } else
         this.availableTargetUsers = allMembers;
-    
+
       // tslint:disable-next-line: max-line-length
       if (this.project.users && this.project.users.length > 0) {
         this.project.users.map(s => {
@@ -215,7 +215,7 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
       }
       if (this.project.projectTargetUsers && this.project.projectTargetUsers.length > 0) {
         this.project.projectTargetUsers.map(s => {
-          const item = { userId: s.userId, roleName: s.roleName } as DisplayProjectTargetUserDto;
+          const item = { userId: s.userId, roleName: s.roleName, isUserActive: s.isUserActive} as DisplayProjectTargetUserDto;
           const user = allMembers.find(u => u.id === item.userId);
           if (user) {
             item.type = user.type;
@@ -232,7 +232,6 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
           this.projectTargetUsers.push(item);
         });
       }
-
       this.displayActiveMembers = this.activeMembers.filter(x => true); // initial value of displayActive... list (call only 1 time when OnInint)
       this.displayAvailableTargetUsers = this.availableTargetUsers.filter(x => true); // initial value of displayAvailable... list (call only 1 time when OnInint)
 
@@ -412,6 +411,7 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
       this.project.projectTargetUsers = this.projectTargetUsers.map((targetUser) => ({
         userId: targetUser.userId,
         roleName: targetUser.roleName,
+        isUserActive: targetUser.isUserActive,
       }));
     } else this.project.projectTargetUsers = [];
     if (_.isEmpty(this.projectTasks)) {
@@ -470,7 +470,7 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
 
   searchTargetUser() {
       this.displayAvailableTargetUsers = this.availableTargetUsers.filter(
-        targetUser => targetUser.name.search(new RegExp(this.searchTargetUserText, "ig")) > -1 
+        targetUser => targetUser.name.search(new RegExp(this.searchTargetUserText, "ig")) > -1
         || targetUser.emailAddress.toLowerCase().includes(this.searchTargetUserText.toLowerCase()));
   }
 
@@ -486,7 +486,7 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
       type: mem.type,
       emailAddress: mem.emailAddress
     } as DisplayProjectTargetUserDto
-    this.projectTargetUsers.push(ptuser);    
+    this.projectTargetUsers.push(ptuser);
       let i = this.availableTargetUsers.indexOf(mem);
     this.availableTargetUsers.splice(i, 1);;
     this.displayAvailableTargetUsers.splice(index, 1);

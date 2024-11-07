@@ -53,7 +53,8 @@ export interface UserProjectDto {
 export interface ProjectTargetUsersDto {
     userId: number,
     roleName: string,
-    id?: number
+    id?: number,
+    isUserActive: boolean
 }
 
 export class BaseUserDto {
@@ -89,6 +90,7 @@ export class ProjectUserDto extends BaseUserDto {
 export class DisplayProjectTargetUserDto extends BaseUserDto {
     userId: number;
     roleName: string;
+    isUserActive: boolean;
 }
 
 export class ProjectTaskDto {

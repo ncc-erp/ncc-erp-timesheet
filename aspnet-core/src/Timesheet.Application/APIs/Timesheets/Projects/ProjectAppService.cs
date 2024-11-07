@@ -140,7 +140,8 @@ namespace Timesheet.Timesheets.Projects
                         {
                             ProjectId = input.Id,
                             UserId = pTargetUserDto.UserId,
-                            RoleName = pTargetUserDto.RoleName
+                            RoleName = pTargetUserDto.RoleName,
+                            IsActive = pTargetUserDto.IsUserActive
                         };
                         await WorkScope.GetRepo<ProjectTargetUser, long>().InsertAsync(projectTargetUser);
                     }
@@ -317,12 +318,26 @@ namespace Timesheet.Timesheets.Projects
 
                     foreach (var item in updateProjectTargetUsers)
                     {
+                        bool hasChanges = false;
+
                         if (item.Dto.RoleName != item.ProjectTargetUser.RoleName)
                         {
                             item.ProjectTargetUser.RoleName = item.Dto.RoleName;
+                            hasChanges = true;
+                        }
+
+                        if (item.ProjectTargetUser.IsActive != item.Dto.IsUserActive)
+                        {
+                            item.ProjectTargetUser.IsActive = item.Dto.IsUserActive;
+                            hasChanges = true;
+                        }
+
+                        if (hasChanges)
+                        {
                             await WorkScope.UpdateAsync<ProjectTargetUser>(item.ProjectTargetUser);
                         }
                     }
+
                 }
             }
             return input;
@@ -518,7 +533,8 @@ namespace Timesheet.Timesheets.Projects
                                   {
                                       Id = s.Id,
                                       RoleName = s.RoleName,
-                                      UserId = s.UserId
+                                      UserId = s.UserId,
+                                      IsUserActive = s.IsActive,
                                   }).ToList()
                               }
                               ).FirstOrDefault();
@@ -601,7 +617,7 @@ namespace Timesheet.Timesheets.Projects
                           join ptu in
                                  from ptuu in WorkScope.GetAll<ProjectTargetUser>()
                                  join u in WorkScope.GetAll<User>() on ptuu.UserId equals u.Id
-                                 select new { ProjectTargetUserId = ptuu.Id, ptuu.ProjectId, UserName = u.FullName }
+                                 select new { ProjectTargetUserId = ptuu.Id, ptuu.ProjectId, UserName = ptuu.RoleName, IsUserActive = ptuu.IsActive }
                           on p.Id equals ptu.ProjectId into ptus
 
                           join pu in
@@ -631,7 +647,9 @@ namespace Timesheet.Timesheets.Projects
                               TargetUsers = ptus.Select(s => new PTargetUserDto
                               {
                                   ProjectTargetUserId = s.ProjectTargetUserId,
-                                  UserName = s.UserName
+                                  UserName = s.UserName,
+                                  IsUserActive = s.IsUserActive,
+
                               }).ToList()
                           }).ToListAsync();
         }

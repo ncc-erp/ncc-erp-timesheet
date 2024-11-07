@@ -13,6 +13,7 @@ namespace Ncc.Entities
         [ForeignKey(nameof(UserId))]
         public User User { get; set; }
         public long UserId { get; set; }
+        public bool IsActive { get; set; }
 
         [ForeignKey(nameof(ProjectId))]
         public Project Project { get; set; }
