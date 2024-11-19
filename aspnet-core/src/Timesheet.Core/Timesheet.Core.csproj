@@ -39,6 +39,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.2.0" />
     <PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="3.3.1" />
     <PackageReference Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1003" />
+    <PackageReference Include="Minio" Version="3.1.13" />
     <PackageReference Include="Sieve" Version="2.3.1" />
   </ItemGroup>
   <ItemGroup>

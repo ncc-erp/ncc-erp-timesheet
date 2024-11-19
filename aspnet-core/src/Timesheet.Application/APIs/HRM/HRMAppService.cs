@@ -385,6 +385,7 @@ namespace Timesheet.APIs.HRM
 
             //user.BranchOld = input.BranchId;
             if (Constants.ConstantUploadFile.Provider == Constants.ConstantUploadFile.AMAZONE_S3
+                || Constants.ConstantUploadFile.Provider == Constants.ConstantUploadFile.MINIO
                 && !string.IsNullOrEmpty(input.AvatarPath))
             {
                 user.AvatarPath = input.AvatarPath;

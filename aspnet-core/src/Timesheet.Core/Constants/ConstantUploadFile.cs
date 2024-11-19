@@ -12,6 +12,9 @@ namespace Timesheet.Constants
 
 
         public static readonly string AMAZONE_S3 = "AWS";
+
+        public static readonly string MINIO = "MinIO";
+
         public static readonly string INTERNAL = "Internal";
 
         public static string AvatarFolder { get; set; }

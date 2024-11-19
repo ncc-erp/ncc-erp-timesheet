@@ -21,6 +21,10 @@ namespace Timesheet.Uitls
             {
                 return Constants.ConstantAmazonS3.CloudFront.TrimEnd('/') + "/" + filePath;
             }
+            else if (Constants.ConstantUploadFile.Provider == Constants.ConstantUploadFile.MINIO)
+            {
+                return Constants.ConstantMinIO.CloudFront.TrimEnd('/') + "/" + filePath;
+            }
             else
             {
                 return Constants.ConstantInternalUploadFile.RootUrl.TrimEnd('/') + "/" + filePath;

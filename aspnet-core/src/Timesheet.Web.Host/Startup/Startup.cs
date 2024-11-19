@@ -38,6 +38,9 @@ using Abp.Runtime.Security;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http.Connections;
 using Timesheet.Services.Mezon;
+using Minio;
+using Minio.DataModel;
+using Minio.Exceptions;
 
 namespace Ncc.Web.Host.Startup
 {
@@ -196,15 +199,40 @@ namespace Ncc.Web.Host.Startup
             sharedFile.RegisterProfile(profile);
         }
 
+       private void ConfigureMinio(IServiceCollection services)
+        {
+            var minioConfig = _appConfiguration.GetSection("Minio");
+            var minioEndpoint = minioConfig.GetValue<string>("Endpoint");
+            var minioAccessKey = minioConfig.GetValue<string>("AccessKeyId");
+            var minioSecretKey = minioConfig.GetValue<string>("SecretKeyId");
+            var minioBucketName = minioConfig.GetValue<string>("BucketName");
+            var minioPrefix = minioConfig.GetValue<string>("Prefix");
+            var minioCloudFront = minioConfig.GetValue<string>("CloudFront");
+            var useSSL = minioConfig.GetValue<bool>("Secure");
+
+            var minioClient = new MinioClient(minioEndpoint, minioAccessKey, minioSecretKey);
+            if (useSSL)
+            {
+                minioClient = minioClient.WithSSL();
+            }
+            services.AddSingleton(minioClient);
+        }
         private void LoadUploadFileConfig()
         {
-            ConstantAmazonS3.Profile = _appConfiguration.GetValue<string>("AWS:Profile");
-            ConstantAmazonS3.AccessKeyId = _appConfiguration.GetValue<string>("AWS:AccessKeyId");
-            ConstantAmazonS3.SecretKeyId = _appConfiguration.GetValue<string>("AWS:SecretKeyId");
-            ConstantAmazonS3.Region = _appConfiguration.GetValue<string>("AWS:Region");
-            ConstantAmazonS3.BucketName = _appConfiguration.GetValue<string>("AWS:BucketName");
-            ConstantAmazonS3.Prefix = _appConfiguration.GetValue<string>("AWS:Prefix");
-            ConstantAmazonS3.CloudFront = _appConfiguration.GetValue<string>("AWS:CloudFront");
+            // MinIO Configuration
+            ConstantMinIO.Endpoint = _appConfiguration.GetValue<string>("Minio:Endpoint");
+            ConstantMinIO.AccessKeyId = _appConfiguration.GetValue<string>("Minio:AccessKeyId");
+            ConstantMinIO.SecretKeyId = _appConfiguration.GetValue<string>("Minio:SecretKeyId");
+            ConstantMinIO.BucketName = _appConfiguration.GetValue<string>("Minio:BucketName");
+            ConstantMinIO.Prefix = _appConfiguration.GetValue<string>("Minio:Prefix");
+            ConstantMinIO.CloudFront = _appConfiguration.GetValue<string>("Minio:CloudFront");
+            // ConstantAmazonS3.Profile = _appConfiguration.GetValue<string>("AWS:Profile");
+            // ConstantAmazonS3.AccessKeyId = _appConfiguration.GetValue<string>("AWS:AccessKeyId");
+            // ConstantAmazonS3.SecretKeyId = _appConfiguration.GetValue<string>("AWS:SecretKeyId");
+            // ConstantAmazonS3.Region = _appConfiguration.GetValue<string>("AWS:Region");
+            // ConstantAmazonS3.BucketName = _appConfiguration.GetValue<string>("AWS:BucketName");
+            // ConstantAmazonS3.Prefix = _appConfiguration.GetValue<string>("AWS:Prefix");
+            // ConstantAmazonS3.CloudFront = _appConfiguration.GetValue<string>("AWS:CloudFront");
 
 
             ConstantUploadFile.AvatarFolder = _appConfiguration.GetValue<string>("UploadFile:AvatarFolder");
@@ -231,6 +259,11 @@ namespace Ncc.Web.Host.Startup
                 CreateAWSCredentialProfile();
                 services.AddAWSService<IAmazonS3>();
                 services.AddTransient<IUploadFileService, AmazonS3Service>();
+            }
+            else if (ConstantUploadFile.Provider == ConstantUploadFile.MINIO)
+            {
+                ConfigureMinio(services);
+                services.AddTransient<IUploadFileService, MinioService>();
             }
             else
             {
