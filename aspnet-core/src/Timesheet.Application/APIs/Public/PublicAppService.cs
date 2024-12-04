@@ -1076,5 +1076,14 @@ namespace Timesheet.APIs.Public
             }
             return resultList;
         }
+
+        public async Task<Boolean> CheckUserIsCheckIn(string emailAddress, DateTime? date)
+        {
+            DateTime dateAt = date.HasValue ? date.Value.Date : DateTimeUtils.GetNow().Date;
+            var status = await queryAbsenceDay(dateAt).Where(s => s.EmailAddress == emailAddress).ToListAsync();
+            var RemoteOrOnsite = status.Where(s => s.RequestType == RequestType.Remote || s.RequestType == RequestType.Onsite)
+                                    .Where(s => s.Status == RequestStatus.Approved).FirstOrDefault();
+            return RemoteOrOnsite == null ? false : true;
+        }
     }
 }
