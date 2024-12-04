@@ -431,7 +431,7 @@ namespace Timesheet.APIs.Info
         }
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
-        public async System.Threading.Tasks.Task UnlockToLogTimesheet(string emailAddress)
+        public async System.Threading.Tasks.Task UnlockToLogTimesheet(string emailAddress, string client)
         {
             if (!checkSecurityCode())
             {
@@ -457,6 +457,19 @@ namespace Timesheet.APIs.Info
 
             //var listUnlockWeekEmployee = await getMyTimesheetLockedAsync(userId.Value);
 
+            if (!ClientRequest.MEZON.ToString().Equals(client))
+            {
+                await UnlockTimeSheetIms(userId.Value);
+            }
+            await WorkScope.InsertAsync<UnlockTimesheet>(new UnlockTimesheet
+            {
+                UserId = userId.Value,
+                Type = LockUnlockTimesheetType.MyTimesheet
+            });
+        }
+
+        public async System.Threading.Tasks.Task UnlockTimeSheetIms(long userId)
+        {
             var timesLockedEmployee = 1;
 
             if (timesLockedEmployee > 0)
@@ -478,24 +491,18 @@ namespace Timesheet.APIs.Info
                 }
                 await WorkScope.InsertAsync<UserUnlockIms>(new UserUnlockIms
                 {
-                    UserId = userId.Value,
+                    UserId = userId,
                     Times = timesLockedEmployee,
                     IsPayment = false,
                     Type = LockUnlockTimesheetType.MyTimesheet,
                     Amount = amount
                 });
-
-                //Add unlock user
-                await WorkScope.InsertAsync<UnlockTimesheet>(new UnlockTimesheet
-                {
-                    UserId = userId.Value,
-                    Type = LockUnlockTimesheetType.MyTimesheet
-                });
             }
         }
+
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
-        public async System.Threading.Tasks.Task UnlockToApproveTimesheet(string emailAddress)
+        public async System.Threading.Tasks.Task UnlockToApproveTimesheet(string emailAddress, string client)
         {
             if (!checkSecurityCode())
             {
@@ -519,35 +526,40 @@ namespace Timesheet.APIs.Info
             }
             else
             {
-                await UnlockToApproveTimesheet(userId.Value, 1);
+                await UnlockToApproveTimesheet(userId.Value, 1, client);
             }
         }
-        private async System.Threading.Tasks.Task UnlockToApproveTimesheet(long userId, int timesLockedPM)
+
+        private async System.Threading.Tasks.Task UnlockToApproveTimesheet(long userId, int timesLockedPM, string client)
         {
-            float fMoneyPMUnlockTimeSheet = getMoneyPMUnlockTimeSheet();           
-            var amount = timesLockedPM * fMoneyPMUnlockTimeSheet;
-            var fund = await WorkScope.GetAll<Fund>().Where(s => s.Status == FundStatus.Proceeds).FirstOrDefaultAsync();
-            if (fund == null)
+            if (!ClientRequest.MEZON.ToString().Equals(client))
             {
-                await WorkScope.InsertAsync<Fund>(new Fund
+                float fMoneyPMUnlockTimeSheet = getMoneyPMUnlockTimeSheet();
+                var amount = timesLockedPM * fMoneyPMUnlockTimeSheet;
+                var fund = await WorkScope.GetAll<Fund>().Where(s => s.Status == FundStatus.Proceeds).FirstOrDefaultAsync();
+                if (fund == null)
                 {
-                    Amount = amount,
-                    Status = FundStatus.Proceeds
+                    await WorkScope.InsertAsync<Fund>(new Fund
+                    {
+                        Amount = amount,
+                        Status = FundStatus.Proceeds
+                    });
+                }
+                else
+                {
+                    fund.Amount += amount;
+                    await WorkScope.UpdateAsync(fund);
+                }
+                await WorkScope.InsertAsync<UserUnlockIms>(new UserUnlockIms
+                {
+                    UserId = userId,
+                    Times = timesLockedPM,
+                    IsPayment = false,
+                    Type = LockUnlockTimesheetType.ApproveRejectTimesheet,
+                    Amount = amount
                 });
             }
-            else
-            {
-                fund.Amount += amount;
-                await WorkScope.UpdateAsync(fund);
-            }
-            await WorkScope.InsertAsync<UserUnlockIms>(new UserUnlockIms
-            {
-                UserId = userId,
-                Times = timesLockedPM,
-                IsPayment = false,
-                Type = LockUnlockTimesheetType.ApproveRejectTimesheet,
-                Amount = amount
-            });
+            
             //Add unlock pm
             await WorkScope.InsertAsync<UnlockTimesheet>(new UnlockTimesheet
             {
@@ -556,6 +568,7 @@ namespace Timesheet.APIs.Info
             }); 
       
         }
+
         private bool IsAlreadyUnlockToLog(long userId)
         {
             return WorkScope.GetAll<UnlockTimesheet>()

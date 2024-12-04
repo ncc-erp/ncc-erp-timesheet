@@ -314,5 +314,9 @@ namespace Ncc.Entities.Enum
             NUMBER = 1,
             LEVEL = 2,
         }
+        public enum ClientRequest
+        {
+            MEZON = 1,
+        }
     }
 }
