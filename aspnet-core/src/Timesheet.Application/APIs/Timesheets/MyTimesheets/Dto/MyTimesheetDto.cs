@@ -22,5 +22,6 @@ namespace Timesheet.Timesheets.MyTimesheets.Dto
         public long? ProjectTargetUserId { get; set; }
         public bool IsTemp { get; set; }
         public long UserId { get; set; }
+        public string EmailAddress { get; set; }
     }
 }
