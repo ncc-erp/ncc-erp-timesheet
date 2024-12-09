@@ -19,6 +19,7 @@ namespace Timesheet.APIs.MyAbsenceDays.Dto
         public string Reason { get; set; }
         public RequestType Type { get; set; }
         public List<AbsenceDayDetailDto> Absences { get; set; }
+        public string EmailAddress { get; set; }
 
         public bool IsValidDiMuonVeSom()
         {

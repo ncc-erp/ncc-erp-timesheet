@@ -297,10 +297,10 @@ namespace Timesheet.Timesheets.MyTimesheets
         }
 
 
-        private void CheckValidCreateUpdateTimesheet(MyTimesheetDto input, bool isUnlocked)
+        public void CheckValidCreateUpdateTimesheet(MyTimesheetDto input, bool isUnlocked)
         {
 
-            var firstDateCanUnlock = GetFirstDateToLockTS(AbpSession.UserId.Value, isUnlocked).Result;
+            var firstDateCanUnlock = GetFirstDateToLockTS(input.UserId, isUnlocked).Result;
             if (input.DateAt.Date < firstDateCanUnlock)
             {
                 throw new UserFriendlyException("Timesheet was locked! You can log timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
@@ -327,12 +327,12 @@ namespace Timesheet.Timesheets.MyTimesheets
             return startDateToCheck;
         }
 
-        private bool IsUserUnlockedToLogTS(long userId)
+        public bool IsUserUnlockedToLogTS(long userId)
         {
             return WorkScope.GetAll<UnlockTimesheet>()
                 .Any(s => s.UserId == userId && s.Type == LockUnlockTimesheetType.MyTimesheet);
         }
-        private async System.Threading.Tasks.Task validLogTimsheetInFuture(MyTimesheetDto input)
+        public async System.Threading.Tasks.Task validLogTimsheetInFuture(MyTimesheetDto input)
         {
             var canLogTimesheetInFuture = await SettingManager.GetSettingValueAsync(AppSettingNames.LogTimesheetInFuture);
             var dayAllow = await SettingManager.GetSettingValueAsync(AppSettingNames.DayAllowLogTimesheetInFuture);
@@ -397,10 +397,8 @@ namespace Timesheet.Timesheets.MyTimesheets
                 throw new UserFriendlyException(String.Format("You requested off {0} hour. So can't log total normal working > {1} on {2}", offHour, maxHour - offHour, dateAt.ToString("yyyy-MM-dd")));
             }
         }
-        private void validTotalLogTimesheet(DateTime dateAt, int workingTime, int maxHour)
+        public void validTotalLogTimesheet(DateTime dateAt, int workingTime, int maxHour, long userId)
         {
-            var userId = AbpSession.UserId.Value;
-
             double sumWorkingTimeOlds = WorkScope.GetAll<MyTimesheet>()
                .Where(s => s.UserId == userId && s.DateAt.Date == dateAt.Date)
                .Sum(s => s.WorkingTime);
@@ -412,7 +410,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                 throw new UserFriendlyException(string.Format($"total working time on {dateAt.ToString("yyyy-MM-dd")} can't  > {maxHour} hours"));
             }
         }
-        private async System.Threading.Tasks.Task validLogOTTimesheet(DateTime dateAt, int workingTime, TypeOfWork typeOfWork)
+        public async System.Threading.Tasks.Task validLogOTTimesheet(DateTime dateAt, int workingTime, TypeOfWork typeOfWork, long userId)
         {
             if (typeOfWork == TypeOfWork.NormalWorkingHours)
             {
@@ -422,7 +420,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             {
                 return;
             }
-            var normalWorkingMinute = await sumNormalWorkingMinute(AbpSession.UserId.Value, dateAt);
+            var normalWorkingMinute = await sumNormalWorkingMinute(userId, dateAt);
 
             var OTMinute = workingTime - (240 - normalWorkingMinute);
 
@@ -449,6 +447,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                 throw new UserFriendlyException("You can't log this time sheet with working time < 0");
 
             var userId = AbpSession.UserId.Value;
+            input.UserId = userId;
 
             //var isUnlock = await validUnLockTimsheet(input);
             var isUnlocked = IsUserUnlockedToLogTS(userId);
@@ -462,10 +461,10 @@ namespace Timesheet.Timesheets.MyTimesheets
                 //await validLogTimesheetOver8h(input.DateAt, input.WorkingTime, maxHourCanLog);
                 //await validLogTimesheetOver8h(input.DateAt, input.WorkingTime)
             }
-            validTotalLogTimesheet(input.DateAt, input.WorkingTime, getMaxHourCanLog());
+            validTotalLogTimesheet(input.DateAt, input.WorkingTime, getMaxHourCanLog(), userId);
 
 
-            await validLogOTTimesheet(input.DateAt, input.WorkingTime, input.TypeOfWork);
+            await validLogOTTimesheet(input.DateAt, input.WorkingTime, input.TypeOfWork, userId);
 
             bool IsTemp = UserIsTempInProject(userId, input.ProjectTaskId);
 
@@ -483,7 +482,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             return input;
         }
 
-        private bool UserIsTempInProject(long userId, long projectTaskId)
+        public bool UserIsTempInProject(long userId, long projectTaskId)
         {
             var projectId = WorkScope.GetAll<ProjectTask>()
                 .Where(s => s.Id == projectTaskId)
@@ -526,7 +525,9 @@ namespace Timesheet.Timesheets.MyTimesheets
                 throw new UserFriendlyException("Invalid working time. You can't log this Timesheet.");
 
             //var isUnlock = await validUnLockTimsheet(input);
-            var isUnlocked = IsUserUnlockedToLogTS(AbpSession.UserId.Value);
+            var userId = AbpSession.UserId.Value;
+            input.UserId = userId;
+            var isUnlocked = IsUserUnlockedToLogTS(userId);
             DateTime lockDate = _commonService.getlockDateUser();
 
             if (!isUnlocked && input.DateAt.Date < lockDate)
@@ -540,7 +541,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             if (item == null)
                 throw new UserFriendlyException(string.Format("Timesheet Id {0} is not exist", input.Id));
 
-            if (AbpSession.UserId.Value != item.UserId)
+            if (userId != item.UserId)
                 throw new UserFriendlyException(string.Format("You can't update other people's Timesheet"));
 
             if (item.Status == TimesheetStatus.Approve)
@@ -558,7 +559,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             {
                 await validUpdateNormalToOT(item, input);
             }
-            validTotalLogTimesheet(input.DateAt, input.WorkingTime - item.WorkingTime, getMaxHourCanLog());
+            validTotalLogTimesheet(input.DateAt, input.WorkingTime - item.WorkingTime, getMaxHourCanLog(), userId);
 
             var status = item.Status;
             input.IsTemp = item.IsTemp;
@@ -857,7 +858,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             {
                 await validUpdateNormalToOT(mts, input);
             }
-            validTotalLogTimesheet(input.DateAt, input.WorkingTime - mts.WorkingTime, getMaxHourCanLog());
+            validTotalLogTimesheet(input.DateAt, input.WorkingTime - mts.WorkingTime, getMaxHourCanLog(), AbpSession.UserId.Value);
 
             ObjectMapper.Map(input, mts);
             mts.Status = TimesheetStatus.Pending;
@@ -868,7 +869,7 @@ namespace Timesheet.Timesheets.MyTimesheets
 
             return input;
         }
-        private int getMaxHourCanLog()
+        public int getMaxHourCanLog()
         {
             return int.Parse(SettingManager.GetSettingValue(AppSettingNames.MaxTimeSheetHourPerDay));
         }
