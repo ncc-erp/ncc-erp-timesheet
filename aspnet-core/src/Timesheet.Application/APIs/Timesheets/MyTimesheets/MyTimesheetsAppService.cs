@@ -586,7 +586,22 @@ namespace Timesheet.Timesheets.MyTimesheets
         public async Task<MyTimesheetDto> Get(long id)
         {
             var item = await WorkScope.GetAsync<MyTimesheet>(id);
-            return ObjectMapper.Map<MyTimesheetDto>(item);
+            return new MyTimesheetDto
+            {
+                Id = item.Id,
+                ProjectTaskId = item.ProjectTaskId,
+                Note = item.Note,
+                WorkingTime = item.WorkingTime,
+                TargetUserWorkingTime = item.TargetUserWorkingTime,
+                TypeOfWork = item.TypeOfWork,
+                IsCharged = item.IsCharged,
+                DateAt = item.DateAt,
+                Status = item.Status,
+                ProjectTargetUserId = item.ProjectTargetUserId,
+                IsTemp = item.IsTemp,
+                UserId = item.UserId,
+                EmailAddress = item.User?.EmailAddress ?? string.Empty 
+            };
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimesheet_Submit)]
