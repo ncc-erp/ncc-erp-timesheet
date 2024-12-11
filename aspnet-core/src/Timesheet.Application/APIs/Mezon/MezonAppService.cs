@@ -200,6 +200,18 @@ namespace Timesheet.APIs.Mezon
         {
             return await WorkScope.GetAll<DayOffType>().ProjectTo<AbsenceTypeDto>().ToListAsync();
         }
+
+        [HttpPost]
+        [System.Security.SuppressUnmanagedCodeSecurity]
+        public async System.Threading.Tasks.Task<List<MyTimesheetDto>> SaveListTimeSheet(List<MyTimesheetDto> myTimesheets)
+        {
+            foreach (var item in myTimesheets)
+            {
+                await CreateTimeSheet(item);
+            }
+
+            return myTimesheets;
+        }
     }
 }
 
