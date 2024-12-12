@@ -220,6 +220,7 @@ namespace Timesheet.APIs.Mezon
         }
 
         [HttpPost]
+        [System.Security.SuppressUnmanagedCodeSecurity]
         public async System.Threading.Tasks.Task ApproveRequestDay(RequestDayMezon requestDayDto)
         {
             string emailPm = requestDayDto.Email;
@@ -273,6 +274,7 @@ namespace Timesheet.APIs.Mezon
         }
 
         [HttpPost]
+        [System.Security.SuppressUnmanagedCodeSecurity]
         public async System.Threading.Tasks.Task RejectRequestDay(RequestDayMezon requestDayDto)
         {
             string emailPm = requestDayDto.Email;
