@@ -30,6 +30,10 @@ using Timesheet.Timesheets.MyTimesheets;
 using Abp.Authorization;
 using AutoMapper.QueryableExtensions;
 using Timesheet.APIs.DayOffs.Dto;
+using Timesheet.APIs.Mezon.Dto;
+using Timesheet.Services.W2;
+using Timesheet.APIs.RequestDays.Dto;
+using Microsoft.Office.Interop.Word;
 
 namespace Timesheet.APIs.Mezon
 {
@@ -42,10 +46,11 @@ namespace Timesheet.APIs.Mezon
         private readonly IUserServices _userService;
         private readonly RequestDayAppService _requestDayAppService;
         private readonly MyTimesheetsAppService _myTimesheetsAppService;
+        private readonly IW2Service _w2Service;
         public MezonAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
             IWorkScope workScope, IApproveRequestOffServices approveRequestOffServices,
             MezonService mezonService, IUserServices userService, RequestDayAppService requestDayAppService,
-            MyTimesheetsAppService myTimesheetsAppService) : base(workScope)
+            MyTimesheetsAppService myTimesheetsAppService, IW2Service w2Service) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _komuService = komuService;
@@ -54,6 +59,7 @@ namespace Timesheet.APIs.Mezon
             _userService = userService;
             _requestDayAppService = requestDayAppService;
             _myTimesheetsAppService = myTimesheetsAppService;
+            _w2Service = w2Service;
         }
 
         [HttpPost]
@@ -211,6 +217,106 @@ namespace Timesheet.APIs.Mezon
             }
 
             return myTimesheets;
+        }
+
+        [HttpPost]
+        public async System.Threading.Tasks.Task ApproveRequestDay(RequestDayMezon requestDayDto)
+        {
+            string emailPm = requestDayDto.Email;
+            var userIdPmCurrent = await _userService.GetUserIdByEmail(emailPm);
+            if (!userIdPmCurrent.HasValue)
+            {
+                throw new UserFriendlyException("Not found user with email " + emailPm);
+            }
+            long userIdPm = userIdPmCurrent.Value;
+
+            foreach (var requestId in requestDayDto.RequestIds)
+            {
+                var request = await WorkScope
+                .GetAll<AbsenceDayRequest>()
+                .Include(ar => ar.User) // Eager loading User
+                .FirstOrDefaultAsync(ar => ar.Id == requestId);
+
+                if (await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm))
+                {
+                    var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
+                        .Where(s => s.RequestId == requestId)
+                        .Where(s => s.Request.Type == RequestType.Remote)
+                        .Where(s => s.Request.Status == RequestStatus.Rejected)
+                        .Select(s => s.DateAt.ToString("yyyy-MM-dd"))
+                        .FirstOrDefaultAsync();
+
+                    if (dateRemote != null)
+                    {
+                        var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
+
+                        if (wfhRequestDto == null)
+                        {
+                            throw new UserFriendlyException("Cannot get request information from the W2 system!");
+                        }
+                        if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
+                        {
+                            throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
+                        }
+                    }
+
+                    request.Status = RequestStatus.Approved;
+                    await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
+
+                    await _requestDayAppService.notifyKomuWhenApproveOrRejectRequest(request, true, userIdPm);
+                }
+                else if (!(await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm)))
+                {
+                    throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+                }
+            }
+        }
+
+        [HttpPost]
+        public async System.Threading.Tasks.Task RejectRequestDay(RequestDayMezon requestDayDto)
+        {
+            string emailPm = requestDayDto.Email;
+            var userIdPmCurrent = await _userService.GetUserIdByEmail(emailPm);
+            if (!userIdPmCurrent.HasValue)
+            {
+                throw new UserFriendlyException("Not found user with email " + emailPm);
+            }
+            long userIdPm = userIdPmCurrent.Value;
+
+            foreach (var requestId in requestDayDto.RequestIds)
+            {
+                var request = await WorkScope.GetAsync<AbsenceDayRequest>(requestId);
+
+                if (await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm))
+                {
+                    request.Status = RequestStatus.Rejected;
+                    await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
+
+                    await _requestDayAppService.notifyKomuWhenApproveOrRejectRequest(request, false, userIdPm);
+                }
+                else if (!(await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm)))
+                {
+                    throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+                }
+            }
+        }
+
+        public async Task<bool> CheckUserIsPMOfUserByEmail(long userId, long userIdPm)
+        {
+            var qprojectIdsOfSessionUser = WorkScope.GetAll<ProjectUser>()
+                .Where(s => s.UserId == userIdPm && s.Type == ProjectUserType.PM)
+                .Where(s => s.Project.Status == ProjectStatus.Active)
+                .Select(s => s.ProjectId);
+
+            var qprojectIdsOfUser = WorkScope.GetAll<ProjectUser>()
+                .Where(s => s.UserId == userId && s.Type != ProjectUserType.DeActive)
+                .Where(s => s.Project.Status == ProjectStatus.Active)
+                .Select(s => s.ProjectId);
+
+            return await (from p in qprojectIdsOfSessionUser
+                          join p2 in qprojectIdsOfUser on p equals p2
+                          select p).AnyAsync();
+
         }
     }
 }

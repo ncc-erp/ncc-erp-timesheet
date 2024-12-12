@@ -659,6 +659,7 @@ namespace Timesheet.APIs.RequestDays
                 CurrentUnitOfWork.SaveChanges();
 
                 abs.Status = absencedayRequest.Status;
+                abs.RequestId = requestId;
             }
 
             await notify(requester, input);
@@ -1178,7 +1179,7 @@ namespace Timesheet.APIs.RequestDays
             }
         }
 
-        private async Task<bool> CheckSessionUserIsPMOfUser(long userId)
+        public async Task<bool> CheckSessionUserIsPMOfUser(long userId)
         {
             var qprojectIdsOfSessionUser = WorkScope.GetAll<ProjectUser>()
                 .Where(s => s.UserId == AbpSession.UserId.Value && s.Type == ProjectUserType.PM)
@@ -1232,7 +1233,8 @@ namespace Timesheet.APIs.RequestDays
                     request.Status = RequestStatus.Approved;
                     await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
 
-                    await notifyKomuWhenApproveOrRejectRequest(request, true);
+                    var approverId = AbpSession.UserId.Value;
+                    await notifyKomuWhenApproveOrRejectRequest(request, true, approverId);
                 }
                 else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
@@ -1254,7 +1256,8 @@ namespace Timesheet.APIs.RequestDays
                     request.Status = RequestStatus.Rejected;
                     await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
 
-                    await notifyKomuWhenApproveOrRejectRequest(request, false);
+                    var approverId = AbpSession.UserId.Value;
+                    await notifyKomuWhenApproveOrRejectRequest(request, false, approverId);
                 }
                 else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
@@ -1263,12 +1266,12 @@ namespace Timesheet.APIs.RequestDays
             }
         }
 
-        private async System.Threading.Tasks.Task notifyKomuWhenApproveOrRejectRequest(AbsenceDayRequest request, bool isApprove)
+        public async System.Threading.Tasks.Task notifyKomuWhenApproveOrRejectRequest(AbsenceDayRequest request, bool isApprove, long approverId)
         {
             var enableNotify = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendKomuRequest);
             if (enableNotify != "true")
             {
-                Logger.Info("notifyKomuWhenApproveOrRejectRequest() SendKomuRequest=" + enableNotify + ", AbpSessionUserId=" + AbpSession.UserId);
+                Logger.Info("notifyKomuWhenApproveOrRejectRequest() SendKomuRequest=" + enableNotify + ", AbpSessionUserId=" + approverId);
                 return;
             }
             var offTypeName = "";
@@ -1280,7 +1283,7 @@ namespace Timesheet.APIs.RequestDays
                     .FirstOrDefaultAsync();
             }
 
-            var approver = await getNotifyUserInfoDto(AbpSession.UserId.Value);
+            var approver = await getNotifyUserInfoDto(approverId);
             var receivers = await getReceiverApproveRejectList(request.UserId);
             var requester = await getNotifyUserInfoDto(request.UserId);
 
