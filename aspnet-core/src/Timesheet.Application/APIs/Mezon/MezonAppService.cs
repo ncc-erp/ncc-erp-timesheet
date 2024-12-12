@@ -231,33 +231,46 @@ namespace Timesheet.APIs.Mezon
             }
             long userIdPm = userIdPmCurrent.Value;
 
+            var requestIds = requestDayDto.RequestIds;
+            var requests = await WorkScope
+            .GetAll<AbsenceDayRequest>()
+            .Include(ar => ar.User) // Eager loading User
+            .Where(ar => requestDayDto.RequestIds.Contains(ar.Id))
+            .ToListAsync();
+            var requestDictionary = requests.ToDictionary(ar => ar.Id);
+
+            var dateRemotes = await WorkScope.GetAll<AbsenceDayDetail>()
+            .Where(s => requestIds.Contains(s.RequestId)) 
+            .Where(s => s.Request.Type == RequestType.Remote)
+            .Where(s => s.Request.Status == RequestStatus.Rejected)
+            .GroupBy(s => s.RequestId)
+            .ToDictionaryAsync(g => g.Key, g => g.Select(s => s.DateAt.ToString("yyyy-MM-dd")).FirstOrDefault());
+
+
             foreach (var requestId in requestDayDto.RequestIds)
             {
-                var request = await WorkScope
-                .GetAll<AbsenceDayRequest>()
-                .Include(ar => ar.User) // Eager loading User
-                .FirstOrDefaultAsync(ar => ar.Id == requestId);
+                if (!requestDictionary.TryGetValue(requestId, out var request))
+                {
+                    continue;
+                }
 
                 if (await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm))
                 {
-                    var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
-                        .Where(s => s.RequestId == requestId)
-                        .Where(s => s.Request.Type == RequestType.Remote)
-                        .Where(s => s.Request.Status == RequestStatus.Rejected)
-                        .Select(s => s.DateAt.ToString("yyyy-MM-dd"))
-                        .FirstOrDefaultAsync();
-
-                    if (dateRemote != null)
+                    if (dateRemotes.TryGetValue(requestId, out var dateRemote))
                     {
-                        var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
+                        if (dateRemote != null)
+                        {
+                            var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
 
-                        if (wfhRequestDto == null)
-                        {
-                            throw new UserFriendlyException("Cannot get request information from the W2 system!");
-                        }
-                        if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
-                        {
-                            throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
+                            if (wfhRequestDto == null)
+                            {
+                                throw new UserFriendlyException("Cannot get request information from the W2 system!");
+                            }
+
+                            if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
+                            {
+                                throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
+                            }
                         }
                     }
 
@@ -266,7 +279,7 @@ namespace Timesheet.APIs.Mezon
 
                     await _requestDayAppService.notifyKomuWhenApproveOrRejectRequest(request, true, userIdPm);
                 }
-                else if (!(await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm)))
+                else
                 {
                     throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
                 }
@@ -285,9 +298,19 @@ namespace Timesheet.APIs.Mezon
             }
             long userIdPm = userIdPmCurrent.Value;
 
+            var requests = await WorkScope
+                .GetAll<AbsenceDayRequest>()
+                .Where(ar => requestDayDto.RequestIds.Contains(ar.Id))
+                .ToListAsync();
+
+            var requestDictionary = requests.ToDictionary(ar => ar.Id);
+
             foreach (var requestId in requestDayDto.RequestIds)
             {
-                var request = await WorkScope.GetAsync<AbsenceDayRequest>(requestId);
+                if (!requestDictionary.TryGetValue(requestId, out var request))
+                {
+                    continue;
+                }
 
                 if (await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm))
                 {
@@ -296,7 +319,7 @@ namespace Timesheet.APIs.Mezon
 
                     await _requestDayAppService.notifyKomuWhenApproveOrRejectRequest(request, false, userIdPm);
                 }
-                else if (!(await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm)))
+                else
                 {
                     throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
                 }
