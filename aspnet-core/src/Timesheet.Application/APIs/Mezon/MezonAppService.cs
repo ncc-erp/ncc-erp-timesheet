@@ -246,7 +246,6 @@ namespace Timesheet.APIs.Mezon
             .GroupBy(s => s.RequestId)
             .ToDictionaryAsync(g => g.Key, g => g.Select(s => s.DateAt.ToString("yyyy-MM-dd")).FirstOrDefault());
 
-
             foreach (var requestId in requestDayDto.RequestIds)
             {
                 if (!requestDictionary.TryGetValue(requestId, out var request))
@@ -254,35 +253,19 @@ namespace Timesheet.APIs.Mezon
                     continue;
                 }
 
-                if (await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm))
-                {
-                    if (dateRemotes.TryGetValue(requestId, out var dateRemote))
-                    {
-                        if (dateRemote != null)
-                        {
-                            var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
-
-                            if (wfhRequestDto == null)
-                            {
-                                throw new UserFriendlyException("Cannot get request information from the W2 system!");
-                            }
-
-                            if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
-                            {
-                                throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
-                            }
-                        }
-                    }
-
-                    request.Status = RequestStatus.Approved;
-                    await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
-
-                    await _requestDayAppService.notifyKomuWhenApproveOrRejectRequest(request, true, userIdPm);
-                }
-                else
+                if (!await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm))
                 {
                     throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
                 }
+
+                if (dateRemotes.TryGetValue(requestId, out var dateRemote) && dateRemote != null)
+                {
+                    ValidateWfhRequest(request.User.EmailAddress, dateRemote);
+                }
+
+                request.Status = RequestStatus.Approved;
+                await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
+                await _requestDayAppService.notifyKomuWhenApproveOrRejectRequest(request, true, userIdPm);
             }
         }
 
@@ -342,6 +325,21 @@ namespace Timesheet.APIs.Mezon
                           join p2 in qprojectIdsOfUser on p equals p2
                           select p).AnyAsync();
 
+        }
+
+        private void ValidateWfhRequest(string emailAddress, string dateRemote)
+        {
+            var wfhRequestDto = _w2Service.GetWfhRequest(emailAddress, dateRemote);
+
+            if (wfhRequestDto == null)
+            {
+                throw new UserFriendlyException("Cannot get request information from the W2 system!");
+            }
+
+            if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
+            {
+                throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
+            }
         }
     }
 }
