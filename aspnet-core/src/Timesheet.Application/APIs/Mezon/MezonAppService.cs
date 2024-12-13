@@ -295,17 +295,14 @@ namespace Timesheet.APIs.Mezon
                     continue;
                 }
 
-                if (await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm))
+                if (!await CheckUserIsPMOfUserByEmail(request.UserId, userIdPm))
                 {
-                    request.Status = RequestStatus.Rejected;
-                    await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
+                    throw new UserFriendlyException($"You are not PM of UserId {request.UserId}");
+                }
 
-                    await _requestDayAppService.notifyKomuWhenApproveOrRejectRequest(request, false, userIdPm);
-                }
-                else
-                {
-                    throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
-                }
+                request.Status = RequestStatus.Rejected;
+                await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
+                await _requestDayAppService.notifyKomuWhenApproveOrRejectRequest(request, false, userIdPm);
             }
         }
 
