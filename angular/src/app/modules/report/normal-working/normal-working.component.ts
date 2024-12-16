@@ -199,7 +199,7 @@ export class NormalWorkingComponent extends PagedListingComponentBase<WorkingRep
       return 'dayTS-log-than-default-working-time'
     }
 
-    if (detail.isNoCheckIn) {
+    if (detail.isNoCheckIn && detail.dayName !== 'Saturday') {
       return 'dayNoCheckIn';
     }
 
