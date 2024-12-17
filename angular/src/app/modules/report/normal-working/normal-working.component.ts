@@ -199,7 +199,7 @@ export class NormalWorkingComponent extends PagedListingComponentBase<WorkingRep
       return 'dayTS-log-than-default-working-time'
     }
 
-    if (detail.isNoCheckIn) {
+    if (detail.isNoCheckIn && APP_CONSTANT.EnumDayOfWeek[detail.dayName] !== APP_CONSTANT.EnumDayOfWeek.Saturday) {
       return 'dayNoCheckIn';
     }
 
