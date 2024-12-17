@@ -40,8 +40,8 @@ namespace Timesheet.BackgroundWorker
 
         [UnitOfWork]
         protected override void DoWork()
-        {
-            if (_isSendMailToHeadPm)
+        {            
+           if (_isSendMailToHeadPm)
             {
                 try
                 {
@@ -139,7 +139,7 @@ namespace Timesheet.BackgroundWorker
             }
 
             long reviewId = _reviewInternService.LastIdReviewIntern();
-            bool check = _reviewDetailAppService.CheckRecordRemainingWithStatus(reviewId, ReviewInternStatus.PmReviewed);
+            bool check = _reviewDetailAppService.HasRemainingInternReviewed(reviewId, ReviewInternStatus.PmReviewed);
             if (!check) return false;
 
             string headPmMail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
@@ -166,7 +166,7 @@ namespace Timesheet.BackgroundWorker
             if (dateNow.Hour < sendMailToHeadPmAtHour) return;
 
             long reviewId = _reviewInternService.LastIdReviewIntern();
-            bool check = _reviewDetailAppService.CheckRecordRemainingWithStatus(reviewId, ReviewInternStatus.PmReviewed);
+            bool check = _reviewDetailAppService.HasRemainingInternReviewed(reviewId, ReviewInternStatus.PmReviewed);
             if (!check) return;
 
             int dateSendMailToHeadPm = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMAndPresidentReviewInternOnDate));
@@ -297,7 +297,7 @@ namespace Timesheet.BackgroundWorker
                 return false;
             }
             long reviewId = _reviewInternService.LastIdReviewIntern();
-            bool check = _reviewDetailAppService.CheckRecordRemainingWithStatus(reviewId, ReviewInternStatus.Reviewed);
+            bool check = _reviewDetailAppService.HasRemainingInternReviewed(reviewId, ReviewInternStatus.Reviewed);
             if (!check)
             {
                 Logger.Error("The PM or headPM has not finished evaluating the interns.");
@@ -329,7 +329,7 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
             long reviewId = _reviewInternService.LastIdReviewIntern();
-            bool check = _reviewDetailAppService.CheckRecordRemainingWithStatus(reviewId, ReviewInternStatus.Reviewed);
+            bool check = _reviewDetailAppService.HasRemainingInternReviewed(reviewId, ReviewInternStatus.Reviewed);
             if (!check)
             {
                 Logger.Error("The PM or headPM has not finished evaluating the interns.");
