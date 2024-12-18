@@ -73,6 +73,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_MEZON_SETTNG = PERMISSIONS_CONSTANT. EditMezonSetting
   VIEW_NRIT_CONFIG = PERMISSIONS_CONSTANT.ViewNRITSetting;
   EDIT_NRIT_CONFIG = PERMISSIONS_CONSTANT.EditNRITSetting;
+  VIEW_NHPMAPRIT_CONFIG = PERMISSIONS_CONSTANT.ViewNHPMAPRITSetting;
+  EDIT_NHPMAPRIT_CONFIG = PERMISSIONS_CONSTANT.EditNHPMAPRITSetting;
   VIEW_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.ViewUnlockTimesheetSetting;
   UPDATE_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.UpdateUnlockTimesheetSetting;
   VIEW_PUNISHCHECKIN_CONFIG = PERMISSIONS_CONSTANT.ViewSendKomuPunishedCheckIn;
@@ -185,6 +187,11 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditNRITConfig: boolean = false;
   isShowNoticePunishedCheckIn: boolean = false;
   NRITConfig = {} as NRITConfigDto;
+  
+  isShowNHPMAPRITConfig: boolean = false;
+  isEditNHPMAPRITConfig: boolean = false;
+  NHPMAPRITConfig= {} as NotifyHeadPMAndPresidentReviewInternConfigDto;
+
   unlockSetting = {} as UnlockTimesheetConfigDto;
   timesCanLateAndEarlyInMonthSetting = {} as TimesCanLateAndEarlyInMonthSettingDto;
   percentOfTrackerOnWorking: string = "";
@@ -303,6 +310,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getResetDataTeamBuildingConfig();
     
     this.getSendMessageToPunishUserConfig();
+    this.getNHPMAPRITConfig();
   }
   protected list(): void {
     if (this.permission.isGranted(this.VIEW_EMAIL_SETTING)) {
@@ -1080,6 +1088,60 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     })
   }
 
+  // Notify To HeadPm And President Review Intern Setting
+  refreshNHPMAPRITConfig() {
+    this.getNHPMAPRITConfig();
+    this.isEditNHPMAPRITConfig = false;
+  }
+
+  getNHPMAPRITConfig() {
+    if (this.permission.isGranted(this.VIEW_NHPMAPRIT_CONFIG)) {
+      this.configurationService.GetNHPMAPRITConfig().subscribe(data => {
+        this.NHPMAPRITConfig = data.result;
+      })
+    }
+  }
+
+  editNHPMAPRITConfig() {
+    this.isEditNHPMAPRITConfig = true;
+  }
+
+  onNHPMAPRITEnableWorker(e) {
+    if (e.checked == true) {
+      this.NHPMAPRITConfig.notifyHeadPMAndPresidentReviewInternEnableWorker = "true"
+    }
+    else {
+      this.NHPMAPRITConfig.notifyHeadPMAndPresidentReviewInternEnableWorker = "false"
+    }
+  }
+
+  SaveNHPMAPRITConfig() {
+    if (_.isEmpty(this.NHPMAPRITConfig.notifyHeadPMAndPresidentReviewInternAtHour)) {
+      abp.message.error("At hour day required!")
+      return;
+    }
+    if (_.isEmpty(this.NHPMAPRITConfig.notifyHeadPMAndPresidentReviewInternOnDate)) {
+      abp.message.error("Notify on dates required!")
+      return;
+    }
+
+    if (_.isEmpty(this.NHPMAPRITConfig.notifyHeadPmMail)) {
+      abp.message.error("Notify HeadPm Mail required!")
+      return;
+    }
+
+    if (_.isEmpty(this.NHPMAPRITConfig.notifyPresidentEmail)) {
+      abp.message.error("Notify President Mail required!")
+      return;
+    }
+    this.configurationService.SetNHPMAPRITConfig(this.NHPMAPRITConfig).subscribe((res:any) => {
+      this.isEditNHPMAPRITConfig = !this.isEditNHPMAPRITConfig;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
+
   //Retro Notify setting
   refreshRetroNotifyConfig() {
     this.getRetroNotifyConfig();
@@ -1763,6 +1825,13 @@ export class NRITConfigDto {
   notifyPenaltyFee: string;
 }
 
+export class NotifyHeadPMAndPresidentReviewInternConfigDto {
+  notifyHeadPMAndPresidentReviewInternEnableWorker: string;
+  notifyHeadPMAndPresidentReviewInternAtHour: string;
+  notifyHeadPMAndPresidentReviewInternOnDate: string;
+  notifyHeadPmMail: string;
+  notifyPresidentEmail: string;
+}
 export class ProjectConfigDto {
   projectUri: string;
   secretCode: string;

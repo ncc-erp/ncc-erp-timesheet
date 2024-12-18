@@ -9,6 +9,7 @@ using Castle.Core.Internal;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Ncc;
 using Ncc.Authorization;
 using Ncc.Authorization.Users;
@@ -35,6 +36,7 @@ using Timesheet.Paging;
 using Timesheet.Services.File;
 using Timesheet.Services.HRM;
 using Timesheet.Services.HRM.Dto;
+using Timesheet.Services.Komu;
 using Timesheet.Services.Project;
 using Timesheet.Services.Project.Dto;
 using Timesheet.Uitls;
@@ -51,15 +53,19 @@ namespace Timesheet.APIs.ReviewDetails
         private readonly ExportFileService _fileService;
         private readonly ProjectService _projectService;
         private readonly HRMService _hRMService;
+        private readonly KomuService _komuService;
+        private readonly IConfiguration _configuration;
 
         public ReviewDetailAppService(IBackgroundJobManager backgroundJobManager, ProjectService projectService, HRMService hRMService,
-            IHostingEnvironment hostingEnvironment, ExportFileService fileService, IWorkScope workScope) : base(workScope)
+            IHostingEnvironment hostingEnvironment, ExportFileService fileService, IWorkScope workScope, KomuService komuService, IConfiguration configuration) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _hostingEnvironment = hostingEnvironment;
             _fileService = fileService;
             _projectService = projectService;
             _hRMService = hRMService;
+            _komuService = komuService;
+            _configuration = configuration;
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_ViewAll)]
@@ -1225,11 +1231,21 @@ namespace Timesheet.APIs.ReviewDetails
                 await WorkScope.InsertAsync(reviewInternComment);
             }
             await WorkScope.UpdateAsync(detail);
+
+            List<long> listId = new List<long> { detail.Id };
+            bool check = HasRemainingInternReviewed(detail.ReviewId, ReviewInternStatus.PmReviewed, listId);
+            if(check)
+            {
+                string headPmEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
+                string usernameHeadPM = headPmEmail.Split('@')[0];
+                SendMailToNotifyTransition(headPmEmail, usernameHeadPM, ReviewInternStatus.PmReviewed, detail.ReviewId);
+            }
+
             return input;
         }
         [HttpPost]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AddNew)]
-        public async Task CreateInternCapability(ReviewDetailInputDto input)
+        public async System.Threading.Tasks.Task CreateInternCapability(ReviewDetailInputDto input)
         {
             var review = await WorkScope.GetAsync<ReviewIntern>(input.ReviewId);
             if (!review.IsActive)
@@ -1318,7 +1334,7 @@ namespace Timesheet.APIs.ReviewDetails
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_VerifyPmReviewedForOneIntern)]
         [HttpPost]
-        public async Task HeadPmVerify(HeadPmVerifyDto input)
+        public async System.Threading.Tasks.Task HeadPmVerify(HeadPmVerifyDto input)
         {
             var detail = await WorkScope.GetAsync<ReviewDetail>(input.ReviewDetailId);
 
@@ -1333,11 +1349,13 @@ namespace Timesheet.APIs.ReviewDetails
             }
             detail.Status = input.Status;
             await WorkScope.UpdateAsync(detail);
+            List<long> listId = new List<long> { detail.Id };
+            CheckSendMailToPresident(detail.ReviewId, listId);
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote)]
         [HttpPost]
-        public async Task CreatePMNote(CreatePrivateNoteDto input)
+        public async System.Threading.Tasks.Task CreatePMNote(CreatePrivateNoteDto input)
         {
             if (input.Status == ReviewInternStatus.Reviewed)
             {
@@ -1371,7 +1389,7 @@ namespace Timesheet.APIs.ReviewDetails
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_CreateInterviewNote)]
         [HttpPost]
-        public async Task CreateInterviewNote(CreatePrivateNoteDto input)
+        public async System.Threading.Tasks.Task CreateInterviewNote(CreatePrivateNoteDto input)
         {
             if (input.Status == ReviewInternStatus.Reviewed)
             {
@@ -1405,7 +1423,7 @@ namespace Timesheet.APIs.ReviewDetails
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern)]
         [HttpPost]
-        public async Task HeadPmVerifyOrRejectAll(List<HeadPmVerifyDto> input)
+        public async System.Threading.Tasks.Task HeadPmVerifyOrRejectAll(List<HeadPmVerifyDto> input)
         {
             var listReviewDetail = new List<ReviewDetail>();
 
@@ -1427,6 +1445,10 @@ namespace Timesheet.APIs.ReviewDetails
                 listReviewDetail.Add(detail);
             }
             await WorkScope.UpdateRangeAsync(listReviewDetail);
+            
+            List<long> listId = listReviewDetail.Select(x => x.Id).ToList();
+            CheckSendMailToPresident(listReviewDetail.FirstOrDefault().ReviewId, listId);
+            Logger.Info("send mail to GD ");
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_ViewAll)]
@@ -1445,6 +1467,63 @@ namespace Timesheet.APIs.ReviewDetails
                         })
                         .ToListAsync();
             return listInternshipMaxLevelMonths;
+        }
+
+        public async void CheckSendMailToPresident(long reviewId, List<long> listId)
+        {
+            bool check = HasRemainingInternReviewed(reviewId, ReviewInternStatus.Reviewed, listId);
+            if (!check) return;
+
+            string presidentEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentEmail);
+            string username = presidentEmail.Split('@')[0];
+        
+            SendMailToNotifyTransition(presidentEmail, username, ReviewInternStatus.PmReviewed, reviewId);
+        }
+
+        public bool HasRemainingInternReviewed(long reviewId, ReviewInternStatus status, List<long> listId = null)
+        {
+            return WorkScope.GetAll<ReviewDetail>()
+              .Where(x => x.ReviewId == reviewId)
+              .WhereIf(listId != null && listId.Any(), x => !listId.Contains(x.Id))
+              .All(x => x.Status == status);
+        }
+
+        public async void SendMailToNotifyTransition(string email, string username, ReviewInternStatus status, long reviewId)
+        {
+            ReviewIntern reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            StringBuilder content = new StringBuilder("");
+            try
+            {
+                content.Append($"Thân gửi anh <span style='font-weight: 600'>{username} </span>, <br> ");
+                if (status == ReviewInternStatus.Reviewed)
+                {
+                    content.Append("$Head PM đã đánh giá xong.");
+                } 
+                else
+                {
+                    content.Append($"Các PM đã đánh giá xong thực tập sinh");
+                }
+                content.Append("<br>");
+                content.Append("Mời anh vào đánh giá ạ.");
+                string rootUrl = _configuration.GetValue<string>("App:ClientRootAddress");
+                string link = rootUrl + "app/main/review-detail?id=" + reviewIntern.Id + "&year=" + reviewIntern.Year + "&month=" + reviewIntern.Month;
+                content.Append('\n');
+                content.Append(link);
+                var emailSubject = $"[NCC] Thông báo giai đoạn review và chuyển {status} trên timesheet";
+                var targetEmails = new List<string>() { email };
+
+                await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
+                {
+                    TargetEmails = targetEmails,
+                    Body = content.ToString(),
+                    Subject = emailSubject
+                }, BackgroundJobPriority.High
+                );
+            }
+            catch (Exception e)
+            {
+                Logger.Error("SendEmails() error=>" + e.Message);
+            }
         }
     }
 }

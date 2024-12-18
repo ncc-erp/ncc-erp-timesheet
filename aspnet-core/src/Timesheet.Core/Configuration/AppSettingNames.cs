@@ -91,6 +91,11 @@
         public const string NRITNotifyAtHour = "App.NRITNotifyAtHour";
         public const string NRITNotifyOnDates = "App.NRITNotifyOnDates";
         public const string NRITNotifyReviewDeadline = "App.NRITNotifyReviewDeadline";
+        public const string NotifyHeadPMAndPresidentReviewInternEnableWorker = "App.NotifyHeadPMAndPresidentReviewInternEnableWorker";
+        public const string NotifyHeadPMAndPresidentReviewInternAtHour = "App.NotifyHeadPMAndPresidentReviewInternAtHour";
+        public const string NotifyHeadPMAndPresidentReviewInternOnDate = "App.NotifyHeadPMAndPresidentReviewInternOnDate";
+        public const string NotifyHeadPmMail = "App.NotifyHeadPmMail";
+        public const string NotifyPresidentEmail = "App.NotifyPresidentEmail";
         public const string NRITNotifyToChannels = "App.NRITNotifyToChannels";
         public const string NRITNotifyPenaltyFee = "App.NRITNotifyPenaltyFee";
         public const string TotalTimeAbsenceTime = "App.TotalTimeAbsenceTime";
