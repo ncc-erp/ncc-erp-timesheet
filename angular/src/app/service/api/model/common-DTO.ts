@@ -60,7 +60,7 @@ export class WeekByTask {
   taskName: string;
   customerName: string;
   totalTime: number;
-  note : string ; 
+  note : string ;
   monWorkingTime: string;
   tueWorkingTime: string;
   wedWorkingTime: string;
@@ -91,7 +91,8 @@ export class PTaskDto {
 
 export class PTargetUserDto {
   projectTargetUserId: number;
-  userName: string
+  userName: string;
+  roleName: string;
 }
 
 export class ProjectIncludingTaskDto {

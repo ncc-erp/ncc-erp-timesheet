@@ -22,7 +22,7 @@
             <mat-option *ngFor="let task of selectedProject.tasks" [value]="task.projectTaskId">
               {{ task.taskName }}
             </mat-option>
-          </mat-select>      
+          </mat-select>
         </mat-form-field>
         <mat-checkbox id="btnDefaultTask" class="btn-check-default" style="margin-left: 10px;" [disabled]="!myTimesheet.projectTaskId" [checked]="defaultTask" (change)="checkDefaultTask()">
           <span class="btn-check-default" style="margin-top: 15px;">Default</span>
@@ -33,7 +33,8 @@
       <mat-label>Target user</mat-label>
       <mat-select matInput name="targetUser" [(ngModel)]="myTimesheet.projectTargetUserId" required>
         <mat-option *ngFor="let targetUser of selectedProject.targetUsers" [value]="targetUser.projectTargetUserId">
-          {{ targetUser.userName }}
+            {{ targetUser.userName }}
+            <span class="red-text-with-yellow-outline">{{ targetUser.roleName ? '- ' + targetUser.roleName : '' }}</span>
         </mat-option>
       </mat-select>
     </mat-form-field>
