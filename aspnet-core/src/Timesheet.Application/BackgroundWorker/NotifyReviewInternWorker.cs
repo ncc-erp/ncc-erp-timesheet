@@ -40,7 +40,7 @@ namespace Timesheet.BackgroundWorker
 
         [UnitOfWork]
         protected override void DoWork()
-        {            
+        {
            if (_isSendMailToHeadPm)
             {
                 try
@@ -152,7 +152,7 @@ namespace Timesheet.BackgroundWorker
 
             if ((isSixthDay && !isWeekend) || isMondayAfterSixth)
             {
-                _reviewDetailAppService.SendMailToNotifyTransition(headPmMail, usernameHeadPm, ReviewInternStatus.PmReviewed, reviewId);
+                 _reviewDetailAppService.SendMailToNotifyTransition(headPmMail, usernameHeadPm, ReviewInternStatus.PmReviewed, reviewId);
                 return true;
             }
 
@@ -180,12 +180,11 @@ namespace Timesheet.BackgroundWorker
                 string usernameHeadPm = headPmEmail.Split('@')[0];
 
                 var sb = new StringBuilder();
-                sb.AppendLine($"PMs have finished evaluating interns, please review.");
+                sb.AppendLine($"[Review Intern] PMs have finished evaluating interns, please review.");
                 _komuService.SendMessageToUser(sb.ToString(), usernameHeadPm.Trim());
                 sb.Clear();
             }
         }
-
 
         private void NotifyPMReviewerIntern()
         {
@@ -344,7 +343,7 @@ namespace Timesheet.BackgroundWorker
             string username = presidentEmail.Split('@')[0];
 
             var sb = new StringBuilder();
-            sb.AppendLine($"HeadPm have finished evaluating interns, please review.");
+            sb.AppendLine($"[Review Intern] HeadPm have finished evaluating interns, please review.");
             _komuService.SendMessageToUser(sb.ToString(), username.Trim());
             sb.Clear();
             
