@@ -9639,7 +9639,7 @@ section.content {
   -moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   -ms-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-  z-index: 11 
+  z-index: 11
 }
 
 .sidebar .legal {
@@ -9841,7 +9841,7 @@ section.content {
 }
 
 .sidebar .menu .list .menu-toggle.active::after {
-  content: '+' !important; 
+  content: '+' !important;
   -moz-transform: scale(0);
   -ms-transform: scale(0);
   -o-transform: scale(0);
@@ -10631,6 +10631,16 @@ thead{
 
 .cdk-overlay-pane {
   transform: none !important;
+}
+
+.red-text-with-yellow-outline {
+    color: red;
+    text-shadow:
+            -1px -1px 0 yellow,
+            1px -1px 0 yellow,
+            -1px 1px 0 yellow,
+            1px 1px 0 yellow;
+    font-weight: bold;
 }
 
 @media screen and (max-width: 600px) {

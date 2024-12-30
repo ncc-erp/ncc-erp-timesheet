@@ -129,7 +129,8 @@ namespace Timesheet.Timesheets.Timesheets
                         IsUnlockedByEmployee = a.IsUnlockedByEmployee,
                         projectTargetUser = a.ProjectTargetUser.User.FullName,
                         workingTimeTargetUser = a.TargetUserWorkingTime,
-                        openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == a.User.Id && a.DateAt == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
+                        openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == a.User.Id && a.DateAt == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault(),
+                        ProjectTargetRoleName = a.ProjectTargetUser.RoleName
                     };
             var query = q.WhereIf(opentalkTime.HasValue, s => opentalkTimeType.Value ? s.openTalkTime >= opentalkTime : s.openTalkTime < opentalkTime).OrderBy(i => i.EmailAddress).ThenByDescending(s => s.DateAt).ToList();
             var listTimekeeping = WorkScope.GetAll<Timekeeping>()

@@ -601,7 +601,7 @@ namespace Timesheet.Timesheets.Projects
                           join ptu in
                                  from ptuu in WorkScope.GetAll<ProjectTargetUser>()
                                  join u in WorkScope.GetAll<User>() on ptuu.UserId equals u.Id
-                                 select new { ProjectTargetUserId = ptuu.Id, ptuu.ProjectId, UserName = u.FullName }
+                                 select new { ProjectTargetUserId = ptuu.Id, ptuu.ProjectId, UserName = u.FullName, RoleName = ptuu.RoleName }
                           on p.Id equals ptu.ProjectId into ptus
 
                           join pu in
@@ -631,7 +631,8 @@ namespace Timesheet.Timesheets.Projects
                               TargetUsers = ptus.Select(s => new PTargetUserDto
                               {
                                   ProjectTargetUserId = s.ProjectTargetUserId,
-                                  UserName = s.UserName
+                                  UserName = s.UserName,
+                                  RoleName = s.RoleName
                               }).ToList()
                           }).ToListAsync();
         }

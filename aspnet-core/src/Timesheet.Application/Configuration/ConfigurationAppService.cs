@@ -472,6 +472,30 @@ namespace Ncc.Configuration
             return input;
         }
 
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_NHPMAPRITConfig_View)]
+        public async Task<NotifyHeadPMAndPresidentReviewInternConfigDto> GetNHPMAPRITConfig()
+        {
+            return new NotifyHeadPMAndPresidentReviewInternConfigDto
+            {
+                NotifyHeadPMAndPresidentReviewInternEnableWorker = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternEnableWorker),
+                NotifyHeadPMAndPresidentReviewInternAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternAtHour),
+                NotifyHeadPMAndPresidentReviewInternOnDate = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternOnDate),
+                NotifyHeadPmMail = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyHeadPmMail),
+                NotifyPresidentEmail = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyPresidentEmail)
+            };
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_NHPMAPRITConfig_Update)]
+        public async Task<NotifyHeadPMAndPresidentReviewInternConfigDto> SetNHPMAPRITConfig(NotifyHeadPMAndPresidentReviewInternConfigDto input)
+        {
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternEnableWorker, input.NotifyHeadPMAndPresidentReviewInternEnableWorker);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternAtHour, input.NotifyHeadPMAndPresidentReviewInternAtHour);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternOnDate, input.NotifyHeadPMAndPresidentReviewInternOnDate);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyHeadPmMail, input.NotifyHeadPmMail);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyPresidentEmail, input.NotifyPresidentEmail);
+            return input;
+        }
+
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_UnlockTimesheetSetting_View)]
         public UnlockTimesheetConfigDto GetUnlockTimesheetConfig()
         {
