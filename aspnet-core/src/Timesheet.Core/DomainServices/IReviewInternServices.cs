@@ -11,6 +11,7 @@ namespace Timesheet.DomainServices
     public interface IReviewInternServices : IDomainService
     {
         long LastIdReviewIntern();
+        ReviewIntern LastReviewIntern();
         List<NotifyReviewInternDto> GetListPmNotReview(long reviewId);
     }
 }

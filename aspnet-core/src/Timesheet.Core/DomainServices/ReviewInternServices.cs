@@ -29,6 +29,14 @@ namespace Timesheet.DomainServices
                 Select(s => s.Id).FirstOrDefault();
         }
 
+        public ReviewIntern LastReviewIntern()
+        {
+            return WorkScope.GetAll<ReviewIntern>().
+                Where(s => s.IsActive).
+                OrderByDescending(s => s.Id)
+               .FirstOrDefault();
+        }
+
         public List<NotifyReviewInternDto> GetListPmNotReview(long reviewId)
         {
             var PMsNotReview = WorkScope.GetAll<ReviewDetail>().

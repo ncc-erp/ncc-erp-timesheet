@@ -156,8 +156,8 @@ namespace Timesheet.BackgroundWorker
             int sendMailToHeadPmAtHour = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMAndPresidentReviewInternAtHour));
             if (dateNow.Hour < sendMailToHeadPmAtHour) return;
 
-            long reviewId = _reviewInternService.LastIdReviewIntern();
-            bool check = _reviewDetailAppService.HasRemainingInternReviewed(reviewId, ReviewInternStatus.PmReviewed);
+            ReviewIntern review = _reviewInternService.LastReviewIntern();
+            bool check = _reviewDetailAppService.HasRemainingInternReviewed(review.Id, ReviewInternStatus.PmReviewed);
             if (!check) return;
 
             int dateSendMailToHeadPm = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMAndPresidentReviewInternOnDate));
@@ -172,7 +172,8 @@ namespace Timesheet.BackgroundWorker
 
                 var sb = new StringBuilder();
                 sb.AppendLine($"[Review Intern] PMs have finished evaluating interns, please review.");
-                _komuService.SendMessageToUser(sb.ToString(), usernameHeadPm.Trim());
+                string message = "Review Intern " + review.Month + "/" + review.Year;
+                _komuService.SendMessageReviewInternToUser(sb.ToString(), usernameHeadPm.Trim(), message);
                 sb.Clear();
             }
         }
@@ -199,8 +200,8 @@ namespace Timesheet.BackgroundWorker
 
             if ((today.Day != reviewDeadline || isWeekend) && !isMondayAfterFifth) return;
 
-            long reviewId = _reviewInternService.LastIdReviewIntern();
-            var listPMNotReview = _reviewInternService.GetListPmNotReview(reviewId);
+            ReviewIntern review = _reviewInternService.LastReviewIntern();
+            var listPMNotReview = _reviewInternService.GetListPmNotReview(review.Id);
 
             if (listPMNotReview.Count == 0) return;
 
@@ -215,8 +216,8 @@ namespace Timesheet.BackgroundWorker
                     sb.AppendLine($"{interShip.FullName} [{interShip.BranchDisplayName}] ({CommonUtils.UserLevelName(interShip.Level)})");
                 }
                 sb.AppendLine($"```");
-
-                _komuService.SendMessageToUser(sb.ToString(), item.UserName.Trim());
+                string message = "Review Intern " + review.Month + "/" + review.Year;
+                _komuService.SendMessageReviewInternToUser(sb.ToString(), item.UserName.Trim(), message);
                 sb.Clear();
             }
         }
@@ -267,8 +268,8 @@ namespace Timesheet.BackgroundWorker
                 Logger.Error("Mail must be sent after 10am");
                 return;
             }
-            long reviewId = _reviewInternService.LastIdReviewIntern();
-            bool check = _reviewDetailAppService.HasRemainingInternReviewed(reviewId, ReviewInternStatus.Reviewed);
+            ReviewIntern review = _reviewInternService.LastReviewIntern();
+            bool check = _reviewDetailAppService.HasRemainingInternReviewed(review.Id, ReviewInternStatus.Reviewed);
             if (!check)
             {
                 Logger.Error("The PM or headPM has not finished evaluating the interns.");
@@ -281,10 +282,11 @@ namespace Timesheet.BackgroundWorker
 
             string presidentEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentEmail);
             string username = presidentEmail.Split('@')[0];
+            string message = "Review Intern " + review.Month + "/" + review.Year;
 
             var sb = new StringBuilder();
             sb.AppendLine($"[Review Intern] HeadPm have finished evaluating interns, please review.");
-            _komuService.SendMessageToUser(sb.ToString(), username.Trim());
+            _komuService.SendMessageReviewInternToUser(sb.ToString(), username.Trim(), message);
             sb.Clear();
             
         }

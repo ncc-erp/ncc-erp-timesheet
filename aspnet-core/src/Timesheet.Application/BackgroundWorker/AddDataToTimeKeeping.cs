@@ -331,25 +331,26 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
 
-            long reviewId = _reviewInternService.LastIdReviewIntern();
-            var listPMNotReview = _reviewInternService.GetListPmNotReview(reviewId);
+            ReviewIntern review = _reviewInternService.LastReviewIntern();
+            var listPMNotReview = _reviewInternService.GetListPmNotReview(review.Id);
 
             int reviewDeadline = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyReviewDeadline));
             DateTime deadlineDate = new DateTime(today.Year, today.Month, reviewDeadline);
             string notifyPenaltyFee = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyPenaltyFee);
 
+            string message = "Review Intern " + review.Month + "/" + review.Year;
             var sb = new StringBuilder();
             foreach (var item in listPMNotReview)
             {
-                sb.AppendLine($"PM: {item.KomuAccountTag()} please complete reviewing **{item.InterShips.Count}** interns before " +
+                sb.AppendLine($"PM: {item.KomuAccountTag()} Please complete reviewing **{item.InterShips.Count}** interns before " +
                               $"**{DateTimeUtils.ToString(deadlineDate.Date)}** (**{notifyPenaltyFee}đ/intern** if you miss. Don't lose your money):");
                 sb.AppendLine($"```");
                 foreach (var interShip in item.InterShips)
                 {
-                    sb.AppendLine($"{interShip.FullName} [{interShip.BranchDisplayName}] ({CommonUtils.UserLevelName(interShip.Level)})");
+                    sb.AppendLine($"[{interShip.BranchDisplayName}] {interShip.FullName} - {CommonUtils.UserLevelName(interShip.Level)}");
                 }
                 sb.AppendLine($"```");
-                _komuService.SendMessageToUser(sb.ToString(), item.UserName.Trim());
+                _komuService.SendMessageReviewInternToUser(sb.ToString(), item.UserName.Trim(), message);
                 sb.Clear();
             }
         }

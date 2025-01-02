@@ -199,7 +199,7 @@ namespace Timesheet.Services.Komu
 
         public void SendMessageToUser(string komuMessage, string userName)
         {
-            
+
             if (_isNotifyToKomu != "true")
             {
                 logger.LogInformation("_isNotifyToKomu=" + _isNotifyToKomu + " => stop");
@@ -230,7 +230,7 @@ namespace Timesheet.Services.Komu
                 var listMessage = CommonUtils.SeparateMessage(messageToSend, MAX_LENGTH, "\n");
                 foreach (var message in listMessage)
                 {
-                  Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageToUserDto { message = message, username = userNameToSend });
+                    Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageToUserDto { message = message, username = userNameToSend });
                 }
             }
             else if (komuMessage.Contains(" "))
@@ -245,6 +245,93 @@ namespace Timesheet.Services.Komu
             {
                 Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageToUserDto { message = messageToSend, username = userNameToSend });
             }
+        }
+
+        public void SendMessageReviewInternToUser(string komuMessage, string userName, string reviewAt)
+        {
+            if (_isNotifyToKomu != "true")
+            {
+                logger.LogInformation("_isNotifyToKomu=" + _isNotifyToKomu + " => stop");
+                return;
+            }
+
+            var userNameDevModeConfig = _settingManager.GetSettingValueForApplication(AppSettingNames.KomuUserNameDevMode);
+            var userNameToSend = !string.IsNullOrEmpty(userNameDevModeConfig) ? userNameDevModeConfig : _userNameDevMode;
+            string messageToSend = komuMessage;
+
+            if (string.IsNullOrEmpty(userNameToSend))
+            {
+                userNameToSend = userName;
+            }
+            else
+            {
+                messageToSend = "[DEV-MODE] " + komuMessage;
+            }
+
+            if (userNameToSend.Equals("UNKNOW-USER"))
+            {
+                //Nothing todo: [DEV_MODE] not config userName
+                return;
+            }
+
+            if (komuMessage.Contains("\n"))
+            {
+                var listMessage = CommonUtils.SeparateMessage(messageToSend, MAX_LENGTH, "\n");
+                foreach (var message in listMessage)
+                {
+                    var (title, des) = SplitMessage(message);
+                    string options = ConvertOptions(title, des);
+                    Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageReviewInternToUserDto { message = reviewAt, username = userNameToSend, options = JsonConvert.DeserializeObject(options) });
+                }
+            }
+            else if (komuMessage.Contains(" "))
+            {
+                var listMessage = CommonUtils.SeparateMessage(messageToSend, MAX_LENGTH, " ");
+                foreach (var message in listMessage)
+                {
+                    var (title, des) = SplitMessage(message);
+                    string options = ConvertOptions(title, des);
+                    Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageReviewInternToUserDto { message = reviewAt, username = userNameToSend, options = JsonConvert.DeserializeObject(options) });
+                }
+            }
+            else
+            {
+                var (title, des) = SplitMessage(komuMessage);
+                string options = ConvertOptions(title, des);
+                Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageReviewInternToUserDto { message = reviewAt, username = userNameToSend, options = JsonConvert.DeserializeObject(options) });
+            }
+        }
+
+        public (string, string) SplitMessage(string message)
+        {
+            int splitIndex = message.IndexOf("\r\n");
+            if (splitIndex >= 0)
+            {
+                string part1 = message.Substring(0, splitIndex);
+                string part2 = message.Substring(splitIndex + 2); 
+                return (part1, part2);
+            }
+            return (message, string.Empty);
+        }
+
+        public string ConvertOptions (string title, string des)
+        {
+            string date = DateTime.Now.ToString("dd/MM/yyyy");
+            var options = new JObject(
+                new JProperty("embed", new JArray(
+                    new JObject(
+                        new JProperty("color", "yellow"),
+                        new JProperty("title", title),
+                        new JProperty("description", des),  
+                        new JProperty("timestamp", date),
+                        new JProperty("footer", new JObject(  
+                            new JProperty("text", "Powered by Mezon"),
+                            new JProperty("icon_url", "https://cdn.mezon.vn/1837043892743049216/1840654271217930240/1827994776956309500/857_0246x0w.webp") 
+                        ))
+                    )
+                ))
+            );
+            return options.ToString();
         }
 
         public async Task<T> GetAsync<T>(string url)
