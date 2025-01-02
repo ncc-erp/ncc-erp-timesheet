@@ -331,26 +331,28 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
 
-            ReviewIntern review = _reviewInternService.LastReviewIntern();
-            var listPMNotReview = _reviewInternService.GetListPmNotReview(review.Id);
+            long reviewId = _reviewInternService.LastIdReviewIntern();
+            var listPMNotReview = _reviewInternService.GetListPmNotReview(reviewId);
 
             int reviewDeadline = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyReviewDeadline));
             DateTime deadlineDate = new DateTime(today.Year, today.Month, reviewDeadline);
             string notifyPenaltyFee = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyPenaltyFee);
 
-            string message = "Review Intern " + review.Month + "/" + review.Year;
             var sb = new StringBuilder();
+            var interns = new StringBuilder();
             foreach (var item in listPMNotReview)
             {
                 sb.AppendLine($"PM: {item.KomuAccountTag()} Please complete reviewing **{item.InterShips.Count}** interns before " +
                               $"**{DateTimeUtils.ToString(deadlineDate.Date)}** (**{notifyPenaltyFee}đ/intern** if you miss. Don't lose your money):");
-                sb.AppendLine($"```");
+                interns.AppendLine($"```");
                 foreach (var interShip in item.InterShips)
                 {
-                    sb.AppendLine($"[{interShip.BranchDisplayName}] {interShip.FullName} - {CommonUtils.UserLevelName(interShip.Level)}");
+                    interns.AppendLine($"[{interShip.BranchDisplayName}] {interShip.FullName} - {CommonUtils.UserLevelName(interShip.Level)}");
                 }
-                sb.AppendLine($"```");
-                _komuService.SendMessageReviewInternToUser(sb.ToString(), item.UserName.Trim(), message);
+                interns.AppendLine($"```");
+                _komuService.SendMessageReviewInternToUser(sb.ToString(), item.UserName.Trim(), interns.ToString());
+
+                interns.Clear();
                 sb.Clear();
             }
         }

@@ -247,7 +247,7 @@ namespace Timesheet.Services.Komu
             }
         }
 
-        public void SendMessageReviewInternToUser(string komuMessage, string userName, string reviewAt)
+        public void SendMessageReviewInternToUser(string komuMessage, string userName, string interns = null)
         {
             if (_isNotifyToKomu != "true")
             {
@@ -274,64 +274,36 @@ namespace Timesheet.Services.Komu
                 return;
             }
 
-            if (komuMessage.Contains("\n"))
+            DateTime previous = DateTime.Now.AddMonths(-1);
+            var options = ConvertOptions(messageToSend, interns);
+            Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageReviewInternToUserDto
             {
-                var listMessage = CommonUtils.SeparateMessage(messageToSend, MAX_LENGTH, "\n");
-                foreach (var message in listMessage)
-                {
-                    var (title, des) = SplitMessage(message);
-                    string options = ConvertOptions(title, des);
-                    Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageReviewInternToUserDto { message = reviewAt, username = userNameToSend, options = JsonConvert.DeserializeObject(options) });
-                }
-            }
-            else if (komuMessage.Contains(" "))
-            {
-                var listMessage = CommonUtils.SeparateMessage(messageToSend, MAX_LENGTH, " ");
-                foreach (var message in listMessage)
-                {
-                    var (title, des) = SplitMessage(message);
-                    string options = ConvertOptions(title, des);
-                    Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageReviewInternToUserDto { message = reviewAt, username = userNameToSend, options = JsonConvert.DeserializeObject(options) });
-                }
-            }
-            else
-            {
-                var (title, des) = SplitMessage(komuMessage);
-                string options = ConvertOptions(title, des);
-                Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageReviewInternToUserDto { message = reviewAt, username = userNameToSend, options = JsonConvert.DeserializeObject(options) });
-            }
+                message = "Review Intern " + previous.Month + "/" + previous.Year,
+                username = userNameToSend,
+                options = options
+            });
         }
 
-        public (string, string) SplitMessage(string message)
+        public object ConvertOptions(string title, string description)
         {
-            int splitIndex = message.IndexOf("\r\n");
-            if (splitIndex >= 0)
+            return new
             {
-                string part1 = message.Substring(0, splitIndex);
-                string part2 = message.Substring(splitIndex + 2); 
-                return (part1, part2);
-            }
-            return (message, string.Empty);
-        }
-
-        public string ConvertOptions (string title, string des)
-        {
-            string date = DateTime.Now.ToString("dd/MM/yyyy");
-            var options = new JObject(
-                new JProperty("embed", new JArray(
-                    new JObject(
-                        new JProperty("color", "yellow"),
-                        new JProperty("title", title),
-                        new JProperty("description", des),  
-                        new JProperty("timestamp", date),
-                        new JProperty("footer", new JObject(  
-                            new JProperty("text", "Powered by Mezon"),
-                            new JProperty("icon_url", "https://cdn.mezon.vn/1837043892743049216/1840654271217930240/1827994776956309500/857_0246x0w.webp") 
-                        ))
-                    )
-                ))
-            );
-            return options.ToString();
+                embed = new[]
+                {
+                    new
+                    {
+                        color = "yellow",
+                        title = title,
+                        description = description,
+                        timestamp = DateTime.Now.ToString("yyyy-MM-dd"),
+                        footer = new
+                        {
+                            text = "Powered by Mezon",
+                            icon_url = "https://cdn.mezon.vn/1837043892743049216/1840654271217930240/1827994776956309500/857_0246x0w.webp"
+                        }
+                    }
+                }
+            };
         }
 
         public async Task<T> GetAsync<T>(string url)
