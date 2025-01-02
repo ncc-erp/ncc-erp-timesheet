@@ -213,7 +213,7 @@ namespace Timesheet.BackgroundWorker
                 sb.AppendLine($"```");
                 foreach (var interShip in item.InterShips)
                 {
-                    sb.AppendLine($"{interShip.FullName} [{interShip.BranchDisplayName}] ({CommonUtils.UserLevelName(interShip.Level)})");
+                    sb.AppendLine($"[{interShip.BranchDisplayName}] {interShip.FullName} - {CommonUtils.UserLevelName(interShip.Level)}");
                 }
                 sb.AppendLine($"```");
                 string message = "Review Intern " + review.Month + "/" + review.Year;
