@@ -158,6 +158,14 @@ namespace Timesheet.BackgroundWorker
             {
                 Logger.Error("NotifyApproveTimesheet() error: " + e.Message);
             }
+            try
+            {
+                NotifyPMReviewerIntern();
+            }
+            catch (Exception e)
+            {
+                Logger.Error("NotifyPMReviewerIntern() error: " + e.Message);
+            }
         }
 
         private void AddTimkeeping(DateTime now)
@@ -291,6 +299,57 @@ namespace Timesheet.BackgroundWorker
                         _komuService.NotifyToChannel(sb.ToString(), arrListChannel[i].Trim());
                     }
                 }
+                sb.Clear();
+            }
+        }
+
+        private void NotifyPMReviewerIntern()
+        {
+            Logger.Info("NotifyReviewerIntern() start");
+            string notifyEnableWorker = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyEnableWorker);
+            if (notifyEnableWorker != "true")
+            {
+                Logger.Info("NotifyReviewerIntern() stop: notifyEnableWorker=" + notifyEnableWorker);
+                return;
+            }
+
+            var NRITNotifyOnDates = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyOnDates);
+            string[] notifyOnDates = NRITNotifyOnDates.Split(',');
+            var today = DateTimeUtils.GetNow();
+            Logger.Info("NotifyReviewerIntern() NRITNotifyOnDates=" + NRITNotifyOnDates + ",today.Day=" + today.Day + ", today.Hour=" + today.Hour);
+            if (!notifyOnDates.Contains(today.Day.ToString()))
+            {
+                Logger.Info("NotifyReviewerIntern() stop: today is not in notifyOnDates=>stop");
+                return;
+            }
+
+            string notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyAtHour);
+
+            if (notifyAtHourConfig != today.Hour.ToString())
+            {
+                Logger.Error("NotifyReviewerIntern() stop: notifyAtHourConfig=" + notifyAtHourConfig);
+                return;
+            }
+
+            long reviewId = _reviewInternService.LastIdReviewIntern();
+            var listPMNotReview = _reviewInternService.GetListPmNotReview(reviewId);
+
+            int reviewDeadline = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyReviewDeadline));
+            DateTime deadlineDate = new DateTime(today.Year, today.Month, reviewDeadline);
+            string notifyPenaltyFee = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyPenaltyFee);
+
+            var sb = new StringBuilder();
+            foreach (var item in listPMNotReview)
+            {
+                sb.AppendLine($"PM: {item.KomuAccountTag()} please complete reviewing **{item.InterShips.Count}** interns before " +
+                              $"**{DateTimeUtils.ToString(deadlineDate.Date)}** (**{notifyPenaltyFee}đ/intern** if you miss. Don't lose your money):");
+                sb.AppendLine($"```");
+                foreach (var interShip in item.InterShips)
+                {
+                    sb.AppendLine($"{interShip.FullName} [{interShip.BranchDisplayName}] ({CommonUtils.UserLevelName(interShip.Level)})");
+                }
+                sb.AppendLine($"```");
+                _komuService.SendMessageToUser(sb.ToString(), item.UserName.Trim());
                 sb.Clear();
             }
         }
