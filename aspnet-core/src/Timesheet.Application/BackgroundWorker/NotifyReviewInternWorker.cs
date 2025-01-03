@@ -208,7 +208,7 @@ namespace Timesheet.BackgroundWorker
             var interns = new StringBuilder();
             foreach (var item in listPMNotReview)
             {
-                sb.AppendLine($"PM: {item.KomuAccountTag()} please complete reviewing **{item.InterShips.Count}** interns before " +
+                sb.AppendLine($"PM: {item.KomuAccountTag()} Please complete reviewing **{item.InterShips.Count}** interns before " +
                                 $"**{DateTimeUtils.ToString(deadlineDate.Date)}** (**{notifyPenaltyFee}đ/intern** if you miss. Don't lose your money):");
                 interns.AppendLine($"```");
                 foreach (var interShip in item.InterShips)
