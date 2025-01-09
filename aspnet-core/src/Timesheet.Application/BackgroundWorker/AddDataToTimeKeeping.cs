@@ -14,7 +14,6 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using Timesheet.APIs.TeamBuildingDetails;
 using Timesheet.APIs.TeamBuildingDetails.Dto;
 using Timesheet.DomainServices;
@@ -306,14 +305,14 @@ namespace Timesheet.BackgroundWorker
         private void NotifyPMReviewerIntern()
         {
             Logger.Info("NotifyReviewerIntern() start");
-            string notifyEnableWorker = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyEnableWorker);
+            string notifyEnableWorker = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyReviewInternEnableWorker);
             if (notifyEnableWorker != "true")
             {
                 Logger.Info("NotifyReviewerIntern() stop: notifyEnableWorker=" + notifyEnableWorker);
                 return;
             }
 
-            var NRITNotifyOnDates = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyOnDates);
+            var NRITNotifyOnDates = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPmReviewInternOnDates);
             string[] notifyOnDates = NRITNotifyOnDates.Split(',');
             var today = DateTimeUtils.GetNow();
             Logger.Info("NotifyReviewerIntern() NRITNotifyOnDates=" + NRITNotifyOnDates + ",today.Day=" + today.Day + ", today.Hour=" + today.Hour);
@@ -323,7 +322,7 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
 
-            string notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyAtHour);
+            string notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyReviewInternAtHour);
 
             if (notifyAtHourConfig != today.Hour.ToString())
             {

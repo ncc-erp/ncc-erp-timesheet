@@ -1233,7 +1233,7 @@ namespace Timesheet.APIs.ReviewDetails
             await WorkScope.UpdateAsync(detail);
 
             List<long> listId = new List<long> { detail.Id };
-            bool check = HasRemainingInternReviewed(detail.ReviewId, ReviewInternStatus.PmReviewed, listId);
+            bool check = GetReviewInternStatusSummary(detail.ReviewId, ReviewInternStatus.PmReviewed, listId).hasAllSameStatus;
             if(check)
             {
                 string headPmEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
@@ -1471,7 +1471,7 @@ namespace Timesheet.APIs.ReviewDetails
 
         public async Task CheckSendMailToPresident(long reviewId, List<long> listId)
         {
-            bool check = HasRemainingInternReviewed(reviewId, ReviewInternStatus.Reviewed, listId);
+            bool check = GetReviewInternStatusSummary(reviewId, ReviewInternStatus.Reviewed, listId).hasAllSameStatus;
             if (!check) return;
 
             string presidentEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentEmail);
@@ -1480,12 +1480,22 @@ namespace Timesheet.APIs.ReviewDetails
             await SendMailToNotifyTransition(presidentEmail, username, ReviewInternStatus.Reviewed, reviewId);
         }
 
-        public bool HasRemainingInternReviewed(long reviewId, ReviewInternStatus status, List<long> listId = null)
+        public (bool hasAllSameStatus, int totalPendingInterns) GetReviewInternStatusSummary(long reviewId, ReviewInternStatus status, List<long> listId = null)
         {
-            return WorkScope.GetAll<ReviewDetail>()
-              .Where(x => x.ReviewId == reviewId)
-              .WhereIf(listId != null && listId.Any(), x => !listId.Contains(x.Id))
-              .All(x => x.Status == status);
+            var query = WorkScope.GetAll<ReviewDetail>()
+                .Where(x => x.ReviewId == reviewId)
+                .WhereIf(listId != null && listId.Any(), x => !listId.Contains(x.Id));
+            var result = query.GroupBy(x => x.Status)
+                      .Select(g => new
+                      {
+                          Status = g.Key,
+                          Count = g.Count()
+                      })
+                      .ToList();
+
+            var totalPendingInterns = result.FirstOrDefault(x => x.Status == status)?.Count ?? 0;
+            var hasAllSameStatus = result.Count == 1 && result.First().Status == status;
+            return (hasAllSameStatus, totalPendingInterns);
         }
 
         public async Task SendMailToNotifyTransition(string email, string username, ReviewInternStatus status, long reviewId)
@@ -1515,7 +1525,9 @@ namespace Timesheet.APIs.ReviewDetails
                 content.Append('\n');
                 content.Append(link);
                 var emailSubject = $"[NCC-Review Intern {reviewIntern.Month}/{reviewIntern.Year}] Thông báo giai đoạn review và chuyển {title} trên timesheet";
-                var targetEmails = new List<string>() { email };
+                var targetEmails = new List<string> { email };
+                targetEmails.AddRange(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
 
                 await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                 {

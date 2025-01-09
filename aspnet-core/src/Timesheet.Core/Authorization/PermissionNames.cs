@@ -96,8 +96,8 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_SpecialProjectTaskSetting_Edit = "Admin.Configuration.SpecialProjectTaskSetting.EditSpecialProjectTaskSetting";
         public const string Admin_Configuration_NRITConfig_View = "Admin.Configuration.NRITConfig.ViewNRITConfig";
         public const string Admin_Configuration_NRITConfig_Update = "Admin.Configuration.NRITConfig.UpdateNRITConfig";
-        public const string Admin_Configuration_NHPMAPRITConfig_View = "Admin.Configuration.NHPMAPRITConfig.ViewNHPMAPRITConfig";
-        public const string Admin_Configuration_NHPMAPRITConfig_Update = "Admin.Configuration.NHPMAPRITConfig.UpdateNHPMAPRITConfig";
+        public const string Admin_Configuration_NRITVMAEConfig_View = "Admin.Configuration.NRITVMAEConfig.ViewNRITVMAEConfig";
+        public const string Admin_Configuration_NRITVMAEConfig_Update = "Admin.Configuration.NRITVMAEConfig.UpdateNRITVMAEConfig";
         public const string Admin_Configuration_UnlockTimesheetSetting_View = "Admin.Configuration.UnlockTimesheetSetting.ViewUnlockTimesheetSetting";
         public const string Admin_Configuration_UnlockTimesheetSetting_Update = "Admin.Configuration.UnlockTimesheetSetting.UpdateUnlockTimesheetSetting";
         public const string Admin_Configuration_RetroNotifyConfig = "Admin.Configuration.RetroNotifyConfig";
@@ -453,8 +453,8 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_Configuration_NotificationSetting_Edit,
                     PermissionNames.Admin_Configuration_NRITConfig_View,
                     PermissionNames.Admin_Configuration_NRITConfig_Update,
-                    PermissionNames.Admin_Configuration_NHPMAPRITConfig_View,
-                    PermissionNames.Admin_Configuration_NHPMAPRITConfig_Update,
+                    PermissionNames.Admin_Configuration_NRITVMAEConfig_View,
+                    PermissionNames.Admin_Configuration_NRITVMAEConfig_Update,
                     PermissionNames.Admin_Configuration_UnlockTimesheetSetting_View,
                     PermissionNames.Admin_Configuration_UnlockTimesheetSetting_Update,
                     PermissionNames.Admin_Configuration_SettingWorkerNoticeKomuPunishmentUserNoCheckInOut_View,
@@ -954,8 +954,8 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NotificationSetting_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Notification Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NotificationSetting_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notification Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Notify Review Intern Setting" },
-            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NHPMAPRITConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Notify to HeadPM and President review Intern Setting"},
-            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NHPMAPRITConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notify to HeadPM and President review Intern Setting"},
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITVMAEConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Notify Review Intern via Mezon and Email Setting"},
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITVMAEConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notify Review Intern via Mezon and Email Setting"},
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notify Review Intern Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_UnlockTimesheetSetting_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Unlock Timesheet Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_UnlockTimesheetSetting_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Unlock Timesheet Setting" },
@@ -1391,8 +1391,8 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NHPMAPRITConfig, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Notify To HeadPM and President Review Intern Setting",
                                  Childrens = new List<SystemPermission>()
                                  {
-                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NHPMAPRITConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View" },
-                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NHPMAPRITConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit" },
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITVMAEConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View" },
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITVMAEConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit" },
                                  }
                             },
                             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_UnlockTimesheetSetting, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Unlock Timesheet Setting",

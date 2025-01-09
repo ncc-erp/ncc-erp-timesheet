@@ -1,4 +1,4 @@
-import { HRMConfigDto, KomuDto, ProjectConfigDto, NRITConfigDto, UnlockTimesheetConfigDto, RetroNotifyConfigDto, TeamBuildingConfigDto, ApproveTimesheetNotifyConfigDto, ApproveRequestOffNotifyConfigDto, SendMessageRequestPendingTeamBuildingToHRConfigDto, NotifyHRTheEmployeeMayHaveLeftConfigDto,MoneyPMUnlockTimeSheetConfigDto, SendMessageToPunishUserConfigDto, GenerateRetroResultConfigDto, CreateNewRetroConfigDto, ResetDataTeamBuildingConfigDto, NotifyHeadPMAndPresidentReviewInternConfigDto } from './../../configuration/configuration.component';
+import { HRMConfigDto, KomuDto, ProjectConfigDto, NRITConfigDto, UnlockTimesheetConfigDto, RetroNotifyConfigDto, TeamBuildingConfigDto, ApproveTimesheetNotifyConfigDto, ApproveRequestOffNotifyConfigDto, SendMessageRequestPendingTeamBuildingToHRConfigDto, NotifyHRTheEmployeeMayHaveLeftConfigDto,MoneyPMUnlockTimeSheetConfigDto, SendMessageToPunishUserConfigDto, GenerateRetroResultConfigDto, CreateNewRetroConfigDto, ResetDataTeamBuildingConfigDto, NotifyReviewInternViaMezonAndEmailConfigDto } from './../../configuration/configuration.component';
 import { HttpClient } from '@angular/common/http';
 import { BaseApiService } from '@app/service/api/base-api.service';
 import { Injectable } from '@angular/core';
@@ -56,12 +56,13 @@ export class ConfigurationService extends BaseApiService {
   SetNRITConfig(config: NRITConfigDto): Observable<any> {
     return this.http.post(this.rootUrl + "/SetNRITConfig", config);
   }
-  GetNHPMAPRITConfig(): Observable<any> {
-    return this.http.get(this.rootUrl + "/GetNHPMAPRITConfig");
+
+  GetNRITVMAEConfig(): Observable<any> {
+    return this.http.get(this.rootUrl + "/GetNRITVMAEConfig");
   }
 
-  SetNHPMAPRITConfig(config: NotifyHeadPMAndPresidentReviewInternConfigDto): Observable<any> {
-    return this.http.post(this.rootUrl + "/SetNHPMAPRITConfig", config);
+  SetNRITVMAEConfig(config: NotifyReviewInternViaMezonAndEmailConfigDto): Observable<any> {
+    return this.http.post(this.rootUrl + "/SetNRITVMAEConfig", config);
   }
 
   GetUnlockTimesheetConfig(): Observable<any> {

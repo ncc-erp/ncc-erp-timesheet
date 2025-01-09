@@ -73,8 +73,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_MEZON_SETTNG = PERMISSIONS_CONSTANT. EditMezonSetting
   VIEW_NRIT_CONFIG = PERMISSIONS_CONSTANT.ViewNRITSetting;
   EDIT_NRIT_CONFIG = PERMISSIONS_CONSTANT.EditNRITSetting;
-  VIEW_NHPMAPRIT_CONFIG = PERMISSIONS_CONSTANT.ViewNHPMAPRITSetting;
-  EDIT_NHPMAPRIT_CONFIG = PERMISSIONS_CONSTANT.EditNHPMAPRITSetting;
+  VIEW_NRITVMAE_CONFIG = PERMISSIONS_CONSTANT.ViewNRITVMAESetting;
+  EDIT_NRITVMAE_CONFIG = PERMISSIONS_CONSTANT.EditNRITVMAESetting;
   VIEW_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.ViewUnlockTimesheetSetting;
   UPDATE_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.UpdateUnlockTimesheetSetting;
   VIEW_PUNISHCHECKIN_CONFIG = PERMISSIONS_CONSTANT.ViewSendKomuPunishedCheckIn;
@@ -188,9 +188,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isShowNoticePunishedCheckIn: boolean = false;
   NRITConfig = {} as NRITConfigDto;
   
-  isShowNHPMAPRITConfig: boolean = false;
-  isEditNHPMAPRITConfig: boolean = false;
-  NHPMAPRITConfig= {} as NotifyHeadPMAndPresidentReviewInternConfigDto;
+  isShowNRITVMAEConfig: boolean = false;
+  isEditNRITVMAEConfig: boolean = false;
+  NRITVMAEConfig= {} as NotifyReviewInternViaMezonAndEmailConfigDto;
 
   unlockSetting = {} as UnlockTimesheetConfigDto;
   timesCanLateAndEarlyInMonthSetting = {} as TimesCanLateAndEarlyInMonthSettingDto;
@@ -310,7 +310,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getResetDataTeamBuildingConfig();
     
     this.getSendMessageToPunishUserConfig();
-    this.getNHPMAPRITConfig();
+    this.getNRITVMAEConfig();
   }
   protected list(): void {
     if (this.permission.isGranted(this.VIEW_EMAIL_SETTING)) {
@@ -1088,54 +1088,85 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     })
   }
 
-  // Notify To HeadPm And President Review Intern Setting
-  refreshNHPMAPRITConfig() {
-    this.getNHPMAPRITConfig();
-    this.isEditNHPMAPRITConfig = false;
+  // Notify Review Intern via Mezon and Email Setting
+  refreshNRITVMAEConfig() {
+    this.getNRITVMAEConfig();
+    this.isEditNRITVMAEConfig = false;
   }
 
-  getNHPMAPRITConfig() {
-    if (this.permission.isGranted(this.VIEW_NHPMAPRIT_CONFIG)) {
-      this.configurationService.GetNHPMAPRITConfig().subscribe(data => {
-        this.NHPMAPRITConfig = data.result;
+  getNRITVMAEConfig() {
+    if (this.permission.isGranted(this.VIEW_NRITVMAE_CONFIG)) {
+      this.configurationService.GetNRITVMAEConfig().subscribe(data => {
+        this.NRITVMAEConfig = data.result;
       })
     }
   }
 
-  editNHPMAPRITConfig() {
-    this.isEditNHPMAPRITConfig = true;
+  editNRITVMAEConfig() {
+    this.isEditNRITVMAEConfig = true;
   }
 
   onNHPMAPRITEnableWorker(e) {
     if (e.checked == true) {
-      this.NHPMAPRITConfig.notifyHeadPMAndPresidentReviewInternEnableWorker = "true"
+      this.NRITVMAEConfig.notifyReviewInternEnableWorker = "true"
     }
     else {
-      this.NHPMAPRITConfig.notifyHeadPMAndPresidentReviewInternEnableWorker = "false"
+      this.NRITVMAEConfig.notifyReviewInternEnableWorker = "false"
     }
   }
 
-  SaveNHPMAPRITConfig() {
-    if (_.isEmpty(this.NHPMAPRITConfig.notifyHeadPMAndPresidentReviewInternAtHour)) {
-      abp.message.error("At hour day required!")
-      return;
-    }
-    if (_.isEmpty(this.NHPMAPRITConfig.notifyHeadPMAndPresidentReviewInternOnDate)) {
-      abp.message.error("Notify on dates required!")
+  SaveNRITVMAEConfig() {
+    if (_.isEmpty(this.NRITVMAEConfig.notifyReviewInternIntervalMinutes)) {
+      abp.message.error("Notify Review Intern Interval Minutes required!")
       return;
     }
 
-    if (_.isEmpty(this.NHPMAPRITConfig.notifyHeadPmMail)) {
+    if (_.isEmpty(this.NRITVMAEConfig.notifyReviewInternAtHour)) {
+      abp.message.error("Notify Review Intern At hour day required!")
+      return;
+    }
+
+    if (_.isEmpty(this.NRITVMAEConfig.notifyHeadPMReviewInternOnDate)) {
+      abp.message.error("Notify HeadPM Review Intern On Date required!")
+      return;
+    }
+
+    if (_.isEmpty(this.NRITVMAEConfig.notifyPresidentReviewInternOnDate)) {
+      abp.message.error("Notify President Review Intern On Date required!")
+      return;
+    }
+
+    if (_.isEmpty(this.NRITVMAEConfig.notifyHeadPmMail)) {
       abp.message.error("Notify HeadPm Mail required!")
       return;
     }
 
-    if (_.isEmpty(this.NHPMAPRITConfig.notifyPresidentEmail)) {
+    if (_.isEmpty(this.NRITVMAEConfig.notifyPresidentEmail)) {
       abp.message.error("Notify President Mail required!")
       return;
     }
-    this.configurationService.SetNHPMAPRITConfig(this.NHPMAPRITConfig).subscribe((res:any) => {
-      this.isEditNHPMAPRITConfig = !this.isEditNHPMAPRITConfig;
+
+    if (_.isEmpty(this.NRITVMAEConfig.notifyHrEmail)) {
+      abp.message.error("Notify Hr Mail required!")
+      return;
+    }
+
+    if (_.isEmpty(this.NRITVMAEConfig.updateTimeCronjobAtHour)) {
+      abp.message.error("Update Time Cronjob At Hour required!")
+      return;
+    }
+
+    if (_.isEmpty(this.NRITVMAEConfig.updateTimeCronjobOnDate)) {
+      abp.message.error("Update Time Cronjobn on date required!")
+      return;
+    }
+
+    if (_.isEmpty(this.NRITVMAEConfig.notifyPmReviewInternOnDates)) {
+      abp.message.error("Notify Pm Review Intern On Dates required!")
+      return;
+    }
+    this.configurationService.SetNRITVMAEConfig(this.NRITVMAEConfig).subscribe((res:any) => {
+      this.isEditNRITVMAEConfig = !this.isEditNRITVMAEConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
       }
@@ -1825,13 +1856,20 @@ export class NRITConfigDto {
   notifyPenaltyFee: string;
 }
 
-export class NotifyHeadPMAndPresidentReviewInternConfigDto {
-  notifyHeadPMAndPresidentReviewInternEnableWorker: string;
-  notifyHeadPMAndPresidentReviewInternAtHour: string;
-  notifyHeadPMAndPresidentReviewInternOnDate: string;
+export class NotifyReviewInternViaMezonAndEmailConfigDto {
+  notifyReviewInternEnableWorker: string;
+  notifyReviewInternIntervalMinutes: string;
+  notifyReviewInternAtHour: string;
+  notifyHeadPMReviewInternOnDate: string;
+  notifyPresidentReviewInternOnDate: string;
   notifyHeadPmMail: string;
   notifyPresidentEmail: string;
+  notifyHrEmail: string;
+  updateTimeCronjobAtHour: string;
+  updateTimeCronjobOnDate: string;
+  notifyPmReviewInternOnDates: string;
 }
+
 export class ProjectConfigDto {
   projectUri: string;
   secretCode: string;
