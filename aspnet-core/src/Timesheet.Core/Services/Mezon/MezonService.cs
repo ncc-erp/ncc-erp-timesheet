@@ -8,6 +8,8 @@ using Newtonsoft.Json;
 using Ncc.Configuration;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Timesheet.Services.Mezon
 {
@@ -68,10 +70,67 @@ namespace Timesheet.Services.Mezon
             return default;
 
         }
+
         public void NotifyToChannel(string MezonUrl, string MezonMessage)
         {
-            Post(MezonUrl, new { type = "TIMESHEET", message = new { t = MezonMessage } });
+            var mkList = ExtractMarkdown(MezonMessage);
+            var mentions = ExtractMentions(MezonMessage);
+
+            Post(MezonUrl, new
+            {
+                type = "TIMESHEET",
+                message = new
+                {
+                    t = MezonMessage,
+                    mk = mkList,
+                    mentions = mentions
+                }
+            });
         }
+
+        public List<object> ExtractMarkdown(string message)
+        {
+            var mkList = new List<object>();
+            string patternRegex = @"(```|`)";
+            var matches = Regex.Matches(message, patternRegex);
+
+            for (int i = 0; i < matches.Count; i++)
+            {
+                var currentMatch = matches[i];
+                if (i + 1 < matches.Count && matches[i + 1].Value == currentMatch.Value)
+                {
+                    mkList.Add(new
+                    {
+                        type = currentMatch.Value == "```" ? "t" : "s",
+                        s = currentMatch.Index,
+                        e = matches[i + 1].Index + matches[i + 1].Length
+                    });
+                    i++;
+                }
+            }
+            return mkList;
+        }
+
+        public List<object> ExtractMentions(string message)
+        {
+            var mentions = new List<object>();
+            string patternRegex = @"@([a-zA-Z0-9.]+)";
+            string excludedPattern = @"(```.*?```|`.*?`)";
+            string cleanedMessage = Regex.Replace(message, excludedPattern, string.Empty, RegexOptions.Singleline);
+
+            var matches = Regex.Matches(cleanedMessage, patternRegex);
+            foreach (Match match in matches)
+            {
+                mentions.Add(new
+                {
+                    user_id = match.Groups[1].Value,
+                    s = match.Index,
+                    e = match.Index + match.Length
+                });
+            }
+            return mentions;
+        }
+
         public void Post(string url, object input)
         {
             string strInput = JsonConvert.SerializeObject(input);
