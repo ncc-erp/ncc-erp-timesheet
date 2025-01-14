@@ -124,7 +124,7 @@ namespace Timesheet.Services.Mezon
             {
                 mentions.Add(new
                 {
-                    user_id = match.Groups[1].Value,
+                    username = match.Groups[1].Value,
                     s = match.Index,
                     e = match.Index + match.Length
                 });
