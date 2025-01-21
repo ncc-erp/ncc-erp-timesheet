@@ -34,6 +34,8 @@ using Timesheet.APIs.Mezon.Dto;
 using Timesheet.Services.W2;
 using Timesheet.APIs.RequestDays.Dto;
 using Microsoft.Office.Interop.Word;
+using Abp.Configuration;
+using Microsoft.AspNetCore.Http;
 
 namespace Timesheet.APIs.Mezon
 {
@@ -47,10 +49,13 @@ namespace Timesheet.APIs.Mezon
         private readonly RequestDayAppService _requestDayAppService;
         private readonly MyTimesheetsAppService _myTimesheetsAppService;
         private readonly IW2Service _w2Service;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICommonServices _commonService;
         public MezonAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
             IWorkScope workScope, IApproveRequestOffServices approveRequestOffServices,
             MezonService mezonService, IUserServices userService, RequestDayAppService requestDayAppService,
-            MyTimesheetsAppService myTimesheetsAppService, IW2Service w2Service) : base(workScope)
+            MyTimesheetsAppService myTimesheetsAppService, IW2Service w2Service,
+            IHttpContextAccessor httpContextAccessor, ICommonServices commonService) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _komuService = komuService;
@@ -60,6 +65,8 @@ namespace Timesheet.APIs.Mezon
             _requestDayAppService = requestDayAppService;
             _myTimesheetsAppService = myTimesheetsAppService;
             _w2Service = w2Service;
+            _httpContextAccessor = httpContextAccessor;
+            _commonService = commonService;
         }
 
         [HttpPost]
@@ -337,6 +344,118 @@ namespace Timesheet.APIs.Mezon
             {
                 throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
             }
+        }
+
+        [HttpGet]
+        [System.Security.SuppressUnmanagedCodeSecurity]
+        public async Task<List<GetTimesheetDto>> GetAllTimesheetOfUser(DateTime startDate, DateTime endDate, string emailAddress)
+        {
+            var userIdCurrent = await _userService.GetUserIdByEmail(emailAddress);
+            if (!userIdCurrent.HasValue)
+            {
+                throw new UserFriendlyException("Not found user with email " + emailAddress);
+            }
+            long userId = userIdCurrent.Value;
+
+            var openTalkTimes = WorkScope.GetAll<OpenTalk>()
+                .Where(x => x.UserId == userId)
+                .ToList()
+                .GroupBy(x => x.DateAt.Date)
+                .ToDictionary(g => g.Key, g => g.Sum(x => x.totalTime));
+
+            var timesheets = await (from myTimesheet in WorkScope.All<MyTimesheet>().AsNoTracking()
+                                    join ptask in WorkScope.All<ProjectTask>().AsNoTracking() on myTimesheet.ProjectTaskId equals ptask.Id
+                                    join project in WorkScope.All<Project>().AsNoTracking() on ptask.ProjectId equals project.Id
+                                    join task in WorkScope.All<Ncc.Entities.Task>().AsNoTracking() on ptask.TaskId equals task.Id
+                                    join cus in WorkScope.All<Customer>().AsNoTracking() on project.CustomerId equals cus.Id
+                                    where myTimesheet.UserId == userId && myTimesheet.DateAt >= startDate && myTimesheet.DateAt <= endDate
+                                    select new GetTimesheetDto
+                                    {
+                                        Id = myTimesheet.Id,
+                                        CustomerName = cus.Name,
+                                        DateAt = myTimesheet.DateAt,
+                                        ProjectCode = project.Code,
+                                        ProjectName = project.Name,
+                                        Status = myTimesheet.Status,
+                                        TaskName = task.Name,
+                                        WorkingTime = myTimesheet.WorkingTime,
+                                        ProjectTaskId = ptask.Id,
+                                        Note = myTimesheet.Note,
+                                        TypeOfWork = myTimesheet.TypeOfWork,
+                                        IsCharged = myTimesheet.IsCharged,
+                                        Billable = ptask.Billable,
+                                        IsTemp = myTimesheet.IsTemp,
+                                        ProjectTargetUser = myTimesheet.ProjectTargetUser.User.FullName,
+                                        WorkingTimeTargetUser = myTimesheet.TargetUserWorkingTime,
+                                        OpenTalkJoinTime = task.Name == "Open Talk" && openTalkTimes.ContainsKey(myTimesheet.DateAt.Date) ? openTalkTimes[myTimesheet.DateAt.Date] : 0
+                                    }).ToListAsync();
+
+            return timesheets;
+        }
+
+        [HttpPost]
+        [System.Security.SuppressUnmanagedCodeSecurity]
+        public async Task<string> SubmitTsToPending(StartEndDateDto input, string emailAddress)
+        {
+            var userIdCurrent = await _userService.GetUserIdByEmail(emailAddress);
+            if (!userIdCurrent.HasValue)
+            {
+                throw new UserFriendlyException("Not found user with email " + emailAddress);
+            }
+            long userId = userIdCurrent.Value;
+
+            var isUnLocked = _myTimesheetsAppService.IsUserUnlockedToLogTS(userId);
+
+            var mytimesheets = await WorkScope.GetAll<MyTimesheet>()
+                .Where(s => s.UserId == userId)
+                .Where(s => s.DateAt >= input.StartDate.Date && s.DateAt.Date <= input.EndDate)
+                .Where(s => s.Status == TimesheetStatus.None)
+                .ToListAsync();
+
+            //Valid :
+            DateTime lockDate = _commonService.getlockDateUser();
+            if (!isUnLocked && mytimesheets.Any(s => s.DateAt.Date < lockDate))
+            {
+                throw new UserFriendlyException("Go to ims.nccsoft.vn > Unlock timesheet");
+            }
+
+            var firstDateCanUnlock = _myTimesheetsAppService.GetFirstDateToLockTS(userId, isUnLocked).Result;
+            if (input.EndDate.Date < firstDateCanUnlock)
+            {
+                throw new UserFriendlyException("Timesheet was locked! You can submit timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
+            }
+
+            foreach (var item in mytimesheets)
+            {
+                item.Status = TimesheetStatus.Pending;
+                if (isUnLocked)
+                {
+                    item.IsUnlockedByEmployee = isUnLocked;
+                }
+            }
+            await WorkScope.UpdateRangeAsync(mytimesheets);
+
+            await notifySubmitTimesheet(mytimesheets, userId);
+
+            var result = "Submit success " + mytimesheets.Count + " timesheets";
+            return result;
+        }
+
+        public async System.Threading.Tasks.Task notifySubmitTimesheet(List<MyTimesheet> mytimesheets, long userId)
+        {
+            var SendEmailSubmitTimesheet = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendEmailTimesheet);
+            var NotifyKomuWhenSubmitTimesheet = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendKomuSubmitTimesheet);
+            if (NotifyKomuWhenSubmitTimesheet != "true" && SendEmailSubmitTimesheet != "true")
+            {
+                Logger.Info("SendEmailSubmitTimesheet=" + SendEmailSubmitTimesheet + ", UserId=" + userId);
+                Logger.Info("NotifyKomuWhenSubmitTimesheet=" + NotifyKomuWhenSubmitTimesheet + ", UserId=" + userId);
+                return;
+            }
+            var requester = await _myTimesheetsAppService.getNotifyUserInfoDto(userId);
+            var receivers = await _myTimesheetsAppService.getReceiverList(mytimesheets);
+
+            _myTimesheetsAppService.notifyKomuWhenSubmitTimesheet(requester, receivers);
+            await _myTimesheetsAppService.notifyEmailWhenSubmitTimesheet(requester, receivers);
         }
     }
 }
