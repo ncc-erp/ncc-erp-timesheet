@@ -73,12 +73,7 @@ namespace Timesheet.APIs.Mezon
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async Task<MyRequestDto> SubmitToPendingNewRequestDay(MyRequestDto input)
         {
-            var userIdCurrent = await _userService.GetUserIdByEmail(input.EmailAddress);
-            if (!userIdCurrent.HasValue)
-            {
-                throw new UserFriendlyException("Not found user with email " + input.EmailAddress);
-            }
-            long userId = userIdCurrent.Value;
+            long userId = await getCurrentUserId(input.EmailAddress);
 
             var requester = GetSessionUserInfoDtoByUserId(userId);
 
@@ -89,12 +84,7 @@ namespace Timesheet.APIs.Mezon
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async Task<List<ProjectIncludingTaskDto>> GetProjectsIncludingTasks(string emailAddress)
         {
-            var userIdCurrent = await _userService.GetUserIdByEmail(emailAddress);
-            if (!userIdCurrent.HasValue)
-            {
-                throw new UserFriendlyException("Not found user with email " + emailAddress);
-            }
-            long userId = userIdCurrent.Value;
+            long userId = await getCurrentUserId(emailAddress);
 
             var qProjectUserType = WorkScope.GetAll<ProjectUser>()
                   .Where(s => s.UserId == userId && s.Type != ProjectUserType.DeActive)
@@ -166,12 +156,7 @@ namespace Timesheet.APIs.Mezon
             if (input.WorkingTime < 0)
                 throw new UserFriendlyException("You can't log this time sheet with working time < 0");
 
-            var userIdCurrent = await _userService.GetUserIdByEmail(input.EmailAddress);
-            if (!userIdCurrent.HasValue)
-            {
-                throw new UserFriendlyException("Not found user with email " + input.EmailAddress);
-            }
-            long userId = userIdCurrent.Value;
+            long userId = await getCurrentUserId(input.EmailAddress);
             input.UserId = userId;
 
             //var isUnlock = await validUnLockTimsheet(input);
@@ -350,12 +335,7 @@ namespace Timesheet.APIs.Mezon
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async Task<List<GetTimesheetDto>> GetAllTimesheetOfUser(DateTime startDate, DateTime endDate, string emailAddress)
         {
-            var userIdCurrent = await _userService.GetUserIdByEmail(emailAddress);
-            if (!userIdCurrent.HasValue)
-            {
-                throw new UserFriendlyException("Not found user with email " + emailAddress);
-            }
-            long userId = userIdCurrent.Value;
+            long userId = await getCurrentUserId(emailAddress);
 
             var openTalkTimes = WorkScope.GetAll<OpenTalk>()
                 .Where(x => x.UserId == userId)
@@ -397,12 +377,7 @@ namespace Timesheet.APIs.Mezon
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async Task<string> SubmitTsToPending(StartEndDateDto input, string emailAddress)
         {
-            var userIdCurrent = await _userService.GetUserIdByEmail(emailAddress);
-            if (!userIdCurrent.HasValue)
-            {
-                throw new UserFriendlyException("Not found user with email " + emailAddress);
-            }
-            long userId = userIdCurrent.Value;
+            long userId = await getCurrentUserId(emailAddress);
 
             var isUnLocked = _myTimesheetsAppService.IsUserUnlockedToLogTS(userId);
 
@@ -437,8 +412,7 @@ namespace Timesheet.APIs.Mezon
 
             await notifySubmitTimesheet(mytimesheets, userId);
 
-            var result = "Submit success " + mytimesheets.Count + " timesheets";
-            return result;
+            return "Submit success " + mytimesheets.Count + " timesheets";
         }
 
         public async System.Threading.Tasks.Task notifySubmitTimesheet(List<MyTimesheet> mytimesheets, long userId)
@@ -456,6 +430,16 @@ namespace Timesheet.APIs.Mezon
 
             _myTimesheetsAppService.notifyKomuWhenSubmitTimesheet(requester, receivers);
             await _myTimesheetsAppService.notifyEmailWhenSubmitTimesheet(requester, receivers);
+        }
+
+        public async Task<long> getCurrentUserId(string emailAddress)
+        {
+            var userIdCurrent = await _userService.GetUserIdByEmail(emailAddress);
+            if (!userIdCurrent.HasValue)
+            {
+                throw new UserFriendlyException("Not found user with email " + emailAddress);
+            }
+            return userIdCurrent.Value;
         }
     }
 }
