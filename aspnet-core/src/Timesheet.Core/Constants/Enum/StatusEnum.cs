@@ -24,6 +24,12 @@ namespace Ncc.Entities.Enum
             NoSalary = 6
         }
 
+        public enum NotifyAtHourType
+        {
+            Fullday = 0,
+            Working_Time = 1
+        }
+
         public enum NotifyChannel
         {
             KOMU = 0,

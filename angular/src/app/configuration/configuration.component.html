@@ -633,16 +633,19 @@
                       (change)="onnotifyEnableWorker($event)" [disabled]="!isEditNRITConfig">
                       Enable worker</mat-checkbox>
                   </div>
-
                   <div class="col-md-12" style="max-width: 880px;">
-                    <mat-form-field>
-                      <span class="special-label">Notify at hour *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: 14 mean at 14h o'clock">help</mat-icon>
-                      <input type="text" matInput name="notifyAtHour" [(ngModel)]="NRITConfig.notifyAtHour" required
-                        [disabled]="!isEditNRITConfig" />
-                    </mat-form-field>
-                  </div>
-
+                    <div>
+                      <span class="special-label">Notify at hour *</span>
+                      <mat-icon class="special-icon" matTooltip="Notify PM on the due date, HPM, President
+                      Fullday: from 10am to midnight
+                      Working time: individual working time">help</mat-icon>
+                    </div>
+                    <mat-radio-group matInput name="notifyAtHour" [(ngModel)]="NRITConfig.notifyAtHourType" required 
+                    [disabled]="!isEditNRITConfig" style="display: flex; flex-direction: column; gap: 10px;">
+                      <mat-radio-button value="Fullday">Fullday</mat-radio-button>
+                      <mat-radio-button value="Working_Time">Working time</mat-radio-button>
+                    </mat-radio-group>   
+                  </div>                                                           
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
                       <span class="special-label">Notify on dates *</span> <mat-icon class="special-icon"

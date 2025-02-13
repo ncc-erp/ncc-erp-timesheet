@@ -452,7 +452,7 @@ namespace Ncc.Configuration
             return new NRITConfigDto
             {
                 NotifyEnableWorker = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyEnableWorker),
-                NotifyAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyAtHour),
+                NotifyAtHourType = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyAtHourType),
                 NotifyReviewDeadline = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyReviewDeadline),
                 NotifyOnDates = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyOnDates),
                 NotifyToChannels = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyToChannels),
@@ -464,7 +464,7 @@ namespace Ncc.Configuration
         public async Task<NRITConfigDto> SetNRITConfig(NRITConfigDto input)
         {
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyEnableWorker, input.NotifyEnableWorker);
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyAtHour, input.NotifyAtHour);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyAtHourType, input.NotifyAtHourType);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyReviewDeadline, input.NotifyReviewDeadline);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyOnDates, input.NotifyOnDates);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyToChannels, input.NotifyToChannels);

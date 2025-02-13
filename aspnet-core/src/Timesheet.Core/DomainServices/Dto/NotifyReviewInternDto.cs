@@ -10,6 +10,8 @@ namespace Timesheet.DomainServices.Dto
     {
         public ulong? KomuUserId { get; set; }
         public string EmailAddress { get; set; }
+        public string StartWorkingAt { get; set; }
+        public string EndWorkingAt { get; set; }
         public string UserName => EmailAddress.Split('@')[0];
 
         public List<NotifyUserInfoDto> InterShips { get; set; }

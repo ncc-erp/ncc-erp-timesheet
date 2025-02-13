@@ -103,6 +103,7 @@ ul {
 }
 ::ng-deep .mat-tooltip {
     font-size: 12px !important;
+    white-space: pre-line !important;
 }
 
 .configuration-tab-content {
@@ -141,4 +142,4 @@ ul {
         display: flex;
         margin-left: 0px;
     }
-}
+}  

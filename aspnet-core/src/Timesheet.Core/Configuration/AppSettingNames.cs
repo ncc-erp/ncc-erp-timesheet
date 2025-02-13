@@ -88,7 +88,7 @@
         public const string EnableNofityKomuCheckInOutPunishment  = "App.EnableNofityKomuCheckInOutPunishment ";
         public const string SendKomuRequest = "App.SendKomuRequest";
         public const string NRITNotifyEnableWorker = "App.NotifyEnableWorker";
-        public const string NRITNotifyAtHour = "App.NRITNotifyAtHour";
+        public const string NRITNotifyAtHourType = "App.NRITNotifyAtHourType";
         public const string NRITNotifyOnDates = "App.NRITNotifyOnDates";
         public const string NRITNotifyReviewDeadline = "App.NRITNotifyReviewDeadline";
         public const string NotifyReviewInternEnableWorker = "App.NotifyReviewInternEnableWorker";

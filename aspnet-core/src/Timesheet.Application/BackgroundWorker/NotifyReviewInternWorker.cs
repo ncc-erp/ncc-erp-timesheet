@@ -27,6 +27,7 @@ using Timesheet.Extension;
 using Timesheet.Configuration.Dto;
 using System.Threading.Tasks;
 using Abp;
+using Timesheet.Helper;
 
 namespace Timesheet.BackgroundWorker  
 {
@@ -39,6 +40,7 @@ namespace Timesheet.BackgroundWorker
         private readonly ConfigurationAppService _configurationAppService;
         private bool _isSendMailToHeadPm = true;
         private bool _isSendMailToGD = true;
+        private string notifyAtHourConfig;
 
         public NotifyReviewInternWorker(AbpTimer timer, ReviewDetailAppService reviewDetailAppService, 
             ReviewInternServices reviewInternServices, 
@@ -62,6 +64,11 @@ namespace Timesheet.BackgroundWorker
             Timer.Period = 1000 * 60 * intervalMinutes;
         }
 
+        private void UpdateNotifyAtHourConfig()
+        {
+            notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyAtHourType);
+        }
+
         [UnitOfWork]
         protected override void DoWork()
         {
@@ -81,6 +88,15 @@ namespace Timesheet.BackgroundWorker
             catch (Exception e)
             {
                 Logger.Error(("UpdateTimeCronjob() error: " + e.Message));
+            }
+
+            try
+            {
+                UpdateNotifyAtHourConfig();
+            }
+            catch (Exception e)
+            {
+                Logger.Error(("UpdateNotifyAtHourConfig() error: " + e.Message));
             }
 
             if (_isSendMailToHeadPm)
@@ -185,20 +201,20 @@ namespace Timesheet.BackgroundWorker
             switch (deadlineDate.DayOfWeek)
             {
                 case DayOfWeek.Friday:
-                case DayOfWeek.Saturday:
-                    NRITVMAEConfigDto.NotifyHeadPMReviewInternOnDate = "8";
+                case DayOfWeek.Saturday: 
+                    NRITVMAEConfigDto.NotifyHeadPMReviewInternOnDate = "8"; 
                     NRITVMAEConfigDto.NotifyPresidentReviewInternOnDate = "9";
                     break;
                 case DayOfWeek.Sunday:
-                    NRITVMAEConfigDto.NotifyHeadPMReviewInternOnDate = "7";
+                    NRITVMAEConfigDto.NotifyHeadPMReviewInternOnDate = "7"; 
                     NRITVMAEConfigDto.NotifyPresidentReviewInternOnDate = "8";
                     break;
                 case DayOfWeek.Thursday:
-                    NRITVMAEConfigDto.NotifyHeadPMReviewInternOnDate = "6";
+                    NRITVMAEConfigDto.NotifyHeadPMReviewInternOnDate = "6"; 
                     NRITVMAEConfigDto.NotifyPresidentReviewInternOnDate = "9";
                     break;
                 default:
-                    NRITVMAEConfigDto.NotifyHeadPMReviewInternOnDate = "6";
+                    NRITVMAEConfigDto.NotifyHeadPMReviewInternOnDate = "6"; 
                     NRITVMAEConfigDto.NotifyPresidentReviewInternOnDate = "7";
                     break;
             }
@@ -254,11 +270,13 @@ namespace Timesheet.BackgroundWorker
 
             string headPmEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
             string usernameHeadPm = headPmEmail.Split('@')[0];
-            var user = _userServices.GetUserByEmail(headPmEmail);
-            int workStartTime = Convert.ToInt16(user.MorningStartAt.Split(':')[0]);
-            int workEndTime = Convert.ToInt16(user.AfternoonEndAt.Split(':')[0]);
-
-            if (dateNow.Hour < workStartTime && dateNow.Hour > workEndTime)
+            (int startHour, int endHour, bool isFullday) = TimeHelper.GetTimeRangeNotifyPmReviewIntern(notifyAtHourConfig);
+            if (!isFullday) {
+                var user = _userServices.GetUserByEmail(headPmEmail);
+                startHour = Convert.ToInt16(user.MorningStartAt.Split(':')[0]);
+                endHour = Convert.ToInt16(user.AfternoonEndAt.Split(':')[0]);            
+            }
+            if (dateNow.Hour < startHour || dateNow.Hour > endHour)
             {
                 Logger.Info("NotifyHeadPMRewviewWorker() stop at hour:" + dateNow.Hour);
                 return;
@@ -290,10 +308,10 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
 
-            int notifyAtHourConfig = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyAtHour));
-            if (today.Hour < notifyAtHourConfig)
+            (int startHour, int endHour, bool isFullday) = TimeHelper.GetTimeRangeNotifyPmReviewIntern(notifyAtHourConfig);
+            if (isFullday && (today.Hour < startHour || today.Hour > endHour))
             {
-                Logger.Error("NotifyReviewerIntern() stop: notifyAtHourConfig=" + notifyAtHourConfig);
+                Logger.Error("NotifyReviewerIntern() stop: fullday - notifyAtHourConfig=" + notifyAtHourConfig);
                 return;
             }
 
@@ -310,11 +328,16 @@ namespace Timesheet.BackgroundWorker
             long reviewId = _reviewInternService.LastIdReviewIntern();
             var listPMNotReview = _reviewInternService.GetListPmNotReview(reviewId);
 
-            if (listPMNotReview.Count == 0) return;
+            if (listPMNotReview.Count == 0) return; 
 
             var sb = new StringBuilder();
             foreach (var item in listPMNotReview)
             {
+                if (!isFullday && (today.Hour < Convert.ToInt16(item.StartWorkingAt.Split(':')[0]) || today.Hour > Convert.ToInt16(item.EndWorkingAt.Split(':')[0]))) 
+                {
+                    Logger.Error("NotifyReviewerIntern() stop: working_time - notifyAtHourConfig=" + notifyAtHourConfig);
+                    continue;
+                }
                 sb.AppendLine($"PM: {item.KomuAccountTag()} please complete reviewing **{item.InterShips.Count}** interns before " +
                                 $"**{DateTimeUtils.ToString(deadlineDate.Date)}** (**{notifyPenaltyFee}đ/intern** if you miss. Don't lose your money):");
                 sb.AppendLine($"```");
@@ -379,16 +402,19 @@ namespace Timesheet.BackgroundWorker
             int notifyPresidentReviewInternOnDate = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentReviewInternOnDate));
             if (dateNow.Day != notifyPresidentReviewInternOnDate)
             {
-                Logger.Error("NotifyToPresident() stop: notifyPresidentReviewInternOnDate" + notifyPresidentReviewInternOnDate);
+                Logger.Error("NotifyToPresident() stop: notifyPresidentReviewInternOnDate=" + notifyPresidentReviewInternOnDate);
                 return;
             }
 
             string presidentEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentEmail);
             string username = presidentEmail.Split('@')[0];
-            var user = _userServices.GetUserByEmail(presidentEmail);
-            int workStartTime = Convert.ToInt16(user.MorningStartAt.Split(':')[0]);
-            int workEndTime = Convert.ToInt16(user.AfternoonEndAt.Split(':')[0]);
-            if (dateNow.Hour < workStartTime || dateNow.Hour > workEndTime)
+            (int startHour, int endHour, bool isFullday) = TimeHelper.GetTimeRangeNotifyPmReviewIntern(notifyAtHourConfig);
+            if (!isFullday) {
+                var user = _userServices.GetUserByEmail(presidentEmail);
+                startHour = Convert.ToInt16(user.MorningStartAt.Split(':')[0]);
+                endHour = Convert.ToInt16(user.AfternoonEndAt.Split(':')[0]);                
+            }
+            if (dateNow.Hour < startHour || dateNow.Hour > endHour)
             {
                 Logger.Error("NotifyToPresident() stop at " + dateNow.Hour);
                 return;
