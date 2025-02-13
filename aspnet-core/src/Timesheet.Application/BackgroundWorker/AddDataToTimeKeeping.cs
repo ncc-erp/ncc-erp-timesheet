@@ -348,7 +348,7 @@ namespace Timesheet.BackgroundWorker
                     sb.AppendLine($"{interShip.FullName} [{interShip.BranchDisplayName}] ({CommonUtils.UserLevelName(interShip.Level)})");
                 }
                 sb.AppendLine($"```");
-                 _komuService.SendMessageToUser(sb.ToString(), item.UserName.Trim());
+                _komuService.SendMessageToUser(sb.ToString(), item.UserName.Trim());
                 sb.Clear();
             }
         }
