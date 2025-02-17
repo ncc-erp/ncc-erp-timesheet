@@ -680,35 +680,35 @@
             </div>
           </mat-expansion-panel>
 
-          <!-- Notify To HeadPm and President Review Intern  thêm permission--> 
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_NHPMAPRIT_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowNHPMAPRITConfig">
-            <mat-expansion-panel-header (click)="isShowNHPMAPRITConfig =!isShowNHPMAPRITConfig" class="panel-header">
+          <!-- Notify Review Intern via Mezon and Email Setting --> 
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_NRITVMAE_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowNRITVMAEConfig">
+            <mat-expansion-panel-header (click)="isShowNRITVMAEConfig =!isShowNRITVMAEConfig" class="panel-header">
               <mat-panel-title>
-                <p class="title">{{"Notify To Head Pm And President Review Intern Setting"}}</p>
-                <div *ngIf="isShowNHPMAPRITConfig" class="edit-save">
-                  <button *ngIf="!isEditNHPMAPRITConfig &&permission.isGranted(EDIT_NHPMAPRIT_CONFIG )" large mat-raised-button
-                    color="primary" (click)="editNHPMAPRITConfig();$event.stopPropagation()">
+                <p class="title">{{"Notify Review Intern via Mezon and Email Setting"}}</p>
+                <div *ngIf="isShowNRITVMAEConfig" class="edit-save">
+                  <button *ngIf="!isEditNRITVMAEConfig &&permission.isGranted(EDIT_NRITVMAE_CONFIG )" large mat-raised-button
+                    color="primary" (click)="editNRITVMAEConfig();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
                   </button>
-                  <button *ngIf="isEditNHPMAPRITConfig" large mat-raised-button color="primary"
-                    (click)="SaveNHPMAPRITConfig();$event.stopPropagation()">
+                  <button *ngIf="isEditNRITVMAEConfig" large mat-raised-button color="primary"
+                    (click)="SaveNRITVMAEConfig();$event.stopPropagation()">
                     <mat-icon>save</mat-icon>Save
                   </button>
-                  <button *ngIf="isEditNHPMAPRITConfig" large mat-raised-button color="primary"
-                    (click)="refreshNHPMAPRITConfig();$event.stopPropagation()">
+                  <button *ngIf="isEditNRITVMAEConfig" large mat-raised-button color="primary"
+                    (click)="refreshNRITVMAEConfig();$event.stopPropagation()">
                     <mat-icon>cancel</mat-icon>Cancel
                   </button>
                 </div>
               </mat-panel-title>
 
-              <ul class="header-dropdown m-r--5" *ngIf="isShowNHPMAPRITConfig">
+              <ul class="header-dropdown m-r--5" *ngIf="isShowNRITVMAEConfig">
                 <li>
                   <button mat-icon-button [matMenuTriggerFor]="headerMenu3" (click)="$event.stopPropagation()"
                     class="header-dropdown-mat-icon-button">
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #headerMenu3="matMenu">
-                    <button mat-menu-item (click)="refreshNHPMAPRITConfig();$event.stopPropagation()">
+                    <button mat-menu-item (click)="refreshNRITVMAEConfig();$event.stopPropagation()">
                       <mat-icon>refresh</mat-icon>
                       <span>{{ "Refresh" | localize }}</span>
                     </button>
@@ -721,44 +721,98 @@
                 <div class="row">
                   <div class="col-md-12">
                     <mat-checkbox style="padding: 0;" class="autoSubmit"
-                      [checked]="NHPMAPRITConfig.notifyHeadPMAndPresidentReviewInternEnableWorker == 'true'?true:false" name="notifyHeadPMAndPresidentReviewInternEnableWorker"
-                      (change)="onNHPMAPRITEnableWorker($event)" [disabled]="!isEditNHPMAPRITConfig">
+                      [checked]="NRITVMAEConfig.notifyReviewInternEnableWorker == 'true'?true:false" name="notifyReviewInternEnableWorker"
+                      (change)="onNHPMAPRITEnableWorker($event)" [disabled]="!isEditNRITVMAEConfig">
                       Enable worker</mat-checkbox>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Notify at hour *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: 14 mean at 14h o'clock">help</mat-icon>
-                      <input type="text" matInput name="notifyHeadPMAndPresidentReviewInternAtHour" [(ngModel)]="NHPMAPRITConfig.notifyHeadPMAndPresidentReviewInternAtHour" required
-                        [disabled]="!isEditNHPMAPRITConfig" />
+                      <span class="special-label">Notify Review Intern Interval Minutes *</span> <mat-icon class="special-icon"
+                        matTooltip="interval between each cronjob run ex: 30, meaning once every 30 minutes">help</mat-icon>
+                      <input type="text" matInput name="notifyReviewInternIntervalMinutes" [(ngModel)]="NRITVMAEConfig.notifyReviewInternIntervalMinutes" required
+                        [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Notify on dates *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: 10,13,15 mean: 10th, 13th, 15th">help</mat-icon>
-                      <input type="text" matInput name="notifyHeadPMAndPresidentReviewInternOnDate" [(ngModel)]="NHPMAPRITConfig.notifyHeadPMAndPresidentReviewInternOnDate" required
-                        [disabled]="!isEditNHPMAPRITConfig" />
+                      <span class="special-label">Notify at hour *</span> <mat-icon class="special-icon"
+                        matTooltip="Time to send mail to headPm and President, ex: 14 mean at 14h o'clock">help</mat-icon>
+                      <input type="text" matInput name="notifyReviewInternAtHour" [(ngModel)]="NRITVMAEConfig.notifyReviewInternAtHour" required
+                        [disabled]="!isEditNRITVMAEConfig" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Notify HeadPm Review Intern on date *</span> <mat-icon class="special-icon"
+                        matTooltip="Date of notification to headPm, ex: 10 mean: 10th">help</mat-icon>
+                      <input type="text" matInput name="notifyHeadPMReviewInternOnDate" [(ngModel)]="NRITVMAEConfig.notifyHeadPMReviewInternOnDate" required
+                        [disabled]="!isEditNRITVMAEConfig" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Notify President Review Intern on date *</span> <mat-icon class="special-icon"
+                        matTooltip="Date of notification to President, ex: 10 mean: 10th">help</mat-icon>
+                      <input type="text" matInput name="notifyPresidentReviewInternOnDate" [(ngModel)]="NRITVMAEConfig.notifyPresidentReviewInternOnDate" required
+                        [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
                       <span class="special-label">Notify HeadPM Mail *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: tien.nguyenhuu@ncc.asia">help</mat-icon>
-                      <input type="text" matInput name="notifyHeadPmMail" [(ngModel)]="NHPMAPRITConfig.notifyHeadPmMail" required
-                        [disabled]="!isEditNHPMAPRITConfig" />
+                        matTooltip="HeadPm's email, ex: tien.nguyenhuu@ncc.asia">help</mat-icon>
+                      <input type="text" matInput name="notifyHeadPmMail" [(ngModel)]="NRITVMAEConfig.notifyHeadPmMail" required
+                        [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
                       <span class="special-label">Notify President Mail *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: nhan.nguyen@ncc.asia">help</mat-icon>
-                      <input type="text" matInput name="notifyPresidentEmail" [(ngModel)]="NHPMAPRITConfig.notifyPresidentEmail" required
-                        [disabled]="!isEditNHPMAPRITConfig" />
+                        matTooltip="President's email, ex: nhan.nguyen@ncc.asia">help</mat-icon>
+                      <input type="text" matInput name="notifyPresidentEmail" [(ngModel)]="NRITVMAEConfig.notifyPresidentEmail" required
+                        [disabled]="!isEditNRITVMAEConfig" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Notify Hr Mail *</span> <mat-icon class="special-icon"
+                        matTooltip="Hr's email, ex: hien.ngothu@ncc.asia">help</mat-icon>
+                      <input type="text" matInput name="notifyHrEmail" [(ngModel)]="NRITVMAEConfig.notifyHrEmail" required
+                        [disabled]="!isEditNRITVMAEConfig" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Update Time Cronjob At Hour *</span> <mat-icon class="special-icon"
+                        matTooltip="Cronjob update time review monthly interns, ex:  1 mean at 1h o'clock">help</mat-icon>
+                      <input type="text" matInput name="updateTimeCronjobAtHour" [(ngModel)]="NRITVMAEConfig.updateTimeCronjobAtHour" required
+                        [disabled]="!isEditNRITVMAEConfig" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Update Time Cronjob On Date *</span> <mat-icon class="special-icon"
+                        matTooltip="Cronjob update time review monthly interns, ex: 1 mean: 1st.">help</mat-icon>
+                      <input type="text" matInput name="updateTimeCronjobOnDate" [(ngModel)]="NRITVMAEConfig.updateTimeCronjobOnDate" required
+                        [disabled]="!isEditNRITVMAEConfig" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Notify Pm Review Intern On Dates *</span> <mat-icon class="special-icon"
+                        matTooltip="Date of notification to Pm, ex: 1,2,3 mean: 1st,2nd,3rd.">help</mat-icon>
+                      <input type="text" matInput name="notifyPmReviewInternOnDates" [(ngModel)]="NRITVMAEConfig.notifyPmReviewInternOnDates" required
+                        [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
                 </div>
