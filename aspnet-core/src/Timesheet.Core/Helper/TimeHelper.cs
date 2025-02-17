@@ -1,5 +1,6 @@
 using System;
 using Ncc.Entities.Enum;
+using Timesheet.Constants;
 
 namespace Timesheet.Helper
 {
@@ -8,7 +9,9 @@ namespace Timesheet.Helper
         {
             if (Enum.TryParse(notifyAtHourType, out StatusEnum.NotifyAtHourType type))
             {
-                return type == StatusEnum.NotifyAtHourType.Fullday ? (10, 24, true) : (-1, -1, false);
+                return type == StatusEnum.NotifyAtHourType.Fullday 
+                    ? (CommonConstant.NotifyReviewIntern_Fullday_StartHour, CommonConstant.NotifyReviewIntern_Fullday_EndHour, true) 
+                    : (-1, -1, false);
             }
             return (-1, -1, false);
         }

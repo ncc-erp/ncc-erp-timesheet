@@ -64,11 +64,6 @@ namespace Timesheet.BackgroundWorker
             Timer.Period = 1000 * 60 * intervalMinutes;
         }
 
-        private void UpdateNotifyAtHourConfig()
-        {
-            notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyAtHourType);
-        }
-
         [UnitOfWork]
         protected override void DoWork()
         {
@@ -92,7 +87,7 @@ namespace Timesheet.BackgroundWorker
 
             try
             {
-                UpdateNotifyAtHourConfig();
+                notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyAtHourType);
             }
             catch (Exception e)
             {
@@ -270,12 +265,7 @@ namespace Timesheet.BackgroundWorker
 
             string headPmEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
             string usernameHeadPm = headPmEmail.Split('@')[0];
-            (int startHour, int endHour, bool isFullday) = TimeHelper.GetTimeRangeNotifyPmReviewIntern(notifyAtHourConfig);
-            if (!isFullday) {
-                var user = _userServices.GetUserByEmail(headPmEmail);
-                startHour = Convert.ToInt16(user.MorningStartAt.Split(':')[0]);
-                endHour = Convert.ToInt16(user.AfternoonEndAt.Split(':')[0]);            
-            }
+            (int startHour, int endHour, bool isFullday) = GetReviewInternTimeRange(headPmEmail);
             if (dateNow.Hour < startHour || dateNow.Hour > endHour)
             {
                 Logger.Info("NotifyHeadPMRewviewWorker() stop at hour:" + dateNow.Hour);
@@ -408,12 +398,7 @@ namespace Timesheet.BackgroundWorker
 
             string presidentEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentEmail);
             string username = presidentEmail.Split('@')[0];
-            (int startHour, int endHour, bool isFullday) = TimeHelper.GetTimeRangeNotifyPmReviewIntern(notifyAtHourConfig);
-            if (!isFullday) {
-                var user = _userServices.GetUserByEmail(presidentEmail);
-                startHour = Convert.ToInt16(user.MorningStartAt.Split(':')[0]);
-                endHour = Convert.ToInt16(user.AfternoonEndAt.Split(':')[0]);                
-            }
+            (int startHour, int endHour, bool isFullday) = GetReviewInternTimeRange(presidentEmail);
             if (dateNow.Hour < startHour || dateNow.Hour > endHour)
             {
                 Logger.Error("NotifyToPresident() stop at " + dateNow.Hour);
@@ -440,6 +425,18 @@ namespace Timesheet.BackgroundWorker
             if (today.Day != 1)  return;
             _isSendMailToHeadPm = true;
             _isSendMailToGD = true;
+        }
+
+        private (int startHour, int endHour, bool isFullday) GetReviewInternTimeRange(string receiverEmail)
+        { 
+            (int startHour, int endHour, bool isFullday) = TimeHelper.GetTimeRangeNotifyPmReviewIntern(notifyAtHourConfig);
+            if (!isFullday)
+            {
+                var user = _userServices.GetUserByEmail(receiverEmail);
+                startHour = Convert.ToInt16(user.MorningStartAt.Split(':')[0]);
+                endHour = Convert.ToInt16(user.AfternoonEndAt.Split(':')[0]);
+            }
+            return (startHour, endHour, isFullday);
         }
     }
 }
