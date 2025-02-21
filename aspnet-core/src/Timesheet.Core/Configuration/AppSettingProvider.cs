@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Abp.Configuration;
 using Microsoft.Extensions.Configuration;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Ncc.Configuration
 {
@@ -81,7 +82,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.EnableNofityKomuCheckInOutPunishment, "false", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendKomuRequest, "true", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NRITNotifyEnableWorker,"false",scopes:SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.NRITNotifyAtHour,"14",scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.NRITNotifyAtHourType,Entities.Enum.StatusEnum.NotifyAtHourType.Working_Time.ToString(),scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NRITNotifyOnDates,"10,13,15",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NRITNotifyReviewDeadline,"15",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NRITNotifyPenaltyFee,"50.000",scopes:SettingScopes.Application|SettingScopes.Tenant),

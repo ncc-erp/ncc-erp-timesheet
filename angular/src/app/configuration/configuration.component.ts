@@ -1043,6 +1043,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     if (this.permission.isGranted(this.VIEW_NRIT_CONFIG)) {
       this.configurationService.GetNRITConfig().subscribe(data => {
         this.NRITConfig = data.result;
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1;
+        const currentYear = today.getFullYear();
+        this.NRITConfig.notifyReviewDeadline = `${this.NRITConfig.notifyReviewDeadline} (${currentMonth}/${currentYear})`;
       })
     }
   }
@@ -1060,7 +1064,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   }
 
   SaveNRITConfig() {
-    if (_.isEmpty(this.NRITConfig.notifyAtHour)) {
+    if (_.isEmpty(this.NRITConfig.notifyAtHourType)) {
       abp.message.error("At hour day required!")
       return;
     }
@@ -1080,7 +1084,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Notify Penalty Fee required!")
       return;
     }
-    this.configurationService.SetNRITConfig(this.NRITConfig).subscribe((res:any) => {
+    const NRITConfigToSend = { ...this.NRITConfig };
+    NRITConfigToSend.notifyReviewDeadline = NRITConfigToSend.notifyReviewDeadline.split(' ')[0];
+    this.configurationService.SetNRITConfig(NRITConfigToSend).subscribe((res:any) => {
       this.isEditNRITConfig = !this.isEditNRITConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1098,6 +1104,11 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     if (this.permission.isGranted(this.VIEW_NRITVMAE_CONFIG)) {
       this.configurationService.GetNRITVMAEConfig().subscribe(data => {
         this.NRITVMAEConfig = data.result;
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1;
+        const currentYear = today.getFullYear();
+        this.NRITVMAEConfig.notifyHeadPMReviewInternOnDate = `${this.NRITVMAEConfig.notifyHeadPMReviewInternOnDate} (${currentMonth}/${currentYear})`;
+        this.NRITVMAEConfig.notifyPresidentReviewInternOnDate = `${this.NRITVMAEConfig.notifyPresidentReviewInternOnDate} (${currentMonth}/${currentYear})`;
       })
     }
   }
@@ -1165,7 +1176,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Notify Pm Review Intern On Dates required!")
       return;
     }
-    this.configurationService.SetNRITVMAEConfig(this.NRITVMAEConfig).subscribe((res:any) => {
+    const NRITVMAEConfigToSend = { ...this.NRITVMAEConfig };
+    NRITVMAEConfigToSend.notifyHeadPMReviewInternOnDate = NRITVMAEConfigToSend.notifyHeadPMReviewInternOnDate.split(' ')[0];
+    NRITVMAEConfigToSend.notifyPresidentReviewInternOnDate = NRITVMAEConfigToSend.notifyPresidentReviewInternOnDate.split(' ')[0];
+    this.configurationService.SetNRITVMAEConfig(NRITVMAEConfigToSend).subscribe((res:any) => {
       this.isEditNRITVMAEConfig = !this.isEditNRITVMAEConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1849,7 +1863,7 @@ export class HRMConfigDto {
 
 export class NRITConfigDto {
   notifyEnableWorker: string;
-  notifyAtHour: string;
+  notifyAtHourType: string;
   notifyReviewDeadline: string;
   notifyOnDates: string;
   notifyToChannels: string;

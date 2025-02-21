@@ -256,7 +256,7 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
 
-            string notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyAtHour);
+            string notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyReviewInternAtHour);
 
             if (notifyAtHourConfig != today.Hour.ToString())
             {
