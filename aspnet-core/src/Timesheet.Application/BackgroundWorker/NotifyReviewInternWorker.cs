@@ -284,7 +284,7 @@ namespace Timesheet.BackgroundWorker
 
             var sb = new StringBuilder();
             sb.AppendLine($"[Review Intern] PMs have finished evaluating interns, please review.");
-            _komuService.SendMessageToUser(sb.ToString(), usernameHeadPm.Trim());
+            _komuService.SendMessageReviewInternToUser(sb.ToString(), usernameHeadPm.Trim());
             sb.Clear();
         }
 
@@ -329,7 +329,7 @@ namespace Timesheet.BackgroundWorker
                     Logger.Error("NotifyReviewerIntern() stop: working_time - notifyAtHourConfig=" + notifyAtHourConfig);
                     continue;
                 }
-                sb.AppendLine($"PM: {item.KomuAccountTag()} please complete reviewing **{item.InterShips.Count}** interns before " +
+                sb.AppendLine($"PM: {item.KomuAccountTag()} Please complete reviewing **{item.InterShips.Count}** interns before " +
                                 $"**{DateTimeUtils.ToString(deadlineDate.Date)}** (**{notifyPenaltyFee}đ/intern** if you miss. Don't lose your money):");
                 interns.AppendLine($"```");
                 foreach (var interShip in item.InterShips)
