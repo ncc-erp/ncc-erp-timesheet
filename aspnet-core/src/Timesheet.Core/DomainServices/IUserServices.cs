@@ -21,5 +21,6 @@ namespace Timesheet.DomainServices
         Task<NotifyUserInfoDto> getKomuUserInfo(long userId);
         Task<User> CreateUserFromHrmv2Async(CreateUpdateByHRMV2Dto input);
         Task<User> UpdateUserFromHrmV2Async(CreateUpdateByHRMV2Dto input);
+        User GetUserByEmail(string email);
     }
 }

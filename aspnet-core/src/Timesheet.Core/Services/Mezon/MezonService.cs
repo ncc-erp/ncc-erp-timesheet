@@ -8,6 +8,9 @@ using Newtonsoft.Json;
 using Ncc.Configuration;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Timesheet.Constants;
 
 namespace Timesheet.Services.Mezon
 {
@@ -68,10 +71,67 @@ namespace Timesheet.Services.Mezon
             return default;
 
         }
+
         public void NotifyToChannel(string MezonUrl, string MezonMessage)
         {
-            Post(MezonUrl, new { type = "TIMESHEET", message = new { t = MezonMessage } });
+            var mkList = ExtractMarkdown(MezonMessage);
+            var mentions = ExtractMentions(MezonMessage);
+
+            Post(MezonUrl, new
+            {
+                type = MezonConstant.MEZON_NOTI_TYPE,
+                message = new
+                {
+                    t = MezonMessage,
+                    mk = mkList,
+                    mentions = mentions
+                }
+            });
         }
+
+        public List<object> ExtractMarkdown(string message)
+        {
+            var mkList = new List<object>();
+            string markdownPattern = MezonConstant.MARKDOWN_PATTERN;
+            var matches = Regex.Matches(message, markdownPattern);
+            if (matches.Count == 0) return mkList;
+
+            for (int i = 0; i < matches.Count; i++)
+            {
+                var currentMatch = matches[i];
+                if (i + 1 < matches.Count && matches[i + 1].Value == currentMatch.Value)
+                {
+                    mkList.Add(new
+                    {
+                        type = currentMatch.Value == MezonConstant.TRIPLE_BACKTICKS ? MezonConstant.MULTILINE_MARKDOWN_CODE_TYPE : MezonConstant.INLINE_MARKDOWN_CODE_TYPE,
+                        s = currentMatch.Index,
+                        e = matches[i + 1].Index + matches[i + 1].Length
+                    });
+                    i++;
+                }
+            }
+            return mkList;
+        }
+
+        public List<object> ExtractMentions(string message)
+        {
+            var mentions = new List<object>();
+            string mentionPattern = MezonConstant.MENTION_PATTERN;
+            var matches = Regex.Matches(message, mentionPattern);
+            if (matches.Count == 0 )  return mentions; 
+
+            foreach (Match match in matches)
+            {
+                mentions.Add(new
+                {
+                    username = match.Groups[1].Value,
+                    s = match.Index,
+                    e = match.Index + match.Length
+                });
+            }
+            return mentions;
+        }
+
         public void Post(string url, object input)
         {
             string strInput = JsonConvert.SerializeObject(input);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Abp.Configuration;
 using Microsoft.Extensions.Configuration;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Ncc.Configuration
 {
@@ -81,15 +82,21 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.EnableNofityKomuCheckInOutPunishment, "false", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendKomuRequest, "true", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NRITNotifyEnableWorker,"false",scopes:SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.NRITNotifyAtHour,"14",scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.NRITNotifyAtHourType,Entities.Enum.StatusEnum.NotifyAtHourType.Working_Time.ToString(),scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NRITNotifyOnDates,"10,13,15",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NRITNotifyReviewDeadline,"15",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NRITNotifyPenaltyFee,"50.000",scopes:SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.NotifyHeadPMAndPresidentReviewInternEnableWorker, "false", scopes:SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.NotifyHeadPMAndPresidentReviewInternAtHour, "10", scopes:SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.NotifyHeadPMAndPresidentReviewInternOnDate, "6", scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.NotifyReviewInternEnableWorker, "false", scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.NotifyReviewInternIntervalMinutes, "60", scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.NotifyReviewInternAtHour, "10", scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.NotifyHeadPMReviewInternOnDate, "6", scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.NotifyPresidentReviewInternOnDate, "7", scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NotifyHeadPmMail, "tien.nguyenhuu@ncc.asia", scopes:SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.NotifyPresidentEmail, "nhan.nguyen@ncc.asia", scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.NotifyPresidentEmail, "nguyentran@ncc.asia", scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.NotifyHrEmail, "giang.tranminhchau@ncc.asia,hien.ngothu@ncc.asia", scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.UpdateTimeCronjobAtHour, "0", scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.UpdateTimeCronjobOnDate, "1", scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.NotifyPmReviewInternOnDates, "1,2,3,4", scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.TotalTimeAbsenceTime,"2",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.WeeksCanUnlockBefor,"1",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NofityKomuCheckInOutPunishmentAtHour, "14", scopes: SettingScopes.Application|SettingScopes.Tenant),

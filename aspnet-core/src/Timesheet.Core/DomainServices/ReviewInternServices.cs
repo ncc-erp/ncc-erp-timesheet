@@ -44,6 +44,8 @@ namespace Timesheet.DomainServices
                                     {
                                         EmailAddress = s.Key.EmailAddress,
                                         KomuUserId = s.Key.KomuUserId,
+                                        StartWorkingAt = s.First().Reviewer.MorningStartAt,
+                                        EndWorkingAt = s.First().Reviewer.AfternoonEndAt,
                                         InterShips = s.Select(x => new NotifyUserInfoDto
                                         {
                                             FullName = x.InterShip.FullName,
