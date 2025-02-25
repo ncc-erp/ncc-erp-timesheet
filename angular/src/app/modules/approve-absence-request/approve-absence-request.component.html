@@ -70,11 +70,13 @@
                         <img style="width: 60px; height: 60px; border-radius: 50%;" [src]="getAvatar(req)">
                         <span> {{req.fullName}} ({{req.dayOffName}})</span>
                         <span *ngIf="req.type == 0"
-                          class="label status-label bg-red">{{userTypes[req.type].label}}</span>
+                          class="label status-label bg-red">{{ getLabel(req.type) }}</span>
                         <span *ngIf="req.type == 1"
-                          class="label status-label bg-green">{{userTypes[req.type].label}}</span>
+                          class="label status-label bg-green">{{ getLabel(req.type) }}</span>
                         <span *ngIf="req.type == 2"
-                          class="label status-label bg-blue">{{userTypes[req.type].label}}</span>
+                          class="label status-label bg-blue">{{ getLabel(req.type) }}</span>
+                        <span *ngIf="req.type == 5"
+                          class="label status-label bg-grey">{{ getLabel(req.type) }}</span>
                         <span *ngIf="req.level != null">
                           <span class="label status-label mr-left"
                             [ngStyle]=" userLevels[req.level].style">{{userLevels[req.level].name}}</span>

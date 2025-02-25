@@ -160,15 +160,19 @@
                           </span>
                           <span *ngIf="item.userType != null" class="spacing-center">
                             <span *ngIf="item.userType == 0"
-                              class="label status-label bg-red">{{listUserType[item.userType].name}}
+                              class="label status-label bg-red">{{ getUserTypeName(item.userType) }}
                             </span>
 
                             <span *ngIf="item.userType == 1"
-                              class="label status-label bg-green">{{listUserType[item.userType].name}}
+                              class="label status-label bg-green">{{ getUserTypeName(item.userType) }}
                             </span>
 
                             <span *ngIf="item.userType == 2"
-                              class="label status-label bg-blue">{{listUserType[item.userType].name}}
+                              class="label status-label bg-blue">{{ getUserTypeName(item.userType) }}
+                            </span>
+
+                            <span *ngIf="item.userType == 5"
+                              class="label status-label bg-grey">{{ getUserTypeName(item.userType) }}
                             </span>
 
                           </span>

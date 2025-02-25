@@ -62,7 +62,8 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   userTypes = [
     { value: 0, label: 'Staff' },
     { value: 1, label: 'Internship' },
-    { value: 2, label: 'Collaborator' }
+    { value: 2, label: 'Collaborator' },
+    { value: 5, label: 'Vendor' }
   ];
  
   ngOnInit() {
@@ -147,11 +148,17 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     )
   }
 
+  getLabel(userType: number): string {
+    const found = this.userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
+  }  
+
   getUserTypeCssClass(userType: number){
     switch (userType) {
       case 0: return 'bg-red';
       case 1: return 'bg-green';
-      default: return 'bg-blue';
+      case 2: return 'bg-blue';
+      default: return 'bg-grey';
     }
   }
 

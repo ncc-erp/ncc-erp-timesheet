@@ -453,21 +453,26 @@
                                 style="margin-left: 10px"
                                 *ngIf="member.type == 0"
                                 class="label status-label bg-red"
-                                >{{ userTypes[member.type].label }}</span
+                                >{{ getLabel(member.type) }}</span
                               >
                               <span
                                 style="margin-left: 10px"
                                 *ngIf="member.type == 1"
                                 class="label status-label bg-green"
-                                >{{ userTypes[member.type].label }}</span
+                                >{{ getLabel(member.type) }}</span
                               >
                               <span
                                 style="margin-left: 10px"
                                 *ngIf="member.type == 2"
                                 class="label status-label bg-blue"
-                                >{{ userTypes[member.type].label }}</span
+                                >{{ getLabel(member.type) }}</span
                               >
-
+                              <span
+                                style="margin-left: 10px"
+                                *ngIf="member.type == 5"
+                                class="label status-label bg-grey"
+                                >{{ getLabel(member.type) }}</span
+                              >                    
                               <span *ngIf="member.level != null">
                                 <span
                                   class="label status-label mr-left"

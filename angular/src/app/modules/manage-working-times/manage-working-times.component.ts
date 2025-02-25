@@ -24,7 +24,8 @@ export class ManageWorkingTimesComponent extends AppComponentBase implements OnI
   public userTypes = [
     { value: 0, label: 'Staff' },
     { value: 1, label: 'Intern' },
-    { value: 2, label: 'CTV' }
+    { value: 2, label: 'CTV' },
+    { value: 5, label: 'Vendor' }
   ];
   status = 1;
   public listStatus = [
@@ -73,6 +74,11 @@ export class ManageWorkingTimesComponent extends AppComponentBase implements OnI
 
       this.getUserWorkingTimes();
     })
+  }
+
+  getLabel(userType: number): string {
+    const found = this.userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
   }
 
   refresh() {

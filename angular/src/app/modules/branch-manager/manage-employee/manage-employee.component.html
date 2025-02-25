@@ -163,7 +163,7 @@
                         <span class="label bg-red">{{user.branchDisplayName}}</span>
                         <!-- type -->
                         <span *ngIf="user.type != null" class="label" [ngClass]="getUserTypeCssClass(user.type)">
-                          {{userTypes[user.type].label}}
+                          {{ getLabel(user.type) }}
                         </span>
                         <!-- level -->
                         <span class="label" [ngStyle]="userLevels[user.level]?.style">{{userLevels[user.level]?.name}}</span>

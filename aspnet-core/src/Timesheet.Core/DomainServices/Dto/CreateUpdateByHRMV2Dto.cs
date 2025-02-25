@@ -12,7 +12,7 @@ namespace Timesheet.DomainServices.Dto
     public class CreateUpdateByHRMV2Dto 
     {
         public Sex Sex { get; set; }
-        public Usertype Type { get; set; }
+        public UserType Type { get; set; }
         public string EmailAddress { get; set; }
         public string Surname { get; set; }
         public string Name { get; set; }

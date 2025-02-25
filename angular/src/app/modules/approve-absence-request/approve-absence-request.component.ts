@@ -28,7 +28,8 @@ export class ApproveAbsenceRequestComponent extends AppComponentBase implements 
   userTypes = [
     { value: 0, label: 'Staff' },
     { value: 1, label: 'Internship' },
-    { value: 2, label: 'Collaborator' }
+    { value: 2, label: 'Collaborator' },
+    { value: 5, label: 'Vendor' }
   ];
   absenceRequests: AbsenceRequest[];
   backupAbsenceRequests: AbsenceRequest[];
@@ -126,6 +127,10 @@ export class ApproveAbsenceRequestComponent extends AppComponentBase implements 
     }
   }
 
+  getLabel(userType: number): string {
+    const found = this.userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
+  }  
 
   getAbsenceTypeName(detail: RequestDetailDto){
     if (detail.dateType == this.APP_CONSTANT.AbsenceType.FullDay){

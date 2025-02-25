@@ -88,6 +88,15 @@ namespace Ncc.Entities.Enum
             //ProbationaryStaff = 3
         }
 
+        public enum UserType
+        {
+            Internship = 0,
+            Collaborators = 1,
+            Staff = 2,
+            ProbationaryStaff = 3,
+            Vendor = 5
+        }
+
         public enum UserLevel : byte
         {
             Intern_0 = 0,

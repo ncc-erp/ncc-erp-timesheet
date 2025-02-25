@@ -67,6 +67,7 @@ namespace Timesheet.DomainServices
                     AfternoonStartAt = u.AfternoonStartAt,
                     AfternoonEndAt = u.AfternoonEndAt,
                     AfternoonWorking = u.AfternoonWorking,
+                    Type = u.Type,
                 }).ToList();
 
             if (users.Count < 1)
@@ -195,8 +196,10 @@ namespace Timesheet.DomainServices
                 t.DateAt = selectedDate;
                 t.UserId = user.UserId;
 
-                await CheckIsPunished(t, LimitedMinute);
-                await CheckIsPunishedByRule(t, LimitedMinute, trackerTime);
+                if (user.Type != Usertype.Vendor) {
+                    await CheckIsPunished(t, LimitedMinute);
+                    await CheckIsPunishedByRule(t, LimitedMinute, trackerTime);   
+                }
                 if (user.IsStopWork || (user.StopWorkingDate.HasValue && user.StopWorkingDate.Value.Date < selectedDate))
                 {
                     t.IsPunishedCheckIn = false;
@@ -642,6 +645,7 @@ namespace Timesheet.DomainServices
                 .ToList();
 
             var workingUserIds = WorkScope.GetAll<User>()
+                .Where(s => s.Type != Usertype.Vendor)
                 .Where(s => !s.IsStopWork || (s.IsStopWork && s.EndDateAt > dateAt.Date))
                 .Select(s => s.Id)
                 .ToList();

@@ -67,7 +67,8 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
   userTypes = [
     { value: 0, label: "Staff" },
     { value: 1, label: "Internship" },
-    { value: 2, label: "Collaborator" }
+    { value: 2, label: "Collaborator" },
+    { value: 5, label: "Vendor" }
   ];
 
   status = [
@@ -123,6 +124,11 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
     }
     this.statusForFilter = "";
 
+  }
+
+  getLabel(userType: number): string {
+    const found = this.userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
   }
 
   getListBranch() {

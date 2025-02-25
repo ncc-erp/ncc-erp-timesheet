@@ -71,6 +71,7 @@ export class CreateEditRetroDetailComponent
     { id: EnumUserType.Staff, name: "Staff" },
     { id: EnumUserType.Internship, name: "Internship" },
     { id: EnumUserType.Collaborator, name: "Collaborator" },
+    { id: EnumUserType.Vendor, name: "Vendor" },
   ];
   public listUserTypeSelected: number[] = [];
 

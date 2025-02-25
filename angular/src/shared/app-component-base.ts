@@ -20,7 +20,8 @@ export abstract class AppComponentBase {
     UserType = {
         Staff: 0,
         Intern: 1,
-        Collaborator: 2
+        Collaborator: 2,
+        Vendor: 5
     };
     Level = {
         Intern_0: 0,

@@ -75,6 +75,7 @@ export class RetroDetailComponent
     { id: EnumUserType.Staff, name: "Staff" },
     { id: EnumUserType.Internship, name: "Internship" },
     { id: EnumUserType.Collaborator, name: "Collaborator" },
+    { id: EnumUserType.Vendor, name: "Vendor" },
   ];
   public listUserTypeSelected: number[] = [];
 
@@ -281,6 +282,11 @@ export class RetroDetailComponent
       return member.internFullPath;
     }
     return "assets/images/undefine.png";
+  }
+
+  getUserTypeName(userType: EnumUserType): string {
+    const found = this.listUserType.find(u => u.id === userType);
+    return found ? found.name : 'Unknown';
   }
 
   changeStatusNote(item) {

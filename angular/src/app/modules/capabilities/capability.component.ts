@@ -119,6 +119,8 @@ export class CapabilityComponent extends PagedListingComponentBase<CapabilityDto
         return "#014C6E";
       case this.UserType.Collaborator:
         return "#F9AE60";
+      case this.UserType.Vendor:
+        return "#40920e";
       default:
         return "#000"
     }

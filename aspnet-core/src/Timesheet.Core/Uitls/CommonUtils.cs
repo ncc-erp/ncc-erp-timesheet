@@ -264,10 +264,16 @@ namespace Timesheet.Uitls
         {
             return Enum.Parse<UserLevel>(levelCode);
         }
-        public static Usertype GetUserTypeByTypeFromHrmV2(Usertype typeFromHrmV2)
+        public static Usertype GetUserTypeByTypeFromHrmV2(UserType typeFromHrmV2)
         {
-            var userTypeMapers = new Usertype[] { Usertype.Internship, Usertype.Collaborators, Usertype.Staff, Usertype.Staff };
-            return userTypeMapers[(int)typeFromHrmV2];
+            return new Dictionary<UserType, Usertype>
+            {
+                { UserType.Internship, Usertype.Internship },
+                { UserType.Collaborators, Usertype.Collaborators },
+                { UserType.Staff, Usertype.Staff },
+                { UserType.ProbationaryStaff, Usertype.Staff },
+                { UserType.Vendor, Usertype.Vendor }
+            }[typeFromHrmV2]; 
         }
         public static Sex GetSexBySexFromHrmV2(Sex sexFromHrmV2)
         {
