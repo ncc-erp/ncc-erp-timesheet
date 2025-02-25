@@ -88,7 +88,7 @@ namespace Ncc.Entities.Enum
             //ProbationaryStaff = 3
         }
 
-        public enum UserType
+        public enum UserTypeFromHRM
         {
             Internship = 0,
             Collaborators = 1,
