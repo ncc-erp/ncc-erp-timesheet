@@ -338,17 +338,20 @@ namespace Timesheet.BackgroundWorker
             string notifyPenaltyFee = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyPenaltyFee);
 
             var sb = new StringBuilder();
+            var interns = new StringBuilder();
             foreach (var item in listPMNotReview)
             {
-                sb.AppendLine($"PM: {item.KomuAccountTag()} please complete reviewing **{item.InterShips.Count}** interns before " +
+                sb.AppendLine($"PM: {item.KomuAccountTag()} Please complete reviewing **{item.InterShips.Count}** interns before " +
                               $"**{DateTimeUtils.ToString(deadlineDate.Date)}** (**{notifyPenaltyFee}đ/intern** if you miss. Don't lose your money):");
-                sb.AppendLine($"```");
+                interns.AppendLine($"```");
                 foreach (var interShip in item.InterShips)
                 {
-                    sb.AppendLine($"{interShip.FullName} [{interShip.BranchDisplayName}] ({CommonUtils.UserLevelName(interShip.Level)})");
+                    interns.AppendLine($"[{interShip.BranchDisplayName}] {interShip.FullName} - {CommonUtils.UserLevelName(interShip.Level)}");
                 }
-                sb.AppendLine($"```");
-                _komuService.SendMessageToUser(sb.ToString(), item.UserName.Trim());
+                interns.AppendLine($"```");
+                _komuService.SendMessageReviewInternToUser(sb.ToString(), item.UserName.Trim(), interns.ToString());
+
+                interns.Clear();
                 sb.Clear();
             }
         }

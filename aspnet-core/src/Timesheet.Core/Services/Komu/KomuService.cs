@@ -199,7 +199,7 @@ namespace Timesheet.Services.Komu
 
         public void SendMessageToUser(string komuMessage, string userName)
         {
-            
+
             if (_isNotifyToKomu != "true")
             {
                 logger.LogInformation("_isNotifyToKomu=" + _isNotifyToKomu + " => stop");
@@ -230,7 +230,7 @@ namespace Timesheet.Services.Komu
                 var listMessage = CommonUtils.SeparateMessage(messageToSend, MAX_LENGTH, "\n");
                 foreach (var message in listMessage)
                 {
-                  Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageToUserDto { message = message, username = userNameToSend });
+                    Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageToUserDto { message = message, username = userNameToSend });
                 }
             }
             else if (komuMessage.Contains(" "))
@@ -245,6 +245,65 @@ namespace Timesheet.Services.Komu
             {
                 Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageToUserDto { message = messageToSend, username = userNameToSend });
             }
+        }
+
+        public void SendMessageReviewInternToUser(string komuMessage, string userName, string interns = null)
+        {
+            if (_isNotifyToKomu != "true")
+            {
+                logger.LogInformation("_isNotifyToKomu=" + _isNotifyToKomu + " => stop");
+                return;
+            }
+
+            var userNameDevModeConfig = _settingManager.GetSettingValueForApplication(AppSettingNames.KomuUserNameDevMode);
+            var userNameToSend = !string.IsNullOrEmpty(userNameDevModeConfig) ? userNameDevModeConfig : _userNameDevMode;
+            string messageToSend = komuMessage;
+
+            if (string.IsNullOrEmpty(userNameToSend))
+            {
+                userNameToSend = userName;
+            }
+            else
+            {
+                messageToSend = "[DEV-MODE] " + komuMessage;
+            }
+
+            if (userNameToSend.Equals("UNKNOW-USER"))
+            {
+                //Nothing todo: [DEV_MODE] not config userName
+                return;
+            }
+
+            DateTime previous = DateTime.Now.AddMonths(-1);
+            var options = ConvertOptions(messageToSend, interns);
+            Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageReviewInternToUserDto
+            {
+                message = "Review Intern " + previous.Month + "/" + previous.Year,
+                username = userNameToSend,
+                options = options
+            });
+        }
+
+        public object ConvertOptions(string title, string description)
+        {
+            return new
+            {
+                embed = new[]
+                {
+                    new
+                    {
+                        color = "yellow",
+                        title = title,
+                        description = description,
+                        timestamp = DateTime.Now.ToString("yyyy-MM-dd"),
+                        footer = new
+                        {
+                            text = "Powered by Mezon",
+                            icon_url = "https://cdn.mezon.vn/1837043892743049216/1840654271217930240/1827994776956309500/857_0246x0w.webp"
+                        }
+                    }
+                }
+            };
         }
 
         public async Task<T> GetAsync<T>(string url)

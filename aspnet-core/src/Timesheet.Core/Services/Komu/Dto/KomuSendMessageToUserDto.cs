@@ -9,4 +9,11 @@ namespace Timesheet.Services.Komu.Dto
         public string message { get; set; }
         public string username { get; set; }
     }
+
+    public class KomuSendMessageReviewInternToUserDto
+    {
+        public string message { get; set; }
+        public string username { get; set; }
+        public object options { get; set; }
+    }
 }

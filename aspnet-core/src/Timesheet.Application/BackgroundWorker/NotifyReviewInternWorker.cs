@@ -284,7 +284,7 @@ namespace Timesheet.BackgroundWorker
 
             var sb = new StringBuilder();
             sb.AppendLine($"[Review Intern] PMs have finished evaluating interns, please review.");
-            _komuService.SendMessageToUser(sb.ToString(), usernameHeadPm.Trim());
+            _komuService.SendMessageReviewInternToUser(sb.ToString(), usernameHeadPm.Trim());
             sb.Clear();
         }
 
@@ -321,6 +321,7 @@ namespace Timesheet.BackgroundWorker
             if (listPMNotReview.Count == 0) return; 
 
             var sb = new StringBuilder();
+            var interns = new StringBuilder();
             foreach (var item in listPMNotReview)
             {
                 if (!isFullday && (today.Hour < Convert.ToInt16(item.StartWorkingAt.Split(':')[0]) || today.Hour > Convert.ToInt16(item.EndWorkingAt.Split(':')[0]))) 
@@ -328,16 +329,17 @@ namespace Timesheet.BackgroundWorker
                     Logger.Error("NotifyReviewerIntern() stop: working_time - notifyAtHourConfig=" + notifyAtHourConfig);
                     continue;
                 }
-                sb.AppendLine($"PM: {item.KomuAccountTag()} please complete reviewing **{item.InterShips.Count}** interns before " +
+                sb.AppendLine($"PM: {item.KomuAccountTag()} Please complete reviewing **{item.InterShips.Count}** interns before " +
                                 $"**{DateTimeUtils.ToString(deadlineDate.Date)}** (**{notifyPenaltyFee}đ/intern** if you miss. Don't lose your money):");
-                sb.AppendLine($"```");
+                interns.AppendLine($"```");
                 foreach (var interShip in item.InterShips)
                 {
-                    sb.AppendLine($"{interShip.FullName} [{interShip.BranchDisplayName}] ({CommonUtils.UserLevelName(interShip.Level)})");
+                    interns.AppendLine($"[{interShip.BranchDisplayName}] {interShip.FullName} - {CommonUtils.UserLevelName(interShip.Level)}");
                 }
-                sb.AppendLine($"```");
+                interns.AppendLine($"```");
+                _komuService.SendMessageReviewInternToUser(sb.ToString(), item.UserName.Trim(), interns.ToString());
 
-                _komuService.SendMessageToUser(sb.ToString(), item.UserName.Trim());
+                interns.Clear();
                 sb.Clear();
             }
         }
@@ -414,7 +416,8 @@ namespace Timesheet.BackgroundWorker
 
             var sb = new StringBuilder();
             sb.AppendLine($"[Review Intern] HeadPm have finished evaluating interns, please review.");
-            _komuService.SendMessageToUser(sb.ToString(), username.Trim());
+            _komuService.SendMessageReviewInternToUser(sb.ToString(), username.Trim());
+
             sb.Clear();
             
         }
