@@ -365,6 +365,13 @@ namespace Timesheet.DomainServices
 
             return user;
         }
+
+        public User GetUserByEmail(string email)
+        {
+            return WorkScope.GetAll<User>()
+                    .Where(x => x.EmailAddress.ToLower().Trim() == email.ToLower().Trim())
+                    .FirstOrDefault();
+        }
     }
 
 }

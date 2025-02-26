@@ -452,7 +452,7 @@ namespace Ncc.Configuration
             return new NRITConfigDto
             {
                 NotifyEnableWorker = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyEnableWorker),
-                NotifyAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyAtHour),
+                NotifyAtHourType = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyAtHourType),
                 NotifyReviewDeadline = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyReviewDeadline),
                 NotifyOnDates = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyOnDates),
                 NotifyToChannels = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NRITNotifyToChannels),
@@ -464,7 +464,7 @@ namespace Ncc.Configuration
         public async Task<NRITConfigDto> SetNRITConfig(NRITConfigDto input)
         {
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyEnableWorker, input.NotifyEnableWorker);
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyAtHour, input.NotifyAtHour);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyAtHourType, input.NotifyAtHourType);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyReviewDeadline, input.NotifyReviewDeadline);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyOnDates, input.NotifyOnDates);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NRITNotifyToChannels, input.NotifyToChannels);
@@ -472,27 +472,39 @@ namespace Ncc.Configuration
             return input;
         }
 
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_NHPMAPRITConfig_View)]
-        public async Task<NotifyHeadPMAndPresidentReviewInternConfigDto> GetNHPMAPRITConfig()
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_NRITVMAEConfig_View)]
+        public async Task<NotifyReviewInternViaMezonAndEmailConfigDto> GetNRITVMAEConfig()
         {
-            return new NotifyHeadPMAndPresidentReviewInternConfigDto
+            return new NotifyReviewInternViaMezonAndEmailConfigDto
             {
-                NotifyHeadPMAndPresidentReviewInternEnableWorker = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternEnableWorker),
-                NotifyHeadPMAndPresidentReviewInternAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternAtHour),
-                NotifyHeadPMAndPresidentReviewInternOnDate = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternOnDate),
+                NotifyReviewInternEnableWorker = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyReviewInternEnableWorker),
+                NotifyReviewInternIntervalMinutes = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyReviewInternIntervalMinutes),
+                NotifyReviewInternAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyReviewInternAtHour),
+                NotifyHeadPMReviewInternOnDate = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyHeadPMReviewInternOnDate),
+                NotifyPresidentReviewInternOnDate = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyPresidentReviewInternOnDate),
                 NotifyHeadPmMail = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyHeadPmMail),
-                NotifyPresidentEmail = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyPresidentEmail)
+                NotifyPresidentEmail = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyPresidentEmail),
+                NotifyHrEmail = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyHrEmail),
+                UpdateTimeCronjobAtHour = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.UpdateTimeCronjobAtHour),
+                UpdateTimeCronjobOnDate = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.UpdateTimeCronjobOnDate),
+                NotifyPmReviewInternOnDates = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.NotifyPmReviewInternOnDates),
             };
         }
 
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_NHPMAPRITConfig_Update)]
-        public async Task<NotifyHeadPMAndPresidentReviewInternConfigDto> SetNHPMAPRITConfig(NotifyHeadPMAndPresidentReviewInternConfigDto input)
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_NRITVMAEConfig_Update)]
+        public async Task<NotifyReviewInternViaMezonAndEmailConfigDto> SetNRITVMAEConfig(NotifyReviewInternViaMezonAndEmailConfigDto input)
         {
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternEnableWorker, input.NotifyHeadPMAndPresidentReviewInternEnableWorker);
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternAtHour, input.NotifyHeadPMAndPresidentReviewInternAtHour);
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyHeadPMAndPresidentReviewInternOnDate, input.NotifyHeadPMAndPresidentReviewInternOnDate);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyReviewInternEnableWorker, input.NotifyReviewInternEnableWorker);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyReviewInternIntervalMinutes, input.NotifyReviewInternIntervalMinutes);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyReviewInternAtHour, input.NotifyReviewInternAtHour);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyHeadPMReviewInternOnDate, input.NotifyHeadPMReviewInternOnDate);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyPresidentReviewInternOnDate, input.NotifyPresidentReviewInternOnDate);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyHeadPmMail, input.NotifyHeadPmMail);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyPresidentEmail, input.NotifyPresidentEmail);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyHrEmail, input.NotifyHrEmail);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.UpdateTimeCronjobAtHour, input.UpdateTimeCronjobAtHour);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.UpdateTimeCronjobOnDate, input.UpdateTimeCronjobOnDate);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.NotifyPmReviewInternOnDates, input.NotifyPmReviewInternOnDates);
             return input;
         }
 

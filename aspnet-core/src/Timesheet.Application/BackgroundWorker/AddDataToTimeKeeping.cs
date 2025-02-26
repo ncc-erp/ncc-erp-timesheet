@@ -14,7 +14,6 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using Timesheet.APIs.TeamBuildingDetails;
 using Timesheet.APIs.TeamBuildingDetails.Dto;
 using Timesheet.DomainServices;
@@ -257,7 +256,7 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
 
-            string notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyAtHour);
+            string notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyReviewInternAtHour);
 
             if (notifyAtHourConfig != today.Hour.ToString())
             {
@@ -306,14 +305,14 @@ namespace Timesheet.BackgroundWorker
         private void NotifyPMReviewerIntern()
         {
             Logger.Info("NotifyReviewerIntern() start");
-            string notifyEnableWorker = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyEnableWorker);
+            string notifyEnableWorker = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyReviewInternEnableWorker);
             if (notifyEnableWorker != "true")
             {
                 Logger.Info("NotifyReviewerIntern() stop: notifyEnableWorker=" + notifyEnableWorker);
                 return;
             }
 
-            var NRITNotifyOnDates = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyOnDates);
+            var NRITNotifyOnDates = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPmReviewInternOnDates);
             string[] notifyOnDates = NRITNotifyOnDates.Split(',');
             var today = DateTimeUtils.GetNow();
             Logger.Info("NotifyReviewerIntern() NRITNotifyOnDates=" + NRITNotifyOnDates + ",today.Day=" + today.Day + ", today.Hour=" + today.Hour);
@@ -323,7 +322,7 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
 
-            string notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyAtHour);
+            string notifyAtHourConfig = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyReviewInternAtHour);
 
             if (notifyAtHourConfig != today.Hour.ToString())
             {
@@ -339,17 +338,20 @@ namespace Timesheet.BackgroundWorker
             string notifyPenaltyFee = SettingManager.GetSettingValueForApplication(AppSettingNames.NRITNotifyPenaltyFee);
 
             var sb = new StringBuilder();
+            var interns = new StringBuilder();
             foreach (var item in listPMNotReview)
             {
-                sb.AppendLine($"PM: {item.KomuAccountTag()} please complete reviewing **{item.InterShips.Count}** interns before " +
+                sb.AppendLine($"PM: {item.KomuAccountTag()} Please complete reviewing **{item.InterShips.Count}** interns before " +
                               $"**{DateTimeUtils.ToString(deadlineDate.Date)}** (**{notifyPenaltyFee}đ/intern** if you miss. Don't lose your money):");
-                sb.AppendLine($"```");
+                interns.AppendLine($"```");
                 foreach (var interShip in item.InterShips)
                 {
-                    sb.AppendLine($"{interShip.FullName} [{interShip.BranchDisplayName}] ({CommonUtils.UserLevelName(interShip.Level)})");
+                    interns.AppendLine($"[{interShip.BranchDisplayName}] {interShip.FullName} - {CommonUtils.UserLevelName(interShip.Level)}");
                 }
-                sb.AppendLine($"```");
-                _komuService.SendMessageToUser(sb.ToString(), item.UserName.Trim());
+                interns.AppendLine($"```");
+                _komuService.SendMessageReviewInternToUser(sb.ToString(), item.UserName.Trim(), interns.ToString());
+
+                interns.Clear();
                 sb.Clear();
             }
         }

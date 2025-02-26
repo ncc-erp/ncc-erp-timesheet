@@ -668,7 +668,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             return result;
         }
 
-        private async System.Threading.Tasks.Task notifyEmailWhenSubmitTimesheet(NotifyUserInfoDto requester, List<NotifyKomuTimesheetDto> receivers)
+        public async System.Threading.Tasks.Task notifyEmailWhenSubmitTimesheet(NotifyUserInfoDto requester, List<NotifyKomuTimesheetDto> receivers)
         {
             var SendEmailSubmitTimesheet = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendEmailTimesheet);
             if (SendEmailSubmitTimesheet != "true")
@@ -726,7 +726,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             }
         }
 
-        private async Task<NotifyUserInfoDto> getNotifyUserInfoDto(long userId)
+        public async Task<NotifyUserInfoDto> getNotifyUserInfoDto(long userId)
         {
             return await WorkScope.GetAll<User>().Where(s => s.Id == userId)
                 .Select(user => new NotifyUserInfoDto
@@ -794,7 +794,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             return result;
         }
 
-        private async System.Threading.Tasks.Task notifySubmitTimesheet(List<MyTimesheet> mytimesheets)
+        public async System.Threading.Tasks.Task notifySubmitTimesheet(List<MyTimesheet> mytimesheets)
         {
             var SendEmailSubmitTimesheet = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendEmailTimesheet);
             var NotifyKomuWhenSubmitTimesheet = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendKomuSubmitTimesheet);
@@ -811,7 +811,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             await notifyEmailWhenSubmitTimesheet(requester, receivers);
         }
 
-        private void notifyKomuWhenSubmitTimesheet(NotifyUserInfoDto requester, List<NotifyKomuTimesheetDto> receivers)
+        public void notifyKomuWhenSubmitTimesheet(NotifyUserInfoDto requester, List<NotifyKomuTimesheetDto> receivers)
         {
             var NotifyKomuWhenSubmitTimesheet = SettingManager.GetSettingValueForApplication(AppSettingNames.SendKomuSubmitTimesheet);
             if (NotifyKomuWhenSubmitTimesheet != "true")
