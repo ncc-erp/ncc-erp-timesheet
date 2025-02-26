@@ -206,11 +206,11 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
 
   clickSelectAll(value){
     this.selectedDays.clear();
-    if(value){
-      const currentMonth = new Date().getMonth();
+    const currentMonth = new Date().getMonth();
+    if(value && this.month >= currentMonth){
       const absencePending = this.absenceReqs.filter(day => {
           const dateMonth = new Date(day.detail.dateAt).getMonth();
-          return dateMonth === currentMonth && day.status === this.APP_CONSTANT.AbsenceStatus.Pending;
+          return dateMonth === this.month && day.status === this.APP_CONSTANT.AbsenceStatus.Pending;
       });
       absencePending.forEach(s => {
         if (this.selectedDays.has(s.detail.dateAt)) {
