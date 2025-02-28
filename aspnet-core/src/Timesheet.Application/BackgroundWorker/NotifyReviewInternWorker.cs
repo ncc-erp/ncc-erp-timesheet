@@ -78,7 +78,8 @@ namespace Timesheet.BackgroundWorker
 
             try
             {
-                UpdateTimeCronjob();
+                var task = UpdateTimeCronjob();
+                task.Wait();
             }
             catch (Exception e)
             {
