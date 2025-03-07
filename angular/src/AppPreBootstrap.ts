@@ -9,7 +9,7 @@ export class AppPreBootstrap {
     static run(appRootUrl: string, callback: () => void): void {
         AppPreBootstrap.getApplicationConfig(appRootUrl, () => {
             AppPreBootstrap.getUserConfiguration(callback);
-            AppPreBootstrap.getGoogleClientAppId();
+            // AppPreBootstrap.getGoogleClientAppId();
         });
     }
 
@@ -37,20 +37,20 @@ export class AppPreBootstrap {
         });
     }
 
-    private static getGoogleClientAppId() {
-        if (!AppConsts.backendIsNotABP){
-            return abp.ajax({
-                url: AppConsts.remoteServiceBaseUrl + '/api/services/app/Configuration/GetGoogleClientAppId',
-                method: 'GET',
-                headers: {
-                    'Abp.TenantId': abp.multiTenancy.getTenantIdCookie()
-                }
-            }).done(result => {
-                AppConsts.googleClientAppId = result;
-            });
-        }
+    // private static getGoogleClientAppId() {
+    //     if (!AppConsts.backendIsNotABP){
+    //         return abp.ajax({
+    //             url: AppConsts.remoteServiceBaseUrl + '/api/services/app/Configuration/GetGoogleClientAppId',
+    //             method: 'GET',
+    //             headers: {
+    //                 'Abp.TenantId': abp.multiTenancy.getTenantIdCookie()
+    //             }
+    //         }).done(result => {
+    //             AppConsts.googleClientAppId = result;
+    //         });
+    //     }
 
-    }
+    // }
 
     private static getCurrentClockProvider(currentProviderName: string): abp.timing.IClockProvider {
         if (currentProviderName === 'unspecifiedClockProvider') {
