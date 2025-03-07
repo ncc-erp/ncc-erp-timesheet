@@ -6,9 +6,9 @@ import { LoginService } from 'account/login/login.service';
 import { MessageService } from '@abp/message/message.service';
 
 @Component({
-  selector: 'talent-auth-callback',
+  selector: 'auth-callback',
   templateUrl: './auth-callback.component.html',
-  styleUrls: ['./auth-callback.component.scss']
+  styleUrls: ['./auth-callback.component.css']
 })
 export class AuthCallbackComponent extends AppComponentBase implements OnInit {
   isLoading: boolean = false;
