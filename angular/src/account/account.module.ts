@@ -29,6 +29,7 @@ import { TenantChangeDialogComponent } from './tenant/tenant-change-dialog.compo
 import { SocialLoginModule, AuthServiceConfig } from "angularx-social-login";
 import { GoogleLoginProvider, FacebookLoginProvider } from "angularx-social-login";
 import { AppConsts } from '@shared/AppConsts';
+import { AuthCallbackComponent } from './auth-callback/auth-callback.component';
 
 
 let config = new AuthServiceConfig([
@@ -66,6 +67,7 @@ export function provideConfig() {
         // tenant
         TenantChangeComponent,
         TenantChangeDialogComponent,
+        AuthCallbackComponent,
     ],
     providers: [
         LoginService,

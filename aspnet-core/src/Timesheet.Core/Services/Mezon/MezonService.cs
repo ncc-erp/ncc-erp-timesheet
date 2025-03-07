@@ -11,6 +11,9 @@ using System.Text;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Timesheet.Constants;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Abp.Extensions;
 
 namespace Timesheet.Services.Mezon
 {
@@ -18,10 +21,21 @@ namespace Timesheet.Services.Mezon
     {
         private readonly ILogger<MezonService> logger;
         private readonly ISettingManager _settingManager;
-        public MezonService(HttpClient httpClient, ISettingManager settingManager, ILogger<MezonService> logger)
+        private HttpClient _httpClient;
+        private const string serviceName = "MezonService";
+        private readonly string _clientId;
+        private readonly string _clientSecret;
+        private readonly string _redirectUri;
+        public MezonService(HttpClient httpClient, ISettingManager settingManager, ILogger<MezonService> logger, IConfiguration configuration)
         {
             this.logger = logger;
             this._settingManager = settingManager;
+            this._httpClient = httpClient;
+            _clientId = configuration.GetValue<string>($"{serviceName}:ClientId");
+            _clientSecret = configuration.GetValue<string>($"{serviceName}:ClientSecret");
+            _redirectUri = configuration.GetValue<string>($"{serviceName}:RedirectUri");
+            var baseAddress = configuration.GetValue<string>($"{serviceName}:BaseAddress");
+            httpClient.BaseAddress = new Uri(baseAddress);
         }
         public OpenTalkListDto[] GetOpenTalkLog(DateTime? day = null)
         {
@@ -159,6 +173,78 @@ namespace Timesheet.Services.Mezon
             {
                 logger.LogError($"MezonService Post: {url} input: {strInput} Error: {ex.Message}");
             }
+        }
+
+        protected async Task<T> PostAsync<T>(string url, object input)
+        {
+            var fullUrl = $"{_httpClient.BaseAddress}/{url}";
+
+            try
+            {
+                var body = new FormUrlEncodedContent(input as Dictionary<string, string>);
+
+                var response = await _httpClient.PostAsync(url, body);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    logger.LogInformation($"Post: {fullUrl} input: {body} response: {responseContent}");
+                    return JsonConvert.DeserializeObject<T>(responseContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Post: {fullUrl} error: {ex.Message}");
+            }
+            return default;
+        }
+
+        public async Task<OAuth2TokenResponse> GetTokenAsync(OAuth2Request request)
+        {
+            return await PostAsync<OAuth2TokenResponse>("oauth2/token", new Dictionary<string, string>()
+            {
+                { "grant_type", "authorization_code" },
+                { "code", request.Code },
+                { "scope", request.Scope },
+                { "state", request.State },
+                { "client_id", _clientId },
+                { "client_secret", _clientSecret },
+                { "redirect_uri", _redirectUri }
+            });
+        }
+
+        public async Task<UserInfoResponse> GetUserInfoAsync(string accessToken)
+        {
+            var body = new Dictionary<string, string>()
+            {
+                { "access_token", Uri.EscapeDataString(accessToken) },
+                { "client_id", _clientId },
+                { "client_secret", _clientSecret },
+                { "redirect_uri", _redirectUri }
+            };
+            return await PostAsync<UserInfoResponse>("userinfo", body);
+        }
+
+        public string GenerateOAuthUrl()
+        {
+            var state = Guid.NewGuid().ToString("N").Truncate(11);
+
+            return $"{_httpClient.BaseAddress}/oauth2/auth?" +
+                   $"client_id={_clientId}&" +
+                   $"redirect_uri={Uri.EscapeDataString(_redirectUri)}&" +
+                   $"response_type=code&" +
+                   $"scope=openid+offline&" +
+                   $"state={state}";
+        }
+
+        public MezonServiceConfig GetConfig()
+        {
+            return new MezonServiceConfig
+            {
+                ServiceName = serviceName,
+                ClientId = _clientId,
+                ClientSecret = _clientSecret,
+                RedirectUri = _redirectUri
+            };
         }
     }
 }
