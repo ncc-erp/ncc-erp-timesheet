@@ -6,6 +6,7 @@ import { LoginService } from './login.service';
 import { AuthService, SocialUser } from "angularx-social-login";
 import { GoogleLoginProvider } from "angularx-social-login";
 import { AppConsts } from '@shared/AppConsts';
+import { MezonLoginService } from '@app/service/api/mezon-api.service';
 @Component({
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.less'],
@@ -24,6 +25,7 @@ export class LoginComponent extends AppComponentBase implements OnInit {
     public loginService: LoginService,
     private _sessionService: AbpSessionService,
     private authService: AuthService,
+    private mezonLoginService: MezonLoginService
   ) {
     super(injector);
   }
@@ -68,6 +70,10 @@ export class LoginComponent extends AppComponentBase implements OnInit {
     //     this.loginService.authenticateGoogle(user.idToken, this.nccCode);
     //   }
     // });
+  }
+
+  signInWithMezon(): void {
+    this.mezonLoginService.redirectToOAuth();
   }
 
   signOut(): void {
