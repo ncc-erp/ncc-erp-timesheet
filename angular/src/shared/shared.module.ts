@@ -78,6 +78,7 @@ import { DayTypePipe } from './pipes/dateType.pipe';
 import { AddUserOtherProjectComponent } from './add-user-other-project/add-user-other-project.component';
 import { SentryService } from './sentry-service';
 import { ShowProjectInActivePipe } from './pipes/show-project-in-active.pipe';
+import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
 @NgModule({
   imports: [
     FormsModule,
@@ -230,7 +231,8 @@ export class SharedModule {
         AppUrlService,
         AppAuthService,
         AppRouteGuard,
-        SentryService
+        SentryService,
+        MezonWebViewService
       ],
     };
   }

@@ -3,6 +3,7 @@
   "appBaseUrl": "http://localhost:4200",
   "enableNormalLogin": true,
   "backendIsNotABP": false,
+  "mezonAppId": "1840673453682724864",
   "localeMappings": [
     {
       "from": "pt-BR",
