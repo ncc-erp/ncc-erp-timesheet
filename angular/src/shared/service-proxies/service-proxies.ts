@@ -1096,7 +1096,6 @@ export class TokenAuthServiceProxy {
     }
 
     protected processAuthenticate(response: HttpResponseBase): Observable<AuthenticateResultModel> {
-        console.log("processAuthenticate response: ", response)
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :

@@ -17,7 +17,7 @@ import { MezonhashCallbackComponent } from './mezon-hash/mezonhash-callback.comp
                 ]
             },
             { path: 'login/callback', component: AuthCallbackComponent },
-            { path: 'mezonhash-call', component: MezonhashCallbackComponent }
+            { path: '/', component: MezonhashCallbackComponent }
 
         ])
     ],
