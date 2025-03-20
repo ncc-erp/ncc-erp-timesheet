@@ -146,18 +146,19 @@ export class LoginService {
         this.rememberMe = false;
     }
 
-    authenticateMezonHash(authDto: IHashMezonAuthModel, errorHandller?: (error?: any) => any): Observable<any> {
-        return this._mezonService
-            .mezonHashAuthenticate(authDto).pipe(
-                map(data => {
-                    this.processAuthenticateResult(data.result);
-                    return { ...data, loading: false }
-                }),
-                startWith({ loading: true, success: false }),
-                catchError((err: HttpErrorResponse) => {
-                    this.router.navigate(['']);
-                    return of({ loading: false, success: false, error: err.error.error });
-                }),
-            );
+  
+    authenticateMezonHash(authDto: IHashMezonAuthModel, errorHandller?: (error?: any) => any): void {
+        this._tokenAuthService
+            .mezonHashAuthenticate(authDto)
+            .pipe(
+                finalize(() => { }),
+                catchError((error) => {
+                    return errorHandller(error);
+                })
+            )
+            .subscribe((result: AuthenticateResultModel) => {
+                console.log(result)
+                this.processAuthenticateResult(result);
+            })
     }
 }
