@@ -27,7 +27,7 @@ export class MezonLoginService extends BaseApiService {
   }
 
   mezonHashAuthenticate(model: IHashMezonAuthModel): Observable<any> {
-    console.log('request body: ', model)
+    // console.log('request body: ', model) 
     return this.http.post(this.baseUrl + '/api/TokenAuth/HashAuthenticate', { HashData: model.hashData });
   }
 }

@@ -20,7 +20,6 @@ export class MezonWebViewService {
         });
     }
 
-
     listenToPong() {
         window.Mezon.WebView.onEvent("PONG" as MezonAppEvent, () => {
             this.isInMezon.next(true);
@@ -38,15 +37,12 @@ export class MezonWebViewService {
         });
     }
 
-
-
     removeEventListeners() {
         window.Mezon.WebView.offEvent("CURRENT_USER_INFO" as MezonAppEvent, () => { });
         window.Mezon.WebView.offEvent("USER_HASH_INFO" as MezonAppEvent, () => { });
     }
 
     logout() {
-        // Add your logic to log out user, like clearing the token, etc.
         console.log('User logged out');
     }
 

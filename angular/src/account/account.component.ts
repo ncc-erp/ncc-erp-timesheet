@@ -21,15 +21,8 @@ export class AccountComponent extends AppComponentBase implements OnInit {
         injector: Injector,
         private _loginService: LoginService,
         private _appAuthService: AppAuthService,
-        private _mezonWebViewService: MezonWebViewService,
     ) {
         super(injector);
-
-        console.log("I'm in constructor of account componentttttt constructor");
-        this._mezonWebViewService.ping();
-        this._mezonWebViewService.sendBotId();
-        this._mezonWebViewService.listenToPong();
-        this._mezonWebViewService.listenToUserHashInfo();
 
         this.currentYear = new Date().getFullYear();
         this.versionText = this.appSession.application.version + ' [' + this.appSession.application.releaseDate.format('YYYYDDMM') + ']';

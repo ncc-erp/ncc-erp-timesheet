@@ -35,7 +35,6 @@ export class LoginComponent extends AppComponentBase implements OnInit {
     private _sessionService: AbpSessionService,
     private authService: AuthService,
     private mezonLoginService: MezonLoginService,
-    private _appAuthService: AppAuthService
 
   ) {
     super(injector);
@@ -43,43 +42,14 @@ export class LoginComponent extends AppComponentBase implements OnInit {
 
 
   ngOnInit() {
-    console.log("In constructor of login")
-    this._appAuthService.isInMezon$.subscribe((status) => {
-      this.isMezonApp = status;
-    });
-
-    this._appAuthService.userHashData$.subscribe((userHashData) => {
-      this.hashData = userHashData;
-      this.isAuthenticating = true;
-      console.log('userHashData: ', userHashData);
-      this.signInWithHash(this.hashData);
-    });
-
-    console.log('Sign in with hash is coming')
 
     this.enableNormalLogin = AppConsts.enableNormalLogin;
 
     // Disable Auto Login By Google
     this.authService.authState.subscribe((user) => {
-      // if (user) {
-      //   this.loginService.authenticateGoogle(user.idToken, this.nccCode);
-      // }
     }, err => this.authService.signOut());
   }
 
-
-  signInWithHash(hashData: string) {
-    if (hashData) {
-      this.isAuthenticating = true;
-      const hashAuthData: IHashMezonAuthModel = {
-        hashData: Base64.encode(hashData),
-      }
-      this.loginService.authenticateMezonHash(hashAuthData, (error) => {
-        console.log("Error: ", error);
-        this.isAuthenFailed = true;
-      })
-    }
-  }
 
 
   checkShowpass() {

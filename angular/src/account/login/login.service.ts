@@ -127,8 +127,6 @@ export class LoginService {
         location.href = initialUrl;
     }
 
-
-
     selectBestRoute(): string {
         if (this._permissionChecker.isGranted('Timesheet')) {
             return '/app/main/timesheets';
@@ -149,7 +147,6 @@ export class LoginService {
     }
 
     authenticateMezonHash(authDto: IHashMezonAuthModel, errorHandller?: (error?: any) => any): Observable<any> {
-        console.log("authDto", authDto)
         return this._mezonService
             .mezonHashAuthenticate(authDto).pipe(
                 map(data => {

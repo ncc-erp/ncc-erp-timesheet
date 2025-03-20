@@ -33,7 +33,6 @@ export class MezonhashCallbackComponent extends AppComponentBase implements OnIn
   }
 
   ngOnInit(): void {
-    console.log("In constructor of mezonhash-callback.components")
     this.mezonWebViewService.ping();
     this.mezonWebViewService.sendBotId();
     this.mezonWebViewService.listenToPong();
@@ -47,21 +46,17 @@ export class MezonhashCallbackComponent extends AppComponentBase implements OnIn
     this.mezonWebViewService.userHashData$.subscribe((userHashData) => {
       this.hashData = userHashData;
       this.isAuthenticating = true;
-      console.log('userHashData: ', userHashData);
       this.signInWithHash(userHashData);
     });
   }
 
   signInWithHash(hashData: string) {
-    // this.isLoading = true;
     if (hashData) {
       this.isAuthenticating = true;
       const hashAuthData: IHashMezonAuthModel = {
         hashData: Base64.encode(hashData),
       }
-      console.log("authenticateMezonHash ", hashAuthData);
       this.loginService.authenticateMezonHash(hashAuthData, (error) => {
-        console.log("hashAuthData", hashAuthData)
         console.log("Error: ", error);
         this.isAuthenFailed = true;
       })
