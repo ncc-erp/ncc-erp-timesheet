@@ -4,7 +4,6 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { AccountComponent } from './account.component';
 import { AuthCallbackComponent } from './auth-callback/auth-callback.component';
-import { MezonhashCallbackComponent } from './mezon-hash/mezonhash-callback.component';
 @NgModule({
     imports: [
         RouterModule.forChild([
@@ -17,8 +16,6 @@ import { MezonhashCallbackComponent } from './mezon-hash/mezonhash-callback.comp
                 ]
             },
             { path: 'login/callback', component: AuthCallbackComponent },
-            { path: '/', component: MezonhashCallbackComponent }
-
         ])
     ],
     exports: [

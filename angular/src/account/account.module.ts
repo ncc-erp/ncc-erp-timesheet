@@ -31,8 +31,6 @@ import { GoogleLoginProvider, FacebookLoginProvider } from "angularx-social-logi
 import { AppConsts } from '@shared/AppConsts';
 import { AuthCallbackComponent } from './auth-callback/auth-callback.component';
 
-//mezon hash
-import { MezonhashCallbackComponent } from './mezon-hash/mezonhash-callback.component';
 import { AppAuthService } from '@shared/auth/app-auth.service';
 import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
 let config = new AuthServiceConfig([
@@ -70,8 +68,7 @@ export function provideConfig() {
     // tenant
     TenantChangeComponent,
     TenantChangeDialogComponent,
-    AuthCallbackComponent,
-    MezonhashCallbackComponent
+    AuthCallbackComponent
   ],
   providers: [
     LoginService,
