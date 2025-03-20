@@ -216,7 +216,7 @@ export class RoleServiceProxy {
         this.baseUrl = baseUrl ? baseUrl : "";
     }
 
-    changeRolePermission(input: RolePermissionDto) : Observable<any>{
+    changeRolePermission(input: RolePermissionDto): Observable<any> {
         return this.http.post(this.baseUrl + "/api/services/app/Role/ChangeRolePermission", input);
     }
 
@@ -677,7 +677,7 @@ export class SessionServiceProxy {
     /**
      * @return Success
      */
-    getCurrentLoginInformations(): Observable<GetCurrentLoginInformationsOutput> {        
+    getCurrentLoginInformations(): Observable<GetCurrentLoginInformationsOutput> {
         let url_ = this.baseUrl + "/api/services/app/Session/GetCurrentLoginInformations";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -702,8 +702,8 @@ export class SessionServiceProxy {
             } else
                 return <Observable<GetCurrentLoginInformationsOutput>><any>_observableThrow(response_);
         }));
-        
-        
+
+
     }
 
     protected processGetCurrentLoginInformations(response: HttpResponseBase): Observable<GetCurrentLoginInformationsOutput> {
@@ -1065,6 +1065,36 @@ export class TokenAuthServiceProxy {
         }));
     }
 
+    mezonHashAuthenticate(model: IHashMezonAuthModel): Observable<AuthenticateResultModel> {
+        let url_ = this.baseUrl + "/api/TokenAuth/HashAuthenticate";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(model);
+
+        let options_: any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_: any) => {
+            return this.processAuthenticate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processAuthenticate(<any>response_);
+                } catch (e) {
+                    return <Observable<AuthenticateResultModel>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<AuthenticateResultModel>><any>_observableThrow(response_);
+        }));
+    }
+
     protected processAuthenticate(response: HttpResponseBase): Observable<AuthenticateResultModel> {
         const status = response.status;
         const responseBlob =
@@ -1209,8 +1239,8 @@ export class UserServiceProxy {
         this.http = http;
         this.baseUrl = baseUrl ? baseUrl : "";
     }
-    
-   
+
+
 
     /**
      * @param input (optional) 
@@ -2068,7 +2098,7 @@ export class RoleDto implements IRoleDto {
         return result;
     }
 }
-export class RolePermissionDto{
+export class RolePermissionDto {
     permissions: string[] | undefined;
     id: number;
 }
@@ -3708,6 +3738,10 @@ export enum IsTenantAvailableOutputState {
     _1 = 1,
     _2 = 2,
     _3 = 3,
+}
+
+export interface IHashMezonAuthModel {
+    hashData: string;
 }
 
 export class SwaggerException extends Error {

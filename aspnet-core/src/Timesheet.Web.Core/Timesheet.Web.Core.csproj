@@ -16,6 +16,9 @@
     <RootNamespace>Timesheet</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="..\Timesheet.Migrator\appsettings.json" Link="appsettings.json" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Timesheet.Application\Timesheet.Application.csproj" />
     <ProjectReference Include="..\Timesheet.EntityFrameworkCore\Timesheet.EntityFrameworkCore.csproj" />
   </ItemGroup>

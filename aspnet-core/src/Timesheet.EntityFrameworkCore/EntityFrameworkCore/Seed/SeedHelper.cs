@@ -1,12 +1,12 @@
-﻿using System;
-using System.Transactions;
-using Microsoft.EntityFrameworkCore;
-using Abp.Dependency;
+﻿using Abp.Dependency;
 using Abp.Domain.Uow;
 using Abp.EntityFrameworkCore.Uow;
 using Abp.MultiTenancy;
+using Microsoft.EntityFrameworkCore;
 using Ncc.EntityFrameworkCore.Seed.Host;
 using Ncc.EntityFrameworkCore.Seed.Tenants;
+using System;
+using System.Transactions;
 
 namespace Ncc.EntityFrameworkCore.Seed
 {

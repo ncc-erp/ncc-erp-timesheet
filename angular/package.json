@@ -5,7 +5,7 @@
   "angular-cli": {},
   "scripts": {
     "ng": "ng",
-    "start": "ng serve -o --host 0.0.0.0 --port 4200 --poll=1000",
+    "start": "ng serve -o --host 0.0.0.0 --port 4200 --poll=1000 ",
     "hmr": "ng serve --host 0.0.0.0 --port 4200 --hmr",
     "test": "ng test",
     "pree2e": "webdriver-manager update --standalone false --gecko false",
@@ -63,6 +63,7 @@
     "jquery-slimscroll": "^1.3.8",
     "jquery-sparkline": "^2.4.0",
     "js-cookie": "^2.1.4",
+    "js-base64": "^3.7.7",
     "lodash": "^4.17.4",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.13",

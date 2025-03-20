@@ -80,7 +80,8 @@
               "node_modules/abp-web-resources/Abp/Framework/scripts/libs/abp.moment.js",
               "src/bsb-theme/js/admin.js",
               "src/bsb-theme/js/demo.js",
-              "src/bsb-theme/js/jquery.validate.js"
+              "src/bsb-theme/js/jquery.validate.js",
+              "src/patches/abp.patch.js"
             ]
           },
           "configurations": {

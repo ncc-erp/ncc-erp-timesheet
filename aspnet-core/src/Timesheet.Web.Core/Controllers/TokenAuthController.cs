@@ -1,26 +1,27 @@
-﻿using System;
+﻿using Abp.Authorization;
+using Abp.Authorization.Users;
+using Abp.Configuration;
+using Abp.MultiTenancy;
+using Abp.Runtime.Security;
+using Abp.UI;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Ncc.Authentication.External;
+using Ncc.Authentication.JwtBearer;
+using Ncc.Authorization;
+using Ncc.Authorization.Users;
+using Ncc.Configuration;
+using Ncc.Models.TokenAuth;
+using Ncc.MultiTenancy;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Abp.Authorization;
-using Abp.Authorization.Users;
-using Abp.MultiTenancy;
-using Abp.Runtime.Security;
-using Abp.UI;
-using Ncc.Authentication.External;
-using Ncc.Authentication.JwtBearer;
-using Ncc.Authorization;
-using Ncc.Authorization.Users;
-using Ncc.Models.TokenAuth;
-using Ncc.MultiTenancy;
 using Timesheet.Controllers.Dto;
-using Abp.Configuration;
-using Ncc.Configuration;
 using Timesheet.Services.Mezon;
+using Timesheet.Services.Mezon.Dto;
 
 namespace Ncc.Controllers
 {
@@ -78,6 +79,36 @@ namespace Ncc.Controllers
             };
         }
 
+        [HttpPost]
+        public async Task<AuthenticateResultModel> HashAuthenticate([FromBody] MezonHashAuthDto model)
+        {
+            var loginResult = await GetLoginResultMezonHashAsync(
+               model
+            );
+
+            var accessToken = CreateAccessToken(CreateJwtClaims(loginResult.Identity));
+            return new AuthenticateResultModel
+            {
+                AccessToken = accessToken,
+                EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
+                ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
+                UserId = loginResult.User.Id
+            };
+        }
+
+        private async Task<AbpLoginResult<Tenant, User>> GetLoginResultMezonHashAsync(MezonHashAuthDto authDto)
+        {
+            var loginResult = await _logInManager.LoginHashMezonAsnyc(authDto);
+
+            switch (loginResult.Result)
+            {
+                case AbpLoginResultType.Success:
+                    return loginResult;
+                default:
+                    throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(loginResult.Result, null, authDto.TenancyName);
+            }
+        }
+
         [HttpGet]
         public IActionResult MezonRedirect()
         {
@@ -104,7 +135,8 @@ namespace Ncc.Controllers
         {
             Logger.Info("GetLoginResultMezonAsync");
             var loginResult = await _logInManager.LoginOAuth2Async(token, tenancyName, false);
-            switch (loginResult.Result) {
+            switch (loginResult.Result)
+            {
                 case AbpLoginResultType.Success:
                     return loginResult;
                 default:
@@ -116,7 +148,7 @@ namespace Ncc.Controllers
         public async Task<AuthenticateResultModel> GoogleAuthenticate([FromBody] TokenDto model)
         {
             var loginBefore = DateTime.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.LogoutAllUser));
-            if(DateTime.UtcNow < loginBefore.ToUniversalTime())
+            if (DateTime.UtcNow < loginBefore.ToUniversalTime())
             {
                 throw new UserFriendlyException($"Hệ thống từ chối đăng nhập trước {loginBefore.ToString("HH:mm dd-MM-yyyy")}. Vui lòng chờ!");
             }
@@ -139,7 +171,7 @@ namespace Ncc.Controllers
 
         private async Task<AbpLoginResult<Tenant, User>> GetLoginResultGoogleAsync(string token, string tenancyName, string secretCode)
         {
-            var loginResult = await _logInManager.LoginAsyncNoPass(token,secretCode ,tenancyName, false);
+            var loginResult = await _logInManager.LoginAsyncNoPass(token, secretCode, tenancyName, false);
 
             switch (loginResult.Result)
             {

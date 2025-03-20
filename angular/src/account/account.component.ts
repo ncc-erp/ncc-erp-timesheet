@@ -1,6 +1,11 @@
-import { Component, ViewContainerRef, OnInit, ViewEncapsulation, Injector } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, Injector } from '@angular/core';
 import { LoginService } from './login/login.service';
 import { AppComponentBase } from '@shared/app-component-base';
+import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
+import { ActivatedRoute, Router } from '@node_modules/@angular/router';
+import { IHashMezonAuthModel } from '@shared/service-proxies/service-proxies';
+import { Base64 } from '@node_modules/js-base64/base64';
+import { AppAuthService } from '@shared/auth/app-auth.service';
 
 @Component({
     templateUrl: './account.component.html',
@@ -10,15 +15,23 @@ import { AppComponentBase } from '@shared/app-component-base';
     encapsulation: ViewEncapsulation.None
 })
 export class AccountComponent extends AppComponentBase implements OnInit {
+    userHash: any;
 
+    hashData: string;
+    isMezonApp: boolean = false;
+    isAuthenFailed: boolean = false;
+    isAuthenticating: boolean = false;
+    isLoading: boolean = false;
     versionText: string;
     currentYear: number;
 
-    private viewContainerRef: ViewContainerRef;
-
     public constructor(
         injector: Injector,
-        private _loginService: LoginService
+        private _authService: AppAuthService,
+        private mezonWebViewService: MezonWebViewService,
+        private route: ActivatedRoute,
+        private _router: Router,
+        public loginService: LoginService,
     ) {
         super(injector);
 
@@ -31,6 +44,43 @@ export class AccountComponent extends AppComponentBase implements OnInit {
     }
 
     ngOnInit(): void {
-        $('body').attr('class', 'login-page');
+        this.mezonWebViewService.ping();
+        this.mezonWebViewService.listenToPong();
+        this.mezonWebViewService.sendBotId();
+        this.mezonWebViewService.listenToUserHashInfo();
+
+
+        this.mezonWebViewService.isInMezon$.subscribe((status) => {
+            this.isMezonApp = status;
+        });
+
+        if (!this.isMezonApp) {
+            $('body').attr('class', 'login-page');
+        }
+
+        this.mezonWebViewService.userHashData$.subscribe((userHashData) => {
+            this.hashData = userHashData;
+            this.isAuthenticating = true;
+            this.signInWithHash(userHashData);
+            this._router.navigate(['app/main/mytimesheets']);
+        });
     }
+
+    signInWithHash(hashData: string) {
+        if (hashData) {
+          this.isAuthenticating = true;
+          const hashAuthData: IHashMezonAuthModel = {
+            hashData: Base64.encode(hashData),
+          }
+          this.loginService.authenticateMezonHash(hashAuthData, (error) => {
+            this.isAuthenFailed = true;
+          })
+        }
+      }
+    
+    
+      // Hàm logout
+      logout() {
+        this._authService.logout();
+      }
 }

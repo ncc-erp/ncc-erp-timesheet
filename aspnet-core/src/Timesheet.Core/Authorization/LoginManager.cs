@@ -1,32 +1,33 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Abp.Authorization;
+﻿using Abp.Authorization;
 using Abp.Authorization.Users;
+using Abp.BackgroundJobs;
 using Abp.Configuration;
 using Abp.Configuration.Startup;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
+using Abp.Extensions;
+using Abp.UI;
 using Abp.Zero.Configuration;
+using Castle.Core.Logging;
+using Google.Apis.Auth;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Ncc.Authorization.Roles;
 using Ncc.Authorization.Users;
-using Ncc.MultiTenancy;
-using System.Threading.Tasks;
-using System;
-using Abp.Extensions;
-using Google.Apis;
-using Google.Apis.Auth;
-using Google.Apis.Auth.OAuth2;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Collections.Generic;
 using Ncc.Configuration;
-using Timesheet.Helper;
-using Abp.BackgroundJobs;
-using Timesheet.BackgroundJob;
-using Abp.UI;
 using Ncc.IoC;
+using Ncc.MultiTenancy;
+using Newtonsoft.Json;
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web;
+using Timesheet.Authorization.Users;
+using Timesheet.Helper;
 using Timesheet.Services.Mezon;
-using Castle.Core.Logging;
 using Timesheet.Services.Mezon.Dto;
 
 namespace Ncc.Authorization
@@ -51,7 +52,8 @@ namespace Ncc.Authorization
             UserClaimsPrincipalFactory claimsPrincipalFactory,
             IBackgroundJobManager backgroundJobManager,
             IWorkScope workScope,
-            MezonService mezonService
+            MezonService mezonService,
+            IConfiguration configuration
            )
             : base(
                   userManager,
@@ -70,7 +72,144 @@ namespace Ncc.Authorization
             _workScope = workScope;
             _mezonService = mezonService;
             Logger = NullLogger.Instance;
+            Configuration = configuration;
+
         }
+        private IConfiguration Configuration { get; }
+
+
+        [UnitOfWork]
+        public async Task<AbpLoginResult<Tenant, User>> LoginHashMezonAsnyc(MezonHashAuthDto hashAuthDto)
+        {
+            var result = await AuthMezonHashAsync(hashAuthDto);
+            var user = result.User;
+            await SaveLoginAttempt(result, hashAuthDto.TenancyName, user == null ? null : user.EmailAddress);
+            return result;
+        }
+
+        private async Task<AbpLoginResult<Tenant, User>> AuthMezonHashAsync(MezonHashAuthDto hashAuthDto)
+        {
+            if (hashAuthDto.HashData.IsNullOrEmpty())
+            {
+                throw new ArgumentNullException(nameof(hashAuthDto.HashData));
+            }
+            try
+            {
+                var appToken = Configuration["MezonService:AppToken"] ?? throw new ArgumentNullException("Invalid AppToken");
+                var rawHashData = hashAuthDto.HashData.DecodeBase64();
+                var hashData = HashParamsParser(rawHashData);
+                var hashParams = new BaseHashData { query_id = hashData.query_id, user = hashData.user, auth_date = hashData.auth_date, signature = hashData.signature };
+                var mezonUser = JsonConvert.DeserializeObject<MezonUser>(hashParams.user);
+                byte[] secretKey = Hasher.HMAC_SHA256(Encoding.UTF8.GetBytes(appToken), Encoding.UTF8.GetBytes("WebAppData"));
+                var hashParamsStringify = HashParamsStringify(hashParams);
+                var hashedData = Hasher.HEX(Hasher.HMAC_SHA256(secretKey, Encoding.UTF8.GetBytes(HashParamsStringify(hashParams))));
+
+                if (hashData.hash.Equals(hashedData) == false)
+                    throw new UserFriendlyException("Authenticattion failed - Invalid hash key");
+
+                Logger.Info($"Try to login with user email: {mezonUser.mezon_id}");
+
+                var loginResult = await HandleAuthWithEmail(mezonUser.mezon_id, hashAuthDto.TenancyName);
+
+                //var user = UserManager.Users.FirstOrDefault(x => x.EmailAddress == userInfo.Subject);
+
+                //var loginResult = CreateLoginResultAsync(user, tenant);
+                return loginResult;
+            }
+            catch (Exception e)
+            {
+                Logger.Info("Authenticattion failed - Can't authenticate with Mezon server");
+                return new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null);
+            }
+        }
+
+        private async Task<AbpLoginResult<Tenant, User>> HandleAuthWithEmail(string emailAddress, string tenancyName, bool shouldLockout = true)
+        {
+
+            Tenant tenant = null;
+
+            //Get and check tenant
+            using (UnitOfWorkManager.Current.SetTenantId(null))
+            {
+                if (!MultiTenancyConfig.IsEnabled)
+                {
+                    tenant = await GetDefaultTenantAsync();
+                }
+
+                else if (!string.IsNullOrWhiteSpace(tenancyName))
+                {
+                    tenant = await TenantRepository.FirstOrDefaultAsync(t => t.TenancyName == tenancyName);
+                    if (tenant == null)
+                    {
+                        return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidTenancyName);
+                    }
+
+                    if (!tenant.IsActive)
+                    {
+                        return new AbpLoginResult<Tenant, User>(AbpLoginResultType.TenantIsNotActive, tenant);
+                    }
+                }
+                var tenantId = tenant?.Id;
+                using (UnitOfWorkManager.Current.SetTenantId(tenantId))
+                {
+                    await UserManager.InitializeOptionsAsync(tenantId);
+                    //var user = await UserManager.FindByNameOrEmailAsync(tenantId, emailAddress);
+                    var user = UserManager.Users.FirstOrDefault(x => x.EmailAddress == emailAddress);
+                    if (user == null)
+                    {
+                        return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, tenant);
+                    }
+
+                    //if (await UserManager.IsLockedOutAsync(user))
+                    //{
+                    //    return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
+                    //}
+
+                    //if (shouldLockout && await TryLockOutAsync(tenantId, user.Id))
+                    //{
+                    //    return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
+                    //}
+                    var logỉnResult = await CreateLoginResultAsync(user, tenant);
+                    return logỉnResult;
+                }
+            }
+        }
+
+
+        private HashData HashParamsParser(string queryString)
+        {
+            var queryParams = HttpUtility.ParseQueryString(queryString);
+            var hashData = new HashData
+            {
+                query_id = queryParams["query_id"],
+                user = queryParams["user"],
+                auth_date = long.Parse(queryParams["auth_date"]),
+                signature = queryParams["signature"],
+                hash = queryParams["hash"]
+            };
+            return hashData;
+        }
+
+        private string HashParamsStringify(object hashData)
+        {
+            var queryString = new StringBuilder();
+
+            var properties = hashData.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var property in properties)
+            {
+                var value = property.GetValue(hashData);
+                if (value != null)
+                {
+                    if (queryString.Length > 0)
+                        queryString.Append("&");
+                    queryString.AppendFormat($"{Uri.EscapeDataString(property.Name)}={Uri.EscapeDataString(value.ToString())}");
+                }
+            }
+
+            return queryString.ToString();
+        }
+
         [UnitOfWork]
         public async Task<AbpLoginResult<Tenant, User>> LoginAsyncNoPass(string token, string secretCode = "", string tenancyName = null, bool shouldLockout = true)
         {
@@ -307,5 +446,5 @@ namespace Ncc.Authorization
                 return new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null);
             }
         }
-    } 
+    }
 }
