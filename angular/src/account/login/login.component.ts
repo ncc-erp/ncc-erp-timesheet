@@ -7,6 +7,8 @@ import { AuthService, SocialUser } from "angularx-social-login";
 import { GoogleLoginProvider } from "angularx-social-login";
 import { AppConsts } from '@shared/AppConsts';
 import { MezonLoginService } from '@app/service/api/mezon-api.service';
+
+
 @Component({
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.less'],
@@ -17,29 +19,32 @@ export class LoginComponent extends AppComponentBase implements OnInit {
   nccCode: string;
   isShowPassword = true;
   enableNormalLogin: boolean;
-  // private user: SocialUser;
-  // private loggedIn: boolean;
 
+  hashData: string;
+  isMezonApp: boolean = false;
+  
   constructor(
     injector: Injector,
     public loginService: LoginService,
     private _sessionService: AbpSessionService,
     private authService: AuthService,
-    private mezonLoginService: MezonLoginService
+    private mezonLoginService: MezonLoginService,
+
   ) {
     super(injector);
   }
 
 
   ngOnInit() {
+
     this.enableNormalLogin = AppConsts.enableNormalLogin;
+
     // Disable Auto Login By Google
     this.authService.authState.subscribe((user) => {
-      if (user) {
-        this.loginService.authenticateGoogle(user.idToken, this.nccCode);
-      }
     }, err => this.authService.signOut());
   }
+
+
 
   checkShowpass() {
     this.isShowPassword = !this.isShowPassword;
@@ -62,14 +67,7 @@ export class LoginComponent extends AppComponentBase implements OnInit {
   }
 
   signInWithGoogle(): void {
-    //alert(GoogleLoginProvider.PROVIDER_ID);
-    //console.log('signInWithGoogle', GoogleLoginProvider.PROVIDER_ID)
     this.authService.signIn(GoogleLoginProvider.PROVIDER_ID);
-    // this.authService.signIn(GoogleLoginProvider.PROVIDER_ID).then((user) => {
-    //   if (user) {
-    //     this.loginService.authenticateGoogle(user.idToken, this.nccCode);
-    //   }
-    // });
   }
 
   signInWithMezon(): void {

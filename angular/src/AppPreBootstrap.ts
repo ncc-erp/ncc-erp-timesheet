@@ -30,7 +30,8 @@ export class AppPreBootstrap {
             AppConsts.localeMappings = result.localeMappings;
             AppConsts.enableNormalLogin = result.enableNormalLogin;
             AppConsts.backendIsNotABP = result.backendIsNotABP;
-            if(typeof result.sentryDsn != "undefined" && result.sentryDsn !== ""){
+            AppConsts.mezonAppId = result.mezonAppId;
+            if (typeof result.sentryDsn != "undefined" && result.sentryDsn !== "") {
                 AppConsts.sentryDsn = result.sentryDsn;
             }
             callback();
@@ -65,12 +66,12 @@ export class AppPreBootstrap {
     }
 
     public static getUserConfiguration(callback: () => void): JQueryPromise<any> {
-        if (AppConsts.backendIsNotABP){
+        if (AppConsts.backendIsNotABP) {
             $.extend(true, abp, abpsetting.result);
             abp.clock.provider = abp.timing.utcClockProvider;
             moment.locale('en');
             callback();
-        }else{
+        } else {
             return abp.ajax({
                 url: AppConsts.remoteServiceBaseUrl + '/AbpUserConfiguration/GetAll',
                 method: 'GET',

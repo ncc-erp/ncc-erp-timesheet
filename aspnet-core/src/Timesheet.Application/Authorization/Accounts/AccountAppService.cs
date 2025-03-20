@@ -1,9 +1,9 @@
-using System.Threading.Tasks;
 using Abp.Configuration;
 using Abp.Zero.Configuration;
 using Ncc.Authorization.Accounts.Dto;
 using Ncc.Authorization.Users;
 using Ncc.IoC;
+using System.Threading.Tasks;
 
 namespace Ncc.Authorization.Accounts
 {

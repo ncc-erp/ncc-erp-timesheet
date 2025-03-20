@@ -6,7 +6,6 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppConsts } from '@shared/AppConsts';
 import { UrlHelper } from '@shared/helpers/UrlHelper';
-import { AuthenticateModel, AuthenticateResultModel, TokenAuthServiceProxy } from '@shared/service-proxies/service-proxies';
 import { catchError, finalize, map, startWith } from 'rxjs/operators';
 import { PermissionCheckerService } from 'abp-ng2-module/dist/src/auth/permission-checker.service';
 import { AppPreBootstrap } from 'AppPreBootstrap';
@@ -14,6 +13,8 @@ import { GoogleLoginService } from '@app/service/api/goole-login.service';
 import { Observable, of, throwError } from '@node_modules/rxjs';
 import { HttpErrorResponse } from '@node_modules/@angular/common/http';
 import { MezonLoginService } from '@app/service/api/mezon-api.service';
+import { AuthenticateModel, AuthenticateResultModel, IHashMezonAuthModel, TokenAuthServiceProxy } from '@shared/service-proxies/service-proxies';
+import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
 
 
 @Injectable()
@@ -115,9 +116,9 @@ export class LoginService {
             initialUrl = AppConsts.appBaseUrl;
         }
 
-        if(AppConsts.urlBeforeLogin != ""){
+        if (AppConsts.urlBeforeLogin != "") {
             initialUrl = AppConsts.urlBeforeLogin;
-         }
+        }
 
         AppPreBootstrap.getUserConfiguration(() => {
             location.href = `${AppConsts.appBaseUrl}${this.selectBestRoute()}`;
@@ -125,8 +126,6 @@ export class LoginService {
 
         location.href = initialUrl;
     }
-
-
 
     selectBestRoute(): string {
         if (this._permissionChecker.isGranted('Timesheet')) {
@@ -145,5 +144,20 @@ export class LoginService {
         this.authenticateModel.rememberClient = false;
         this.authenticateResult = null;
         this.rememberMe = false;
+    }
+
+    authenticateMezonHash(authDto: IHashMezonAuthModel, errorHandller?: (error?: any) => any): Observable<any> {
+        return this._mezonService
+            .mezonHashAuthenticate(authDto).pipe(
+                map(data => {
+                    this.processAuthenticateResult(data.result);
+                    return { ...data, loading: false }
+                }),
+                startWith({ loading: true, success: false }),
+                catchError((err: HttpErrorResponse) => {
+                    this.router.navigate(['']);
+                    return of({ loading: false, success: false, error: err.error.error });
+                }),
+            );
     }
 }

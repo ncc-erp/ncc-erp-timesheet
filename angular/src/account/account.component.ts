@@ -1,7 +1,8 @@
 import { Component, ViewContainerRef, OnInit, ViewEncapsulation, Injector } from '@angular/core';
 import { LoginService } from './login/login.service';
 import { AppComponentBase } from '@shared/app-component-base';
-
+import { AppAuthService } from '@shared/auth/app-auth.service';
+import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
 @Component({
     templateUrl: './account.component.html',
     styleUrls: [
@@ -18,12 +19,14 @@ export class AccountComponent extends AppComponentBase implements OnInit {
 
     public constructor(
         injector: Injector,
-        private _loginService: LoginService
+        private _loginService: LoginService,
+        private _appAuthService: AppAuthService,
     ) {
         super(injector);
 
         this.currentYear = new Date().getFullYear();
         this.versionText = this.appSession.application.version + ' [' + this.appSession.application.releaseDate.format('YYYYDDMM') + ']';
+
     }
 
     showTenantChange(): boolean {

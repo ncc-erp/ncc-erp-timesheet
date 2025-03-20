@@ -11,6 +11,9 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\src\Timesheet.Core\Authorization\LoginManager.cs" Link="LoginManager.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Timesheet.Application\Timesheet.Application.csproj" />
     <ProjectReference Include="..\..\src\Timesheet.EntityFrameworkCore\Timesheet.EntityFrameworkCore.csproj" />
   </ItemGroup>

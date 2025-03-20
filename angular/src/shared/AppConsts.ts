@@ -6,9 +6,14 @@ export class AppConsts {
     static googleClientAppId: string;//use for google single signon
     static enableNormalLogin: boolean;
     static backendIsNotABP: boolean;
-    static urlBeforeLogin:string = "";
-    static readonly hrEmailAddress:string = "hr@ncc.asia";
-    static sentryDsn:string = "";
+    static urlBeforeLogin: string = "";
+    static readonly hrEmailAddress: string = "hr@ncc.asia";
+    static sentryDsn: string = "";
+
+    static mezonClientId: string;
+    static mezonAppId: string;
+    static mezonAuthServerUrl: string;
+    static redirectUri: string;
 
 
     static localeMappings: any = [];
