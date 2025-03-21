@@ -96,24 +96,34 @@ namespace Ncc.Authorization
             try
             {
                 var appToken = Configuration["MezonService:AppToken"] ?? throw new ArgumentNullException("Invalid AppToken");
+
+                //separate payload to 2 part, userinfo and mezonHash
                 var rawHashData = hashAuthDto.HashData.DecodeBase64();
-                var hashData = HashParamsParser(rawHashData);
-                var hashParams = new BaseHashData { query_id = hashData.query_id, user = hashData.user, auth_date = hashData.auth_date, signature = hashData.signature };
-                var mezonUser = JsonConvert.DeserializeObject<MezonUser>(hashParams.user);
+                var delimiter = "&hash=";
+                int index = rawHashData.IndexOf(delimiter);
+                string queryId = rawHashData.Substring(0, index);
+                string mezonHash = rawHashData.Substring(index + delimiter.Length);
+                var hashData = HashParamsParser(queryId);
+
+                //check user exist by email from query_id
+                var mezonUser = JsonConvert.DeserializeObject<MezonUser>(hashData.user);
+                var user = UserManager.Users.FirstOrDefault(x => x.EmailAddress == mezonUser.mezon_id);
+                if (user == null)
+                {
+                    Logger.Info($"Login fail with email: {mezonUser.mezon_id}");
+                    return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null);
+                }
+ 
                 byte[] secretKey = Hasher.HMAC_SHA256(Encoding.UTF8.GetBytes(appToken), Encoding.UTF8.GetBytes("WebAppData"));
-                var hashParamsStringify = HashParamsStringify(hashParams);
-                var hashedData = Hasher.HEX(Hasher.HMAC_SHA256(secretKey, Encoding.UTF8.GetBytes(HashParamsStringify(hashParams))));
+                var hashedData = Hasher.HEX(Hasher.HMAC_SHA256(secretKey, Encoding.UTF8.GetBytes(queryId)));
 
-                if (hashData.hash.Equals(hashedData) == false)
+                if (mezonHash.Equals(hashedData) == false)
+                {
+                    Logger.Info("Authenticattion failed - Invalid hash key");
                     throw new UserFriendlyException("Authenticattion failed - Invalid hash key");
-
-                Logger.Info($"Try to login with user email: {mezonUser.mezon_id}");
+                }
 
                 var loginResult = await HandleAuthWithEmail(mezonUser.mezon_id, hashAuthDto.TenancyName);
-
-                //var user = UserManager.Users.FirstOrDefault(x => x.EmailAddress == userInfo.Subject);
-
-                //var loginResult = CreateLoginResultAsync(user, tenant);
                 return loginResult;
             }
             catch (Exception e)
@@ -121,7 +131,7 @@ namespace Ncc.Authorization
                 Logger.Info("Authenticattion failed - Can't authenticate with Mezon server");
                 return new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null);
             }
-        }
+            }
 
         private async Task<AbpLoginResult<Tenant, User>> HandleAuthWithEmail(string emailAddress, string tenancyName, bool shouldLockout = true)
         {
