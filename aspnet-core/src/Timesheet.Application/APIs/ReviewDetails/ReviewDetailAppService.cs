@@ -16,6 +16,7 @@ using Ncc.Authorization.Users;
 using Ncc.Configuration;
 using Ncc.IoC;
 using Newtonsoft.Json;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -55,9 +56,11 @@ namespace Timesheet.APIs.ReviewDetails
         private readonly HRMService _hRMService;
         private readonly KomuService _komuService;
         private readonly IConfiguration _configuration;
+        private readonly UserServices _userServices;
 
         public ReviewDetailAppService(IBackgroundJobManager backgroundJobManager, ProjectService projectService, HRMService hRMService,
-            IHostingEnvironment hostingEnvironment, ExportFileService fileService, IWorkScope workScope, KomuService komuService, IConfiguration configuration) : base(workScope)
+            IHostingEnvironment hostingEnvironment, ExportFileService fileService, IWorkScope workScope, KomuService komuService, IConfiguration configuration,
+            UserServices userServices) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _hostingEnvironment = hostingEnvironment;
@@ -66,6 +69,7 @@ namespace Timesheet.APIs.ReviewDetails
             _hRMService = hRMService;
             _komuService = komuService;
             _configuration = configuration;
+            _userServices = userServices;
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_ViewAll)]
@@ -1237,8 +1241,8 @@ namespace Timesheet.APIs.ReviewDetails
             if(check)
             {
                 string headPmEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
-                string usernameHeadPM = headPmEmail.Split('@')[0];
-                await SendMailToNotifyTransition(headPmEmail, usernameHeadPM, ReviewInternStatus.PmReviewed, detail.ReviewId);
+                int notifyHeadPmReviewInternOnDate = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMReviewInternOnDate));
+                await SendMailToNotifyTransition(headPmEmail, ReviewInternStatus.PmReviewed, detail.ReviewId, notifyHeadPmReviewInternOnDate);
             }
 
             return input;
@@ -1475,9 +1479,8 @@ namespace Timesheet.APIs.ReviewDetails
             if (!check) return;
 
             string presidentEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentEmail);
-            string username = presidentEmail.Split('@')[0];
-        
-            await SendMailToNotifyTransition(presidentEmail, username, ReviewInternStatus.Reviewed, reviewId);
+            int dateSendMailToPresident = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentReviewInternOnDate));
+            await SendMailToNotifyTransition(presidentEmail, ReviewInternStatus.Reviewed, reviewId, dateSendMailToPresident);
         }
 
         public (bool hasAllSameStatus, int totalPendingInterns) GetReviewInternStatusSummary(long reviewId, ReviewInternStatus status, List<long> listId = null)
@@ -1494,37 +1497,39 @@ namespace Timesheet.APIs.ReviewDetails
                       .ToList();
 
             var totalPendingInterns = result.FirstOrDefault(x => x.Status == status)?.Count ?? 0;
-            var hasAllSameStatus = result.Count == 1 && result.First().Status == status;
+            var hasAllSameStatus = result.Count == 0 || (result.Count == 1 && result.First().Status == status);
             return (hasAllSameStatus, totalPendingInterns);
         }
 
-        public async Task SendMailToNotifyTransition(string email, string username, ReviewInternStatus status, long reviewId)
+        public async Task SendMailToNotifyTransition(string email, ReviewInternStatus status, long reviewId, int date)
         {
+            string name = _userServices.GetUserByEmail(email).Name;
             ReviewIntern reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            int monthReviewIntern = reviewIntern.Month;
+            int yearReviewIntern = reviewIntern.Year;
+            var dateNow = DateTimeUtils.GetNow();
             StringBuilder content = new StringBuilder("");
-            string title = status.ToString();
-            string phase;
+            string statusExpected;
             try
             {
-                content.Append($"Thân gửi anh <span style='font-weight: 600'>{username} </span>, <br> ");
+                content.Append($"<span style='font-weight: 600'> Kính gửi anh {name} </span>, <br> ");
                 if (status == ReviewInternStatus.Reviewed)
                 {
-                    content.Append($"Head PM đã đánh giá xong.");
-                    phase = "ba";
-                } 
+                    string headPmMail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
+                    string nameHeadPm = _userServices.GetUserByEmail(headPmMail).Name;
+                    content.Append($"Anh {nameHeadPm} đã hoàn tất giai đoạn review và chuyển trạng thái  <span style='font-weight: 600'> {status} </span> trên Timesheet cho đợt đánh giá intern tháng {monthReviewIntern}/{yearReviewIntern}.");
+                    statusExpected = "Approved";
+                }
                 else
                 {
-                    content.Append($"Các PM đã đánh giá xong thực tập sinh");
-                    phase = "hai";
-                    title = "PM Reviewed";
+                    content.Append($"Hiện tại, tất cả các PM đã hoàn tất việc đánh giá intern tháng {reviewIntern.Month}/{reviewIntern.Year} trên Timesheet.");
+                    statusExpected = "Reviewed";
                 }
                 content.Append("<br>");
-                content.Append("Anh hoàn thành giai đoạn " + phase + " giúp em. Tại: ");
-                string rootUrl = _configuration.GetValue<string>("App:ClientRootAddress");
-                string link = rootUrl + "app/main/review-detail?id=" + reviewIntern.Id + "&year=" + reviewIntern.Year + "&month=" + reviewIntern.Month;
-                content.Append('\n');
-                content.Append(link);
-                var emailSubject = $"[NCC-Review Intern {reviewIntern.Month}/{reviewIntern.Year}] Thông báo giai đoạn review và chuyển {title} trên timesheet";
+                content.Append($"Kính mong anh xem xét và thực hiện chuyển trạng thái sang  <span style='font-weight: 600'> {statusExpected} </span> trước  <span style='font-weight: 600'> ngày {date + 1}/{dateNow.Month}/{dateNow.Year}. </span>");
+                content.Append("<br>");
+                content.Append("Trân trọng cảm ơn anh!");
+                var emailSubject = $"[NCC-Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo giai đoạn review và chuyển trạng thái {statusExpected} trên timesheet";
                 var targetEmails = new List<string> { email };
                 targetEmails.AddRange(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
                     .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));

@@ -248,9 +248,8 @@ namespace Timesheet.BackgroundWorker
             if (!check) return false;
 
             string headPmMail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
-            string usernameHeadPm = headPmMail.Split('@')[0];
 
-            _reviewDetailAppService.SendMailToNotifyTransition(headPmMail, usernameHeadPm, ReviewInternStatus.PmReviewed, reviewId);
+            _reviewDetailAppService.SendMailToNotifyTransition(headPmMail, ReviewInternStatus.PmReviewed, reviewId, notifyHeadPmReviewInternOnDate);
             return true;
         }
 
@@ -376,9 +375,8 @@ namespace Timesheet.BackgroundWorker
                 return false;
             }
             string presidentEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentEmail);
-            string username = presidentEmail.Split('@')[0];
 
-            _reviewDetailAppService.SendMailToNotifyTransition(presidentEmail, username, ReviewInternStatus.Reviewed, reviewId);
+            _reviewDetailAppService.SendMailToNotifyTransition(presidentEmail, ReviewInternStatus.Reviewed, reviewId, dateSendMailToPresident);
             return true;
         }
 
