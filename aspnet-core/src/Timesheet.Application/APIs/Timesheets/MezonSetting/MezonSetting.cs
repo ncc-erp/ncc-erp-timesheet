@@ -54,13 +54,13 @@ namespace Timesheet.APIs.Timesheets.MezonSetting
         public async System.Threading.Tasks.Task createOpentalkLog(DateTime? date)
         {
             OpenTalkListDto[] userList = _mezonService.GetOpenTalkLog(date);
-            var userDict = userList.ToDictionary(s => s.googleId, s => s);
-            var OpentalkList = await WorkScope.GetAll<User>().Where(s => s.GoogleId != null && userDict.ContainsKey(s.GoogleId))
+            var userDict = userList.ToDictionary(s => s.mezonId, s => s);
+            var OpentalkList = await WorkScope.GetAll<User>().Where(s => s.EmailAddress != null && userDict.ContainsKey(s.EmailAddress))
                                       .Select(s => new OpenTalk
                                       {
                                           UserId = s.Id,
-                                          DateAt = userDict[s.GoogleId].date,
-                                          totalTime = userDict[s.GoogleId].totalTime
+                                          DateAt = userDict[s.EmailAddress].date,
+                                          totalTime = userDict[s.EmailAddress].totalTime
                                       }).ToListAsync();
             foreach (var opentalk in OpentalkList)
             {
