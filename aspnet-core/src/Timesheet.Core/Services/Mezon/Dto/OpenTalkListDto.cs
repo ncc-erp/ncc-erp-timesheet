@@ -10,5 +10,6 @@ namespace Timesheet.Services.Mezon.Dto
         public string googleId { get; set; }
         public DateTime date { get; set; }
         public int totalTime { get; set; }
+        public string mezonId { get; set; }
     }
 }

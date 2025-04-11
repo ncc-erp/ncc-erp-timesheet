@@ -63,13 +63,13 @@ namespace Timesheet.BackgroundWorker
             var OpenTalkListDto = _mezonService.GetOpenTalkLog();
             if (OpenTalkListDto != null)
             {
-                var userDict = OpenTalkListDto.ToDictionary(s => s.googleId, s => s);
-                var OpentalkList = _workScope.GetAll<User>().Where(s => s.GoogleId != null && userDict.ContainsKey(s.GoogleId))
+                var userDict = OpenTalkListDto.ToDictionary(s => s.mezonId, s => s);
+                var OpentalkList = _workScope.GetAll<User>().Where(s => s.EmailAddress != null && userDict.ContainsKey(s.EmailAddress))
                                             .Select(s => new OpenTalk
                                             {
                                                 UserId = s.Id,
-                                                DateAt = userDict[s.GoogleId].date,
-                                                totalTime = userDict[s.GoogleId].totalTime
+                                                DateAt = userDict[s.EmailAddress].date,
+                                                totalTime = userDict[s.EmailAddress].totalTime
                                             }).ToList();
                 foreach (var opentalk in OpentalkList)
                 {
