@@ -575,28 +575,50 @@ const routes: Routes = [
       },
     ],
   },
-  {
-    path: "interns-info",
-    component: MainComponent,
-    canActivate: [AppRouteGuard],
-    children: [
-      {
-        path: "",
+    {
+        path: "interns-info",
+        component: MainComponent,
+        canActivate: [AppRouteGuard],
         children: [
-          {
-            path: "",
-            loadChildren:
-              "../modules/report/interns-info/interns-info.module#InternsInfoModule",
-            data: {
-              permission: "Report.InternsInfo",
-              preload: true,
+            {
+                path: "",
+                children: [
+                    {
+                        path: "",
+                        loadChildren:
+                            "../modules/report/interns-info/interns-info.module#InternsInfoModule",
+                        data: {
+                            permission: "Report.InternsInfo",
+                            preload: true,
+                        },
+                        canActivate: [AppRouteGuard],
+                    },
+                ],
             },
-            canActivate: [AppRouteGuard],
-          },
         ],
-      },
-    ],
-  },
+    },
+    {
+        path: "absence",
+        component: MainComponent,
+        canActivate: [AppRouteGuard],
+        children: [
+            {
+                path: "",
+                children: [
+                    {
+                        path: "",
+                        loadChildren:
+                            "../modules/report/absence/absence.module#AbsenceModule",
+                        data: {
+                            permission: "Report.InternsInfo",
+                            preload: true,
+                        },
+                        canActivate: [AppRouteGuard],
+                    },
+                ],
+            },
+        ],
+    },
   {
     path: "normal-working",
     component: MainComponent,
