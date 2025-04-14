@@ -30,6 +30,7 @@ using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Extension;
+using Timesheet.Paging;
 using Timesheet.Services.Komu;
 using Timesheet.Services.W2;
 using Timesheet.Uitls;
@@ -56,6 +57,62 @@ namespace Timesheet.APIs.RequestDays
             _komuService = komuService;
             _approveRequestOffServices = approveRequestOffServices;
             _w2Service = w2Service;
+        }
+
+        [HttpPost]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch)]
+        public async Task<GridResult<AbsenceReportDto>> GetAbsenceReport(InputAbsenceReportDto input)
+        { 
+        
+            var query = WorkScope.GetAll<AbsenceDayDetail>()
+                .Where(s => s.DateAt >= input.startDate)
+                .Where(s => s.DateAt <= input.endDate)
+                .Where(s => s.Request.Status == RequestStatus.Approved)
+                .Where(s => s.Request.Type == input.requestType.Value)
+                .Where(s => !string.IsNullOrWhiteSpace(input.email) ? s.Request.User.EmailAddress.Contains(input.email) : true) // Nếu có email thì lọc, nếu không thì lấy tất cả
+                .Where(s => input.positionId == 0 || s.Request.User.PositionId == input.positionId.Value) 
+                .Where(s => input.branchId == 0 || s.Request.User.BranchId == input.branchId.Value)      
+                .GroupBy(s => new
+                {
+                    s.Request.UserId,
+                    s.Request.User.Name,
+                    s.Request.User.Surname,
+                    s.Request.User.EmailAddress,
+                    UserLevel = s.Request.User.Level.Value,
+                    UserType = s.Request.User.Type.Value,
+                    PositionName = s.Request.User.Position.Name,
+                    BranchName = s.Request.User.Branch.Name,
+                    s.Request.User.Branch.DisplayName,
+                    s.Request.User.Branch.Color,
+                    s.Request.User.AvatarPath
+
+                })
+                .Select(g => new AbsenceReportDto
+                {
+                    userId = g.Key.UserId,
+                    userFirstname = g.Key.Name,
+                    userSurname = g.Key.Surname,
+                    userEmail = g.Key.EmailAddress,
+                    userLevel = g.Key.UserLevel,
+                    userType = g.Key.UserType,
+                    Position = g.Key.PositionName,
+                    Branch = g.Key.BranchName,
+                    BranchDisplayName = g.Key.DisplayName,
+                    BranchColor = g.Key.Color,
+                    AvatarPath = g.Key.AvatarPath,
+                    totalTime = g.Count()
+                })
+                .OrderByDescending(s => s.totalTime);
+
+            var res = await query.GetGridResult(query, input);
+
+            foreach (var item in res.Items)
+            {
+                item.userLevelName = item.userLevel.ToString();
+                item.userTypeName = item.userType.ToString();
+            }
+
+            return res;
         }
 
         [HttpPost]
@@ -133,6 +190,10 @@ namespace Timesheet.APIs.RequestDays
                     AbsenceTime = s.AbsenceTime,
                     CreateTime = s.CreationTime
                 });
+
+            string str = query.ToString();
+            
+
 
             var res = await query.ToListAsync();
 

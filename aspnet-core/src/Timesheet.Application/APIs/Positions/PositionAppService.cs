@@ -149,5 +149,28 @@ namespace Timesheet.APIs.Positions
                      Color = s.Color,
                  }).ToListAsync();
         }
+
+        public async Task<List<PositionDto>> GetAllPositionDropDownListFilter(bool isAll = false)
+        {
+            var query = await WorkScope.GetAll<Position>()
+                 .Select(s => new PositionDto
+                 {
+                     Id = s.Id,
+                     Name = s.Name,
+                     ShortName = s.ShortName,
+                     Code = s.Code,
+                     Color = s.Color,
+                 }).ToListAsync();
+            if(isAll)
+            {
+                query.Add(new PositionDto
+                {
+                    Id = 0,
+                    Name = "All",
+                    ShortName = "All"
+                });
+            }
+            return query.OrderBy(s => s.Id).ToList();
+        }
     }
 }

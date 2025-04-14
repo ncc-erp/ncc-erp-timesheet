@@ -179,6 +179,12 @@ export class SideBarNavComponent extends AppComponentBase {
                         "/app/main/interns-info"
                     ),
                     new MenuItem(
+                      this.l("Absence report"),
+                      "AbsenceDayByProject.ViewByBranch",
+                      "description",
+                      "/app/main/absence"
+                    ),
+                    new MenuItem(
                         this.l("Normal working"),
                         "Report.NormalWorking",
                         "work_outline",

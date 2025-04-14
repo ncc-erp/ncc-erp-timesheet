@@ -1,0 +1,394 @@
+/* Main card styling */
+.card.main-content {
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    margin: 16px;
+    min-height: 450px;
+}
+
+/* Filter row styling */
+.filter-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.filter-item {
+    flex: 1 1 auto;
+    min-width: 180px;
+}
+
+/* Action buttons container */
+.button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Button row styling */
+/* Added alignment and gap for the left row */
+.button-row-left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; /* Align items vertically */
+    gap: 8px; /* Space between toggle groups/items */
+}
+
+.action-buttons-rows {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px; /* Use gap instead of 2px for better spacing */
+    flex-wrap: wrap;
+}
+
+/* Button styling */
+.action-button { /* Combined common styles */
+    height: 40px;
+    min-width: 80px; /* Use min-width */
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0 16px;
+    line-height: 40px; /* Helps vertical alignment */
+    box-sizing: border-box;
+}
+
+.clear-button {
+    color: #333 !important;
+    background-color: #fff !important;
+    border: 1px solid #ccc !important;
+}
+
+.clear-button:hover {
+    background-color: #f5f5f5 !important;
+    border-color: #bbb !important;
+}
+
+.filter-button {
+    color: #fff !important;
+    background-color: #f44336 !important;
+    border: 1px solid #f44336 !important;
+}
+
+.filter-button:hover {
+    background-color: #d32f2f !important;
+    border-color: #d32f2f !important;
+}
+
+.date-range{
+    height: 48px;
+    border: #E0E0E0 0.5px solid;
+    border-radius: 4px;
+    min-width: 200px;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Styles potentially hiding month/year picker parts - uncomment if needed */
+/*
+.mat-calendar-body-cell {
+    display: none;
+  }
+
+.mat-calendar-body-label {
+display: none;
+}
+
+.mat-calendar-period-button {
+pointer-events: none;
+}
+
+.mat-calendar-arrow {
+display: none;
+}
+*/
+
+/* Table styling with borders */
+table.mat-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Header styling */
+.mat-header-row {
+    background-color: #f8f9fa; /* Lighter gray */
+    height: 48px;
+}
+
+.mat-header-cell {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    border-right: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 16px;
+    text-align: left;
+}
+
+.mat-header-cell:last-child {
+    border-right: none;
+}
+
+/* Cell styling */
+.mat-cell {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #555;
+    border-right: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.mat-cell:last-child {
+    border-right: none;
+}
+
+.mat-row:last-child .mat-cell {
+    border-bottom: none;
+}
+
+/* Row effects */
+.mat-row:hover {
+    background-color: #f1f1f1;
+}
+
+.mat-row:nth-child(even) {
+    /* background-color: #fafafa; */ /* Optional zebra striping */
+}
+
+/* Column specific styling */
+.mat-column-index,
+.mat-column-index.mat-header-cell {
+    width: 60px;
+    text-align: center;
+}
+
+.mat-column-user {
+    min-width: 250px;
+}
+
+.mat-column-position,
+.mat-column-position.mat-header-cell {
+    min-width: 150px;
+    text-align: center;
+}
+
+.mat-column-totalTime,
+.mat-column-totalTime.mat-header-cell {
+    min-width: 120px;
+    text-align: center;
+}
+
+/* User container styling */
+.user-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user-info strong {
+    font-weight: 500;
+}
+
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.badge {
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    color: white;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.badge.location { background-color: #F44336; }
+.badge.type { background-color: #4CAF50; }
+.badge.level { background-color: #318CE7; }
+
+.email {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .filter-item {
+        min-width: 160px;
+    }
+}
+
+@media (max-width: 992px) {
+    .filter-row {
+        flex-wrap: wrap;
+        gap: 10px;
+        overflow-x: visible;
+        padding-bottom: 0;
+    }
+
+    .filter-item {
+        flex: 1 1 calc(50% - 10px);
+        min-width: 140px;
+    }
+
+    .button-container {
+        align-items: stretch;
+    }
+
+    .button-row-left {
+       justify-content: center;
+    }
+
+    .action-buttons-rows {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .action-button {
+        flex-grow: 1;
+        max-width: calc(50% - 5px);
+    }
+
+    /* Responsive Table */
+    table.mat-table { border: none; }
+    .mat-header-row { display: none; }
+    .mat-row {
+        display: block;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 10px;
+        padding: 10px 0;
+    }
+    .mat-row:last-child { border-bottom: none; }
+    .mat-cell {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: none;
+        padding: 8px 0;
+        text-align: right;
+    }
+    .mat-cell::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #333;
+        text-align: left;
+        padding-right: 10px;
+        white-space: nowrap;
+    }
+     /* Add data-label attributes in TS or specific rules here */
+     .mat-column-user .mat-cell::before { content: "User:"; }
+     .mat-column-position .mat-cell::before { content: "Position:"; }
+     .mat-column-totalTime .mat-cell::before { content: "Total Time:"; }
+     .mat-column-index .mat-cell::before { content: "No.:"; }
+
+     .mat-column-user .mat-cell {
+         flex-direction: column;
+         align-items: flex-start;
+     }
+     .mat-column-user .mat-cell::before { margin-bottom: 5px; width: 100%; }
+     .user-container { width: 100%; }
+}
+
+@media (max-width: 600px) {
+    .card.main-content {
+        padding: 12px;
+        margin: 8px;
+    }
+    .filter-item { flex: 1 1 100%; }
+    .button-row-left { justify-content: space-around; }
+    .action-button { max-width: 100%; font-size: 14px; }
+    .user-avatar { width: 32px; height: 32px; }
+    .badge { font-size: 10px; padding: 2px 6px; }
+}
+
+
+/* ==================================================================== */
+/* === CSS FIX: Hiển thị Datepicker Toggle bị ẩn trong MatButtonToggle === */
+/* ==================================================================== */
+
+/* 1. Tạo không gian định vị cho button toggle chứa datepicker */
+.button-row-left mat-button-toggle[mattooltip="Today"],
+.button-row-left mat-button-toggle[mattooltip="Select Month"] {
+  position: relative; /* Cần thiết cho absolute positioning của con */
+  overflow: hidden; /* Ngăn nội dung tràn ra ngoài nếu quá chật */
+}
+
+/* 2. Điều chỉnh input bên trong để chừa chỗ cho icon */
+.button-row-left mat-button-toggle[mattooltip="Today"] input[matInput],
+.button-row-left mat-button-toggle[mattooltip="Select Month"] input[matInput] {
+  /* Quan trọng: Thêm padding bên phải để input không đè lên icon */
+  padding-right: 36px !important; /* Khoảng cách đủ cho icon (~30-40px) */
+  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước tổng */
+
+  /* Các style khác để input trông giống text bình thường trong button */
+  background-color: transparent;
+  border: none;
+  outline: none;
+  font: inherit; /* Dùng font của button toggle */
+  color: inherit; /* Dùng màu chữ của button toggle */
+  width: auto; /* Cho phép input co giãn */
+  max-width: calc(100% - 36px); /* Giới hạn chiều rộng tối đa */
+  vertical-align: middle; /* Căn giữa theo chiều dọc */
+  display: inline-block; /* Hiển thị dạng inline */
+}
+
+/* 3. Định vị tuyệt đối cho icon datepicker toggle */
+.button-row-left mat-button-toggle[mattooltip="Today"] mat-datepicker-toggle,
+.button-row-left mat-button-toggle[mattooltip="Select Month"] mat-datepicker-toggle {
+  position: absolute;
+  top: 50%; /* Căn giữa theo chiều dọc */
+  right: 0px; /* Đặt ở cạnh phải */
+  transform: translateY(-50%); /* Tinh chỉnh căn giữa dọc */
+  z-index: 2; /* Đảm bảo icon nằm trên input */
+
+  /* Ghi đè kích thước mặc định nếu cần để khớp với button toggle */
+   width: 36px;  /* Chiều rộng ước tính */
+   height: 36px; /* Chiều cao ước tính */
+
+  /* Đảm bảo icon hiển thị đúng */
+   display: inline-flex !important;
+   align-items: center;
+   justify-content: center;
+   padding: 0; /* Bỏ padding mặc định của button */
+   color: inherit; /* Dùng màu icon mặc định của toggle */
+}
+
+/* 4. (Tùy chọn) Đảm bảo nội dung gốc của button toggle có đủ không gian */
+.button-row-left mat-button-toggle[mattooltip="Today"] .mat-button-toggle-label-content,
+.button-row-left mat-button-toggle[mattooltip="Select Month"] .mat-button-toggle-label-content {
+   /* Ví dụ: Đảm bảo label content có padding nếu cần */
+   /* padding: 0 40px 0 8px; */ /* top right bottom left */
+   display: flex; /* Canh giữa input bên trong nếu dùng flex */
+   align-items: center;
+}
