@@ -28,9 +28,10 @@
 /* Action buttons container */
 .button-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 10px;
     margin-bottom: 20px;
+    height: 48px;
 }
 
 /* Button row styling */
@@ -44,20 +45,24 @@
 
 .action-buttons-rows {
     display: flex;
-    justify-content: flex-end;
-    gap: 10px; /* Use gap instead of 2px for better spacing */
+    margin-left: auto;
+    gap: 4px; 
     flex-wrap: wrap;
+    width: 150px;
+    height: 48px;
 }
 
 /* Button styling */
 .action-button { /* Combined common styles */
-    height: 40px;
-    min-width: 80px; /* Use min-width */
+    height: 48px;
+    min-width: 70px; /* Use min-width */
     font-weight: 500;
     transition: all 0.3s ease;
     padding: 0 16px;
     line-height: 40px; /* Helps vertical alignment */
     box-sizing: border-box;
+    top: 0px;
+    
 }
 
 .clear-button {
@@ -93,25 +98,6 @@
     align-items: center;
     justify-content: center;
 }
-
-/* Styles potentially hiding month/year picker parts - uncomment if needed */
-/*
-.mat-calendar-body-cell {
-    display: none;
-  }
-
-.mat-calendar-body-label {
-display: none;
-}
-
-.mat-calendar-period-button {
-pointer-events: none;
-}
-
-.mat-calendar-arrow {
-display: none;
-}
-*/
 
 /* Table styling with borders */
 table.mat-table {
@@ -332,63 +318,51 @@ table.mat-table {
     .badge { font-size: 10px; padding: 2px 6px; }
 }
 
-
-/* ==================================================================== */
-/* === CSS FIX: Hiển thị Datepicker Toggle bị ẩn trong MatButtonToggle === */
-/* ==================================================================== */
-
-/* 1. Tạo không gian định vị cho button toggle chứa datepicker */
 .button-row-left mat-button-toggle[mattooltip="Today"],
 .button-row-left mat-button-toggle[mattooltip="Select Month"] {
-  position: relative; /* Cần thiết cho absolute positioning của con */
-  overflow: hidden; /* Ngăn nội dung tràn ra ngoài nếu quá chật */
+  position: relative; 
+  overflow: hidden; 
 }
 
-/* 2. Điều chỉnh input bên trong để chừa chỗ cho icon */
+
 .button-row-left mat-button-toggle[mattooltip="Today"] input[matInput],
 .button-row-left mat-button-toggle[mattooltip="Select Month"] input[matInput] {
-  /* Quan trọng: Thêm padding bên phải để input không đè lên icon */
-  padding-right: 36px !important; /* Khoảng cách đủ cho icon (~30-40px) */
-  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước tổng */
+  
+  padding-right: 36px !important; 
+  box-sizing: border-box; 
 
-  /* Các style khác để input trông giống text bình thường trong button */
   background-color: transparent;
   border: none;
   outline: none;
-  font: inherit; /* Dùng font của button toggle */
-  color: inherit; /* Dùng màu chữ của button toggle */
-  width: auto; /* Cho phép input co giãn */
-  max-width: calc(100% - 36px); /* Giới hạn chiều rộng tối đa */
-  vertical-align: middle; /* Căn giữa theo chiều dọc */
-  display: inline-block; /* Hiển thị dạng inline */
+  font: inherit; 
+  color: inherit; 
+  width: auto; 
+  max-width: calc(100% - 36px); 
+  vertical-align: middle; 
+  display: inline-block; 
 }
 
-/* 3. Định vị tuyệt đối cho icon datepicker toggle */
 .button-row-left mat-button-toggle[mattooltip="Today"] mat-datepicker-toggle,
 .button-row-left mat-button-toggle[mattooltip="Select Month"] mat-datepicker-toggle {
   position: absolute;
-  top: 50%; /* Căn giữa theo chiều dọc */
-  right: 0px; /* Đặt ở cạnh phải */
-  transform: translateY(-50%); /* Tinh chỉnh căn giữa dọc */
-  z-index: 2; /* Đảm bảo icon nằm trên input */
+  top: 50%;
+  right: 0px; 
+  transform: translateY(-50%); 
+  z-index: 2; 
 
-  /* Ghi đè kích thước mặc định nếu cần để khớp với button toggle */
-   width: 36px;  /* Chiều rộng ước tính */
-   height: 36px; /* Chiều cao ước tính */
+   width: 36px;  
+   height: 36px; 
 
-  /* Đảm bảo icon hiển thị đúng */
    display: inline-flex !important;
    align-items: center;
    justify-content: center;
-   padding: 0; /* Bỏ padding mặc định của button */
-   color: inherit; /* Dùng màu icon mặc định của toggle */
+   padding: 0; 
+   color: inherit; 
 }
 
-/* 4. (Tùy chọn) Đảm bảo nội dung gốc của button toggle có đủ không gian */
 .button-row-left mat-button-toggle[mattooltip="Today"] .mat-button-toggle-label-content,
 .button-row-left mat-button-toggle[mattooltip="Select Month"] .mat-button-toggle-label-content {
-   /* Ví dụ: Đảm bảo label content có padding nếu cần */
-   /* padding: 0 40px 0 8px; */ /* top right bottom left */
-   display: flex; /* Canh giữa input bên trong nếu dùng flex */
+
+   display: flex;
    align-items: center;
 }
