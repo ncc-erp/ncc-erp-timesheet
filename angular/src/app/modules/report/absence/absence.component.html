@@ -78,16 +78,14 @@
         <mat-button-toggle name="monthBtnToggle" value="month" (click)="viewBy('MONTH')">Month</mat-button-toggle>
       </mat-button-toggle-group>
 
-      <div class="date-range">
+      <div class="date-range" *ngIf="selectedTimeRange === 'WEEK' || selectedTimeRange === 'MONTH'">
         <div *ngIf="selectedTimeRange === 'WEEK'">
           {{ absenceReportRequestDto.startDate | date: 'MMM d, yyyy' }} - {{ absenceReportRequestDto.endDate | date: 'MMM d, yyyy' }}
         </div>
         <div *ngIf="selectedTimeRange === 'MONTH'">
           {{ absenceReportRequestDto.startDate | date: 'MMM d, yyyy' }} - {{ absenceReportRequestDto.endDate | date: 'MMM d, yyyy' }}
         </div>
-        <div *ngIf="selectedTimeRange === 'DAY'">
-          {{ displayDay | date: 'MMM d, yyyy' }}
-        </div>
+      
       </div>
       <div *ngIf="selectedTimeRange" (ngModelChange)="updateTimeRange()"></div>
     </div>
