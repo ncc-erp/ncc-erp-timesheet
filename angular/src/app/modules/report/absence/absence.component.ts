@@ -1,16 +1,16 @@
-import {Component, Injector, OnInit} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {BranchDto} from '@shared/service-proxies/service-proxies';
-import {PositionDto} from '@app/service/api/model/position-dto';
-import {BranchService} from '@app/service/api/branch.service';
-import {PositionService} from '@app/service/api/position.service';
-import {AbsenceDayService} from '@app/service/api/absence-day.service';
-import {AppSessionService} from '@shared/session/app-session.service';
-import {AbsenceReportRequest} from '@app/service/api/model/absence-day-dto';
+import { Component, Injector, OnInit, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { BranchDto } from '@shared/service-proxies/service-proxies';
+import { PositionDto } from '@app/service/api/model/position-dto';
+import { BranchService } from '@app/service/api/branch.service';
+import { PositionService } from '@app/service/api/position.service';
+import { AbsenceDayService } from '@app/service/api/absence-day.service';
+import { AppSessionService } from '@shared/session/app-session.service';
+import { AbsenceReportRequest } from '@app/service/api/model/absence-day-dto';
 import * as moment from 'moment';
-import {MatDatepicker, PageEvent} from '@node_modules/@angular/material';
-import {PagedRequestDto} from '@shared/paged-listing-component-base';
-import {PagedListingComponentBase} from '@shared/paged-listing-component-base';
+import { MatDatepicker, MatPaginator, PageEvent } from '@node_modules/@angular/material';
+import { PagedRequestDto } from '@shared/paged-listing-component-base';
+import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { log } from 'console';
 import { Moment } from 'moment';
@@ -22,6 +22,7 @@ import { MAT_DATE_FORMATS } from '@angular/material/core';
   styleUrls: ['./absence.component.css']
 })
 export class AbsenceComponent extends PagedListingComponentBase<any> implements OnInit {
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 
   AbsenceReport_View = PERMISSIONS_CONSTANT.ViewAbsenceDayByBranch;
 
@@ -38,8 +39,8 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
   listPositionFilter: PositionDto[];
 
   requestTypes = [
-    {value: 2, label: 'Remote'},
-    {value: 0, label: 'Off'}
+    { value: 2, label: 'Remote' },
+    { value: 0, label: 'Off' }
   ];
 
   absenceReportRequestDto: AbsenceReportRequest;
@@ -51,7 +52,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
   isDisabled: boolean = false;
 
   monthYearControl = new FormControl();
-  selectedMonthYear: Moment ;
+  selectedMonthYear: Moment;
 
 
 
@@ -137,10 +138,11 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
 
   protected list(request: PagedRequestDto, pageNumber: number, finishedCallback: Function): void {
     this.isLoading = true;
-    
-    this.absenceReportRequestDto.skipCount = request.skipCount;
-    this.absenceReportRequestDto.maxResultCount = request.maxResultCount;
-    
+
+    const skipCount = (pageNumber - 1) * this.pageSize;
+    this.absenceReportRequestDto.skipCount = skipCount;
+    this.absenceReportRequestDto.maxResultCount = this.pageSize;
+
     this.absenceDayService.getAbsenceReport(this.absenceReportRequestDto)
       .subscribe(data => {
         if (data.result && data.result.items) {
@@ -155,12 +157,29 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
         finishedCallback();
       });
   }
-  
+
   onFilter() {
-    this.getDataPage(1); 
+    this.pageNumber = 1;
+    this.absenceReportRequestDto.skipCount = 0;
+
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+
+
+    this.getDataPage(1);
+
   }
 
   clearFilters() {
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+    this.pageNumber = 1;
+    this.absenceReportRequestDto.skipCount = 0;
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
     this.loadInitFormData();
   }
 
@@ -175,6 +194,8 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
   }
 
   updateTimeRange() {
+    this.pageNumber = 1;
+    this.absenceReportRequestDto.skipCount = 0;
     switch (this.selectedTimeRange) {
       case 'DAY': {
         const startDate = new Date(this.displayDay);
@@ -230,7 +251,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
   onMatPaginatorChange(event: PageEvent): void {
     this.pageSize = event.pageSize;
     const pageIndex = event.pageIndex;
-    this.getDataPage(pageIndex + 1); 
+    this.getDataPage(pageIndex + 1);
   }
 
   protected delete(entity: any): void {
