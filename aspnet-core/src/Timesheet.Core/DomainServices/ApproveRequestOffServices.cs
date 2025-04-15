@@ -17,6 +17,7 @@ using Timesheet.Entities;
 using Timesheet.Services.Komu;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
+using Branch = Timesheet.Entities.Branch;
 
 namespace Timesheet.DomainServices
 {
@@ -26,77 +27,56 @@ namespace Timesheet.DomainServices
         private readonly IRepository<ProjectUser, long> _projectUserRepository;
         private readonly KomuService _komuService;
         private readonly IRepository<User, long> _userRepository;  // Inject User repository
-        public ApproveRequestOffServices(IRepository<AbsenceDayDetail, long> absenceDayDetailRepository, IRepository<ProjectUser, long> projectUserRepository, KomuService komuService, IRepository<User, long> userRepository)
+        private readonly IRepository<Branch, long> _branchRepository;
+        public ApproveRequestOffServices(IRepository<AbsenceDayDetail, long> absenceDayDetailRepository, IRepository<ProjectUser, long> projectUserRepository, KomuService komuService, IRepository<User, long> userRepository, IRepository<Branch, long> branchRepository)
         {
             _absenceDayDetailRepository = absenceDayDetailRepository;
             _projectUserRepository = projectUserRepository;
             _komuService = komuService;
             _userRepository = userRepository;
+            _branchRepository = branchRepository;
         }
 
+        private (string, string, string, string) GetWorkingTimes(User user)
+        {
+            Branch branch = null;
+            if (user?.BranchId != null)
+            {
+                branch = _branchRepository.FirstOrDefault((long)user.BranchId);
+            }
+            else
+            {
+                branch = _branchRepository.GetAll().FirstOrDefault();
+            }
+
+            string morningStart = !string.IsNullOrEmpty(user?.MorningStartAt)
+                ? user.MorningStartAt
+                : branch?.MorningStartAt;
+            string morningEnd = !string.IsNullOrEmpty(user?.MorningEndAt)
+                ? user.MorningEndAt
+                : branch?.MorningEndAt;
+            string afternoonStart = !string.IsNullOrEmpty(user?.AfternoonStartAt)
+                ? user.AfternoonStartAt
+                : branch?.AfternoonStartAt;
+            string afternoonEnd = !string.IsNullOrEmpty(user?.AfternoonEndAt)
+                ? user.AfternoonEndAt
+                : branch?.AfternoonEndAt;   
+
+            return (morningStart, morningEnd, afternoonStart, afternoonEnd);
+        }
 
         private bool IsWithinWorkingHours(TimeSpan currentTime, User user)
         {
-            // Giá trị mặc định
-            TimeSpan defaultMorningStart = new TimeSpan(8, 30, 0);  // 8:30 AM
-            TimeSpan defaultMorningEnd = new TimeSpan(12, 0, 0);    // 12:00 PM
-            TimeSpan defaultAfternoonStart = new TimeSpan(13, 0, 0); // 1:00 PM
-            TimeSpan defaultAfternoonEnd = new TimeSpan(17, 30, 0);  // 5:30 PM
+            var (morningStart, morningEnd, afternoonStart, afternoonEnd) = GetWorkingTimes(user);
+            var morningStartTime = TimeSpan.Parse(morningStart);
+            var morningEndTime = TimeSpan.Parse(morningEnd);
+            var afternoonStartTime = TimeSpan.Parse(afternoonStart);
+            var afternoonEndTime = TimeSpan.Parse(afternoonEnd);
 
-            TimeSpan morningStart = string.IsNullOrEmpty(user?.MorningStartAt)
-                ? defaultMorningStart
-                : TimeSpan.Parse(user.MorningStartAt);
-
-            TimeSpan morningEnd = string.IsNullOrEmpty(user?.MorningEndAt)
-                ? defaultMorningEnd
-                : TimeSpan.Parse(user.MorningEndAt);
-
-            TimeSpan afternoonStart = string.IsNullOrEmpty(user?.AfternoonStartAt)  
-                ? defaultAfternoonStart
-                : TimeSpan.Parse(user.AfternoonStartAt);
-
-            TimeSpan afternoonEnd = string.IsNullOrEmpty(user?.AfternoonEndAt)
-                ? defaultAfternoonEnd
-                : TimeSpan.Parse(user.AfternoonEndAt);
-
-            // Kiểm tra currentTime có nằm trong khoảng giờ làm việc không
-            return (currentTime >= morningStart && currentTime <= morningEnd) ||
-                   (currentTime >= afternoonStart && currentTime <= afternoonEnd);
+            return (currentTime >= morningStartTime && currentTime <= morningEndTime) ||
+                   (currentTime >= afternoonStartTime && currentTime <= afternoonEndTime);
         }
-
-
-
-        private bool IsWithinWorkingHours(TimeSpan currentTime, PmInfoRequestOffDto pm)
-        {
-            TimeSpan defaultMorningStart = new TimeSpan(8, 30, 0);   
-            TimeSpan defaultMorningEnd = new TimeSpan(12, 0, 0);     
-            TimeSpan defaultAfternoonStart = new TimeSpan(13, 0, 0); 
-            TimeSpan defaultAfternoonEnd = new TimeSpan(17, 30, 0); 
-
-            TimeSpan morningStart = string.IsNullOrEmpty(pm?.MorningStartAt)
-                ? defaultMorningStart
-                : TimeSpan.Parse(pm.MorningStartAt);
-
-            TimeSpan morningEnd = string.IsNullOrEmpty(pm?.MorningEndAt)
-                ? defaultMorningEnd
-                : TimeSpan.Parse(pm.MorningEndAt);
-
-            TimeSpan afternoonStart = string.IsNullOrEmpty(pm?.AfternoonStartAt)
-                ? defaultAfternoonStart
-                : TimeSpan.Parse(pm.AfternoonStartAt);
-
-            TimeSpan afternoonEnd = string.IsNullOrEmpty(pm?.AfternoonEndAt)
-                ? defaultAfternoonEnd
-                : TimeSpan.Parse(pm.AfternoonEndAt);
-
-            // Kiểm tra xem currentTime có nằm trong khoảng giờ làm việc không
-            return (currentTime >= morningStart && currentTime <= morningEnd) ||
-                   (currentTime >= afternoonStart && currentTime <= afternoonEnd);
-        }
-
-
-
-
+       
         public List<RequestAddDto> GetListPmNotApproveRequestOff()
         {
             double timePeriodWithPendingRequest = Double.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ApproveRequestOffNotifyTimePeriodWithPendingRequest));
@@ -148,7 +128,7 @@ namespace Timesheet.DomainServices
 
             var projectIds = allProjectUsers.Where(s => userIds.Contains(s.UserId)).Where(s => !s.Project.isAllUserBelongTo).Select(s => s.ProjectId).Distinct();
 
-            // Lấy danh sách PM và thông tin working time của họ
+            
             var listPM = allProjectUsers
                 .Where(s => s.Type == ProjectUserType.PM)
                 .Where(s => projectIds.Contains(s.ProjectId))
@@ -157,22 +137,18 @@ namespace Timesheet.DomainServices
                     UserId = s.UserId,
                     EmailAddress = s.User.EmailAddress,
                     KomuUserId = s.User.KomuUserId,
-                    MorningStartAt = s.User.MorningStartAt,
-                    MorningEndAt = s.User.MorningEndAt,
-                    AfternoonStartAt = s.User.AfternoonStartAt,
-                    AfternoonEndAt = s.User.AfternoonEndAt
+                    User = s.User
                 })
                 .Distinct()
                 .ToList();
 
             listPM.ForEach(pm =>
             {
-                // Check if current time is within PM's working hours
-                if (!IsWithinWorkingHours(currentTime, pm))
+                
+                if (!IsWithinWorkingHours(currentTime, pm.User))
                 {
-                    return; // Skip this PM if not within their working hours
+                    return;
                 }
-
                 //Filter list projects by PM
                 var projectIdsByPM = allProjectUsers
                 .Where(item => item.UserId.Equals(pm.UserId))
