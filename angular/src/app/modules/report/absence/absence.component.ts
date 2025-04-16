@@ -8,13 +8,12 @@ import { AbsenceDayService } from '@app/service/api/absence-day.service';
 import { AppSessionService } from '@shared/session/app-session.service';
 import { AbsenceReportRequest } from '@app/service/api/model/absence-day-dto';
 import * as moment from 'moment';
-import { MatDatepicker, MatPaginator, PageEvent } from '@node_modules/@angular/material';
+import { MatPaginator, PageEvent } from '@node_modules/@angular/material';
 import { PagedRequestDto } from '@shared/paged-listing-component-base';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
-import { log } from 'console';
+import { APP_CONSTANT } from '@app/constant/api.constants';
 import { Moment } from 'moment';
-import { MAT_DATE_FORMATS } from '@angular/material/core';
 
 @Component({
   selector: 'app-absence',
@@ -25,7 +24,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   AbsenceReport_View = PERMISSIONS_CONSTANT.ViewAbsenceDayByBranch;
-
+  APP_CONSTANT = APP_CONSTANT;
   searchText: any;
 
   branchId: any;
@@ -47,7 +46,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
   absenceReportResult: any[] = [];
   displayedColumns: any[] = ['index', 'user', 'position', 'totalTime'];
   displayDay: any;
-  selectedTimeRange: string;
+  selectedTimeRange: number;
   isLoading: boolean = false;
   isDisabled: boolean = false;
 
@@ -83,7 +82,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
   ngOnInit(): void {
     this.getListBranch();
     this.getListPosition();
-    this.selectedTimeRange = 'DAY';
+    this.selectedTimeRange = APP_CONSTANT.AbsenceReportTimeRange.DAY;
 
     this.loadInitFormData();
 
@@ -121,7 +120,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
   }
 
   getListPosition() {
-    this.positionService.getAllFilter().subscribe(res => {
+    this.positionService.getAllFilter(true).subscribe(res => {
       this.listPosition = res.result;
       this.listPositionFilter = this.listPosition;
     });
@@ -197,7 +196,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
     this.pageNumber = 1;
     this.absenceReportRequestDto.skipCount = 0;
     switch (this.selectedTimeRange) {
-      case 'DAY': {
+      case APP_CONSTANT.AbsenceReportTimeRange.DAY: {
         const startDate = new Date(this.displayDay);
         startDate.setHours(0, 0, 0, 0);
         this.absenceReportRequestDto.startDate = startDate.toISOString();
@@ -207,7 +206,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
         this.absenceReportRequestDto.endDate = endDate.toISOString();
         break;
       }
-      case 'WEEK': {
+      case APP_CONSTANT.AbsenceReportTimeRange.WEEK: {
         const d = new Date(this.displayDay);
 
         // Get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
@@ -227,7 +226,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
         this.absenceReportRequestDto.endDate = sunday.toISOString();
         break;
       }
-      case 'MONTH': {
+      case APP_CONSTANT.AbsenceReportTimeRange.MONTH: {
         const startDate = new Date(new Date(this.displayDay).getFullYear(), new Date(this.displayDay).getMonth(), 1);
         startDate.setHours(0, 0, 0, 0);
         this.absenceReportRequestDto.startDate = startDate.toISOString();
@@ -243,7 +242,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
 
 
 
-  viewBy(range: string) {
+  viewBy(range: number) {
     this.selectedTimeRange = range;
     this.updateTimeRange();
   }

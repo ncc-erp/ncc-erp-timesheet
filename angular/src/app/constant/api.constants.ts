@@ -84,6 +84,11 @@ export const APP_CONSTANT = {
     Day: 0,
     Week: 1
   },
+  AbsenceReportTimeRange: {
+    DAY: 0,
+    WEEK: 1,
+    MONTH: 2
+  },
   MAX_WORKING_TIME: 960,
   CHECK_STATUS: {
     CHECKED_NONE: 0,

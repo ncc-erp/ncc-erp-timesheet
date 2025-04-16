@@ -73,7 +73,7 @@ namespace Timesheet.APIs.RequestDays
                 .Where(s => s.DateAt <= input.endDate)
                 .Where(s => s.Request.Status == RequestStatus.Approved)
                 .Where(s => s.Request.Type == input.requestType.Value)
-                .Where(s => !string.IsNullOrWhiteSpace(input.email) ? s.Request.User.EmailAddress.Contains(input.email) : true) // Nếu có email thì lọc, nếu không thì lấy tất cả
+                .Where(s => !string.IsNullOrWhiteSpace(input.email) ? s.Request.User.EmailAddress.Contains(input.email) : true) // filter by email if input.email is not null or empty 
                 .Where(s => input.positionId == 0 || s.Request.User.PositionId == input.positionId.Value) 
                 .Where(s => input.branchId == 0 || s.Request.User.BranchId == input.branchId.Value)      
                 .GroupBy(s => new
@@ -194,10 +194,6 @@ namespace Timesheet.APIs.RequestDays
                     AbsenceTime = s.AbsenceTime,
                     CreateTime = s.CreationTime
                 });
-
-            string str = query.ToString();
-            
-
 
             var res = await query.ToListAsync();
 

@@ -73,16 +73,16 @@
       </mat-button-toggle-group>
 
       <mat-button-toggle-group name="fontStyle" aria-label="Font Style" #group="matButtonToggleGroup" value="day">
-        <mat-button-toggle name="dayBtnToggle" value="day" (click)="viewBy('DAY')">Day</mat-button-toggle>
-        <mat-button-toggle name="weekBtnToggle" value="week" (click)="viewBy('WEEK')">Week</mat-button-toggle>
-        <mat-button-toggle name="monthBtnToggle" value="month" (click)="viewBy('MONTH')">Month</mat-button-toggle>
+        <mat-button-toggle name="dayBtnToggle" value="day" (click)="viewBy(APP_CONSTANT.AbsenceReportTimeRange.DAY)">Day</mat-button-toggle>
+        <mat-button-toggle name="weekBtnToggle" value="week" (click)="viewBy(APP_CONSTANT.AbsenceReportTimeRange.WEEK)">Week</mat-button-toggle>
+        <mat-button-toggle name="monthBtnToggle" value="month" (click)="viewBy(APP_CONSTANT.AbsenceReportTimeRange.MONTH)">Month</mat-button-toggle>
       </mat-button-toggle-group>
 
-      <div class="date-range" *ngIf="selectedTimeRange === 'WEEK' || selectedTimeRange === 'MONTH'">
-        <div *ngIf="selectedTimeRange === 'WEEK'">
+      <div class="date-range" *ngIf="selectedTimeRange === APP_CONSTANT.AbsenceReportTimeRange.WEEK || selectedTimeRange === APP_CONSTANT.AbsenceReportTimeRange.MONTH">
+        <div *ngIf="selectedTimeRange === APP_CONSTANT.AbsenceReportTimeRange.WEEK">
           {{ absenceReportRequestDto.startDate | date: 'MMM d, yyyy' }} - {{ absenceReportRequestDto.endDate | date: 'MMM d, yyyy' }}
         </div>
-        <div *ngIf="selectedTimeRange === 'MONTH'">
+        <div *ngIf="selectedTimeRange === APP_CONSTANT.AbsenceReportTimeRange.MONTH">
           {{ absenceReportRequestDto.startDate | date: 'MMM d, yyyy' }} - {{ absenceReportRequestDto.endDate | date: 'MMM d, yyyy' }}
         </div>
       
