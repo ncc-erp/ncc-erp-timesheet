@@ -4,6 +4,7 @@ import { SharedModule } from '@shared/shared.module';
 import { BranchManagerComponent } from './branch-manager.component';
 import { BranchManagerRoutingModule } from './branch-manager-routing.module';
 import { ManageEmployeeComponent } from './manage-employee/manage-employee.component';
+import { AbsenceComponent } from './absence/absence.component';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { FormsModule } from '@angular/forms';
@@ -25,6 +26,7 @@ import {ProjectTargetUserPipe} from '@shared/pipes/projectTargetUser.pipe';
       ProjectTargetUserPipe,
       BranchManagerComponent,
       ManageEmployeeComponent,
+      AbsenceComponent,
       PopupCustomeTimeComponent,
       ProjectManagementComponent,
       PopupUpdateProjectComponent,

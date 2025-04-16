@@ -597,28 +597,6 @@ const routes: Routes = [
             },
         ],
     },
-    {
-        path: "absence",
-        component: MainComponent,
-        canActivate: [AppRouteGuard],
-        children: [
-            {
-                path: "",
-                children: [
-                    {
-                        path: "",
-                        loadChildren:
-                            "../modules/report/absence/absence.module#AbsenceModule",
-                        data: {
-                            permission: "Report.InternsInfo",
-                            preload: true,
-                        },
-                        canActivate: [AppRouteGuard],
-                    },
-                ],
-            },
-        ],
-    },
   {
     path: "normal-working",
     component: MainComponent,
