@@ -49,6 +49,9 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
     MatMomentDateModule
   ], entryComponents: [
   ],
+  exports: [
+    AbsenceComponent
+  ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
   ]
