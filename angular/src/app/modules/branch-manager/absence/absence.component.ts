@@ -82,7 +82,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
   ngOnInit(): void {
     this.getListBranch();
     this.getListPosition();
-    this.selectedTimeRange = APP_CONSTANT.AbsenceReportTimeRange.DAY;
+    this.selectedTimeRange = APP_CONSTANT.TypeViewBranchManager.Day;
 
     this.loadInitFormData();
 
@@ -196,7 +196,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
     this.pageNumber = 1;
     this.absenceReportRequestDto.skipCount = 0;
     switch (this.selectedTimeRange) {
-      case APP_CONSTANT.AbsenceReportTimeRange.DAY: {
+      case APP_CONSTANT.TypeViewBranchManager.Day: {
         const startDate = new Date(this.displayDay);
         startDate.setHours(0, 0, 0, 0);
         this.absenceReportRequestDto.startDate = startDate.toISOString();
@@ -206,7 +206,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
         this.absenceReportRequestDto.endDate = endDate.toISOString();
         break;
       }
-      case APP_CONSTANT.AbsenceReportTimeRange.WEEK: {
+      case APP_CONSTANT.TypeViewBranchManager.Week: {
         const d = new Date(this.displayDay);
 
         // Get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
@@ -226,7 +226,7 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
         this.absenceReportRequestDto.endDate = sunday.toISOString();
         break;
       }
-      case APP_CONSTANT.AbsenceReportTimeRange.MONTH: {
+      case APP_CONSTANT.TypeViewBranchManager.Month: {
         const startDate = new Date(new Date(this.displayDay).getFullYear(), new Date(this.displayDay).getMonth(), 1);
         startDate.setHours(0, 0, 0, 0);
         this.absenceReportRequestDto.startDate = startDate.toISOString();
