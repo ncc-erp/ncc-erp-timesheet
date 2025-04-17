@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Timesheet.Paging;
 using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.RequestDays.Dto
 {
-    public class InputRequestDto
+    public class InputRequestDto : GridParam
     {
         public DateTime startDate { get; set; }
         public DateTime endDate { get; set; }

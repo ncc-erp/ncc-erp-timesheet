@@ -68,3 +68,14 @@ export class RequestOfUserDto {
     isFuture: boolean;
     absenceTime: number;
 }
+
+export class AbsenceReportRequest {
+    startDate: string;
+    endDate: string;
+    email: string;
+    positionId: number;
+    branchId: number;
+    requestType: number;
+    skipCount: number;
+    maxResultCount: number;
+}

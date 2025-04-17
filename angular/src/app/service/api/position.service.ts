@@ -21,4 +21,7 @@ export class PositionService extends BaseApiService {
   getAll(): Observable<any> {
     return this.http.get(this.rootUrl + "/GetAllPositionDropDownList");
   }
+  getAllFilter(isAll: boolean): Observable<any> {
+      return this.http.get(this.rootUrl + `/GetAllPositionDropDownListFilter?isAll=${isAll}`);
+  }
 }

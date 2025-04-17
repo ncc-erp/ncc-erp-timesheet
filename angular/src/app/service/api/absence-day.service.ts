@@ -31,4 +31,8 @@ export class AbsenceDayService extends BaseApiService {
     cancelAbsenceDayRequest(reqId: any):Observable<any> {
         return this.http.post(this.rootUrl + '/CancelMyRequest?requestId=' +reqId,{});
     }
+
+    getAbsenceReport(reqBody: any): Observable<any> {
+        return this.http.post<any>(this.rootUrl + '/GetAbsenceReport', reqBody);
+    }
 }
