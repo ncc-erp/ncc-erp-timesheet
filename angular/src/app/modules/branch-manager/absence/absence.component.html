@@ -10,7 +10,7 @@
       <mat-icon style="color: #9E9E9E" matPrefix>search</mat-icon>
       <mat-label>Search by email</mat-label>
       <input name="searchText" matInput type="text" [(ngModel)]="absenceReportRequestDto.email"
-        (keyup.enter)="onFilter()" placeholder="user email">
+        (keyup.enter)="onFilter()" placeholder="User email">
     </mat-form-field>
 
 
@@ -99,59 +99,60 @@
       </button>
     </div>
   </div>
-
-  <table mat-table [dataSource]="absenceReportResult" class="mat-elevation-z0" [busy]="isLoading">
-
-
-    <ng-container matColumnDef="index">
-      <th mat-header-cell *matHeaderCellDef> No. </th>
-      <td mat-cell *matCellDef="let user; let i = index">
-        {{ i + 1 + (absenceReportRequestDto.skipCount || 0) }}
-      </td>
-    </ng-container>
+  <div style="overflow-x: auto;">
+    <table mat-table [dataSource]="absenceReportResult" class="mat-elevation-z0" [busy]="isLoading">
 
 
-    <ng-container matColumnDef="user">
-      <th mat-header-cell *matHeaderCellDef> User </th>
-      <td mat-cell *matCellDef="let user">
-        <div class="user-container">
-          <img *ngIf="user.avatarFullPath; else defaultAvatar" [src]="user.avatarFullPath" class="user-avatar">
-          <ng-template #defaultAvatar>
-            <img src="assets/images/undefine.png" class="user-avatar">
-          </ng-template>
-          <div class="user-info">
-            <strong>{{ user.userSurname + ' ' + user.userFirstname }}</strong>
-            <div class="badges">
-                <span class="badge location" [ngStyle]="{'background-color': user.branchColor}">
-                {{ user.branchDisplayName }}
-                </span>
-                <span class="badge type" [ngStyle]="{'background-color': user.userType === 1 ? 'green' : user.userType === 2 ? 'blue' : 'red'}">
-                {{ user.userTypeName }}
-                </span>
-              <span class="badge level"  [ngStyle]="userLevels[user.userLevel].style" >{{ user.userLevelName }}</span>
+      <ng-container matColumnDef="index">
+        <th mat-header-cell *matHeaderCellDef> No. </th>
+        <td mat-cell *matCellDef="let user; let i = index">
+          {{ i + 1 + (absenceReportRequestDto.skipCount || 0) }}
+        </td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="user">
+        <th mat-header-cell *matHeaderCellDef> User </th>
+        <td mat-cell *matCellDef="let user">
+          <div class="user-container">
+            <img *ngIf="user.avatarFullPath; else defaultAvatar" [src]="user.avatarFullPath" class="user-avatar">
+            <ng-template #defaultAvatar>
+              <img src="assets/images/undefine.png" class="user-avatar">
+            </ng-template>
+            <div class="user-info">
+              <strong>{{ user.userSurname + ' ' + user.userFirstname }}</strong>
+              <div class="badges">
+                  <span *ngIf="user.branchDisplayName" class="badge location" [ngStyle]="{'background-color': user.branchColor}">
+                  {{ user.branchDisplayName }}
+                  </span>
+                  <span *ngIf="user.userTypeName" class="badge type" [ngStyle]="{'background-color': user.userType === 1 ? 'green' : user.userType === 2 ? 'blue' : 'red'}">
+                  {{ user.userTypeName }}
+                  </span>
+                  <span *ngIf="user.userLevelName" class="badge level"  [ngStyle]="userLevels[user.userLevel].style" >{{ user.userLevelName }}</span>
+              </div>
+              <div class="email">{{ user.userEmail }}</div>
             </div>
-            <div class="email">{{ user.userEmail }}</div>
           </div>
-        </div>
-      </td>
-    </ng-container>
+        </td>
+      </ng-container>
 
 
-    <ng-container matColumnDef="position">
-      <th mat-header-cell *matHeaderCellDef> Position </th>
-      <td mat-cell *matCellDef="let user"> {{ user.position }} </td>
-    </ng-container>
+      <ng-container matColumnDef="position">
+        <th mat-header-cell *matHeaderCellDef> Position </th>
+        <td mat-cell *matCellDef="let user"> {{ user.position }} </td>
+      </ng-container>
 
 
-    <ng-container matColumnDef="totalTime">
-      <th mat-header-cell *matHeaderCellDef> Total time </th>
-      <td mat-cell *matCellDef="let user"> {{ user.totalTime }} </td>
-    </ng-container>
+      <ng-container matColumnDef="totalTime">
+        <th mat-header-cell *matHeaderCellDef> Total time </th>
+        <td mat-cell *matCellDef="let user"> {{ user.totalTime }} </td>
+      </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
-
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+  
   <mat-paginator
     [length]="totalItems"
     [pageSize]="pageSize"
