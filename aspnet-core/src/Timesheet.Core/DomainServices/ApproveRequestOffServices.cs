@@ -2,6 +2,7 @@
 using Abp.Dependency;
 using Abp.Domain.Repositories;
 using Abp.Domain.Services;
+using Ncc.Authorization.Users;
 using Ncc.Configuration;
 using Ncc.Entities;
 using Newtonsoft.Json;
@@ -16,6 +17,7 @@ using Timesheet.Entities;
 using Timesheet.Services.Komu;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
+using Branch = Timesheet.Entities.Branch;
 
 namespace Timesheet.DomainServices
 {
@@ -24,11 +26,61 @@ namespace Timesheet.DomainServices
         private readonly IRepository<AbsenceDayDetail, long> _absenceDayDetailRepository;
         private readonly IRepository<ProjectUser, long> _projectUserRepository;
         private readonly KomuService _komuService;
-        public ApproveRequestOffServices(IRepository<AbsenceDayDetail, long> absenceDayDetailRepository, IRepository<ProjectUser, long> projectUserRepository, KomuService komuService)
+        private readonly IRepository<User, long> _userRepository;  // Inject User repository
+        private readonly IRepository<Branch, long> _branchRepository;
+        public ApproveRequestOffServices(IRepository<AbsenceDayDetail, long> absenceDayDetailRepository, IRepository<ProjectUser, long> projectUserRepository, KomuService komuService, IRepository<User, long> userRepository, IRepository<Branch, long> branchRepository)
         {
             _absenceDayDetailRepository = absenceDayDetailRepository;
             _projectUserRepository = projectUserRepository;
             _komuService = komuService;
+            _userRepository = userRepository;
+            _branchRepository = branchRepository;
+        }
+
+        private WorkingTimeDto GetWorkingTimes(User user)
+        {
+            Branch branch = null;
+            if (user?.BranchId != null)
+            {
+                branch = _branchRepository.FirstOrDefault((long)user.BranchId);
+            }
+            else
+            {
+                branch = _branchRepository.GetAll().FirstOrDefault();
+            }
+            string morningStart = !string.IsNullOrEmpty(user?.MorningStartAt)
+                ? user.MorningStartAt
+                : branch?.MorningStartAt;
+            string morningEnd = !string.IsNullOrEmpty(user?.MorningEndAt)
+                ? user.MorningEndAt
+                : branch?.MorningEndAt;
+            string afternoonStart = !string.IsNullOrEmpty(user?.AfternoonStartAt)
+                ? user.AfternoonStartAt
+                : branch?.AfternoonStartAt;
+            string afternoonEnd = !string.IsNullOrEmpty(user?.AfternoonEndAt)
+                ? user.AfternoonEndAt
+                : branch?.AfternoonEndAt;
+
+            return new WorkingTimeDto
+            {
+                MorningStartAt = morningStart,
+                MorningEndAt = morningEnd,
+                AfternoonStartAt = afternoonStart,
+                AfternoonEndAt = afternoonEnd
+            };
+        }
+
+        private bool IsWithinWorkingHours(TimeSpan currentTime, User user)
+        {
+            var workingTimes = GetWorkingTimes(user);
+
+            var morningStartTime = TimeSpan.Parse(workingTimes.MorningStartAt);
+            var morningEndTime = TimeSpan.Parse(workingTimes.MorningEndAt);
+            var afternoonStartTime = TimeSpan.Parse(workingTimes.AfternoonStartAt);
+            var afternoonEndTime = TimeSpan.Parse(workingTimes.AfternoonEndAt);
+
+            return (currentTime >= morningStartTime && currentTime <= morningEndTime) ||
+                   (currentTime >= afternoonStartTime && currentTime <= afternoonEndTime);
         }
 
         public List<RequestAddDto> GetListPmNotApproveRequestOff()
@@ -72,6 +124,7 @@ namespace Timesheet.DomainServices
             List<NotifyApproveRequestOffDto> result = new List<NotifyApproveRequestOffDto>();
 
             var userIds = listInfo.Select(s => s.Key.UserId).Distinct().ToList();
+            var currentTime = DateTime.Now.TimeOfDay;
 
             // Filter list project has request based on list userIds
             var allProjectUsers = _projectUserRepository.GetAll()
@@ -81,6 +134,7 @@ namespace Timesheet.DomainServices
 
             var projectIds = allProjectUsers.Where(s => userIds.Contains(s.UserId)).Where(s => !s.Project.isAllUserBelongTo).Select(s => s.ProjectId).Distinct();
 
+            
             var listPM = allProjectUsers
                 .Where(s => s.Type == ProjectUserType.PM)
                 .Where(s => projectIds.Contains(s.ProjectId))
@@ -89,22 +143,37 @@ namespace Timesheet.DomainServices
                     UserId = s.UserId,
                     EmailAddress = s.User.EmailAddress,
                     KomuUserId = s.User.KomuUserId,
+                    User = s.User
                 })
-                .Distinct().ToList();
+                .Distinct()
+                .ToList();
 
             listPM.ForEach(pm =>
             {
+                
+                if (!IsWithinWorkingHours(currentTime, pm.User))
+                {
+                    return;
+                }
                 //Filter list projects by PM
-                var projectIdsByPM = allProjectUsers.Where(item => item.UserId.Equals(pm.UserId)).Where(s => s.Type == ProjectUserType.PM).Where(s => projectIds.Contains(s.ProjectId)).Select(item => item.ProjectId).Distinct().ToList();
+                var projectIdsByPM = allProjectUsers
+                .Where(item => item.UserId.Equals(pm.UserId))
+                .Where(s => s.Type == ProjectUserType.PM)
+                .Where(s => projectIds.Contains(s.ProjectId))
+                .Select(item => item.ProjectId).Distinct().ToList();
                 //Logger.Debug("Get list project by PM[" + pm.EmailAddress + "]" + JsonConvert.SerializeObject(allProjectUsers.Where(item => item.UserId.Equals(pm.UserId)).Where(s => s.Type == ProjectUserType.PM).Where(s => projectIds.Contains(s.ProjectId)).Select(item => new { item.ProjectId, item.Project.Name }).ToList()));
                 //Filter list userIds by list project by PM
-                var projectUserIds = allProjectUsers.Where(item => projectIdsByPM.Contains(item.ProjectId)).Select(item => item.UserId).Distinct().ToList();
+                var projectUserIds = allProjectUsers
+                .Where(item => projectIdsByPM
+                .Contains(item.ProjectId))
+                .Select(item => item.UserId).Distinct().ToList();
                 //Logger.Debug("Get list users by list: " + JsonConvert.SerializeObject(allProjectUsers.Where(item => projectIdsByPM.Contains(item.ProjectId)).Select(item => new { item.UserId, item.ProjectId, item.User.FullName }).Distinct().ToList()));
 
                 var row = new NotifyApproveRequestOffDto();
                 row.EmailAddress = pm.EmailAddress;
                 row.KomuUserId = pm.KomuUserId;
-                row.Users = listInfo.Where(item => projectUserIds.Contains(item.Key.UserId)).Select(item => new UserInfoApproveRequestOffDto
+                row.Users = listInfo.Where(item => projectUserIds
+                .Contains(item.Key.UserId)).Select(item => new UserInfoApproveRequestOffDto
                 {
                     FullName = item.Key.FullName,
                     RequestOffDtos = item.Value
@@ -179,41 +248,36 @@ namespace Timesheet.DomainServices
                     UserName = x.UserName,
                 }).ToList());
 
-            var result = listInfo.
-                Select(s => new SendMessageToUserRequestOffDto
-                {
-                    UserName = s.Value.FirstOrDefault().UserName,
-                    RequestOffDtos = s.Value.Select(x => new RequestOffDto
-                    {
-                        DateAt = x.DateAt,
-                        DayType = x.DayType,
-                        RequestType = x.RequestType,
-                    }).ToList(),
-                }).ToList();
+            var currentTime = DateTime.Now.TimeOfDay;
 
-            var sb = new StringBuilder();
-            foreach (var item in result)
+            foreach (var userGroup in listInfo)
             {
-                if (item.RequestOffDtos.Count() == 1)
+                var userId = userGroup.Key;
+                var user = _userRepository.FirstOrDefault(u => u.Id == userId);
+
+                if (!IsWithinWorkingHours(currentTime, user))
                 {
-                    sb.AppendLine($"You have **{item.RequestOffDtos.Count()}** pending request, please confirm with PM to approve it:");
-                }
-                else
-                {
-                    sb.AppendLine($"You have **{item.RequestOffDtos.Count()}** pending requests, please confirm with PM to approve it:");
+                    continue; 
                 }
 
-                item.RequestOffDtos.ForEach(s =>
+                var userRequests = userGroup.Value;
+                var userName = userRequests.FirstOrDefault()?.UserName;
+                if (string.IsNullOrEmpty(userName)) continue;
+
+                var sb = new StringBuilder();
+                var requestCount = userRequests.Count;
+
+                sb.AppendLine($"You have **{requestCount}** pending request{(requestCount > 1 ? "s" : "")}, please confirm with PM to approve it:");
+
+                foreach (var request in userRequests)
                 {
                     sb.Append(" ");
-                    sb.AppendLine($"({s.RequestType} {s.DayType} - {s.DateAt.ToString("dd/MM/yyyy")})");
-                });
+                    sb.AppendLine($"({request.RequestType} {request.DayType} - {request.DateAt:dd/MM/yyyy})");
+                }
 
-
-                _komuService.SendMessageToUser(sb.ToString(), item.UserName.Trim());
-
-                sb.Clear();
+                _komuService.SendMessageToUser(sb.ToString(), userName.Trim());
             }
         }
     }
 }
+
