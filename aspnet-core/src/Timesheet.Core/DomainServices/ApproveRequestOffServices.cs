@@ -37,7 +37,7 @@ namespace Timesheet.DomainServices
             _branchRepository = branchRepository;
         }
 
-        private (string, string, string, string) GetWorkingTimes(User user)
+        private WorkingTimeDto GetWorkingTimes(User user)
         {
             Branch branch = null;
             if (user?.BranchId != null)
@@ -48,7 +48,6 @@ namespace Timesheet.DomainServices
             {
                 branch = _branchRepository.GetAll().FirstOrDefault();
             }
-
             string morningStart = !string.IsNullOrEmpty(user?.MorningStartAt)
                 ? user.MorningStartAt
                 : branch?.MorningStartAt;
@@ -60,23 +59,30 @@ namespace Timesheet.DomainServices
                 : branch?.AfternoonStartAt;
             string afternoonEnd = !string.IsNullOrEmpty(user?.AfternoonEndAt)
                 ? user.AfternoonEndAt
-                : branch?.AfternoonEndAt;   
+                : branch?.AfternoonEndAt;
 
-            return (morningStart, morningEnd, afternoonStart, afternoonEnd);
+            return new WorkingTimeDto
+            {
+                MorningStartAt = morningStart,
+                MorningEndAt = morningEnd,
+                AfternoonStartAt = afternoonStart,
+                AfternoonEndAt = afternoonEnd
+            };
         }
 
         private bool IsWithinWorkingHours(TimeSpan currentTime, User user)
         {
-            var (morningStart, morningEnd, afternoonStart, afternoonEnd) = GetWorkingTimes(user);
-            var morningStartTime = TimeSpan.Parse(morningStart);
-            var morningEndTime = TimeSpan.Parse(morningEnd);
-            var afternoonStartTime = TimeSpan.Parse(afternoonStart);
-            var afternoonEndTime = TimeSpan.Parse(afternoonEnd);
+            var workingTimes = GetWorkingTimes(user);
+
+            var morningStartTime = TimeSpan.Parse(workingTimes.MorningStartAt);
+            var morningEndTime = TimeSpan.Parse(workingTimes.MorningEndAt);
+            var afternoonStartTime = TimeSpan.Parse(workingTimes.AfternoonStartAt);
+            var afternoonEndTime = TimeSpan.Parse(workingTimes.AfternoonEndAt);
 
             return (currentTime >= morningStartTime && currentTime <= morningEndTime) ||
                    (currentTime >= afternoonStartTime && currentTime <= afternoonEndTime);
         }
-       
+
         public List<RequestAddDto> GetListPmNotApproveRequestOff()
         {
             double timePeriodWithPendingRequest = Double.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ApproveRequestOffNotifyTimePeriodWithPendingRequest));
