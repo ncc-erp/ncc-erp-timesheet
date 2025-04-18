@@ -184,12 +184,26 @@ export class AbsenceComponent extends PagedListingComponentBase<any> implements 
 
   back() {
     this.displayDay = moment(this.displayDay).subtract(1, 'days').format('YYYY-MM-DD');
-    this.updateTimeRange();
+    this.filterByNewTimeRange();
   }
 
   next() {
     this.displayDay = moment(this.displayDay).add(1, 'days').format('YYYY-MM-DD');
+    this.filterByNewTimeRange();
+  }
+
+  filterByNewTimeRange() {
+    const currentStartDate = this.absenceReportRequestDto.startDate;
+    const currentEndDate = this.absenceReportRequestDto.endDate;
     this.updateTimeRange();
+    if(currentStartDate !== this.absenceReportRequestDto.startDate || currentEndDate !== this.absenceReportRequestDto.endDate) {
+      this.pageNumber = 1;
+      this.absenceReportRequestDto.skipCount = 0;
+      if (this.paginator) {
+        this.paginator.pageIndex = 0;
+      }
+      this.getDataPage(this.pageNumber);
+    }
   }
 
   updateTimeRange() {

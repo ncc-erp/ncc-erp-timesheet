@@ -54,12 +54,12 @@
 
   <div class="button-container">
     <div class="button-row-left">
-      <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
-        <mat-button-toggle name="previousBtn" matTooltip="Previous" matTooltipPosition="above" (click)="back()">
+      <mat-button-toggle-group class="date-picker"name="fontStyle" aria-label="Font Style">
+        <mat-button-toggle class="fixed-button" name="previousBtn" matTooltip="Previous" matTooltipPosition="above" (click)="back()">
           <mat-icon>keyboard_arrow_left</mat-icon>
         </mat-button-toggle>
 
-        <mat-button-toggle matTooltip="Today" matTooltipPosition="above">
+        <mat-button-toggle class="flexible-date-input" matTooltip="Today" matTooltipPosition="above">
             <input matInput [matDatepicker]="picker2" [(ngModel)]="displayDay" (dateInput)="updateTimeRange()"
             placeholder="Pick a date" readonly >
           <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
@@ -67,7 +67,7 @@
         </mat-button-toggle>
         
 
-        <mat-button-toggle name="nextBtn" matTooltip="Next" matTooltipPosition="above" (click)="next()">
+        <mat-button-toggle class="fixed-button" name="nextBtn" matTooltip="Next" matTooltipPosition="above" (click)="next()">
           <mat-icon>keyboard_arrow_right</mat-icon>
         </mat-button-toggle>
       </mat-button-toggle-group>
@@ -87,7 +87,6 @@
         </div>
       
       </div>
-      <div *ngIf="selectedTimeRange" (ngModelChange)="updateTimeRange()"></div>
     </div>
 
     <div class="action-buttons-rows">

@@ -94,7 +94,7 @@
     height: 48px;
     border: #E0E0E0 0.5px solid;
     border-radius: 4px;
-    min-width: 200px;
+    min-width: 150px;
     padding-left: 10px;
     padding-right: 10px;
     display: flex;
@@ -196,8 +196,8 @@ table.mat-table {
 }
 
 .user-avatar {
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -262,17 +262,12 @@ table.mat-table {
     }
 
     .button-row-left {
-       justify-content: center;
+       justify-content: flex-start;
     }
 
     .action-buttons-rows {
-        justify-content: center;
+        justify-content: flex-end;
         width: 100%;
-    }
-
-    .action-button {
-        flex-grow: 1;
-        max-width: calc(50% - 5px);
     }
 }
 
@@ -282,7 +277,39 @@ table.mat-table {
         margin: 8px;
     }
     .filter-item { flex: 1 1 100%; }
-    .button-row-left { justify-content: space-around; }
+    .date-picker {
+        display: flex;
+        width: 100%; 
+        border: 1px solid #ccc; 
+    }
+        
+    .fixed-button {
+        flex: 0 0 48px; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+      
+    .flexible-date-input {
+        flex: 1;  
+        overflow: hidden;
+    }
+    
+    .mat-button-toggle-label-content {
+        width: 100%;
+        padding: 0;
+    }
+    
+    .mat-input-element {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .date-range{
+        width: 150px;
+        flex: 1;
+    }
+    .button-row-left { justify-content: flex-start; }
     .action-button { max-width: 100%; font-size: 14px; }
 }
 
