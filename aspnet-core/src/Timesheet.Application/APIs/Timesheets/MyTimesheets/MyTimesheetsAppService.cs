@@ -410,25 +410,6 @@ namespace Timesheet.Timesheets.MyTimesheets
                 throw new UserFriendlyException(string.Format($"total working time on {dateAt.ToString("yyyy-MM-dd")} can't  > {maxHour} hours"));
             }
         }
-        public async System.Threading.Tasks.Task validLogOTTimesheet(DateTime dateAt, int workingTime, TypeOfWork typeOfWork, long userId)
-        {
-            if (typeOfWork == TypeOfWork.NormalWorkingHours)
-            {
-                return;
-            }
-            if (dateAt.DayOfWeek != DayOfWeek.Saturday)
-            {
-                return;
-            }
-            var normalWorkingMinute = await sumNormalWorkingMinute(userId, dateAt);
-
-            var OTMinute = workingTime - (240 - normalWorkingMinute);
-
-            if (normalWorkingMinute < 240)
-            {
-                throw new UserFriendlyException($"Saturday morning is NORMAL WORKING. You have to log 4h NORMAL WORKING first. So, the rest {CommonUtils.ConvertHourToHHmm(OTMinute)} is OT");
-            }
-        }
 
         private async Task<int> sumNormalWorkingMinute(long userId, DateTime dateAt)
         {
@@ -463,9 +444,6 @@ namespace Timesheet.Timesheets.MyTimesheets
             }
             validTotalLogTimesheet(input.DateAt, input.WorkingTime, getMaxHourCanLog(), userId);
 
-
-            await validLogOTTimesheet(input.DateAt, input.WorkingTime, input.TypeOfWork, userId);
-
             bool IsTemp = UserIsTempInProject(userId, input.ProjectTaskId);
 
             var timesheet = ObjectMapper.Map<MyTimesheet>(input);
@@ -497,25 +475,6 @@ namespace Timesheet.Timesheets.MyTimesheets
                .Where(s => s.ProjectId == projectId)
                .Select(s => s.IsTemp).FirstOrDefault();
             return IsTemp;
-        }
-
-        private async System.Threading.Tasks.Task validUpdateNormalToOT(MyTimesheet entity, MyTimesheetDto dto)
-        {
-            if (entity.TypeOfWork == dto.TypeOfWork || dto.TypeOfWork == TypeOfWork.NormalWorkingHours)
-            {
-                return;
-            }
-            if (dto.DateAt.DayOfWeek != DayOfWeek.Saturday)
-            {
-                return;
-            }
-            var normalWorkingMinute = await sumNormalWorkingMinute(AbpSession.UserId.Value, dto.DateAt);
-            normalWorkingMinute -= entity.WorkingTime;
-
-            if (normalWorkingMinute < 240)
-            {
-                throw new UserFriendlyException($"Saturday morning is NORMAL WORKING. You have to log 4h NORMAL WORKING first.");
-            }
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimesheet_Edit)]
@@ -555,10 +514,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                 //await validLogTimesheetOver8h(input.DateAt, input.WorkingTime - item.WorkingTime, maxHourCanLog);
                 //await validLogTimesheetOver8h(input.DateAt, input.WorkingTime - item.WorkingTime);
             }
-            else
-            {
-                await validUpdateNormalToOT(item, input);
-            }
+
             validTotalLogTimesheet(input.DateAt, input.WorkingTime - item.WorkingTime, getMaxHourCanLog(), userId);
 
             var status = item.Status;
@@ -869,10 +825,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                 //await validLogTimesheetOver8h(input.DateAt, input.WorkingTime - mts.WorkingTime, maxHourCanLog);
                 //await validLogTimesheetOver8h(input.DateAt, input.WorkingTime - mts.WorkingTime);
             }
-            else
-            {
-                await validUpdateNormalToOT(mts, input);
-            }
+   
             validTotalLogTimesheet(input.DateAt, input.WorkingTime - mts.WorkingTime, getMaxHourCanLog(), AbpSession.UserId.Value);
 
             ObjectMapper.Map(input, mts);

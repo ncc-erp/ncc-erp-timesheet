@@ -173,9 +173,6 @@ namespace Timesheet.APIs.Mezon
             }
             _myTimesheetsAppService.validTotalLogTimesheet(input.DateAt, input.WorkingTime, _myTimesheetsAppService.getMaxHourCanLog(), userId);
 
-
-            await _myTimesheetsAppService.validLogOTTimesheet(input.DateAt, input.WorkingTime, input.TypeOfWork, userId);
-
             bool IsTemp = _myTimesheetsAppService.UserIsTempInProject(userId, input.ProjectTaskId);
 
             var timesheet = ObjectMapper.Map<MyTimesheet>(input);
