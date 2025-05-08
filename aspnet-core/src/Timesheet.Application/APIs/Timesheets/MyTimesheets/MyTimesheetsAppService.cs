@@ -465,9 +465,11 @@ namespace Timesheet.Timesheets.MyTimesheets
             bool IsTemp = UserIsTempInProject(userId, input.ProjectTaskId);
 
             var timesheet = ObjectMapper.Map<MyTimesheet>(input);
-            if (timesheet.ProjectTaskId == Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId)))
+            // Default 1h for Open Talk if no time provided
+            if (timesheet.ProjectTaskId == Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId))
+                && input.WorkingTime <= 0)
             {
-                timesheet.WorkingTime = 240;
+                timesheet.WorkingTime = 60;
             }
             timesheet.UserId = userId;
             timesheet.Status = TimesheetStatus.None;

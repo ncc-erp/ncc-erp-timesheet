@@ -132,7 +132,8 @@ export class CreateEditTimesheetItemComponent extends AppComponentBase implement
 
   private processSpecialTask(){
     if (this.isSpecialTask()){
-      this.strWorkingTime = 4;
+      // default Open Talk to 1h instead of 4h
+      this.strWorkingTime = 1;
     }
   }
 
@@ -164,7 +165,8 @@ export class CreateEditTimesheetItemComponent extends AppComponentBase implement
 
   onTaskChange(): void {
     if (this.isSpecialTask()) {
-      this.strWorkingTime = 4;
+      // default Open Talk to 1h instead of 4h
+      this.strWorkingTime = 1;
       this.myTimesheet.typeOfWork = APP_CONFIG.EnumTypeOfWork[0].value;
     }
 
