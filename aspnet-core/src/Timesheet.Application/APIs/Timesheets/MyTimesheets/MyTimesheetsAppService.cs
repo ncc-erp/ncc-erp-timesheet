@@ -30,6 +30,7 @@ using Timesheet.NCCAuthen;
 using Timesheet.Services.Komu;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Timesheet.Services.Mezon;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace Timesheet.Timesheets.MyTimesheets
 {
@@ -465,13 +466,10 @@ namespace Timesheet.Timesheets.MyTimesheets
             bool IsTemp = UserIsTempInProject(userId, input.ProjectTaskId);
 
             var timesheet = ObjectMapper.Map<MyTimesheet>(input);
-            
-            if (timesheet.ProjectTaskId == Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId))
-                && input.WorkingTime <= 0)
+            if (timesheet.ProjectTaskId == Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId)) && input.WorkingTime <= 0)
             {
-                timesheet.WorkingTime = 240;
+                throw new UserFriendlyException($"Invalid working hours");
             }
-
             timesheet.UserId = userId;
             timesheet.Status = TimesheetStatus.None;
             timesheet.DateAt = input.DateAt.Date;
@@ -567,9 +565,9 @@ namespace Timesheet.Timesheets.MyTimesheets
                 item.IsCharged = false;
 
             item.IsUnlockedByEmployee = isUnlocked;
-            if (item.ProjectTaskId == Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId)))
+            if (item.ProjectTaskId == Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId)) && input.WorkingTime <= 0)
             {
-                item.WorkingTime = 240;
+                throw new UserFriendlyException($"Invalid working hours");
             }
 
             await WorkScope.UpdateAsync(item);
