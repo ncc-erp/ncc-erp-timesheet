@@ -423,11 +423,6 @@ namespace Timesheet.Timesheets.MyTimesheets
             var normalWorkingMinute = await sumNormalWorkingMinute(userId, dateAt);
 
             var OTMinute = workingTime - (240 - normalWorkingMinute);
-
-            if (normalWorkingMinute < 240)
-            {
-                throw new UserFriendlyException($"Saturday morning is NORMAL WORKING. You have to log 4h NORMAL WORKING first. So, the rest {CommonUtils.ConvertHourToHHmm(OTMinute)} is OT");
-            }
         }
 
         private async Task<int> sumNormalWorkingMinute(long userId, DateTime dateAt)
@@ -469,9 +464,9 @@ namespace Timesheet.Timesheets.MyTimesheets
             bool IsTemp = UserIsTempInProject(userId, input.ProjectTaskId);
 
             var timesheet = ObjectMapper.Map<MyTimesheet>(input);
-            if (timesheet.ProjectTaskId == Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId)))
+            if (timesheet.ProjectTaskId == Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId)) && input.WorkingTime <= 0)
             {
-                timesheet.WorkingTime = 240;
+                throw new UserFriendlyException($"Invalid working hours");
             }
             timesheet.UserId = userId;
             timesheet.Status = TimesheetStatus.None;
@@ -511,11 +506,6 @@ namespace Timesheet.Timesheets.MyTimesheets
             }
             var normalWorkingMinute = await sumNormalWorkingMinute(AbpSession.UserId.Value, dto.DateAt);
             normalWorkingMinute -= entity.WorkingTime;
-
-            if (normalWorkingMinute < 240)
-            {
-                throw new UserFriendlyException($"Saturday morning is NORMAL WORKING. You have to log 4h NORMAL WORKING first.");
-            }
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimesheet_Edit)]
@@ -572,9 +562,9 @@ namespace Timesheet.Timesheets.MyTimesheets
                 item.IsCharged = false;
 
             item.IsUnlockedByEmployee = isUnlocked;
-            if (item.ProjectTaskId == Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId)))
+            if (item.ProjectTaskId == Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId)) && input.WorkingTime <= 0)
             {
-                item.WorkingTime = 240;
+                throw new UserFriendlyException($"Invalid working hours");
             }
 
             await WorkScope.UpdateAsync(item);
