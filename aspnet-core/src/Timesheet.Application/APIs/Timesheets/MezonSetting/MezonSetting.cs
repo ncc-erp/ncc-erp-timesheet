@@ -49,33 +49,84 @@ namespace Timesheet.APIs.Timesheets.MezonSetting
             return input;
         }
 
+        //[HttpGet]
+        //[AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_MezonSetting_Edit)]
+        //public async System.Threading.Tasks.Task createOpentalkLog(DateTime? date)
+        //{
+        //    //OpenTalkListDto[] userList = _mezonService.GetOpenTalkLog(date);
+        //    OpenTalkListDto[] userList = _mezonService.GetOpenTalkLog(date);
+
+
+        //    var userDict = userList.ToDictionary(s => s.mezonId, s => s);
+        //    var OpentalkList = await WorkScope.GetAll<User>().Where(s => s.EmailAddress != null && userDict.ContainsKey(s.EmailAddress))
+        //                              .Select(s => new OpenTalk
+        //                              {
+        //                                  UserId = s.Id,
+        //                                  DateAt = userDict[s.EmailAddress].date,
+        //                                  totalTime = userDict[s.EmailAddress].totalTime
+        //                              }).ToListAsync();
+        //    foreach (var opentalk in OpentalkList)
+        //    {
+        //        var dbRequest = await WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == opentalk.UserId)
+        //                                                          .Where(s => s.DateAt.Date == opentalk.DateAt.Date)
+        //                                                          .FirstOrDefaultAsync();
+        //        if (dbRequest == null)
+        //        {
+        //            await WorkScope.InsertAsync(opentalk);
+        //        }
+        //        else
+        //        {
+        //            dbRequest.totalTime = opentalk.totalTime;
+        //            await WorkScope.UpdateAsync(dbRequest);
+        //        }
+        //    }
+        //}
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_MezonSetting_Edit)]
-        public async System.Threading.Tasks.Task createOpentalkLog(DateTime? date)
+        public async Task<OpenTalkListDto[]> createOpentalkLog(DateTime? date)
         {
-            OpenTalkListDto[] userList = _mezonService.GetOpenTalkLog(date);
-            var userDict = userList.ToDictionary(s => s.mezonId, s => s);
-            var OpentalkList = await WorkScope.GetAll<User>().Where(s => s.EmailAddress != null && userDict.ContainsKey(s.EmailAddress))
-                                      .Select(s => new OpenTalk
-                                      {
-                                          UserId = s.Id,
-                                          DateAt = userDict[s.EmailAddress].date,
-                                          totalTime = userDict[s.EmailAddress].totalTime
-                                      }).ToListAsync();
-            foreach (var opentalk in OpentalkList)
+            try
             {
-                var dbRequest = await WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == opentalk.UserId)
-                                                                  .Where(s => s.DateAt.Date == opentalk.DateAt.Date)
-                                                                  .FirstOrDefaultAsync();
-                if (dbRequest == null)
+                OpenTalkListDto[] userList = _mezonService.GetOpenTalkLog(date);
+
+                if (userList == null || !userList.Any())
                 {
-                    await WorkScope.InsertAsync(opentalk);
+                    return new OpenTalkListDto[0];
                 }
-                else
+
+                var userDict = userList.ToDictionary(s => s.mezonId, s => s);
+
+                var OpentalkList = await WorkScope.GetAll<User>()
+                    .Where(s => s.EmailAddress != null && userDict.ContainsKey(s.EmailAddress))
+                    .Select(s => new OpenTalk
+                    {
+                        UserId = s.Id,
+                        DateAt = userDict[s.EmailAddress].date,
+                        totalTime = userDict[s.EmailAddress].totalTime
+                    }).ToListAsync();
+
+                foreach (var opentalk in OpentalkList)
                 {
-                    dbRequest.totalTime = opentalk.totalTime;
-                    await WorkScope.UpdateAsync(dbRequest);
+                    var dbRequest = await WorkScope.GetAll<OpenTalk>()
+                        .Where(s => s.UserId == opentalk.UserId)
+                        .Where(s => s.DateAt.Date == opentalk.DateAt.Date)
+                        .FirstOrDefaultAsync();
+                    if (dbRequest == null)
+                    {
+                        await WorkScope.InsertAsync(opentalk);
+                    }
+                    else
+                    {
+                        dbRequest.totalTime = opentalk.totalTime;
+                        await WorkScope.UpdateAsync(dbRequest);
+                    }
                 }
+                return userList;
+            }
+            catch (Exception ex)
+            {
+                // Không log lỗi, nhưng vẫn trả về mảng rỗng
+                return new OpenTalkListDto[0];
             }
         }
     }
