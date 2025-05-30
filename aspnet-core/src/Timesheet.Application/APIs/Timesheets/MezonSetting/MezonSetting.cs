@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Timesheet.APIs.Timesheets.MezonSetting.Dto;
 using Timesheet.Entities;
+using Timesheet.Services.Komu;
 using Timesheet.Services.Mezon;
 using Timesheet.Services.Mezon.Dto;
 
@@ -20,10 +21,12 @@ namespace Timesheet.APIs.Timesheets.MezonSetting
     {
         protected IWorkScope WorkScope { get; set; }
         private readonly MezonService _mezonService;
-        public MezonSetting(IWorkScope workScope, MezonService mezonService)
+        private readonly KomuService _komuService;
+        public MezonSetting(IWorkScope workScope, MezonService mezonService, KomuService komuService)
         {
             WorkScope = workScope;
             _mezonService = mezonService;
+            _komuService = komuService;
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_MezonSetting_View)]
@@ -51,17 +54,18 @@ namespace Timesheet.APIs.Timesheets.MezonSetting
 
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_MezonSetting_Edit)]
-        public async System.Threading.Tasks.Task createOpentalkLog(DateTime? date)
+        public async System.Threading.Tasks.Task createOpentalkLog(DateTime date)
         {
-            OpenTalkListDto[] userList = _mezonService.GetOpenTalkLog(date);
-            var userDict = userList.ToDictionary(s => s.mezonId, s => s);
-            var OpentalkList = await WorkScope.GetAll<User>().Where(s => s.EmailAddress != null && userDict.ContainsKey(s.EmailAddress))
+            OpenTalkListNewDto[] userList = _komuService.GetOpenTalkLogNew(date);
+            var userDict = userList.ToDictionary(s => s.email, s => s);
+            var OpentalkList = await WorkScope.GetAll<User>().Where(s => s.UserName != null && userDict.ContainsKey(s.UserName))
                                       .Select(s => new OpenTalk
                                       {
                                           UserId = s.Id,
-                                          DateAt = userDict[s.EmailAddress].date,
-                                          totalTime = userDict[s.EmailAddress].totalTime
+                                          DateAt = userDict[s.UserName].date,
+                                          totalTime = userDict[s.UserName].totalTime
                                       }).ToListAsync();
+
             foreach (var opentalk in OpentalkList)
             {
                 var dbRequest = await WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == opentalk.UserId)
