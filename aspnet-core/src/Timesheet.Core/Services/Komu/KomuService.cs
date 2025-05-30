@@ -7,11 +7,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Timesheet.Constants;
 using Timesheet.Services.Komu.Dto;
+using Timesheet.Services.Mezon.Dto;
 using Timesheet.Services.Project.Dto;
 using Timesheet.Uitls;
 
@@ -336,11 +338,55 @@ namespace Timesheet.Services.Komu
             }
         }
 
+        public async Task<T> GetAsyncNew<T>(string url)
+        {
+            var fullUrl = $"{this.httpClient.BaseAddress}{url}";
+
+            try
+            {
+                var response = await httpClient.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    logger.LogInformation($"Get: {fullUrl} => Response: {responseContent}");
+
+                    var settings = new JsonSerializerSettings
+                    {
+                        DateFormatString = "dd/MM/yyyy",
+                        Culture = CultureInfo.InvariantCulture
+                    };
+
+                    var result = JsonConvert.DeserializeObject<T>(responseContent, settings);
+
+                    return result != null ? result : JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(JObject.Parse(responseContent)));
+
+                }
+                else
+                {
+                    return default;
+                }
+            }
+            catch (Exception e)
+            {
+                logger.LogError($"Get: {fullUrl} => Exception: {e}");
+                return default;
+            }
+        }
+
         public virtual GetDailyReportDto GetDailyReport(DateTime date)
         {
             var url = $"getDailyReport?date={date.ToString("dd/MM/yyyy")}";
 
             var result = GetAsync<GetDailyReportDto>(url).Result;
+            return result;
+        }
+
+        public OpenTalkListNewDto[] GetOpenTalkLogNew(DateTime date)
+        {
+            var url = $"getAllOpentalkTime?date={date.ToString("dd/MM/yyyy")}";
+
+            var result = GetAsyncNew<OpenTalkListNewDto[]>(url).Result;
             return result;
         }
     }
