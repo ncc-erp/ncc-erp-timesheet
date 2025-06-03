@@ -70,6 +70,7 @@ namespace Ncc.Authorization.Users
         public long? BranchId { get; set; }
         public long? PositionId { get; set; }
         public string GoogleId { get; set; }
+        public string MezonId { get; set; }
 
         #region Foreign Keys
 
