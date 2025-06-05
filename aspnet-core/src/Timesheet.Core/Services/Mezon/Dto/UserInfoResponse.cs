@@ -24,6 +24,9 @@ namespace Timesheet.Services.Mezon.Dto
         [JsonProperty("sub")]
         public string Subject { get; set; }
 
+        [JsonProperty("user_id")]
+        public string MezonId { get; set; }
+
         public DateTime AuthTimeUtc => DateTimeOffset.FromUnixTimeSeconds(AuthTime).UtcDateTime;
         public DateTime IssuedAtUtc => DateTimeOffset.FromUnixTimeSeconds(IssuedAt).UtcDateTime;
         public DateTime RequestedAtUtc => DateTimeOffset.FromUnixTimeSeconds(RequestedAt).UtcDateTime;
