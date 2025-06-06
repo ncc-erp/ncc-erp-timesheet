@@ -113,7 +113,7 @@ namespace Ncc.Authorization
                     Logger.Info($"Login fail with email: {mezonUser.mezon_id}");
                     return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null);
                 }
- 
+
                 byte[] secretKey = Hasher.HMAC_SHA256(Encoding.UTF8.GetBytes(appToken), Encoding.UTF8.GetBytes("WebAppData"));
                 var hashedData = Hasher.HEX(Hasher.HMAC_SHA256(secretKey, Encoding.UTF8.GetBytes(queryId)));
 
@@ -131,7 +131,7 @@ namespace Ncc.Authorization
                 Logger.Info("Authenticattion failed - Can't authenticate with Mezon server");
                 return new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null);
             }
-            }
+        }
 
         private async Task<AbpLoginResult<Tenant, User>> HandleAuthWithEmail(string emailAddress, string tenancyName, bool shouldLockout = true)
         {
@@ -431,7 +431,10 @@ namespace Ncc.Authorization
                 using (UnitOfWorkManager.Current.SetTenantId(tenantId))
                 {
                     await UserManager.InitializeOptionsAsync(tenantId);
-                    var user = UserManager.Users.FirstOrDefault(x => x.EmailAddress == userInfo.Subject);
+
+                    var user = UserManager.Users.FirstOrDefault(x => !string.IsNullOrEmpty(x.MezonId) && x.MezonId == userInfo.MezonId) ??
+                    UserManager.Users.FirstOrDefault(x => x.EmailAddress == userInfo.Subject);
+
                     if (user == null)
                     {
                         return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, tenant);
