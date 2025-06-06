@@ -63,6 +63,12 @@
               </mat-select>
             </mat-form-field>
           </div>
+          <div class="col-md-6">
+            <mat-form-field>
+              <mat-label>Mezon ID</mat-label>
+              <input matInput name="MezonId" [(ngModel)]="user.mezonUserId" maxlength="100" placeholder="Enter Mezon ID" />
+            </mat-form-field>
+          </div>
           <div class="col-md-12">
             <div class="checkbox-wrapper">
               <mat-checkbox name="IsActive" [(ngModel)]="user.isActive">

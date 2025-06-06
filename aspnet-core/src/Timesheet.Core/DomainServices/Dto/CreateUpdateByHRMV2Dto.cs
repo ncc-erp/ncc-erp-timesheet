@@ -34,6 +34,7 @@ namespace Timesheet.DomainServices.Dto
         }
         public Usertype UserType => CommonUtils.GetUserTypeByTypeFromHrmV2(Type);
         public Sex GetSex => CommonUtils.GetSexBySexFromHrmV2(Sex);
+        public string MezonUserId { get; set; }
     }
 
 }
