@@ -425,6 +425,10 @@ namespace Timesheet.Timesheets.MyTimesheets
 
             var OTMinute = workingTime - (240 - normalWorkingMinute);
 
+            if (normalWorkingMinute < 240)
+            {
+                throw new UserFriendlyException($"Saturday morning is NORMAL WORKING. You have to log 4h NORMAL WORKING first. So, the rest {CommonUtils.ConvertHourToHHmm(OTMinute)} is OT");
+            }
         }
 
         private async Task<int> sumNormalWorkingMinute(long userId, DateTime dateAt)
@@ -509,6 +513,10 @@ namespace Timesheet.Timesheets.MyTimesheets
             var normalWorkingMinute = await sumNormalWorkingMinute(AbpSession.UserId.Value, dto.DateAt);
             normalWorkingMinute -= entity.WorkingTime;
 
+            if (normalWorkingMinute < 240)
+            {
+                throw new UserFriendlyException($"Saturday morning is NORMAL WORKING. You have to log 4h NORMAL WORKING first.");
+            }
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimesheet_Edit)]

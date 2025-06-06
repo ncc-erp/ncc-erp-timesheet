@@ -134,6 +134,7 @@ export class CreateUserComponent extends AppComponentBase implements OnInit {
         this.user.isActive = true;
         this.user.allowedLeaveDay = 0;
         this.user.branchId = this.appSession.user.branchId != null ? this.appSession.user.branchId : 1;
+        this.user.mezonUserId = '';
         this.managersFiltered = this.managers.slice();
         this.changeTime()
         this.userService.getRoles().subscribe(data => {
@@ -438,7 +439,7 @@ export class createUserDTO {
   type: number;
   jobTitle: string;
   level: number;
-  isWorkingTimeDefault : boolean;
+  isWorkingTimeDefault: boolean;
   registerWorkDay: string;
   allowedLeaveDay: number;
   startDateAt: any;
@@ -457,8 +458,9 @@ export class createUserDTO {
   isStopWork: boolean;
   branchId: number;
   positionId: number;
-  beginLevel:number;
-  endDateAt:any;
+  beginLevel: number;
+  endDateAt: any;
+  mezonUserId: string;
 }
 
 
