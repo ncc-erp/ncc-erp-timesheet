@@ -424,7 +424,6 @@ namespace Timesheet.Timesheets.MyTimesheets
             var normalWorkingMinute = await sumNormalWorkingMinute(userId, dateAt);
 
             var OTMinute = workingTime - (240 - normalWorkingMinute);
-
         }
 
         private async Task<int> sumNormalWorkingMinute(long userId, DateTime dateAt)
@@ -508,7 +507,6 @@ namespace Timesheet.Timesheets.MyTimesheets
             }
             var normalWorkingMinute = await sumNormalWorkingMinute(AbpSession.UserId.Value, dto.DateAt);
             normalWorkingMinute -= entity.WorkingTime;
-
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimesheet_Edit)]

@@ -128,7 +128,7 @@ export class UpdateUserComponent extends AppComponentBase implements OnInit {
         this.isDefault = this.user.isWorkingTimeDefault;
         this.title = 'Edit User ' + this.user.userName;
         this.managersFiltered = this.managers.slice();
-        this.user.mezonId = this.user.mezonId || '';
+        this.user.mezonUserId = this.user.mezonUserId || '';
       });
     })
   }
@@ -409,7 +409,7 @@ export class createUserDTO {
   positionId: number;
   beginLevel:number;
   endDateAt:any;
-  mezonId: string;
+  mezonUserId: string;
 }
 
 

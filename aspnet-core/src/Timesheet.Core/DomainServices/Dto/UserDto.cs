@@ -62,7 +62,7 @@ namespace Timesheet.DomainServices.Dto
         public DateTime? EndDateAt { get; set; }
         public long? PositionId { get; set; }
         public string PositionName { get; set; }
-        public string MezonId { get; set; }
+        public string MezonUserId { get; set; }
     }
     
 }
