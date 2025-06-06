@@ -432,7 +432,7 @@ namespace Ncc.Authorization
                 {
                     await UserManager.InitializeOptionsAsync(tenantId);
 
-                    var user = UserManager.Users.FirstOrDefault(x => !string.IsNullOrEmpty(x.MezonId) && x.MezonId == userInfo.MezonId) ??
+                    var user = UserManager.Users.FirstOrDefault(x => !string.IsNullOrEmpty(x.MezonUserId) && x.MezonUserId == userInfo.MezonUserId) ??
                     UserManager.Users.FirstOrDefault(x => x.EmailAddress == userInfo.Subject);
 
                     if (user == null)

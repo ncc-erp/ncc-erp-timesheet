@@ -63,6 +63,6 @@ namespace Timesheet.DomainServices.Dto
         public UserLevel? BeginLevel { get; set; }
         public DateTime? EndDateAt { get; set; }
         public long? PositionId { get; set; }
-        public string MezonId { get; set; }
+        public string MezonUserId { get; set; }
     }
 }
