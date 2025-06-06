@@ -296,6 +296,7 @@ namespace Timesheet.DomainServices
                 Level = input.Level,
                 StartDateAt = input.WorkingStartDate,
                 BeginLevel = input.Level,
+                MezonUserId = input.MezonUserId
             };
 
             var positionId = GetPositionIdByCode(input.PositionCode);
@@ -355,6 +356,7 @@ namespace Timesheet.DomainServices
             user.Branch = await GetBranchByCode(input.BranchCode);
             user.UserName = input.EmailAddress?.Replace("@ncc.asia", "").Replace("@gmail.com", "");
             user.NormalizedUserName = input.EmailAddress?.Replace("@ncc.asia", "").Replace("@gmail.com", "").ToLower();
+            user.MezonUserId = input.MezonUserId;
 
             var positionId = GetPositionIdByCode(input.PositionCode);
             if ( positionId != default)
