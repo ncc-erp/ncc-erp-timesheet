@@ -107,7 +107,8 @@ namespace Ncc.Authorization
 
                 //check user exist by email from query_id
                 var mezonUser = JsonConvert.DeserializeObject<MezonUser>(hashData.user);
-                var user = UserManager.Users.FirstOrDefault(x => x.EmailAddress == mezonUser.mezon_id);
+                var user = UserManager.Users.FirstOrDefault(x => !string.IsNullOrEmpty(x.MezonUserId) && x.MezonUserId == mezonUser.mezon_user_id) ??
+                    UserManager.Users.FirstOrDefault(x => x.EmailAddress == mezonUser.mezon_id);
                 if (user == null)
                 {
                     Logger.Info($"Login fail with email: {mezonUser.mezon_id}");
@@ -123,7 +124,12 @@ namespace Ncc.Authorization
                     throw new UserFriendlyException("Authenticattion failed - Invalid hash key");
                 }
 
-                var loginResult = await HandleAuthWithEmail(mezonUser.mezon_id, hashAuthDto.TenancyName);
+                var loginResult = await HandleAuthWithEmail(
+                    emailAddress: mezonUser.mezon_id,
+                    mezonUserId: mezonUser.mezon_user_id,
+                    tenancyName: hashAuthDto.TenancyName
+                    );
+
                 return loginResult;
             }
             catch (Exception e)
@@ -133,7 +139,7 @@ namespace Ncc.Authorization
             }
         }
 
-        private async Task<AbpLoginResult<Tenant, User>> HandleAuthWithEmail(string emailAddress, string tenancyName, bool shouldLockout = true)
+        private async Task<AbpLoginResult<Tenant, User>> HandleAuthWithEmail(string emailAddress, string mezonUserId, string tenancyName, bool shouldLockout = true)
         {
 
             Tenant tenant = null;
@@ -164,23 +170,23 @@ namespace Ncc.Authorization
                 {
                     await UserManager.InitializeOptionsAsync(tenantId);
                     //var user = await UserManager.FindByNameOrEmailAsync(tenantId, emailAddress);
-                    var user = UserManager.Users.FirstOrDefault(x => x.EmailAddress == emailAddress);
+                    var user = UserManager.Users.FirstOrDefault(x => !string.IsNullOrEmpty(x.MezonUserId) && x.MezonUserId == mezonUserId) ??
+                    UserManager.Users.FirstOrDefault(x => x.EmailAddress == emailAddress);
                     if (user == null)
                     {
                         return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, tenant);
                     }
-
-                    //if (await UserManager.IsLockedOutAsync(user))
-                    //{
-                    //    return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
-                    //}
-
-                    //if (shouldLockout && await TryLockOutAsync(tenantId, user.Id))
-                    //{
-                    //    return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
-                    //}
-                    var logỉnResult = await CreateLoginResultAsync(user, tenant);
-                    return logỉnResult;
+                    if (await UserManager.IsLockedOutAsync(user))
+                    {
+                        return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
+                    }
+                    if (shouldLockout && await TryLockOutAsync(tenantId, user.Id))
+                    {
+                        return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
+                    }
+                    await UserManager.ResetAccessFailedCountAsync(user);
+                    var loginResult = await CreateLoginResultAsync(user, tenant);
+                    return loginResult;
                 }
             }
         }
@@ -406,53 +412,14 @@ namespace Ncc.Authorization
                     return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null);
                 }
 
-                Tenant tenant = null;
-                using (UnitOfWorkManager.Current.SetTenantId(null))
-                {
-                    if (!MultiTenancyConfig.IsEnabled)
-                    {
-                        tenant = await GetDefaultTenantAsync();
-                    }
-                    else if (!string.IsNullOrWhiteSpace(tenancyName))
-                    {
-                        tenant = await TenantRepository.FirstOrDefaultAsync(t => t.TenancyName == tenancyName);
-                        if (tenant == null)
-                        {
-                            return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidTenancyName);
-                        }
-                        if (!tenant.IsActive)
-                        {
-                            return new AbpLoginResult<Tenant, User>(AbpLoginResultType.TenantIsNotActive, tenant);
-                        }
-                    }
-                }
+                var loginResult = await HandleAuthWithEmail(
+                    emailAddress: userInfo.Subject,
+                    mezonUserId: userInfo.MezonUserId,
+                    tenancyName: tenancyName,
+                    shouldLockout: shouldLockout
+                    );
 
-                var tenantId = tenant?.Id;
-                using (UnitOfWorkManager.Current.SetTenantId(tenantId))
-                {
-                    await UserManager.InitializeOptionsAsync(tenantId);
-
-                    var user = UserManager.Users.FirstOrDefault(x => !string.IsNullOrEmpty(x.MezonUserId) && x.MezonUserId == userInfo.MezonUserId) ??
-                    UserManager.Users.FirstOrDefault(x => x.EmailAddress == userInfo.Subject);
-
-                    if (user == null)
-                    {
-                        return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, tenant);
-                    }
-
-                    if (await UserManager.IsLockedOutAsync(user))
-                    {
-                        return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
-                    }
-
-                    if (shouldLockout && await TryLockOutAsync(tenantId, user.Id))
-                    {
-                        return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
-                    }
-
-                    await UserManager.ResetAccessFailedCountAsync(user);
-                    return await CreateLoginResultAsync(user, tenant);
-                }
+                return loginResult;
             }
             catch (Exception)
             {
