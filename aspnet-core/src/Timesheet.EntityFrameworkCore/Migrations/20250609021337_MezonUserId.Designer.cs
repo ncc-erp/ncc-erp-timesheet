@@ -10,8 +10,8 @@ using Ncc.EntityFrameworkCore;
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    [Migration("20250606084948_add_mezonuserid_to_user_table")]
-    partial class add_mezonuserid_to_user_table
+    [Migration("20250609021337_MezonUserId")]
+    partial class MezonUserId
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
