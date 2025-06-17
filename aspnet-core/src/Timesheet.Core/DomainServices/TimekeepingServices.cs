@@ -5,6 +5,7 @@ using Abp.Domain.Uow;
 using Abp.Extensions;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Office.Interop.Word;
 using Ncc.Authorization.Users;
 using Ncc.Configuration;
 using Ncc.IoC;
@@ -93,6 +94,21 @@ namespace Timesheet.DomainServices
                 s.DeletionTime = DateTimeUtils.GetNow();
             });
             CurrentUnitOfWork.SaveChanges();
+
+            // Xóa dữ liệu cũ trong bảng UserPunishment
+            var oldPunishments = await WorkScope.GetAll<UserPunishment>()
+                .Where(p => p.DateAt.Date == selectedDate.Date)
+                .ToListAsync();
+
+            if (oldPunishments.Any())
+            {
+                foreach (var punishment in oldPunishments)
+                {
+                    punishment.IsDeleted = true;
+                    punishment.DeletionTime = DateTimeUtils.GetNow();
+                }
+                await CurrentUnitOfWork.SaveChangesAsync();
+            }
 
             var mapAbsenceUsers = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request)
                 .Where(s => s.DateAt.Date == selectedDate.Date
@@ -228,13 +244,58 @@ namespace Timesheet.DomainServices
                 t.TrackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].active_time : "0";
                 try
                 {
+                    // Lưu bản ghi Timekeeping (bao gồm phạt check-in/check-out)
                     t.Id = WorkScope.InsertAndGetId<Timekeeping>(t);
                     rs.Add(t);
+
+                    // Lưu bản ghi phạt check-in/check-out vào UserPunishment nếu có
+                    if (t.StatusPunish != CheckInCheckOutPunishmentType.NoPunish)
+                    {
+                        try
+                        {
+                            var punishmentSystemId = (long)t.StatusPunish + 1;
+                            var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
+                                .FirstOrDefaultAsync(x => x.Id == punishmentSystemId);
+
+                            if (punishmentSystem == null)
+                            {
+                                Logger.Error($"PunishmentSystem with ID {punishmentSystemId} not found for user {user.UserId}");
+                                // Tiếp tục xử lý các loại phạt khác nếu có
+                            }
+                            else
+                            {
+                                var userPunishment = new UserPunishment
+                                {
+                                    DateAt = selectedDate,
+                                    UserId = user.UserId,
+                                    PunishmentSystemId = punishmentSystemId,
+                                    Type = punishmentSystem.Type,
+                                    Count = 1,
+                                    TotalMoney = t.MoneyPunish,
+                                    UserNote = t.UserNote,
+                                    NoteReply = t.NoteReply
+                                };
+                                await WorkScope.InsertAndGetIdAsync(userPunishment);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error($"Error saving CheckIn/CheckOut UserPunishment for user {user.UserId}: {ex}");
+                        }
+                    }
+                    // Gọi phương thức để tạo bản ghi phạt tracker time nếu có
+                    if (trackerTime > 0 && t.StatusPunish == CheckInCheckOutPunishmentType.NoPunish)
+                    {
+                        var registerWorkingMinutes = CommonUtils.GetEmployeeWorkingHours(t.RegisterCheckOut, t.RegisterCheckIn);
+                        var dayOffType = registerCheckInOut.AbsenceDayType;
+                        await CreateTrackerTimePunishment(selectedDate, user.UserId, trackerTime, registerWorkingMinutes, t.UserNote, t.UserNote, dayOffType);
+                    }
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
+                    Logger.Error($"INSERT DATA ISSUE (Timekeeping) email: {user?.EmailAddress ?? "Unknown"}, UserId: {user?.UserId}, Error: {e}");
                 }
+
             }
 
             // co trong checkIn nhung ko co trong user
@@ -261,12 +322,164 @@ namespace Timesheet.DomainServices
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"INSERT DATA ISSUE email: {t.User.EmailAddress} Error: {e.Message}");
+                    Logger.Error($"INSERT DATA ISSUE email: {t.User?.EmailAddress} Error: {e.Message}");
                 }
             }
 
+            // Save daily and mention punishments
+            await SaveDailyAndMentionPunishments(selectedDate, users, mapDailyUsers, mapMentionUsers);
+
             return rs;
         }
+
+        public async System.Threading.Tasks.Task SaveDailyAndMentionPunishments(DateTime selectedDate, List<TimesheetUserDto> users, 
+            Dictionary<string, int> mapDailyUsers, Dictionary<string, int> mapMentionUsers)
+        {
+            // Lấy thông tin tiền phạt từ bảng PunishmentSystem
+            var punishmentSystems = await WorkScope.GetAll<PunishmentSystem>()
+                .Where(x => x.Id == (long)KomuPunishmentType.Daily || x.Id == (long)KomuPunishmentType.Mention)
+                .ToDictionaryAsync(x => x.Id);
+
+            if (!punishmentSystems.Any())
+            {
+                Logger.Error("Could not find punishment systems for daily/mention penalties");
+                return;
+            }
+
+            // Lưu phạt daily
+            foreach (var user in users)
+            {
+                try
+                {
+                    // Xử lý phạt daily
+                    if (mapDailyUsers.ContainsKey(user.UserName) && mapDailyUsers[user.UserName] > 0)
+                    {
+                        if (!punishmentSystems.TryGetValue((long)KomuPunishmentType.Daily, out var dailyPunishment))
+                        {
+                            Logger.Error($"Daily punishment system (ID {(long)KomuPunishmentType.Daily}) not found");
+                            continue;
+                        }
+
+                        var punishment = new UserPunishment
+                        {
+                            DateAt = selectedDate,
+                            UserId = user.UserId,
+                            PunishmentSystemId = (long)KomuPunishmentType.Daily,
+                            Type = dailyPunishment.Type,
+                            Count = mapDailyUsers[user.UserName],
+                            TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money,
+                        };
+                        await WorkScope.InsertAndGetIdAsync(punishment);
+                    }
+
+                    // Xử lý phạt mention
+                    if (mapMentionUsers.ContainsKey(user.UserName) && mapMentionUsers[user.UserName] > 0)
+                    {
+                        if (!punishmentSystems.TryGetValue((long)KomuPunishmentType.Mention, out var mentionPunishment))
+                        {
+                            Logger.Error($"Mention punishment system (ID {(long)KomuPunishmentType.Mention}) not found");
+                            continue;
+                        }
+
+                        var punishment = new UserPunishment
+                        {
+                            DateAt = selectedDate,
+                            UserId = user.UserId,
+                            PunishmentSystemId = (long)KomuPunishmentType.Mention,
+                            Type = mentionPunishment.Type,
+                            Count = mapMentionUsers[user.UserName],
+                            TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
+                        };
+                        await WorkScope.InsertAndGetIdAsync(punishment);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Error saving punishment for user {user.UserId}: {ex.Message}");
+                }
+            }
+        }
+
+        public async System.Threading.Tasks.Task CreateTrackerTimePunishment(DateTime selectedDate, long userId, float trackerTime, double registerWorkingMinutes, string userNote, string noteReply, DayType? dayOffType = null)
+        {
+            int punishmentAmount = 0;
+            long punishmentSystemId = (long)TrackerPunishmentType.NoPunish;
+            double trackerTimeInHours = trackerTime / 60.0;
+            double percentage = 0;
+
+            // Get all punishment systems of type "Remote"
+            var punishmentSystems = await WorkScope.GetAll<PunishmentSystem>()
+                .Where(x => x.Type == "Remote")
+                .ToDictionaryAsync(x => x.Id);
+
+            // Standardize working hours for half-day off cases
+            double standardWorkingHours = registerWorkingMinutes / 60;
+
+            // If it's a half-day off (morning or afternoon), set standard working hours to 4 hours
+            if (dayOffType == DayType.Morning || dayOffType == DayType.Afternoon)
+            {
+                standardWorkingHours = 4;
+            }
+
+            // Calculate percentage of working time
+            if (standardWorkingHours > 0)
+            {
+                percentage = (trackerTimeInHours / standardWorkingHours) * 100;
+            }
+
+            // Rest of the method remains the same...
+            if (percentage < 25) // 0% to <25%
+            {
+                if (punishmentSystems.TryGetValue((long)TrackerPunishmentType.Level4_200k, out var ps4))
+                {
+                    punishmentAmount = ps4.Money;
+                    punishmentSystemId = (long)TrackerPunishmentType.Level4_200k;
+                }
+            }
+            else if (percentage < 50) // 25% to <50%
+            {
+                if (punishmentSystems.TryGetValue((long)TrackerPunishmentType.Level3_100k, out var ps3))
+                {
+                    punishmentAmount = ps3.Money;
+                    punishmentSystemId = (long)TrackerPunishmentType.Level3_100k;
+                }
+            }
+            else if (percentage < 75) // 50% to <75%
+            {
+                if (punishmentSystems.TryGetValue((long)TrackerPunishmentType.Level2_50k, out var ps2))
+                {
+                    punishmentAmount = ps2.Money;
+                    punishmentSystemId = (long)TrackerPunishmentType.Level2_50k;
+                }
+            }
+            else if (percentage < 85) // 75% to <85%
+            {
+                if (punishmentSystems.TryGetValue((long)TrackerPunishmentType.Level1_20k, out var ps1))
+                {
+                    punishmentAmount = ps1.Money;
+                    punishmentSystemId = (long)TrackerPunishmentType.Level1_20k;
+                }
+            }
+
+            // Only create punishment record if punishment is applied
+            if (punishmentSystemId != (long)TrackerPunishmentType.NoPunish)
+            {
+                var punishment = new UserPunishment
+                {
+                    DateAt = selectedDate,
+                    UserId = userId,
+                    PunishmentSystemId = punishmentSystemId,
+                    Type = "Remote",
+                    Count = 1,
+                    TotalMoney = punishmentAmount,
+                    UserNote = userNote,
+                    NoteReply = noteReply
+                };
+                await WorkScope.InsertAndGetIdAsync(punishment);
+            }
+        }
+
+
 
         public void ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(Timekeeping t)
         {
@@ -766,7 +979,7 @@ namespace Timesheet.DomainServices
             var strPercentOfTrackerOnWorking = SettingManager.GetSettingValueForApplication(AppSettingNames.PercentOfTrackerOnWorking);
             if (string.IsNullOrEmpty(strPercentOfTrackerOnWorking))
             {
-                return 0.9f;
+                return 0.9f;    
             }
             try
             {

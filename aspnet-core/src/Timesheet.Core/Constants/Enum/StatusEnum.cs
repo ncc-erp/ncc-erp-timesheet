@@ -271,6 +271,19 @@ namespace Ncc.Entities.Enum
             LateAndNoCheckOut = 4,
             NoCheckInAndNoCheckOut = 5
         }
+        public enum KomuPunishmentType
+        {
+            Daily = 7,
+            Mention = 8
+        }
+        public enum TrackerPunishmentType
+        {
+            NoPunish = 0,
+            Level1_20k = 9, // Tương ứng với ID trong bảng PunishmentSystem
+            Level2_50k = 10,
+            Level3_100k = 11,
+            Level4_200k = 12
+        }
         public enum TeamBuildingStatus
         {
             Open = 0,
