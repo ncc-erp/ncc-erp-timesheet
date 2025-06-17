@@ -47,7 +47,7 @@ namespace TimesheetApplication.UserPunishment
             {
                 Logger.Info($"Received input: {Newtonsoft.Json.JsonConvert.SerializeObject(input)}");
 
-                // Validate input
+
                 if (input == null)
                 {
                     throw new UserFriendlyException("Input cannot be null");
@@ -73,7 +73,7 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException("Count must be greater than 0");
                 }
 
-                // Check if PunishmentSystem exists
+
                 var punishmentSystem = await _workScope.GetAll<Timesheet.Entities.PunishmentSystem>()
                     .FirstOrDefaultAsync(x => x.Id == input.PunishmentSystemId);
                 if (punishmentSystem == null)
@@ -81,7 +81,7 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException($"PunishmentSystem with Id {input.PunishmentSystemId} not found");
                 }
 
-                // Check if User exists
+
                 var user = await _workScope.GetAll<User>()
                     .FirstOrDefaultAsync(x => x.Id == input.UserId.Value);
                 if (user == null)
@@ -89,7 +89,7 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException($"User with Id {input.UserId.Value} not found");
                 }
 
-                // Manual mapping instead of AutoMapper
+
                 var userPunishment = new Timesheet.Entities.UserPunishment
                 {
                     DateAt = input.DateAt,
@@ -111,7 +111,7 @@ namespace TimesheetApplication.UserPunishment
 
                 Logger.Info($"Successfully created UserPunishment with Id: {createdEntity.Id}");
 
-                // Manual mapping for return
+
                 var result = new UserPunishmentDto
                 {
                     Id = createdEntity.Id,
@@ -130,7 +130,7 @@ namespace TimesheetApplication.UserPunishment
             }
             catch (UserFriendlyException)
             {
-                throw; // Re-throw UserFriendlyException as-is
+                throw;
             }
             catch (Exception ex)
             {
@@ -138,13 +138,6 @@ namespace TimesheetApplication.UserPunishment
                 throw new UserFriendlyException("An error occurred while creating user punishment. Please try again.");
             }
         }
-
-
-
-
-
-
-
         [HttpGet]
         public async Task<UserPunishmentDto> GetUserPunishmentAsync(EntityDto<long> input)
         {
@@ -162,7 +155,7 @@ namespace TimesheetApplication.UserPunishment
             Logger.Info($"Received input for update: {Newtonsoft.Json.JsonConvert.SerializeObject(input)}");
             try
             {
-                // Validate input
+
                 if (input == null)
                 {
                     throw new UserFriendlyException("Input cannot be null");
@@ -193,7 +186,7 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException("Count must be greater than 0");
                 }
 
-                // Check if UserPunishment exists
+
                 var userPunishment = await _workScope.GetAll<Timesheet.Entities.UserPunishment>()
                     .FirstOrDefaultAsync(x => x.Id == input.Id);
                 if (userPunishment == null)
@@ -202,7 +195,7 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException($"User punishment with id = {input.Id} not found!");
                 }
 
-                // Check if PunishmentSystem exists
+
                 var punishmentSystem = await _workScope.GetAll<Timesheet.Entities.PunishmentSystem>()
                     .FirstOrDefaultAsync(x => x.Id == input.PunishmentSystemId);
                 if (punishmentSystem == null)
@@ -210,7 +203,7 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException($"PunishmentSystem with Id {input.PunishmentSystemId} not found");
                 }
 
-                // Check if User exists
+
                 var user = await _workScope.GetAll<User>()
                     .FirstOrDefaultAsync(x => x.Id == input.UserId.Value);
                 if (user == null)
@@ -218,7 +211,7 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException($"User with Id {input.UserId.Value} not found");
                 }
 
-                // Manual mapping
+
                 userPunishment.DateAt = input.DateAt;
                 userPunishment.UserId = input.UserId.Value;
                 userPunishment.PunishmentSystemId = input.PunishmentSystemId;
@@ -239,7 +232,7 @@ namespace TimesheetApplication.UserPunishment
             }
             catch (UserFriendlyException)
             {
-                throw; // Re-throw UserFriendlyException as-is
+                throw;
             }
             catch (Exception ex)
             {
@@ -259,82 +252,130 @@ namespace TimesheetApplication.UserPunishment
             await _workScope.DeleteAsync<Timesheet.Entities.UserPunishment>(input.Id);
             await CurrentUnitOfWork.SaveChangesAsync();
         }
+        [HttpGet]
+        public async Task<List<UserPunishmentDto>> GetAllUserPunishmentsAsync()
+        {
+            Logger.Info("Fetching all UserPunishments");
+            try
+            {
+                var userPunishments = await _workScope.GetAll<Timesheet.Entities.UserPunishment>().ToListAsync();
+                if (!userPunishments.Any())
+                {
+                    Logger.Warn("No UserPunishments found");
+                    return new List<UserPunishmentDto>(); 
+                }
 
+                var result = ObjectMapper.Map<List<UserPunishmentDto>>(userPunishments);
+                Logger.Info($"Successfully fetched {result.Count} UserPunishments");
+                return result;
+            }
+            catch (UserFriendlyException)
+            {
+                throw; 
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Unexpected error in GetAllUserPunishmentsAsync: {ex.Message}", ex);
+                throw new UserFriendlyException("An error occurred while fetching user punishments. Please try again.");
+            }
+        }
         [HttpPost]
         public async Task<PagedResultDto<UserPunishmentDto>> GetUserPunishmentsAsync(GetUserPunishmentsInput input)
         {
-            var query = _workScope.GetAll<Timesheet.Entities.UserPunishment>();
-
-            // Apply filters
-            if (!string.IsNullOrEmpty(input.FilterText))
+            Logger.Info($"Fetching UserPunishments with input: {Newtonsoft.Json.JsonConvert.SerializeObject(input)}");
+            try
             {
-                query = query.Where(x => x.Type.Contains(input.FilterText) ||
-                                        x.UserNote.Contains(input.FilterText) ||
-                                        x.NoteReply.Contains(input.FilterText));
-            }
+                var query = _workScope.GetAll<Timesheet.Entities.UserPunishment>().AsNoTracking();
 
-            if (input.UserId.HasValue)
-            {
-                query = query.Where(x => x.UserId == input.UserId.Value);
-            }
 
-            if (input.PunishmentSystemId.HasValue)
-            {
-                query = query.Where(x => x.PunishmentSystemId == input.PunishmentSystemId.Value);
-            }
-
-            if (input.Type != null)
-            {
-                query = query.Where(x => x.Type == input.Type);
-            }
-
-            if (input.IsActive.HasValue && input.IsActive.Value)
-            {
-                query = query.Where(x => !x.IsDeleted);
-            }
-
-            // Get total count
-            var totalCount = await query.CountAsync();
-            if (string.IsNullOrEmpty(input.Sorting))
-            {
-                query = query.OrderByDescending(x => x.CreationTime);
-            }
-            else
-            {                
-                switch (input.Sorting.ToLower().Trim())
+                if (!string.IsNullOrEmpty(input.FilterText))
                 {
-                    case "creationtime":
-                        query = query.OrderBy(x => x.CreationTime);
-                        break;
-                    case "creationtime desc":
-                        query = query.OrderByDescending(x => x.CreationTime);
-                        break;
-                    case "type":
-                        query = query.OrderBy(x => x.Type);
-                        break;
-                    case "type desc":
-                        query = query.OrderByDescending(x => x.Type);
-                        break;
-                    case "userid":
-                        query = query.OrderBy(x => x.UserId);
-                        break;
-                    case "userid desc":
-                        query = query.OrderByDescending(x => x.UserId);
-                        break;
-                    default:
-                        query = query.OrderByDescending(x => x.CreationTime);
-                        break;
+                    query = query.Where(x => x.Type.Contains(input.FilterText) ||
+                                            x.UserNote.Contains(input.FilterText) ||
+                                            x.NoteReply.Contains(input.FilterText));
                 }
+
+                if (input.UserId.HasValue)
+                {
+                    query = query.Where(x => x.UserId == input.UserId.Value);
+                }
+
+                if (input.PunishmentSystemId.HasValue)
+                {
+                    query = query.Where(x => x.PunishmentSystemId == input.PunishmentSystemId.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(input.Type))
+                {
+                    query = query.Where(x => x.Type == input.Type);
+                }
+
+                if (input.IsActive.HasValue && input.IsActive.Value)
+                {
+                    query = query.Where(x => !x.IsDeleted);
+                }
+
+
+                var totalCount = await query.CountAsync();
+                if (string.IsNullOrEmpty(input.Sorting))
+                {
+                    query = query.OrderByDescending(x => x.CreationTime);
+                    Logger.Info("Sorting applied: default (CreationTime descending)");
+                }
+                else
+                {
+                    Logger.Info($"Applying sorting: {input.Sorting}");
+                    switch (input.Sorting.ToLower().Trim())
+                    {
+                        case "creationtime":
+                            query = query.OrderBy(x => x.CreationTime);
+                            break;
+                        case "creationtime desc":
+                            query = query.OrderByDescending(x => x.CreationTime);
+                            break;
+                        case "type":
+                            query = query.OrderBy(x => x.Type);
+                            break;
+                        case "type desc":
+                            query = query.OrderByDescending(x => x.Type);
+                            break;
+                        case "userid":
+                            query = query.OrderBy(x => x.UserId);
+                            break;
+                        case "userid desc":
+                            query = query.OrderByDescending(x => x.UserId);
+                            break;
+                        default:
+                            query = query.OrderByDescending(x => x.CreationTime);
+                            Logger.Warn($"Unsupported sorting value '{input.Sorting}', defaulting to CreationTime descending");
+                            break;
+                    }
+                }
+                if (input.SkipCount < 0 || input.MaxResultCount <= 0)
+                {
+                    throw new UserFriendlyException("Invalid paging parameters: SkipCount must be non-negative and MaxResultCount must be positive.");
+                }
+
+
+                var entities = await query
+                    .Skip(input.SkipCount)
+                    .Take(input.MaxResultCount)
+                    .ToListAsync();
+
+                var dtos = entities.Select(entity => ObjectMapper.Map<UserPunishmentDto>(entity)).ToList();
+                Logger.Info($"Fetched {dtos.Count} UserPunishments out of {totalCount} total records");
+
+                return new PagedResultDto<UserPunishmentDto>(totalCount, dtos);
             }
-            // Apply paging
-            var entities = await query
-                .Skip(input.SkipCount)
-                .Take(input.MaxResultCount)
-                .ToListAsync();
-
-            var dtos = entities.Select(entity => ObjectMapper.Map<UserPunishmentDto>(entity)).ToList();
-
-            return new PagedResultDto<UserPunishmentDto>(totalCount, dtos);
+            catch (UserFriendlyException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Unexpected error in GetUserPunishmentsAsync: {ex.Message}", ex);
+                throw new UserFriendlyException("An error occurred while fetching user punishments. Please try again.");
+            }
         }
     }
 }

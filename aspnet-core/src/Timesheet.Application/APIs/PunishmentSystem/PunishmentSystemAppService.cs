@@ -39,19 +39,13 @@ namespace TimesheetApplication.PunishmentSystem
             _settingManager = settingManager;
         }
 
-        // Create
+
         [HttpPost]
         public async Task<PunishmentSystemDto> CreatePunishmentSystemAsync(CreatePunishmentSystemDto input)
         {
             Logger.Info($"Received input: {Newtonsoft.Json.JsonConvert.SerializeObject(input)}");
             try
             {
-                //if (!CheckSecurityCode())
-                //{
-                //    throw new UserFriendlyException("Wrong security code");
-                //}
-
-                // Validate input
                 if (input == null)
                 {
                     throw new UserFriendlyException("Input cannot be null");
@@ -67,7 +61,6 @@ namespace TimesheetApplication.PunishmentSystem
                     throw new UserFriendlyException("Type is required");
                 }
 
-                // Check for duplicate Name and Type
                 var existingPunishmentSystem = await _workScope.GetAll<Timesheet.Entities.PunishmentSystem>()
                     .FirstOrDefaultAsync(ps => ps.Name.ToLower() == input.Name.ToLower() && ps.Type.ToLower() == input.Type.ToLower());
                 if (existingPunishmentSystem != null)
@@ -75,18 +68,31 @@ namespace TimesheetApplication.PunishmentSystem
                     throw new UserFriendlyException($"A PunishmentSystem with Name '{input.Name}' and Type '{input.Type}' already exists.");
                 }
 
-                // Map and create entity
                 var punishmentSystem = ObjectMapper.Map<Timesheet.Entities.PunishmentSystem>(input);
                 var createdEntity = await _workScope.InsertAsync(punishmentSystem);
                 await CurrentUnitOfWork.SaveChangesAsync();
 
+                if (createdEntity == null || createdEntity.Id <= 0)
+                {
+                    Logger.Error("Failed to create PunishmentSystem: createdEntity is null or Id is invalid");
+                    throw new UserFriendlyException("Failed to create punishment system due to invalid entity.");
+                }
+
                 Logger.Info($"Successfully created PunishmentSystem with Id: {createdEntity.Id}");
 
-                return ObjectMapper.Map<PunishmentSystemDto>(createdEntity);
+                var result = ObjectMapper.Map<PunishmentSystemDto>(createdEntity);
+                if (result == null)
+                {
+                    Logger.Error("Mapping to PunishmentSystemDto failed: result is null");
+                    throw new UserFriendlyException("Error mapping punishment system data.");
+                }
+                Logger.Info($"Mapped to DTO: {Newtonsoft.Json.JsonConvert.SerializeObject(result)}");
+
+                return result;
             }
             catch (UserFriendlyException)
             {
-                throw; // Re-throw UserFriendlyException as-is
+                throw;
             }
             catch (Exception ex)
             {
@@ -94,14 +100,9 @@ namespace TimesheetApplication.PunishmentSystem
                 throw new UserFriendlyException("An error occurred while creating punishment system. Please try again.");
             }
         }
-        // Read
         [HttpGet]
         public async Task<PunishmentSystemDto> GetPunishmentSystemAsync(EntityDto<long> input)
         {
-            //if (!CheckSecurityCode())
-            //{
-            //    throw new UserFriendlyException("Timesheet server can't connect");
-            //}
 
             var punishmentSystem = await _workScope.GetAsync<Timesheet.Entities.PunishmentSystem>(input.Id);
             if (punishmentSystem == null)
@@ -111,48 +112,32 @@ namespace TimesheetApplication.PunishmentSystem
             return ObjectMapper.Map<PunishmentSystemDto>(punishmentSystem);
         }
 
-        // Update
         [HttpPut]
         public async Task UpdatePunishmentSystemAsync(UpdatePunishmentSystemDto input)
         {
             Logger.Info($"Received input for update: {Newtonsoft.Json.JsonConvert.SerializeObject(input)}");
             try
             {
-                //if (!CheckSecurityCode())
-                //{
-                //    throw new UserFriendlyException("Wrong security code");
-                //}
-
-                // Validate input
                 if (input == null || input.Id <= 0)
                 {
                     throw new UserFriendlyException("Valid PunishmentSystem Id is required");
                 }
 
-                // Check if PunishmentSystem exists
                 var punishmentSystem = await _workScope.GetAsync<Timesheet.Entities.PunishmentSystem>(input.Id);
                 if (punishmentSystem == null)
                 {
                     Logger.Error($"PunishmentSystem with Id {input.Id} not found");
                     throw new UserFriendlyException("Punishment system not found");
                 }
-
-                // Map input to PunishmentSystem
                 ObjectMapper.Map(input, punishmentSystem);
 
-                // Update related UserPunishments
                 var userPunishments = await _workScope.GetAll<Timesheet.Entities.UserPunishment>()
                     .Where(up => up.PunishmentSystemId == input.Id)
                     .ToListAsync();
                 foreach (var userPunishment in userPunishments)
                 {
-                    // Sync Money and IsActive from updated PunishmentSystem
-                    userPunishment.TotalMoney = punishmentSystem.Money; // Assuming TotalMoney in UserPunishment reflects PunishmentSystem.Money
-                                                                        // Add other fields to sync if needed (e.g., IsActive if relevant)
-                                                                        // userPunishment.SomeOtherField = punishmentSystem.SomeOtherField;
+                    userPunishment.TotalMoney = punishmentSystem.Money;
                 }
-
-                // Save changes
                 await _workScope.UpdateAsync(punishmentSystem);
                 if (userPunishments.Any())
                 {
@@ -164,7 +149,7 @@ namespace TimesheetApplication.PunishmentSystem
             }
             catch (UserFriendlyException)
             {
-                throw; // Re-throw UserFriendlyException as-is
+                throw;
             }
             catch (Exception ex)
             {
@@ -173,25 +158,19 @@ namespace TimesheetApplication.PunishmentSystem
             }
         }
 
-        // Delete
+
         [HttpDelete]
         public async Task DeletePunishmentSystemAsync(EntityDto<long> input)
         {
             Logger.Info($"Received input for delete: {Newtonsoft.Json.JsonConvert.SerializeObject(input)}");
             try
             {
-                //if (!CheckSecurityCode())
-                //{
-                //    throw new UserFriendlyException("Timesheet server can't connect");
-                //}
 
-                // Validate input
                 if (input == null || input.Id <= 0)
                 {
                     throw new UserFriendlyException("Valid PunishmentSystem Id is required");
                 }
 
-                // Check if PunishmentSystem exists
                 var punishmentSystem = await _workScope.GetAsync<Timesheet.Entities.PunishmentSystem>(input.Id);
                 if (punishmentSystem == null)
                 {
@@ -199,7 +178,7 @@ namespace TimesheetApplication.PunishmentSystem
                     throw new UserFriendlyException("Punishment system not found");
                 }
 
-                // Check if any UserPunishment is using this PunishmentSystem
+
                 var hasRelatedUserPunishments = await _workScope.GetAll<Timesheet.Entities.UserPunishment>()
                     .AnyAsync(up => up.PunishmentSystemId == input.Id);
                 if (hasRelatedUserPunishments)
@@ -208,7 +187,7 @@ namespace TimesheetApplication.PunishmentSystem
                     throw new UserFriendlyException($"Cannot delete PunishmentSystem with Id {input.Id} because it is currently in use by user punishments.");
                 }
 
-                // Proceed with deletion
+
                 await _workScope.DeleteAsync<Timesheet.Entities.PunishmentSystem>(input.Id);
                 await CurrentUnitOfWork.SaveChangesAsync();
 
@@ -216,7 +195,7 @@ namespace TimesheetApplication.PunishmentSystem
             }
             catch (UserFriendlyException)
             {
-                throw; // Re-throw UserFriendlyException as-is
+                throw;
             }
             catch (Exception ex)
             {
@@ -225,18 +204,15 @@ namespace TimesheetApplication.PunishmentSystem
             }
         }
 
-        // Get All with paging and filtering - Thêm mới
+
         [HttpPost]
         public async Task<PagedResultDto<PunishmentSystemDto>> GetPunishmentSystemsAsync(GetPunishmentSystemsInput input)
         {
-            //if (!CheckSecurityCode())
-            //{
-            //    throw new UserFriendlyException("Timesheet server can't connect");
-            //}
+
 
             var query = _workScope.GetAll<Timesheet.Entities.PunishmentSystem>();
 
-            // Apply filters
+
             if (!string.IsNullOrEmpty(input.FilterText))
             {
                 query = query.Where(x => x.Name.Contains(input.FilterText) ||
@@ -252,18 +228,14 @@ namespace TimesheetApplication.PunishmentSystem
             {
                 query = query.Where(x => x.IsActive == input.IsActive.Value);
             }
-
-            // Get total count
             var totalCount = await query.CountAsync();
 
-            // Apply sorting
             if (string.IsNullOrEmpty(input.Sorting))
             {
                 query = query.OrderByDescending(x => x.CreationTime);
             }
             else
             {
-                // Simple sorting - có thể mở rộng thêm
                 switch (input.Sorting.ToLower())
                 {
                     case "name":
@@ -290,9 +262,8 @@ namespace TimesheetApplication.PunishmentSystem
                 }
             }
 
-            // Apply paging
-            var skipCount = input.SkipCount ;
-            var maxResultCount = input.MaxResultCount ;
+            var skipCount = input.SkipCount;
+            var maxResultCount = input.MaxResultCount;
 
             var entities = await query
                 .Skip(skipCount)
@@ -304,14 +275,9 @@ namespace TimesheetApplication.PunishmentSystem
             return new PagedResultDto<PunishmentSystemDto>(totalCount, dtos);
         }
 
-        // Get All Active - Thêm mới
         [HttpGet]
         public async Task<ListResultDto<PunishmentSystemDto>> GetAllActivePunishmentSystemsAsync()
         {
-            //if (!CheckSecurityCode())
-            //{
-            //    throw new UserFriendlyException("Timesheet server can't connect");
-            //}
 
             var entities = await _workScope.GetAll<Timesheet.Entities.PunishmentSystem>()
                 .Where(x => x.IsActive)
