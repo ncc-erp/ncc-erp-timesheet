@@ -205,7 +205,7 @@ namespace TimesheetApplication.PunishmentSystem
         }
 
 
-        [HttpPost]
+        [Httpget]
         public async Task<PagedResultDto<PunishmentSystemDto>> GetPunishmentSystemsAsync(GetPunishmentSystemsInput input)
         {
 

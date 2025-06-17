@@ -262,7 +262,7 @@ namespace TimesheetApplication.UserPunishment
                 if (!userPunishments.Any())
                 {
                     Logger.Warn("No UserPunishments found");
-                    return new List<UserPunishmentDto>(); 
+                    return new List<UserPunishmentDto>();
                 }
 
                 var result = ObjectMapper.Map<List<UserPunishmentDto>>(userPunishments);
@@ -271,7 +271,7 @@ namespace TimesheetApplication.UserPunishment
             }
             catch (UserFriendlyException)
             {
-                throw; 
+                throw;
             }
             catch (Exception ex)
             {
@@ -279,7 +279,7 @@ namespace TimesheetApplication.UserPunishment
                 throw new UserFriendlyException("An error occurred while fetching user punishments. Please try again.");
             }
         }
-        [HttpPost]
+        [HttpGet]
         public async Task<PagedResultDto<UserPunishmentDto>> GetUserPunishmentsAsync(GetUserPunishmentsInput input)
         {
             Logger.Info($"Fetching UserPunishments with input: {Newtonsoft.Json.JsonConvert.SerializeObject(input)}");
