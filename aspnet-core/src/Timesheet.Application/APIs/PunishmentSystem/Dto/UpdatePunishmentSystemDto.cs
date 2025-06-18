@@ -2,6 +2,7 @@
 using Abp.AutoMapper;
 using System.ComponentModel.DataAnnotations;
 using Timesheet.Entities;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.PunishmentSystems.Dto
 {
@@ -16,8 +17,7 @@ namespace Timesheet.APIs.PunishmentSystems.Dto
         public string Description { get; set; }
 
         [Required]
-        [MaxLength(50)]
-        public string Type { get; set; }
+        public UserPunishmentType Type { get; set; }
 
         [Range(0, int.MaxValue)]
         public int Money { get; set; }

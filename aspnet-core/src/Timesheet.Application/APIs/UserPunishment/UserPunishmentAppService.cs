@@ -19,8 +19,7 @@ using AutoMapper;
 using Timesheet.APIs.UserPunishments.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Ncc;
-
-
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace TimesheetApplication.UserPunishment
 {
@@ -40,14 +39,13 @@ namespace TimesheetApplication.UserPunishment
             _workScope = workScope;
             _settingManager = settingManager;
         }
+
         [HttpPost]
         public async Task<UserPunishmentDto> CreateUserPunishmentAsync(CreateUserPunishmentDto input)
         {
+            Logger.Info($"Received input: {Newtonsoft.Json.JsonConvert.SerializeObject(input)}");
             try
             {
-                Logger.Info($"Received input: {Newtonsoft.Json.JsonConvert.SerializeObject(input)}");
-
-
                 if (input == null)
                 {
                     throw new UserFriendlyException("Input cannot be null");
@@ -63,9 +61,23 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException("Valid PunishmentSystemId is required");
                 }
 
-                if (string.IsNullOrWhiteSpace(input.Type))
+                var validTypes = new[] {
+            UserPunishmentType.Late,
+            UserPunishmentType.NoCheckIn,
+            UserPunishmentType.NoCheckOut,
+            UserPunishmentType.LateAndNoCheckOut,
+            UserPunishmentType.NoCheckInAndNoCheckOut,
+            UserPunishmentType.Daily,
+            UserPunishmentType.Mention,
+            UserPunishmentType.Level1_20k,
+            UserPunishmentType.Level2_50k,
+            UserPunishmentType.Level3_100k,
+            UserPunishmentType.Level4_200k
+        };
+
+                if (!validTypes.Contains(input.Type))
                 {
-                    throw new UserFriendlyException("Type is required");
+                    throw new UserFriendlyException($"Invalid punishment type: {input.Type}. Valid types are: {string.Join(", ", validTypes)}");
                 }
 
                 if (input.Count <= 0)
@@ -73,22 +85,53 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException("Count must be greater than 0");
                 }
 
+                if (input.TotalMoney < 0)
+                {
+                    throw new UserFriendlyException("TotalMoney cannot be negative");
+                }
+
+                if (input.DateAt == default(DateTime) || input.DateAt > DateTime.Now.AddDays(1))
+                {
+                    throw new UserFriendlyException("Invalid DateAt value");
+                }
 
                 var punishmentSystem = await _workScope.GetAll<Timesheet.Entities.PunishmentSystem>()
                     .FirstOrDefaultAsync(x => x.Id == input.PunishmentSystemId);
+
                 if (punishmentSystem == null)
                 {
                     throw new UserFriendlyException($"PunishmentSystem with Id {input.PunishmentSystemId} not found");
                 }
 
+                if (!punishmentSystem.IsActive)
+                {
+                    throw new UserFriendlyException($"PunishmentSystem with Id {input.PunishmentSystemId} is not active");
+                }
 
                 var user = await _workScope.GetAll<User>()
                     .FirstOrDefaultAsync(x => x.Id == input.UserId.Value);
+
                 if (user == null)
                 {
                     throw new UserFriendlyException($"User with Id {input.UserId.Value} not found");
                 }
 
+                var existingPunishment = await _workScope.GetAll<Timesheet.Entities.UserPunishment>()
+                    .FirstOrDefaultAsync(x => x.UserId == input.UserId.Value
+                                           && x.PunishmentSystemId == input.PunishmentSystemId
+                                           && x.DateAt.Date == input.DateAt.Date
+                                           && x.Type == input.Type);
+
+                if (existingPunishment != null)
+                {
+                    throw new UserFriendlyException($"User already has this punishment type on {input.DateAt:yyyy-MM-dd}");
+                }
+
+                var calculatedTotalMoney = punishmentSystem.Money * input.Count;
+                if (input.TotalMoney > 0 && input.TotalMoney != calculatedTotalMoney)
+                {
+                    Logger.Warn($"Provided TotalMoney ({input.TotalMoney}) differs from calculated ({calculatedTotalMoney}). Using calculated value.");
+                }
 
                 var userPunishment = new Timesheet.Entities.UserPunishment
                 {
@@ -97,21 +140,25 @@ namespace TimesheetApplication.UserPunishment
                     PunishmentSystemId = input.PunishmentSystemId,
                     Type = input.Type,
                     Count = input.Count,
-                    TotalMoney = input.TotalMoney,
-                    UserNote = input.UserNote,
-                    NoteReply = input.NoteReply,
+                    TotalMoney = calculatedTotalMoney, 
+                    UserNote = input.UserNote?.Trim(),
+                    NoteReply = input.NoteReply?.Trim(),
                     CreationTime = DateTime.Now,
                     CreatorUserId = AbpSession.UserId
                 };
 
-                Logger.Info($"Created UserPunishment object: PunishmentSystemId={userPunishment.PunishmentSystemId}, UserId={userPunishment.UserId}");
+                Logger.Info($"Creating UserPunishment: UserId={userPunishment.UserId}, PunishmentSystemId={userPunishment.PunishmentSystemId}, Type={userPunishment.Type}");
 
                 var createdEntity = await _workScope.InsertAsync(userPunishment);
                 await CurrentUnitOfWork.SaveChangesAsync();
 
+                if (createdEntity == null || createdEntity.Id <= 0)
+                {
+                    Logger.Error("Failed to create UserPunishment: createdEntity is null or Id is invalid");
+                    throw new UserFriendlyException("Failed to create user punishment due to invalid entity.");
+                }
+
                 Logger.Info($"Successfully created UserPunishment with Id: {createdEntity.Id}");
-
-
                 var result = new UserPunishmentDto
                 {
                     Id = createdEntity.Id,
@@ -123,8 +170,15 @@ namespace TimesheetApplication.UserPunishment
                     TotalMoney = createdEntity.TotalMoney,
                     UserNote = createdEntity.UserNote,
                     NoteReply = createdEntity.NoteReply,
-                    CreationTime = createdEntity.CreationTime
+                    CreationTime = createdEntity.CreationTime,
+                    LastModificationTime = createdEntity.LastModificationTime
                 };
+
+                if (result == null)
+                {
+                    Logger.Error("Mapping to UserPunishmentDto failed: result is null");
+                    throw new UserFriendlyException("Error mapping user punishment data.");
+                }
 
                 return result;
             }
@@ -138,6 +192,7 @@ namespace TimesheetApplication.UserPunishment
                 throw new UserFriendlyException("An error occurred while creating user punishment. Please try again.");
             }
         }
+
         [HttpGet]
         public async Task<UserPunishmentDto> GetUserPunishmentAsync(EntityDto<long> input)
         {
@@ -146,7 +201,22 @@ namespace TimesheetApplication.UserPunishment
             {
                 throw new UserFriendlyException("User punishment not found");
             }
-            return ObjectMapper.Map<UserPunishmentDto>(userPunishment);
+        
+            var result = new UserPunishmentDto
+            {
+                Id = userPunishment.Id,
+                DateAt = userPunishment.DateAt,
+                UserId = userPunishment.UserId,
+                PunishmentSystemId = userPunishment.PunishmentSystemId,
+                Type = userPunishment.Type,
+                Count = userPunishment.Count,
+                TotalMoney = userPunishment.TotalMoney,
+                UserNote = userPunishment.UserNote,
+                NoteReply = userPunishment.NoteReply,
+                CreationTime = userPunishment.CreationTime,
+                LastModificationTime = userPunishment.LastModificationTime
+            };
+            return result;
         }
 
         [HttpPut]
@@ -155,7 +225,7 @@ namespace TimesheetApplication.UserPunishment
             Logger.Info($"Received input for update: {Newtonsoft.Json.JsonConvert.SerializeObject(input)}");
             try
             {
-
+               
                 if (input == null)
                 {
                     throw new UserFriendlyException("Input cannot be null");
@@ -176,9 +246,23 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException("Valid PunishmentSystemId is required");
                 }
 
-                if (string.IsNullOrWhiteSpace(input.Type))
+                var validTypes = new[] {
+            UserPunishmentType.Late,
+            UserPunishmentType.NoCheckIn,
+            UserPunishmentType.NoCheckOut,
+            UserPunishmentType.LateAndNoCheckOut,
+            UserPunishmentType.NoCheckInAndNoCheckOut,
+            UserPunishmentType.Daily,
+            UserPunishmentType.Mention,
+            UserPunishmentType.Level1_20k,
+            UserPunishmentType.Level2_50k,
+            UserPunishmentType.Level3_100k,
+            UserPunishmentType.Level4_200k
+        };
+
+                if (!validTypes.Contains(input.Type))
                 {
-                    throw new UserFriendlyException("Type is required");
+                    throw new UserFriendlyException($"Invalid punishment type: {input.Type}. Valid types are: {string.Join(", ", validTypes)}");
                 }
 
                 if (input.Count <= 0)
@@ -186,44 +270,79 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException("Count must be greater than 0");
                 }
 
+                if (input.TotalMoney < 0)
+                {
+                    throw new UserFriendlyException("TotalMoney cannot be negative");
+                }
+
+                if (input.DateAt == default(DateTime) || input.DateAt > DateTime.Now.AddDays(1))
+                {
+                    throw new UserFriendlyException("Invalid DateAt value");
+                }
 
                 var userPunishment = await _workScope.GetAll<Timesheet.Entities.UserPunishment>()
                     .FirstOrDefaultAsync(x => x.Id == input.Id);
+
                 if (userPunishment == null)
                 {
                     Logger.Error($"UserPunishment with Id {input.Id} not found");
-                    throw new UserFriendlyException($"User punishment with id = {input.Id} not found!");
+                    throw new UserFriendlyException($"User punishment with Id {input.Id} not found");
                 }
-
 
                 var punishmentSystem = await _workScope.GetAll<Timesheet.Entities.PunishmentSystem>()
                     .FirstOrDefaultAsync(x => x.Id == input.PunishmentSystemId);
+
                 if (punishmentSystem == null)
                 {
                     throw new UserFriendlyException($"PunishmentSystem with Id {input.PunishmentSystemId} not found");
                 }
 
+                if (!punishmentSystem.IsActive)
+                {
+                    throw new UserFriendlyException($"PunishmentSystem with Id {input.PunishmentSystemId} is not active");
+                }
 
                 var user = await _workScope.GetAll<User>()
                     .FirstOrDefaultAsync(x => x.Id == input.UserId.Value);
+
                 if (user == null)
                 {
                     throw new UserFriendlyException($"User with Id {input.UserId.Value} not found");
                 }
 
+               
+                var existingPunishment = await _workScope.GetAll<Timesheet.Entities.UserPunishment>()
+                    .FirstOrDefaultAsync(x => x.Id != input.Id
+                                           && x.UserId == input.UserId.Value
+                                           && x.PunishmentSystemId == input.PunishmentSystemId
+                                           && x.DateAt.Date == input.DateAt.Date
+                                           && x.Type == input.Type);
 
+                if (existingPunishment != null)
+                {
+                    throw new UserFriendlyException($"User already has this punishment type on {input.DateAt:yyyy-MM-dd}");
+                }
+
+            
+                var calculatedTotalMoney = punishmentSystem.Money * input.Count;
+                if (input.TotalMoney > 0 && input.TotalMoney != calculatedTotalMoney)
+                {
+                    Logger.Warn($"Provided TotalMoney ({input.TotalMoney}) differs from calculated ({calculatedTotalMoney}). Using calculated value.");
+                }
+
+               
                 userPunishment.DateAt = input.DateAt;
                 userPunishment.UserId = input.UserId.Value;
                 userPunishment.PunishmentSystemId = input.PunishmentSystemId;
                 userPunishment.Type = input.Type;
                 userPunishment.Count = input.Count;
-                userPunishment.TotalMoney = input.TotalMoney;
-                userPunishment.UserNote = input.UserNote;
-                userPunishment.NoteReply = input.NoteReply;
+                userPunishment.TotalMoney = calculatedTotalMoney; 
+                userPunishment.UserNote = input.UserNote?.Trim();
+                userPunishment.NoteReply = input.NoteReply?.Trim();
                 userPunishment.LastModificationTime = DateTime.Now;
                 userPunishment.LastModifierUserId = AbpSession.UserId;
 
-                Logger.Info($"Updated UserPunishment object: PunishmentSystemId={userPunishment.PunishmentSystemId}, UserId={userPunishment.UserId}");
+                Logger.Info($"Updating UserPunishment: Id={userPunishment.Id}, UserId={userPunishment.UserId}, PunishmentSystemId={userPunishment.PunishmentSystemId}");
 
                 await _workScope.UpdateAsync(userPunishment);
                 await CurrentUnitOfWork.SaveChangesAsync();
@@ -252,6 +371,7 @@ namespace TimesheetApplication.UserPunishment
             await _workScope.DeleteAsync<Timesheet.Entities.UserPunishment>(input.Id);
             await CurrentUnitOfWork.SaveChangesAsync();
         }
+
         [HttpGet]
         public async Task<List<UserPunishmentDto>> GetAllUserPunishmentsAsync()
         {
@@ -265,7 +385,22 @@ namespace TimesheetApplication.UserPunishment
                     return new List<UserPunishmentDto>();
                 }
 
-                var result = ObjectMapper.Map<List<UserPunishmentDto>>(userPunishments);
+               
+                var result = userPunishments.Select(entity => new UserPunishmentDto
+                {
+                    Id = entity.Id,
+                    DateAt = entity.DateAt,
+                    UserId = entity.UserId,
+                    PunishmentSystemId = entity.PunishmentSystemId,
+                    Type = entity.Type,
+                    Count = entity.Count,
+                    TotalMoney = entity.TotalMoney,
+                    UserNote = entity.UserNote,
+                    NoteReply = entity.NoteReply,
+                    CreationTime = entity.CreationTime,
+                    LastModificationTime = entity.LastModificationTime
+                }).ToList();
+
                 Logger.Info($"Successfully fetched {result.Count} UserPunishments");
                 return result;
             }
@@ -279,103 +414,85 @@ namespace TimesheetApplication.UserPunishment
                 throw new UserFriendlyException("An error occurred while fetching user punishments. Please try again.");
             }
         }
+
         [HttpGet]
         public async Task<PagedResultDto<UserPunishmentDto>> GetUserPunishmentsAsync(GetUserPunishmentsInput input)
         {
-            Logger.Info($"Fetching UserPunishments with input: {Newtonsoft.Json.JsonConvert.SerializeObject(input)}");
-            try
+            var query = _workScope.GetAll<Timesheet.Entities.UserPunishment>();
+
+          
+            if (!string.IsNullOrEmpty(input.FilterText))
             {
-                var query = _workScope.GetAll<Timesheet.Entities.UserPunishment>().AsNoTracking();
-
-
-                if (!string.IsNullOrEmpty(input.FilterText))
-                {
-                    query = query.Where(x => x.Type.Contains(input.FilterText) ||
-                                            x.UserNote.Contains(input.FilterText) ||
-                                            x.NoteReply.Contains(input.FilterText));
-                }
-
-                if (input.UserId.HasValue)
-                {
-                    query = query.Where(x => x.UserId == input.UserId.Value);
-                }
-
-                if (input.PunishmentSystemId.HasValue)
-                {
-                    query = query.Where(x => x.PunishmentSystemId == input.PunishmentSystemId.Value);
-                }
-
-                if (!string.IsNullOrWhiteSpace(input.Type))
-                {
-                    query = query.Where(x => x.Type == input.Type);
-                }
-
-                if (input.IsActive.HasValue && input.IsActive.Value)
-                {
-                    query = query.Where(x => !x.IsDeleted);
-                }
-
-
-                var totalCount = await query.CountAsync();
-                if (string.IsNullOrEmpty(input.Sorting))
-                {
-                    query = query.OrderByDescending(x => x.CreationTime);
-                    Logger.Info("Sorting applied: default (CreationTime descending)");
-                }
-                else
-                {
-                    Logger.Info($"Applying sorting: {input.Sorting}");
-                    switch (input.Sorting.ToLower().Trim())
-                    {
-                        case "creationtime":
-                            query = query.OrderBy(x => x.CreationTime);
-                            break;
-                        case "creationtime desc":
-                            query = query.OrderByDescending(x => x.CreationTime);
-                            break;
-                        case "type":
-                            query = query.OrderBy(x => x.Type);
-                            break;
-                        case "type desc":
-                            query = query.OrderByDescending(x => x.Type);
-                            break;
-                        case "userid":
-                            query = query.OrderBy(x => x.UserId);
-                            break;
-                        case "userid desc":
-                            query = query.OrderByDescending(x => x.UserId);
-                            break;
-                        default:
-                            query = query.OrderByDescending(x => x.CreationTime);
-                            Logger.Warn($"Unsupported sorting value '{input.Sorting}', defaulting to CreationTime descending");
-                            break;
-                    }
-                }
-                if (input.SkipCount < 0 || input.MaxResultCount <= 0)
-                {
-                    throw new UserFriendlyException("Invalid paging parameters: SkipCount must be non-negative and MaxResultCount must be positive.");
-                }
-
-
-                var entities = await query
-                    .Skip(input.SkipCount)
-                    .Take(input.MaxResultCount)
-                    .ToListAsync();
-
-                var dtos = entities.Select(entity => ObjectMapper.Map<UserPunishmentDto>(entity)).ToList();
-                Logger.Info($"Fetched {dtos.Count} UserPunishments out of {totalCount} total records");
-
-                return new PagedResultDto<UserPunishmentDto>(totalCount, dtos);
+                query = query.Where(x => x.Type.ToString().Contains(input.FilterText) ||
+                                        x.UserNote.Contains(input.FilterText) ||
+                                        x.NoteReply.Contains(input.FilterText));
             }
-            catch (UserFriendlyException)
+
+            if (input.Type != UserPunishmentType.NoPunish && input.Type != 0)
             {
-                throw;
+                query = query.Where(x => x.Type == input.Type);
             }
-            catch (Exception ex)
+
+            var totalCount = await query.CountAsync();
+
+            if (string.IsNullOrEmpty(input.Sorting))
             {
-                Logger.Error($"Unexpected error in GetUserPunishmentsAsync: {ex.Message}", ex);
-                throw new UserFriendlyException("An error occurred while fetching user punishments. Please try again.");
+                query = query.OrderByDescending(x => x.CreationTime);
             }
+            else
+            {
+                switch (input.Sorting.ToLower())
+                {
+                    case "type":
+                        query = query.OrderBy(x => x.Type);
+                        break;
+                    case "type desc":
+                        query = query.OrderByDescending(x => x.Type);
+                        break;
+                    case "userid":
+                        query = query.OrderBy(x => x.UserId);
+                        break;
+                    case "userid desc":
+                        query = query.OrderByDescending(x => x.UserId);
+                        break;
+                    case "punishmentsystemid":
+                        query = query.OrderBy(x => x.PunishmentSystemId);
+                        break;
+                    case "punishmentsystemid desc":
+                        query = query.OrderByDescending(x => x.PunishmentSystemId);
+                        break;
+                    default:
+                        query = query.OrderByDescending(x => x.CreationTime);
+                        break;
+                }
+            }
+
+            
+            var skipCount = input.SkipCount;
+            var maxResultCount = input.MaxResultCount;
+
+            var entities = await query
+                .Skip(skipCount)
+                .Take(maxResultCount)
+                .ToListAsync();
+
+            
+            var dtos = entities.Select(entity => new UserPunishmentDto
+            {
+                Id = entity.Id,
+                DateAt = entity.DateAt,
+                UserId = entity.UserId,
+                PunishmentSystemId = entity.PunishmentSystemId,
+                Type = entity.Type,
+                Count = entity.Count,
+                TotalMoney = entity.TotalMoney,
+                UserNote = entity.UserNote,
+                NoteReply = entity.NoteReply,
+                CreationTime = entity.CreationTime,
+                LastModificationTime = entity.LastModificationTime
+            }).ToList();
+
+            return new PagedResultDto<UserPunishmentDto>(totalCount, dtos);
         }
     }
 }

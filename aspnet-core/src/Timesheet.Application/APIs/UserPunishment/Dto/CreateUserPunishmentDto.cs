@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.UserPunishments.Dto
 {
@@ -15,8 +16,8 @@ namespace Timesheet.APIs.UserPunishments.Dto
         public long PunishmentSystemId { get; set; }
 
         [Required]
-        [MaxLength(100)]
-        public string Type { get; set; }
+       
+        public UserPunishmentType Type { get; set; }
 
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Count must be greater than 0")]

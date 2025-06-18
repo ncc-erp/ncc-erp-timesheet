@@ -1,6 +1,7 @@
 ﻿using Abp.Domain.Entities.Auditing;
 using System;
 using System.ComponentModel.DataAnnotations;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.Entities
 {
@@ -12,10 +13,8 @@ namespace Timesheet.Entities
 
         [MaxLength(1000)]
         public string Description { get; set; }
-
         [Required]
-        [MaxLength(50)]
-        public string Type { get; set; } 
+        public UserPunishmentType Type { get; set; } 
 
         public int Money { get; set; }
 

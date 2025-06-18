@@ -19,6 +19,7 @@ using AutoMapper;
 using Ncc;
 using Timesheet.APIs.PunishmentSystems.Dto;
 using Microsoft.AspNetCore.Mvc;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace TimesheetApplication.PunishmentSystem
 {
@@ -56,13 +57,13 @@ namespace TimesheetApplication.PunishmentSystem
                     throw new UserFriendlyException("Name is required");
                 }
 
-                if (string.IsNullOrWhiteSpace(input.Type))
+                if (input.Type == UserPunishmentType.NoPunish)
                 {
                     throw new UserFriendlyException("Type is required");
                 }
 
                 var existingPunishmentSystem = await _workScope.GetAll<Timesheet.Entities.PunishmentSystem>()
-                    .FirstOrDefaultAsync(ps => ps.Name.ToLower() == input.Name.ToLower() && ps.Type.ToLower() == input.Type.ToLower());
+                    .FirstOrDefaultAsync(ps => ps.Name.ToLower() == input.Name.ToLower() && ps.Type == input.Type);
                 if (existingPunishmentSystem != null)
                 {
                     throw new UserFriendlyException($"A PunishmentSystem with Name '{input.Name}' and Type '{input.Type}' already exists.");
@@ -205,7 +206,7 @@ namespace TimesheetApplication.PunishmentSystem
         }
 
 
-        [Httpget]
+        [HttpGet]
         public async Task<PagedResultDto<PunishmentSystemDto>> GetPunishmentSystemsAsync(GetPunishmentSystemsInput input)
         {
 
@@ -219,7 +220,7 @@ namespace TimesheetApplication.PunishmentSystem
                                         x.Description.Contains(input.FilterText));
             }
 
-            if (!string.IsNullOrEmpty(input.Type))
+            if (input.Type != UserPunishmentType.NoPunish) 
             {
                 query = query.Where(x => x.Type == input.Type);
             }

@@ -2,6 +2,7 @@
 using Abp.AutoMapper;
 using Timesheet.Entities;
 using System;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.PunishmentSystems.Dto
 {
@@ -9,7 +10,7 @@ namespace Timesheet.APIs.PunishmentSystems.Dto
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public string Type { get; set; }
+        public UserPunishmentType Type { get; set; }
         public int Money { get; set; }
         public bool IsActive { get; set; }
     }
