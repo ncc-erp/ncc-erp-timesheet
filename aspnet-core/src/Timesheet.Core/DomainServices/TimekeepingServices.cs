@@ -110,21 +110,28 @@ namespace Timesheet.DomainServices
                 await CurrentUnitOfWork.SaveChangesAsync();
             }
 
-            var mapAbsenceUsers = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request)
-                .Where(s => s.DateAt.Date == selectedDate.Date
-                && s.Request.Status == RequestStatus.Approved
-                && s.Request.Type != RequestType.Remote)
-                .GroupBy(s => s.Request.UserId)
-                .ToDictionary(s => s.Key, s => s.Select(x => new MapAbsenceUserDto
-                {
-                    UserId = x.Request.UserId,
-                    DateType = x.DateType,//morning, afternoon, fullday, custom
-                    AbsenceTime = x.AbsenceTime,//dau. giua, cuoi
-                    Hour = x.Hour,
-                    Type = x.Request.Type,
-                })
-                                .OrderBy(x => x.AbsenceTime)
-                                .ToList());
+            var allApprovedRequests = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request).Where(s => s.DateAt.Date == selectedDate.Date && s.Request.Status == RequestStatus.Approved).ToList();
+
+            // Tách thành 2 dictionary riêng biệt
+            var mapAbsenceUsers = allApprovedRequests.Where(s => s.Request.Type != RequestType.Remote).GroupBy(s => s.Request.UserId).ToDictionary(
+            s => s.Key, s => s.Select(x => new MapAbsenceUserDto
+            {
+                UserId = x.Request.UserId,
+                DateType = x.DateType,
+                AbsenceTime = x.AbsenceTime,
+                Hour = x.Hour,
+                Type = x.Request.Type,
+            }).OrderBy(x => x.AbsenceTime).ToList());
+
+            var mapRemoteUsers = allApprovedRequests.Where(s => s.Request.Type == RequestType.Remote).GroupBy(s => s.Request.UserId).ToDictionary(
+            s => s.Key, s => s.Select(x => new MapAbsenceUserDto
+            {
+                UserId = x.Request.UserId,
+                DateType = x.DateType,
+                AbsenceTime = x.AbsenceTime,
+                Hour = x.Hour,
+                Type = x.Request.Type,
+            }).OrderBy(x => x.AbsenceTime).ToList());
 
             var rs = new List<Timekeeping>();
             var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
@@ -159,10 +166,13 @@ namespace Timesheet.DomainServices
             foreach (var user in users)
             {
                 var t = new Timekeeping { };
+                bool isRemoteWork = mapRemoteUsers.ContainsKey(user.UserId);
 
-                // Tính toán register check in out với leave
-                //var RegisterCheckInOut = CaculateCheckInOutTime(mapAbsenceUsers, user);
-                var registerCheckInOut = CaculateCheckInOutTimeNew(mapAbsenceUsers, user);
+                var registerCheckInOut = isRemoteWork ?
+                  CaculateCheckInOutTimeNew(mapRemoteUsers, user) // Cần tạo method mới
+                  :
+                  CaculateCheckInOutTimeNew(mapAbsenceUsers, user);
+                //var registerCheckInOut = CaculateCheckInOutTimeNew(mapAbsenceUsers, user);
                 float trackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].ActiveMinute : 0;
 
                 t.RegisterCheckIn = registerCheckInOut.CheckIn;
@@ -284,7 +294,7 @@ namespace Timesheet.DomainServices
                         }
                     }
                     // Gọi phương thức để tạo bản ghi phạt tracker time nếu có
-                    if (trackerTime > 0 && t.StatusPunish == CheckInCheckOutPunishmentType.NoPunish)
+                    if (trackerTime > 0 && isRemoteWork)
                     {
                         var registerWorkingMinutes = CommonUtils.GetEmployeeWorkingHours(t.RegisterCheckOut, t.RegisterCheckIn);
                         var dayOffType = registerCheckInOut.AbsenceDayType;
