@@ -95,6 +95,15 @@ namespace TimesheetApplication.UserPunishment
                     throw new UserFriendlyException("Invalid DateAt value");
                 }
 
+                // Kiểm tra xem Type đã có trong PunishmentSystem chưa
+                var existingTypeInPunishmentSystem = await _workScope.GetAll<Timesheet.Entities.PunishmentSystem>()
+                    .AnyAsync(x => x.Type == input.Type);
+                Logger.Info($"Checking if Type {input.Type} exists in PunishmentSystem: {existingTypeInPunishmentSystem}");
+                if (!existingTypeInPunishmentSystem)
+                {
+                    throw new UserFriendlyException($"Punishment type {input.Type} is not defined in PunishmentSystem. Please add it to PunishmentSystem first.");
+                }
+
                 var punishmentSystem = await _workScope.GetAll<Timesheet.Entities.PunishmentSystem>()
                     .FirstOrDefaultAsync(x => x.Id == input.PunishmentSystemId);
 
@@ -140,7 +149,7 @@ namespace TimesheetApplication.UserPunishment
                     PunishmentSystemId = input.PunishmentSystemId,
                     Type = input.Type,
                     Count = input.Count,
-                    TotalMoney = calculatedTotalMoney, 
+                    TotalMoney = calculatedTotalMoney,
                     UserNote = input.UserNote?.Trim(),
                     NoteReply = input.NoteReply?.Trim(),
                     CreationTime = DateTime.Now,
@@ -264,7 +273,12 @@ namespace TimesheetApplication.UserPunishment
                 {
                     throw new UserFriendlyException($"Invalid punishment type: {input.Type}. Valid types are: {string.Join(", ", validTypes)}");
                 }
+                var existingTypeInPunishmentSystem = await _workScope.GetAll<Timesheet.Entities.PunishmentSystem>().AnyAsync(x => x.Type == input.Type);
 
+                if (!existingTypeInPunishmentSystem)
+                {
+                    throw new UserFriendlyException($"Punishment type {input.Type} is not defined in PunishmentSystem. Please add it to PunishmentSystem first.");
+                }
                 if (input.Count <= 0)
                 {
                     throw new UserFriendlyException("Count must be greater than 0");
