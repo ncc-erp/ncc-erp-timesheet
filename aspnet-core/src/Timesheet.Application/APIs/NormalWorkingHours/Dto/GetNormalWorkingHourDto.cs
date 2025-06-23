@@ -36,6 +36,7 @@ namespace Timesheet.APIs.NormalWorkingHours.Dto
         public bool IsUnlock { get; set; }
         public string BranchDisplayName { get; set; }
         public string BranchColor { get; set; }
+        public int TotalFine { get; set; }
         public IEnumerable<WorkingHourDto> ListWorkingHour { get; set; }
     }
     public class WorkingHourDto
