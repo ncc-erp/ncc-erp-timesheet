@@ -10,14 +10,11 @@ namespace Timesheet.Entities
         [Required]
         [MaxLength(256)]
         public string Name { get; set; }
-
         [MaxLength(1000)]
         public string Description { get; set; }
         [Required]
         public UserPunishmentType Type { get; set; } 
-
         public int Money { get; set; }
-
         public bool IsActive { get; set; } = true;
     }
 }

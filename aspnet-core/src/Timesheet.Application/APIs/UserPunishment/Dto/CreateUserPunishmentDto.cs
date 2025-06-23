@@ -10,7 +10,7 @@ namespace Timesheet.APIs.UserPunishments.Dto
         public DateTime DateAt { get; set; }
 
         [Required]
-        public long? UserId { get; set; }
+        public long UserId { get; set; }
 
         [Required]
         public long PunishmentSystemId { get; set; }

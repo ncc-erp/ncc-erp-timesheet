@@ -7,7 +7,7 @@ namespace Timesheet.APIs.UserPunishments.Dto
     public class UserPunishmentDto : EntityDto<long>
     {
         public DateTime DateAt { get; set; }
-        public long? UserId { get; set; }
+        public long UserId { get; set; }
         public long PunishmentSystemId { get; set; }
         public UserPunishmentType Type { get; set; }
         public int Count { get; set; }
@@ -15,11 +15,11 @@ namespace Timesheet.APIs.UserPunishments.Dto
         public string UserNote { get; set; }
         public string NoteReply { get; set; }
         public DateTime CreationTime { get; set; }
-        public long? CreatorUserId { get; set; }
+        public long CreatorUserId { get; set; }
         public DateTime? LastModificationTime { get; set; }
         public long? LastModifierUserId { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime? DeletionTime { get; set; }
-        public long? DeleterUserId { get; set; }
+        public long DeleterUserId { get; set; }
     }
 }

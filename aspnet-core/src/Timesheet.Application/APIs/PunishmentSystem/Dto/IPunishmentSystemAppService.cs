@@ -11,7 +11,8 @@ namespace TimesheetApplication.PunishmentSystem
         Task<PunishmentSystemDto> GetPunishmentSystemAsync(EntityDto<long> input);
         Task UpdatePunishmentSystemAsync(UpdatePunishmentSystemDto input);
         Task DeletePunishmentSystemAsync(EntityDto<long> input);
-        Task<PagedResultDto<PunishmentSystemDto>> GetPunishmentSystemsAsync(GetPunishmentSystemsInput input);
-        Task<ListResultDto<PunishmentSystemDto>> GetAllActivePunishmentSystemsAsync();
+        //Task<PagedResultDto<PunishmentSystemDto>> GetPunishmentSystemsAsync(GetPunishmentSystemsInput input);
+        //Task<ListResultDto<PunishmentSystemDto>> GetAllActivePunishmentSystemsAsync();
+        Task<PagedResultDto<PunishmentSystemDto>> GetAllActivePunishmentSystemsAsync(GetAllActivePunishmentSystemsInput input);
     }
 }

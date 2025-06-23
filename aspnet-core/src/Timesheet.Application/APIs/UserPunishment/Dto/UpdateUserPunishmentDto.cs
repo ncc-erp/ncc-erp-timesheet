@@ -7,7 +7,7 @@ namespace Timesheet.APIs.UserPunishments.Dto
     public class UpdateUserPunishmentDto : EntityDto<long>
     {
         public DateTime DateAt { get; set; }
-        public long? UserId { get; set; }
+        public long UserId { get; set; }
         public long PunishmentSystemId { get; set; }
         public UserPunishmentType Type { get; set; }
         public int Count { get; set; }

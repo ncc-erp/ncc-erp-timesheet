@@ -16,7 +16,7 @@ namespace Timesheet.APIs.PunishmentSystems.Dto
         public string Description { get; set; }
 
         [Required]
-        public UserPunishmentType Type { get; set; } 
+        public UserPunishmentType? Type { get; set; }
 
         [Range(0, int.MaxValue)]
         public int Money { get; set; }

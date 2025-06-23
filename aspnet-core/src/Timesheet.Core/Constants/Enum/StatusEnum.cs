@@ -266,10 +266,10 @@ namespace Ncc.Entities.Enum
             NoCheckInAndNoCheckOut = 5,
             Daily = 7,
             Mention = 8,
-            Level1_20k = 9,
-            Level2_50k = 10,
-            Level3_100k = 11,
-            Level4_200k = 12
+            Tracker_20k = 9,
+            Tracker_50k = 10,
+            Tracker_100k = 11,
+            Tracker_200k = 12
         }
 
         public enum CapabilityType
