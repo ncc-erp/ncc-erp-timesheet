@@ -977,7 +977,7 @@ namespace Timesheet.APIs.ReviewInterns
             }
         }
         [HttpPost]
-        [AbpAuthorize]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_AddNewReviewByCapability)]
         public async Task<List<string>> CreateInternCapability(ReviewInternDto input)
         {
             var fails = new List<string>();
