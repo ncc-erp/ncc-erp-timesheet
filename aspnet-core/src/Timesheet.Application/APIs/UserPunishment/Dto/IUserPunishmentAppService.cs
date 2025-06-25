@@ -11,7 +11,6 @@ namespace TimesheetApplication.UserPunishment
         Task<UserPunishmentDto> GetUserPunishmentAsync(EntityDto<long> input);
         Task UpdateUserPunishmentAsync(UpdateUserPunishmentDto input);
         Task DeleteUserPunishmentAsync(EntityDto<long> input);
-        //Task<int> ApplyPMReportPunishmentsAsync();
-        ////Task<PagedResultDto<UserPunishmentDto>> GetUserPunishmentsAsync(GetUserPunishmentsInput input);
+        //Task<PagedResultDto<UserPunishmentDto>> GetUserPunishmentsAsync(GetUserPunishmentsInput input);
     }
 }
