@@ -54,16 +54,18 @@ namespace Timesheet.APIs.ReviewInterns
         private readonly HRMService _hrmService;
         private readonly ProjectService _projectService;
         private readonly ReviewDetailAppService _reviewDetailAppService;
+        private readonly IReviewInternServices _reviewInternServices;
 
 
         public ReviewInternAppService(IBackgroundJobManager backgroundJobManager, HRMv2Service hrmv2Service, IWorkScope workScope,
-            ProjectService projectService, HRMService hRMService, ReviewDetailAppService reviewDetailAppService) : base(workScope)
+            ProjectService projectService, HRMService hRMService, ReviewDetailAppService reviewDetailAppService, IReviewInternServices reviewInternServices) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _hrmService = hRMService;
             _hrmv2Service = hrmv2Service;
             _projectService = projectService;
             _reviewDetailAppService = reviewDetailAppService;
+            _reviewInternServices = reviewInternServices;
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_AddNewReview)]
@@ -975,7 +977,7 @@ namespace Timesheet.APIs.ReviewInterns
             }
         }
         [HttpPost]
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_AddNewReviewByCapability)]
+        [AbpAuthorize]
         public async Task<List<string>> CreateInternCapability(ReviewInternDto input)
         {
             var fails = new List<string>();
@@ -1163,6 +1165,13 @@ namespace Timesheet.APIs.ReviewInterns
                 review.IsDeleted = true;
             }
             CurrentUnitOfWork.SaveChanges();
+        }
+
+        [HttpPost]
+        [AbpAuthorize]
+        public async Task<LateReviewPunishmentResultDto> CheckAndPunishLateReview(ReviewInternsDto input)
+        {
+            return await _reviewInternServices.CheckAndPunishLateReview(input);
         }
     }
 }

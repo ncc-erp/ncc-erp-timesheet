@@ -85,6 +85,43 @@ namespace Timesheet.Services.Project
 
         }
 
+        public async Task<T> GetAsync2<T>(string url)
+        {
+            try
+            {
+                var response = await httpClient.GetAsync(url);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                logger.LogInformation($"GET: {baseAddress}/{url} => Response: {responseContent}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseJObj = JObject.Parse(responseContent);
+
+                    // Nếu có trường "result" thì deserialize từ nó, ngược lại deserialize toàn bộ
+                    if (responseJObj["result"] != null)
+                    {
+                        return responseJObj["result"].ToObject<T>();
+                    }
+                    else
+                    {
+                        return JsonConvert.DeserializeObject<T>(responseContent);
+                    }
+                }
+                else
+                {
+                    logger.LogWarning($"GET: {baseAddress}/{url} => Failed with status code: {response.StatusCode}");
+                    return default;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"GET: {baseAddress}/{url} => Exception occurred");
+                return default;
+            }
+        }
+
+
         public void Post(string url, object input)
         {
             string strInput = JsonConvert.SerializeObject(input);
@@ -185,7 +222,11 @@ namespace Timesheet.Services.Project
             return GetAsync<List<GetProjectPMNameDto>>(url).Result;
         }
         //TODO: unable to test, result = null
-
-
+        public virtual PMReportResultDto GetCurrentWeekPMReport()
+        {
+            var url = "api/services/app/Public/GetWeeklyReportSendTimeSlots";
+            var result = GetAsync2<PMReportResultDto>(url).Result;
+            return result;
+        }
     }
 }

@@ -141,6 +141,11 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.ResetDataTeamBuildingEnableWorker, "false", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ResetDataTeamBuildingAtHour, "1", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ResetDataTeamBuildingOnDateAndMonth, "1/1", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                
+                new SettingDefinition(AppSettingNames.PMReportPunishEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.PMReportPunishAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.PMReportPunishAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
+
                 new SettingDefinition(AppSettingNames.AddDataToOpenTalkEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AddDataToOpenTalkAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AddDataToOpenTalkAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),

@@ -129,6 +129,10 @@
         public const string ResetDataTeamBuildingEnableWorker = "Abp.ResetDataTeamBuildingEnableWorker";
         public const string ResetDataTeamBuildingAtHour = "Abp.ResetDataTeamBuildingAtHour";
         public const string ResetDataTeamBuildingOnDateAndMonth = "Abp.ResetDataTeamBuildingOnDateAndMonth";
+        public const string PMReportPunishEnable = "Abp.PMReportPunishEnable";
+        public const string PMReportPunishAtHour = "Abp.PMReportPunishAtHour";
+        public const string PMReportPunishAtDayOfWeek = "Abp.PMReportPunishAtDayOfWeek";
+
 
         public const string AddDataToOpenTalkEnable = "Abp.AddDataToOpenTalkEnable";
         public const string AddDataToOpenTalkAtHour = "Abp.AddDataToOpenTalkAtHour";

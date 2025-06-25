@@ -12,5 +12,6 @@ namespace Timesheet.DomainServices
     {
         long LastIdReviewIntern();
         List<NotifyReviewInternDto> GetListPmNotReview(long reviewId);
+        Task<LateReviewPunishmentResultDto> CheckAndPunishLateReview(ReviewInternsDto input);
     }
 }
