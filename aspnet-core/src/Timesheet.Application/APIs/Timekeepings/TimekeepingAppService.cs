@@ -1,6 +1,7 @@
 ﻿using Abp.Authorization;
 using Abp.Configuration;
 using Abp.UI;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ncc;
@@ -129,9 +130,28 @@ namespace Timesheet.APIs.Timekeepings
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimeSheet_ViewMyTardinessDetail)]
         public async Task<List<GetTimekeepingUserDto>> GetMyDetails(int year, int month)
         {
+            var userId = AbpSession.UserId;
+            var totalMonthlyPunishment = await WorkScope.GetAll<Timekeeping>()
+            .Where(s => s.DateAt.Year == year && s.DateAt.Month == month && s.UserId == AbpSession.UserId)
+            .SumAsync(s => s.MoneyPunish);
+            var userPunishments = await WorkScope.GetAll<Timesheet.Entities.UserPunishment>()
+        .Where(x => x.UserId == userId && x.DateAt.Year == year && x.DateAt.Month == month)
+        .ToListAsync();
+            int totalLate = userPunishments.Where(x => x.Type == UserPunishmentType.Late).Sum(x => x.TotalMoney);
+            int totalNoCheckIn = userPunishments.Where(x => x.Type == UserPunishmentType.NoCheckIn).Sum(x => x.TotalMoney);
+            int totalNoCheckOut = userPunishments.Where(x => x.Type == UserPunishmentType.NoCheckOut).Sum(x => x.TotalMoney);
+            int totalLateAndNoCheckOut = userPunishments.Where(x => x.Type == UserPunishmentType.LateAndNoCheckOut).Sum(x => x.TotalMoney);
+            int totalNoCheckInAndNoCheckOut = userPunishments.Where(x => x.Type == UserPunishmentType.NoCheckInAndNoCheckOut).Sum(x => x.TotalMoney);
+            int totalDaily = userPunishments.Where(x => x.Type == UserPunishmentType.Daily).Sum(x => x.TotalMoney);
+            int totalMention = userPunishments.Where(x => x.Type == UserPunishmentType.Mention).Sum(x => x.TotalMoney);
+            int totalTracker20k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_20k).Sum(x => x.TotalMoney);
+            int totalTracker50k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_50k).Sum(x => x.TotalMoney);
+            int totalTracker100k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_100k).Sum(x => x.TotalMoney);
+            int totalTracker200k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_200k).Sum(x => x.TotalMoney);
+            int totalAllDailyMoney = await WorkScope.GetAll<Timekeeping>().Where(x => x.UserId == userId && x.DateAt.Year == year && x.DateAt.Month == month).SumAsync(x => x.CountPunishDaily * 20000);
+            int totalAllMentionMoney = await WorkScope.GetAll<Timekeeping>().Where(x => x.UserId == userId && x.DateAt.Year == year && x.DateAt.Month == month).SumAsync(x => x.CountPunishMention * 10000);
             return await (from t in WorkScope.GetAll<Timekeeping>().Where(s => s.DateAt.Year == year && s.DateAt.Month == month && s.UserId == AbpSession.UserId)
                           join u in WorkScope.GetAll<User>() on t.LastModifierUserId equals u.Id into uu
-
                           select new GetTimekeepingUserDto
                           {
                               UserId = t.UserId,
@@ -156,8 +176,22 @@ namespace Timesheet.APIs.Timekeepings
                               StatusPunish = t.StatusPunish,
                               MoneyPunish = t.MoneyPunish,
                               TrackerTime = t.TrackerTime,
-                              DailyPunish = t.CountPunishDaily,
-                              MentionPunish = t.CountPunishMention
+                              DailyPunish = t.CountPunishDaily * 20000,
+                              MentionPunish = t.CountPunishMention * 10000,
+                              TotalMonthlyPunishment = totalMonthlyPunishment,
+                              TotalLatePunish = totalLate,
+                              TotalNoCheckInPunish = totalNoCheckIn,
+                              TotalNoCheckOutPunish = totalNoCheckOut,
+                              TotalLateAndNoCheckOutPunish = totalLateAndNoCheckOut,
+                              TotalNoCheckInAndNoCheckOutPunish = totalNoCheckInAndNoCheckOut,
+                              TotalDailyPunish = totalDaily,
+                              TotalMentionPunish = totalMention,
+                              TotalTracker20kPunish = totalTracker20k,
+                              TotalTracker50kPunish = totalTracker50k,
+                              TotalTracker100kPunish = totalTracker100k,
+                              TotalTracker200kPunish = totalTracker200k,
+                              TotalAllDailyMoney = totalAllDailyMoney,
+                              TotalAllMentionMoney = totalAllMentionMoney,
                           }).OrderByDescending(t => t.Date).ToListAsync();
         }
 
@@ -202,6 +236,10 @@ namespace Timesheet.APIs.Timekeepings
             t.TrackerTime = input.TrackerTime;
             await timekeepingServices.CheckIsPunished(t);
             await timekeepingServices.CheckIsPunishedByRule(t, LimitedMinute, DateTimeUtils.ConvertHHmmssToMinutes(input.TrackerTime));
+            var totalFine = await WorkScope.GetAll<Timekeeping>()
+        .Where(x => x.UserId == t.UserId && x.DateAt.Year == t.DateAt.Year && x.DateAt.Month == t.DateAt.Month)
+        .SumAsync(x => (int?)x.MoneyPunish) ?? 0; 
+
             await WorkScope.GetRepo<Timekeeping>().UpdateAsync(t);
             return t;
         }
@@ -210,22 +248,81 @@ namespace Timesheet.APIs.Timekeepings
         [HttpPost]
         public async Task<Timekeeping> UserKhieuLai(TimekeepingUserNoteDto input)
         {
+            if (input.PunishmentType == UserPunishmentType.NoPunish)
+            {
+                throw new UserFriendlyException("Vui lòng chọn loại phạt trước khi khiếu lại!");
+            }
             var t = await WorkScope.GetAsync<Timekeeping>(input.Id);
             if (t != null && t.UserId != AbpSession.UserId.Value)
             {
                 throw new UserFriendlyException("Bạn chỉ có thể khiếu lại cho bản ghi của mình");
             }
+             if ((UserPunishmentType)t.StatusPunish != input.PunishmentType)
+    {
+        throw new UserFriendlyException("Bạn phải chọn đúng loại phạt mà bạn đang bị phạt!");
+    }
 
             try
             {
-                t.UserNote = input.UserNote;
+                var punishmentTypeName = GetPunishmentTypeName(input.PunishmentType);
+                var fullUserNote = $"[{punishmentTypeName}] {input.UserNote}";
+                t.UserNote = fullUserNote;
                 await WorkScope.GetRepo<Timekeeping>().UpdateAsync(t);
+                await UpdateUserPunishmentNote(t.UserId.Value, t.DateAt, input.PunishmentType, fullUserNote, punishmentTypeName);
                 return t;
-            } 
+            }
             catch (Exception ex)
             {
                 Logger.Error("Error: " + ex.Message);
                 throw new UserFriendlyException("An internal error occurred during your request!");
+            }
+
+        }
+        private string GetPunishmentTypeName(UserPunishmentType punishmentType)
+        {
+            var punishmentTypeNames = new Dictionary<UserPunishmentType, string>
+            {
+                { UserPunishmentType.Late, "Đi muộn" },
+                { UserPunishmentType.NoCheckIn, "Không check-in" },
+                { UserPunishmentType.NoCheckOut, "Không check-out" },
+                { UserPunishmentType.LateAndNoCheckOut, "Đi muộn & Không check-out" },
+                { UserPunishmentType.NoCheckInAndNoCheckOut, "Không check-in & Không check-out" },
+                { UserPunishmentType.Daily, "Daily" },
+                { UserPunishmentType.Mention, "Mention" },
+                { UserPunishmentType.Tracker_20k, "Tracker 20k" },
+                { UserPunishmentType.Tracker_50k, "Tracker 50k" },
+                { UserPunishmentType.Tracker_100k, "Tracker 100k" },
+                { UserPunishmentType.Tracker_200k, "Tracker 200k" }
+            };
+
+            return punishmentTypeNames.ContainsKey(punishmentType)
+                ? punishmentTypeNames[punishmentType]
+                : punishmentType.ToString();
+        }
+        private async Task UpdateUserPunishmentNote(long userId, DateTime dateAt, UserPunishmentType punishmentType, string userNote, string punishmentTypeName)
+        {
+            try
+            {
+                var userPunishment = await WorkScope.GetAll<Timesheet.Entities.UserPunishment>()
+                    .FirstOrDefaultAsync(x => x.UserId == userId &&
+                                            x.DateAt.Date == dateAt.Date &&
+                                            x.Type == punishmentType);
+                if (userPunishment != null)
+                {
+                    userPunishment.UserNote = userNote;
+                    userPunishment.LastModificationTime = DateTime.Now;
+                    userPunishment.LastModifierUserId = AbpSession.UserId;
+                    await WorkScope.GetRepo<Timesheet.Entities.UserPunishment>().UpdateAsync(userPunishment);
+                    Logger.Info($"Updated UserPunishment UserNote for UserId: {userId}, Date: {dateAt:yyyy-MM-dd}, Type: {punishmentType}");
+                }
+                else
+                {
+                    Logger.Warn($"UserPunishment not found for UserId: {userId}, Date: {dateAt:yyyy-MM-dd}, Type: {punishmentType}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Error updating UserPunishment UserNote: {ex.Message}");
             }
         }
 

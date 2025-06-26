@@ -95,10 +95,7 @@ namespace TimesheetApplication.UserPunishment
             if (input?.PunishmentSystemId <= 0) validationErrors.Add("Valid PunishmentSystemId is required");
             if (input?.Count <= 0) validationErrors.Add("Count must be greater than 0");
             if (input?.TotalMoney < 0) validationErrors.Add("TotalMoney cannot be negative");
-            if (input?.DateAt ==
-              default(DateTime) || input?.DateAt > DateTime.Now.AddDays(1))
-                validationErrors.Add("Invalid DateAt value");
-
+            
             var validTypes = new[] {
         UserPunishmentType.Late,
           UserPunishmentType.NoCheckIn,
@@ -148,11 +145,12 @@ namespace TimesheetApplication.UserPunishment
 
             if (!punishmentSystem.IsActive)
                 businessErrors.Add($"PunishmentSystem with Id {input.PunishmentSystemId} is not active");
+            var today = DateTime.Today;
             var existingPunishment = await _workScope.GetAll<Timesheet.Entities.UserPunishment>()
-              .AnyAsync(x => x.UserId == input.UserId &&
-                x.PunishmentSystemId == input.PunishmentSystemId &&
-                x.DateAt.Date == input.DateAt.Date &&
-                x.Type == input.Type);
+                .AnyAsync(x => x.UserId == input.UserId &&
+                    x.PunishmentSystemId == input.PunishmentSystemId &&
+                    x.DateAt.Date == today &&
+                    x.Type == input.Type);
             if (existingPunishment)
                 businessErrors.Add($"User already has this punishment type on {input.DateAt:yyyy-MM-dd}");
             if (businessErrors.Any())
@@ -163,7 +161,7 @@ namespace TimesheetApplication.UserPunishment
             var calculatedTotalMoney = punishmentSystem.Money * input.Count;
             return new Timesheet.Entities.UserPunishment
             {
-                DateAt = input.DateAt,
+                DateAt = DateTime.Today,
                 UserId = input.UserId,
                 PunishmentSystemId = input.PunishmentSystemId,
                 Type = input.Type,

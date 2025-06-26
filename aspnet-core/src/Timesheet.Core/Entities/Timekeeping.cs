@@ -35,5 +35,6 @@ namespace Timesheet.Entities
         public string TrackerTime { get; set; }
         public int CountPunishDaily { get; set; }
         public int CountPunishMention { get; set; }
+        public decimal TotalFine { get; set; }
     }
 }
