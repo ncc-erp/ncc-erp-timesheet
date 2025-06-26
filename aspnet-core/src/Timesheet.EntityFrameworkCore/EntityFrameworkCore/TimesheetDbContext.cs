@@ -48,8 +48,8 @@ namespace Ncc.EntityFrameworkCore
         public DbSet<ReviewInternPrivateNote> ReviewInternPrivateNotes { get; set; }
         public DbSet<ValueOfUserInProject> ValueOfUserInProjects { get; set; }
         public DbSet<OpenTalk> OpenTalk { get; set; }
-        public DbSet<UserPunishment> UserPunishments { get; set; }
         public DbSet<PunishmentSystem> PunishmentSystems { get; set; }
+        public DbSet<UserPunishment> UserPunishments { get; set; }
         public TimesheetDbContext(DbContextOptions<TimesheetDbContext> options)
             : base(options)
         {

@@ -256,6 +256,12 @@ namespace Ncc.Entities.Enum
             PVI = 2,
             NONE = 3
         }
+
+        public enum CapabilityType
+        {
+            Point = 0,
+            Note = 1,
+        }
         public enum UserPunishmentType
         {
             NoPunish = 0,
@@ -264,18 +270,15 @@ namespace Ncc.Entities.Enum
             NoCheckOut = 3,
             LateAndNoCheckOut = 4,
             NoCheckInAndNoCheckOut = 5,
-            Daily = 7,
-            Mention = 8,
-            Tracker_20k = 9,
-            Tracker_50k = 10,
-            Tracker_100k = 11,
-            Tracker_200k = 12
-        }
-
-        public enum CapabilityType
-        {
-            Point = 0,
-            Note = 1,
+            Daily = 6,
+            Mention = 7,
+            Tracker_20k = 8, 
+            Tracker_50k = 9,
+            Tracker_100k = 10,
+            Tracker_200k = 11,
+            ReviewIntern = 12,
+            PMReport_20k = 13,
+            PMReport_50k = 14
         }
         public enum CheckInCheckOutPunishmentType
         {

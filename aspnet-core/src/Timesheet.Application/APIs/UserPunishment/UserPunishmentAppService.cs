@@ -1,14 +1,26 @@
-﻿using Abp.Application.Services;
+using Abp.Application.Services;
+using Abp.Application.Services.Dto;
 using Abp.Authorization;
+using Abp.Configuration;
 using Abp.Domain.Repositories;
 using Abp.UI;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Ncc;
 using Ncc.Authorization.Users;
+using Ncc.Configuration;
+using Ncc.IoC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Timesheet.APIs.UserPunishments.Dto;
+using Timesheet.DomainServices;
 using Timesheet.Entities;
+using Timesheet.Services.Project.Dto;
 using TimesheetApplication.PunishmentSystem;
 using Abp.Application.Services.Dto;
 using Ncc.Configuration;
@@ -29,15 +41,21 @@ namespace TimesheetApplication.UserPunishment
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IWorkScope _workScope;
         private readonly ISettingManager _settingManager;
+        private readonly IUserPunishmentServices _userPunishmentServices;
+        private readonly ILogger<UserPunishmentAppService> _logger;
 
         public UserPunishmentAppService(
           IHttpContextAccessor httpContextAccessor,
           IWorkScope workScope,
-          ISettingManager settingManager) : base(workScope)
+          ISettingManager settingManager,
+          IUserPunishmentServices userPunishmentServices,
+          ILogger<UserPunishmentAppService> logger) : base(workScope)
         {
             _httpContextAccessor = httpContextAccessor;
             _workScope = workScope;
             _settingManager = settingManager;
+            _userPunishmentServices = userPunishmentServices;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -364,6 +382,14 @@ namespace TimesheetApplication.UserPunishment
                 LastModificationTime = entity.LastModificationTime
             }).ToList();
             return dtos;
+        }
+
+
+        [AbpAuthorize]
+        [HttpPost]
+        public async Task<List<PMReportItemDto>> ApplyPMReportPunishmentsAsync()
+        {
+            return await _userPunishmentServices.ApplyPMReportPunishmentsAsync();
         }
     }
 }
