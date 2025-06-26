@@ -98,7 +98,6 @@ namespace Timesheet.Services.Project
                 {
                     var responseJObj = JObject.Parse(responseContent);
 
-                    // Nếu có trường "result" thì deserialize từ nó, ngược lại deserialize toàn bộ
                     if (responseJObj["result"] != null)
                     {
                         return responseJObj["result"].ToObject<T>();

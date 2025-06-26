@@ -35,13 +35,15 @@ namespace Timesheet.DomainServices
         private readonly TrackerService _trackerService;
         private readonly FaceIdService _faceIdService;
         private readonly ProjectService _projectService;
+        private readonly ISettingManager _settingManager;
 
-        public TimekeepingServices(KomuService komuService, TrackerService trackerService, IWorkScope workScope, FaceIdService faceIdService, ProjectService projectService) : base(workScope)
+        public TimekeepingServices(KomuService komuService, TrackerService trackerService, IWorkScope workScope, FaceIdService faceIdService, ProjectService projectService, ISettingManager settingManager) : base(workScope)
         {
             _komuService = komuService;
             _trackerService = trackerService;
             _faceIdService = faceIdService;
             _projectService = projectService;
+            _settingManager = settingManager;
         }
 
         [UnitOfWork]
@@ -221,8 +223,11 @@ namespace Timesheet.DomainServices
                 t.DateAt = selectedDate;
                 t.UserId = user.UserId;
 
-                await CheckIsPunished(t, LimitedMinute);
-                await CheckIsPunishedByRule(t, LimitedMinute, trackerTime);
+                if (!isRemoteWork)
+                {
+                    await CheckIsPunished(t, LimitedMinute);
+                    await CheckIsPunishedByRule(t, LimitedMinute, trackerTime);
+                }
                 if (user.IsStopWork || (user.StopWorkingDate.HasValue && user.StopWorkingDate.Value.Date < selectedDate))
                 {
                     t.IsPunishedCheckIn = false;
@@ -375,11 +380,19 @@ namespace Timesheet.DomainServices
         public async Task<UserPunishment> CreateTrackerTimePunishment(DateTime selectedDate, long userId, float trackerTime, double registerWorkingMinutes, string userNote, string noteReply, DayType? dayOffType, Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems)
         {
             var punishmentLevels = new List<(UserPunishmentType Type, double MinPercentage, double? MaxPercentage)> {
-            (UserPunishmentType.Tracker_200k, 0, 25),
-            (UserPunishmentType.Tracker_100k, 25, 50),
-            (UserPunishmentType.Tracker_50k, 50, 75),
-            (UserPunishmentType.Tracker_20k, 75, 85)
-          };
+              (UserPunishmentType.Tracker_200k,
+                double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker200kPunishment).Split('-')[0]),
+                double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker200kPunishment).Split('-')[1])),
+              (UserPunishmentType.Tracker_100k,
+                double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker100kPunishment).Split('-')[0]),
+                double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker100kPunishment).Split('-')[1])),
+              (UserPunishmentType.Tracker_50k,
+                double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker50kPunishment).Split('-')[0]),
+                double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker50kPunishment).Split('-')[1])),
+              (UserPunishmentType.Tracker_20k,
+                double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker20kPunishment).Split('-')[0]),
+                double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker20kPunishment).Split('-')[1]))
+            };
 
             double standardWorkingHours = dayOffType == DayType.Morning || dayOffType == DayType.Afternoon ? 4 : registerWorkingMinutes / 60;
             double percentage = standardWorkingHours > 0 ? (trackerTime / 60.0 / standardWorkingHours) * 100 : 0;

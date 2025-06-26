@@ -1,3 +1,4 @@
+using Abp.Configuration;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
@@ -5,6 +6,7 @@ using Abp.Threading.BackgroundWorkers;
 using Abp.Threading.Timers;
 using Abp.UI;
 using Microsoft.Extensions.Logging;
+using Ncc.Configuration;
 using System;
 using System.Linq;
 using Timesheet.APIs.ReviewInterns;
@@ -33,7 +35,7 @@ namespace Timesheet.BackgroundWorker
             _reviewInternRepository = reviewInternRepository;
 
             Timer.RunOnStart = false;
-            Timer.Period = GetPeriodToNext6th();
+            Timer.Period = (int)TimeSpan.FromHours(1).TotalMilliseconds; 
             Timer.Elapsed += Timer_Elapsed;
         }
 
@@ -92,7 +94,7 @@ namespace Timesheet.BackgroundWorker
                 }
             }
 
-            Timer.Period = GetPeriodToNext6th();
+            Timer.Period = GetPeriodToNextReviewDate();
         }
 
         private void Timer_Elapsed(object sender, System.EventArgs e)
@@ -109,9 +111,11 @@ namespace Timesheet.BackgroundWorker
 
         private DateTime CalculateDeadlineDate(ReviewInternsDto input)
         {
-            int deadlineDay = 5;
-            var startDate = new DateTime(input.Year, input.Month, 1);
-            var endDate = startDate.AddDays(4);
+            var deadlineDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDay));
+            var daysToAdd = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDaysToAdd));
+            var startDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewStartDayOfMonth));
+            var startDate = new DateTime(input.Year, input.Month, startDay);
+            var endDate = startDate.AddDays(daysToAdd);
 
             int weekendDays = 0;
             for (var date = startDate; date <= endDate; date = date.AddDays(1))
@@ -133,10 +137,11 @@ namespace Timesheet.BackgroundWorker
             return deadlineDate;
         }
 
-        private int GetPeriodToNext6th()
+        private int GetPeriodToNextReviewDate()
         {
+            var nextRunDate = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewNextRunDate));
             var now = DateTimeUtils.GetNow();
-            var nextRun = new DateTime(now.Year, now.Month, 6, 0, 0, 0);
+            var nextRun = new DateTime(now.Year, now.Month, nextRunDate, 0, 0, 0);
             if (now > nextRun)
             {
                 nextRun = nextRun.AddMonths(1);

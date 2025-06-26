@@ -5,6 +5,7 @@ using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Ncc.Authorization.Users;
 using Ncc.Configuration;
+using Ncc.IoC;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,13 @@ namespace Timesheet.DomainServices
 {
     public class ReviewInternServices : BaseDomainService, IReviewInternServices, ITransientDependency
     {
+        private readonly ISettingManager _settingManager;
+        public ReviewInternServices(
+          IWorkScope workScope,
+          ISettingManager settingManager) : base(workScope)
+        {
+            _settingManager = settingManager;
+        }
         public long LastIdReviewIntern()
         {
             return WorkScope.GetAll<ReviewIntern>().
@@ -71,9 +79,11 @@ namespace Timesheet.DomainServices
             var now = Clock.Now;
             var currentDate = now.Date;
 
-            var deadlineDay = 5;
-            var startDate = new DateTime(input.Year, input.Month, 1);
-            var endDate = startDate.AddDays(4);
+            var deadlineDay = int.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDay));
+            var daysToAdd = int.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDaysToAdd));
+            var startDay = int.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.ReviewStartDayOfMonth));
+            var startDate = new DateTime(input.Year, input.Month, startDay);
+            var endDate = startDate.AddDays(daysToAdd);
 
             int weekendDays = 0;
             for (var date = startDate; date <= endDate; date = date.AddDays(1))

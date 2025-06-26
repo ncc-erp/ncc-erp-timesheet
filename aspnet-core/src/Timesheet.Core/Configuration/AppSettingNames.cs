@@ -133,6 +133,15 @@
         public const string PMReportPunishAtHour = "Abp.PMReportPunishAtHour";
         public const string PMReportPunishAtDayOfWeek = "Abp.PMReportPunishAtDayOfWeek";
 
+        public const string ReviewDeadlineDay = "App.Review.DeadlineDay";
+        public const string ReviewDeadlineDaysToAdd = "App.Review.DaysToAdd";
+        public const string ReviewStartDayOfMonth = "App.Review.StartDayOfMonth";
+        public const string ReviewNextRunDate = "App.Review.NextRunDate";
+
+        public const string Tracker200kPunishment = "App.Tracker.Punishment.200k";
+        public const string Tracker100kPunishment = "App.Tracker.Punishment.100k";
+        public const string Tracker50kPunishment = "App.Tracker.Punishment.50k";
+        public const string Tracker20kPunishment = "App.Tracker.Punishment.20k";
 
         public const string AddDataToOpenTalkEnable = "Abp.AddDataToOpenTalkEnable";
         public const string AddDataToOpenTalkAtHour = "Abp.AddDataToOpenTalkAtHour";

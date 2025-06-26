@@ -146,6 +146,16 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.PMReportPunishAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.PMReportPunishAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
 
+                new SettingDefinition(AppSettingNames.ReviewDeadlineDay, "5", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.ReviewDeadlineDaysToAdd, "4", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.ReviewStartDayOfMonth, "1", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.ReviewNextRunDate, "6", scopes: SettingScopes.Application | SettingScopes.Tenant),
+
+                new SettingDefinition(AppSettingNames.Tracker200kPunishment, "0-25", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.Tracker100kPunishment, "25-50", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.Tracker50kPunishment, "50-75", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.Tracker20kPunishment, "75-85", scopes: SettingScopes.Application | SettingScopes.Tenant),
+
                 new SettingDefinition(AppSettingNames.AddDataToOpenTalkEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AddDataToOpenTalkAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AddDataToOpenTalkAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),

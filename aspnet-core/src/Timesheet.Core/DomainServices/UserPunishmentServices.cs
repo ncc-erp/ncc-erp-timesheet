@@ -72,11 +72,14 @@ namespace Timesheet.DomainServices
                 return new List<PMReportItemDto>();
             }
 
-            var listFrom15To17 = pmReportData.between3To5PM.ToList();
-            var listAfter17 = pmReportData.after5PMOrMissing.ToList();
+            var listbetween3to5PM = pmReportData.between3To5PM.ToList();
+            var listAfter5OrMissing = pmReportData.after5PMOrMissing.ToList();
 
-            var map15To17 = listFrom15To17.Select(x => x.emailAddress).Distinct().ToHashSet();
-            var mapAfter17 = listAfter17.Select(x => x.emailAddress).Distinct().ToHashSet();
+            // Map of email addresses for PMs who submitted reports between 3-5 PM
+            var mapBetween3To5PM = listbetween3to5PM.Select(x => x.emailAddress).Distinct().ToHashSet();
+
+            // Map of email addresses for PMs who submitted reports after 5 PM or missed the deadline
+            var mapAfter5PMOrMissing = listAfter5OrMissing.Select(x => x.emailAddress).Distinct().ToHashSet();
 
             var systems = await WorkScope.GetAll<PunishmentSystem>()
               .Where(x => (x.Type == UserPunishmentType.PMReport_20k || x.Type == UserPunishmentType.PMReport_50k) && x.IsActive)
@@ -85,50 +88,50 @@ namespace Timesheet.DomainServices
             if (!systems.ContainsKey(UserPunishmentType.PMReport_20k) || !systems.ContainsKey(UserPunishmentType.PMReport_50k))
                 throw new UserFriendlyException("Punishment systems for PM report late not configured.");
 
-            var pm20k = systems[UserPunishmentType.PMReport_20k];
-            var pm50k = systems[UserPunishmentType.PMReport_50k];
+            var pmReport20k = systems[UserPunishmentType.PMReport_20k];
+            var pmReport50k = systems[UserPunishmentType.PMReport_50k];
 
             var punishments = new List<UserPunishment>();
             var punishedDtos = new List<PMReportItemDto>();
 
             foreach (var user in users)
             {
-                if (mapAfter17.Contains(user.EmailAddress))
+                if (mapAfter5PMOrMissing.Contains(user.EmailAddress))
                 {
                     punishments.Add(new UserPunishment
                     {
                         DateAt = Clock.Now,
                         UserId = user.Id,
-                        PunishmentSystemId = pm50k.Id,
-                        Type = pm50k.Type,
+                        PunishmentSystemId = pmReport50k.Id,
+                        Type = pmReport50k.Type,
                         Count = 1,
-                        TotalMoney = pm50k.Money
+                        TotalMoney = pmReport50k.Money
                     });
 
                     punishedDtos.Add(new PMReportItemDto
                     {
                         userName = user.FullName,
                         emailAddress = user.EmailAddress,
-                        money = pm50k.Money
+                        money = pmReport50k.Money
                     });
                 }
-                else if (map15To17.Contains(user.EmailAddress))
+                else if (mapBetween3To5PM.Contains(user.EmailAddress))
                 {
                     punishments.Add(new UserPunishment
                     {
                         DateAt = Clock.Now,
                         UserId = user.Id,
-                        PunishmentSystemId = pm20k.Id,
-                        Type = pm20k.Type,
+                        PunishmentSystemId = pmReport20k.Id,
+                        Type = pmReport20k.Type,
                         Count = 1,
-                        TotalMoney = pm20k.Money
+                        TotalMoney = pmReport20k.Money
                     });
 
                     punishedDtos.Add(new PMReportItemDto
                     {
                         userName = user.FullName,
                         emailAddress = user.EmailAddress,
-                        money = pm20k.Money
+                        money = pmReport20k.Money
                     });
                 }
             }
