@@ -13,12 +13,9 @@ namespace Timesheet.APIs.Timekeepings.Dto
     public class TimekeepingDto: EntityDto<long>
     {
         public bool IsPunishedCheckIn { get; set; }       
-
         public string NoteReply { get; set; }
         public int MoneyPunish { get; set; }
         public CheckInCheckOutPunishmentType StatusPunish { get; set; }
         public decimal TotalFine { get; set; }
-
-
     }
 }
