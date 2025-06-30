@@ -101,13 +101,13 @@
               [formControl]='userControl' [(ngModel)]="userId" (ngModelChange)="onUserChange()">
               <mat-option>
                 <ngx-mat-select-search [formControl]="userSearch" placeholderLabel="Search by Email"
-                noEntriesFoundLabel= "No matching found">
+                  noEntriesFoundLabel= "No matching found">
                 </ngx-mat-select-search>
               </mat-option>
               <mat-option [value]="-1">All</mat-option>
               <mat-option
-                (click)="viewDetail(item.id)"
-                *ngFor="let item of listUserFiltered" [value]='item.id'>
+                 (click)="viewDetail(item.id)"
+                          *ngFor="let item of listUserFiltered" [value]='item.id'>
                 {{item.emailAddress}}
               </mat-option>
             </mat-select>
@@ -118,28 +118,32 @@
           <mat-form-field appearance="outline">
             <mat-label> {{ "Branch" | localize }}</mat-label>
             <mat-select
-              name="selectedBranch" [(value)]="selectedBranch" (selectionChange)="getData()">
+                        name="selectedBranch" [(value)]="selectedBranch" (selectionChange)="getData()">
               <mat-option>
-                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
+                <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
                   noEntriesFoundLabel= "No matching found"></ngx-mat-select-search>
               </mat-option>
               <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
-                  {{branch.displayName}}
+                {{branch.displayName}}
               </mat-option>
-          </mat-select>
+            </mat-select>
           </mat-form-field>
         </div>
 
         <div class="col-sm-2 col-md-2 info-user">
           <mat-form-field appearance="outline">
-            <mat-label>Trạng thái</mat-label>
-            <mat-select
-              name="selectedStatus" [(value)]="selectedStatus" (selectionChange)="getData()">
+            <mat-label>Punishment Type</mat-label>
+            <mat-select name="selectedStatus" [(value)]="selectedStatus" (selectionChange)="getData()">
+              <mat-option>
+                <ngx-mat-select-search placeholderLabel="Search for type" [formControl]="statusSearch"
+                  noEntriesFoundLabel="No matching found">
+                </ngx-mat-select-search>
+              </mat-option>
               <mat-option [value]='-1'>All</mat-option>
-              <mat-option *ngFor="let item of APP_CONSTANT.PunishRules" [value] = 'item.value'>
+              <mat-option *ngFor="let item of filteredPunishRules" [value]='item.value'>
                 {{item.name}}
               </mat-option>
-          </mat-select>
+            </mat-select>
           </mat-form-field>
         </div>
 
@@ -197,7 +201,7 @@
                     {{ "Result" | localize }}
                   </th>
                   <th rowspan="2" style="min-width: 50px; max-width: 100px;"
-                  (click)="handleSortByColumn('editByUserName')" style="cursor: pointer">
+                    (click)="handleSortByColumn('editByUserName')" style="cursor: pointer">
                     <div class="item-tardiness">
                       {{ "Edit by" | localize }}
                       <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'editByUserName'"></i>
@@ -223,12 +227,15 @@
                     </div>
                   </th>
                   <th rowspan="2" style="width: 250px;"
-                  (click)="handleSortByColumn('noteReplyToString')" style="cursor: pointer">
+                      (click)="handleSortByColumn('noteReplyToString')" style="cursor: pointer">
                     <div class="item-tardiness">
                       {{ "Complain Reply" | localize }}
                       <i [ngClass]="iconSort" *ngIf="currentSortColumn === 'noteReplyToString'"></i>
                       <i *ngIf="currentSortColumn !== 'noteReplyToString'" class="fas fa-sort"></i>
                     </div>
+                  </th>
+                  <th rowspan="2">
+                    {{ "Type" | localize }}
                   </th>
 
                 </tr>
@@ -259,21 +266,26 @@
                   <td>
                     <div style="display: flex; justify-content: flex-start; align-items: center;">
                       <div>
-                        <span mat-dialog-close>
-                          <img style="max-width: 40px;min-width: 40px; height: 40px; border-radius: 50%;"
-                            [src]='getAvatar(item)' alt="avatar">
-                        </span>
-                      </div>
-                      <div style="margin-left: 3px;">
                         <div>
                           <div>
-                            <span *ngIf="item.userName!=null" mat-dialog-close>{{item.userName}}
-                            </span>
-                            <br>
-                            <span *ngIf="item.userEmail!=null" mat-dialog-close>{{item.userEmail}}
+                            <span mat-dialog-close>
+                              <img style="max-width: 40px;min-width: 40px; height: 40px; border-radius: 50%;"
+                                [src]='getAvatar(item)' alt="avatar">
                             </span>
                           </div>
-                          <div *ngIf="item.branchId!=null" class="label status-label" [style.backgroundColor]="item.branchColor">{{ item.branchDisplayName}}</div>
+                          <div style="margin-left: 3px;">
+                            <div>
+                              <div>
+                                <span *ngIf="item.userName!=null" mat-dialog-close>{{item.userName}}
+                                </span>
+                                <br>
+                                <span *ngIf="item.userEmail!=null" mat-dialog-close>{{item.userEmail}}
+                                </span>
+                              </div>
+                              <div *ngIf="item.branchId!=null" class="label status-label"
+                                [style.backgroundColor]="item.branchColor">{{ item.branchDisplayName}}</div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -284,12 +296,12 @@
                       Edit
                     </button>
                     <button [name]="'replyBtn-'+item.strTimekeepingId" *ngIf="!item.isEditing && permission.isGranted(Timekeeping_ReplyUserNote)"
-                      class="btn btn-default" (click)="replyComplain(item)">
+                       class="btn btn-default" (click)="replyComplain(item)">
                       Reply
                     </button>
                     <div *ngIf=" item.isEditing">
-                      <button [name]="'saveEditBtn-'+item.strTimekeepingId" mat-mini-fab class="btn-success button24" style="margin-right: 10px;"
-                        (click)="onSave(item)">
+                      <button [name]="'saveEditBtn-'+item.strTimekeepingId" mat-mini-fab class="btn-success button24"
+                        style="margin-right: 10px;" (click)="onSave(item)">
                         <mat-icon class="icon24">done</mat-icon>
                       </button>
                       <button [name]="'cancelEditBtn-'+item.strTimekeepingId" mat-mini-fab class="btn-danger button24" (click)="onCancel(item)">
@@ -302,7 +314,7 @@
                     <span *ngIf="!item.isEditing">{{item.registrationTimeStart}}</span>
                     <mat-form-field *ngIf="item.isEditing" class="time">
                       <input [name]="'registrationTimeStartInput-'+item.strTimekeepingId" [textMask]="{mask: maskTime, guide: false}" matInput
-                        [(ngModel)]="item.registrationTimeStart" autocomplete="off">
+                             [(ngModel)]="item.registrationTimeStart" autocomplete="off">
                     </mat-form-field>
                   </td>
                   <td style="text-align: center;">
@@ -352,6 +364,12 @@
                   <td class="text-center font-size-13" style="min-width: 150px;">
                     {{item.noteReply}}
                   </td>
+                  <td style="text-align: center;">
+                    <span class="label {{getStatusColorClass(item.statusPunish)}}"
+                      style="color: white; padding: 4px 8px; border-radius: 4px;">
+                      {{item.statusPunish | punishName}}
+                    </span>
+                  </td>
 
 
                 </tr>
@@ -362,24 +380,24 @@
         <div style="margin-top: 20px; display: flex; " class="ml-4">
           <mat-form-field  style="width: 100px;">
             <!-- <mat-label>Number items</mat-label> -->
-              <mat-select [(ngModel)]="itemPerPage">
-                <mat-option [value]="10">
-                  10
-                </mat-option >
-                <mat-option [value]="20">
-                  20
-                </mat-option>
-                <mat-option [value]="50">
-                  50
-                </mat-option>
-                <mat-option [value]="70">
-                  70
-                </mat-option>
-                <mat-option [value]="100">
-                  100
-                </mat-option>
+            <mat-select [(ngModel)]="itemPerPage">
+              <mat-option [value]="10">
+                10
+              </mat-option >
+              <mat-option [value]="20">
+                20
+              </mat-option>
+              <mat-option [value]="50">
+                50
+              </mat-option>
+              <mat-option [value]="70">
+                70
+              </mat-option>
+              <mat-option [value]="100">
+                100
+              </mat-option>
 
-              </mat-select>
+            </mat-select>
           </mat-form-field>
           <pagination-controls style="margin: 0 auto;" autoHide="true" (pageChange)="page = $event"></pagination-controls>
         </div>

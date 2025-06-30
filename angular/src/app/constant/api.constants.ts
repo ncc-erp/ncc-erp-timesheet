@@ -230,7 +230,35 @@ export const APP_CONSTANT = {
     { "name": "Không CheckIn", "value": 2 },
     { "name": "Không CheckOut", "value": 3 },
     { "name": "Đi muộn và Không CheckOut", "value": 4 },
-    { "name": "Không CheckIn và không CheckOut", "value": 5 }
+    { "name": "Không Checkin và Không CheckOut", "value": 5 },
+    { "name": "Daily", "value": 6 },
+    { "name": "Mention", "value": 7 },
+    { "name": "Tracker dưới 85% yêu cầu", "value": 8 },
+    { "name": "Tracker dưới 75% yêu cầu", "value": 9 },
+    { "name": "Tracker dưới 50% yêu cầu", "value": 10 },
+    { "name": "Tracker dưới 25% yêu cầu", "value": 11 },
+    { "name": "Review intern muộn", "value": 12 },
+    { "name": "Report từ 15-17h", "value": 13 },
+    { "name": "Report sau 17h hoặc quên report", "value": 14 }
+    
+  ],
+  PunishRulesShortName: [
+    { "name": "Không phạt", "value": 0 },
+    { "name": "Đi muộn", "value": 1 },
+    { "name": "Không CheckIn", "value": 2 },
+    { "name": "Không CheckOut", "value": 3 },
+    { "name": "Muộn + Không CO", "value": 4 },
+    { "name": "Không CI + CO", "value": 5 },
+    { "name": "Daily", "value": 6 },
+    { "name": "Mention", "value": 7 },
+    { "name": "Tracker <85%", "value": 8 },
+    { "name": "Tracker <75%", "value": 9 },
+    { "name": "Tracker <50%", "value": 10 },
+    { "name": "Tracker <25%", "value": 11 },
+    { "name": "Review Intern muộn", "value": 12 },
+    { "name": "Report 15-17h", "value": 13 },
+    { "name": "Report sau 17h", "value": 14 }
+    
   ],
   ProjectMemberType: {
     Expose: 0,
