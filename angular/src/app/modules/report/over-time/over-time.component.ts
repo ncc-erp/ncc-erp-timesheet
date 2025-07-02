@@ -77,10 +77,8 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
 
   formatHour(time) {
     const hours = Math.floor(time);
-    const rhours = ('0' + hours).slice(-2);
-    const minutes = (time - hours) * 60;
-    const rminutes = ('0' + minutes).slice(-2);
-    return rhours + ':' + rminutes;
+    const minutes = Math.round((time - hours) * 60);
+    return `${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
   }
 
   getProjects() {
