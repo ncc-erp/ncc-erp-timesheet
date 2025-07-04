@@ -52,10 +52,8 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
       request.searchText = this.searchText;
     }
 
-    // Tạo một request mới không phân trang để lấy toàn bộ dữ liệu
     const allDataRequest = { ...request, skipCount: 0, maxResultCount: 9999 };
 
-    // Gọi API để lấy dữ liệu phân trang
     this.overTimeService
       .getAll(request, this.month + 1, this.year, this.projectId)
       .pipe(finalize(() => {
@@ -63,12 +61,10 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
       }))
       .subscribe((result: any) => {
         this.listOverTime = result.result.items;
-        
-        // Gọi thêm một lần nữa để lấy toàn bộ dữ liệu không phân trang
+
         this.overTimeService.getAll(allDataRequest, this.month + 1, this.year, this.projectId)
           .subscribe((allDataResult: any) => {
-            this.totalOtHours = 0; // Reset tổng
-            // Tính tổng từ toàn bộ dữ liệu
+            this.totalOtHours = 0;
             allDataResult.result.items.forEach(data => {
               let userTotal = 0;
               data.listOverTimeHour.forEach(d => {
@@ -78,7 +74,6 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
             });
           });
 
-        // Xử lý dữ liệu phân trang để hiển thị
         this.listOverTime.forEach(data => {
           data.totalHour = 0;
           data.totalWorkingHour = 0;

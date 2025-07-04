@@ -46,7 +46,7 @@
 .column-header {
     position: relative;
     display: flex;
-    justify-content: center; /* căn giữa title */
+    justify-content: center;
     align-items: center;
   }
   
