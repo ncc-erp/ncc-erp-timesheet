@@ -71,7 +71,15 @@
                   <th style="width: 20px; min-width: 0px;">{{ "STT" | localize}}</th>
                   <th>{{ "User" | localize}}</th>
                   <th>{{ "Working Hours" | localize}}</th>
-                  <th>{{ "Working Hours x Coefficient" | localize}}</th>
+                  <th>
+                    <div class="column-header">
+                      <span class="title-text">{{ "Working Hours x Coefficient" | localize }}</span>
+                      <span class="total-hours-display">
+                        Hours: {{ totalOtHours | number:'1.0-1' }} / Days: {{ totalOtHours / 8 | number:'1.1-1' }}
+                      </span>
+                    </div>
+                  </th>
+                  
                 </tr>
               </thead>
               <tbody>
