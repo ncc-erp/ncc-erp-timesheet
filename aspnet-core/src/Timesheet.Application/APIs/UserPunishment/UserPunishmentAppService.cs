@@ -56,7 +56,7 @@ namespace TimesheetApplication.UserPunishment {
     }
 
     [HttpPost]
-    public async Task < UserPunishmentDto > CreateUserPunishmentAsync(CreateUserPunishmentDto input) {
+    public async Task <UserPunishmentDto> CreateUserPunishmentAsync(CreateUserPunishmentDto input) {
       try {
         await ValidateInputAsync(input);
 
@@ -78,7 +78,7 @@ namespace TimesheetApplication.UserPunishment {
     }
 
     private async Task ValidateInputAsync(CreateUserPunishmentDto input) {
-      var validationErrors = new List < string > ();
+      var validationErrors = new List <string> ();
 
       if (input == null) validationErrors.Add("Input cannot be null");
       if (input?.UserId <= 0) validationErrors.Add("Invalid UserId");
@@ -107,14 +107,14 @@ namespace TimesheetApplication.UserPunishment {
         throw new UserFriendlyException(string.Join("; ", validationErrors));
     }
 
-    private async Task < (Timesheet.Entities.PunishmentSystem punishmentSystem, User user) > GetRequiredEntitiesAsync(CreateUserPunishmentDto input) {
+    private async Task <(Timesheet.Entities.PunishmentSystem punishmentSystem, User user)> GetRequiredEntitiesAsync(CreateUserPunishmentDto input) {
       var punishmentSystem = await _workScope.GetAll < Timesheet.Entities.PunishmentSystem > ()
         .FirstOrDefaultAsync(x => x.Id == input.PunishmentSystemId);
 
-      var user = await _workScope.GetAll < User > ()
+      var user = await _workScope.GetAll<User> ()
         .FirstOrDefaultAsync(x => x.Id == input.UserId);
 
-      var errors = new List < string > ();
+      var errors = new List <string> ();
       if (punishmentSystem == null) errors.Add($"PunishmentSystem with Id {input.PunishmentSystemId} not found");
       if (user == null) errors.Add($"User with Id {input.UserId} not found");
 
@@ -125,8 +125,8 @@ namespace TimesheetApplication.UserPunishment {
     }
 
     private async Task ValidateBusinessRulesAsync(CreateUserPunishmentDto input, Timesheet.Entities.PunishmentSystem punishmentSystem) {
-      var businessErrors = new List < string > ();
-      var typeExists = await _workScope.GetAll < Timesheet.Entities.PunishmentSystem > ()
+      var businessErrors = new List <string> ();
+      var typeExists = await _workScope.GetAll <Timesheet.Entities.PunishmentSystem> ()
         .AnyAsync(x => x.Type == input.Type);
       if (!typeExists)
         businessErrors.Add($"Punishment type {input.Type} is not defined in PunishmentSystem. Please add it to PunishmentSystem first.");
@@ -134,7 +134,7 @@ namespace TimesheetApplication.UserPunishment {
       if (!punishmentSystem.IsActive)
         businessErrors.Add($"PunishmentSystem with Id {input.PunishmentSystemId} is not active");
       var today = DateTime.Today;
-      var existingPunishment = await _workScope.GetAll < Timesheet.Entities.UserPunishment > ()
+      var existingPunishment = await _workScope.GetAll <Timesheet.Entities.UserPunishment> ()
         .AnyAsync(x => x.UserId == input.UserId &&
           x.PunishmentSystemId == input.PunishmentSystemId &&
           x.DateAt.Date == today &&
@@ -144,6 +144,7 @@ namespace TimesheetApplication.UserPunishment {
       if (businessErrors.Any())
         throw new UserFriendlyException(string.Join("; ", businessErrors));
     }
+
     private Timesheet.Entities.UserPunishment CreateUserPunishmentEntity(CreateUserPunishmentDto input, Timesheet.Entities.PunishmentSystem punishmentSystem) {
       var calculatedTotalMoney = punishmentSystem.Money * input.Count;
       return new Timesheet.Entities.UserPunishment {
@@ -159,6 +160,7 @@ namespace TimesheetApplication.UserPunishment {
           CreatorUserId = AbpSession.UserId
       };
     }
+
     private UserPunishmentDto MapToDto(Timesheet.Entities.UserPunishment entity) {
         return new UserPunishmentDto {
           Id = entity.Id,
@@ -174,9 +176,10 @@ namespace TimesheetApplication.UserPunishment {
             LastModificationTime = entity.LastModificationTime
         };
       }
+
       [HttpGet]
-    public async Task < UserPunishmentDto > GetUserPunishmentAsync(EntityDto < long > input) {
-        var userPunishment = await _workScope.GetAsync < Timesheet.Entities.UserPunishment > (input.Id);
+    public async Task < UserPunishmentDto > GetUserPunishmentAsync(EntityDto <long> input) {
+        var userPunishment = await _workScope.GetAsync <Timesheet.Entities.UserPunishment> (input.Id);
         if (userPunishment == null) {
           throw new UserFriendlyException("User punishment not found");
         }
@@ -195,6 +198,7 @@ namespace TimesheetApplication.UserPunishment {
         };
         return result;
       }
+
       [HttpPut]
     public async Task UpdateUserPunishmentAsync(UpdateUserPunishmentDto input) {
       try {
@@ -208,22 +212,24 @@ namespace TimesheetApplication.UserPunishment {
         throw new UserFriendlyException("An error occurred while updating user punishment.");
       }
     }
-    private async Task < (Timesheet.Entities.UserPunishment UserPunishment, Timesheet.Entities.PunishmentSystem PunishmentSystem, User User) > LoadRequiredEntitiesAsync(UpdateUserPunishmentDto input) {
-      var userPunishment = await _workScope.GetAll < Timesheet.Entities.UserPunishment > ()
+
+        private async Task <(Timesheet.Entities.UserPunishment UserPunishment, Timesheet.Entities.PunishmentSystem PunishmentSystem, User User)> LoadRequiredEntitiesAsync(UpdateUserPunishmentDto input) {
+      var userPunishment = await _workScope.GetAll <Timesheet.Entities.UserPunishment> ()
         .FirstOrDefaultAsync(x => x.Id == input.Id) ??
         throw new UserFriendlyException($"User punishment with Id {input.Id} not found");
-      var punishmentSystem = await _workScope.GetAll < Timesheet.Entities.PunishmentSystem > ()
+      var punishmentSystem = await _workScope.GetAll<Timesheet.Entities.PunishmentSystem>()
         .FirstOrDefaultAsync(x => x.Id == input.PunishmentSystemId) ??
         throw new UserFriendlyException($"PunishmentSystem with Id {input.PunishmentSystemId} not found");
-      var user = await _workScope.GetAll < User > ()
+      var user = await _workScope.GetAll <User> ()
         .FirstOrDefaultAsync(x => x.Id == input.UserId) ??
         throw new UserFriendlyException($"User with Id {input.UserId} not found");
       return (userPunishment, punishmentSystem, user);
     }
+
     private async Task ValidateBusinessRulesAsync(UpdateUserPunishmentDto input, Timesheet.Entities.PunishmentSystem punishmentSystem) {
       if (!punishmentSystem.IsActive)
         throw new UserFriendlyException($"PunishmentSystem with Id {input.PunishmentSystemId} is not active");
-      var existingPunishment = await _workScope.GetAll < Timesheet.Entities.UserPunishment > ()
+      var existingPunishment = await _workScope.GetAll <Timesheet.Entities.UserPunishment> ()
         .FirstOrDefaultAsync(x => x.Id != input.Id &&
           x.UserId == input.UserId &&
           x.PunishmentSystemId == input.PunishmentSystemId &&
@@ -232,6 +238,7 @@ namespace TimesheetApplication.UserPunishment {
       if (existingPunishment != null)
         throw new UserFriendlyException($"User already has this punishment type on {input.DateAt:yyyy-MM-dd}");
     }
+
     private void UpdatePunishmentEntity(UpdateUserPunishmentDto input, Timesheet.Entities.UserPunishment userPunishment) {
       userPunishment.DateAt = input.DateAt;
       userPunishment.UserId = input.UserId;
@@ -243,8 +250,9 @@ namespace TimesheetApplication.UserPunishment {
       userPunishment.LastModificationTime = DateTime.Now;
       userPunishment.LastModifierUserId = AbpSession.UserId;
     }
+
     private void ValidateInput(UpdateUserPunishmentDto input) {
-      var validationRules = new List < (bool condition, string message) > {
+      var validationRules = new List <(bool condition, string message)> {
         (input == null, "Input cannot be null"),
         (input?.Id <= 0, "Valid Id is required"),
         (input?.UserId <= 0, "Valid UserId is required"),
@@ -262,6 +270,7 @@ namespace TimesheetApplication.UserPunishment {
       if (!validTypes.Contains(input.Type))
         throw new UserFriendlyException($"Invalid punishment type: {input.Type}. Valid types are: {string.Join(", ", validTypes)}");
     }
+
     private static UserPunishmentType[] GetValidPunishmentTypes() {
         return new [] {
           UserPunishmentType.Late,
@@ -277,23 +286,25 @@ namespace TimesheetApplication.UserPunishment {
             UserPunishmentType.Tracker_200k
         };
       }
+
       [HttpDelete]
-    public async Task DeleteUserPunishmentAsync(EntityDto < long > input) {
-        var userPunishment = await _workScope.GetAsync < Timesheet.Entities.UserPunishment > (input.Id);
+    public async Task DeleteUserPunishmentAsync(EntityDto<long>input) {
+        var userPunishment = await _workScope.GetAsync <Timesheet.Entities.UserPunishment> (input.Id);
         if (userPunishment == null) {
           throw new UserFriendlyException("User punishment not found");
         }
-        await _workScope.DeleteAsync < Timesheet.Entities.UserPunishment > (input.Id);
+        await _workScope.DeleteAsync <Timesheet.Entities.UserPunishment>(input.Id);
         await CurrentUnitOfWork.SaveChangesAsync();
       }
+
       [HttpGet]
-    public async Task < List < UserPunishmentDto >> GetAllUserPunishmentsAsync() {
+    public async Task <List<UserPunishmentDto>>GetAllUserPunishmentsAsync() {
         Logger.Info("Fetching all UserPunishments");
         try {
-          var userPunishments = await _workScope.GetAll < Timesheet.Entities.UserPunishment > ().ToListAsync();
+          var userPunishments = await _workScope.GetAll<Timesheet.Entities.UserPunishment>().ToListAsync();
           if (!userPunishments.Any()) {
             Logger.Warn("No UserPunishments found");
-            return new List < UserPunishmentDto > ();
+            return new List <UserPunishmentDto> ();
           }
           var result = userPunishments.Select(entity => new UserPunishmentDto {
             Id = entity.Id,
@@ -317,12 +328,13 @@ namespace TimesheetApplication.UserPunishment {
           throw new UserFriendlyException("An error occurred while fetching user punishments. Please try again.");
         }
       }
+
       [HttpGet]
-    public async Task < List < UserPunishmentDto >> GetUserPunishmentsAsync(long userId) {
+    public async Task <List<UserPunishmentDto>> GetUserPunishmentsAsync(long userId) {
       if (userId <= 0) {
         throw new UserFriendlyException("Valid UserId is required");
       }
-      var query = _workScope.GetAll < Timesheet.Entities.UserPunishment > ()
+      var query = _workScope.GetAll <Timesheet.Entities.UserPunishment> ()
         .Where(x => x.UserId == userId);
       var entities = await query.ToListAsync();
       var dtos = entities.Select(entity => new UserPunishmentDto {
@@ -340,9 +352,10 @@ namespace TimesheetApplication.UserPunishment {
       }).ToList();
       return dtos;
     }
+
     [AbpAuthorize]
     [HttpPost]
-    public async Task < List < PMReportItemDto >> ApplyPMReportPunishmentsAsync() {
+    public async Task <List<PMReportItemDto>>ApplyPMReportPunishmentsAsync() {
       return await _userPunishmentServices.ApplyPMReportPunishmentsAsync();
     }
   }

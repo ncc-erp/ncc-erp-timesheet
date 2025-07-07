@@ -136,6 +136,7 @@ namespace Timesheet.APIs.Timekeepings
             }
             return await q.ToListAsync();
         }
+
         private UserPunishmentSummaryDto CalculateUserPunishmentSummary(
             List<UserPunishment> userPunishments,
             List<Timekeeping> timekeepings)
@@ -158,6 +159,7 @@ namespace Timesheet.APIs.Timekeepings
                 TotalMonthlyPunishment = timekeepings.Sum(x => x.MoneyPunish)
             };
         }
+
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimeSheet_ViewMyTardinessDetail)]
         public async Task<List<GetTimekeepingUserDto>> GetMyDetails(int year, int month)
         {
@@ -225,6 +227,7 @@ namespace Timesheet.APIs.Timekeepings
             var moneyForPunish = listPunish.Where(x => x.Id == StatusPunish).Select(x => x.Money).FirstOrDefault();
             return moneyForPunish;
         }
+
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_Edit)]
         [HttpPost]
         public async Task<Timekeeping> UpdateTimekeeping(Timekeeping input)
@@ -290,6 +293,7 @@ namespace Timesheet.APIs.Timekeepings
             }
 
         }
+
         private string GetPunishmentTypeName(UserPunishmentType punishmentType)
         {
             var punishmentTypeNames = new Dictionary<UserPunishmentType,
@@ -342,6 +346,7 @@ namespace Timesheet.APIs.Timekeepings
               punishmentTypeNames[punishmentType] :
               punishmentType.ToString();
         }
+
         private async Task UpdateUserPunishmentNote(long userId, DateTime dateAt, UserPunishmentType punishmentType, string userNote, string punishmentTypeName)
         {
             try
