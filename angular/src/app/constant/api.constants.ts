@@ -258,8 +258,35 @@ export const APP_CONSTANT = {
     { "name": "Late Intern Review", "value": 12 },
     { "name": "Report 15:00-17:00", "value": 13 },
     { "name": "Report after 17:00", "value": 14 }
-    
   ],
+  
+  PunishmentGroups: {
+    NO_PUNISH: [0],
+    CHECK_IN_OUT: [1, 2, 3, 4, 5],
+    DAILY: [6],
+    MENTION: [7],  
+    TRACKER: [8, 9, 10, 11],            
+    LATE_REVIEW: [12],             
+    REPORT: [13, 14]               
+  },
+  
+  PunishmentTypeMap: {
+    0: ['NO_PUNISH', 'CHECK_IN_OUT', 'DAILY', 'MENTION', 'TRACKER', 'LATE_REVIEW', 'REPORT'], 
+    1: ['NO_PUNISH', 'CHECK_IN_OUT'], 
+    2: ['NO_PUNISH', 'CHECK_IN_OUT'],
+    3: ['NO_PUNISH', 'CHECK_IN_OUT'],
+    4: ['NO_PUNISH', 'CHECK_IN_OUT'],
+    5: ['NO_PUNISH', 'CHECK_IN_OUT'],
+    6: ['NO_PUNISH', 'DAILY'],
+    7: ['NO_PUNISH', 'MENTION'],
+    8: ['NO_PUNISH', 'TRACKER'],
+    9: ['NO_PUNISH', 'TRACKER'], 
+    10: ['NO_PUNISH', 'TRACKER'], 
+    11: ['NO_PUNISH', 'TRACKER'], 
+    12: ['NO_PUNISH', 'LATE_REVIEW'],
+    13: ['NO_PUNISH', 'REPORT'], 
+    14: ['NO_PUNISH', 'REPORT']  
+  },
   ProjectMemberType: {
     Expose: 0,
     Shadow: 1,

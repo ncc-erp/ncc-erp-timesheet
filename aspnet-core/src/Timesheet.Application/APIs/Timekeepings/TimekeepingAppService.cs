@@ -379,7 +379,7 @@ namespace Timesheet.APIs.Timekeepings
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timekeeping_UserNote)]
         [HttpPost]
         [UnitOfWork(IsolationLevel.ReadCommitted)]
-        public async Task<TraLoiKhieuLaiResultDto> TraLoiKhieuLai(TraLoiKhieuLaiDto input)
+        public async Task<RespondToComplaintResultDto> RespondToComplaint(RespondToComplaintDto input)
         {
             try
             {
@@ -396,10 +396,12 @@ namespace Timesheet.APIs.Timekeepings
                              t.DateAt.Date == userPunishment.DateAt.Date)
                     .FirstOrDefaultAsync();
 
-                if ((oldPunishmentType == UserPunishmentType.Daily || oldPunishmentType == UserPunishmentType.Mention) &&
-                  input.ChangeCount.HasValue && input.ChangeCount != 0)
+                if (oldPunishmentType == UserPunishmentType.Daily || oldPunishmentType == UserPunishmentType.Mention)
                 {
-                    return await HandleChangePunishmentCount(userPunishment, input, timekeeping);
+                    if (input.ChangeCount.HasValue)
+                    {
+                        return await HandleChangePunishmentCount(userPunishment, input, timekeeping);
+                    }
                 }
 
                 ValidatePunishmentTypeChange(oldPunishmentType, newPunishmentType);
@@ -434,7 +436,7 @@ namespace Timesheet.APIs.Timekeepings
                 throw new UserFriendlyException("Sorry, something went wrong while updating the userpunishments.");
             }
         }
-        private async Task<TraLoiKhieuLaiResultDto> HandlePunishmentTypeChange(
+        private async Task<RespondToComplaintResultDto> HandlePunishmentTypeChange(
             UserPunishment userPunishment,
             UserPunishmentType oldType,
             UserPunishmentType newType,
@@ -462,7 +464,7 @@ namespace Timesheet.APIs.Timekeepings
                     await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
                 }
                 
-                return new TraLoiKhieuLaiResultDto
+                return new RespondToComplaintResultDto
                 {
                     Success = true,
                     PunishmentId = 0,
@@ -482,7 +484,7 @@ namespace Timesheet.APIs.Timekeepings
                 await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
             }
 
-            return new TraLoiKhieuLaiResultDto
+            return new RespondToComplaintResultDto
             {
                 Success = true,
                 PunishmentId = userPunishment.Id,
@@ -541,46 +543,41 @@ namespace Timesheet.APIs.Timekeepings
                                                newType == UserPunishmentType.NoCheckInAndNoCheckOut;
             }
         }
-        private async Task<TraLoiKhieuLaiResultDto> HandleChangePunishmentCount(
-            UserPunishment userPunishment, 
-            TraLoiKhieuLaiDto input,
-            Timekeeping timekeeping)
+        private async Task<RespondToComplaintResultDto> HandleChangePunishmentCount(
+          UserPunishment userPunishment,
+          RespondToComplaintDto input,
+          Timekeeping timekeeping)
         {
             using (var uow = UnitOfWorkManager.Begin())
             {
                 try
                 {
-                    var changeCount = input.ChangeCount.Value;
-                    var newCount = userPunishment.Count + changeCount;
-                    
-                    if (newCount < 0)
-                    {
-                        newCount = 0;
-                    }
-                    
-                    userPunishment.Count = newCount;
-                    
-                    if (timekeeping != null)
-                    {
-                        if (userPunishment.Type == UserPunishmentType.Mention)
-                        {
-                            timekeeping.CountPunishMention = Math.Max(0, timekeeping.CountPunishMention + changeCount);
-                        }
-                        else if (userPunishment.Type == UserPunishmentType.Daily)
-                        {
-                            timekeeping.CountPunishDaily = Math.Max(0, timekeeping.CountPunishDaily + changeCount);
-                        }
-                        
-                        timekeeping.NoteReply = input.NoteReply;
-                        await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
-                    }
+                    var newCount = input.ChangeCount.Value;
 
-                    if (userPunishment.Count <= 0)
+                    if (newCount <= 0)
                     {
+                        var punishmentType = userPunishment.Type;
+
                         await WorkScope.GetRepo<UserPunishment>().DeleteAsync(userPunishment.Id);
+
+                        if (timekeeping != null)
+                        {
+                            if (punishmentType == UserPunishmentType.Mention)
+                            {
+                                timekeeping.CountPunishMention = 0;
+                            }
+                            else if (punishmentType == UserPunishmentType.Daily)
+                            {
+                                timekeeping.CountPunishDaily = 0;
+                            }
+
+                            timekeeping.NoteReply = input.NoteReply;
+                            await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
+                        }
+
                         await uow.CompleteAsync();
-                        
-                        return new TraLoiKhieuLaiResultDto
+
+                        return new RespondToComplaintResultDto
                         {
                             Success = true,
                             PunishmentId = 0,
@@ -590,10 +587,27 @@ namespace Timesheet.APIs.Timekeepings
                         };
                     }
 
+                    userPunishment.Count = newCount;
+
+                    if (timekeeping != null)
+                    {
+                        if (userPunishment.Type == UserPunishmentType.Mention)
+                        {
+                            timekeeping.CountPunishMention = newCount;
+                        }
+                        else if (userPunishment.Type == UserPunishmentType.Daily)
+                        {
+                            timekeeping.CountPunishDaily = newCount;
+                        }
+
+                        timekeeping.NoteReply = input.NoteReply;
+                        await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
+                    }
+
                     var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
-                        .Where(x => x.Type == userPunishment.Type && x.IsActive)
-                        .OrderByDescending(x => x.CreationTime)
-                        .FirstOrDefaultAsync();
+                      .Where(x => x.Type == userPunishment.Type && x.IsActive)
+                      .OrderByDescending(x => x.CreationTime)
+                      .FirstOrDefaultAsync();
 
                     if (punishmentSystem != null)
                     {
@@ -605,7 +619,7 @@ namespace Timesheet.APIs.Timekeepings
 
                     await uow.CompleteAsync();
 
-                    return new TraLoiKhieuLaiResultDto
+                    return new RespondToComplaintResultDto
                     {
                         Success = true,
                         PunishmentId = userPunishment.Id,

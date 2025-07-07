@@ -13,8 +13,12 @@ export class ComplainReplyComponent extends AppComponentBase implements OnInit, 
   complain = {} as complainDto;
   showChangeCount = false;
   
-  readonly PUNISH_TYPES_WITH_COUNT = [6, 7];
+  readonly PUNISH_TYPES_WITH_COUNT = [6, 7]; 
   changeCount: number = 0;
+  filteredPunishTypes: any[] = [];
+  
+  private readonly PUNISHMENT_GROUPS = APP_CONSTANT.PunishmentGroups;
+  private readonly PUNISHMENT_TYPE_MAP = APP_CONSTANT.PunishmentTypeMap;
 
   constructor(
     private timekeepingService: TimekeepingService, 
@@ -32,6 +36,13 @@ export class ComplainReplyComponent extends AppComponentBase implements OnInit, 
     this.complain.noteReply = this.data.noteReply;
     this.complain.statusPunish = this.data.statusPunish;
     this.complain.punishType = this.data.punishType;
+
+    if (this.PUNISH_TYPES_WITH_COUNT.some(x => x === this.complain.statusPunish)) {
+      this.changeCount = this.data.count || 0;
+      this.complain.changeCount = this.changeCount;
+    }
+    
+    this.updateFilteredPunishTypes(this.complain.statusPunish);
   }
 
   ngAfterViewInit() {
@@ -42,12 +53,12 @@ export class ComplainReplyComponent extends AppComponentBase implements OnInit, 
   }
 
   private checkPunishType(punishType: number) {
-    this.showChangeCount = this.PUNISH_TYPES_WITH_COUNT.indexOf(punishType) !== -1;
+    this.showChangeCount = this.PUNISH_TYPES_WITH_COUNT.some(x => x === punishType);
     if (this.showChangeCount) {
-      this.changeCount = this.complain.changeCount !== null && this.complain.changeCount !== undefined 
-        ? this.complain.changeCount 
-        : 0;
-      this.complain.changeCount = this.changeCount;
+      if (this.complain.changeCount === undefined || this.complain.changeCount === null) {
+        this.complain.changeCount = this.data.count || 0;
+      }
+      this.changeCount = this.complain.changeCount;
     } else {
       this.complain.changeCount = null;
     }
@@ -55,18 +66,37 @@ export class ComplainReplyComponent extends AppComponentBase implements OnInit, 
   
   onPunishTypeChange() {
     this.checkPunishType(this.complain.statusPunish);
+    this.updateFilteredPunishTypes(this.complain.statusPunish);
     this.cdr.detectChanges();
   }
 
+  private updateFilteredPunishTypes(currentType: number) {
+    const allowedGroups = this.PUNISHMENT_TYPE_MAP[currentType] || [];
+    
+    const allowedTypes = new Set<number>();
+    allowedGroups.forEach(group => {
+      this.PUNISHMENT_GROUPS[group].forEach(type => allowedTypes.add(type));
+    });
+    
+    this.filteredPunishTypes = APP_CONSTANT.PunishRules
+      .filter(option => allowedTypes.has(option.value))
+      .sort((a, b) => a.value - b.value);
+  }
+
   increment() {
-    this.changeCount++;
-    this.complain.changeCount = this.changeCount;
+    if (this.PUNISH_TYPES_WITH_COUNT.some(x => x === this.complain.statusPunish)) {
+      this.changeCount++;
+      this.complain.changeCount = this.changeCount;
+    }
   }
 
   decrement() {
-    this.changeCount--;
-    this.complain.changeCount = this.changeCount;
+    if (this.PUNISH_TYPES_WITH_COUNT.some(x => x === this.complain.statusPunish) && this.changeCount > 0) {
+      this.changeCount--;
+      this.complain.changeCount = this.changeCount;
+    }
   }
+
   saveAndClose() {
     if (this.showChangeCount) {
       this.complain.changeCount = this.changeCount;

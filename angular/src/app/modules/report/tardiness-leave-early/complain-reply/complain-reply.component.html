@@ -20,7 +20,7 @@
         <div style="flex: 1; margin-right: 180px;">
           <mat-form-field style="width: 100%; margin-bottom: 0;">
             <mat-select [(ngModel)]="complain.statusPunish" (selectionChange)="onPunishTypeChange()" name="statusPunish">
-              <mat-option *ngFor="let item of APP_CONSTANT.PunishRules" [value]="item.value">
+              <mat-option *ngFor="let item of filteredPunishTypes" [value]="item.value">
                 {{item.name}}
               </mat-option>
             </mat-select>
@@ -33,7 +33,7 @@
             <button mat-icon-button color="primary" (click)="decrement()" type="button" matTooltip="Decrease">
               <mat-icon>remove_circle_outline</mat-icon>
             </button>
-            <div class="mx-2" style="min-width: 24px; text-align: center;">{{changeCount > 0 ? '+' : ''}}{{changeCount === 0 ? '0' : changeCount}}</div>
+            <div class="mx-2" style="min-width: 24px; text-align: center;">{{changeCount}}</div>
             <button mat-icon-button color="primary" (click)="increment()" type="button" matTooltip="Increase">
               <mat-icon>add_circle_outline</mat-icon>
             </button>
