@@ -581,6 +581,7 @@ namespace Timesheet.APIs.Timekeepings
                 throw new UserFriendlyException("Sorry, something went wrong while updating the userpunishments.");
             }
         }
+        
         private async Task<RespondToComplaintResultDto> HandlePunishmentTypeChange(
             UserPunishment userPunishment,
             UserPunishmentType oldType,
@@ -638,6 +639,7 @@ namespace Timesheet.APIs.Timekeepings
                 RemainingCount = userPunishment.Count
             };
         }
+        
         private async Task HandleOldPunishmentType(
             Timekeeping timekeeping, 
             UserPunishmentType oldType, 
@@ -669,6 +671,7 @@ namespace Timesheet.APIs.Timekeepings
             return type >= UserPunishmentType.Late && 
                    type <= UserPunishmentType.NoCheckInAndNoCheckOut;
         }
+        
         private async Task HandleNewPunishmentType(
             Timekeeping timekeeping, 
             UserPunishmentType newType,
@@ -688,6 +691,7 @@ namespace Timesheet.APIs.Timekeepings
                                                newType == UserPunishmentType.NoCheckInAndNoCheckOut;
             }
         }
+        
         private async Task<RespondToComplaintResultDto> HandleChangePunishmentCount(
           UserPunishment userPunishment,
           RespondToComplaintDto input,
@@ -780,6 +784,7 @@ namespace Timesheet.APIs.Timekeepings
                 }
             }
         }
+        
         private void ValidatePunishmentTypeChange(UserPunishmentType oldType, UserPunishmentType newType)
         {
             if (newType == UserPunishmentType.NoPunish)
@@ -819,6 +824,7 @@ namespace Timesheet.APIs.Timekeepings
                 throw new UserFriendlyException(errorMessage);
             }
         }
+        
         private string GetPunishmentGroup(UserPunishmentType type)
         {
             if (type == UserPunishmentType.ReviewIntern) 
