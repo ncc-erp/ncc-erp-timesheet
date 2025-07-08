@@ -1,4 +1,4 @@
-﻿using Abp.Authorization;
+using Abp.Authorization;
 using Abp.Configuration;
 using Abp.UI;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -82,60 +82,205 @@ namespace Timesheet.APIs.Timekeepings
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_View)]
         [HttpGet]
-        public async Task<List<GetTimekeepingUserDto>> GetDetailTimekeeping(int year, int month, int? day, long? userId, long? branchId, bool? isPunished, bool? isComplain, CheckInCheckOutPunishmentType? statusPunish)
+        public async Task<List<UserPunishmentDetailDto>> GetDetailTimekeeping(
+          int year, int month, int? day,
+          long? userId, long? branchId,
+          bool? isPunished, bool? isComplain,
+          UserPunishmentType? statusPunish = null)
         {
-            //var m = Int64.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
-            //var viewAll = PermissionChecker.IsGranted(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_View);
-            var q = (from t in WorkScope.GetAll<Timekeeping>()
-                     join u in WorkScope.GetAll<User>() on t.LastModifierUserId equals u.Id into tu
-                     where (!userId.HasValue || t.UserId == userId) &&
-              (t.DateAt.Year == year && t.DateAt.Month == month) &&
-              (!day.HasValue || day.Value < 0 || day == t.DateAt.Day) &&
-              (!branchId.HasValue || branchId == t.User.BranchId) &&
-              (!isPunished.HasValue || isPunished == t.IsPunishedCheckIn) &&
-              (!isComplain.HasValue || String.IsNullOrEmpty(t.UserNote) != isComplain) &&
-              (!statusPunish.HasValue || t.StatusPunish == statusPunish)
-                     select new GetTimekeepingUserDto
-                     {
-                         UserId = t.UserId,
-                         UserName = t.User.FullName,
-                         UserType = t.User.Type,
-                         UserEmail = t.UserEmail,
-                         Branch = t.User.BranchOld,
-                         BranchColor = t.User.Branch.Color,
-                         BranchDisplayName = t.User.Branch.DisplayName,
-                         BranchId = t.User.Branch.Id,
-                         AvatarPath = t.User.AvatarPath,
-                         Date = t.DateAt,
-                         TimekeepingId = t.Id,
-                         RegistrationTimeStart = t.RegisterCheckIn,
-                         RegistrationTimeEnd = t.RegisterCheckOut,
-                         CheckIn = t.CheckIn,
-                         CheckOut = t.CheckOut,
-                         ResultCheckIn = CommonUtils.SubtractHHmm(t.CheckIn, t.RegisterCheckIn),
-                         ResultCheckOut = CommonUtils.SubtractHHmm(t.RegisterCheckOut, t.CheckOut),
-                         EditByUserName = tu.FirstOrDefault().UserName,
-                         Status = t.IsPunishedCheckIn ? PunishmentStatus.Punish : PunishmentStatus.Normal,
-                         EditByUserId = t.LastModifierUserId,
-                         UserNote = t.UserNote,
-                         NoteReply = t.NoteReply,
-                         TrackerTime = t.TrackerTime,
-                         StatusPunish = t.StatusPunish,
-                         MoneyPunish = t.MoneyPunish,
-                         DailyPunish = t.CountPunishDaily,
-                         MentionPunish = t.CountPunishMention,
-                     });
+            if (statusPunish == UserPunishmentType.NoPunish || (statusPunish == null && (isPunished == false)))
+            {
+                var query = from t in WorkScope.GetAll<Timekeeping>()
+                            join u in WorkScope.GetAll<User>() on t.UserId equals u.Id
+                            where t.DateAt.Year == year &&
+                              t.DateAt.Month == month &&
+                              t.StatusPunish == CheckInCheckOutPunishmentType.NoPunish &&
+                              t.CountPunishDaily == 0 &&
+                              t.CountPunishMention == 0 &&
+                              (!userId.HasValue || t.UserId == userId) &&
+                              (!day.HasValue || day < 0 || t.DateAt.Day == day) &&
+                              (!branchId.HasValue || u.BranchId == branchId) &&
+                              (!isPunished.HasValue || t.IsPunishedCheckIn == isPunished) &&
+                              (!isComplain.HasValue || string.IsNullOrEmpty(t.UserNote) != isComplain)
+                            join tu in WorkScope.GetAll<User>() on t.LastModifierUserId equals tu.Id into tuGroup
+                            from tu in tuGroup.DefaultIfEmpty()
+                            select new UserPunishmentDetailDto
+                            {
+                                UserId = t.UserId,
+                                UserName = u.FullName,
+                                UserType = u.Type,
+                                UserEmail = u.EmailAddress,
+                                Branch = u.BranchOld,
+                                BranchColor = u.Branch.Color,
+                                BranchDisplayName = u.Branch.DisplayName,
+                                BranchId = u.Branch.Id,
+                                AvatarPath = u.AvatarPath,
+                                Date = t.DateAt,
+                                TimekeepingId = t.Id,
+                                UserpunishmentId = 0,
+                                RegistrationTimeStart = t.RegisterCheckIn,
+                                RegistrationTimeEnd = t.RegisterCheckOut,
+                                CheckIn = t.CheckIn,
+                                CheckOut = t.CheckOut,
+                                ResultCheckIn = CommonUtils.SubtractHHmm(t.CheckIn, t.RegisterCheckIn),
+                                ResultCheckOut = CommonUtils.SubtractHHmm(t.RegisterCheckOut, t.CheckOut),
+                                EditByUserName = tu != null ? tu.UserName : string.Empty,
+                                EditByUserId = t.LastModifierUserId,
+                                UserNote = t.UserNote,
+                                NoteReply = t.NoteReply,
+                                TrackerTime = t.TrackerTime,
+                                StatusPunish = UserPunishmentType.NoPunish,
+                                MoneyPunish = 0,
+                                Count = 0,
+                                IsPunished = false,
+                                PunishmentSystemId = null
+                            };
 
-            if (isComplain.HasValue && isComplain.Value)
-            {
-                q = q.OrderByDescending(t => t.Status).ThenByDescending(s => s.ResultCheckIn).ThenByDescending(s => s.Date);
+                var noPunishResult = await query.ToListAsync();
+
+                return isComplain == true ?
+                  noPunishResult.OrderByDescending(d => d.IsPunished)
+                  .ThenByDescending(d => d.ResultCheckIn)
+                  .ThenByDescending(d => d.Date)
+                  .ToList() :
+                  noPunishResult.OrderByDescending(d => d.Date)
+                  .ThenByDescending(d => d.IsPunished)
+                  .ThenByDescending(d => d.ResultCheckIn)
+                  .ToList();
             }
-            else
+
+            var upList = await WorkScope.GetAll<UserPunishment>()
+              .Include(up => up.User)
+              .ThenInclude(u => u.Branch)
+              .Where(up => up.DateAt.Year == year && up.DateAt.Month == month)
+              .ToListAsync();
+
+            var tkList = await WorkScope.GetAll<Timekeeping>()
+              .Where(t => t.DateAt.Year == year && t.DateAt.Month == month)
+              .ToListAsync();
+
+            var userList = await WorkScope.GetAll<User>()
+              .Select(u => new {
+                  u.Id,
+                  u.UserName
+              })
+              .ToListAsync();
+
+            var joined = from up in upList
+                         join t in tkList
+                         on (up.UserId, up.DateAt) equals (t.UserId, t.DateAt)
+                         into gj
+                         from t in gj.DefaultIfEmpty()
+
+                         let lastModId = t != null ? (long?)t.LastModifierUserId : null
+
+                         join tu in userList
+                         on lastModId equals tu.Id
+                         into mgj
+                         from tu in mgj.DefaultIfEmpty()
+
+                         where (!userId.HasValue || up.UserId == userId) &&
+                           (!day.HasValue || day < 0 || up.DateAt.Day == day) &&
+                           (!branchId.HasValue || up.User.BranchId == branchId) &&
+                           (!isPunished.HasValue || (up.Type != UserPunishmentType.NoPunish) == isPunished.Value) &&
+                           (!isComplain.HasValue || (string.IsNullOrEmpty(up.UserNote) != isComplain.Value)) &&
+                           (!statusPunish.HasValue || up.Type == statusPunish.Value)
+                         select new UserPunishmentDetailDto
+                         {
+                             TimekeepingId = t?.Id,
+                             UserpunishmentId = up.Id,
+                             UserId = up.UserId,
+                             UserName = up.User.FullName,
+                             UserType = up.User.Type,
+                             UserEmail = up.User.EmailAddress,
+                             Date = up.DateAt,
+                             Count = up.Count,
+                             MoneyPunish = up.TotalMoney,
+                             UserNote = up.UserNote,
+                             NoteReply = up.NoteReply,
+                             PunishmentSystemId = up.PunishmentSystemId,
+                             CheckIn = t?.CheckIn,
+                             CheckOut = t?.CheckOut,
+                             RegistrationTimeStart = t?.RegisterCheckIn,
+                             RegistrationTimeEnd = t?.RegisterCheckOut,
+                             TrackerTime = t?.TrackerTime,
+                             ResultCheckIn = t != null ? (double?)CommonUtils.SubtractHHmm(t.CheckIn, t.RegisterCheckIn) : null,
+                             ResultCheckOut = t != null ? (double?)CommonUtils.SubtractHHmm(t.RegisterCheckOut, t.CheckOut) : null,
+                             AvatarPath = up.User.AvatarPath,
+                             BranchDisplayName = up.User.Branch?.DisplayName,
+                             BranchColor = up.User.Branch?.Color,
+                             BranchId = up.User.BranchId,
+                             IsPunished = up.Type != UserPunishmentType.NoPunish,
+                             StatusPunish = up.Type,
+                             EditByUserId = t?.LastModifierUserId,
+                             EditByUserName = tu?.UserName
+                         };
+
+            var finalResult = joined.ToList();
+
+            if (statusPunish == null && (isPunished == null || isPunished == false))
             {
-                q = q.OrderByDescending(t => t.Date).ThenByDescending(s => s.Status).ThenByDescending(s => s.ResultCheckIn);
+                var noPunishQuery = from t in WorkScope.GetAll<Timekeeping>()
+                                    join u in WorkScope.GetAll<User>() on t.UserId equals u.Id
+                                    where t.DateAt.Year == year &&
+                                      t.DateAt.Month == month &&
+                                      t.StatusPunish == CheckInCheckOutPunishmentType.NoPunish &&
+                                      t.CountPunishDaily == 0 &&
+                                      t.CountPunishMention == 0 &&
+                                      (!userId.HasValue || t.UserId == userId) &&
+                                      (!day.HasValue || day < 0 || t.DateAt.Day == day) &&
+                                      (!branchId.HasValue || u.BranchId == branchId) &&
+                                      (!isPunished.HasValue || t.IsPunishedCheckIn == isPunished) &&
+                                      (!isComplain.HasValue || string.IsNullOrEmpty(t.UserNote) != isComplain)
+                                    join tu in WorkScope.GetAll<User>() on t.LastModifierUserId equals tu.Id into tuGroup
+                                    from tu in tuGroup.DefaultIfEmpty()
+                                    select new UserPunishmentDetailDto
+                                    {
+                                        UserId = t.UserId,
+                                        UserName = u.FullName,
+                                        UserType = u.Type,
+                                        UserEmail = u.EmailAddress,
+                                        Branch = u.BranchOld,
+                                        BranchColor = u.Branch.Color,
+                                        BranchDisplayName = u.Branch.DisplayName,
+                                        BranchId = u.Branch.Id,
+                                        AvatarPath = u.AvatarPath,
+                                        Date = t.DateAt,
+                                        TimekeepingId = t.Id,
+                                        UserpunishmentId = 0,
+                                        RegistrationTimeStart = t.RegisterCheckIn,
+                                        RegistrationTimeEnd = t.RegisterCheckOut,
+                                        CheckIn = t.CheckIn,
+                                        CheckOut = t.CheckOut,
+                                        ResultCheckIn = CommonUtils.SubtractHHmm(t.CheckIn, t.RegisterCheckIn),
+                                        ResultCheckOut = CommonUtils.SubtractHHmm(t.RegisterCheckOut, t.CheckOut),
+                                        EditByUserName = tu != null ? tu.UserName : string.Empty,
+                                        EditByUserId = t.LastModifierUserId,
+                                        UserNote = t.UserNote,
+                                        NoteReply = t.NoteReply,
+                                        TrackerTime = t.TrackerTime,
+                                        StatusPunish = UserPunishmentType.NoPunish,
+                                        MoneyPunish = 0,
+                                        Count = 0,
+                                        IsPunished = false,
+                                        PunishmentSystemId = null
+                                    };
+
+                var noPunishResult = await noPunishQuery.ToListAsync();
+                finalResult = finalResult.Union(noPunishResult).ToList();
             }
-            return await q.ToListAsync();
+
+            return isComplain == true ?
+              finalResult.OrderByDescending(d => d.IsPunished)
+              .ThenByDescending(d => d.ResultCheckIn)
+              .ThenByDescending(d => d.Date)
+              .ToList() :
+              finalResult.OrderByDescending(d => d.Date)
+              .ThenByDescending(d => d.IsPunished)
+              .ThenByDescending(d => d.ResultCheckIn)
+              .ToList();
         }
+
 
         private UserPunishmentSummaryDto CalculateUserPunishmentSummary(
             List<UserPunishment> userPunishments,

@@ -65,7 +65,9 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
   public itemPerPage: number = 50;
   listBranch: BranchDto[] = [];
   branchSearch: FormControl = new FormControl("")
+  statusSearch: FormControl = new FormControl("")
   listBranchFilter : BranchDto[];
+  filteredPunishRules: any[] = [];
 
   public currentSortColumn: string = "transactionDate";
   public sortDirection: number = 0;
@@ -106,6 +108,11 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
     this.getUser();
     this.onUserChange();
     this.getListBranch();
+    this.filteredPunishRules = this.APP_CONSTANT.PunishRules;
+    
+    this.statusSearch.valueChanges.subscribe(() => {
+      this.filterStatus();
+    });
   }
   setDataDefaul()
   {
@@ -125,6 +132,16 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
       this.listBranch = this.listBranchFilter.filter(data => data.displayName.toLowerCase().includes(this.branchSearch.value.toLowerCase().trim()));
     } else {
       this.listBranch = this.listBranchFilter.slice();
+    }
+  }
+  filterStatus() {
+    if (this.statusSearch.value) {
+      const searchValue = this.statusSearch.value.toLowerCase().trim();
+      this.filteredPunishRules = this.APP_CONSTANT.PunishRules.filter(
+        item => item.name.toLowerCase().includes(searchValue)
+      );
+    } else {
+      this.filteredPunishRules = this.APP_CONSTANT.PunishRules;
     }
   }
   getData() {
@@ -335,7 +352,10 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
   }
   public maskTime = [/[\d]/, /\d/, ':', /\d/, /\d/]
 
-  //Hàm Sort theo các trường
+  getStatusColorClass(statusPunish: number): string {
+    return `punish-status-${statusPunish}`;
+  }
+
   handleSortByColumn(columnName) {
     if (this.currentSortColumn !== columnName) {
       this.sortDirection = -1;
