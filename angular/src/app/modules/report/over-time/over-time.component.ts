@@ -20,6 +20,7 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
   listYear = APP_CONSTANT.ListYear;
   listOverTime: OverTimeItem[] = [];
   searchText = '';
+  totalOtHours = 0;
   projectFilter = []
   projectId = -1;
   projectSearch: FormControl = new FormControl("")
@@ -51,6 +52,8 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
       request.searchText = this.searchText;
     }
 
+    const allDataRequest = { ...request, skipCount: 0, maxResultCount: 9999 };
+
     this.overTimeService
       .getAll(request, this.month + 1, this.year, this.projectId)
       .pipe(finalize(() => {
@@ -58,6 +61,19 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
       }))
       .subscribe((result: any) => {
         this.listOverTime = result.result.items;
+
+        this.overTimeService.getAll(allDataRequest, this.month + 1, this.year, this.projectId)
+          .subscribe((allDataResult: any) => {
+            this.totalOtHours = 0;
+            allDataResult.result.items.forEach(data => {
+              let userTotal = 0;
+              data.listOverTimeHour.forEach(d => {
+                userTotal += d.otHour;
+              });
+              this.totalOtHours += userTotal;
+            });
+          });
+
         this.listOverTime.forEach(data => {
           data.totalHour = 0;
           data.totalWorkingHour = 0;
@@ -67,6 +83,7 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
             d.date = moment(d.date).format("DD/MM/YYYY");
           });
         });
+        
         this.showPaging(result.result, pageNumber);
       });
 
@@ -77,10 +94,8 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
 
   formatHour(time) {
     const hours = Math.floor(time);
-    const rhours = ('0' + hours).slice(-2);
-    const minutes = (time - hours) * 60;
-    const rminutes = ('0' + minutes).slice(-2);
-    return rhours + ':' + rminutes;
+    const minutes = Math.round((time - hours) * 60);
+    return `${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
   }
 
   getProjects() {
