@@ -78,7 +78,7 @@ export class TimekeepingService extends BaseApiService {
     return this.http.post<any>(this.rootUrl + '/UserKhieuLai', param);
   }
   answerComplain(param): Observable<any> {
-    return this.http.post<any>(this.rootUrl + '/TraLoiKhieuLai', param);
+    return this.http.post<any>(this.rootUrl + '/RespondToComplaint', param);
 
   }
 }

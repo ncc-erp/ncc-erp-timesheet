@@ -18,6 +18,8 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
+using Abp.Domain.Uow;
 using Timesheet.APIs.ReviewDetails.Dto;
 using Timesheet.APIs.Timekeepings.Dto;
 using Timesheet.DomainServices;
@@ -521,37 +523,325 @@ namespace Timesheet.APIs.Timekeepings
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timekeeping_UserNote)]
         [HttpPost]
-        public async Task<Timekeeping> TraLoiKhieuLai(TimekeepingDto input)
+        [UnitOfWork(IsolationLevel.ReadCommitted)]
+        public async Task<RespondToComplaintResultDto> RespondToComplaint(RespondToComplaintDto input)
         {
-            var t = await WorkScope.GetAsync<Timekeeping>(input.Id);
-            if (input.StatusPunish == CheckInCheckOutPunishmentType.NoPunish)
+            try
             {
-                throw new UserFriendlyException("Vui lòng chọn loại phạt trước khi trả lời khiếu nại!");
+                var userPunishment = await this.WorkScope.GetAll<UserPunishment>()
+                    .Where(x => x.Id == input.UserpunishmentId)
+                    .FirstOrDefaultAsync() ?? 
+                    throw new UserFriendlyException("No matching record found to update.");
+
+                var oldPunishmentType = userPunishment.Type;
+                var newPunishmentType = input.StatusPunish;
+
+                var timekeeping = await this.WorkScope.GetAll<Timekeeping>()
+                    .Where(t => t.UserId == userPunishment.UserId && 
+                             t.DateAt.Date == userPunishment.DateAt.Date)
+                    .FirstOrDefaultAsync();
+
+                if (oldPunishmentType == UserPunishmentType.Daily || oldPunishmentType == UserPunishmentType.Mention)
+                {
+                    if (input.ChangeCount.HasValue)
+                    {
+                        return await HandleChangePunishmentCount(userPunishment, input, timekeeping);
+                    }
+                }
+
+                ValidatePunishmentTypeChange(oldPunishmentType, newPunishmentType);
+                PunishmentSystem punishmentSystem = null;
+                if (newPunishmentType != UserPunishmentType.NoPunish)
+                {
+                    punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
+                        .Where(x => x.Type == newPunishmentType && x.IsActive)
+                        .OrderByDescending(x => x.CreationTime)
+                        .FirstOrDefaultAsync() ?? 
+                        throw new UserFriendlyException("No matching punishment configuration found.");
+                }
+
+                var result = await HandlePunishmentTypeChange(
+                    userPunishment, 
+                    oldPunishmentType, 
+                    newPunishmentType, 
+                    punishmentSystem, 
+                    timekeeping, 
+                    input.NoteReply);
+
+                await CurrentUnitOfWork.SaveChangesAsync();
+                return result;
             }
-            if (t.StatusPunish != input.StatusPunish)
+            catch (UserFriendlyException)
             {
-                throw new UserFriendlyException("Bạn phải chọn đúng loại phạt mà bản ghi đang bị phạt!");
+                throw;
             }
-            t.NoteReply = input.NoteReply;
-            if (t.StatusPunish == CheckInCheckOutPunishmentType.NoPunish)
+            catch (Exception ex)
             {
-                t.IsPunishedCheckIn = false;
+                Logger.Error("Error while updating punishment: " + ex.Message, ex);
+                throw new UserFriendlyException("Sorry, something went wrong while updating the userpunishments.");
             }
-            if (new List<CheckInCheckOutPunishmentType> {
-          CheckInCheckOutPunishmentType.Late,
-          CheckInCheckOutPunishmentType.NoCheckIn,
-          CheckInCheckOutPunishmentType.NoCheckOut,
-          CheckInCheckOutPunishmentType.LateAndNoCheckOut,
-          CheckInCheckOutPunishmentType.NoCheckInAndNoCheckOut
-        }.Contains(t.StatusPunish))
+        }
+        
+        private async Task<RespondToComplaintResultDto> HandlePunishmentTypeChange(
+            UserPunishment userPunishment,
+            UserPunishmentType oldType,
+            UserPunishmentType newType,
+            PunishmentSystem punishmentSystem,
+            Timekeeping timekeeping,
+            string noteReply)
+        {
+            await HandleOldPunishmentType(timekeeping, oldType, newType, userPunishment.Count);
+
+            userPunishment.Type = newType;
+            userPunishment.NoteReply = noteReply;
+            
+            if (punishmentSystem != null)
             {
-                t.IsPunishedCheckIn = true;
+                userPunishment.PunishmentSystemId = punishmentSystem.Id;
+                userPunishment.TotalMoney = punishmentSystem.Money * (userPunishment.Count > 0 ? userPunishment.Count : 1);
             }
-            t.MoneyPunish = await GetMoneyPunishByType(t.StatusPunish);
-            await WorkScope.GetRepo<Timekeeping>().UpdateAsync(t);
-            return t;
+            else if (newType == UserPunishmentType.NoPunish)
+            {
+                await WorkScope.GetRepo<UserPunishment>().DeleteAsync(userPunishment.Id);
+                
+                if (timekeeping != null)
+                {
+                    timekeeping.NoteReply = noteReply;
+                    await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
+                }
+                
+                return new RespondToComplaintResultDto
+                {
+                    Success = true,
+                    PunishmentId = 0,
+                    PunishmentType = UserPunishmentType.NoPunish.ToString(),
+                    PunishmentMoney = 0,
+                    RemainingCount = 0
+                };
+            }
+
+            await HandleNewPunishmentType(timekeeping, newType, punishmentSystem);
+
+            await WorkScope.GetRepo<UserPunishment>().UpdateAsync(userPunishment);
+            
+            if (timekeeping != null)
+            {
+                timekeeping.NoteReply = noteReply;
+                await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
+            }
+
+            return new RespondToComplaintResultDto
+            {
+                Success = true,
+                PunishmentId = userPunishment.Id,
+                PunishmentType = userPunishment.Type.ToString(),
+                PunishmentMoney = userPunishment.TotalMoney,
+                RemainingCount = userPunishment.Count
+            };
+        }
+        
+        private async Task HandleOldPunishmentType(
+            Timekeeping timekeeping, 
+            UserPunishmentType oldType, 
+            UserPunishmentType newType,
+            int count)
+        {
+            if (timekeeping == null) return;
+
+            if (IsCheckInOutPunishment(oldType) && 
+                (!IsCheckInOutPunishment(newType) || oldType != newType))
+            {
+                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                timekeeping.MoneyPunish = 0;
+                timekeeping.IsPunishedCheckIn = false;
+                timekeeping.IsPunishedCheckOut = false;
+            }
+            if (newType == UserPunishmentType.NoPunish)
+            {
+                if (oldType == UserPunishmentType.Daily)
+                    timekeeping.CountPunishDaily = 0;
+
+                if (oldType == UserPunishmentType.Mention)
+                    timekeeping.CountPunishMention = 0;
+            }
         }
 
+        private bool IsCheckInOutPunishment(UserPunishmentType type)
+        {
+            return type >= UserPunishmentType.Late && 
+                   type <= UserPunishmentType.NoCheckInAndNoCheckOut;
+        }
+        
+        private async Task HandleNewPunishmentType(
+            Timekeeping timekeeping, 
+            UserPunishmentType newType,
+            PunishmentSystem punishmentSystem)
+        {
+            if (timekeeping == null || punishmentSystem == null) return;
+
+            if (IsCheckInOutPunishment(newType))
+            {
+                timekeeping.StatusPunish = (CheckInCheckOutPunishmentType)newType;
+                timekeeping.MoneyPunish = punishmentSystem.Money;
+                
+                timekeeping.IsPunishedCheckIn = newType == UserPunishmentType.NoCheckIn || 
+                                              newType == UserPunishmentType.NoCheckInAndNoCheckOut;
+                timekeeping.IsPunishedCheckOut = newType == UserPunishmentType.NoCheckOut || 
+                                               newType == UserPunishmentType.LateAndNoCheckOut || 
+                                               newType == UserPunishmentType.NoCheckInAndNoCheckOut;
+            }
+        }
+        
+        private async Task<RespondToComplaintResultDto> HandleChangePunishmentCount(
+          UserPunishment userPunishment,
+          RespondToComplaintDto input,
+          Timekeeping timekeeping)
+        {
+            using (var uow = UnitOfWorkManager.Begin())
+            {
+                try
+                {
+                    var newCount = input.ChangeCount.Value;
+
+                    if (newCount <= 0)
+                    {
+                        var punishmentType = userPunishment.Type;
+
+                        await WorkScope.GetRepo<UserPunishment>().DeleteAsync(userPunishment.Id);
+
+                        if (timekeeping != null)
+                        {
+                            if (punishmentType == UserPunishmentType.Mention)
+                            {
+                                timekeeping.CountPunishMention = 0;
+                            }
+                            else if (punishmentType == UserPunishmentType.Daily)
+                            {
+                                timekeeping.CountPunishDaily = 0;
+                            }
+
+                            timekeeping.NoteReply = input.NoteReply;
+                            await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
+                        }
+
+                        await uow.CompleteAsync();
+
+                        return new RespondToComplaintResultDto
+                        {
+                            Success = true,
+                            PunishmentId = 0,
+                            PunishmentType = UserPunishmentType.NoPunish.ToString(),
+                            PunishmentMoney = 0,
+                            RemainingCount = 0
+                        };
+                    }
+
+                    userPunishment.Count = newCount;
+
+                    if (timekeeping != null)
+                    {
+                        if (userPunishment.Type == UserPunishmentType.Mention)
+                        {
+                            timekeeping.CountPunishMention = newCount;
+                        }
+                        else if (userPunishment.Type == UserPunishmentType.Daily)
+                        {
+                            timekeeping.CountPunishDaily = newCount;
+                        }
+
+                        timekeeping.NoteReply = input.NoteReply;
+                        await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
+                    }
+
+                    var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
+                      .Where(x => x.Type == userPunishment.Type && x.IsActive)
+                      .OrderByDescending(x => x.CreationTime)
+                      .FirstOrDefaultAsync();
+
+                    if (punishmentSystem != null)
+                    {
+                        userPunishment.TotalMoney = userPunishment.Count * punishmentSystem.Money;
+                    }
+
+                    userPunishment.NoteReply = input.NoteReply;
+                    await WorkScope.GetRepo<UserPunishment>().UpdateAsync(userPunishment);
+
+                    await uow.CompleteAsync();
+
+                    return new RespondToComplaintResultDto
+                    {
+                        Success = true,
+                        PunishmentId = userPunishment.Id,
+                        PunishmentType = userPunishment.Type.ToString(),
+                        PunishmentMoney = userPunishment.TotalMoney,
+                        RemainingCount = userPunishment.Count
+                    };
+                }
+                catch (Exception)
+                {
+                    uow.Dispose();
+                    throw;
+                }
+            }
+        }
+        
+        private void ValidatePunishmentTypeChange(UserPunishmentType oldType, UserPunishmentType newType)
+        {
+            if (newType == UserPunishmentType.NoPunish)
+                return;
+
+            if (oldType == UserPunishmentType.Daily || oldType == UserPunishmentType.Mention)
+            {
+                throw new UserFriendlyException("Can't change type Daily/Mention");
+            }
+            
+            if (oldType == UserPunishmentType.ReviewIntern)
+            {
+                throw new UserFriendlyException("Can't change type ReviewIntern");
+            }
+
+            var oldGroup = GetPunishmentGroup(oldType);
+
+            var newGroup = GetPunishmentGroup(newType);
+            if (oldGroup != newGroup)
+            {
+                string errorMessage;
+                switch (oldGroup)
+                {
+                    case "Tracker":
+                        errorMessage = "You can only switch between Tracker type";
+                        break;
+                    case "CheckInOut":
+                        errorMessage = "You can only switch between checkin/checkout type";
+                        break;
+                    case "PMReport":
+                        errorMessage = "You can only switch between PM Report type";
+                        break;
+                    default:
+                        errorMessage = "You can't switch between punishment types from different groups";
+                        break;
+                }
+                throw new UserFriendlyException(errorMessage);
+            }
+        }
+        
+        private string GetPunishmentGroup(UserPunishmentType type)
+        {
+            if (type == UserPunishmentType.ReviewIntern) 
+                return "ReviewIntern";
+                
+            if (type >= UserPunishmentType.Late && type <= UserPunishmentType.NoCheckInAndNoCheckOut)
+                return "CheckInOut";
+                
+            if (type >= UserPunishmentType.Tracker_20k && type <= UserPunishmentType.Tracker_200k)
+                return "Tracker";
+                
+            if (type == UserPunishmentType.PMReport_20k || type == UserPunishmentType.PMReport_50k)
+                return "PMReport";
+                
+            return "Other";
+        }
+        
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_GetData)]
         [HttpPost]
         public async Task<List<Timekeeping>> AddTimekeepingByDay(string date)

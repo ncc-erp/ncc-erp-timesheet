@@ -3,31 +3,46 @@
     <h3>Complain Reply</h3>
   </div>
   <div style="margin-top: 15px;">
-    <div class="form-group row">
+  <div class="form-group row">
       <label class="col-md-3 col-form-label" for="ischarge">Reply Note:</label>
       <div class="col-md-9 ">
-        <mat-form-field class="full-width" appearance="outline">
+      <mat-form-field class="full-width" appearance="outline">
           <mat-label>Reply</mat-label>
           <textarea matInput placeholder="enter text here" rows="3" [(ngModel)]="complain.noteReply"></textarea>
-        </mat-form-field>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="form-group row" style="margin-bottom: 0; align-items: center;">
+    <label class="col-md-3 col-form-label" for="statusPunish">Status Punish:</label>
+    <div class="col-md-9 p-0">
+      <div class="d-flex" style="width: 100%; position: relative;">
+        <div style="flex: 1; margin-right: 180px;">
+          <mat-form-field style="width: 100%; margin-bottom: 0;">
+            <mat-select [(ngModel)]="complain.statusPunish" (selectionChange)="onPunishTypeChange()" name="statusPunish">
+              <mat-option *ngFor="let item of filteredPunishTypes" [value]="item.value">
+                {{item.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      
+        <div *ngIf="showChangeCount" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%);">
+          <div class="d-flex align-items-center">
+            <label class="mr-2 mb-0">Count:</label>
+            <button mat-icon-button color="primary" (click)="decrement()" type="button" matTooltip="Decrease">
+              <mat-icon>remove_circle_outline</mat-icon>
+            </button>
+            <div class="mx-2" style="min-width: 24px; text-align: center;">{{changeCount}}</div>
+            <button mat-icon-button color="primary" (click)="increment()" type="button" matTooltip="Increase">
+              <mat-icon>add_circle_outline</mat-icon>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="form-group row">
-      <label class="col-md-3 col-form-label" for="ischarge">Status Punish:</label>
-      <div class="col-md-9">
-        <!-- <mat-checkbox [(ngModel)]="complain.isPunishedCheckIn" name="ischarge">is Punish
-        </mat-checkbox> -->
-        <mat-form-field>
-          <mat-select [(ngModel)]="complain.statusPunish">
-            <mat-option *ngFor="let item of APP_CONSTANT.PunishRules" [value] = 'item.value'>
-              {{item.name}}
-          </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </div>
-
+  </div>
+  
 
 
   </div>
