@@ -94,13 +94,13 @@ export class TimekeepingDto {
   dailyLateAndNoCheckOutPunish?: number;
   dailyNoCheckInAndNoCheckOutPunish?: number;
   
-  // Các trường mới cho UI hiển thị phạt theo nhóm
-  attendancePunish?: number;     // Nhóm phạt liên quan đến điểm danh (types 1-5)
-  trackerPunish?: number;        // Nhóm phạt liên quan đến tracker (types 8-11)
-  reviewInternPunish?: number;   // Phạt review intern (type 12)
-  pmReportPunish?: number;       // Phạt PM report (types 13-14)
-  antPunish?: number;            // Phạt ant (type 15)
-  unlockTSPunish?: number;       // Phạt unlock timesheet (type 16)
+  
+  attendancePunish?: number;    
+  trackerPunish?: number;        
+  reviewInternPunish?: number; 
+  pmReportPunish?: number;     
+  antPunish?: number;
+  unlockTSPunish?: number;       
   
     
   structuredUserNotes?: Array<{
@@ -109,11 +109,11 @@ export class TimekeepingDto {
     userNote: string;
   }>;
 
-  // Tổng tiền phạt trong ngày và tháng
+  
   totalDayPunishment?: number;
   totalMonthPunishmentTotal?: number;
   
-  // Tổng tiền phạt theo loại cho hiển thị tổng hợp
+  
   totalAttendancePunish?: number;
   totalDailyPunish?: number;
   totalMentionPunish?: number;
@@ -123,9 +123,9 @@ export class TimekeepingDto {
   totalAntPunish?: number;
   totalUnlockTSPunish?: number;
   
-  // Structured note replies for multiple punishment types
+ 
   structuredNoteReplies?: PunishmentNoteReply[];
-  showAllReplies?: boolean; // Flag to control showing all replies
+  showAllReplies?: boolean; 
   showAllComplaints?: boolean;
   shouldShowMore?: boolean;
 

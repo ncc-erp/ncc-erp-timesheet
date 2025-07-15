@@ -44,7 +44,6 @@
   padding-bottom: 0.8em;
 }
 
-/* Điều chỉnh chiều ngang của ô nhập */
 ::ng-deep .punishment-note .mat-form-field-flex {
   display: inline-flex;
   align-items: baseline;

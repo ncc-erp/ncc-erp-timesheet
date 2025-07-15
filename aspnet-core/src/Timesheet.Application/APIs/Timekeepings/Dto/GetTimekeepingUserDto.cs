@@ -42,19 +42,7 @@ namespace Timesheet.APIs.Timekeepings.Dto
         public int TotalMonthPunishment { get; set; }
         public int? DailyPunish { get; set; }
         public int? MentionPunish { get; set; }
-        //public int TotalLatePunish { get; set; }
-        //public int TotalNoCheckInPunish { get; set; }
-        //public int TotalNoCheckOutPunish { get; set; }
-        //public int TotalLateAndNoCheckOutPunish { get; set; }
-        //public int TotalNoCheckInAndNoCheckOutPunish { get; set; }
-        //public int TotalDailyPunish { get; set; }
-        //public int TotalMentionPunish { get; set; }
-        //public int TotalTracker20kPunish { get; set; }
-        //public int TotalTracker50kPunish { get; set; }
-        //public int TotalTracker100kPunish { get; set; }
-        //public int TotalTracker200kPunish { get; set; }
-        //public int TotalAllDailyMoney { get; set; }
-        //public int TotalAllMentionMoney { get; set; }
+        
         public int DailyLatePunish { get; set; }
         public int DailyNoCheckInPunish { get; set; }
         public int DailyNoCheckOutPunish { get; set; }

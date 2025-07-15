@@ -122,9 +122,6 @@
                   <span>{{item.checkOut}}</span>
                 </td>
                 <td class="text-center"><span class="pm" *ngIf="item.editByUserName">{{item.editByUserName}}</span></td>
-
-
-                <!-- Attendance column (consolidated) -->
                 <td style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.attendancePunish)" 
                         *ngIf="item.attendancePunish > 0"
@@ -132,50 +129,37 @@
                     {{ formatPunishmentAmount(item.attendancePunish) }}
                   </span>
                 </td>
-
-                <!-- Daily column -->
                 <td style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.dailyPunish)" *ngIf="item.dailyPunish > 0">
                     {{ formatPunishmentAmount(item.dailyPunish) }}
                   </span>
                 </td>
-
-                <!-- Mention column -->
                 <td style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.mentionPunish)" *ngIf="item.mentionPunish > 0">
                     {{ formatPunishmentAmount(item.mentionPunish) }}
                   </span>
                 </td>
-
-                <!-- Tracker column -->
                 <td style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.trackerPunish)" *ngIf="item.trackerPunish > 0">
                     {{ formatPunishmentAmount(item.trackerPunish) }}
                   </span>
                 </td>
-
-                <!-- ReviewIntern column -->
                 <td style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.reviewInternPunish)" *ngIf="item.reviewInternPunish > 0">
                     {{ formatPunishmentAmount(item.reviewInternPunish) }}
                   </span>
                 </td>
-
-                <!-- Ant column -->
                 <td style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.antPunish)" *ngIf="item.antPunish > 0">
                     {{ formatPunishmentAmount(item.antPunish) }}
                   </span>
                 </td>
-
-                <!-- UnlockTS column -->
                 <td style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.unlockTSPunish)" *ngIf="item.unlockTSPunish > 0">
                     {{ formatPunishmentAmount(item.unlockTSPunish) }}
                   </span>
                 </td>
 
-                <!-- Total column -->
                 <td style="text-align: center;">
                   <span class="red" style="font-weight: bold;">
                     {{ formatPunishmentAmount(item.totalDayPunishment) }}
@@ -183,11 +167,8 @@
                 </td>
                 
                 <td class="text-center" style="word-wrap: break-word; overflow: hidden; max-width: 300px;">
-                  <!-- Khi không có structuredUserNotes -->
                   <p *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && item.userNote" style="white-space: pre-line;">{{item.userNote}}</p>
                   <span *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && !item.userNote">-</span>
-                  
-                  <!-- Khi có structuredUserNotes -->
                   <div *ngIf="item.structuredUserNotes && item.structuredUserNotes.length > 0" class="structured-complaints" style="text-align: left;">
                     <div #complaintContent [attr.data-id]="item.timekeepingId" [ngClass]="{'complaint-content': !item.showAllComplaints, 'complaint-content expanded': item.showAllComplaints}">
                       <div *ngFor="let complaint of item.structuredUserNotes" class="complaint-item" style="margin-bottom: 4px;">

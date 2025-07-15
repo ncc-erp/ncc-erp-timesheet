@@ -223,72 +223,52 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
             userNote: item.userNote
           });
         } else if (record.structuredUserNotes[existingNoteIndex].userNote !== item.userNote) {
-          // Update existing complaint if different
           record.structuredUserNotes[existingNoteIndex].userNote = item.userNote;
         }
-        
-        // Also keep the legacy userNote field updated with the first complaint
+
         if (!record.userNote) {
           record.userNote = item.userNote;
         }
       }
-      
-      // Add note reply to structured replies if present
+
       if (item.noteReply && item.noteReply.trim()) {
-        // Get the punishment name from the constants
         const punishmentName = this.getPunishmentTypeName(punishType);
-        
-        // Check if we already have a reply for this punishment type
+
         const existingReplyIndex = record.structuredNoteReplies.findIndex(
           reply => reply.punishmentType === punishType
         );
         
         if (existingReplyIndex === -1) {
-          // Add new reply
           record.structuredNoteReplies.push({
             punishmentType: punishType,
             punishmentName: punishmentName,
             noteReply: item.noteReply
           });
         } else if (record.structuredNoteReplies[existingReplyIndex].noteReply !== item.noteReply) {
-          // Update existing reply if different
           record.structuredNoteReplies[existingReplyIndex].noteReply = item.noteReply;
         }
-        
-        // Also keep the legacy noteReply field updated with the first reply
         if (!record.noteReply) {
           record.noteReply = item.noteReply;
         }
       }
-      
-      // Group punishment types by category
+
       if (punishType >= 1 && punishType <= 5) {
-        // Attendance-related punishments
         record.attendancePunish = (record.attendancePunish || 0) + moneyAmount;
       } else if (punishType === 6) {
-        // Daily punishment
         record.dailyPunish = (record.dailyPunish || 0) + moneyAmount;
       } else if (punishType === 7) {
-        // Mention punishment
         record.mentionPunish = (record.mentionPunish || 0) + moneyAmount;
       } else if (punishType >= 8 && punishType <= 11) {
-        // Tracker punishments
         record.trackerPunish = (record.trackerPunish || 0) + moneyAmount;
       } else if (punishType === 12) {
-        // Review Intern punishment
         record.reviewInternPunish = (record.reviewInternPunish || 0) + moneyAmount;
       } else if (punishType === 13 || punishType === 14) {
-        // PM Report punishments
         record.pmReportPunish = (record.pmReportPunish || 0) + moneyAmount;
       } else if (punishType === 15) {
-        // Ant punishment
         record.antPunish = (record.antPunish || 0) + moneyAmount;
       } else if (punishType === 16) {
-        // UnlockTS punishment
         record.unlockTSPunish = (record.unlockTSPunish || 0) + moneyAmount;
       }
-      
-      // Update total day punishment
       record.totalDayPunishment = (
         (record.attendancePunish || 0) + 
         (record.dailyPunish || 0) + 
@@ -300,8 +280,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         (record.unlockTSPunish || 0)
       );
     });
-    
-    // Sort note replies and user notes by punishment type for each day
     dateMap.forEach(record => {
       if (record.structuredNoteReplies && record.structuredNoteReplies.length > 0) {
         record.structuredNoteReplies.sort((a, b) => a.punishmentType - b.punishmentType);
@@ -311,12 +289,9 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         record.structuredUserNotes.sort((a, b) => a.punishmentType - b.punishmentType);
       }
     });
-
-    // Convert map to array and sort by date (newest first)
     this.groupedTimekeeping = Array.from(dateMap.values())
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      this.groupedTimekeeping.forEach(item => {item.showAllComplaints = false;
-      });
+    this.groupedTimekeeping.forEach(item => { item.showAllComplaints = false; });
       console.log(this.groupedTimekeeping.map(i => i.showAllComplaints));
   }
 
@@ -389,18 +364,13 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   }
 
   openComplainDialog(item: TimekeepingDto) {
-    // Sử dụng dữ liệu đã có sẵn từ listTimekeeping thay vì gọi lại API
     const currentDate = item.date;
     const userPunishmentTypes = [];
-    
-    // Lọc userPunishments cho ngày hiện tại từ dữ liệu đã có
     const dayOfMonth = parseInt(item.date.split('-')[2]);
     const filteredUserPunishments = this.listTimekeeping.filter(up => {
       const punishmentDate = new Date(up.date);
       return punishmentDate.getDate() === dayOfMonth && up.userPunishmentType > 0;
     });
-    
-    // Lấy danh sách các loại phạt từ userPunishments đã lọc
     filteredUserPunishments.forEach(up => {
       if (up.userPunishmentType > 0) {
         const punishmentType = this.APP_CONSTANT.PUNISHMENT_TYPES.find(p => p.value === up.userPunishmentType);
@@ -409,10 +379,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         }
       }
     });
-    
-    
-    
-    // Open dialog
     const dialogRef = this.dialog.open(ComplainDialogComponent, {
       width: '650px',
       data: {
@@ -422,23 +388,17 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         userPunishments: filteredUserPunishments
       }
     });
-
-    // Handle dialog result
     dialogRef.afterClosed().subscribe(result => {
       if (result && result.length > 0) {
-        // Process each complaint
         const promises = result.map(complaint => {
           return this.timekeepingService.addComplain({
             userPunishmentId: complaint.userPunishmentId,
             userNote: complaint.userNote
           }).toPromise();
         });
-
-        // Wait for all complaints to be processed
         Promise.all(promises)
           .then(() => {
             this.notify.success('Complaints submitted successfully');
-            // Refresh data
             this.getData();
           })
           .catch(error => {
@@ -455,14 +415,12 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   
   toggleUserNotes(item: any) {
     item.showAllComplaints = !item.showAllComplaints;
-    // Khi thu nhỏ lại, cần đo lại số dòng để xác định có cần show more không
     if (!item.showAllComplaints) {
       setTimeout(() => this.ngAfterViewChecked());
     }
   }
 
   getAttendancePunishmentTypes(item: TimekeepingDto): string {
-    // Filter for attendance punishment types (1-5) from structured note replies
     const attendanceReplies = item.structuredNoteReplies ? item.structuredNoteReplies.filter(reply => 
       reply.punishmentType >= 1 && reply.punishmentType <= 5
     ) : [];
@@ -471,7 +429,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       return attendanceReplies.map(reply => reply.punishmentName).join(', ');
     }
     
-    // Fallback: use userPunishmentType if available
     if (item.userPunishmentType && item.userPunishmentType >= 1 && item.userPunishmentType <= 5) {
       const punishmentType = this.APP_CONSTANT.PUNISHMENT_TYPES.find(p => p.value === item.userPunishmentType);
       return punishmentType ? punishmentType.name : 'Attendance';
@@ -503,16 +460,12 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   }
 
   onSave(item: TimekeepingDto) {
-    // Lấy thông tin về userPunishments từ API
     this.timekeepingService.getMyDetails(
       this.year, 
       this.month + 1
     ).subscribe(
       (response) => {
-        // Lấy thông tin userPunishments từ response
         const userPunishments = response && response.result ? response.result : [];
-        
-        // Lọc userPunishments cho ngày hiện tại
         const dayOfMonth = parseInt(item.date.split('-')[2]);
         const filteredUserPunishments = userPunishments.filter(up => {
           const punishmentDate = new Date(up.date);
@@ -520,7 +473,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         });
         
         if (filteredUserPunishments && filteredUserPunishments.length > 0) {
-          // Mở dialog khiếu nại nếu có các loại phạt
           this.openComplainDialog(item);
         } else {
           this.notify.info('Không có loại phạt nào cho ngày này');

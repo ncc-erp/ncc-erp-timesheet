@@ -36,10 +36,8 @@ namespace Timesheet.APIs.Timekeepings
     public class TimekeepingAppService : AppServiceBase
     {
         private readonly ITimekeepingServices timekeepingServices;
-        //private readonly FaceIdService faceIdService;
         public TimekeepingAppService(TimekeepingServices timekeepingServices, IWorkScope workScope) : base(workScope)
         {
-            //this.faceIdService = faceIdService;
             this.timekeepingServices = timekeepingServices;
         }
 
@@ -84,10 +82,10 @@ namespace Timesheet.APIs.Timekeepings
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_View)]
         [HttpGet]
         public async Task<List<UserPunishmentDetailDto>> GetDetailTimekeeping(
-          int year, int month, int? day,
-          long? userId, long? branchId,
-          bool? isPunished, bool? isComplain,
-          UserPunishmentType? statusPunish = null)
+            int year, int month, int? day,
+            long? userId, long? branchId,
+            bool? isPunished, bool? isComplain,
+            UserPunishmentType? statusPunish = null)
         {
             if (statusPunish == UserPunishmentType.NoPunish || (statusPunish == null && (isPunished == false)))
             {
@@ -281,182 +279,9 @@ namespace Timesheet.APIs.Timekeepings
               .ThenByDescending(d => d.ResultCheckIn)
               .ToList();
         }
-
-
-        private UserPunishmentSummaryDto CalculateUserPunishmentSummary(
-            List<UserPunishment> userPunishments,
-            List<Timekeeping> timekeepings)
-        {
-            return new UserPunishmentSummaryDto
-          {
-        //        TotalLate = userPunishments.Where(x => x.Type == UserPunishmentType.Late).Sum(x => x.TotalMoney),
-        //        TotalNoCheckIn = userPunishments.Where(x => x.Type == UserPunishmentType.NoCheckIn).Sum(x => x.TotalMoney),
-        //        TotalNoCheckOut = userPunishments.Where(x => x.Type == UserPunishmentType.NoCheckOut).Sum(x => x.TotalMoney),
-        //        TotalLateAndNoCheckOut = userPunishments.Where(x => x.Type == UserPunishmentType.LateAndNoCheckOut).Sum(x => x.TotalMoney),
-        //        TotalNoCheckInAndNoCheckOut = userPunishments.Where(x => x.Type == UserPunishmentType.NoCheckInAndNoCheckOut).Sum(x => x.TotalMoney),
-        //        TotalDaily = userPunishments.Where(x => x.Type == UserPunishmentType.Daily).Sum(x => x.TotalMoney),
-        //        TotalMention = userPunishments.Where(x => x.Type == UserPunishmentType.Mention).Sum(x => x.TotalMoney),
-        //        TotalTracker20k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_20k).Sum(x => x.TotalMoney),
-        //        TotalTracker50k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_50k).Sum(x => x.TotalMoney),
-        //        TotalTracker100k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_100k).Sum(x => x.TotalMoney),
-        //        TotalTracker200k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_200k).Sum(x => x.TotalMoney),
-        //        TotalAllDailyMoney = timekeepings.Sum(x => x.CountPunishDaily * 20000),
-        //        TotalAllMentionMoney = timekeepings.Sum(x => x.CountPunishMention * 10000),
-             TotalMonthlyPunishment = timekeepings.Sum(x => x.MoneyPunish)
-            };
-        }
-
-        //        private UserPunishmentDailyDto CalculateUserPunishmentDaily(
-        //List<UserPunishment> userPunishments,
-        //DateTime date)
-        //        {
-        //            var dailyPunishments = userPunishments.Where(x => x.DateAt.Date == date.Date).ToList();
-
-        //            return new UserPunishmentDailyDto
-        //            {
-        //                DailyLate = dailyPunishments.Where(x => x.Type == UserPunishmentType.Late).Sum(x => x.TotalMoney),
-        //                DailyNoCheckIn = dailyPunishments.Where(x => x.Type == UserPunishmentType.NoCheckIn).Sum(x => x.TotalMoney),
-        //                DailyNoCheckOut = dailyPunishments.Where(x => x.Type == UserPunishmentType.NoCheckOut).Sum(x => x.TotalMoney),
-        //                DailyLateAndNoCheckOut = dailyPunishments.Where(x => x.Type == UserPunishmentType.LateAndNoCheckOut).Sum(x => x.TotalMoney),
-        //                DailyNoCheckInAndNoCheckOut = dailyPunishments.Where(x => x.Type == UserPunishmentType.NoCheckInAndNoCheckOut).Sum(x => x.TotalMoney),
-        //                DailyDaily = dailyPunishments.Where(x => x.Type == UserPunishmentType.Daily).Sum(x => x.TotalMoney),
-        //                DailyMention = dailyPunishments.Where(x => x.Type == UserPunishmentType.Mention).Sum(x => x.TotalMoney),
-        //                DailyTracker20k = dailyPunishments.Where(x => x.Type == UserPunishmentType.Tracker_20k).Sum(x => x.TotalMoney),
-        //                DailyTracker50k = dailyPunishments.Where(x => x.Type == UserPunishmentType.Tracker_50k).Sum(x => x.TotalMoney),
-        //                DailyTracker100k = dailyPunishments.Where(x => x.Type == UserPunishmentType.Tracker_100k).Sum(x => x.TotalMoney),
-        //                DailyTracker200k = dailyPunishments.Where(x => x.Type == UserPunishmentType.Tracker_200k).Sum(x => x.TotalMoney),
-        //                TotalDayPunishment = dailyPunishments.Sum(x => x.TotalMoney),
-        //                TotalDayPunishmentTotal = dailyPunishments.GroupBy(x => x.DateAt.Date)
-        //                                         .Select(g => g.Sum(x => x.TotalMoney))
-        //                                         .Sum()
-        //            };
-        //        }
-
-        //[AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimeSheet_ViewMyTardinessDetail)]
-        //public async Task<List<GetTimekeepingUserDto>> GetMyDetails(int year, int month)
-        //{
-        //    var userId = AbpSession.UserId;
-        //    var timekeepings = await WorkScope.GetAll<Timekeeping>()
-        //      .Include(x => x.User)
-        //      .Where(x => x.UserId == userId && x.DateAt.Year == year && x.DateAt.Month == month)
-        //      .ToListAsync();
-
-        //    var userPunishments = await WorkScope.GetAll<Timesheet.Entities.UserPunishment>()
-        //      .Where(x => x.UserId == userId && x.DateAt.Year == year && x.DateAt.Month == month)
-        //      .ToListAsync();
-
-        //    var summary = CalculateUserPunishmentSummary(userPunishments, timekeepings);
-        //    var totalMonthPunishment = userPunishments.Sum(x => x.TotalMoney);
-
-        //    // Group UserPunishments by DateAt để dễ dàng truy xuất theo ngày
-        //    var userPunishmentsByDate = userPunishments
-        //        .GroupBy(x => x.DateAt.Date)
-        //        .ToDictionary(g => g.Key, g => g.ToList());
-
-        //    return (from t in timekeepings
-        //            let dailySummary = CalculateUserPunishmentDaily(userPunishments, t.DateAt)
-        //            let datePunishments = userPunishmentsByDate.ContainsKey(t.DateAt.Date)
-        //                ? userPunishmentsByDate[t.DateAt.Date]
-        //                : new List<UserPunishment>()
-        //            let hasUserPunishmentData = datePunishments.Any()
-        //            select new GetTimekeepingUserDto
-        //            {
-        //                UserId = t.UserId,
-        //                UserName = t.User.FullName,
-        //                UserType = t.User.Type,
-        //                UserEmail = t.UserEmail,
-        //                Branch = t.User.BranchOld,
-        //                AvatarPath = t.User.AvatarPath,
-        //                Date = t.DateAt,
-        //                TimekeepingId = t.Id,
-        //                UserPunishmentId = datePunishments.FirstOrDefault()?.Id ?? 0,
-
-        //                // Luôn lấy từ Timekeeping
-        //                RegistrationTimeStart = t.RegisterCheckIn,
-        //                RegistrationTimeEnd = t.RegisterCheckOut,
-        //                CheckIn = t.CheckIn,
-        //                CheckOut = t.CheckOut,
-        //                ResultCheckIn = CommonUtils.SubtractHHmm(t.CheckIn, t.RegisterCheckIn),
-        //                ResultCheckOut = CommonUtils.SubtractHHmm(t.RegisterCheckOut, t.CheckOut),
-        //                TrackerTime = t.TrackerTime,
-
-        //                // Các thông tin khác từ Timekeeping
-        //                Status = t.IsPunishedCheckIn ? PunishmentStatus.Punish : PunishmentStatus.Normal,
-        //                EditByUserId = t.LastModifierUserId,
-        //                // Combine tất cả UserNote từ các punishments
-        //                UserNote = hasUserPunishmentData ? string.Join(" | ", datePunishments.Select(x => x.UserNote).Where(x => !string.IsNullOrEmpty(x))) : t.UserNote,
-        //                NoteReply = hasUserPunishmentData ? string.Join(" | ", datePunishments.Select(x => x.NoteReply).Where(x => !string.IsNullOrEmpty(x))) : t.NoteReply,
-        //                StatusPunish = t.StatusPunish,
-
-        //                // Ưu tiên UserPunishment, fallback về Timekeeping - lấy type có priority cao nhất
-        //                UserPunishmentType = hasUserPunishmentData ? datePunishments.OrderByDescending(x => (int)x.Type).FirstOrDefault()?.Type ?? default(UserPunishmentType) : default(UserPunishmentType),
-
-        //                // Tiền phạt: Tổng tất cả UserPunishment trong ngày
-        //                MoneyPunish = hasUserPunishmentData ? datePunishments.Sum(x => x.TotalMoney) : t.MoneyPunish,
-
-        //                // DailyPunish và MentionPunish: Tổng từ tất cả UserPunishment theo type
-        //                DailyPunish = hasUserPunishmentData ?
-        //                    datePunishments.Where(x => x.Type == UserPunishmentType.Daily).Sum(x => x.TotalMoney) :
-        //                    t.CountPunishDaily * 20000,
-
-        //                MentionPunish = hasUserPunishmentData ?
-        //                    datePunishments.Where(x => x.Type == UserPunishmentType.Mention).Sum(x => x.TotalMoney) :
-        //                    t.CountPunishMention * 10000,
-
-        //                // Populate UserPunishments list
-        //                UserPunishments = datePunishments.Select(up => new UserPunishmentDetailDto
-        //                {
-        //                    UserpunishmentId = up.Id,
-        //                    StatusPunish = up.Type,
-        //                    MoneyPunish = up.TotalMoney,
-        //                    UserNote = up.UserNote,
-        //                    NoteReply = up.NoteReply,
-        //                    UserId = up.UserId,
-        //                    Count = up.Count,
-        //                    Date = up.DateAt,
-
-        //                    // Thêm thông tin từ Timekeeping cho UserPunishmentDetailDto
-        //                    TimekeepingId = t.Id,
-        //                    CheckIn = t.CheckIn,
-        //                    CheckOut = t.CheckOut,
-        //                    RegistrationTimeStart = t.RegisterCheckIn,
-        //                    RegistrationTimeEnd = t.RegisterCheckOut,
-        //                    TrackerTime = t.TrackerTime,
-        //                    ResultCheckIn = CommonUtils.SubtractHHmm(t.CheckIn, t.RegisterCheckIn),
-        //                    ResultCheckOut = CommonUtils.SubtractHHmm(t.RegisterCheckOut, t.CheckOut),
-
-        //                    // Tính toán DailyPunish và MentionPunish cho từng UserPunishment
-        //                    DailyPunish = up.Type == UserPunishmentType.Daily ? up.TotalMoney : 0,
-        //                    MentionPunish = up.Type == UserPunishmentType.Mention ? up.TotalMoney : 0,
-
-        //                    // Thông tin User từ Timekeeping
-        //                    UserName = t.User.FullName,
-        //                    UserEmail = t.UserEmail,
-        //                    UserType = t.User.Type,
-        //                    AvatarPath = t.User.AvatarPath,
-        //                    Branch = t.User.BranchOld,
-        //                }).ToList(),
-
-        //                // Daily summary - vẫn giữ nguyên
-        //                DailyLatePunish = dailySummary.DailyLate,
-        //                DailyNoCheckInPunish = dailySummary.DailyNoCheckIn,
-        //                DailyNoCheckOutPunish = dailySummary.DailyNoCheckOut,
-        //                DailyLateAndNoCheckOutPunish = dailySummary.DailyLateAndNoCheckOut,
-        //                DailyNoCheckInAndNoCheckOutPunish = dailySummary.DailyNoCheckInAndNoCheckOut,
-        //                DailyDailyPunish = dailySummary.DailyDaily,
-        //                DailyMentionPunish = dailySummary.DailyMention,
-        //                DailyTracker20kPunish = dailySummary.DailyTracker20k,
-        //                DailyTracker50kPunish = dailySummary.DailyTracker50k,
-        //                DailyTracker100kPunish = dailySummary.DailyTracker100k,
-        //                DailyTracker200kPunish = dailySummary.DailyTracker200k,
-        //                TotalDayPunishment = dailySummary.TotalDayPunishment,
-        //                TotalDayPunishmentTotal = totalMonthPunishment
-        //            }).OrderByDescending(t => t.Date).ToList();
-        //}
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimeSheet_ViewMyTardinessDetail)]
         public async Task<List<GetTimekeepingUserDto>> GetMyDetails(int year, int month)
         {
-            // Lấy dữ liệu từ cả hai bảng
             var tkList = await WorkScope.GetAll<Timekeeping>()
               .Include(t => t.User).ThenInclude(u => u.Branch)
               .Where(t =>
@@ -490,16 +315,12 @@ namespace Timesheet.APIs.Timekeepings
 
             var result = new List<GetTimekeepingUserDto>();
 
-            // Tạo lookup từ UserPunishment để dễ dàng tìm kiếm
             var upLookup = upList.ToLookup(up => new {
                 Date = up.DateAt.Date,
                 UserId = (long)up.UserId
             });
-
-            // Xử lý từng record trong Timekeeping
             foreach (var tk in tkList)
             {
-                // Chỉ xử lý các record có UserId
                 if (!tk.UserId.HasValue)
                     continue;
 
@@ -509,12 +330,10 @@ namespace Timesheet.APIs.Timekeepings
                     UserId = tk.UserId.Value
                 }].ToList();
 
-                // Tính tổng tiền phạt trong ngày và tổng tiền phạt trong tháng
                 var (totalDayPunishment, totalMonthPunishmentTotal) = CalculatePunishmentTotals(upList, tk.DateAt, tk.UserId.Value);
 
                 if (matchingUps.Any())
                 {
-                    // Có record tương ứng trong UserPunishment
                     foreach (var up in matchingUps)
                     {
                         result.Add(new GetTimekeepingUserDto
@@ -540,21 +359,15 @@ namespace Timesheet.APIs.Timekeepings
                             UserNote = up.UserNote ?? tk.UserNote,
                             NoteReply = up.NoteReply ?? tk.NoteReply,
 
-                            // Punishment info
                             UserPunishmentType = up.Type,
                             MoneyPunish = up.TotalMoney,
                             TrackerTime = tk.TrackerTime,
                             DailyPunish = tk.CountPunishDaily,
                             MentionPunish = tk.CountPunishMention,
-
-                            // Branch info
                             BranchColor = tk.User.Branch?.Color,
                             BranchDisplayName = tk.User.Branch?.DisplayName,
                             BranchId = tk.User.BranchId,
-
                             StatusPunish = tk.StatusPunish,
-
-                            // Tổng tiền phạt
                             TotalDayPunishment = totalDayPunishment,
                             TotalMonthPunishmentTotal = totalMonthPunishmentTotal
                         });
@@ -562,7 +375,7 @@ namespace Timesheet.APIs.Timekeepings
                 }
                 else
                 {
-                    // Không có record tương ứng trong UserPunishment
+
                     result.Add(new GetTimekeepingUserDto
                     {
                         TimekeepingId = tk.Id,
@@ -585,27 +398,23 @@ namespace Timesheet.APIs.Timekeepings
                         UserNote = tk.UserNote,
                         NoteReply = tk.NoteReply,
 
-                        // Punishment info
                         MoneyPunish = tk.MoneyPunish,
                         TrackerTime = tk.TrackerTime,
                         DailyPunish = tk.CountPunishDaily,
                         MentionPunish = tk.CountPunishMention,
 
-                        // Branch info
                         BranchColor = tk.User.Branch?.Color,
                         BranchDisplayName = tk.User.Branch?.DisplayName,
                         BranchId = tk.User.BranchId,
 
                         StatusPunish = tk.StatusPunish,
 
-                        // Tổng tiền phạt
                         TotalDayPunishment = totalDayPunishment,
                         TotalMonthPunishmentTotal = totalMonthPunishmentTotal
                     });
                 }
             }
 
-            // Kiểm tra các record trong UserPunishment mà không có trong Timekeeping
             var tkLookup = tkList.Where(tk => tk.UserId.HasValue)
               .ToLookup(tk => new {
                   Date = tk.DateAt.Date,
@@ -621,10 +430,9 @@ namespace Timesheet.APIs.Timekeepings
                 };
                 if (!tkLookup.Contains(key))
                 {
-                    // Tính tổng tiền phạt trong ngày và tổng tiền phạt trong tháng
+
                     var (totalDayPunishment, totalMonthPunishmentTotal) = CalculatePunishmentTotals(upList, up.DateAt, up.UserId);
 
-                    // Record chỉ có trong UserPunishment
                     result.Add(new GetTimekeepingUserDto
                     {
                         TimekeepingId = 0,
@@ -647,19 +455,13 @@ namespace Timesheet.APIs.Timekeepings
                         EditByUserId = up.LastModifierUserId,
                         UserNote = up.UserNote,
                         NoteReply = up.NoteReply,
-
-                        // Punishment info
                         UserPunishmentType = up.Type,
                         MoneyPunish = up.TotalMoney,
-
-                        // Branch info
                         BranchColor = up.User.Branch?.Color,
                         BranchDisplayName = up.User.Branch?.DisplayName,
                         BranchId = up.User.BranchId,
 
                         StatusPunish = CheckInCheckOutPunishmentType.NoPunish,
-
-                        // Tổng tiền phạt
                         TotalDayPunishment = totalDayPunishment,
                         TotalMonthPunishmentTotal = totalMonthPunishmentTotal
                     });
@@ -671,12 +473,9 @@ namespace Timesheet.APIs.Timekeepings
 
         private (int totalDayPunishment, decimal totalMonthPunishmentTotal) CalculatePunishmentTotals(List<UserPunishment> userPunishments, DateTime date, long userId)
         {
-            // Tính tổng tiền phạt trong ngày (tổng các loại phạt như ant, daily, late trong một ngày)
             int totalDayPunishment = userPunishments
               .Where(up => up.DateAt.Date == date.Date && up.UserId == userId)
               .Sum(up => up.TotalMoney);
-
-            // Tính tổng tiền phạt trong tháng
             decimal totalMonthPunishmentTotal = userPunishments
               .Where(up => up.DateAt.Year == date.Year && up.DateAt.Month == date.Month && up.UserId == userId)
               .Sum(up => up.TotalMoney);
@@ -688,8 +487,7 @@ namespace Timesheet.APIs.Timekeepings
         {
             var checkInCheckOutPunishmentSetting = await SettingManager.GetSettingValueAsync(AppSettingNames.CheckInCheckOutPunishmentSetting);
             var rs = JsonConvert.DeserializeObject<List<CheckInCheckOutPunishmentSettingDto>>(checkInCheckOutPunishmentSetting);
-            var listPunish = rs.Select(item => new
-            {
+            var listPunish = rs.Select(item => new {
                 Id = item.Id,
                 Name = item.Name,
                 Money = item.Money,
@@ -698,13 +496,12 @@ namespace Timesheet.APIs.Timekeepings
             return moneyForPunish;
         }
 
-
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_Edit)]
         [HttpPost]
         public async Task<Timekeeping> UpdateTimekeeping(Timekeeping input)
         {
-            if (string.IsNullOrEmpty(input.RegisterCheckIn)
-                || string.IsNullOrEmpty(input.RegisterCheckOut))
+            if (string.IsNullOrEmpty(input.RegisterCheckIn) ||
+              string.IsNullOrEmpty(input.RegisterCheckOut))
             {
                 throw new UserFriendlyException("RegisterCheckIn or RegisterCheckOut is null or empty");
             }
@@ -714,7 +511,7 @@ namespace Timesheet.APIs.Timekeepings
             }
             DateTime time1 = new DateTime();
             if (!(String.IsNullOrEmpty(input.CheckIn) || DateTime.TryParseExact(input.CheckIn, "HH:mm", null, System.Globalization.DateTimeStyles.None, out time1)) &&
-                !(String.IsNullOrEmpty(input.CheckOut) || DateTime.TryParseExact(input.CheckOut, "HH:mm", null, System.Globalization.DateTimeStyles.None, out time1)))
+              !(String.IsNullOrEmpty(input.CheckOut) || DateTime.TryParseExact(input.CheckOut, "HH:mm", null, System.Globalization.DateTimeStyles.None, out time1)))
             {
                 throw new UserFriendlyException("Wrong time format (must be HH:mm)");
             }
@@ -737,45 +534,35 @@ namespace Timesheet.APIs.Timekeepings
         {
             try
             {
-                // Lấy thông tin UserPunishment dựa trên ID
+
                 var userPunishment = await WorkScope.GetAll<UserPunishment>()
-                    .Where(x => x.Id == input.UserPunishmentId)
-                    .FirstOrDefaultAsync();
+                  .Where(x => x.Id == input.UserPunishmentId)
+                  .FirstOrDefaultAsync();
 
                 if (userPunishment == null)
                 {
                     throw new UserFriendlyException("Không tìm thấy bản ghi phạt tương ứng!");
                 }
 
-                // Kiểm tra xem người dùng có quyền khiếu nại bản ghi này không
                 if (userPunishment.UserId != AbpSession.UserId.Value)
                 {
                     throw new UserFriendlyException("Bạn chỉ có thể khiếu nại cho bản ghi của mình");
                 }
 
-                // Cập nhật ghi chú khiếu nại
                 userPunishment.UserNote = input.UserNote;
                 await WorkScope.UpdateAsync(userPunishment);
-
-                // Tìm bản ghi Timekeeping tương ứng (nếu có)
                 var timekeeping = await WorkScope.GetAll<Timekeeping>()
-                    .Where(t => t.UserId == userPunishment.UserId &&
-                           t.DateAt.Date == userPunishment.DateAt.Date)
-                    .FirstOrDefaultAsync();
-
-                // Cập nhật ghi chú trong Timekeeping nếu có
+                  .Where(t => t.UserId == userPunishment.UserId &&
+                    t.DateAt.Date == userPunishment.DateAt.Date)
+                  .FirstOrDefaultAsync();
                 if (timekeeping != null)
                 {
                     timekeeping.UserNote = input.UserNote;
                     await WorkScope.UpdateAsync(timekeeping);
                 }
-
-                // Lấy tên loại phạt
                 var punishmentTypeName = GetPunishmentTypeName(userPunishment.Type);
 
                 await CurrentUnitOfWork.SaveChangesAsync();
-
-                // Trả về kết quả
                 return new UserComplaintResultDto
                 {
                     UserPunishmentId = userPunishment.Id,
@@ -797,7 +584,6 @@ namespace Timesheet.APIs.Timekeepings
                 throw new UserFriendlyException("Đã xảy ra lỗi khi xử lý khiếu nại!");
             }
         }
-
 
         private string GetPunishmentTypeName(UserPunishmentType punishmentType)
         {
