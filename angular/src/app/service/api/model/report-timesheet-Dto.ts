@@ -38,7 +38,24 @@ export class WorkingReportDTO {
 
   listWorkingHour: WorkingHourDto[];
 }
-
+export interface PunishmentNoteReply {
+  punishmentType: number;
+  punishmentName: string;
+  noteReply: string;
+}
+export interface SubmitUserComplaintDto {
+  userPunishmentId: number;
+  userNote: string;
+}
+export interface UserComplaintResultDto {
+  userPunishmentId: number;
+  timekeepingId?: number;
+  userNote: string;
+  punishmentType: number;
+  punishmentTypeName: string;
+  success: boolean;
+  message: string;
+}
 export class TimekeepingDto {
   timekeepingId: number;
   userId: number;
@@ -69,6 +86,50 @@ export class TimekeepingDto {
   strTimekeepingId: string;
   dailyPunish?: number;
   mentionPunish?: number;
+  complaints?: { punishmentType: string, date: string, userNote: string }[];
+  userPunishmentType?: number;
+   dailyLatePunish?: number;
+  dailyNoCheckInPunish?: number;
+  dailyNoCheckOutPunish?: number;
+  dailyLateAndNoCheckOutPunish?: number;
+  dailyNoCheckInAndNoCheckOutPunish?: number;
+  
+  // Các trường mới cho UI hiển thị phạt theo nhóm
+  attendancePunish?: number;     // Nhóm phạt liên quan đến điểm danh (types 1-5)
+  trackerPunish?: number;        // Nhóm phạt liên quan đến tracker (types 8-11)
+  reviewInternPunish?: number;   // Phạt review intern (type 12)
+  pmReportPunish?: number;       // Phạt PM report (types 13-14)
+  antPunish?: number;            // Phạt ant (type 15)
+  unlockTSPunish?: number;       // Phạt unlock timesheet (type 16)
+  
+    
+  structuredUserNotes?: Array<{
+    punishmentType: number;
+    punishmentName: string;
+    userNote: string;
+  }>;
+
+  // Tổng tiền phạt trong ngày và tháng
+  totalDayPunishment?: number;
+  totalMonthPunishmentTotal?: number;
+  
+  // Tổng tiền phạt theo loại cho hiển thị tổng hợp
+  totalAttendancePunish?: number;
+  totalDailyPunish?: number;
+  totalMentionPunish?: number;
+  totalTrackerPunish?: number;
+  totalReviewInternPunish?: number;
+  totalPmReportPunish?: number;
+  totalAntPunish?: number;
+  totalUnlockTSPunish?: number;
+  
+  // Structured note replies for multiple punishment types
+  structuredNoteReplies?: PunishmentNoteReply[];
+  showAllReplies?: boolean; // Flag to control showing all replies
+  showAllComplaints?: boolean;
+  shouldShowMore?: boolean;
+
+  
 }
 
 export class UpdateTimekeepingDto{

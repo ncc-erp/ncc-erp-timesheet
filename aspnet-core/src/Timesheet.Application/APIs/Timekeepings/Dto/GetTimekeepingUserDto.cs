@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Timesheet.APIs.UserPunishments.Dto;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
 
@@ -8,7 +9,9 @@ namespace Timesheet.APIs.Timekeepings.Dto
 {
     public class GetTimekeepingUserDto
     {
+        public List<UserPunishmentDetailDto> UserPunishments { get; set; }
         public long TimekeepingId { get; set; }
+        public long UserPunishmentId { get; set; }
         public long? UserId { get; set; }
         public string UserName { get; set; }
         public Usertype? UserType { get; set; }
@@ -32,24 +35,39 @@ namespace Timesheet.APIs.Timekeepings.Dto
         public string BranchDisplayName { get; set; }
         public long? BranchId { get; set; }
         public CheckInCheckOutPunishmentType StatusPunish { get; set; }
+        public UserPunishmentType UserPunishmentType { get; set; }
         public int MoneyPunish { get; set; }
         public string TrackerTime { get; set; }
         public string StrTimekeepingId => TimekeepingId.ToString();
-        public int TotalMonthlyPunishment { get; set; }
+        public int TotalMonthPunishment { get; set; }
         public int? DailyPunish { get; set; }
         public int? MentionPunish { get; set; }
-        public int TotalLatePunish { get; set; }
-        public int TotalNoCheckInPunish { get; set; }
-        public int TotalNoCheckOutPunish { get; set; }
-        public int TotalLateAndNoCheckOutPunish { get; set; }
-        public int TotalNoCheckInAndNoCheckOutPunish { get; set; }
-        public int TotalDailyPunish { get; set; }
-        public int TotalMentionPunish { get; set; }
-        public int TotalTracker20kPunish { get; set; }
-        public int TotalTracker50kPunish { get; set; }
-        public int TotalTracker100kPunish { get; set; }
-        public int TotalTracker200kPunish { get; set; }
-        public int TotalAllDailyMoney { get; set; }
-        public int TotalAllMentionMoney { get; set; }
+        //public int TotalLatePunish { get; set; }
+        //public int TotalNoCheckInPunish { get; set; }
+        //public int TotalNoCheckOutPunish { get; set; }
+        //public int TotalLateAndNoCheckOutPunish { get; set; }
+        //public int TotalNoCheckInAndNoCheckOutPunish { get; set; }
+        //public int TotalDailyPunish { get; set; }
+        //public int TotalMentionPunish { get; set; }
+        //public int TotalTracker20kPunish { get; set; }
+        //public int TotalTracker50kPunish { get; set; }
+        //public int TotalTracker100kPunish { get; set; }
+        //public int TotalTracker200kPunish { get; set; }
+        //public int TotalAllDailyMoney { get; set; }
+        //public int TotalAllMentionMoney { get; set; }
+        public int DailyLatePunish { get; set; }
+        public int DailyNoCheckInPunish { get; set; }
+        public int DailyNoCheckOutPunish { get; set; }
+        public int DailyLateAndNoCheckOutPunish { get; set; }
+        public int DailyNoCheckInAndNoCheckOutPunish { get; set; }
+        public int DailyDailyPunish { get; set; }
+        public int DailyMentionPunish { get; set; }
+        public int DailyTracker20kPunish { get; set; }
+        public int DailyTracker50kPunish { get; set; }
+        public int DailyTracker100kPunish { get; set; }
+        public int DailyTracker200kPunish { get; set; }
+        public int TotalDayPunishment { get; set; }
+        public decimal TotalDayPunishmentTotal { get; set; }
+        public decimal TotalMonthPunishmentTotal { get; set; }
     }
 }

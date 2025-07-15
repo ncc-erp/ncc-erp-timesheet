@@ -16,6 +16,7 @@ namespace Timesheet.APIs.Timekeepings.Dto
         public string NoteReply { get; set; }
         public int MoneyPunish { get; set; }
         public CheckInCheckOutPunishmentType StatusPunish { get; set; }
+        public UserPunishmentType UserPunishmentType { get; set; }
         public decimal TotalFine { get; set; }
     }
 }
