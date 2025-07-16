@@ -38,7 +38,24 @@ export class WorkingReportDTO {
 
   listWorkingHour: WorkingHourDto[];
 }
-
+export interface PunishmentNoteReply {
+  punishmentType: number;
+  punishmentName: string;
+  noteReply: string;
+}
+export interface SubmitUserComplaintDto {
+  userPunishmentId: number;
+  userNote: string;
+}
+export interface UserComplaintResultDto {
+  userPunishmentId: number;
+  timekeepingId?: number;
+  userNote: string;
+  punishmentType: number;
+  punishmentTypeName: string;
+  success: boolean;
+  message: string;
+}
 export class TimekeepingDto {
   timekeepingId: number;
   userId: number;
@@ -69,6 +86,50 @@ export class TimekeepingDto {
   strTimekeepingId: string;
   dailyPunish?: number;
   mentionPunish?: number;
+  complaints?: { punishmentType: string, date: string, userNote: string }[];
+  userPunishmentType?: number;
+   dailyLatePunish?: number;
+  dailyNoCheckInPunish?: number;
+  dailyNoCheckOutPunish?: number;
+  dailyLateAndNoCheckOutPunish?: number;
+  dailyNoCheckInAndNoCheckOutPunish?: number;
+  
+  
+  attendancePunish?: number;    
+  trackerPunish?: number;        
+  reviewInternPunish?: number; 
+  pmReportPunish?: number;     
+  antPunish?: number;
+  unlockTSPunish?: number;       
+  
+    
+  structuredUserNotes?: Array<{
+    punishmentType: number;
+    punishmentName: string;
+    userNote: string;
+  }>;
+
+  
+  totalDayPunishment?: number;
+  totalMonthPunishmentTotal?: number;
+  
+  
+  totalAttendancePunish?: number;
+  totalDailyPunish?: number;
+  totalMentionPunish?: number;
+  totalTrackerPunish?: number;
+  totalReviewInternPunish?: number;
+  totalPmReportPunish?: number;
+  totalAntPunish?: number;
+  totalUnlockTSPunish?: number;
+  
+ 
+  structuredNoteReplies?: PunishmentNoteReply[];
+  showAllReplies?: boolean; 
+  showAllComplaints?: boolean;
+  shouldShowMore?: boolean;
+
+  
 }
 
 export class UpdateTimekeepingDto{

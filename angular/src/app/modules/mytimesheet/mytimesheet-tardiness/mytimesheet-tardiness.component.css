@@ -35,6 +35,42 @@
     cursor: pointer;
 }
 
+.btn-icon {
+    min-width: 36px;
+    padding: 0 8px;
+    border-radius: 50%;
+    line-height: 36px;
+    height: 36px;
+    width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-icon.btn-sm {
+    height: 30px;
+    width: 30px;
+    line-height: 30px;
+    min-width: 30px;
+}
+
+.btn-icon mat-icon {
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+    color: #666;
+}
+
+.btn-icon:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.btn-icon:hover mat-icon {
+    color: #3f51b5;
+}
+
 .red{
     color: red;
     font-weight: bold;
@@ -45,6 +81,77 @@
     font-weight: bold;
 }
 
+/* Styles for structured note replies */
+.structured-replies {
+    margin-top: 5px;
+}
+
+.reply-item {
+    margin-bottom: 8px;
+    text-align: left;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 5px;
+}
+
+.reply-item:last-child {
+    border-bottom: none;
+}
+
+/* Styles for structured complaints */
+.structured-complaints {
+    margin-top: 5px;
+}
+
+.complaint-item {
+    margin-bottom: 8px;
+    text-align: left;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 5px;
+}
+
+.complaint-item:last-child {
+    border-bottom: none;
+}
+
+.complaint-content {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  transition: max-height 0.2s;
+}
+.complaint-content.expanded {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  max-height: none;
+  overflow: visible;
+}
+
+.punishment-type {
+    font-size: 13px;
+    margin-bottom: 2px;
+}
+
+.reply-content {
+    font-size: 12px;
+    padding-left: 8px;
+    color: #555;
+}
+
+.show-more-container {
+    text-align: center;
+    margin-top: 5px;
+}
+
+.show-more-button {
+    font-size: 12px;
+    line-height: 24px;
+    min-height: 24px;
+    padding: 0 8px;
+}
 
 .btn-back{
     position: absolute;

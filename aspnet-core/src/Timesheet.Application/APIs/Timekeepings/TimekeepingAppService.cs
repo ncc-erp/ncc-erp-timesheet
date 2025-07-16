@@ -18,8 +18,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
-using Abp.Domain.Uow;
+using System.Web.Http.Results;
 using Timesheet.APIs.ReviewDetails.Dto;
 using Timesheet.APIs.Timekeepings.Dto;
 using Timesheet.DomainServices;
@@ -37,10 +36,8 @@ namespace Timesheet.APIs.Timekeepings
     public class TimekeepingAppService : AppServiceBase
     {
         private readonly ITimekeepingServices timekeepingServices;
-        //private readonly FaceIdService faceIdService;
         public TimekeepingAppService(TimekeepingServices timekeepingServices, IWorkScope workScope) : base(workScope)
         {
-            //this.faceIdService = faceIdService;
             this.timekeepingServices = timekeepingServices;
         }
 
@@ -85,10 +82,10 @@ namespace Timesheet.APIs.Timekeepings
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_View)]
         [HttpGet]
         public async Task<List<UserPunishmentDetailDto>> GetDetailTimekeeping(
-          int year, int month, int? day,
-          long? userId, long? branchId,
-          bool? isPunished, bool? isComplain,
-          UserPunishmentType? statusPunish = null)
+            int year, int month, int? day,
+            long? userId, long? branchId,
+            bool? isPunished, bool? isComplain,
+            UserPunishmentType? statusPunish = null)
         {
             if (statusPunish == UserPunishmentType.NoPunish || (statusPunish == null && (isPunished == false)))
             {
@@ -282,84 +279,208 @@ namespace Timesheet.APIs.Timekeepings
               .ThenByDescending(d => d.ResultCheckIn)
               .ToList();
         }
-
-
-        private UserPunishmentSummaryDto CalculateUserPunishmentSummary(
-            List<UserPunishment> userPunishments,
-            List<Timekeeping> timekeepings)
-        {
-            return new UserPunishmentSummaryDto
-            {
-                TotalLate = userPunishments.Where(x => x.Type == UserPunishmentType.Late).Sum(x => x.TotalMoney),
-                TotalNoCheckIn = userPunishments.Where(x => x.Type == UserPunishmentType.NoCheckIn).Sum(x => x.TotalMoney),
-                TotalNoCheckOut = userPunishments.Where(x => x.Type == UserPunishmentType.NoCheckOut).Sum(x => x.TotalMoney),
-                TotalLateAndNoCheckOut = userPunishments.Where(x => x.Type == UserPunishmentType.LateAndNoCheckOut).Sum(x => x.TotalMoney),
-                TotalNoCheckInAndNoCheckOut = userPunishments.Where(x => x.Type == UserPunishmentType.NoCheckInAndNoCheckOut).Sum(x => x.TotalMoney),
-                TotalDaily = userPunishments.Where(x => x.Type == UserPunishmentType.Daily).Sum(x => x.TotalMoney),
-                TotalMention = userPunishments.Where(x => x.Type == UserPunishmentType.Mention).Sum(x => x.TotalMoney),
-                TotalTracker20k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_20k).Sum(x => x.TotalMoney),
-                TotalTracker50k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_50k).Sum(x => x.TotalMoney),
-                TotalTracker100k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_100k).Sum(x => x.TotalMoney),
-                TotalTracker200k = userPunishments.Where(x => x.Type == UserPunishmentType.Tracker_200k).Sum(x => x.TotalMoney),
-                TotalAllDailyMoney = timekeepings.Sum(x => x.CountPunishDaily * 20000),
-                TotalAllMentionMoney = timekeepings.Sum(x => x.CountPunishMention * 10000),
-                TotalMonthlyPunishment = timekeepings.Sum(x => x.MoneyPunish)
-            };
-        }
-
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimeSheet_ViewMyTardinessDetail)]
         public async Task<List<GetTimekeepingUserDto>> GetMyDetails(int year, int month)
         {
-            var userId = AbpSession.UserId;
-            var timekeepings = await WorkScope.GetAll<Timekeeping>()
-              .Include(x => x.User)
-              .Where(x => x.UserId == userId && x.DateAt.Year == year && x.DateAt.Month == month)
+            var tkList = await WorkScope.GetAll<Timekeeping>()
+              .Include(t => t.User).ThenInclude(u => u.Branch)
+              .Where(t =>
+                t.DateAt.Year == year &&
+                t.DateAt.Month == month &&
+                t.UserId == AbpSession.UserId)
               .ToListAsync();
-            var userPunishments = await WorkScope.GetAll<Timesheet.Entities.UserPunishment>()
-              .Where(x => x.UserId == userId && x.DateAt.Year == year && x.DateAt.Month == month)
+
+            var upList = await WorkScope.GetAll<UserPunishment>()
+              .Include(up => up.User).ThenInclude(u => u.Branch)
+              .Where(up =>
+                up.DateAt.Year == year &&
+                up.DateAt.Month == month &&
+                up.UserId == AbpSession.UserId)
               .ToListAsync();
-            var summary = CalculateUserPunishmentSummary(userPunishments, timekeepings);
-            return (from t in timekeepings
-                    select new GetTimekeepingUserDto
+
+            var userIds = tkList.Select(t => t.LastModifierUserId)
+              .Union(upList.Select(up => up.CreatorUserId))
+              .Where(id => id.HasValue)
+              .Select(id => id.Value)
+              .Distinct()
+              .ToList();
+
+            var users = await WorkScope.GetAll<User>()
+              .Where(u => userIds.Contains(u.Id))
+              .Select(u => new {
+                  u.Id,
+                  u.UserName
+              })
+              .ToDictionaryAsync(u => u.Id, u => u.UserName);
+
+            var result = new List<GetTimekeepingUserDto>();
+
+            var upLookup = upList.ToLookup(up => new {
+                Date = up.DateAt.Date,
+                UserId = (long)up.UserId
+            });
+            foreach (var tk in tkList)
+            {
+                if (!tk.UserId.HasValue)
+                    continue;
+
+                var matchingUps = upLookup[new
+                {
+                    Date = tk.DateAt.Date,
+                    UserId = tk.UserId.Value
+                }].ToList();
+
+                var (totalDayPunishment, totalMonthPunishmentTotal) = CalculatePunishmentTotals(upList, tk.DateAt, tk.UserId.Value);
+
+                if (matchingUps.Any())
+                {
+                    foreach (var up in matchingUps)
                     {
-                        UserId = t.UserId,
-                        UserName = t.User.FullName,
-                        UserType = t.User.Type,
-                        UserEmail = t.UserEmail,
-                        Branch = t.User.BranchOld,
-                        AvatarPath = t.User.AvatarPath,
-                        Date = t.DateAt,
-                        TimekeepingId = t.Id,
-                        RegistrationTimeStart = t.RegisterCheckIn,
-                        RegistrationTimeEnd = t.RegisterCheckOut,
-                        CheckIn = t.CheckIn,
-                        CheckOut = t.CheckOut,
-                        ResultCheckIn = CommonUtils.SubtractHHmm(t.CheckIn, t.RegisterCheckIn),
-                        ResultCheckOut = CommonUtils.SubtractHHmm(t.RegisterCheckOut, t.CheckOut),
-                        Status = t.IsPunishedCheckIn ? PunishmentStatus.Punish : PunishmentStatus.Normal,
-                        EditByUserId = t.LastModifierUserId,
-                        UserNote = t.UserNote,
-                        NoteReply = t.NoteReply,
-                        StatusPunish = t.StatusPunish,
-                        MoneyPunish = t.MoneyPunish,
-                        TrackerTime = t.TrackerTime,
-                        DailyPunish = t.CountPunishDaily * 20000,
-                        MentionPunish = t.CountPunishMention * 10000,
-                        TotalMonthlyPunishment = summary.TotalMonthlyPunishment,
-                        TotalLatePunish = summary.TotalLate,
-                        TotalNoCheckInPunish = summary.TotalNoCheckIn,
-                        TotalNoCheckOutPunish = summary.TotalNoCheckOut,
-                        TotalLateAndNoCheckOutPunish = summary.TotalLateAndNoCheckOut,
-                        TotalNoCheckInAndNoCheckOutPunish = summary.TotalNoCheckInAndNoCheckOut,
-                        TotalDailyPunish = summary.TotalDaily,
-                        TotalMentionPunish = summary.TotalMention,
-                        TotalTracker20kPunish = summary.TotalTracker20k,
-                        TotalTracker50kPunish = summary.TotalTracker50k,
-                        TotalTracker100kPunish = summary.TotalTracker100k,
-                        TotalTracker200kPunish = summary.TotalTracker200k,
-                        TotalAllDailyMoney = summary.TotalAllDailyMoney,
-                        TotalAllMentionMoney = summary.TotalAllMentionMoney,
-                    }).OrderByDescending(t => t.Date).ToList();
+                        result.Add(new GetTimekeepingUserDto
+                        {
+                            TimekeepingId = tk.Id,
+                            UserPunishmentId = up.Id,
+                            UserId = tk.UserId,
+                            UserName = tk.User.FullName,
+                            UserType = tk.User.Type,
+                            UserEmail = tk.UserEmail,
+                            Branch = tk.User.BranchOld,
+                            AvatarPath = tk.User.AvatarPath,
+                            Date = tk.DateAt,
+                            RegistrationTimeStart = tk.RegisterCheckIn,
+                            RegistrationTimeEnd = tk.RegisterCheckOut,
+                            CheckIn = tk.CheckIn,
+                            CheckOut = tk.CheckOut,
+                            ResultCheckIn = CommonUtils.SubtractHHmm(tk.CheckIn, tk.RegisterCheckIn),
+                            ResultCheckOut = CommonUtils.SubtractHHmm(tk.RegisterCheckOut, tk.CheckOut),
+                            EditByUserName = tk.LastModifierUserId.HasValue ? users.ContainsKey(tk.LastModifierUserId.Value) ? users[tk.LastModifierUserId.Value] : "" : "",
+                            Status = tk.IsPunishedCheckIn ? PunishmentStatus.Punish : PunishmentStatus.Normal,
+                            EditByUserId = tk.LastModifierUserId,
+                            UserNote = up.UserNote ?? tk.UserNote,
+                            NoteReply = up.NoteReply ?? tk.NoteReply,
+
+                            UserPunishmentType = up.Type,
+                            MoneyPunish = up.TotalMoney,
+                            TrackerTime = tk.TrackerTime,
+                            DailyPunish = tk.CountPunishDaily,
+                            MentionPunish = tk.CountPunishMention,
+                            BranchColor = tk.User.Branch?.Color,
+                            BranchDisplayName = tk.User.Branch?.DisplayName,
+                            BranchId = tk.User.BranchId,
+                            StatusPunish = tk.StatusPunish,
+                            TotalDayPunishment = totalDayPunishment,
+                            TotalMonthPunishmentTotal = totalMonthPunishmentTotal
+                        });
+                    }
+                }
+                else
+                {
+
+                    result.Add(new GetTimekeepingUserDto
+                    {
+                        TimekeepingId = tk.Id,
+                        UserId = tk.UserId,
+                        UserName = tk.User.FullName,
+                        UserType = tk.User.Type,
+                        UserEmail = tk.UserEmail,
+                        Branch = tk.User.BranchOld,
+                        AvatarPath = tk.User.AvatarPath,
+                        Date = tk.DateAt,
+                        RegistrationTimeStart = tk.RegisterCheckIn,
+                        RegistrationTimeEnd = tk.RegisterCheckOut,
+                        CheckIn = tk.CheckIn,
+                        CheckOut = tk.CheckOut,
+                        ResultCheckIn = CommonUtils.SubtractHHmm(tk.CheckIn, tk.RegisterCheckIn),
+                        ResultCheckOut = CommonUtils.SubtractHHmm(tk.RegisterCheckOut, tk.CheckOut),
+                        EditByUserName = tk.LastModifierUserId.HasValue ? users.ContainsKey(tk.LastModifierUserId.Value) ? users[tk.LastModifierUserId.Value] : "" : "",
+                        Status = tk.IsPunishedCheckIn ? PunishmentStatus.Punish : PunishmentStatus.Normal,
+                        EditByUserId = tk.LastModifierUserId,
+                        UserNote = tk.UserNote,
+                        NoteReply = tk.NoteReply,
+
+                        MoneyPunish = tk.MoneyPunish,
+                        TrackerTime = tk.TrackerTime,
+                        DailyPunish = tk.CountPunishDaily,
+                        MentionPunish = tk.CountPunishMention,
+
+                        BranchColor = tk.User.Branch?.Color,
+                        BranchDisplayName = tk.User.Branch?.DisplayName,
+                        BranchId = tk.User.BranchId,
+
+                        StatusPunish = tk.StatusPunish,
+
+                        TotalDayPunishment = totalDayPunishment,
+                        TotalMonthPunishmentTotal = totalMonthPunishmentTotal
+                    });
+                }
+            }
+
+            var tkLookup = tkList.Where(tk => tk.UserId.HasValue)
+              .ToLookup(tk => new {
+                  Date = tk.DateAt.Date,
+                  UserId = tk.UserId.Value
+              });
+
+            foreach (var up in upList)
+            {
+                var key = new
+                {
+                    Date = up.DateAt.Date,
+                    UserId = up.UserId
+                };
+                if (!tkLookup.Contains(key))
+                {
+
+                    var (totalDayPunishment, totalMonthPunishmentTotal) = CalculatePunishmentTotals(upList, up.DateAt, up.UserId);
+
+                    result.Add(new GetTimekeepingUserDto
+                    {
+                        TimekeepingId = 0,
+                        UserPunishmentId = up.Id,
+                        UserId = up.UserId,
+                        UserName = up.User.FullName,
+                        UserType = up.User.Type,
+                        UserEmail = up.User.EmailAddress,
+                        Branch = up.User.BranchOld,
+                        AvatarPath = up.User.AvatarPath,
+                        Date = up.DateAt,
+                        RegistrationTimeStart = null,
+                        RegistrationTimeEnd = null,
+                        CheckIn = null,
+                        CheckOut = null,
+                        ResultCheckIn = null,
+                        ResultCheckOut = null,
+                        EditByUserName = up.LastModifierUserId.HasValue ? users.ContainsKey(up.LastModifierUserId.Value) ? users[up.LastModifierUserId.Value] : "" : "",
+                        Status = PunishmentStatus.Punish,
+                        EditByUserId = up.LastModifierUserId,
+                        UserNote = up.UserNote,
+                        NoteReply = up.NoteReply,
+                        UserPunishmentType = up.Type,
+                        MoneyPunish = up.TotalMoney,
+                        BranchColor = up.User.Branch?.Color,
+                        BranchDisplayName = up.User.Branch?.DisplayName,
+                        BranchId = up.User.BranchId,
+
+                        StatusPunish = CheckInCheckOutPunishmentType.NoPunish,
+                        TotalDayPunishment = totalDayPunishment,
+                        TotalMonthPunishmentTotal = totalMonthPunishmentTotal
+                    });
+                }
+            }
+
+            return result.OrderByDescending(t => t.Date).ToList();
+        }
+
+        private (int totalDayPunishment, decimal totalMonthPunishmentTotal) CalculatePunishmentTotals(List<UserPunishment> userPunishments, DateTime date, long userId)
+        {
+            int totalDayPunishment = userPunishments
+              .Where(up => up.DateAt.Date == date.Date && up.UserId == userId)
+              .Sum(up => up.TotalMoney);
+            decimal totalMonthPunishmentTotal = userPunishments
+              .Where(up => up.DateAt.Year == date.Year && up.DateAt.Month == date.Month && up.UserId == userId)
+              .Sum(up => up.TotalMoney);
+
+            return (totalDayPunishment, totalMonthPunishmentTotal);
         }
 
         private async Task<int> GetMoneyPunishByType(CheckInCheckOutPunishmentType StatusPunish)
@@ -409,36 +530,59 @@ namespace Timesheet.APIs.Timekeepings
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timekeeping_UserNote)]
         [HttpPost]
-        public async Task<Timekeeping> UserKhieuLai(TimekeepingUserNoteDto input)
+        public async Task<UserComplaintResultDto> UserKhieuLai(SubmitUserComplaintDto input)
         {
-            if (input.PunishmentType == UserPunishmentType.NoPunish)
-            {
-                throw new UserFriendlyException("Vui lòng chọn loại phạt trước khi khiếu lại!");
-            }
-            var t = await WorkScope.GetAsync<Timekeeping>(input.Id);
-            if (t != null && t.UserId != AbpSession.UserId.Value)
-            {
-                throw new UserFriendlyException("Bạn chỉ có thể khiếu lại cho bản ghi của mình");
-            }
-            if ((UserPunishmentType)t.StatusPunish != input.PunishmentType)
-            {
-                throw new UserFriendlyException("Bạn phải chọn đúng loại phạt mà bạn đang bị phạt!");
-            }
             try
             {
-                var punishmentTypeName = GetPunishmentTypeName(input.PunishmentType);
-                var fullUserNote = $"[{punishmentTypeName}] {input.UserNote}";
-                t.UserNote = fullUserNote;
-                await WorkScope.GetRepo<Timekeeping>().UpdateAsync(t);
-                await UpdateUserPunishmentNote(t.UserId.Value, t.DateAt, input.PunishmentType, fullUserNote, punishmentTypeName);
-                return t;
+
+                var userPunishment = await WorkScope.GetAll<UserPunishment>()
+                  .Where(x => x.Id == input.UserPunishmentId)
+                  .FirstOrDefaultAsync();
+
+                if (userPunishment == null)
+                {
+                    throw new UserFriendlyException("Không tìm thấy bản ghi phạt tương ứng!");
+                }
+
+                if (userPunishment.UserId != AbpSession.UserId.Value)
+                {
+                    throw new UserFriendlyException("Bạn chỉ có thể khiếu nại cho bản ghi của mình");
+                }
+
+                userPunishment.UserNote = input.UserNote;
+                await WorkScope.UpdateAsync(userPunishment);
+                var timekeeping = await WorkScope.GetAll<Timekeeping>()
+                  .Where(t => t.UserId == userPunishment.UserId &&
+                    t.DateAt.Date == userPunishment.DateAt.Date)
+                  .FirstOrDefaultAsync();
+                if (timekeeping != null)
+                {
+                    timekeeping.UserNote = input.UserNote;
+                    await WorkScope.UpdateAsync(timekeeping);
+                }
+                var punishmentTypeName = GetPunishmentTypeName(userPunishment.Type);
+
+                await CurrentUnitOfWork.SaveChangesAsync();
+                return new UserComplaintResultDto
+                {
+                    UserPunishmentId = userPunishment.Id,
+                    TimekeepingId = timekeeping?.Id,
+                    UserNote = input.UserNote,
+                    PunishmentType = userPunishment.Type,
+                    PunishmentTypeName = punishmentTypeName,
+                    Success = true,
+                    Message = "Đã cập nhật khiếu nại thành công"
+                };
+            }
+            catch (UserFriendlyException ex)
+            {
+                throw ex;
             }
             catch (Exception ex)
             {
-                Logger.Error("Error: " + ex.Message);
-                throw new UserFriendlyException("An internal error occurred during your request!");
+                Logger.Error("Error in UserKhieuLai: " + ex.Message, ex);
+                throw new UserFriendlyException("Đã xảy ra lỗi khi xử lý khiếu nại!");
             }
-
         }
 
         private string GetPunishmentTypeName(UserPunishmentType punishmentType)
