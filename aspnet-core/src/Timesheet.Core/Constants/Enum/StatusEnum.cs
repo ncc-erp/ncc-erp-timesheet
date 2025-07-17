@@ -278,7 +278,9 @@ namespace Ncc.Entities.Enum
             Tracker_200k = 11,
             ReviewIntern = 12,
             PMReport_20k = 13,
-            PMReport_50k = 14
+            PMReport_50k = 14,
+            Ant = 15,
+            UnlockTS = 16
         }
         public enum CheckInCheckOutPunishmentType
         {

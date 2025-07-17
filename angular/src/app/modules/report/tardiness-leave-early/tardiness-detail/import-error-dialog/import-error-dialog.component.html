@@ -1,0 +1,29 @@
+<div class="import-error-dialog">
+  <h2 mat-dialog-title class="error-title">
+    <i class="fa fa-exclamation-triangle"></i> Import Failed - Validation Errors
+  </h2>
+  
+  <mat-dialog-content class="mat-typography">
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th style="width: 80px;">Row</th>
+            <th>Error Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let error of parsedErrors">
+            <td>{{ error.row }}</td>
+            <td>{{ error.description }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="error-note">Please fix these issues in your import file and try again.</p>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button color="warn" (click)="onClose()">Close</button>
+  </mat-dialog-actions>
+</div>

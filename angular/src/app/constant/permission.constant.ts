@@ -145,6 +145,13 @@ export const PERMISSIONS_CONSTANT = {
     UpdateDefaultProjectTask: "Project.UpdateDefaultProjectTask",
     EditTypeWork: "Project.EditTeamWorkType",
     ReleaseUser: "Project.ReleaseUser",
+    
+    // Punishments
+    ViewPunishments: "Admin.Punishments.View",
+    AddPunishments: "Admin.Punishments.AddNew",
+    EditPunishments: "Admin.Punishments.Edit",
+    DeletePunishments: "Admin.Punishments.Delete",
+    PunishmentsChangeStatus: "Admin.Punishments.ChangeStatus",
 
     //my timesheet
     AddMyTimesheet: "MyTimesheet.AddNew",

@@ -268,6 +268,27 @@ const routes: Routes = [
     ],
   },
   {
+    path: "punishments",
+    component: MainComponent,
+    canActivate: [AppRouteGuard],
+    children: [
+      {
+        path: "",
+        children: [
+          {
+            path: "",
+            loadChildren: "../modules/punishment/punishment.module#PunishmentModule",
+            data: {
+              permission: "Admin.Punishments",
+              preload: true,
+            },
+            canActivate: [AppRouteGuard],
+          },
+        ],
+      },
+    ],
+  },
+  {
     path: "manage-absence-types",
     component: MainComponent,
     canActivate: [AppRouteGuard],

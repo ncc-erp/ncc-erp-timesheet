@@ -303,11 +303,33 @@ export const APP_CONSTANT = {
     MENTION: [7],  
     TRACKER: [8, 9, 10, 11],            
     LATE_REVIEW: [12],             
-    REPORT: [13, 14]               
+    REPORT: [13, 14],
+    ANT: [15],
+    UNLOCKTS: [16]              
   },
   
+  PUNISHMENT_TYPES: [
+    { value: 0, name: 'No Punish' },
+    { value: 1, name: 'Late' },
+    { value: 2, name: 'No Check In' },
+    { value: 3, name: 'No Check Out' },
+    { value: 4, name: 'Late And No Check Out' },
+    { value: 5, name: 'No Check In And No Check Out' },
+    { value: 6, name: 'Daily' },
+    { value: 7, name: 'Mention' },
+    { value: 8, name: 'Tracker 20k' },
+    { value: 9, name: 'Tracker 50k' },
+    { value: 10, name: 'Tracker 100k' },
+    { value: 11, name: 'Tracker 200k' },
+    { value: 12, name: 'Review Intern' },
+    { value: 13, name: 'PM Report 20k' },
+    { value: 14, name: 'PM Report 50k' },
+    { value: 15, name: 'Ant' },
+    { value: 16, name: 'UnlockTS' }
+  ],
+  
   PunishmentTypeMap: {
-    0: ['NO_PUNISH', 'CHECK_IN_OUT', 'DAILY', 'MENTION', 'TRACKER', 'LATE_REVIEW', 'REPORT'], 
+    0: ['NO_PUNISH', 'CHECK_IN_OUT', 'DAILY', 'MENTION', 'TRACKER', 'LATE_REVIEW', 'REPORT', 'ANT', 'UNLOCKTS'], 
     1: ['NO_PUNISH', 'CHECK_IN_OUT'], 
     2: ['NO_PUNISH', 'CHECK_IN_OUT'],
     3: ['NO_PUNISH', 'CHECK_IN_OUT'],

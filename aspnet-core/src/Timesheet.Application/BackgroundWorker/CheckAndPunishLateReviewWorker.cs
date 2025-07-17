@@ -60,41 +60,56 @@ namespace Timesheet.BackgroundWorker
             }
 
             _logger.LogInformation($"Starting to apply late review penalties for {month}/{year}.");
-            var processed = _reviewInternRepository.GetAll()
-                .Where(x => x.Month == month && x.Year == year)
-                .Select(x => x.IsPunishmentProcessed)
-                .FirstOrDefault();
-
-            if (processed)
+            var processed = false;
+            var reviewIntern = _reviewInternRepository.GetAll()
+                .FirstOrDefault(x => x.Month == month && x.Year == year);
+                
+            if (reviewIntern == null)
             {
-                _logger.LogInformation($"Completed processing late review penalties for {month}/{year}.");
+                _logger.LogWarning($"No review intern period found for {month}/{year}.");
             }
             else
             {
-                try
+                processed = reviewIntern.IsPunishmentProcessed;
+                
+                if (processed)
                 {
-                    var result = _reviewInternService.CheckAndPunishLateReview(input).Result;
-
-                    var reviewIntern = _reviewInternRepository.GetAll()
-                        .FirstOrDefault(x => x.Month == month && x.Year == year);
-                    if (reviewIntern != null)
+                    _logger.LogInformation($"Completed processing late review penalties for {month}/{year}.");
+                }
+                else
+                {
+                    try
                     {
+                        var result = _reviewInternService.CheckAndPunishLateReview(input).Result;
+
                         reviewIntern.IsPunishmentProcessed = true;
                         _reviewInternRepository.Update(reviewIntern);
                         CurrentUnitOfWork.SaveChanges();
                     }
-                }
-                catch (UserFriendlyException ufex)
-                {
-                    _logger.LogWarning(ufex.Message);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to process late review penalties.");
+                    catch (UserFriendlyException ufex)
+                    {
+                        _logger.LogWarning(ufex.Message);
+                    }
+                    catch (AggregateException agex) when (agex.InnerException is UserFriendlyException)
+                    {
+                        _logger.LogWarning(agex.InnerException.Message);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to process late review penalties.");
+                    }
                 }
             }
-
-            Timer.Period = GetPeriodToNextReviewDate();
+            
+            try
+            {
+                Timer.Period = GetPeriodToNextReviewDate();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error setting timer period. Using default period of 24 hours.");
+                Timer.Period = (int)TimeSpan.FromHours(24).TotalMilliseconds;
+            }
         }
 
         private void Timer_Elapsed(object sender, System.EventArgs e)
@@ -139,14 +154,34 @@ namespace Timesheet.BackgroundWorker
 
         private int GetPeriodToNextReviewDate()
         {
-            var nextRunDate = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewNextRunDate));
-            var now = DateTimeUtils.GetNow();
-            var nextRun = new DateTime(now.Year, now.Month, nextRunDate, 0, 0, 0);
-            if (now > nextRun)
+            try
             {
-                nextRun = nextRun.AddMonths(1);
+                var nextRunDate = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewNextRunDate));
+                var now = DateTimeUtils.GetNow();
+                var nextRun = new DateTime(now.Year, now.Month, nextRunDate, 0, 0, 0);
+                if (now > nextRun)
+                {
+                    nextRun = nextRun.AddMonths(1);
+                }
+                
+                var milliseconds = (nextRun - now).TotalMilliseconds;
+                
+                if (milliseconds > int.MaxValue)
+                {
+                    const int fixedPeriodDays = 15;
+                    
+                    _logger.LogInformation($"Calculated period ({milliseconds} ms) exceeds Int32.MaxValue. Next run scheduled after {fixedPeriodDays} days.");
+                    return (int)TimeSpan.FromDays(fixedPeriodDays).TotalMilliseconds;
+                }
+                
+                return (int)milliseconds;
             }
-            return (int)(nextRun - now).TotalMilliseconds;
+            catch (Exception ex)
+            {
+                const int defaultPeriodDays = 15;
+                _logger.LogError(ex, $"Error calculating next review period. Using default period of {defaultPeriodDays} days.");
+                return (int)TimeSpan.FromDays(defaultPeriodDays).TotalMilliseconds;
+            }
         }
     }
 }

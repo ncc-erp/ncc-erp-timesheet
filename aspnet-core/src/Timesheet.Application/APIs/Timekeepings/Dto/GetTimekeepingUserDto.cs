@@ -42,7 +42,7 @@ namespace Timesheet.APIs.Timekeepings.Dto
         public int TotalMonthPunishment { get; set; }
         public int? DailyPunish { get; set; }
         public int? MentionPunish { get; set; }
-        
+
         public int DailyLatePunish { get; set; }
         public int DailyNoCheckInPunish { get; set; }
         public int DailyNoCheckOutPunish { get; set; }

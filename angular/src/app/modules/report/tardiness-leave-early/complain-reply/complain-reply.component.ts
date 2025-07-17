@@ -16,6 +16,8 @@ export class ComplainReplyComponent extends AppComponentBase implements OnInit, 
   readonly PUNISH_TYPES_WITH_COUNT = [6, 7]; 
   changeCount: number = 0;
   filteredPunishTypes: any[] = [];
+
+  private originalPunishType: number;
   
   private readonly PUNISHMENT_GROUPS = APP_CONSTANT.PunishmentGroups;
   private readonly PUNISHMENT_TYPE_MAP = APP_CONSTANT.PunishmentTypeMap;
@@ -36,12 +38,13 @@ export class ComplainReplyComponent extends AppComponentBase implements OnInit, 
     this.complain.noteReply = this.data.noteReply;
     this.complain.statusPunish = this.data.statusPunish;
     this.complain.punishType = this.data.punishType;
+    this.originalPunishType = this.data.statusPunish;
 
     if (this.PUNISH_TYPES_WITH_COUNT.some(x => x === this.complain.statusPunish)) {
       this.changeCount = this.data.count || 0;
       this.complain.changeCount = this.changeCount;
     }
-    
+
     this.updateFilteredPunishTypes(this.complain.statusPunish);
   }
 
@@ -71,13 +74,37 @@ export class ComplainReplyComponent extends AppComponentBase implements OnInit, 
   }
 
   private updateFilteredPunishTypes(currentType: number) {
-    const allowedGroups = this.PUNISHMENT_TYPE_MAP[currentType] || [];
+    if (this.originalPunishType === 0) {
+      this.filteredPunishTypes = APP_CONSTANT.PunishRules
+        .filter(option => option.value === 0);
+      return;
+    }
     
+    if (currentType === 0) {
+      const allowedTypes = new Set<number>();
+      allowedTypes.add(0); 
+
+      const originalAllowedGroups = this.PUNISHMENT_TYPE_MAP[this.originalPunishType] || [];
+      
+      originalAllowedGroups.forEach(group => {
+        this.PUNISHMENT_GROUPS[group].forEach(type => allowedTypes.add(type));
+      });
+      
+      this.filteredPunishTypes = APP_CONSTANT.PunishRules
+        .filter(option => allowedTypes.has(option.value))
+        .sort((a, b) => a.value - b.value);
+      return;
+    }
+
     const allowedTypes = new Set<number>();
-    allowedGroups.forEach(group => {
+    allowedTypes.add(0);
+
+    const currentAllowedGroups = this.PUNISHMENT_TYPE_MAP[currentType] || [];
+    
+    currentAllowedGroups.forEach(group => {
       this.PUNISHMENT_GROUPS[group].forEach(type => allowedTypes.add(type));
     });
-    
+
     this.filteredPunishTypes = APP_CONSTANT.PunishRules
       .filter(option => allowedTypes.has(option.value))
       .sort((a, b) => a.value - b.value);
