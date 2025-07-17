@@ -52,32 +52,14 @@ export class ComplainDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
-    console.log('Submit button clicked');
-    console.log('User punishments:', this.userPunishments);
-    console.log('User notes:', this.userNotes);
-
-    if (this.userPunishments && this.userPunishments.length > 0) {
-      console.log('First punishment structure:', JSON.stringify(this.userPunishments[0]));
-      console.log('Available fields:', Object.keys(this.userPunishments[0]));
-    }
-
     const result = Object.keys(this.userNotes).map(key => {
       const punishmentType = parseInt(key);
 
       let userPunishment = this.userPunishments.find(up => {
-        console.log(`Checking punishment record:`, up);
-        console.log(`Looking for type ${punishmentType}, record has:`, {
-          type: up.type,
-          userPunishmentType: up.userPunishmentType,
-          Type: up.Type
-        });
-
         return up.type === punishmentType || 
                up.userPunishmentType === punishmentType || 
                up.Type === punishmentType;
       });
-      
-      console.log(`Searching for punishment type ${punishmentType}:`, userPunishment);
 
       if (!userPunishment && this.data.userPunishments) {
         userPunishment = this.data.userPunishments.find(up => {
@@ -91,8 +73,6 @@ export class ComplainDialogComponent implements OnInit {
         (userPunishment.id || userPunishment.Id || userPunishment.userPunishmentId || userPunishment.UserPunishmentId) : 
         null;
       
-      console.log(`Found userPunishmentId: ${userPunishmentId} for type ${punishmentType}`);
-      
       return {
         punishmentType: punishmentType,
         userNote: this.userNotes[punishmentType],
@@ -100,12 +80,9 @@ export class ComplainDialogComponent implements OnInit {
       };
     }).filter(item => item.userPunishmentId);  
 
-    console.log('Result to be returned:', result);
-
     if (result.length > 0) {
       this.dialogRef.close(result);
     } else {
-      console.error('No valid complaints to submit');
       alert('Không thể gửi khiếu nại. Vui lòng kiểm tra lại thông tin và đảm bảo bạn đã chọn loại phạt hợp lệ.');
     }
   }

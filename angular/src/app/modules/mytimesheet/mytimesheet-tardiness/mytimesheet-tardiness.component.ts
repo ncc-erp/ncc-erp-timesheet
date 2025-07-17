@@ -377,12 +377,37 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
 
   hasLongContent(notes: any[]): boolean {
     if (!notes || notes.length === 0) return false;
-    return notes.some(note => note.userNote && note.userNote.length > 50);
+    const totalLength = notes.reduce((total, note) => {
+      const titleLength = note.punishmentName ? note.punishmentName.length + 2 : 0; 
+      const contentLength = note.userNote ? note.userNote.trim().length : 0;
+      return total + titleLength + contentLength;
+    }, 0);
+    return totalLength > 44;
   }
 
   hasLongReplyContent(replies: any[]): boolean {
     if (!replies || replies.length === 0) return false;
-    return replies.some(reply => reply.noteReply && reply.noteReply.length > 50);
+    const totalLength = replies.reduce((total, reply) => {
+      const titleLength = reply.punishmentName ? reply.punishmentName.length + 2 : 0; 
+      const contentLength = reply.noteReply ? reply.noteReply.trim().length : 0;
+      return total + titleLength + contentLength;
+    }, 0);
+    return totalLength > 44;
+  }
+
+  getLineContentCount(text: string): number {
+    if (!text) return 0;
+    return text.split('\n').length;
+  }
+
+  hasMultilineContent(notes: any[]): boolean {
+    if (!notes || notes.length === 0) return false;
+    return notes.some(note => note.userNote && this.getLineContentCount(note.userNote) > 3);
+  }
+
+  hasMultilineReplyContent(replies: any[]): boolean {
+    if (!replies || replies.length === 0) return false;
+    return replies.some(reply => reply.noteReply && this.getLineContentCount(reply.noteReply) > 3);
   }
 
   getAttendancePunishmentTypes(item: TimekeepingDto): string {

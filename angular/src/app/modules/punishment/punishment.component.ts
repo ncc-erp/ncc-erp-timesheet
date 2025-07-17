@@ -186,15 +186,12 @@ export class PunishmentComponent extends PagedListingComponentBase<PunishmentDto
             });
             FileSaver.saveAs(file, response.result.fileName || "TemplateImportPunishmentSystem.xlsx");
           } catch (e) {
-            console.error('Error processing file:', e);
             this.notify.error(this.l('DownloadTemplateFailed'));
           }
         } else {
-          console.error('Invalid response format:', response);
           this.notify.error(this.l('DownloadTemplateFailed'));
         }
       }, error => {
-        console.error('API error:', error);
         this.notify.error(this.l('DownloadTemplateFailed'));
       });
   }
@@ -248,14 +245,10 @@ export class PunishmentComponent extends PagedListingComponentBase<PunishmentDto
             this.l('Import Result', response.successCount, response.failedCount, response.errorCount)
           );
           if (response.failedCount > 0 || response.errorCount > 0) {
-            console.log('Failed items:', response.failedList);
-            console.log('Error items:', response.errorList);
           }
           this.refresh();
         }
       }, (error) => {
-        console.log('Import error:', error);
-
         const toastContainer = document.querySelector('.toast-container');
         if (toastContainer) {
           const errorToasts = toastContainer.querySelectorAll('.toast-error');
@@ -278,7 +271,6 @@ export class PunishmentComponent extends PagedListingComponentBase<PunishmentDto
             rawErrorMessage.includes('Row') ||
             rawErrorMessage.includes('Invalid date format')) {
             errorMessages = this.parseImportErrors(rawErrorMessage);
-            console.log('Parsed error messages:', errorMessages);
           } else {
             errorMessages = [rawErrorMessage || 'Import failed. Please try again.'];
           }
