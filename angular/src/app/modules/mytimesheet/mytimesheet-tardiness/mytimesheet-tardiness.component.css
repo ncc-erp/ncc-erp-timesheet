@@ -4,14 +4,17 @@
   min-width: 50px;
   text-align: center;
   border: 0.2px solid rgba(204, 204, 204, 0.35);
-  white-space: normal !important;
-  word-wrap: break-word;
-  overflow: hidden;
+}
+
+.edited-by-column {
+  width: auto !important;
+  min-width: auto !important;
+  white-space: nowrap !important;
 }
 
 .edited-by-cell {
   width: fit-content !important;
-  min-width: 80px !important;
+  min-width: auto !important;
   white-space: nowrap !important;
   overflow: visible !important;
 }
@@ -23,11 +26,11 @@
   overflow: visible !important;
 }
 
+
+
 .styleUser > tbody > tr > td{
   padding: 4px 4px !important;
   border: 0.2px solid rgba(204, 204, 204, 0.35);
-  white-space: normal !important;
-  word-break: break-word;
 }
 
 .styleUser {
@@ -130,43 +133,22 @@
   border-bottom: none;
 }
 
-.table-responsive table th:nth-last-child(2),
-.table-responsive table th:nth-last-child(3) {
-  width: 160px !important;
-  min-width: 160px !important;
-  max-width: 160px !important;
-  table-layout: fixed !important;
-}
 
-.table-responsive table td:nth-last-child(2),
-.table-responsive table td:nth-last-child(3) {
-  width: 160px !important;
-  min-width: 160px !important;
-  max-width: 160px !important;
-  word-wrap: break-word;
-  overflow: hidden;
-  white-space: normal !important;
-  text-overflow: ellipsis;
-}
-
-.table-responsive table {
-  table-layout: auto !important;
-  width: 100% !important;
-  min-width: 1200px !important;
-}
-
-.styleUser > tbody > tr > td.edited-by-cell {
-  width: auto !important;
-  min-width: 150px !important;
-  max-width: none !important;
-  overflow: visible !important;
-}
 
 .table-responsive {
   overflow-x: auto !important;
   -webkit-overflow-scrolling: touch;
   max-width: 100%;
   width: 100%;
+}
+
+.table-responsive > .table > tbody > tr > td,
+.table-responsive > .table > tbody > tr > th,
+.table-responsive > .table > tfoot > tr > td,
+.table-responsive > .table > tfoot > tr > th,
+.table-responsive > .table > thead > tr > td,
+.table-responsive > .table > thead > tr > th {
+  white-space: pre-wrap;
 }
 
 .red {
@@ -228,20 +210,20 @@
 }
 
 .complaint-content {
-display: -webkit-box;
--webkit-line-clamp: 5;
-line-clamp: 5;
--webkit-box-orient: vertical;
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: normal;
-transition: max-height 0.2s;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  transition: max-height 0.2s;
 }
 .complaint-content.expanded {
--webkit-line-clamp: unset;
-line-clamp: unset;
-max-height: none;
-overflow: visible;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  max-height: none;
+  overflow: visible;
 }
 
 .punishment-type {

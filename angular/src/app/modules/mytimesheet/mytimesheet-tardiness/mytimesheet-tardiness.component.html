@@ -70,17 +70,17 @@
                   {{ "Checking time" | localize }}
                 </th>
 
-                <th rowspan="2" style="width: auto; min-width: 80px;">
+                <th rowspan="2" class="edited-by-column">
                   {{ "Edited by" | localize }}
                 </th>
 
                 <th style="min-width: 490px;" colspan="8">
                   {{ "Punishments" | localize }}
                 </th>
-                <th style="min-width: 200px; max-width: 200px; width: 200px;" rowspan="2">
+                <th style="min-width: 150px; max-width: 300px; width: 200px;" rowspan="2">
                   {{ "Complain" | localize }}
                 </th>
-                <th style="min-width: 200px; max-width: 200px; width: 200px;" rowspan="2">
+                <th style="min-width: 150px; max-width: 300px; width: 200px;" rowspan="2">
                   {{ "Complain Reply" | localize }}
                 </th>
                 <th style="min-width: 70px; width: 70px;" rowspan="2">
@@ -94,13 +94,13 @@
                 <th style="width: 100px;">Check in</th>
                 <th style="width: 100px;">Check out</th>
 
-                <th style="width: auto; min-width: 85px;">Attendance</th>
-                <th style="width: auto; min-width: 40px;">Daily</th>
+                <th style="width: auto; min-width: 60px;">Attendance</th>
+                <th style="width: auto; min-width: 60px;">Daily</th>
                 <th style="width: auto; min-width: 60px;">Mention</th>
                 <th style="width: auto; min-width: 60px;">Tracker</th>
-                <th style="width: auto; min-width: 90px;">ReviewIntern</th>
-                <th style="width: auto; min-width: 35px;">Ant</th>
-                <th style="width: auto; min-width: 70px;">UnlockTS</th>
+                <th style="width: auto; min-width: 60px;">ReviewIntern</th>
+                <th style="width: auto; min-width: 60px;">Ant</th>
+                <th style="width: auto; min-width: 60px;">UnlockTS</th>
                 <th style="width: auto; min-width: 60px; color: #d32f2f;">Total</th>
               </tr>
             </thead>
@@ -171,7 +171,7 @@
                 </td>
 
                 <td style="text-align: center;">
-                  <span [ngClass]="item.totalDayPunishment == 0 ? 'green' : 'red'" style="font-weight: bold;">
+                  <span class="red" style="font-weight: bold;">
                     {{ formatPunishmentAmount(item.totalDayPunishment) }}
                   </span>
                 </td>

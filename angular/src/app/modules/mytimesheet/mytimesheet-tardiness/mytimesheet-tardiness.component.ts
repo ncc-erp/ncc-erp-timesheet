@@ -21,8 +21,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   EDIT_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.EditTardinessLeaveEarly;
   VIEW_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.ViewTardinessLeaveEarly;
   Timekeeping_UserNote = PERMISSIONS_CONSTANT.Timekeeping_UserNote;
-  // listMonth = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-  // listYear = APP_CONSTANT.ListYear;
   month;
   months;
   year;
@@ -69,49 +67,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.timekeepingService.getMyDetails(this.year, this.month + 1).subscribe(res => {
       this.listTimekeeping = res.result;
       if (this.listTimekeeping && this.listTimekeeping.length > 0) {
-        let totalAttendancePunish = 0;
-        let totalDailyPunish = 0;
-        let totalMentionPunish = 0;
-        let totalTrackerPunish = 0;
-        let totalReviewInternPunish = 0;
-        let totalPmReportPunish = 0;
-        let totalAntPunish = 0;
-        let totalUnlockTSPunish = 0;
-
-        this.listTimekeeping.forEach(item => {
-          const punishType = item.userPunishmentType;
-          const moneyAmount = item.moneyPunish || 0;
-          
-          if (punishType >= 1 && punishType <= 5) {
-            totalAttendancePunish += moneyAmount;
-          } else if (punishType === 6) {
-            totalDailyPunish += moneyAmount;
-          } else if (punishType === 7) {
-            totalMentionPunish += moneyAmount;
-          } else if (punishType >= 8 && punishType <= 11) {
-            totalTrackerPunish += moneyAmount;
-          } else if (punishType === 12) {
-            totalReviewInternPunish += moneyAmount;
-          } else if (punishType === 13 || punishType === 14) {
-            totalPmReportPunish += moneyAmount;
-          } else if (punishType === 15) {
-            totalAntPunish += moneyAmount;
-          } else if (punishType === 16) {
-            totalUnlockTSPunish += moneyAmount;
-          }
-        });
-
-        if (this.listTimekeeping[0]) {
-          this.listTimekeeping[0].totalAttendancePunish = totalAttendancePunish;
-          this.listTimekeeping[0].totalDailyPunish = totalDailyPunish;
-          this.listTimekeeping[0].totalMentionPunish = totalMentionPunish;
-          this.listTimekeeping[0].totalTrackerPunish = totalTrackerPunish;
-          this.listTimekeeping[0].totalReviewInternPunish = totalReviewInternPunish;
-          this.listTimekeeping[0].totalPmReportPunish = totalPmReportPunish;
-          this.listTimekeeping[0].totalAntPunish = totalAntPunish;
-          this.listTimekeeping[0].totalUnlockTSPunish = totalUnlockTSPunish;
-        }
-        
         this.totalMonthlyPunishment = this.listTimekeeping[0].totalMonthPunishmentTotal;
       }
       
@@ -360,7 +315,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
             this.getData();
           })
           .catch(error => {
-            console.error('Error submitting complaints:', error);
             this.notify.error('Failed to submit complaints');
           });
       }
@@ -382,7 +336,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       const contentLength = note.userNote ? note.userNote.trim().length : 0;
       return total + titleLength + contentLength;
     }, 0);
-    return totalLength > 44;
+    return totalLength > 57;
   }
 
   hasLongReplyContent(replies: any[]): boolean {
@@ -392,7 +346,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       const contentLength = reply.noteReply ? reply.noteReply.trim().length : 0;
       return total + titleLength + contentLength;
     }, 0);
-    return totalLength > 44;
+    return totalLength > 57;
   }
 
   getLineContentCount(text: string): number {
@@ -470,7 +424,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         }
       },
       (error) => {
-        console.error('Error fetching user punishments:', error);
         this.notify.error('Failed to load punishment details');
       }
     );
