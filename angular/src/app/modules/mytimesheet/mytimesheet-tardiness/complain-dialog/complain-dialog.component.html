@@ -1,0 +1,31 @@
+<h2 mat-dialog-title>Complain</h2>
+<mat-dialog-content>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <p class="date-info">Date: {{timekeeping.date | date:'dd/MM/yyyy'}}</p>
+        <div class="punishment-list">
+          <div *ngFor="let type of punishmentTypes" class="punishment-item">
+            <div class="punishment-header">
+              <mat-checkbox [checked]="userNotes[type.value] !== undefined && userNotes[type.value] !== ''" 
+                            (change)="onCheckboxChange($event, type.value)">
+                {{type.name}}
+              </mat-checkbox>
+            </div>
+            <div *ngIf="userNotes[type.value] !== undefined && userNotes[type.value] !== null" class="punishment-note">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Your complaint</mat-label>
+                <textarea matInput [(ngModel)]="userNotes[type.value]" 
+                          placeholder="Enter your complaint here"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()">Submit</button>
+</mat-dialog-actions>

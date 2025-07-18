@@ -1,4 +1,6 @@
 import { ComplainReplyComponent } from './../complain-reply/complain-reply.component';
+import { CreateEditUserPunishmentComponent } from './create-edit-user-punishment/create-edit-user-punishment.component';
+import { ImportErrorDialogComponent } from './import-error-dialog/import-error-dialog.component';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TardinessDetailComponent } from './tardiness-detail.component';
@@ -13,7 +15,7 @@ import { CalendarModule, DateAdapter } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 
 @NgModule({
-  declarations: [TardinessDetailComponent, ComplainReplyComponent],
+  declarations: [TardinessDetailComponent, ComplainReplyComponent, CreateEditUserPunishmentComponent, ImportErrorDialogComponent],
   imports: [
     CommonModule,
     SharedModule,
@@ -31,7 +33,9 @@ import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 
   entryComponents: [
     TardinessLeaveEarlyComponent,
-    ComplainReplyComponent
+    ComplainReplyComponent,
+    CreateEditUserPunishmentComponent,
+    ImportErrorDialogComponent
   ],
   exports: []
 })

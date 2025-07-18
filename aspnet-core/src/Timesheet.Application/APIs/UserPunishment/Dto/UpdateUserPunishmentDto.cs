@@ -1,18 +1,24 @@
-﻿using Abp.Application.Services.Dto;
+using Abp.Application.Services.Dto;
 using System;
+using System.ComponentModel.DataAnnotations;
 using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.UserPunishments.Dto
 {
     public class UpdateUserPunishmentDto : EntityDto<long>
     {
+        [Required]
         public DateTime DateAt { get; set; }
+        [Required]
         public long UserId { get; set; }
-        public long PunishmentSystemId { get; set; }
+        [Required]
         public UserPunishmentType Type { get; set; }
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Count must be greater than 0")]
         public int Count { get; set; }
-        public int TotalMoney { get; set; }
+        [MaxLength(500)]
         public string UserNote { get; set; }
+        [MaxLength(500)]
         public string NoteReply { get; set; }
     }
 }

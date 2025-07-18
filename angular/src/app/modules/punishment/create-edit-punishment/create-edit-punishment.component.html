@@ -1,0 +1,47 @@
+
+<form *ngIf="active" #createForm="ngForm" autocomplete="off" id="frm_create_punishment" novalidate>
+  <div class="create-edit-punishment-tilte">
+    <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" mat-dialog-title>
+      {{title}} {{punishment.id > 0 ? punishment.name : ''}}
+    </h2>
+  </div>
+  <div class="mat-typography create-edit-punishment">
+    <div class="example-container">
+      <mat-form-field>
+        <input matInput name="name" placeholder="{{'Name' | localize}}" 
+               [(ngModel)]="punishment.name" required maxlength="255">
+      </mat-form-field>
+      <mat-form-field>
+        <textarea matInput name="description" placeholder="{{'Description' | localize}}" 
+                  [(ngModel)]="punishment.description"></textarea>
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput type="number" name="money" placeholder="{{'Money' | localize}}" 
+               [(ngModel)]="punishment.money" required min="0">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-select name="type" placeholder="{{'Type' | localize}}" [(ngModel)]="punishment.type" required>
+          <mat-option *ngIf="isLoadingTypes" disabled>
+            <span class="mat-option-text">{{'Loading...' | localize}}</span>
+          </mat-option>
+          <mat-option *ngFor="let type of punishmentTypes" [value]="type.value">
+            {{type.name}}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="!punishment.type">
+          {{'ThisFieldIsRequired' | localize}}
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+  <mat-dialog-actions align="end">
+    <button name="cancelBtn" class="btn btn-default" mat-raised-button type="button" (click)="close(0)">
+      {{'Cancel' | localize}}
+    </button>
+    <button class="save-btn" name="saveBtn" mat-raised-button color="primary" 
+            [disabled]="!createForm.form.valid || isSaving" type="submit"
+            (click)="save()">
+      {{'Save' | localize}}
+    </button>
+  </mat-dialog-actions>
+</form>

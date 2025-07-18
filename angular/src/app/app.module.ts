@@ -12,7 +12,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 import { AbpModule } from '@abp/abp.module';
-import { ComplainDialogComponent } from './modules/mytimesheet/mytimesheet-tardiness/complain-dialog.component';
 import { ServiceProxyModule } from '@shared/service-proxies/service-proxy.module';
 import { SharedModule } from '@shared/shared.module';
 
@@ -82,7 +81,6 @@ export function provideConfig() {
     SideBarNavComponent,
     SideBarFooterComponent,
     RightSideBarComponent,
-    ComplainDialogComponent,
     // tenants
     TenantsComponent,
     CreateTenantDialogComponent,
@@ -149,7 +147,6 @@ export function provideConfig() {
     ResetPasswordDialogComponent,
     UploadAvatarComponent,
     UpdatePunishMoneyComponent,
-    ComplainDialogComponent,
   ]
 })
 export class AppModule {}

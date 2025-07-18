@@ -12,11 +12,7 @@
 .punishment-list {
   margin-top: 10px;
 }
-.snackbar-error {
-  background: #d32f2f;
-  color: #fff;
-  font-weight: 500;
-}
+
 .punishment-item {
   margin-bottom: 15px;
   border-bottom: 1px solid #eee;

@@ -296,18 +296,8 @@ export const APP_CONSTANT = {
     { value: 16, name: 'UnlockTS' }
   ],
   
-  PunishmentGroups: {
-    NO_PUNISH: [0],
-    CHECK_IN_OUT: [1, 2, 3, 4, 5],
-    DAILY: [6],
-    MENTION: [7],  
-    TRACKER: [8, 9, 10, 11],            
-    LATE_REVIEW: [12],             
-    REPORT: [13, 14]               
-  },
-  
   PunishmentTypeMap: {
-    0: ['NO_PUNISH', 'CHECK_IN_OUT', 'DAILY', 'MENTION', 'TRACKER', 'LATE_REVIEW', 'REPORT'], 
+    0: ['NO_PUNISH', 'CHECK_IN_OUT', 'DAILY', 'MENTION', 'TRACKER', 'LATE_REVIEW', 'REPORT', 'ANT', 'UNLOCKTS'], 
     1: ['NO_PUNISH', 'CHECK_IN_OUT'], 
     2: ['NO_PUNISH', 'CHECK_IN_OUT'],
     3: ['NO_PUNISH', 'CHECK_IN_OUT'],

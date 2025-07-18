@@ -9,7 +9,6 @@ namespace Timesheet.APIs.Timekeepings.Dto
 {
     public class GetTimekeepingUserDto
     {
-        public List<UserPunishmentDetailDto> UserPunishments { get; set; }
         public long TimekeepingId { get; set; }
         public long UserPunishmentId { get; set; }
         public long? UserId { get; set; }
@@ -42,20 +41,7 @@ namespace Timesheet.APIs.Timekeepings.Dto
         public int TotalMonthPunishment { get; set; }
         public int? DailyPunish { get; set; }
         public int? MentionPunish { get; set; }
-        
-        public int DailyLatePunish { get; set; }
-        public int DailyNoCheckInPunish { get; set; }
-        public int DailyNoCheckOutPunish { get; set; }
-        public int DailyLateAndNoCheckOutPunish { get; set; }
-        public int DailyNoCheckInAndNoCheckOutPunish { get; set; }
-        public int DailyDailyPunish { get; set; }
-        public int DailyMentionPunish { get; set; }
-        public int DailyTracker20kPunish { get; set; }
-        public int DailyTracker50kPunish { get; set; }
-        public int DailyTracker100kPunish { get; set; }
-        public int DailyTracker200kPunish { get; set; }
         public int TotalDayPunishment { get; set; }
-        public decimal TotalDayPunishmentTotal { get; set; }
         public decimal TotalMonthPunishmentTotal { get; set; }
     }
 }

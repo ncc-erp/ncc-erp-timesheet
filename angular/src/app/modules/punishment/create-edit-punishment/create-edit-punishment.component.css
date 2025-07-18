@@ -1,0 +1,98 @@
+.create-edit-punishment {
+    padding: 0 24px 24px;
+    min-width: 400px;
+}
+
+.punishment-create-dialog-container {
+    width: 40% !important;
+}
+
+.create-edit-punishment-tilte {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    padding: 16px 24px;
+    margin: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.create-edit-punishment-tilte h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
+    line-height: 32px;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.example-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+/* Make description textarea strictly single line */
+textarea.mat-input-element[name="description"] {
+    height: 24px;
+    line-height: 24px;
+    resize: none;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0;
+    margin: 0;
+}
+
+::ng-deep .save-btn .mat-button-wrapper {
+    color: white !important;
+}
+
+mat-dialog-actions {
+    padding: 8px 24px 24px;
+    margin: 0;
+    min-height: auto;
+    justify-content: flex-end;
+}
+
+@media screen and (max-width: 768px) { 
+    .create-edit-punishment {
+        min-width: unset;
+        width: 100%;
+        padding: 0 16px 16px;
+    }
+
+    .punishment-create-dialog-container {
+        width: 90% !important;
+    }
+
+    .create-edit-punishment-tilte {
+        padding: 16px;
+    }
+
+    mat-dialog-actions {
+        padding: 8px 16px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .create-edit-punishment {
+        min-width: 300px;
+    }
+    
+    .create-edit-punishment-tilte h2 {
+        font-size: 18px;
+        line-height: 28px;
+    }
+}
