@@ -77,7 +77,10 @@ export class CreateEditUserPunishmentComponent extends AppComponentBase implemen
 
   loadPunishmentTypes() {
     this.isLoadingTypes = true;
-    this.punishmentTypes = APP_CONSTANT.PunishRules;
+    // Chỉ cho phép chọn Ant (type 15) và UnlockTS (type 16)
+    this.punishmentTypes = APP_CONSTANT.PunishRules.filter(type => 
+      type.value === 15 || type.value === 16
+    );
     this.isLoadingTypes = false;
   }
   

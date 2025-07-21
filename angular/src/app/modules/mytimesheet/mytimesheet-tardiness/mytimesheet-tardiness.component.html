@@ -94,7 +94,7 @@
                 <th style="width: 100px;">Check in</th>
                 <th style="width: 100px;">Check out</th>
 
-                <th style="width: auto; min-width: 60px;">Attendance</th>
+                <th style="width: auto; min-width: 60px;">CheckIn/Out</th>
                 <th style="width: auto; min-width: 60px;">Daily</th>
                 <th style="width: auto; min-width: 60px;">Mention</th>
                 <th style="width: auto; min-width: 60px;">Tracker</th>
@@ -171,12 +171,12 @@
                 </td>
 
                 <td style="text-align: center;">
-                  <span class="red" style="font-weight: bold;">
+                  <span [ngStyle]="{ color: item.totalDayPunishment === 0 ? '#388e3c' : '#d32f2f', 'font-weight': 'bold' }">
                     {{ formatPunishmentAmount(item.totalDayPunishment) }}
                   </span>
                 </td>
                 
-                <td class="text-center" style="word-wrap: break-word; overflow: hidden; max-width: 300px;">
+                <td class="text-center complain-col" style="word-wrap: break-word; overflow: hidden;">
                   <p *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && item.userNote" [ngClass]="hasMultilineContent([{userNote: item.userNote}]) ? 'preReview' : ''">{{item.userNote}}</p>
                   <span *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && !item.userNote">-</span>
                   <div *ngIf="item.structuredUserNotes && item.structuredUserNotes.length > 0" class="structured-complaints" style="text-align: left;">
@@ -202,14 +202,12 @@
                     <div *ngIf="(item.structuredUserNotes && item.structuredUserNotes.length > 2) || hasLongContent(item.structuredUserNotes) || hasMultilineContent(item.structuredUserNotes)" class="show-more-container" style="text-align: left;">
                       <button mat-button color="primary" (click)="toggleUserNotes(item); $event.stopPropagation();" class="show-more-button" style="padding-left: 0;">
                         <mat-icon>{{ item.showAllComplaints ? 'expand_less' : 'more_horiz' }}</mat-icon>
-                        {{ item.showAllComplaints ? 'Show less' : 'Show more' }}
                       </button>
-                      <mat-icon *ngIf="!item.showAllComplaints && hasMultilineContent(item.structuredUserNotes)" style="padding: 5px 0px 0px 10px;">more_horiz</mat-icon>
                     </div>
                   </div>
                 </td>
 
-                <td class="text-center" style="word-wrap: break-word; overflow: hidden; max-width: 300px;">
+                <td class="text-center complain-reply-col" style="word-wrap: break-word; overflow: hidden;">
 
                   <p *ngIf="(!item.structuredNoteReplies || item.structuredNoteReplies.length === 0) && item.noteReply" [ngClass]="hasMultilineReplyContent([{noteReply: item.noteReply}]) ? 'preReview' : ''">{{item.noteReply}}</p>
                   <span *ngIf="(!item.structuredNoteReplies || item.structuredNoteReplies.length === 0) && !item.noteReply">-</span>
@@ -237,9 +235,7 @@
                     <div *ngIf="(item.structuredNoteReplies && item.structuredNoteReplies.length > 2) || hasLongReplyContent(item.structuredNoteReplies) || hasMultilineReplyContent(item.structuredNoteReplies)" class="show-more-container" style="text-align: left;">
                       <button mat-button color="primary" (click)="toggleNoteReplies(item); $event.stopPropagation();" class="show-more-button" style="padding-left: 0;">
                         <mat-icon>{{ item.showAllReplies ? 'expand_less' : 'more_horiz' }}</mat-icon>
-                        {{ item.showAllReplies ? 'Show less' : 'Show more' }}
                       </button>
-                      <mat-icon *ngIf="!item.showAllReplies && hasMultilineReplyContent(item.structuredNoteReplies)" style="padding: 5px 0px 0px 10px;">more_horiz</mat-icon>
                     </div>
                   </div>
                 </td>
