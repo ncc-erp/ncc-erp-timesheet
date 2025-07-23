@@ -39,6 +39,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   public countLate: number = 0;
   totalMonthlyPunishment: number = 0;
   public maskTime = [/[\d]/, /\d/, ':', /\d/, /\d/];
+  isBasicUser: boolean = false;
 
   constructor(
     private timekeepingService: TimekeepingService,
@@ -56,6 +57,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.userControl = new FormControl(this.userId);
     this.updateDay();
     this.userName = this.appSession.user.surname + ' ' + this.appSession.user.name;
+    this.isBasicUser = this.appSession.user && this.appSession.user.type === 0;
   }
 
   ngOnInit() {
