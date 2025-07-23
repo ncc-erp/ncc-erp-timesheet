@@ -102,6 +102,11 @@ export const PERMISSIONS_CONSTANT = {
 
     ViewSendMessageToPunishUserConfigSetting: "Admin.Configuration.SendMessageToPunishUserConfig.ViewSendMessageToPunishUserConfig",
     EditSendMessageToPunishUserConfigSetting: "Admin.Configuration.SendMessageToPunishUserConfig.UpdateSendMessageToPunishUserConfig",
+
+    ViewLateInternReviewSetting: "Admin.Configuration.LateInternReviewConfig.ViewLateInternReviewConfig",
+    EditLateInternReviewSetting: "Admin.Configuration.LateInternReviewConfig.EditLateInternReviewConfig",
+    ViewPMReportSetting: "Admin.Configuration.PMReportConfig.ViewPMReportConfig",
+    EditPMReportSetting: "Admin.Configuration.PMReportConfig.EditPMReportConfig",
     //client
     ViewClients: "Admin.Clients.View",
     AddClient: "Admin.Clients.AddNew",

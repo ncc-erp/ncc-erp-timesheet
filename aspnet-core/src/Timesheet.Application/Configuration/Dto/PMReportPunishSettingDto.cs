@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Timesheet.APIs.Timesheets.ProjectSetting.Dto
+namespace Timesheet.Configuration.Dto
 {
     public class PMReportPunishSettingDto
     {

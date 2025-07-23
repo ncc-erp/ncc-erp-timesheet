@@ -823,6 +823,174 @@
             </div>
           </mat-expansion-panel>
 
+          <!-- Late Intern Review Setting -->
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_LATE_INTERN_REVIEW_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowLateInternReviewSetting">
+            <mat-expansion-panel-header (click)="isShowLateInternReviewSetting =!isShowLateInternReviewSetting" class="panel-header">
+              <mat-panel-title>
+                <p class="title">{{"Late Intern Review Punishment Setting"}}</p>
+                <div *ngIf="isShowLateInternReviewSetting" class="edit-save">
+                  <button *ngIf="!isEditLateInternReviewSetting" large mat-raised-button
+                    color="primary" (click)="editLateInternReviewSetting();$event.stopPropagation()">
+                    <mat-icon>edit</mat-icon>Edit
+                  </button>
+                  <button *ngIf="isEditLateInternReviewSetting" large mat-raised-button color="primary"
+                    (click)="saveLateInternReviewSetting();$event.stopPropagation()">
+                    <mat-icon>save</mat-icon>Save
+                  </button>
+                  <button *ngIf="isEditLateInternReviewSetting" large mat-raised-button color="primary"
+                    (click)="refreshLateInternReviewSetting();$event.stopPropagation()">
+                    <mat-icon>cancel</mat-icon>Cancel
+                  </button>
+                </div>
+              </mat-panel-title>
+
+              <ul class="header-dropdown m-r--5" *ngIf="isShowLateInternReviewSetting">
+                <li>
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenuLateInternReview" (click)="$event.stopPropagation()"
+                    class="header-dropdown-mat-icon-button">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #headerMenuLateInternReview="matMenu">
+                    <button mat-menu-item (click)="refreshLateInternReviewSetting();$event.stopPropagation()">
+                      <mat-icon>refresh</mat-icon>
+                      <span>{{ "Refresh" | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </li>
+              </ul>
+            </mat-expansion-panel-header>
+            <div class="body">
+              <form>
+                <div class="row">
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-checkbox [(ngModel)]="lateInternReviewSetting.enable" name="enable" 
+                      [disabled]="!isEditLateInternReviewSetting">
+                      <span class="special-label">Enable Late Intern Review Punishment</span>
+                      <mat-icon class="special-icon" 
+                        matTooltip="Enable/disable the background worker that checks and punishes late intern reviews">help</mat-icon>
+                    </mat-checkbox>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Review Deadline Day *</span> <mat-icon class="special-icon"
+                        matTooltip="Day of the month when review deadline occurs, ex: 15 means 15th of the month">help</mat-icon>
+                      <input type="number" matInput name="deadlineDay" [(ngModel)]="lateInternReviewSetting.deadlineDay" required
+                        [disabled]="!isEditLateInternReviewSetting" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Start Day Of Month *</span> <mat-icon class="special-icon"
+                        matTooltip="Day of the month when review starts, ex: 1 means 1st of the month">help</mat-icon>
+                      <input type="number" matInput name="startDayOfMonth" [(ngModel)]="lateInternReviewSetting.startDayOfMonth" required
+                        [disabled]="!isEditLateInternReviewSetting" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Next Run Date *</span> <mat-icon class="special-icon"
+                        matTooltip="Day of the month when background worker runs to check late review interns, ex: 15 means 15th of every month">help</mat-icon>
+                      <input type="number" matInput name="nextRunDate" [(ngModel)]="lateInternReviewSetting.nextRunDate" required
+                        [disabled]="!isEditLateInternReviewSetting" min="1" max="31" />
+                    </mat-form-field>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </mat-expansion-panel>
+
+        </mat-expansion-panel>
+      </div>
+
+      <!-- PM report settings -->
+      <div class="card main-content">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header class="panel-header">
+            <mat-panel-title>
+              <p class="title">{{"PM report settings"}}</p>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <!-- PM Report Punishment Setting -->
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_PM_REPORT_PUNISH_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowPMReportPunishSetting">
+            <mat-expansion-panel-header (click)="isShowPMReportPunishSetting =!isShowPMReportPunishSetting" class="panel-header">
+              <mat-panel-title>
+                <p class="title">{{"PM Report Punishment Setting"}}</p>
+                <div *ngIf="isShowPMReportPunishSetting" class="edit-save">
+                  <button *ngIf="!isEditPMReportPunishSetting" large mat-raised-button
+                    color="primary" (click)="editPMReportPunishSetting();$event.stopPropagation()">
+                    <mat-icon>edit</mat-icon>Edit
+                  </button>
+                  <button *ngIf="isEditPMReportPunishSetting" large mat-raised-button color="primary"
+                    (click)="savePMReportPunishSetting();$event.stopPropagation()">
+                    <mat-icon>save</mat-icon>Save
+                  </button>
+                  <button *ngIf="isEditPMReportPunishSetting" large mat-raised-button color="primary"
+                    (click)="refreshPMReportPunishSetting();$event.stopPropagation()">
+                    <mat-icon>cancel</mat-icon>Cancel
+                  </button>
+                </div>
+              </mat-panel-title>
+
+              <ul class="header-dropdown m-r--5" *ngIf="isShowPMReportPunishSetting">
+                <li>
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenuPMReportPunish" (click)="$event.stopPropagation()"
+                    class="header-dropdown-mat-icon-button">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #headerMenuPMReportPunish="matMenu">
+                    <button mat-menu-item (click)="refreshPMReportPunishSetting();$event.stopPropagation()">
+                      <mat-icon>refresh</mat-icon>
+                      <span>{{ "Refresh" | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </li>
+              </ul>
+            </mat-expansion-panel-header>
+            <div class="body">
+              <form>
+                <div class="row">
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-checkbox [(ngModel)]="pmReportPunishSetting.enable" name="enable"
+                      [disabled]="!isEditPMReportPunishSetting">
+                      <span class="special-label">Enable *</span> <mat-icon class="special-icon"
+                        matTooltip="Enable PM report punishment notification">help</mat-icon>
+                    </mat-checkbox>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Hour *</span> <mat-icon class="special-icon"
+                        matTooltip="Hour to send PM report punishment notification (0-23)">help</mat-icon>
+                      <input type="number" matInput name="hour" [(ngModel)]="pmReportPunishSetting.hour" required
+                        [disabled]="!isEditPMReportPunishSetting" min="0" max="23" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Day of Week *</span> <mat-icon class="special-icon"
+                        matTooltip="Day of week to send notification, ex: Monday, Tuesday, etc.">help</mat-icon>
+                      <mat-select [(ngModel)]="pmReportPunishSetting.dayofweek" name="dayofweek" required
+                        [disabled]="!isEditPMReportPunishSetting">
+                        <mat-option value="Monday">Monday</mat-option>
+                        <mat-option value="Tuesday">Tuesday</mat-option>
+                        <mat-option value="Wednesday">Wednesday</mat-option>
+                        <mat-option value="Thursday">Thursday</mat-option>
+                        <mat-option value="Friday">Friday</mat-option>
+                        <mat-option value="Saturday">Saturday</mat-option>
+                        <mat-option value="Sunday">Sunday</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </mat-expansion-panel>
+
         </mat-expansion-panel>
       </div>
 

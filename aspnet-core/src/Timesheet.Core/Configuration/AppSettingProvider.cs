@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Abp.Configuration;
 using Microsoft.Extensions.Configuration;
@@ -146,6 +146,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.PMReportPunishAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.PMReportPunishAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
 
+                new SettingDefinition(AppSettingNames.ReviewEnableWorker, "true", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ReviewDeadlineDay, "5", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ReviewDeadlineDaysToAdd, "4", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ReviewStartDayOfMonth, "1", scopes: SettingScopes.Application | SettingScopes.Tenant),

@@ -232,8 +232,11 @@ namespace TimesheetApplication.UserPunishment
                 case UserPunishmentType.Ant:
                     return "Ant";
 
-                case UserPunishmentType.UnlockTS:
-                    return "UnlockTS";
+                case UserPunishmentType.UnlockTSGmail:
+                    return "UnlockTSGmail";
+
+                case UserPunishmentType.UnlockTSIMS:
+                    return "UnlockTSIMS";
 
                 default:
                     return "Unknown";
@@ -519,7 +522,8 @@ namespace TimesheetApplication.UserPunishment
                 UserPunishmentType.PMReport_20k,
                 UserPunishmentType.PMReport_50k,
                 UserPunishmentType.Ant,
-                UserPunishmentType.UnlockTS
+                UserPunishmentType.UnlockTSGmail,
+                UserPunishmentType.UnlockTSIMS
             };
         }
 

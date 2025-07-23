@@ -34,7 +34,7 @@ import * as FileSaver from 'file-saver';
 export class TardinessDetailComponent extends AppComponentBase implements OnInit {
   EDIT_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.EditTardinessLeaveEarly;
   VIEW_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.ViewTardinessLeaveEarly;
-  Timekeeping_ReplyUserNote= PERMISSIONS_CONSTANT.Timekeeping_ReplyUserNote;
+  Timekeeping_ReplyUserNote = PERMISSIONS_CONSTANT.Timekeeping_ReplyUserNote;
 
   // listMonth = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
   // listYear = APP_CONSTANT.ListYear;
@@ -62,12 +62,12 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
   isDownloading: boolean = false;
   selectedDay: number = -1;
   dayList: any = []
-  public isComplain : any = true;
-  public isPunish : any = -1;
+  public isComplain: any = true;
+  public isPunish: any = -1;
   public selectedBranch = 0;
-  public selectedStatus : number = -1;
+  public selectedStatus: number = -1;
   public branchList = Object.keys(this.APP_CONSTANT.BRANCH);
-  public page:number =1;
+  public page: number = 1;
   public itemPerPage: number = 50;
   listBranch: BranchDto[] = [];
   branchSearch: FormControl = new FormControl("")
