@@ -44,7 +44,7 @@
       <div class="row" style="padding: 15px 15px 0 15px;">
       </div>
 
-      <div class="row text-center" style="padding: 15px;">
+      <div class="row text-center" style="padding: 15px 15px 15px 24px;">
         <!-- <div class="col-md-3" style="margin-top: 20px;margin-bottom: 10px;">
           <div class="btn-group">
             <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
@@ -61,7 +61,6 @@
             </div>
           </div>
         </div> -->
-        <div class="col-sm-1 col-md-1"></div>
         <div class="col-sm-2 col-md-2 info-user">
           <mat-form-field appearance="outline">
             <mat-label>Day</mat-label>
@@ -171,18 +170,22 @@
         </div> -->
       </div>
 
-      <div class="gr-btn-action" style="display: flex; justify-content: center; margin: 20px 0;">
-        <button class="btn btn-add" name="newUserPunishmentBtn" (click)="createUserPunishment()" style="background-color: #F44336; color: white; margin: 0 10px; border-radius: 4px; padding: 8px 16px; width: 200px;">
-          <i class="fa-solid fa-square-plus"></i>&nbsp; New User Punishment
-        </button>
-        <button class="btn btn-download" name="downloadTemplateBtn" (click)="downloadTemplate()" [disabled]="isDownloading" style="background-color: #2196F3; color: white; margin: 0 10px; border-radius: 4px; padding: 8px 16px; width: 200px;">
-          <i class="fa-solid fa-download" *ngIf="!isDownloading"></i>
-          <i class="fa fa-spinner fa-spin" *ngIf="isDownloading"></i>&nbsp; 
-          {{ isDownloading ? ('Downloading...' | localize) : ('Download Template' | localize) }}
-        </button>
-        <button class="btn btn-import" name="importBtn" (click)="importUserPunishment()" style="background-color: #FF9800; color: white; margin: 0 10px; border-radius: 4px; padding: 8px 16px; width: 200px;">
-          <i class="fas fa-upload"></i>&nbsp; Import
-        </button>
+      <div class="row" style="margin-bottom: 10px; padding-left: 24px;">
+        <div class="col-sm-8 col-md-8">
+          <div class="action-buttons-left">
+            <button class="btn btn-add" name="newUserPunishmentBtn" (click)="createUserPunishment()" style="background-color: #F44336; color: white; margin: 0 10px; border-radius: 4px; padding: 8px 16px; width: 200px;">
+              <i class="fa-solid fa-square-plus"></i>&nbsp; New User Punishment
+            </button>
+            <button class="btn btn-download" name="downloadTemplateBtn" (click)="downloadTemplate()" [disabled]="isDownloading" style="background-color: #2196F3; color: white; margin: 0 10px; border-radius: 4px; padding: 8px 16px; width: 200px;">
+              <i class="fa-solid fa-download" *ngIf="!isDownloading"></i>
+              <i class="fa fa-spinner fa-spin" *ngIf="isDownloading"></i>&nbsp; 
+              {{ isDownloading ? ('Downloading...' | localize) : ('Download Template' | localize) }}
+            </button>
+            <button class="btn btn-import" name="importBtn" (click)="importUserPunishment()" style="background-color: #FF9800; color: white; margin: 0 10px; border-radius: 4px; padding: 8px 16px; width: 200px;">
+              <i class="fas fa-upload"></i>&nbsp; Import
+            </button>
+          </div>
+        </div>
       </div>
 
       <div style="position: relative; padding: 20px;" [busy]="isTableLoading">

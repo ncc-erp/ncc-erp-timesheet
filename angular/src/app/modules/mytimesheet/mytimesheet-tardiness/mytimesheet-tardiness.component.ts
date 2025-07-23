@@ -40,6 +40,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   public countLate: number = 0;
   totalMonthlyPunishment: number = 0;
   public maskTime = [/[\d]/, /\d/, ':', /\d/, /\d/];
+  isBasicUser: boolean = false;
 
   constructor(
     private timekeepingService: TimekeepingService,

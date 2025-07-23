@@ -160,15 +160,17 @@
 }
 
 .show-more-container {
-  margin-top: 5px;
+  margin-top: 0px;
+  padding-top: 0px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .show-more-button {
+  min-width: 24px !important;
   padding: 0 !important;
-  min-width: auto !important;
-  line-height: 24px !important;
+  margin: 0 !important;
+  line-height: 20px !important;
   height: 24px !important;
 }
 
@@ -177,6 +179,8 @@
   height: 18px;
   width: 18px;
   line-height: 18px;
+  vertical-align: middle;
+  margin: 0;
 }
 
 .preReview {
@@ -402,4 +406,12 @@
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
   }
+}
+
+.complain-col,
+.complain-reply-col {
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+  table-layout: fixed;
 }
