@@ -209,11 +209,12 @@
 
                 <td class="text-center complain-reply-col" style="word-wrap: break-word; overflow: hidden;">
 
+                  <!-- Nếu không có structuredNoteReplies thì hiển thị noteReply hoặc dấu '-' -->
                   <p *ngIf="(!item.structuredNoteReplies || item.structuredNoteReplies.length === 0) && item.noteReply" [ngClass]="hasMultilineReplyContent([{noteReply: item.noteReply}]) ? 'preReview' : ''">{{item.noteReply}}</p>
                   <span *ngIf="(!item.structuredNoteReplies || item.structuredNoteReplies.length === 0) && !item.noteReply">-</span>
                   
+                  <!-- Nếu có structuredNoteReplies thì hiển thị show more/less -->
                   <div *ngIf="item.structuredNoteReplies && item.structuredNoteReplies.length > 0" class="structured-replies reply-container" style="text-align: left;">
-
                     <ng-container *ngIf="!item.showAllReplies">
                       <div class="limited-content">
                         <div *ngFor="let reply of item.structuredNoteReplies.slice(0, 2)" class="reply-item">
@@ -223,7 +224,6 @@
                         </div>
                       </div>
                     </ng-container>
-                    
                     <div *ngIf="item.showAllReplies" class="expanded-content">
                       <div *ngFor="let reply of item.structuredNoteReplies" class="reply-item">
                         <div [ngClass]="'review'">
@@ -231,8 +231,7 @@
                         </div>
                       </div>
                     </div>
-                    
-                    <div *ngIf="(item.structuredNoteReplies && item.structuredNoteReplies.length > 2) || hasLongReplyContent(item.structuredNoteReplies) || hasMultilineReplyContent(item.structuredNoteReplies)" class="show-more-container" style="text-align: left;">
+                    <div *ngIf="item.structuredNoteReplies.length > 1" class="show-more-container" style="text-align: left;">
                       <button mat-button color="primary" (click)="toggleNoteReplies(item); $event.stopPropagation();" class="show-more-button" style="padding-left: 0;">
                         <mat-icon>{{ item.showAllReplies ? 'expand_less' : 'more_horiz' }}</mat-icon>
                       </button>
