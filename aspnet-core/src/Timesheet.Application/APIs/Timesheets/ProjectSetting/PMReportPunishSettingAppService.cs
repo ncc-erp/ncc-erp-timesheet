@@ -2,7 +2,7 @@
 using Abp.Authorization;
 using System.Threading.Tasks;
 using Ncc.Configuration;
-using Timesheet.APIs.Timesheets.ProjectSetting.Dto;
+using Timesheet.Configuration.Dto;
 
 namespace Timesheet.APIs.ProjectSetting
 {

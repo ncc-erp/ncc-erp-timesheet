@@ -1,4 +1,4 @@
-﻿using Abp.Collections.Extensions;
+using Abp.Collections.Extensions;
 using Abp.Configuration;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
@@ -77,8 +77,8 @@ namespace Timesheet.BackgroundWorker
             _retroService = retroServices;
             _approveTimesheetServices = approveTimesheetServices;
             _generateDataTeamBuildingServices = generateDataTeamBuildingServices;
-            Timer.Period = 1000 * 60 * 60; //1h
-            //Timer.Period = 1000 * 30; //1h
+            Timer.Period = 1000 * 60 * 60; 
+            Timer.RunOnStart = false;
         }
 
         [UnitOfWork]
@@ -628,4 +628,3 @@ namespace Timesheet.BackgroundWorker
         }
     }
 }
-

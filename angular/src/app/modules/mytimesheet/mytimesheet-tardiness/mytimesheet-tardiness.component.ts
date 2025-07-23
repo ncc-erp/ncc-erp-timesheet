@@ -21,6 +21,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   EDIT_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.EditTardinessLeaveEarly;
   VIEW_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.ViewTardinessLeaveEarly;
   Timekeeping_UserNote = PERMISSIONS_CONSTANT.Timekeeping_UserNote;
+  isBasicUser: boolean = false;
   month;
   months;
   year;
@@ -56,6 +57,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.userControl = new FormControl(this.userId);
     this.updateDay();
     this.userName = this.appSession.user.surname + ' ' + this.appSession.user.name;
+    this.isBasicUser = !this.permission.isGranted('Admin.Users.View');
   }
 
   ngOnInit() {
@@ -85,7 +87,10 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     const dateMap = new Map<string, TimekeepingDto>();
 
     this.listTimekeeping.forEach(item => {
-      const dateKey = new Date(item.date).toISOString().split('T')[0]; 
+      const itemDate = new Date(item.date);
+      const month = (itemDate.getMonth() + 1) < 10 ? '0' + (itemDate.getMonth() + 1) : (itemDate.getMonth() + 1);
+      const day = itemDate.getDate() < 10 ? '0' + itemDate.getDate() : itemDate.getDate();
+      const dateKey = `${itemDate.getFullYear()}-${month}-${day}`;
       
       if (!dateMap.has(dateKey)) {
         dateMap.set(dateKey, {
@@ -97,7 +102,8 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
           reviewInternPunish: 0,  
           pmReportPunish: 0,       
           antPunish: 0,            
-          unlockTSPunish: 0,      
+          unlockTSGmailPunish: 0,      
+          unlockTSIMSPunish: 0,      
           totalDayPunishment: 0,
           structuredNoteReplies: [],
           structuredUserNotes: [],  
@@ -171,7 +177,9 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       } else if (punishType === 15) {
         record.antPunish = (record.antPunish || 0) + moneyAmount;
       } else if (punishType === 16) {
-        record.unlockTSPunish = (record.unlockTSPunish || 0) + moneyAmount;
+        record.unlockTSGmailPunish = (record.unlockTSGmailPunish || 0) + moneyAmount;
+      } else if (punishType === 17) {
+        record.unlockTSIMSPunish = (record.unlockTSIMSPunish || 0) + moneyAmount;
       }
 
       record.totalDayPunishment = (
@@ -182,7 +190,8 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         (record.reviewInternPunish || 0) + 
         (record.pmReportPunish || 0) + 
         (record.antPunish || 0) + 
-        (record.unlockTSPunish || 0)
+        (record.unlockTSGmailPunish || 0) + 
+        (record.unlockTSIMSPunish || 0)
       );
     });
 

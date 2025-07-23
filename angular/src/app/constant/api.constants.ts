@@ -241,7 +241,8 @@ export const APP_CONSTANT = {
     { "name": "Report between 15:00-17:00", "value": 13 },
     { "name": "Report after 17:00 or forgot to report", "value": 14 },
     { "name": "Ant", "value": 15 },
-    { "name": "Unlock Timesheet", "value": 16 }
+    { "name": "Unlock Timesheet Gmail", "value": 16 },
+    { "name": "Unlock Timesheet IMS", "value": 17 }
     
   ],  
   PunishRulesShortName: [
@@ -261,7 +262,8 @@ export const APP_CONSTANT = {
     { "name": "Report 15:00-17:00", "value": 13 },
     { "name": "Report after 17:00", "value": 14 },
     { "name": "Ant", "value": 15 },
-    { "name": "Unlock Timesheet", "value": 16 }
+    { "name": "UnlockTS Gmail", "value": 16 },
+    { "name": "UnlockTS IMS", "value": 17 }
   ],
   
   PunishmentGroups: {
@@ -273,7 +275,8 @@ export const APP_CONSTANT = {
     LATE_REVIEW: [12],             
     REPORT: [13, 14],
     ANT: [15],
-    UNLOCKTS: [16]              
+    UNLOCKTS_GMAIL: [16],
+    UNLOCKTS_IMS: [17]              
   },
   
   PUNISHMENT_TYPES: [
@@ -293,7 +296,8 @@ export const APP_CONSTANT = {
     { value: 13, name: 'PM Report 20k' },
     { value: 14, name: 'PM Report 50k' },
     { value: 15, name: 'Ant' },
-    { value: 16, name: 'UnlockTS' }
+    { value: 16, name: 'UnlockTS Gmail' },
+    { value: 17, name: 'UnlockTS IMS' }
   ],
   
   PunishmentTypeMap: {
@@ -313,7 +317,8 @@ export const APP_CONSTANT = {
     13: ['NO_PUNISH', 'REPORT'], 
     14: ['NO_PUNISH', 'REPORT'],
     15: ['NO_PUNISH', 'ANT'], 
-    16: ['NO_PUNISH', 'UNLOCKTS']    
+    16: ['NO_PUNISH', 'UNLOCKTS_GMAIL'],
+    17: ['NO_PUNISH', 'UNLOCKTS_IMS']    
 
   },
   ProjectMemberType: {

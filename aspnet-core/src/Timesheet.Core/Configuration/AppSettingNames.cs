@@ -1,4 +1,4 @@
-﻿namespace Ncc.Configuration
+namespace Ncc.Configuration
 {
     public static class AppSettingNames
     {
@@ -137,6 +137,7 @@
         public const string ReviewDeadlineDaysToAdd = "App.Review.DaysToAdd";
         public const string ReviewStartDayOfMonth = "App.Review.StartDayOfMonth";
         public const string ReviewNextRunDate = "App.Review.NextRunDate";
+        public const string ReviewEnableWorker = "App.Review.EnableWorker";
 
         public const string Tracker200kPunishment = "App.Tracker.Punishment.200k";
         public const string Tracker100kPunishment = "App.Tracker.Punishment.100k";

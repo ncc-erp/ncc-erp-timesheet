@@ -101,6 +101,8 @@ export class TimekeepingDto {
   pmReportPunish?: number;     
   antPunish?: number;
   unlockTSPunish?: number;       
+  unlockTSGmailPunish?: number;
+  unlockTSIMSPunish?: number;
   
     
   structuredUserNotes?: Array<{

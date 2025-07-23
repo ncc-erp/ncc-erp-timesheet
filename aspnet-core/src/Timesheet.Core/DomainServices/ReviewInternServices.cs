@@ -142,6 +142,19 @@ namespace Timesheet.DomainServices
                 throw new UserFriendlyException("No penalty configuration found for late review");
             }
 
+            var punishments = await WorkScope.GetAll<UserPunishment>()
+                .Where(x => x.DateAt.Year == input.Year && x.DateAt.Month == input.Month)
+                .Where(x => x.Type == punishmentType)
+                .ToListAsync();
+
+            punishments.ForEach(p =>
+            {
+                p.IsDeleted = true;
+                p.DeletionTime = DateTimeUtils.GetNow();
+            });
+
+            await CurrentUnitOfWork.SaveChangesAsync();
+
             var result = new LateReviewPunishmentResultDto
             {
                 PunishedPMs = new List<PunishedPMDto>(),

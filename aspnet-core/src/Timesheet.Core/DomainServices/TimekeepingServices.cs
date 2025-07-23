@@ -1,4 +1,4 @@
-﻿using Abp.Collections.Extensions;
+using Abp.Collections.Extensions;
 using Abp.Configuration;
 using Abp.Dependency;
 using Abp.Domain.Uow;
@@ -113,27 +113,62 @@ namespace Timesheet.DomainServices
                 await CurrentUnitOfWork.SaveChangesAsync();
             }
 
-            var allApprovedRequests = WorkScope.GetAll<AbsenceDayDetail>().Include(s => s.Request).Where(s => s.DateAt.Date == selectedDate.Date && s.Request.Status == RequestStatus.Approved).ToList();
+            Dictionary<long, List<MapAbsenceUserDto>> mapAbsenceUsers = new Dictionary<long, List<MapAbsenceUserDto>>();
+            Dictionary<long, List<MapAbsenceUserDto>> mapRemoteUsers = new Dictionary<long, List<MapAbsenceUserDto>>();
 
-            var mapAbsenceUsers = allApprovedRequests.Where(s => s.Request.Type != RequestType.Remote).GroupBy(s => s.Request.UserId).ToDictionary(
-            s => s.Key, s => s.Select(x => new MapAbsenceUserDto
+            using (var uow = UnitOfWorkManager.Begin(System.Transactions.TransactionScopeOption.RequiresNew))
             {
-                UserId = x.Request.UserId,
-                DateType = x.DateType,
-                AbsenceTime = x.AbsenceTime,
-                Hour = x.Hour,
-                Type = x.Request.Type,
-            }).OrderBy(x => x.AbsenceTime).ToList());
+                var absenceDayDetails = WorkScope.GetAll<AbsenceDayDetail>()
+                    .Include(s => s.Request)
+                    .Where(s => s.DateAt.Date == selectedDate.Date
+                        && s.Request.Status == RequestStatus.Approved)
+                    .ToList();
 
-            var mapRemoteUsers = allApprovedRequests.Where(s => s.Request.Type == RequestType.Remote).GroupBy(s => s.Request.UserId).ToDictionary(
-            s => s.Key, s => s.Select(x => new MapAbsenceUserDto
-            {
-                UserId = x.Request.UserId,
-                DateType = x.DateType,
-                AbsenceTime = x.AbsenceTime,
-                Hour = x.Hour,
-                Type = x.Request.Type,
-            }).OrderBy(x => x.AbsenceTime).ToList());
+                var absenceRecords = absenceDayDetails.Select(s => new
+                {
+                    UserId = s.Request.UserId,
+                    DateType = s.DateType,
+                    AbsenceTime = s.AbsenceTime,
+                    Hour = s.Hour,
+                    Type = s.Request.Type
+                }).ToList();
+
+                uow.Complete();
+
+                var nonRemoteRecords = absenceRecords
+                    .Where(r => r.Type != RequestType.Remote)
+                    .GroupBy(r => r.UserId)
+                    .ToList();
+
+                var remoteRecords = absenceRecords
+                    .Where(r => r.Type == RequestType.Remote)
+                    .GroupBy(r => r.UserId)
+                    .ToList();
+
+                foreach (var group in nonRemoteRecords)
+                {
+                    mapAbsenceUsers[group.Key] = group.Select(x => new MapAbsenceUserDto
+                    {
+                        UserId = x.UserId,
+                        DateType = x.DateType,
+                        AbsenceTime = x.AbsenceTime,
+                        Hour = x.Hour,
+                        Type = x.Type,
+                    }).OrderBy(x => x.AbsenceTime).ToList();
+                }
+
+                foreach (var group in remoteRecords)
+                {
+                    mapRemoteUsers[group.Key] = group.Select(x => new MapAbsenceUserDto
+                    {
+                        UserId = x.UserId,
+                        DateType = x.DateType,
+                        AbsenceTime = x.AbsenceTime,
+                        Hour = x.Hour,
+                        Type = x.Type,
+                    }).OrderBy(x => x.AbsenceTime).ToList();
+                }
+            }
 
             var rs = new List<Timekeeping>();
             var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
@@ -163,9 +198,16 @@ namespace Timesheet.DomainServices
             var punishmentTypes = Enum.GetValues(typeof(UserPunishmentType))
                 .Cast<UserPunishmentType>()
                 .ToArray();
-            var punishmentSystems = await WorkScope.GetAll<PunishmentSystem>()
-                .Where(x => punishmentTypes.Contains(x.Type))
-                .ToDictionaryAsync(x => x.Type, x => x);
+
+            Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems;
+
+            using (var uow = UnitOfWorkManager.Begin())
+            {
+                punishmentSystems = await WorkScope.GetAll<PunishmentSystem>()
+                    .Where(x => punishmentTypes.Contains(x.Type))
+                    .ToDictionaryAsync(x => x.Type, x => x);
+                await uow.CompleteAsync();
+            }
 
             var userPunishmentsToInsert = new List<UserPunishment>();
 
@@ -332,6 +374,7 @@ namespace Timesheet.DomainServices
             }
 
             await SaveDailyAndMentionPunishments(selectedDate, users, mapDailyUsers, mapMentionUsers, punishmentSystems);
+            Logger.Info($"Successfully processed timekeeping for date {selectedDate:yyyy-MM-dd}. Processed {rs.Count} records.");
             return rs;
         }
 

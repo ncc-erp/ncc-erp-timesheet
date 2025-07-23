@@ -28,4 +28,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Timesheet.Core\Timesheet.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="APIs\Timesheets\ProjectSetting\Dto\" />
+    <Folder Include="APIs\Timesheets\ReviewInternSetting\Dto\" />
+  </ItemGroup>
 </Project>

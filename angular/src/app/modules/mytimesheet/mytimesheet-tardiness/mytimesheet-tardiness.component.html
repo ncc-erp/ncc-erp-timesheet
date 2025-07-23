@@ -60,21 +60,20 @@
           <table class="table table-hover table-striped styleUser">
             <thead>
               <tr>
-                <th style="min-width: 90px; width: 90px;" rowspan="2">
+                <th rowspan="2" style="width: 100px;">
                   {{ "Date" | localize }}
                 </th>
-                <th style="min-width: 160px;" colspan="2">
-                  {{ "Registration Hours" | localize }}
-                </th>
-                <th style="min-width: 160px;" colspan="2">
+                <th colspan="2" style="min-width: 160px;">
                   {{ "Checking time" | localize }}
                 </th>
-
+                <th style="width: 80px;" rowspan="2">
+                  {{ "Tracker Time" | localize }}
+                </th>
                 <th rowspan="2" class="edited-by-column">
                   {{ "Edited by" | localize }}
                 </th>
 
-                <th style="min-width: 490px;" colspan="8">
+                <th style="min-width: 490px;" [attr.colspan]="isBasicUser ? 8 : 10">
                   {{ "Punishments" | localize }}
                 </th>
                 <th style="min-width: 150px; max-width: 300px; width: 200px;" rowspan="2">
@@ -91,16 +90,16 @@
               <tr>
                 <th style="width: 100px;">Check in</th>
                 <th style="width: 100px;">Check out</th>
-                <th style="width: 100px;">Check in</th>
-                <th style="width: 100px;">Check out</th>
 
                 <th style="width: auto; min-width: 60px;">Attendance</th>
                 <th style="width: auto; min-width: 60px;">Daily</th>
                 <th style="width: auto; min-width: 60px;">Mention</th>
                 <th style="width: auto; min-width: 60px;">Tracker</th>
-                <th style="width: auto; min-width: 60px;">ReviewIntern</th>
+                <th style="width: auto; min-width: 60px;" *ngIf="!isBasicUser">ReviewIntern</th>
+                <th style="width: auto; min-width: 60px;" *ngIf="!isBasicUser">Pm Report</th>
                 <th style="width: auto; min-width: 60px;">Ant</th>
-                <th style="width: auto; min-width: 60px;">UnlockTS</th>
+                <th style="width: auto; min-width: 60px;">UnlockTS Gmail</th>
+                <th style="width: auto; min-width: 60px;">UnlockTS IMS</th>
                 <th style="width: auto; min-width: 60px; color: #d32f2f;">Total</th>
               </tr>
             </thead>
@@ -108,20 +107,15 @@
               <tr *ngFor="let item of (groupedTimekeeping), index as i">
                 <td style="text-align: center;">{{formatDate(item.date)}}</td>
                 <td style="text-align: center;">
-                  <span>{{item.registrationTimeStart}}</span>
-
-                </td>
-                <td style="text-align: center;">
-                  <span>{{item.registrationTimeEnd}}</span>
-
-                </td>
-                <td style="text-align: center;">
                   <span>{{item.checkIn}}</span>
 
                 </td>
                 <td style="text-align: center;">
                   <span>{{item.checkOut}}</span>
 
+                </td>
+                <td style="text-align: center;">
+                  <span>{{trackerTimeFormat(item.trackerTime)}}</span>
                 </td>
 
                 <td class="text-center edited-by-cell"><span class="pm" *ngIf="item.editByUserName">{{item.editByUserName}}</span></td>
@@ -152,9 +146,15 @@
                   </span>
                 </td>
 
-                <td style="text-align: center;">
+                <td style="text-align: center;" *ngIf="!isBasicUser">
                   <span [class]="getCssClassByPunish(item.reviewInternPunish)" *ngIf="item.reviewInternPunish > 0">
                     {{ formatPunishmentAmount(item.reviewInternPunish) }}
+                  </span>
+                </td>
+
+                <td style="text-align: center;" *ngIf="!isBasicUser">
+                  <span [class]="getCssClassByPunish(item.pmReportPunish)" *ngIf="item.pmReportPunish > 0">
+                    {{ formatPunishmentAmount(item.pmReportPunish) }}
                   </span>
                 </td>
 
@@ -165,8 +165,14 @@
                 </td>
 
                 <td style="text-align: center;">
-                  <span [class]="getCssClassByPunish(item.unlockTSPunish)" *ngIf="item.unlockTSPunish > 0">
-                    {{ formatPunishmentAmount(item.unlockTSPunish) }}
+                  <span [class]="getCssClassByPunish(item.unlockTSGmailPunish)" *ngIf="item.unlockTSGmailPunish > 0">
+                    {{ formatPunishmentAmount(item.unlockTSGmailPunish) }}
+                  </span>
+                </td>
+
+                <td style="text-align: center;">
+                  <span [class]="getCssClassByPunish(item.unlockTSIMSPunish)" *ngIf="item.unlockTSIMSPunish > 0">
+                    {{ formatPunishmentAmount(item.unlockTSIMSPunish) }}
                   </span>
                 </td>
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -764,6 +764,52 @@ namespace Ncc.Configuration
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ResetDataTeamBuildingEnableWorker, input.ResetDataTeamBuildingEnableWorker);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ResetDataTeamBuildingAtHour, input.ResetDataTeamBuildingAtHour);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ResetDataTeamBuildingOnDateAndMonth, input.ResetDataTeamBuildingOnDateAndMonth);
+            return input;
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_LateInternReviewConfig_View)]
+        public async Task<LateInternReviewSettingDto> GetLateInternReviewSetting()
+        {
+            return new LateInternReviewSettingDto
+            {
+                enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ReviewEnableWorker)),
+                deadlineDay = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ReviewDeadlineDay)),
+                daysToAdd = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ReviewDeadlineDaysToAdd)),
+                startDayOfMonth = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ReviewStartDayOfMonth)),
+                nextRunDate = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ReviewNextRunDate))
+            };
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_LateInternReviewConfig_Update)]
+        public async Task<LateInternReviewSettingDto> SetLateInternReviewSetting(LateInternReviewSettingDto input)
+        {
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ReviewEnableWorker, input.enable.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ReviewDeadlineDay, input.deadlineDay.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ReviewDeadlineDaysToAdd, input.daysToAdd.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ReviewStartDayOfMonth, input.startDayOfMonth.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ReviewNextRunDate, input.nextRunDate.ToString());
+
+            return input;
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_PMReportConfig_View)]
+        public async Task<PMReportPunishSettingDto> GetPMReportPunishSetting()
+        {
+            return new PMReportPunishSettingDto
+            {
+                enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.PMReportPunishEnable)),
+                hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.PMReportPunishAtHour)),
+                dayofweek = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.PMReportPunishAtDayOfWeek)
+            };
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_PMReportConfig_Update)]
+        public async Task<PMReportPunishSettingDto> SetPMReportPunishSetting(PMReportPunishSettingDto input)
+        {
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.PMReportPunishEnable, input.enable.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.PMReportPunishAtHour, input.hour.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.PMReportPunishAtDayOfWeek, input.dayofweek);
+
             return input;
         }
     }

@@ -64,10 +64,10 @@
   line-height: 36px;
   height: 36px;
   width: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease-in-out;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 .btn-icon.btn-sm {

@@ -25,6 +25,8 @@ import * as moment from 'moment';
 import { type } from 'os';
 import { MezonSettingService } from '@app/service/api/mezon-setting.service';
 import { LogoutAllUserService } from '@app/service/api/logout-all-user.service';
+import { LateInternReviewSettingService, LateInternReviewSettingDto } from '@app/service/api/late-intern-review-setting.service';
+import { PMReportPunishSettingService, PMReportPunishSettingDto } from '@app/service/api/pm-report-punish-setting.service';
 
 
 @Component({
@@ -75,6 +77,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_NRIT_CONFIG = PERMISSIONS_CONSTANT.EditNRITSetting;
   VIEW_NRITVMAE_CONFIG = PERMISSIONS_CONSTANT.ViewNRITVMAESetting;
   EDIT_NRITVMAE_CONFIG = PERMISSIONS_CONSTANT.EditNRITVMAESetting;
+  VIEW_LATE_INTERN_REVIEW_SETTING = PERMISSIONS_CONSTANT.ViewLateInternReviewSetting;
+  EDIT_LATE_INTERN_REVIEW_SETTING = PERMISSIONS_CONSTANT.EditLateInternReviewSetting;
+  VIEW_PM_REPORT_PUNISH_SETTING = PERMISSIONS_CONSTANT.ViewPMReportSetting;
+  EDIT_PM_REPORT_PUNISH_SETTING = PERMISSIONS_CONSTANT.EditPMReportSetting;
   VIEW_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.ViewUnlockTimesheetSetting;
   UPDATE_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.UpdateUnlockTimesheetSetting;
   VIEW_PUNISHCHECKIN_CONFIG = PERMISSIONS_CONSTANT.ViewSendKomuPunishedCheckIn;
@@ -192,6 +198,14 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditNRITVMAEConfig: boolean = false;
   NRITVMAEConfig= {} as NotifyReviewInternViaMezonAndEmailConfigDto;
 
+  isShowLateInternReviewSetting: boolean = false;
+  isEditLateInternReviewSetting: boolean = false;
+  lateInternReviewSetting = {} as LateInternReviewSettingDto;
+
+  isShowPMReportPunishSetting: boolean = false;
+  isEditPMReportPunishSetting: boolean = false;
+  pmReportPunishSetting = {} as PMReportPunishSettingDto;
+
   unlockSetting = {} as UnlockTimesheetConfigDto;
   timesCanLateAndEarlyInMonthSetting = {} as TimesCanLateAndEarlyInMonthSettingDto;
   percentOfTrackerOnWorking: string = "";
@@ -267,6 +281,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     private timekeepingService: TimekeepingService,
     private timesCanLateAndEarlyInMonthSettingService :TimesCanLateAndEarlyInMonthSettingService,
     private timeStartChangingCheckinToCheckoutSettingService:TimeStartChangingCheckinToCheckoutSettingService,
+    private lateInternReviewSettingService: LateInternReviewSettingService,
+    private pmReportPunishSettingService: PMReportPunishSettingService,
     private dialog : MatDialog,
     injector: Injector) {
     super(injector);
@@ -308,9 +324,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getCreateNewRetroConfig();
     this.getGenerateRetroResultConfig();
     this.getResetDataTeamBuildingConfig();
+    this.getLateInternReviewSetting();
+    this.getPMReportPunishSetting();
     
     this.getSendMessageToPunishUserConfig();
     this.getNRITVMAEConfig();
+    this.getLateInternReviewSetting();
   }
   protected list(): void {
     if (this.permission.isGranted(this.VIEW_EMAIL_SETTING)) {
@@ -1747,6 +1766,88 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
         this.notify.success(this.l('Update Successfully!'));
       }
     })
+  }
+
+  getLateInternReviewSetting() {
+    if (this.permission.isGranted(this.VIEW_LATE_INTERN_REVIEW_SETTING)) {
+      this.lateInternReviewSettingService.get().subscribe((data: any) => {
+        this.lateInternReviewSetting = data.result;
+      })
+    }
+  }
+
+  editLateInternReviewSetting() {
+    this.isEditLateInternReviewSetting = true;
+  }
+
+  saveLateInternReviewSetting() {
+    if (!this.permission.isGranted(this.EDIT_LATE_INTERN_REVIEW_SETTING)) {
+      abp.message.error("You do not have permission to edit this setting!");
+      return;
+    }
+    if (!this.lateInternReviewSetting.deadlineDay) {
+      abp.message.error("Review Deadline Day is required!");
+      return;
+    }
+    if (!this.lateInternReviewSetting.startDayOfMonth) {
+      abp.message.error("Start Day Of Month is required!");
+      return;
+    }
+    if (!this.lateInternReviewSetting.nextRunDate) {
+      abp.message.error("Next Run Date is required!");
+      return;
+    }
+    
+    this.lateInternReviewSettingService.change(this.lateInternReviewSetting).subscribe((res: any) => {
+      this.isEditLateInternReviewSetting = false;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
+
+  refreshLateInternReviewSetting() {
+    this.getLateInternReviewSetting();
+    this.isEditLateInternReviewSetting = false;
+  }
+
+  getPMReportPunishSetting() {
+    if (this.permission.isGranted(this.VIEW_PM_REPORT_PUNISH_SETTING)) {
+      this.pmReportPunishSettingService.get().subscribe((data: any) => {
+        this.pmReportPunishSetting = data.result;
+      });
+    }
+  }
+
+  editPMReportPunishSetting() {
+    this.isEditPMReportPunishSetting = true;
+  }
+
+  savePMReportPunishSetting() {
+    if (!this.permission.isGranted(this.EDIT_PM_REPORT_PUNISH_SETTING)) {
+      abp.message.error("You do not have permission to edit this setting!");
+      return;
+    }
+    if (this.pmReportPunishSetting.hour < 0 || this.pmReportPunishSetting.hour > 23) {
+      abp.message.error("Hour must be between 0 and 23!");
+      return;
+    }
+    if (!this.pmReportPunishSetting.dayofweek) {
+      abp.message.error("Day of week is required!");
+      return;
+    }
+    
+    this.pmReportPunishSettingService.change(this.pmReportPunishSetting).subscribe((res: any) => {
+      this.isEditPMReportPunishSetting = false;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
+
+  refreshPMReportPunishSetting() {
+    this.getPMReportPunishSetting();
+    this.isEditPMReportPunishSetting = false;
   }
 }
 

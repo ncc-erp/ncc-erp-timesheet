@@ -962,7 +962,10 @@ namespace Timesheet.APIs.Timekeepings
             {
                 { UserPunishmentType.Daily, "Daily" },
                 { UserPunishmentType.Mention, "Mention" },
-                { UserPunishmentType.ReviewIntern, "ReviewIntern" }
+                { UserPunishmentType.ReviewIntern, "ReviewIntern" },
+                { UserPunishmentType.Ant, "Ant" },
+                { UserPunishmentType.UnlockTSGmail, "UnlockTS Gmail" },
+                { UserPunishmentType.UnlockTSIMS, "UnlockTS IMS" }
             };
 
             if (specialTypes.ContainsKey(oldType) && oldType != newType)
@@ -979,7 +982,7 @@ namespace Timesheet.APIs.Timekeepings
                 {
                     { "Tracker", "You can only switch between Tracker type" },
                     { "CheckInOut", "You can only switch between checkin/checkout type" },
-                    { "PMReport", "You can only switch between PM Report type" }
+                    { "PMReport", "You can only switch between PM Report type" },
                 };
                 
                 var errorMessage = groupErrorMessages.ContainsKey(oldGroup) 
@@ -992,9 +995,6 @@ namespace Timesheet.APIs.Timekeepings
 
         private string GetPunishmentGroup(UserPunishmentType type)
         {
-            if (type == UserPunishmentType.ReviewIntern)
-                return "ReviewIntern";
-
             if (type >= UserPunishmentType.Late && type <= UserPunishmentType.NoCheckInAndNoCheckOut)
                 return "CheckInOut";
 

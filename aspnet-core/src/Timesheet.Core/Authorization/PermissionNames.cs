@@ -49,6 +49,8 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_RemoteSetting = "Admin.Configuration.RemoteSetting";
         public const string Admin_Configuration_SpecialProjectTaskSetting = "Admin.Configuration.SpecialProjectTaskSetting";
         public const string Admin_Configuration_NRITConfig = "Admin.Configuration.NRITConfig";
+        public const string Admin_Configuration_LateInternReviewConfig = "Admin.Configuration.LateInternReviewConfig";
+        public const string Admin_Configuration_PMReportConfig = "Admin.Configuration.PMReportConfig";
         public const string Admin_Configuration_NHPMAPRITConfig = "Admin.Configuration.NHPMAPRITConfig";
         public const string Admin_Configuration_UnlockTimesheetSetting = "Admin.Configuration.UnlockTimesheetSetting";
         public const string Admin_Configuration_TeamBuilding = "Admin.Configuration.TeamBuilding";
@@ -138,6 +140,10 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_ResetDataTeamBuildingConfig = "Admin.Configuration.ResetDataTeamBuildingConfig";
         public const string Admin_Configuration_ResetDataTeamBuildingConfig_View = "Admin.Configuration.ResetDataTeamBuildingConfig.ViewResetDataTeamBuildingConfig";
         public const string Admin_Configuration_ResetDataTeamBuildingConfig_Update = "Admin.Configuration.ResetDataTeamBuildingConfig.UpdateResetDataTeamBuildingConfig";
+        public const string Admin_Configuration_LateInternReviewConfig_View = "Admin.Configuration.LateInternReviewConfig.ViewLateInternReviewConfig";
+        public const string Admin_Configuration_LateInternReviewConfig_Update = "Admin.Configuration.LateInternReviewConfig.EditLateInternReviewConfig";
+        public const string Admin_Configuration_PMReportConfig_View = "Admin.Configuration.PMReportConfig.ViewPMReportConfig";
+        public const string Admin_Configuration_PMReportConfig_Update = "Admin.Configuration.PMReportConfig.EditPMReportConfig";
 
         public const string Admin_Clients = "Admin.Clients";
         public const string Admin_Clients_View = "Admin.Clients.View";
@@ -466,6 +472,10 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_Configuration_NotificationSetting_Edit,
                     PermissionNames.Admin_Configuration_NRITConfig_View,
                     PermissionNames.Admin_Configuration_NRITConfig_Update,
+                    PermissionNames.Admin_Configuration_LateInternReviewConfig_View,
+                    PermissionNames.Admin_Configuration_LateInternReviewConfig_Update,
+                    PermissionNames.Admin_Configuration_PMReportConfig_View,
+                    PermissionNames.Admin_Configuration_PMReportConfig_Update,
                     PermissionNames.Admin_Configuration_NRITVMAEConfig_View,
                     PermissionNames.Admin_Configuration_NRITVMAEConfig_Update,
                     PermissionNames.Admin_Configuration_UnlockTimesheetSetting_View,
@@ -980,6 +990,10 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NotificationSetting_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Notification Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NotificationSetting_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notification Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Notify Review Intern Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LateInternReviewConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Late Intern Review Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LateInternReviewConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Late Intern Review Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View PM Report Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update PM Report Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITVMAEConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Notify Review Intern via Mezon and Email Setting"},
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITVMAEConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notify Review Intern via Mezon and Email Setting"},
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notify Review Intern Setting" },
@@ -1539,6 +1553,20 @@ namespace Ncc.Authorization
                                 {
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_ResetDataTeamBuildingConfig_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View"},
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_ResetDataTeamBuildingConfig_Update, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Update"},
+                                }
+                            },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LateInternReviewConfig, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Setting Punishment Time for Late Intern Reviews",
+                                Childrens = new List<SystemPermission>
+                                {
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LateInternReviewConfig_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View"},
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LateInternReviewConfig_Update, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Update"},
+                                }
+                            },
+                             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Setting Punishment Time for Pm Report",
+                                Childrens = new List<SystemPermission>
+                                {
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View"},
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_Update, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Update"},
                                 }
                             },
                         }

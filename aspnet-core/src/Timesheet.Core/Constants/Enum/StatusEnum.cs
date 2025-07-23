@@ -280,7 +280,8 @@ namespace Ncc.Entities.Enum
             PMReport_20k = 13,
             PMReport_50k = 14,
             Ant = 15,
-            UnlockTS = 16
+            UnlockTSGmail = 16,
+            UnlockTSIMS = 17
         }
         public enum CheckInCheckOutPunishmentType
         {

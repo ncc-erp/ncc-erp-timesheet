@@ -1,3 +1,4 @@
+
 using Abp.Configuration;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
@@ -20,95 +21,103 @@ namespace Timesheet.BackgroundWorker
     public class CheckAndPunishLateReviewWorker : PeriodicBackgroundWorkerBase, ISingletonDependency
     {
         private readonly ILogger<CheckAndPunishLateReviewWorker> _logger;
-        private readonly IReviewInternServices _reviewInternService;
-        private readonly IRepository<ReviewIntern, long> _reviewInternRepository;
+        private readonly IIocResolver _iocResolver;
 
         public CheckAndPunishLateReviewWorker(
             AbpTimer timer,
             ILogger<CheckAndPunishLateReviewWorker> logger,
-            IReviewInternServices reviewInternService,
-            IRepository<ReviewIntern, long> reviewInternRepository)
+            IIocResolver iocResolver)
             : base(timer)
         {
             _logger = logger;
-            _reviewInternService = reviewInternService;
-            _reviewInternRepository = reviewInternRepository;
+            _iocResolver = iocResolver;
 
-            Timer.RunOnStart = false;
-            Timer.Period = (int)TimeSpan.FromHours(1).TotalMilliseconds; 
+            Timer.RunOnStart = true;
+            Timer.Period = (int)TimeSpan.FromHours(1).TotalMilliseconds;
             Timer.Elapsed += Timer_Elapsed;
         }
 
         [UnitOfWork]
         protected override void DoWork()
         {
-            var now = DateTimeUtils.GetNow();
-            int month = now.Month;
-            int year = now.Year;
-            var input = new ReviewInternsDto { Month = month, Year = year };
-
-            DateTime deadlineDate = CalculateDeadlineDate(input);
-
-            if (now.Date < deadlineDate.Date)
+            using (var reviewInternService = _iocResolver.ResolveAsDisposable<IReviewInternServices>())
+            using (var reviewInternRepository = _iocResolver.ResolveAsDisposable<IRepository<ReviewIntern, long>>())
             {
-                _logger.LogInformation(
-                    $"Deadline not reached yet ({now:dd/MM/yyyy} ≤ {deadlineDate:dd/MM/yyyy}); scheduled to retry at 00:00 on {deadlineDate:dd/MM/yyyy}.");
-
-                var nextRun = deadlineDate.Date;
-                Timer.Period = (int)(nextRun - now).TotalMilliseconds;
-                return;
-            }
-
-            _logger.LogInformation($"Starting to apply late review penalties for {month}/{year}.");
-            var processed = false;
-            var reviewIntern = _reviewInternRepository.GetAll()
-                .FirstOrDefault(x => x.Month == month && x.Year == year);
-                
-            if (reviewIntern == null)
-            {
-                _logger.LogWarning($"No review intern period found for {month}/{year}.");
-            }
-            else
-            {
-                processed = reviewIntern.IsPunishmentProcessed;
-                
-                if (processed)
+                string enable = SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewEnableWorker);
+                if (enable != "True")
                 {
-                    _logger.LogInformation($"Completed processing late review penalties for {month}/{year}.");
+                    _logger.LogInformation("CheckAndPunishLateReviewWorker skipped: Disabled via settings.");
+                    return;
+                }
+
+                var now = DateTimeUtils.GetNow();
+                int month = now.Month;
+                int year = now.Year;
+                var input = new ReviewInternsDto { Month = month, Year = year };
+
+                DateTime deadlineDate = CalculateDeadlineDate(input);
+
+                if (now.Date < deadlineDate.Date)
+                {
+                    _logger.LogInformation(
+                        $"Deadline not reached yet ({now:dd/MM/yyyy} ≤ {deadlineDate:dd/MM/yyyy}); scheduled to retry at 00:00 on {deadlineDate:dd/MM/yyyy}.");
+
+                    var nextRun = deadlineDate.Date;
+                    Timer.Period = (int)(nextRun - now).TotalMilliseconds;
+                    return;
+                }
+
+                _logger.LogInformation($"Starting to apply late review penalties for {month}/{year}.");
+                var processed = false;
+                var reviewIntern = reviewInternRepository.Object.GetAll()
+                .FirstOrDefault(x => x.Month == month && x.Year == year);
+
+                if (reviewIntern == null)
+                {
+                    _logger.LogWarning($"No review intern period found for {month}/{year}.");
                 }
                 else
                 {
-                    try
-                    {
-                        var result = _reviewInternService.CheckAndPunishLateReview(input).Result;
+                    processed = reviewIntern.IsPunishmentProcessed;
 
-                        reviewIntern.IsPunishmentProcessed = true;
-                        _reviewInternRepository.Update(reviewIntern);
-                        CurrentUnitOfWork.SaveChanges();
-                    }
-                    catch (UserFriendlyException ufex)
+                    if (processed)
                     {
-                        _logger.LogWarning(ufex.Message);
+                        _logger.LogInformation($"Completed processing late review penalties for {month}/{year}.");
                     }
-                    catch (AggregateException agex) when (agex.InnerException is UserFriendlyException)
+                    else
                     {
-                        _logger.LogWarning(agex.InnerException.Message);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to process late review penalties.");
+                        try
+                        {
+                            var result = reviewInternService.Object.CheckAndPunishLateReview(input).Result;
+
+                            reviewIntern.IsPunishmentProcessed = true;
+                            reviewInternRepository.Object.Update(reviewIntern);
+                            CurrentUnitOfWork.SaveChanges();
+                        }
+                        catch (UserFriendlyException ufex)
+                        {
+                            _logger.LogWarning(ufex.Message);
+                        }
+                        catch (AggregateException agex) when (agex.InnerException is UserFriendlyException)
+                        {
+                            _logger.LogWarning(agex.InnerException.Message);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to process late review penalties.");
+                        }
                     }
                 }
-            }
-            
-            try
-            {
-                Timer.Period = GetPeriodToNextReviewDate();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error setting timer period. Using default period of 24 hours.");
-                Timer.Period = (int)TimeSpan.FromHours(24).TotalMilliseconds;
+
+                try
+                {
+                    Timer.Period = GetPeriodToNextReviewDate();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error setting timer period. Using default period of 24 hours.");
+                    Timer.Period = (int)TimeSpan.FromHours(24).TotalMilliseconds;
+                }
             }
         }
 
@@ -163,17 +172,17 @@ namespace Timesheet.BackgroundWorker
                 {
                     nextRun = nextRun.AddMonths(1);
                 }
-                
+
                 var milliseconds = (nextRun - now).TotalMilliseconds;
-                
+
                 if (milliseconds > int.MaxValue)
                 {
                     const int fixedPeriodDays = 15;
-                    
+
                     _logger.LogInformation($"Calculated period ({milliseconds} ms) exceeds Int32.MaxValue. Next run scheduled after {fixedPeriodDays} days.");
                     return (int)TimeSpan.FromDays(fixedPeriodDays).TotalMilliseconds;
                 }
-                
+
                 return (int)milliseconds;
             }
             catch (Exception ex)

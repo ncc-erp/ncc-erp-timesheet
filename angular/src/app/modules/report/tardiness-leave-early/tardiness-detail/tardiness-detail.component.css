@@ -93,7 +93,7 @@
 .punish-status-3 { background-color: #FD7E14; }  
 .punish-status-4 { background-color: #E83E8C; }
 .punish-status-5 { background-color: #B21F1F; } 
-.punish-status-6 { background-color: #007BFF; }  
+.punish-status-6 { background-color: #004691; }  
 .punish-status-7 { background-color: #28A745; }   
 .punish-status-8 { background-color: #6610F2; }  
 .punish-status-9 { background-color: #6F42C1; }  
@@ -103,7 +103,8 @@
 .punish-status-13 { background-color: #20C997; }  
 .punish-status-14 { background-color: #138496; } 
 .punish-status-15 { background-color: #ff0066; } 
-.punish-status-16 { background-color: #a2ff00; }     
+.punish-status-16 { background-color: #6eae00; }     
+.punish-status-17 { background-color: #00a2ff; }     
 .punish-status-default { background-color: #7f8c8d; }  
 
 .btn-back {
