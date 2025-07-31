@@ -340,6 +340,7 @@ namespace Ncc.Users
                 {
                     Id = s.Id,
                     Name = s.FullName,
+                    UserName = s.UserName,
                     EmailAddress = s.EmailAddress,
                     IsActive = s.IsActive,
                     Type = s.Type,

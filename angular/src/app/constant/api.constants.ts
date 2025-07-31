@@ -269,14 +269,14 @@ export const APP_CONSTANT = {
   PunishmentGroups: {
     NO_PUNISH: [0],
     CHECK_IN_OUT: [1, 2, 3, 4, 5],
+    TRACKER: [8, 9, 10, 11],
+    PM_REPORT: [13, 14],
     DAILY: [6],
     MENTION: [7],  
-    TRACKER: [8, 9, 10, 11],            
-    LATE_REVIEW: [12],             
-    REPORT: [13, 14],
+    LATE_INTERN_REVIEW: [12],             
     ANT: [15],
-    UNLOCKTS_GMAIL: [16],
-    UNLOCKTS_IMS: [17]              
+    UNLOCK_TS_GMAIL: [16],
+    UNLOCK_TS_IMS: [17]              
   },
   
   PUNISHMENT_TYPES: [
@@ -284,8 +284,8 @@ export const APP_CONSTANT = {
     { value: 1, name: 'Late' },
     { value: 2, name: 'No Check In' },
     { value: 3, name: 'No Check Out' },
-    { value: 4, name: 'Late And No Check Out' },
-    { value: 5, name: 'No Check In And No Check Out' },
+    { value: 4, name: 'Late & No CheckOut' },
+    { value: 5, name: 'No CheckIn & Out' },
     { value: 6, name: 'Daily' },
     { value: 7, name: 'Mention' },
     { value: 8, name: 'Tracker 20k' },
@@ -301,7 +301,7 @@ export const APP_CONSTANT = {
   ],
   
   PunishmentTypeMap: {
-    0: ['NO_PUNISH', 'CHECK_IN_OUT', 'DAILY', 'MENTION', 'TRACKER', 'LATE_REVIEW', 'REPORT', 'ANT', 'UNLOCKTS'], 
+    0: ['NO_PUNISH', 'CHECK_IN_OUT', 'DAILY', 'MENTION', 'TRACKER', 'LATE_INTERN_REVIEW', 'PM_REPORT', 'ANT', 'UNLOCK_TS'], 
     1: ['NO_PUNISH', 'CHECK_IN_OUT'], 
     2: ['NO_PUNISH', 'CHECK_IN_OUT'],
     3: ['NO_PUNISH', 'CHECK_IN_OUT'],
@@ -313,14 +313,27 @@ export const APP_CONSTANT = {
     9: ['NO_PUNISH', 'TRACKER'], 
     10: ['NO_PUNISH', 'TRACKER'], 
     11: ['NO_PUNISH', 'TRACKER'], 
-    12: ['NO_PUNISH', 'LATE_REVIEW'],
-    13: ['NO_PUNISH', 'REPORT'], 
-    14: ['NO_PUNISH', 'REPORT'],
+    12: ['NO_PUNISH', 'LATE_INTERN_REVIEW'],
+    13: ['NO_PUNISH', 'PM_REPORT'], 
+    14: ['NO_PUNISH', 'PM_REPORT'],
     15: ['NO_PUNISH', 'ANT'], 
-    16: ['NO_PUNISH', 'UNLOCKTS_GMAIL'],
-    17: ['NO_PUNISH', 'UNLOCKTS_IMS']    
+    16: ['NO_PUNISH', 'UNLOCK_TS_GMAIL'],
+    17: ['NO_PUNISH', 'UNLOCK_TS_IMS']    
 
   },
+  GroupTypes: [
+    { id: -1, name: 'All' },
+    { id: 0, name: 'No Punish' },
+    { id: 1, name: 'Check In/Out' },
+    { id: 2, name: 'Tracker' },
+    { id: 3, name: 'PM Report' },
+    { id: 6, name: 'Daily' },
+    { id: 7, name: 'Mention' },
+    { id: 12, name: 'Late Intern Review' },
+    { id: 15, name: 'Ant' },
+    { id: 16, name: 'Unlock Timesheet Gmail' },
+    { id: 17, name: 'Unlock Timesheet IMS' }
+  ],
   ProjectMemberType: {
     Expose: 0,
     Shadow: 1,

@@ -91,16 +91,36 @@
                 <th style="width: 100px;">Check in</th>
                 <th style="width: 100px;">Check out</th>
 
-                <th style="width: auto; min-width: 60px;">CheckIn/Out</th>
-                <th style="width: auto; min-width: 60px;">Daily</th>
-                <th style="width: auto; min-width: 60px;">Mention</th>
-                <th style="width: auto; min-width: 60px;">Tracker</th>
-                <th style="width: auto; min-width: 60px;" *ngIf="!isBasicUser">ReviewIntern</th>
-                <th style="width: auto; min-width: 60px;" *ngIf="!isBasicUser">Pm Report</th>
-                <th style="width: auto; min-width: 60px;">Ant</th>
-                <th style="width: auto; min-width: 60px;">UnlockTS Gmail</th>
-                <th style="width: auto; min-width: 60px;">UnlockTS IMS</th>
-                <th style="width: auto; min-width: 60px; color: #d32f2f;">Total</th>
+                <th class="punish-col" rowspan="2">
+                  {{ "CheckIn CheckOut" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "Daily" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "Mention" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "Tracker" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2" *ngIf="!isBasicUser">
+                  {{ "Review Intern" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2" *ngIf="!isBasicUser">
+                  {{ "Pm Report" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "Ant" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "UnlockTS Gmail" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "UnlockTS IMS" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "Total" | localize }}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -120,7 +140,7 @@
 
                 <td class="text-center edited-by-cell"><span class="pm" *ngIf="item.editByUserName">{{item.editByUserName}}</span></td>
 
-                <td style="text-align: center;">
+                <td class="punish-col" style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.attendancePunish)" 
                         *ngIf="item.attendancePunish > 0"
                         [matTooltip]="getAttendancePunishmentTypes(item)">
@@ -128,117 +148,92 @@
                   </span>
                 </td>
 
-                <td style="text-align: center;">
+                <td class="punish-col" style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.dailyPunish)" *ngIf="item.dailyPunish > 0">
                     {{ formatPunishmentAmount(item.dailyPunish) }}
                   </span>
                 </td>
 
-                <td style="text-align: center;">
+                <td class="punish-col" style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.mentionPunish)" *ngIf="item.mentionPunish > 0">
                     {{ formatPunishmentAmount(item.mentionPunish) }}
                   </span>
                 </td>
 
-                <td style="text-align: center;">
+                <td class="punish-col" style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.trackerPunish)" *ngIf="item.trackerPunish > 0">
                     {{ formatPunishmentAmount(item.trackerPunish) }}
                   </span>
                 </td>
 
-                <td style="text-align: center;" *ngIf="!isBasicUser">
+                <td class="punish-col" style="text-align: center;" *ngIf="!isBasicUser">
                   <span [class]="getCssClassByPunish(item.reviewInternPunish)" *ngIf="item.reviewInternPunish > 0">
                     {{ formatPunishmentAmount(item.reviewInternPunish) }}
                   </span>
                 </td>
 
-                <td style="text-align: center;" *ngIf="!isBasicUser">
+                <td class="punish-col" style="text-align: center;" *ngIf="!isBasicUser">
                   <span [class]="getCssClassByPunish(item.pmReportPunish)" *ngIf="item.pmReportPunish > 0">
                     {{ formatPunishmentAmount(item.pmReportPunish) }}
                   </span>
                 </td>
 
-                <td style="text-align: center;">
+                <td class="punish-col" style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.antPunish)" *ngIf="item.antPunish > 0">
                     {{ formatPunishmentAmount(item.antPunish) }}
                   </span>
                 </td>
 
-                <td style="text-align: center;">
+                <td class="punish-col" style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.unlockTSGmailPunish)" *ngIf="item.unlockTSGmailPunish > 0">
                     {{ formatPunishmentAmount(item.unlockTSGmailPunish) }}
                   </span>
                 </td>
 
-                <td style="text-align: center;">
+                <td class="punish-col" style="text-align: center;">
                   <span [class]="getCssClassByPunish(item.unlockTSIMSPunish)" *ngIf="item.unlockTSIMSPunish > 0">
                     {{ formatPunishmentAmount(item.unlockTSIMSPunish) }}
                   </span>
                 </td>
 
-                <td style="text-align: center;">
+                <td class="punish-col" style="text-align: center;">
                   <span [ngStyle]="{ color: item.totalDayPunishment === 0 ? '#388e3c' : '#d32f2f', 'font-weight': 'bold' }">
                     {{ formatPunishmentAmount(item.totalDayPunishment) }}
                   </span>
                 </td>
                 
                 <td class="text-center complain-col" style="word-wrap: break-word; overflow: hidden;">
-                  <p *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && item.userNote" [ngClass]="hasMultilineContent([{userNote: item.userNote}]) ? 'preReview' : ''">{{item.userNote}}</p>
+                  <p *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && item.userNote" class="complain-text">
+                    {{item.userNote}}
+                  </p>
                   <span *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && !item.userNote">-</span>
                   <div *ngIf="item.structuredUserNotes && item.structuredUserNotes.length > 0" class="structured-complaints" style="text-align: left;">
-
-                    <ng-container *ngIf="!item.showAllComplaints">
-                      <div class="limited-content">
-                        <div *ngFor="let complaint of item.structuredUserNotes.slice(0, 2)" class="complaint-item">
-                          <div [ngClass]="'preReview'">
-                            <b>{{ complaint.punishmentName }}:</b> {{ complaint.userNote }}
-                          </div>
-                        </div>
-                      </div>
-                    </ng-container>
-
-                    <div *ngIf="item.showAllComplaints" class="expanded-content">
+                    <div class="complain-content" [class.expanded]="item.showAllComplaints">
                       <div *ngFor="let complaint of item.structuredUserNotes" class="complaint-item">
-                        <div [ngClass]="'review'">
-                          <b>{{ complaint.punishmentName }}:</b> {{ complaint.userNote }}
-                        </div>
+                        <div class="punishment-type">{{ complaint.punishmentName }}:</div>
+                        <div class="complain-text">{{ complaint.userNote }}</div>
                       </div>
                     </div>
 
-                    <div *ngIf="(item.structuredUserNotes && item.structuredUserNotes.length > 2) || hasLongContent(item.structuredUserNotes) || hasMultilineContent(item.structuredUserNotes)" class="show-more-container" style="text-align: left;">
-                      <button mat-button color="primary" (click)="toggleUserNotes(item); $event.stopPropagation();" class="show-more-button" style="padding-left: 0;">
+                    <div class="show-more-container" *ngIf="hasMultipleLines(item, 'complaint')">
+                      <button mat-button color="primary" (click)="toggleUserNotes(item); $event.stopPropagation();" class="show-more-button">
                         <mat-icon>{{ item.showAllComplaints ? 'expand_less' : 'more_horiz' }}</mat-icon>
                       </button>
                     </div>
                   </div>
                 </td>
-
                 <td class="text-center complain-reply-col" style="word-wrap: break-word; overflow: hidden;">
-
-                  <!-- Nếu không có structuredNoteReplies thì hiển thị noteReply hoặc dấu '-' -->
-                  <p *ngIf="(!item.structuredNoteReplies || item.structuredNoteReplies.length === 0) && item.noteReply" [ngClass]="hasMultilineReplyContent([{noteReply: item.noteReply}]) ? 'preReview' : ''">{{item.noteReply}}</p>
-                  <span *ngIf="(!item.structuredNoteReplies || item.structuredNoteReplies.length === 0) && !item.noteReply">-</span>
-                  
-                  <!-- Nếu có structuredNoteReplies thì hiển thị show more/less -->
-                  <div *ngIf="item.structuredNoteReplies && item.structuredNoteReplies.length > 0" class="structured-replies reply-container" style="text-align: left;">
-                    <ng-container *ngIf="!item.showAllReplies">
-                      <div class="limited-content">
-                        <div *ngFor="let reply of item.structuredNoteReplies.slice(0, 2)" class="reply-item">
-                          <div [ngClass]="'preReview'">
-                            <b>{{ reply.punishmentName }}:</b> {{ reply.noteReply }}
-                          </div>
-                        </div>
-                      </div>
-                    </ng-container>
-                    <div *ngIf="item.showAllReplies" class="expanded-content">
-                      <div *ngFor="let reply of item.structuredNoteReplies" class="reply-item">
-                        <div [ngClass]="'review'">
-                          <b>{{ reply.punishmentName }}:</b> {{ reply.noteReply }}
-                        </div>
+                  <span *ngIf="!item.structuredNoteReplies || item.structuredNoteReplies.length === 0">-</span>
+                  <div *ngIf="item.structuredNoteReplies && item.structuredNoteReplies.length > 0" class="structured-replies">
+                    <div class="complain-content" [class.expanded]="item.showAllReplies">
+                      <div *ngFor="let reply of item.structuredNoteReplies" class="complaint-item">
+                        <div class="punishment-type">{{reply.punishmentName}}:</div>
+                        <div class="complain-text">{{reply.noteReply}}</div>
                       </div>
                     </div>
-                    <div *ngIf="item.structuredNoteReplies.length > 1" class="show-more-container" style="text-align: left;">
-                      <button mat-button color="primary" (click)="toggleNoteReplies(item); $event.stopPropagation();" class="show-more-button" style="padding-left: 0;">
+
+                    <div class="show-more-container" *ngIf="hasMultipleLines(item, 'reply')">
+                      <button mat-button color="primary" (click)="toggleNoteReplies(item); $event.stopPropagation();" class="show-more-button">
                         <mat-icon>{{ item.showAllReplies ? 'expand_less' : 'more_horiz' }}</mat-icon>
                       </button>
                     </div>

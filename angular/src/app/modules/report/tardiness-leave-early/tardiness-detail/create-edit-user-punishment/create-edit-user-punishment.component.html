@@ -9,7 +9,7 @@
     <div class="example-container">
       <mat-form-field>
         <mat-label>{{'Date' | localize}}</mat-label>
-        <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" name="dateAt" required (dateChange)="onDateChange()">
+        <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" name="dateAt" required (dateChange)="onDateChange()" (blur)="onDateBlur($event)" placeholder="DD/MM/YYYY">
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
       </mat-form-field>
@@ -22,7 +22,7 @@
             <span>{{'Loading...' | localize}}</span>
           </mat-option>
           <mat-option *ngFor="let user of filteredUsers" [value]="user">
-            {{user.name}}
+            {{user.userName}}
           </mat-option>
         </mat-autocomplete>
         <mat-error *ngIf="!userPunishment.userId">
@@ -46,10 +46,10 @@
       </mat-form-field>
 
       <mat-form-field>
-        <mat-label>{{'Count' | localize}}</mat-label>
-        <input matInput type="number" name="count" [(ngModel)]="userPunishment.count" required min="1">
-        <mat-error *ngIf="userPunishment.count < 1">
-          {{'Count must be at least 1' | localize}}
+        <mat-label>{{'Money' | localize}}</mat-label>
+        <input matInput type="number" name="money" [(ngModel)]="userPunishment.money" required min="1">
+        <mat-error *ngIf="userPunishment.money < 1">
+          {{'Money must be at least 1' | localize}}
         </mat-error>
       </mat-form-field>
 
@@ -65,7 +65,7 @@
       {{'Cancel' | localize}}
     </button>
     <button class="save-btn" name="saveBtn" mat-raised-button color="primary" 
-            [disabled]="!createForm.form.valid || isSaving" type="submit"
+            [disabled]="isSaving" type="submit"
             (click)="save()">
       {{'Save' | localize}}
     </button>

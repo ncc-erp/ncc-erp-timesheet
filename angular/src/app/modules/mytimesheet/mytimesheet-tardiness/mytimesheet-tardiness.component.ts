@@ -9,6 +9,7 @@ import { AppComponentBase } from 'shared/app-component-base';
 import { Component, OnInit, Injector } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { ComplainDialogComponent } from './complain-dialog/complain-dialog.component';
+import { UserServiceProxy } from '@shared/service-proxies/service-proxies';
 
 @Component({
   selector: 'app-mytimesheet-tardiness',
@@ -44,6 +45,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   constructor(
     private timekeepingService: TimekeepingService,
     private dialog: MatDialog,
+    private userService: UserServiceProxy,
     injector: Injector,
   ) {
     super(injector);
@@ -57,11 +59,17 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.userControl = new FormControl(this.userId);
     this.updateDay();
     this.userName = this.appSession.user.surname + ' ' + this.appSession.user.name;
-    this.isBasicUser = !this.permission.isGranted('Admin.Users.View');
+    this.isBasicUser = false;
   }
 
   ngOnInit() {
-    this.getData();
+    this.userService.get(this.userId).subscribe(user => {
+      const hasOnlyBasicRole = user.roleNames && 
+                             user.roleNames.length === 1 && 
+                             user.roleNames[0].toUpperCase() === 'BASICUSER';
+      this.isBasicUser = hasOnlyBasicRole;
+      this.getData();
+    });
   }
 
   getData() {
@@ -338,39 +346,26 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     item.showAllComplaints = !item.showAllComplaints;
   }
 
-  hasLongContent(notes: any[]): boolean {
-    if (!notes || notes.length === 0) return false;
-    const totalLength = notes.reduce((total, note) => {
-      const titleLength = note.punishmentName ? note.punishmentName.length + 2 : 0; 
-      const contentLength = note.userNote ? note.userNote.trim().length : 0;
-      return total + titleLength + contentLength;
-    }, 0);
-    return totalLength > 57;
-  }
+  hasMultipleLines(item: any, type: 'complaint' | 'reply'): boolean {
+    const items = type === 'complaint' 
+      ? (item.structuredUserNotes || []) 
+      : (item.structuredNoteReplies || []);
+    
+    if (items.length === 0) {
+      return false;
+    }
 
-  hasLongReplyContent(replies: any[]): boolean {
-    if (!replies || replies.length === 0) return false;
-    const totalLength = replies.reduce((total, reply) => {
-      const titleLength = reply.punishmentName ? reply.punishmentName.length + 2 : 0; 
-      const contentLength = reply.noteReply ? reply.noteReply.trim().length : 0;
-      return total + titleLength + contentLength;
-    }, 0);
-    return totalLength > 57;
-  }
-
-  getLineContentCount(text: string): number {
-    if (!text) return 0;
-    return text.split('\n').length;
-  }
-
-  hasMultilineContent(notes: any[]): boolean {
-    if (!notes || notes.length === 0) return false;
-    return notes.some(note => note.userNote && this.getLineContentCount(note.userNote) > 3);
-  }
-
-  hasMultilineReplyContent(replies: any[]): boolean {
-    if (!replies || replies.length === 0) return false;
-    return replies.some(reply => reply.noteReply && this.getLineContentCount(reply.noteReply) > 3);
+    if (items.length >= 2) {
+      return true;
+    }
+    
+    const note = items[0];
+    const text = type === 'complaint' 
+      ? (note.userNote || '') 
+      : (note.noteReply || '');
+    
+    const totalLength = (note.punishmentName + ': ' + text).length;
+    return totalLength > 30 || text.includes('\n');
   }
 
   getAttendancePunishmentTypes(item: TimekeepingDto): string {

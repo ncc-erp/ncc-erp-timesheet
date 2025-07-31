@@ -1,4 +1,4 @@
-﻿using Abp.Application.Services;
+using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Configuration;
@@ -92,13 +92,13 @@ namespace TimesheetApplication.UserPunishment
 
             if (input == null) validationErrors.Add("Input cannot be null");
             if (input?.UserId <= 0) validationErrors.Add("Invalid UserId");
-            if (input?.Count <= 0) validationErrors.Add("Count must be greater than 0");
+            if (input?.Money <= 0) validationErrors.Add("Money must be greater than 0");
             if (input?.DateAt == default(DateTime) || input?.DateAt > DateTime.Now.AddDays(1))
                 validationErrors.Add("Invalid DateAt value");
 
             var validTypes = GetValidPunishmentTypes();
             if (input != null && !validTypes.Contains(input.Type))
-                validationErrors.Add($"Invalid punishment type: {input.Type}. Valid types are: {string.Join(", ", validTypes)}");
+                validationErrors.Add($"Invalid punishment type: {input.Type}.");
 
             if (validationErrors.Any())
                 throw new UserFriendlyException(string.Join("; ", validationErrors));
@@ -163,14 +163,14 @@ namespace TimesheetApplication.UserPunishment
 
         private Timesheet.Entities.UserPunishment CreateUserPunishmentEntity(CreateUserPunishmentDto input, Timesheet.Entities.PunishmentSystem punishmentSystem)
         {
-            var calculatedTotalMoney = punishmentSystem.Money * input.Count;
+            var calculatedTotalMoney = input.Money;
             return new Timesheet.Entities.UserPunishment
             {
                 DateAt = input.DateAt,
                 UserId = input.UserId,
                 PunishmentSystemId = punishmentSystem.Id,
                 Type = input.Type,
-                Count = input.Count,
+                Count = 1,
                 TotalMoney = calculatedTotalMoney,
                 NoteReply = input.NoteReply?.Trim(),
                 CreationTime = DateTime.Now,
@@ -323,7 +323,7 @@ namespace TimesheetApplication.UserPunishment
                             {
                                 UserId = userId,
                                 Type = item.Type,
-                                Count = item.Count,
+                                Money = item.Money,
                                 DateAt = item.DateAt,
                                 NoteReply = item.NoteReply
                             };
@@ -378,13 +378,15 @@ namespace TimesheetApplication.UserPunishment
                             try
                             {
                                 var email = worksheet.Cells[row, 1].Value?.ToString().Trim() ?? "";
-                                var typeStr = worksheet.Cells[row, 2].Value?.ToString().Trim() ?? "";
-                                var count = Convert.ToInt32(worksheet.Cells[row, 3].Value?.ToString().Trim() ?? "0");
+                                var moneyStr = worksheet.Cells[row, 2].Value?.ToString().Trim() ?? "0";
+                                var typeStr = worksheet.Cells[row, 3].Value?.ToString().Trim() ?? "";
                                 var dateAtStr = worksheet.Cells[row, 4].Value?.ToString().Trim() ?? "";
                                 var noteReply = worksheet.Cells[row, 5].Value?.ToString().Trim() ?? "";
 
                                 DateTime dateAt = DateTime.Now;
-                                UserPunishmentType type = UserPunishmentType.NoCheckIn;
+                                int money = 0;
+                                UserPunishmentType type;
+                                int.TryParse(moneyStr, out money);
 
                                 bool isValidDate = DateTime.TryParse(dateAtStr, out dateAt);
                                 Enum.TryParse(typeStr, out type);
@@ -394,7 +396,8 @@ namespace TimesheetApplication.UserPunishment
                                     Row = row,
                                     Email = email,
                                     Type = type,
-                                    Count = count,
+                                    OriginalTypeValue = typeStr,
+                                    Money = money,
                                     DateAt = dateAt,
                                     OriginalDateAtValue = dateAtStr,
                                     IsValidDate = isValidDate,
@@ -462,8 +465,8 @@ namespace TimesheetApplication.UserPunishment
                 }
             }
 
-            if (item.Count <= 0)
-                errors.Add("Count must be greater than 0");
+            if (item.Money <= 0)
+                errors.Add("Money must be greater than 0");
 
             if (!item.IsValidDate || item.DateAt == default(DateTime) || item.DateAt > DateTime.Now.AddDays(1))
                 errors.Add("Invalid DateAt value: " + item.OriginalDateAtValue);
@@ -471,18 +474,19 @@ namespace TimesheetApplication.UserPunishment
             var validTypes = GetValidPunishmentTypes();
             if (!validTypes.Contains(item.Type))
             {
-                errors.Add($"Invalid punishment type: {item.Type}");
+                errors.Add($"Invalid punishment type: {item.OriginalTypeValue}");
             }
 
             if (userId > 0 && errors.Count == 0)
             {
                 try
                 {
+                    var moneyToUse = item.Money > 0 ? item.Money : item.Count * (await GetPunishmentSystemAsync(item.Type)).Money;
                     var createDto = new CreateUserPunishmentDto
                     {
                         UserId = userId,
                         Type = item.Type,
-                        Count = item.Count,
+                        Money = moneyToUse,
                         DateAt = item.DateAt,
                         NoteReply = item.NoteReply
                     };
@@ -571,8 +575,8 @@ namespace TimesheetApplication.UserPunishment
                 var worksheet = package.Workbook.Worksheets.Add("UserPunishment");
 
                 worksheet.Cells[1, 1].Value = "Email";
-                worksheet.Cells[1, 2].Value = "Type";
-                worksheet.Cells[1, 3].Value = "Count";
+                worksheet.Cells[1, 2].Value = "Money";
+                worksheet.Cells[1, 3].Value = "Type";
                 worksheet.Cells[1, 4].Value = "DateAt";
                 worksheet.Cells[1, 5].Value = "NoteReply";
 
@@ -584,14 +588,17 @@ namespace TimesheetApplication.UserPunishment
                 }
 
                 worksheet.Cells[2, 1].Value = "example@ncc.asia";
-                worksheet.Cells[2, 2].Value = "Late";
-                worksheet.Cells[2, 3].Value = "1";
+                worksheet.Cells[2, 2].Value = 20000; 
+                worksheet.Cells[2, 3].Value = "Ant"; 
                 worksheet.Cells[2, 4].Value = DateTime.Now.ToString("M/d/yyyy");
                 worksheet.Cells[2, 5].Value = "";
 
-                var validTypes = string.Join(",", Enum.GetNames(typeof(UserPunishmentType)));
-                var typeValidation = worksheet.DataValidations.AddListValidation("B2:B1000");
-                typeValidation.Formula.Values.Add(validTypes);
+                var allowedTypes = new[] { "Ant", "UnlockTSGmail" };
+                var typeValidation = worksheet.DataValidations.AddListValidation("C2:C1000");
+                foreach (var type in allowedTypes)
+                {
+                    typeValidation.Formula.Values.Add(type);
+                }
 
                 package.SaveAs(new FileInfo(templateFilePath));
             }

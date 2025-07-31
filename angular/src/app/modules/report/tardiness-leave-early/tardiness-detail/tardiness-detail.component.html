@@ -134,6 +134,17 @@
 
         <div class="col-sm-2 col-md-2 info-user">
           <mat-form-field appearance="outline">
+            <mat-label>Punishment Group Type</mat-label>
+            <mat-select name="selectedGroupType" [(value)]="selectedGroupType" (selectionChange)="onGroupTypeChange()">
+              <mat-option *ngFor="let type of groupTypes" [value]="type.id">
+                {{type.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-sm-2 col-md-2 info-user">
+          <mat-form-field appearance="outline">
             <mat-label>Punishment Type</mat-label>
             <mat-select name="selectedStatus" [(value)]="selectedStatus" (selectionChange)="getData()">
               <mat-option>

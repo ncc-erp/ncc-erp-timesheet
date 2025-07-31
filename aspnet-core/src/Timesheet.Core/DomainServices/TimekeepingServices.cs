@@ -575,16 +575,65 @@ namespace Timesheet.DomainServices
             }
             else if (!timekeeping.NoteReply.IsNullOrEmpty() && timekeeping.NoteReply.Contains("Onsite"))
             {
-                if ((CheckIn && CheckOut) || (CheckIn && NoCheckOut) || (CheckInLate && NoCheckOut))
+                if (timekeeping.NoteReply.Contains("fullday"))
                 {
                     timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                    timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
                 }
-                else if (NoCheckIn && CheckOut)
+                else if (timekeeping.NoteReply.Contains("morning", StringComparison.OrdinalIgnoreCase))
                 {
-                    timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                    timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
+                    if (NoCheckIn && NoCheckOut)
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckInAndNoCheckOut;
+                    }
+                    else if (CheckIn && NoCheckOut)
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckOut;
+                    }
+                    else if (NoCheckIn && CheckOut)
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckIn;
+                    }
+                    else if (CheckInLate && NoCheckOut)
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.LateAndNoCheckOut;
+                    }
+                    else if (CheckInLate)
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
+                    }
+                    else
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                    }
                 }
+                else if (timekeeping.NoteReply.Contains("afternoon", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (NoCheckIn && NoCheckOut)
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckInAndNoCheckOut;
+                    }
+                    else if (CheckIn && NoCheckOut)
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckOut;
+                    }
+                    else if (NoCheckIn && CheckOut)
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckIn;
+                    }
+                    else if (CheckInLate && NoCheckOut)
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.LateAndNoCheckOut;
+                    }
+                    else if (CheckInLate)
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
+                    }
+                    else
+                    {
+                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                    }
+                }
+                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
             }
             else if (NoCheckInAndNoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
             {
