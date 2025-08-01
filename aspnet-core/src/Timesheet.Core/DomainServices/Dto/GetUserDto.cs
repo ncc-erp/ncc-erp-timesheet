@@ -14,6 +14,7 @@ namespace Timesheet.DomainServices.Dto
     public class GetUserDto : EntityDto<long>
     {
         public string Name { get; set; }
+        public string UserName { get; set; }
         public string EmailAddress { get; set; }
         public bool IsActive { get; set; }
         public Usertype? Type { get; set; }

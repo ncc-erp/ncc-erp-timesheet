@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { AppConsts } from '@shared/AppConsts';
 import { PagedRequestDto } from '@shared/paged-listing-component-base';
 import { Observable } from 'rxjs';
+import { SubmitUserComplaintDto, UserComplaintResultDto } from './model/report-timesheet-Dto';
 import { BaseApiService } from './base-api.service';
 
 @Injectable({
@@ -20,7 +21,7 @@ export class TimekeepingService extends BaseApiService {
     return 'Timekeeping';
   }
 
-  getDetailTimekeeping(year: number, month: number, day: number, userId: number, branchId : number, isPunished : any, isComplain : any, statusPunish?: number): Observable<any> {
+  getDetailTimekeeping(year: number, month: number, day: number, userId: number, branchId: number, isPunished: any, isComplain: any, statusPunish?: number, groupType?: number): Observable<any> {
     let apiString = `${this.rootUrl}/GetDetailTimekeeping?year=${year}&month=${month}&day=${day}`
     if (userId!=-1) {
       apiString += `&userId=${userId}`
@@ -36,6 +37,9 @@ export class TimekeepingService extends BaseApiService {
     }
     if(statusPunish != undefined && statusPunish!=-1){
       apiString += `&statusPunish=${statusPunish}`
+    }
+    if(groupType != null && groupType != undefined) {
+      apiString += `&groupType=${groupType}`
     }
     return this.http.get<any>(apiString);
   }
@@ -74,11 +78,15 @@ export class TimekeepingService extends BaseApiService {
   updateTimekeeping(param): Observable<any> {
     return this.http.post<any>(this.rootUrl + '/UpdateTimekeeping', param);
   }
-  addComplain(param): Observable<any> {
-    return this.http.post<any>(this.rootUrl + '/UserKhieuLai', param);
+  addComplain(param: SubmitUserComplaintDto): Observable<UserComplaintResultDto> {
+    return this.http.post<UserComplaintResultDto>(this.rootUrl + '/UserKhieuLai', JSON.stringify(param), {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    });
   }
   answerComplain(param): Observable<any> {
-    return this.http.post<any>(this.rootUrl + '/TraLoiKhieuLai', param);
+    return this.http.post<any>(this.rootUrl + '/RespondToComplaint', param);
 
   }
 }

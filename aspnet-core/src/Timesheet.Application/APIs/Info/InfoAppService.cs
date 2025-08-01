@@ -1,4 +1,4 @@
-﻿using Abp.Configuration;
+using Abp.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Ncc;
@@ -497,6 +497,23 @@ namespace Timesheet.APIs.Info
                     Type = LockUnlockTimesheetType.MyTimesheet,
                     Amount = amount
                 });
+                
+                var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
+                    .Where(p => p.Type == UserPunishmentType.UnlockTSIMS)
+                    .FirstOrDefaultAsync();
+                    
+                if (punishmentSystem != null)
+                {
+                    await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
+                    {
+                        DateAt = DateTime.Now,
+                        UserId = userId,
+                        PunishmentSystemId = punishmentSystem.Id,
+                        Type = UserPunishmentType.UnlockTSIMS,
+                        Count = 1,
+                        TotalMoney = amount
+                    });
+                }
             }
         }
 

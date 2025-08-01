@@ -7,21 +7,22 @@ import { FormControl } from '@angular/forms';
 import { PERMISSIONS_CONSTANT } from './../../../constant/permission.constant';
 import { AppComponentBase } from 'shared/app-component-base';
 import { Component, OnInit, Injector } from '@angular/core';
+import { MatDialog } from '@angular/material';
+import { ComplainDialogComponent } from './complain-dialog/complain-dialog.component';
+import { UserServiceProxy } from '@shared/service-proxies/service-proxies';
 
 @Component({
   selector: 'app-mytimesheet-tardiness',
   templateUrl: './mytimesheet-tardiness.component.html',
   styleUrls: ['./mytimesheet-tardiness.component.css'],
   providers: [DatePipe]
-
 })
 export class MytimesheetTardinessComponent extends AppComponentBase implements OnInit {
 
   EDIT_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.EditTardinessLeaveEarly;
   VIEW_TARDINESS_LEAVE_EARLY = PERMISSIONS_CONSTANT.ViewTardinessLeaveEarly;
   Timekeeping_UserNote = PERMISSIONS_CONSTANT.Timekeeping_UserNote;
-  // listMonth = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-  // listYear = APP_CONSTANT.ListYear;
+  isBasicUser: boolean = false;
   month;
   months;
   year;
@@ -31,15 +32,20 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   calendarView;
   userControl: FormControl;
   listTimekeeping: TimekeepingDto[] = [];
+  groupedTimekeeping: TimekeepingDto[] = [];
   userId: number;
   userName: string;
   isTableLoading: boolean = false;
   selectedDay: number = -1;
   dayList: any = []
   public countLate: number = 0;
+  totalMonthlyPunishment: number = 0;
+  public maskTime = [/[\d]/, /\d/, ':', /\d/, /\d/];
 
   constructor(
     private timekeepingService: TimekeepingService,
+    private dialog: MatDialog,
+    private userService: UserServiceProxy,
     injector: Injector,
   ) {
     super(injector);
@@ -53,20 +59,164 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.userControl = new FormControl(this.userId);
     this.updateDay();
     this.userName = this.appSession.user.surname + ' ' + this.appSession.user.name;
+    this.isBasicUser = false;
   }
 
   ngOnInit() {
-    this.getData();
+    this.userService.get(this.userId).subscribe(user => {
+      const hasOnlyBasicRole = user.roleNames && 
+                             user.roleNames.length === 1 && 
+                             user.roleNames[0].toUpperCase() === 'BASICUSER';
+      this.isBasicUser = hasOnlyBasicRole;
+      this.getData();
+    });
   }
 
   getData() {
     this.isTableLoading = true;
     this.timekeepingService.getMyDetails(this.year, this.month + 1).subscribe(res => {
       this.listTimekeeping = res.result;
+      if (this.listTimekeeping && this.listTimekeeping.length > 0) {
+        this.totalMonthlyPunishment = this.listTimekeeping[0].totalMonthPunishmentTotal;
+      }
+      
+      this.groupTimekeepingByDay();
       this.isTableLoading = false;
-      this.countLate = this.countPunish(res.result)
+      this.countLate = this.countPunish(res.result);
     });
   }
+
+  groupTimekeepingByDay() {
+    if (!this.listTimekeeping || this.listTimekeeping.length === 0) {
+      this.groupedTimekeeping = [];
+      return;
+    }
+
+    const dateMap = new Map<string, TimekeepingDto>();
+
+    this.listTimekeeping.forEach(item => {
+      const itemDate = new Date(item.date);
+      const month = (itemDate.getMonth() + 1) < 10 ? '0' + (itemDate.getMonth() + 1) : (itemDate.getMonth() + 1);
+      const day = itemDate.getDate() < 10 ? '0' + itemDate.getDate() : itemDate.getDate();
+      const dateKey = `${itemDate.getFullYear()}-${month}-${day}`;
+      
+      if (!dateMap.has(dateKey)) {
+        dateMap.set(dateKey, {
+          ...item,
+          attendancePunish: 0,     
+          dailyPunish: 0,          
+          mentionPunish: 0,       
+          trackerPunish: 0,        
+          reviewInternPunish: 0,  
+          pmReportPunish: 0,       
+          antPunish: 0,            
+          unlockTSGmailPunish: 0,      
+          unlockTSIMSPunish: 0,      
+          totalDayPunishment: 0,
+          structuredNoteReplies: [],
+          structuredUserNotes: [],  
+          showAllReplies: false,
+          showAllComplaints: false  
+        });
+      }
+      
+      const record = dateMap.get(dateKey);
+      const punishType = item.userPunishmentType;
+      const moneyAmount = item.moneyPunish || 0;
+
+      if (item.userNote && item.userNote.trim()) {
+        const punishmentName = this.getPunishmentTypeName(punishType);
+
+        const existingNoteIndex = record.structuredUserNotes ? record.structuredUserNotes.findIndex(
+          note => note.punishmentType === punishType
+        ) : -1;
+        
+        if (existingNoteIndex === -1) {
+          if (!record.structuredUserNotes) {
+            record.structuredUserNotes = [];
+          }
+          
+          record.structuredUserNotes.push({
+            punishmentType: punishType,
+            punishmentName: punishmentName,
+            userNote: item.userNote
+          });
+        } else if (record.structuredUserNotes[existingNoteIndex].userNote !== item.userNote) {
+          record.structuredUserNotes[existingNoteIndex].userNote = item.userNote;
+        }
+        if (!record.userNote) {
+          record.userNote = item.userNote;
+        }
+      }
+
+      if (item.noteReply && item.noteReply.trim()) {
+        const punishmentName = this.getPunishmentTypeName(punishType);
+        const existingReplyIndex = record.structuredNoteReplies.findIndex(
+          reply => reply.punishmentType === punishType
+        );
+        
+        if (existingReplyIndex === -1) {
+          record.structuredNoteReplies.push({
+            punishmentType: punishType,
+            punishmentName: punishmentName,
+            noteReply: item.noteReply
+          });
+        } else if (record.structuredNoteReplies[existingReplyIndex].noteReply !== item.noteReply) {
+          record.structuredNoteReplies[existingReplyIndex].noteReply = item.noteReply;
+        }
+
+        if (!record.noteReply) {
+          record.noteReply = item.noteReply;
+        }
+      }
+
+      if (punishType >= 1 && punishType <= 5) {
+        record.attendancePunish = (record.attendancePunish || 0) + moneyAmount;
+      } else if (punishType === 6) {
+        record.dailyPunish = (record.dailyPunish || 0) + moneyAmount;
+      } else if (punishType === 7) {
+        record.mentionPunish = (record.mentionPunish || 0) + moneyAmount;
+      } else if (punishType >= 8 && punishType <= 11) {
+        record.trackerPunish = (record.trackerPunish || 0) + moneyAmount;
+      } else if (punishType === 12) {
+        record.reviewInternPunish = (record.reviewInternPunish || 0) + moneyAmount;
+      } else if (punishType === 13 || punishType === 14) {
+        record.pmReportPunish = (record.pmReportPunish || 0) + moneyAmount;
+      } else if (punishType === 15) {
+        record.antPunish = (record.antPunish || 0) + moneyAmount;
+      } else if (punishType === 16) {
+        record.unlockTSGmailPunish = (record.unlockTSGmailPunish || 0) + moneyAmount;
+      } else if (punishType === 17) {
+        record.unlockTSIMSPunish = (record.unlockTSIMSPunish || 0) + moneyAmount;
+      }
+
+      record.totalDayPunishment = (
+        (record.attendancePunish || 0) + 
+        (record.dailyPunish || 0) + 
+        (record.mentionPunish || 0) + 
+        (record.trackerPunish || 0) + 
+        (record.reviewInternPunish || 0) + 
+        (record.pmReportPunish || 0) + 
+        (record.antPunish || 0) + 
+        (record.unlockTSGmailPunish || 0) + 
+        (record.unlockTSIMSPunish || 0)
+      );
+    });
+
+    dateMap.forEach(record => {
+      if (record.structuredNoteReplies && record.structuredNoteReplies.length > 0) {
+        record.structuredNoteReplies.sort((a, b) => a.punishmentType - b.punishmentType);
+      }
+      
+      if (record.structuredUserNotes && record.structuredUserNotes.length > 0) {
+        record.structuredUserNotes.sort((a, b) => a.punishmentType - b.punishmentType);
+      }
+    });
+
+    this.groupedTimekeeping = Array.from(dateMap.values())
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
   countPunish(data) {
     return data.filter((item) => {
       return item.statusPunish != 0 || item.status == 1
@@ -78,6 +228,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.year = this.viewDate.getFullYear();
     this.getDayByMonthAndYear(this.month, this.year)
   }
+
   getDayByMonthAndYear(month: number, year: number) {
     let numOfday: number = new Date(year, month + 1, 0).getDate();
     this.dayList = []
@@ -108,6 +259,24 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     return "";
   }
 
+  formatPunishmentAmount(amount?: number): string {
+    if (amount == null || amount === 0) {
+      return '0';
+    }
+    return (amount / 1000) + 'k';
+  }
+
+  hasPunishment(item: TimekeepingDto): boolean {
+    return item.totalDayPunishment > 0;
+  }
+
+  getPunishmentTypeName(type?: number): string {
+    if (type == null) return 'No Punish';
+
+    const punishmentType = this.APP_CONSTANT.PUNISHMENT_TYPES.find(p => p.value === type);
+    return punishmentType ? punishmentType.name : `Unknown (${type})`;
+  }
+
   onDateChange() {
     this.viewDate = new Date(this.year, this.month, this.selectedDay);
     this.getDayByMonthAndYear(this.month, this.year)
@@ -115,26 +284,118 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.countLate = this.countPunish(this.listTimekeeping)
   }
 
-  onSave(item: TimekeepingDto) {
-    let requestBody = {
-      userNote: item.userNote,
-      id: item.strTimekeepingId
-    }
-    this.timekeepingService.addComplain(requestBody).subscribe(res => {
-      if (res.success) {
-        abp.notify.success("add complain successfully");
-        this.getData();
-        item.isComplain = false;
+  openComplainDialog(item: TimekeepingDto) {
+    const currentDate = item.date;
+    const userPunishmentTypes = [];
+
+    const dayOfMonth = parseInt(item.date.split('-')[2]);
+    const filteredUserPunishments = this.listTimekeeping.filter(up => {
+      const punishmentDate = new Date(up.date);
+      return punishmentDate.getDate() === dayOfMonth && up.userPunishmentType > 0;
+    });
+  
+    filteredUserPunishments.forEach(up => {
+      if (up.userPunishmentType > 0) {
+        const punishmentType = this.APP_CONSTANT.PUNISHMENT_TYPES.find(p => p.value === up.userPunishmentType);
+        if (punishmentType && !userPunishmentTypes.some(p => p.value === punishmentType.value)) {
+          userPunishmentTypes.push(punishmentType);
+        }
       }
-    })
+    });
+
+    if (userPunishmentTypes.length === 0) {
+      this.notify.info('Không có loại phạt nào cho ngày này');
+      return; 
+    }
+
+    const dialogRef = this.dialog.open(ComplainDialogComponent, {
+      width: '650px',
+      data: {
+        timekeeping: item,
+        punishmentTypes: userPunishmentTypes,
+        structuredUserNotes: item.structuredUserNotes || [],
+        userPunishments: filteredUserPunishments
+      }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.length > 0) {
+        const promises = result.map(complaint => {
+          return this.timekeepingService.addComplain({
+            userPunishmentId: complaint.userPunishmentId,
+            userNote: complaint.userNote
+          }).toPromise();
+        });
+
+        Promise.all(promises)
+          .then(() => {
+            this.notify.success('Complaints submitted successfully');
+            this.getData();
+          })
+          .catch(error => {
+            this.notify.error('Failed to submit complaints');
+          });
+      }
+    });
+  }
+  
+  toggleNoteReplies(item: TimekeepingDto) {
+    item.showAllReplies = !item.showAllReplies;
+  }
+  
+  toggleUserNotes(item: TimekeepingDto) {
+    item.showAllComplaints = !item.showAllComplaints;
   }
 
-  onCancel(item: TimekeepingDto) {
-    item.isComplain = false;
-    this.getData();
+  hasMultipleLines(item: any, type: 'complaint' | 'reply'): boolean {
+    const items = type === 'complaint' 
+      ? (item.structuredUserNotes || []) 
+      : (item.structuredNoteReplies || []);
+    
+    if (items.length === 0) {
+      return false;
+    }
+
+    if (items.length >= 2) {
+      return true;
+    }
+    
+    const note = items[0];
+    const text = type === 'complaint' 
+      ? (note.userNote || '') 
+      : (note.noteReply || '');
+    
+    const totalLength = (note.punishmentName + ': ' + text).length;
+    return totalLength > 30 || text.includes('\n');
   }
+
+  getAttendancePunishmentTypes(item: TimekeepingDto): string {
+    const attendanceReplies = item.structuredNoteReplies ? item.structuredNoteReplies.filter(reply => 
+      reply.punishmentType >= 1 && reply.punishmentType <= 5
+    ) : [];
+    
+    if (!attendanceReplies || attendanceReplies.length === 0) {
+      for (let i = 1; i <= 5; i++) {
+        const punishmentType = this.APP_CONSTANT.PUNISHMENT_TYPES.find(p => p.value === i);
+        if (punishmentType) {
+          return punishmentType.name;
+        }
+      }
+      return 'Attendance';
+    }
+
+    return attendanceReplies.map(reply => reply.punishmentName).join(', ');
+  }
+
+  getTimekeepingData() {
+    this.timekeepingService.getMyDetails(this.year, this.month + 1).subscribe(res => {
+      this.listTimekeeping = res.result;
+      this.groupTimekeepingByDay();
+      this.countLate = this.countPunish(res.result);
+    });
+  }
+
   trackerTimeFormat(time) {
-    if (time == ""|| time == null) {
+    if (time == "" || time == null) {
       return "";
     }
     if (time == 0) {
@@ -146,5 +407,29 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     return `${formattedHours}:${formattedMinutes}`;
   }
 
-  public maskTime = [/[\d]/, /\d/, ':', /\d/, /\d/]
+  onSave(item: TimekeepingDto) {
+    this.timekeepingService.getMyDetails(
+      this.year, 
+      this.month + 1
+    ).subscribe(
+      (response) => {
+        const userPunishments = response && response.result ? response.result : [];
+
+        const dayOfMonth = parseInt(item.date.split('-')[2]);
+        const filteredUserPunishments = userPunishments.filter(up => {
+          const punishmentDate = new Date(up.date);
+          return punishmentDate.getDate() === dayOfMonth && up.userPunishmentType > 0;
+        });
+        
+        if (filteredUserPunishments && filteredUserPunishments.length > 0) {
+          this.openComplainDialog(item);
+        } else {
+          this.notify.info('Không có loại phạt nào cho ngày này');
+        }
+      },
+      (error) => {
+        this.notify.error('Failed to load punishment details');
+      }
+    );
+  }
 }

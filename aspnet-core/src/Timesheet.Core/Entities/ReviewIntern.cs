@@ -12,5 +12,6 @@ namespace Timesheet.Entities
         public int Year { get; set; }
         //   [DefaultValue("true")]
         public bool IsActive { get; set; }
+        public bool IsPunishmentProcessed { get; set; } 
     }
 }

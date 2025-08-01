@@ -1,0 +1,41 @@
+.import-error-dialog {
+  min-width: 500px;
+}
+
+.error-title {
+  color: #D32F2F;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.error-title i {
+  margin-right: 8px;
+}
+
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th {
+  background-color: #FFCDD2;
+  padding: 10px;
+  text-align: left;
+}
+
+table td {
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+
+.error-note {
+  margin-top: 16px;
+  font-style: italic;
+  color: #ff0000;
+}

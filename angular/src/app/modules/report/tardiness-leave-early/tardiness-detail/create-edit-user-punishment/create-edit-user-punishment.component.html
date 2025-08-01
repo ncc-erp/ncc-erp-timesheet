@@ -1,0 +1,73 @@
+
+<form *ngIf="active" #createForm="ngForm" autocomplete="off" id="frm_create_user_punishment" novalidate>
+  <div class="create-edit-user-punishment-title">
+    <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" mat-dialog-title>
+      {{title}}
+    </h2>
+  </div>
+  <div class="mat-typography create-edit-user-punishment">
+    <div class="example-container">
+      <mat-form-field>
+        <mat-label>{{'Date' | localize}}</mat-label>
+        <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" name="dateAt" required (dateChange)="onDateChange()" (blur)="onDateBlur($event)" placeholder="DD/MM/YYYY">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>{{'User' | localize}}</mat-label>
+        <input type="text" matInput [matAutocomplete]="auto" [(ngModel)]="userSearchText" name="userSearchText" (input)="filterUsers()" autocomplete="off">
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayUserFn" (optionSelected)="onUserSelected($event)">
+          <mat-option *ngIf="isLoadingUsers" disabled>
+            <span>{{'Loading...' | localize}}</span>
+          </mat-option>
+          <mat-option *ngFor="let user of filteredUsers" [value]="user">
+            {{user.userName}}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="!userPunishment.userId">
+          {{'ThisFieldIsRequired' | localize}}
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>{{'Punishment Type' | localize}}</mat-label>
+        <mat-select name="type" [(ngModel)]="userPunishment.type" required>
+          <mat-option *ngIf="isLoadingTypes" disabled>
+            <span class="mat-option-text">{{'Loading...' | localize}}</span>
+          </mat-option>
+          <mat-option *ngFor="let type of punishmentTypes" [value]="type.value">
+              {{type.name}}
+            </mat-option>
+        </mat-select>
+        <mat-error *ngIf="!userPunishment.type">
+          {{'ThisFieldIsRequired' | localize}}
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>{{'Money' | localize}}</mat-label>
+        <input matInput type="number" name="money" [(ngModel)]="userPunishment.money" required min="1">
+        <mat-error *ngIf="userPunishment.money < 1">
+          {{'Money must be at least 1' | localize}}
+        </mat-error>
+      </mat-form-field>
+
+
+      <mat-form-field>
+        <mat-label>{{'Note Reply' | localize}}</mat-label>
+        <textarea matInput name="noteReply" [(ngModel)]="userPunishment.noteReply" maxlength="500" rows="1"></textarea>
+      </mat-form-field>
+    </div>
+  </div>
+  <mat-dialog-actions align="end">
+    <button name="cancelBtn" class="btn btn-default" mat-raised-button type="button" (click)="close(0)">
+      {{'Cancel' | localize}}
+    </button>
+    <button class="save-btn" name="saveBtn" mat-raised-button color="primary" 
+            [disabled]="isSaving" type="submit"
+            (click)="save()">
+      {{'Save' | localize}}
+    </button>
+  </mat-dialog-actions>
+</form>

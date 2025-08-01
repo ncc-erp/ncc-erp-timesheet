@@ -39,6 +39,8 @@ namespace Ncc.Web.Host.Startup
             workManager.Add(IocManager.Resolve<ResetDataTeamBuildingWorker>());
             workManager.Add(IocManager.Resolve<AddDataToOpenTalk>());
             workManager.Add(IocManager.Resolve<NotifyReviewInternWorker>());
+            workManager.Add(IocManager.Resolve<CheckAndPunishLateReviewWorker>());
+            workManager.Add(IocManager.Resolve<ApplyPMReportPunishmentWorker>());
         }
     }
 }

@@ -8,7 +8,7 @@ import { Pipe, PipeTransform } from '@angular/core';
     
 export class PunishNamePipe implements PipeTransform {
     transform(value: number): string | undefined {
-        const found = APP_CONSTANT.PunishRules.find(rule => rule.value === value);
+        const found = APP_CONSTANT.PunishRulesShortName.find(rule => rule.value === value);
         return found ? found.name : undefined;
       }
 }

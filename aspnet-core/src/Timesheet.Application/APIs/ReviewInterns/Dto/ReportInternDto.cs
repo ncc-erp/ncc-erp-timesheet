@@ -55,8 +55,6 @@ namespace Timesheet.APIs.ReviewInterns.Dto
         public UserLevel? NewLevel { get; set; }
     }
 
-
-
     public class ReportInternOutput
     {
         public List<ReportInternForMonth> listInternLevel { get; set; }

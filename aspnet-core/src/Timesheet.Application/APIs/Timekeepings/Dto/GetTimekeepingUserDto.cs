@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Timesheet.APIs.UserPunishments.Dto;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
 
@@ -9,6 +10,7 @@ namespace Timesheet.APIs.Timekeepings.Dto
     public class GetTimekeepingUserDto
     {
         public long TimekeepingId { get; set; }
+        public long UserPunishmentId { get; set; }
         public long? UserId { get; set; }
         public string UserName { get; set; }
         public Usertype? UserType { get; set; }
@@ -32,11 +34,14 @@ namespace Timesheet.APIs.Timekeepings.Dto
         public string BranchDisplayName { get; set; }
         public long? BranchId { get; set; }
         public CheckInCheckOutPunishmentType StatusPunish { get; set; }
+        public UserPunishmentType UserPunishmentType { get; set; }
         public int MoneyPunish { get; set; }
         public string TrackerTime { get; set; }
         public string StrTimekeepingId => TimekeepingId.ToString();
-
+        public int TotalMonthPunishment { get; set; }
         public int? DailyPunish { get; set; }
         public int? MentionPunish { get; set; }
+        public int TotalDayPunishment { get; set; }
+        public decimal TotalMonthPunishmentTotal { get; set; }
     }
 }
