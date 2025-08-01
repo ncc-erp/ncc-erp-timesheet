@@ -10,7 +10,7 @@ export interface UserPunishmentDto {
   userId: number;
   userName: string;
   type: number;
-  count: number;
+  money: number;
   noteReply: string;
   punishmentSystemId: number;
   punishmentSystemName: string;
@@ -21,7 +21,7 @@ export interface CreateUserPunishmentDto {
   dateAt: string;
   userId: number;
   type: number;
-  count: number;
+  money: number;
   noteReply: string;
 }
 
@@ -30,7 +30,7 @@ export interface UpdateUserPunishmentDto {
   dateAt: string;
   userId: number;
   type: number;
-  count: number;
+  money: number;
   noteReply: string;
 }
 

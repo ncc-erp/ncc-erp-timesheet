@@ -126,6 +126,19 @@ namespace Timesheet.APIs.HRMv2
                 }).ToList();
         }
 
+        public List<PunishmentEmployeeDto> GetPunishmentTotal(int year, int month)
+        {
+            return WorkScope.GetAll<UserPunishment>()
+                .Where(s => s.DateAt.Year == year)
+                .Where(s => s.DateAt.Month == month)
+                .Where(s => s.TotalMoney > 0)
+                .GroupBy(s => s.User.EmailAddress)
+                .Select(g => new PunishmentEmployeeDto
+                {
+                    Email = g.Key,
+                    Money = g.Sum(x => x.TotalMoney)
+                }).ToList();
+        }
 
         [HttpPost]
         public List<GetEmployeeRequestDayDto> GetAllRequestDay(InputCollectDataForPayslipDto input)

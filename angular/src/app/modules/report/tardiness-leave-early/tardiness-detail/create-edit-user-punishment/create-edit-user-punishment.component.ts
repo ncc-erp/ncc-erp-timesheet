@@ -1,6 +1,7 @@
 import { AppComponentBase } from '@shared/app-component-base';
 import { MatDialogRef, MAT_DIALOG_DATA, MatAutocompleteSelectedEvent } from '@angular/material';
-import { Component, Injector, Inject, OnInit } from '@angular/core';
+import { Component, Injector, Inject, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 import { UserPunishmentService, CreateUserPunishmentDto, UpdateUserPunishmentDto, UserPunishmentDto } from '@app/service/api/user-punishment.service';
 import { APP_CONSTANT } from '@app/constant/api.constants';
@@ -17,7 +18,7 @@ export interface IPunishmentType {
   templateUrl: './create-edit-user-punishment.component.html',
   styleUrls: ['./create-edit-user-punishment.component.css']
 })
-export class CreateEditUserPunishmentComponent extends AppComponentBase implements OnInit {
+export class CreateEditUserPunishmentComponent extends AppComponentBase implements OnInit, AfterViewInit {
   userPunishment: CreateUserPunishmentDto | UpdateUserPunishmentDto;
   isEditMode = false;
   title: string;
@@ -31,6 +32,8 @@ export class CreateEditUserPunishmentComponent extends AppComponentBase implemen
   isLoadingUsers = true;
   selectedDate: Date = new Date();
   userSearchText = '';
+
+  @ViewChild('createForm') createForm: NgForm;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -56,7 +59,7 @@ export class CreateEditUserPunishmentComponent extends AppComponentBase implemen
         dateAt: this.data.dateAt,
         userId: this.data.userId,
         type: this.data.type,
-        count: this.data.count,
+        money: this.data.totalMoney,
         noteReply: this.data.noteReply || ''
       } as UpdateUserPunishmentDto;
       this.selectedDate = new Date(this.userPunishment.dateAt);
@@ -67,7 +70,7 @@ export class CreateEditUserPunishmentComponent extends AppComponentBase implemen
         dateAt: this.data && this.data.date ? moment(this.data.date).format('YYYY-MM-DD') : moment().format('YYYY-MM-DD'),
         userId: this.data && this.data.userId ? this.data.userId : null,
         type: null,
-        count: 1,
+        money: 0,
         noteReply: ''
       } as CreateUserPunishmentDto;
       this.selectedDate = this.data && this.data.date ? new Date(this.data.date) : new Date();
@@ -77,7 +80,6 @@ export class CreateEditUserPunishmentComponent extends AppComponentBase implemen
 
   loadPunishmentTypes() {
     this.isLoadingTypes = true;
-    // Chỉ cho phép chọn Ant (type 15) và UnlockTS (type 16)
     this.punishmentTypes = APP_CONSTANT.PunishRules.filter(type => 
       type.value === 15 || type.value === 16
     );
@@ -106,7 +108,8 @@ export class CreateEditUserPunishmentComponent extends AppComponentBase implemen
     } else {
       const searchText = this.userSearchText.toLowerCase().trim();
       this.filteredUsers = this.users.filter(user => 
-        user.name.toLowerCase().includes(searchText) || 
+        (user.userName && user.userName.toLowerCase().includes(searchText)) || 
+        (user.name && user.name.toLowerCase().includes(searchText)) || 
         (user.emailAddress && user.emailAddress.toLowerCase().includes(searchText))
       );
     }
@@ -118,11 +121,11 @@ export class CreateEditUserPunishmentComponent extends AppComponentBase implemen
     }
     
     const user = this.users.find(u => u.id === userId);
-    return user ? user.name : '';
+    return user ? (user.userName || user.name || '') : '';
   }
   
   displayUserFn(user: any): string {
-    return user && user.name ? user.name : '';
+    return user && user.userName ? user.userName : '';
   }
   
   onUserSelected(event: MatAutocompleteSelectedEvent): void {
@@ -134,7 +137,36 @@ export class CreateEditUserPunishmentComponent extends AppComponentBase implemen
 
   onDateChange() {
     if (this.userPunishment) {
+      this.updateDateFromSelectedDate();
+    }
+  }
+
+  onDateBlur(event: FocusEvent) {
+    const input = event.target as HTMLInputElement;
+    const value = input.value.trim();
+    
+    if (!value) {
+      this.selectedDate = null;
+      this.userPunishment.dateAt = '';
+      return;
+    }
+
+    const dateMoment = moment(value, ['DD/MM/YYYY', 'D/M/YYYY'], true);
+    
+    if (dateMoment.isValid()) {
+      this.selectedDate = dateMoment.toDate();
+      this.updateDateFromSelectedDate();
+    } else {
+      this.selectedDate = null;
+      this.userPunishment.dateAt = '';
+    }
+  }
+
+  private updateDateFromSelectedDate() {
+    if (this.selectedDate) {
       this.userPunishment.dateAt = moment(this.selectedDate).format('YYYY-MM-DD');
+    } else {
+      this.userPunishment.dateAt = '';
     }
   }
 
@@ -145,7 +177,13 @@ export class CreateEditUserPunishmentComponent extends AppComponentBase implemen
 
     this.isSaving = true;
     
-    this.userPunishment.dateAt = moment(this.selectedDate).format('YYYY-MM-DD');
+    this.updateDateFromSelectedDate();
+    
+    if (!this.selectedDate || !this.userPunishment.dateAt) {
+      this.notify.warn('Please enter a valid date');
+      this.isSaving = false;
+      return;
+    }
     
     let request;
     if (this.isEditMode) {
@@ -180,6 +218,18 @@ export class CreateEditUserPunishmentComponent extends AppComponentBase implemen
         }
       }
     );
+  }
+
+  ngAfterViewInit(): void {
+    Promise.resolve().then(() => {
+      if (this.createForm) {
+        for (const key in this.createForm.controls) {
+          if (this.createForm.controls.hasOwnProperty(key)) {
+            this.createForm.controls[key].markAsTouched();
+          }
+        }
+      }
+    });
   }
 
   close(result?: any): void {

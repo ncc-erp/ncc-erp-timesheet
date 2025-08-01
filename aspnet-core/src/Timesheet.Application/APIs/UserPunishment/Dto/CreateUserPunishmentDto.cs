@@ -16,8 +16,9 @@ namespace Timesheet.APIs.UserPunishments.Dto
         public UserPunishmentType Type { get; set; }
 
         [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Count must be greater than 0")]
-        public int Count { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Money must be greater than 0")]
+        public int Money { get; set; }
+        public int? Count { get; set; }
 
         [MaxLength(500)]
         public string NoteReply { get; set; }

@@ -21,7 +21,7 @@ export class TimekeepingService extends BaseApiService {
     return 'Timekeeping';
   }
 
-  getDetailTimekeeping(year: number, month: number, day: number, userId: number, branchId : number, isPunished : any, isComplain : any, statusPunish?: number): Observable<any> {
+  getDetailTimekeeping(year: number, month: number, day: number, userId: number, branchId: number, isPunished: any, isComplain: any, statusPunish?: number, groupType?: number): Observable<any> {
     let apiString = `${this.rootUrl}/GetDetailTimekeeping?year=${year}&month=${month}&day=${day}`
     if (userId!=-1) {
       apiString += `&userId=${userId}`
@@ -37,6 +37,9 @@ export class TimekeepingService extends BaseApiService {
     }
     if(statusPunish != undefined && statusPunish!=-1){
       apiString += `&statusPunish=${statusPunish}`
+    }
+    if(groupType != null && groupType != undefined) {
+      apiString += `&groupType=${groupType}`
     }
     return this.http.get<any>(apiString);
   }

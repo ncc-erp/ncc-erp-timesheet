@@ -10,7 +10,10 @@ namespace Timesheet.APIs.UserPunishments.Dto
         public int Row { get; set; }
         public string Email { get; set; }
         public UserPunishmentType Type { get; set; }
+        public string OriginalTypeValue { get; set; } 
+
         public int Count { get; set; }
+        public int Money { get; set; }
         public DateTime DateAt { get; set; }
         public string OriginalDateAtValue { get; set; }
         public bool IsValidDate { get; set; } = true;

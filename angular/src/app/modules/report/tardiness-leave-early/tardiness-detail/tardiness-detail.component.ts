@@ -72,8 +72,11 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
   listBranch: BranchDto[] = [];
   branchSearch: FormControl = new FormControl("")
   statusSearch: FormControl = new FormControl("")
-  listBranchFilter: BranchDto[];
+  public listBranchFilter: BranchDto[];
   filteredPunishRules: any[] = [];
+
+  public selectedGroupType: number = -1;
+  public groupTypes = this.APP_CONSTANT.GroupTypes;
 
   public currentSortColumn: string = "transactionDate";
   public sortDirection: number = 0;
@@ -153,19 +156,68 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
   }
 
   filterStatus() {
+    let baseRules = [];
+    
+    if (this.selectedGroupType === -1) {
+      baseRules = [...this.APP_CONSTANT.PunishRules];
+    } else {
+      baseRules = [...this.filteredPunishRules];
+    }
+    
     if (this.statusSearch.value) {
       const searchValue = this.statusSearch.value.toLowerCase().trim();
-      this.filteredPunishRules = this.APP_CONSTANT.PunishRules.filter(
+      this.filteredPunishRules = baseRules.filter(
         item => item.name.toLowerCase().includes(searchValue)
       );
     } else {
-      this.filteredPunishRules = this.APP_CONSTANT.PunishRules;
+      this.filteredPunishRules = baseRules;
     }
+  }
+
+  onGroupTypeChange() {
+    this.selectedStatus = -1;
+    const groupTypeMappings = {
+      1: [1, 2, 3, 4, 5],
+      2: [8, 9, 10, 11],
+      3: [13, 14],
+      0: [0],   
+      6: [6],   
+      7: [7],   
+      12: [12],
+      15: [15], 
+      16: [16], 
+      17: [17]  
+    };
+
+    if (this.selectedGroupType === -1) {
+      this.filteredPunishRules = [...this.APP_CONSTANT.PunishRules];
+    } else if (groupTypeMappings[this.selectedGroupType]) {
+      const allowedTypes = groupTypeMappings[this.selectedGroupType];
+      this.filteredPunishRules = this.APP_CONSTANT.PunishRules.filter(rule => 
+        allowedTypes.includes(rule.value)
+      );
+    } else {
+      this.filteredPunishRules = [];
+    }
+    
+    this.filterStatus();
+
+    this.getData();
   }
 
   getData() {
     this.isTableLoading = true;
-    this.timekeepingService.getDetailTimekeeping(this.year, this.month + 1, this.selectedDay, this.userId, this.selectedBranch, this.isPunish, this.isComplain, this.selectedStatus).subscribe(res => {
+    this.timekeepingService.getDetailTimekeeping(
+      this.year, 
+      this.month + 1, 
+      this.selectedDay, 
+      this.userId, 
+      this.selectedBranch, 
+      this.isPunish, 
+      this.isComplain, 
+      this.selectedStatus,
+      this.selectedGroupType === -1 ? null : this.selectedGroupType
+    ).subscribe(res => {
       this.listTimekeeping = res.result;
       this.listTimekeeping = res.result.map(item => {
         item.noteReplyToString = !item.noteReply ? "" : item.noteReply;
@@ -455,7 +507,6 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
     }
   }
 
-  // Phương thức download template
   downloadTemplate() {
     this.isDownloading = true;
     this.userPunishmentService.downloadTemplateImportUserPunishment()
@@ -464,15 +515,12 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
         console.log('API response:', response);
         if (response && response.result && response.result.base64) {
           try {
-            // Chuyển đổi base64 thành binary data
             const byteCharacters = atob(response.result.base64);
             const byteNumbers = new Array(byteCharacters.length);
             for (let i = 0; i < byteCharacters.length; i++) {
               byteNumbers[i] = byteCharacters.charCodeAt(i);
             }
             const byteArray = new Uint8Array(byteNumbers);
-
-            // Tạo blob và lưu file
             const file = new Blob([byteArray], {
               type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             });
