@@ -15,7 +15,6 @@ export class MezonWebViewService {
     isInMezon$ = this.isInMezon.asObservable();
 
     constructor() {
-        // Khôi phục trạng thái từ localStorage khi khởi tạo
         this._isInMezon = localStorage.getItem('isInMezon') === 'true';
     }
 
