@@ -453,7 +453,7 @@ namespace Timesheet.APIs.Timekeepings
                     UserId = tk.UserId.Value
                 }].ToList();
 
-                var (totalDayPunishment, totalMonthPunishmentTotal) = CalculatePunishmentTotals(upList, tk.DateAt, tk.UserId.Value);
+                var (totalDayPunishment, totalMonthPunishmentTotal) = CalculatePunishmentTotals(upList, tk.DateAt, tk.UserId.Value, tkList);
 
                 if (matchingUps.Any())
                 {
@@ -554,7 +554,7 @@ namespace Timesheet.APIs.Timekeepings
                 if (!tkLookup.Contains(key))
                 {
 
-                    var (totalDayPunishment, totalMonthPunishmentTotal) = CalculatePunishmentTotals(upList, up.DateAt, up.UserId);
+                    var (totalDayPunishment, totalMonthPunishmentTotal) = CalculatePunishmentTotals(upList, up.DateAt, up.UserId, tkList);
 
                     result.Add(new GetTimekeepingUserDto
                     {
@@ -594,16 +594,65 @@ namespace Timesheet.APIs.Timekeepings
             return result.OrderByDescending(t => t.Date).ToList();
         }
 
-        private (int totalDayPunishment, decimal totalMonthPunishmentTotal) CalculatePunishmentTotals(List<UserPunishment> userPunishments, DateTime date, long userId)
+        private (int totalDayPunishment, decimal totalMonthPunishmentTotal) CalculatePunishmentTotals(
+            List<UserPunishment> userPunishments,
+            DateTime date,
+            long userId,
+            List<Timekeeping> timekeepings = null)
         {
-            int totalDayPunishment = userPunishments
-              .Where(up => up.DateAt.Date == date.Date && up.UserId == userId)
-              .Sum(up => up.TotalMoney);
-            decimal totalMonthPunishmentTotal = userPunishments
-              .Where(up => up.DateAt.Year == date.Year && up.DateAt.Month == date.Month && up.UserId == userId)
-              .Sum(up => up.TotalMoney);
+            var dayPunishments = userPunishments
+                .Where(up => up.DateAt.Date == date.Date && up.UserId == userId)
+                .ToList();
 
-            return (totalDayPunishment, totalMonthPunishmentTotal);
+            var monthPunishments = userPunishments
+                .Where(up => up.DateAt.Year == date.Year &&
+                            up.DateAt.Month == date.Month &&
+                            up.UserId == userId)
+                .ToList();
+
+            int totalDayPunishment = dayPunishments.Sum(up => up.TotalMoney);
+            decimal totalMonthPunishmentTotal = monthPunishments.Sum(up => up.TotalMoney);
+
+            if (timekeepings != null && timekeepings.Any())
+            {
+                var daysWithUserPunishment = userPunishments
+                    .Where(up => up.DateAt.Year == date.Year &&
+                                up.DateAt.Month == date.Month &&
+                                up.UserId == userId)
+                    .Select(up => up.DateAt.Date)
+                    .ToHashSet();
+
+                var timekeepingPunishments = timekeepings
+                    .Where(t => t.UserId == userId &&
+                               t.StatusPunish > 0 &&
+                               t.DateAt.Year == date.Year &&
+                               t.DateAt.Month == date.Month)
+                    .GroupBy(t => new { t.DateAt.Date, t.StatusPunish })
+                    .Select(g => new
+                    {
+                        g.Key.Date,
+                        g.Key.StatusPunish,
+                        MoneyPunish = g.Sum(x => x.MoneyPunish)
+                    })
+                    .ToList();
+
+                var currentDayPunishment = timekeepingPunishments
+                    .Where(t => t.Date == date.Date && 
+                              !userPunishments.Any(up => up.DateAt.Date == t.Date && 
+                                                       (int)up.Type == (int)t.StatusPunish))
+                    .Sum(t => t.MoneyPunish);
+
+                totalDayPunishment += currentDayPunishment;
+
+                var currentMonthPunishment = timekeepingPunishments
+                    .Where(t => !userPunishments.Any(up => up.DateAt.Date == t.Date && 
+                                                         (int)up.Type == (int)t.StatusPunish))
+                    .Sum(t => t.MoneyPunish);
+
+                totalMonthPunishmentTotal += currentMonthPunishment;
+            }
+
+            return (totalDayPunishment, (int)totalMonthPunishmentTotal);
         }
 
         private async Task<int> GetMoneyPunishByType(CheckInCheckOutPunishmentType StatusPunish)

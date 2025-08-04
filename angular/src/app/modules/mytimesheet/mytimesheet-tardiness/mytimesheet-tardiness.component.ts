@@ -121,8 +121,12 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       }
       
       const record = dateMap.get(dateKey);
-      const punishType = item.userPunishmentType;
+      let punishType = item.userPunishmentType;
       const moneyAmount = item.moneyPunish || 0;
+      
+      if (item.statusPunish >= 1 && item.statusPunish <= 5 && punishType === 0) {
+        punishType = item.statusPunish; 
+      }
 
       if (item.userNote && item.userNote.trim()) {
         const punishmentName = this.getPunishmentTypeName(punishType);
@@ -369,21 +373,30 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   }
 
   getAttendancePunishmentTypes(item: TimekeepingDto): string {
-    const attendanceReplies = item.structuredNoteReplies ? item.structuredNoteReplies.filter(reply => 
-      reply.punishmentType >= 1 && reply.punishmentType <= 5
-    ) : [];
-    
-    if (!attendanceReplies || attendanceReplies.length === 0) {
-      for (let i = 1; i <= 5; i++) {
-        const punishmentType = this.APP_CONSTANT.PUNISHMENT_TYPES.find(p => p.value === i);
-        if (punishmentType) {
-          return punishmentType.name;
-        }
+    if (item.structuredNoteReplies && item.structuredNoteReplies.length > 0) {
+      const attendanceReplies = item.structuredNoteReplies.filter(reply => 
+        reply.punishmentType >= 1 && reply.punishmentType <= 5
+      );
+      
+      if (attendanceReplies.length > 0) {
+        return attendanceReplies.map(reply => reply.punishmentName).join(', ');
       }
-      return 'Attendance';
     }
 
-    return attendanceReplies.map(reply => reply.punishmentName).join(', ');
+    let punishType = item.userPunishmentType || item.statusPunish;
+    
+    if (!punishType && item.statusPunish) {
+      punishType = item.statusPunish;
+    }
+
+    if (punishType) {
+      const punishmentType = this.APP_CONSTANT.PUNISHMENT_TYPES.find(p => p.value === punishType);
+      if (punishmentType) {
+        return punishmentType.name;
+      }
+    }
+
+    return 'Attendance';
   }
 
   getTimekeepingData() {
