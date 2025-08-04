@@ -176,14 +176,14 @@ namespace Ncc.Authorization
                     {
                         return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, tenant);
                     }
-                    if (await UserManager.IsLockedOutAsync(user))
-                    {
-                        return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
-                    }
-                    if (shouldLockout && await TryLockOutAsync(tenantId, user.Id))
-                    {
-                        return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
-                    }
+                    //if (await UserManager.IsLockedOutAsync(user))
+                    //{
+                    //    return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
+                    //}
+                    //if (shouldLockout && await TryLockOutAsync(tenantId, user.Id))
+                    //{
+                    //    return new AbpLoginResult<Tenant, User>(AbpLoginResultType.LockedOut, tenant, user);
+                    //}
                     await UserManager.ResetAccessFailedCountAsync(user);
                     var loginResult = await CreateLoginResultAsync(user, tenant);
                     return loginResult;
