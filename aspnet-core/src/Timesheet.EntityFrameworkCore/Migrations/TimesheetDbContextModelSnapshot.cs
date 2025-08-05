@@ -1923,6 +1923,44 @@ namespace Timesheet.Migrations
                     b.ToTable("Positions");
                 });
 
+            modelBuilder.Entity("Timesheet.Entities.PunishmentSystem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000);
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<int>("Money");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.Property<int>("Type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PunishmentSystems");
+                });
+
             modelBuilder.Entity("Timesheet.Entities.Retro", b =>
                 {
                     b.Property<long>("Id")
@@ -2087,6 +2125,8 @@ namespace Timesheet.Migrations
                     b.Property<bool>("IsActive");
 
                     b.Property<bool>("IsDeleted");
+
+                    b.Property<bool>("IsPunishmentProcessed");
 
                     b.Property<DateTime?>("LastModificationTime");
 
@@ -2398,6 +2438,53 @@ namespace Timesheet.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UnlockTimesheets");
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserPunishment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Count");
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<DateTime>("DateAt");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<string>("NoteReply")
+                        .HasMaxLength(1000);
+
+                    b.Property<long>("PunishmentSystemId");
+
+                    b.Property<int>("TotalMoney");
+
+                    b.Property<int>("Type");
+
+                    b.Property<long>("UserId");
+
+                    b.Property<string>("UserNote")
+                        .HasMaxLength(1000);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PunishmentSystemId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserPunishments");
                 });
 
             modelBuilder.Entity("Timesheet.Entities.UserUnlockIms", b =>
@@ -2892,6 +2979,19 @@ namespace Timesheet.Migrations
 
             modelBuilder.Entity("Timesheet.Entities.UnlockTimesheet", b =>
                 {
+                    b.HasOne("Ncc.Authorization.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserPunishment", b =>
+                {
+                    b.HasOne("Timesheet.Entities.PunishmentSystem", "PunishmentSystem")
+                        .WithMany()
+                        .HasForeignKey("PunishmentSystemId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("Ncc.Authorization.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")

@@ -4,10 +4,16 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Timesheet.Migrations
 {
-    public partial class Add_User_Punishment_And_Punishment_System_Tables : Migration
+    public partial class Add_UserPunishment_And_PunishmentSystem_And_IsPunishmentProcessedCollumn : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<bool>(
+                name: "IsPunishmentProcessed",
+                table: "ReviewInterns",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.CreateTable(
                 name: "PunishmentSystems",
                 columns: table => new
@@ -23,7 +29,7 @@ namespace Timesheet.Migrations
                     DeletionTime = table.Column<DateTime>(nullable: true),
                     Name = table.Column<string>(maxLength: 256, nullable: false),
                     Description = table.Column<string>(maxLength: 1000, nullable: true),
-                    Type = table.Column<string>(maxLength: 50, nullable: false),
+                    Type = table.Column<int>(nullable: false),
                     Money = table.Column<int>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false)
                 },
@@ -46,9 +52,9 @@ namespace Timesheet.Migrations
                     DeleterUserId = table.Column<long>(nullable: true),
                     DeletionTime = table.Column<DateTime>(nullable: true),
                     DateAt = table.Column<DateTime>(nullable: false),
-                    UserId = table.Column<long>(nullable: true),
+                    UserId = table.Column<long>(nullable: false),
                     PunishmentSystemId = table.Column<long>(nullable: false),
-                    Type = table.Column<string>(nullable: true),
+                    Type = table.Column<int>(nullable: false),
                     Count = table.Column<int>(nullable: false),
                     TotalMoney = table.Column<int>(nullable: false),
                     UserNote = table.Column<string>(maxLength: 1000, nullable: true),
@@ -68,7 +74,7 @@ namespace Timesheet.Migrations
                         column: x => x.UserId,
                         principalTable: "AbpUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -89,6 +95,10 @@ namespace Timesheet.Migrations
 
             migrationBuilder.DropTable(
                 name: "PunishmentSystems");
+
+            migrationBuilder.DropColumn(
+                name: "IsPunishmentProcessed",
+                table: "ReviewInterns");
         }
     }
 }

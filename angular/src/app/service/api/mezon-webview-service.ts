@@ -9,11 +9,23 @@ import { AppConsts } from '@shared/AppConsts';
 export class MezonWebViewService {
     private userHashData = new Subject<any>();
     private isInMezon = new Subject<boolean>();
+    private _isInMezon = false;
 
     userHashData$ = this.userHashData.asObservable();
     isInMezon$ = this.isInMezon.asObservable();
 
-    constructor() { }
+    constructor() {
+        this._isInMezon = localStorage.getItem('isInMezon') === 'true';
+    }
+
+    private setInMezonStatus(isInMezon: boolean): void {
+        this._isInMezon = isInMezon;
+        localStorage.setItem('isInMezon', isInMezon.toString());
+    }
+
+    checkIfInMezon(): boolean {
+        return this._isInMezon;
+    }
 
     ping() {
         window.Mezon.WebView.postEvent("PING" as MezonWebViewEvent, { message: "PING" }, () => {
@@ -22,8 +34,14 @@ export class MezonWebViewService {
 
     listenToPong() {
         window.Mezon.WebView.onEvent("PONG" as MezonAppEvent, () => {
+            this.setInMezonStatus(true);
             this.isInMezon.next(true);
         });
+    }
+
+    clearMezonStatus(): void {
+        this.setInMezonStatus(false);
+        localStorage.removeItem('isInMezon');
     }
 
     sendBotId() {

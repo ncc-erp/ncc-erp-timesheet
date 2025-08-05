@@ -10,8 +10,8 @@ using Ncc.EntityFrameworkCore;
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    [Migration("20250612063737_Add_User_Punishment_And_Punishment_System_Tables")]
-    partial class Add_User_Punishment_And_Punishment_System_Tables
+    [Migration("20250804063651_Add_UserPunishment_And_PunishmentSystem_And_IsPunishmentProcessedCollumn")]
+    partial class Add_UserPunishment_And_PunishmentSystem_And_IsPunishmentProcessedCollumn
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1956,9 +1956,7 @@ namespace Timesheet.Migrations
                         .IsRequired()
                         .HasMaxLength(256);
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50);
+                    b.Property<int>("Type");
 
                     b.HasKey("Id");
 
@@ -2129,6 +2127,8 @@ namespace Timesheet.Migrations
                     b.Property<bool>("IsActive");
 
                     b.Property<bool>("IsDeleted");
+
+                    b.Property<bool>("IsPunishmentProcessed");
 
                     b.Property<DateTime?>("LastModificationTime");
 
@@ -2473,9 +2473,9 @@ namespace Timesheet.Migrations
 
                     b.Property<int>("TotalMoney");
 
-                    b.Property<string>("Type");
+                    b.Property<int>("Type");
 
-                    b.Property<long?>("UserId");
+                    b.Property<long>("UserId");
 
                     b.Property<string>("UserNote")
                         .HasMaxLength(1000);
@@ -2996,7 +2996,8 @@ namespace Timesheet.Migrations
 
                     b.HasOne("Ncc.Authorization.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Timesheet.Entities.UserUnlockIms", b =>
