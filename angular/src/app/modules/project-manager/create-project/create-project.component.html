@@ -218,10 +218,9 @@
               <label>All User</label>
             </div>
             <div class="col-md-10 col-sm-10 col-lg-10 col-xl-10 note-user">
-              <mat-checkbox name="isAll" class="checkbox-user" [(ngModel)]="project.isAllUserBelongTo"
-                >Auto add user as a member of this project when creating new
-                user</mat-checkbox
-              >
+              <mat-checkbox name="isAll" class="checkbox-user" [(ngModel)]="project.isAllUserBelongTo" (change)="onAllUserCheckboxChange($event)" #allUserCheckbox>
+                Auto add user as a member of this project when creating new user
+              </mat-checkbox>
             </div>
           </div>
           <div class="row row-mar-0">
