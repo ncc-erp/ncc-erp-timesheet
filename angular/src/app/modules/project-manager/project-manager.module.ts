@@ -11,9 +11,10 @@ import { ProjectDetailComponent } from './project-detail/project-detail.componen
 import { PopupComponent } from './project-detail/popup/popup.component';
 import { MAT_DATE_LOCALE } from '@angular/material';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { AutoAddUserWarningDialogComponent } from './auto-add-user-warning-dialog.component';
 
 @NgModule({
-  declarations: [ProjectManagerComponent, CreateProjectComponent, ProjectDetailComponent, PopupComponent],
+  declarations: [ProjectManagerComponent, CreateProjectComponent, ProjectDetailComponent, PopupComponent, AutoAddUserWarningDialogComponent],
   imports: [
     CommonModule,
     SharedModule,
@@ -22,7 +23,7 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
     CustomerModule,
     NgxMatSelectSearchModule,
   ],
-  entryComponents:[CreateProjectComponent,CreateEditCustomerComponent,ProjectDetailComponent,PopupComponent],
+  entryComponents:[CreateProjectComponent,CreateEditCustomerComponent,ProjectDetailComponent,PopupComponent, AutoAddUserWarningDialogComponent],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
   ]
