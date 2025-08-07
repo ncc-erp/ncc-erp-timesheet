@@ -148,7 +148,6 @@ namespace Ncc.Configuration
 
                 new SettingDefinition(AppSettingNames.ReviewEnableWorker, "true", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ReviewDeadlineDay, "5", scopes: SettingScopes.Application | SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.ReviewDeadlineDaysToAdd, "4", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ReviewStartDayOfMonth, "1", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ReviewNextRunDate, "6", scopes: SettingScopes.Application | SettingScopes.Tenant),
 
