@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using Timesheet.APIs.UserPunishments.Dto;
 using Timesheet.DataExport;
 using Timesheet.DomainServices;
+using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.Project.Dto;
 using Timesheet.Users.Dto;
@@ -602,6 +603,13 @@ namespace TimesheetApplication.UserPunishment
 
                 package.SaveAs(new FileInfo(templateFilePath));
             }
+        }
+
+        [HttpPost]
+        [AbpAuthorize]
+        public async Task<List<PMReportItemDto>> ApplyPMReportPunishmentsAsync()
+        {
+            return await _userPunishmentServices.ApplyPMReportPunishmentsAsync();
         }
     }
 }

@@ -891,17 +891,40 @@
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Next Run Date *</span> <mat-icon class="special-icon"
-                        matTooltip="Day of the month when background worker runs to check late review interns, ex: 15 means 15th of every month">help</mat-icon>
-                      <input type="number" matInput name="nextRunDate" [(ngModel)]="lateInternReviewSetting.nextRunDate" required
-                        [disabled]="!isEditLateInternReviewSetting" min="1" max="31" />
+                       <span class="special-label">Next Run Date *</span> 
+                       <mat-icon class="special-icon"
+                          matTooltip="Day of the month when background worker runs to check late review interns, ex: 15 means 15th of every month">help</mat-icon>
+                       <input type="number" matInput name="nextRunDate" [(ngModel)]="lateInternReviewSetting.nextRunDate" required
+                       [disabled]="!isEditLateInternReviewSetting" min="1" max="31" />
                     </mat-form-field>
-                  </div>
+                    <div class="row" style="margin-top: 10px;">
+                       <div class="col-md-4">
+                          <mat-form-field style="width: 100%;">
+                             <input matInput 
+                             type="month" 
+                             [(ngModel)]="selectedMonth"
+                             [disabled]="!lateInternReviewSetting.enable"
+                             name="selectedMonth"
+                             style="width: 100%;">
+                          </mat-form-field>
+                       </div>
+                    </div>
+                    <div class="row">
+                       <div class="col-md-4" style="margin-top: 2px;">
+                          <button mat-raised-button 
+                          color="warn" 
+                          [disabled]="!lateInternReviewSetting.enable || !selectedMonth"
+                          (click)="onManualTriggerPunishment()"
+                          style="min-width: 80px;">
+                          Get
+                        </button>
+                       </div>
+                    </div>
+                 </div>
                 </div>
               </form>
             </div>
           </mat-expansion-panel>
-
         </mat-expansion-panel>
       </div>
 
@@ -972,9 +995,9 @@
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Day of Week *</span> <mat-icon class="special-icon"
-                        matTooltip="Day of week to send notification, ex: Monday, Tuesday, etc.">help</mat-icon>
-                      <mat-select [(ngModel)]="pmReportPunishSetting.dayofweek" name="dayofweek" required
+                      <span class="special-label">Day Of Week *</span> <mat-icon class="special-icon"
+                        matTooltip="Day of the week when background worker runs to check PM report punishment, ex: Monday">help</mat-icon>
+                      <mat-select [(ngModel)]="pmReportPunishSetting.dayOfWeek" name="dayOfWeek" required
                         [disabled]="!isEditPMReportPunishSetting">
                         <mat-option value="Monday">Monday</mat-option>
                         <mat-option value="Tuesday">Tuesday</mat-option>
@@ -985,6 +1008,18 @@
                         <mat-option value="Sunday">Sunday</mat-option>
                       </mat-select>
                     </mat-form-field>
+                    
+                    <div class="row" style="margin-top: 10px; align-items: center;">
+                      <div class="col-md-12">
+                        <button mat-raised-button 
+                          color="warn" 
+                          [disabled]="!pmReportPunishSetting.enable"
+                          (click)="onManualTriggerPMReportPunishment()"
+                          style="min-width: 80px;">
+                          Get
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </form>
