@@ -774,7 +774,6 @@ namespace Ncc.Configuration
             {
                 enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ReviewEnableWorker)),
                 deadlineDay = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ReviewDeadlineDay)),
-                daysToAdd = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ReviewDeadlineDaysToAdd)),
                 startDayOfMonth = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ReviewStartDayOfMonth)),
                 nextRunDate = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.ReviewNextRunDate))
             };
@@ -785,7 +784,6 @@ namespace Ncc.Configuration
         {
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ReviewEnableWorker, input.enable.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ReviewDeadlineDay, input.deadlineDay.ToString());
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ReviewDeadlineDaysToAdd, input.daysToAdd.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ReviewStartDayOfMonth, input.startDayOfMonth.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.ReviewNextRunDate, input.nextRunDate.ToString());
 

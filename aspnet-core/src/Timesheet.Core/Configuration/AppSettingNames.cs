@@ -134,7 +134,6 @@ namespace Ncc.Configuration
         public const string PMReportPunishAtDayOfWeek = "Abp.PMReportPunishAtDayOfWeek";
 
         public const string ReviewDeadlineDay = "App.Review.DeadlineDay";
-        public const string ReviewDeadlineDaysToAdd = "App.Review.DaysToAdd";
         public const string ReviewStartDayOfMonth = "App.Review.StartDayOfMonth";
         public const string ReviewNextRunDate = "App.Review.NextRunDate";
         public const string ReviewEnableWorker = "App.Review.EnableWorker";

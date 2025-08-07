@@ -133,32 +133,27 @@ namespace Timesheet.BackgroundWorker
             }
         }
 
-        private DateTime CalculateDeadlineDate(ReviewInternsDto input)
-        {
-            var deadlineDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDay));
-            var daysToAdd = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDaysToAdd));
-            var startDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewStartDayOfMonth));
-            var startDate = new DateTime(input.Year, input.Month, startDay);
-            var endDate = startDate.AddDays(daysToAdd);
+        private DateTime CalculateDeadlineDate(ReviewInternsDto input) {
+          var deadlineDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDay));
+          var startDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewStartDayOfMonth));
+          var startDate = new DateTime(input.Year, input.Month, startDay);
+          var endDate = startDate.AddDays(deadlineDay - 1);
 
-            int weekendDays = 0;
-            for (var date = startDate; date <= endDate; date = date.AddDays(1))
-            {
-                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    weekendDays++;
-                }
+          int weekendDays = 0;
+          for (var date = startDate; date <= endDate; date = date.AddDays(1)) {
+            if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday) {
+              weekendDays++;
             }
+          }
 
-            deadlineDay += weekendDays;
-            var deadlineDate = startDate.AddDays(deadlineDay - 1);
+          deadlineDay += weekendDays;
+          var deadlineDate = startDate.AddDays(deadlineDay - 1);
 
-            while (deadlineDate.DayOfWeek == DayOfWeek.Saturday || deadlineDate.DayOfWeek == DayOfWeek.Sunday)
-            {
-                deadlineDate = deadlineDate.AddDays(1);
-            }
+          while (deadlineDate.DayOfWeek == DayOfWeek.Saturday || deadlineDate.DayOfWeek == DayOfWeek.Sunday) {
+            deadlineDate = deadlineDate.AddDays(1);
+          }
 
-            return deadlineDate;
+          return deadlineDate;
         }
 
         private int GetPeriodToNextReviewDate()
