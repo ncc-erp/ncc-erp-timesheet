@@ -93,30 +93,29 @@ namespace Timesheet.BackgroundWorker
                             reviewIntern.IsPunishmentProcessed = true;
                             reviewInternRepository.Object.Update(reviewIntern);
                             CurrentUnitOfWork.SaveChanges();
+                            
+                            _logger.LogInformation($"Successfully processed late review penalties for {month}/{year}.");
+                        
+                            Timer.Period = GetPeriodToNextReviewDate();
+                            return;
                         }
                         catch (UserFriendlyException ufex)
                         {
-                            _logger.LogWarning(ufex.Message);
+                            _logger.LogWarning($"Review processing delayed: {ufex.Message}");
+                            Timer.Period = GetPeriodToNextReviewDate(isRetry: true);
+                            return;
                         }
                         catch (AggregateException agex) when (agex.InnerException is UserFriendlyException)
                         {
-                            _logger.LogWarning(agex.InnerException.Message);
+                            _logger.LogWarning($"Review processing delayed: {agex.InnerException.Message}");
+                            Timer.Period = GetPeriodToNextReviewDate(isRetry: true);
+                            return;
                         }
                         catch (Exception ex)
                         {
                             _logger.LogError(ex, "Failed to process late review penalties.");
                         }
                     }
-                }
-
-                try
-                {
-                    Timer.Period = GetPeriodToNextReviewDate();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error setting timer period. Using default period of 24 hours.");
-                    Timer.Period = (int)TimeSpan.FromHours(24).TotalMilliseconds;
                 }
             }
         }
@@ -156,8 +155,15 @@ namespace Timesheet.BackgroundWorker
           return deadlineDate;
         }
 
-        private int GetPeriodToNextReviewDate()
+        private int GetPeriodToNextReviewDate(bool isRetry = false)
         {
+            if (isRetry)
+            {
+                const int retryPeriodHours = 1;
+                _logger.LogInformation($"Scheduling retry in {retryPeriodHours} hours.");
+                return (int)TimeSpan.FromHours(retryPeriodHours).TotalMilliseconds;
+            }
+
             try
             {
                 var nextRunDate = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewNextRunDate));
@@ -173,11 +179,11 @@ namespace Timesheet.BackgroundWorker
                 if (milliseconds > int.MaxValue)
                 {
                     const int fixedPeriodDays = 15;
-
                     _logger.LogInformation($"Calculated period ({milliseconds} ms) exceeds Int32.MaxValue. Next run scheduled after {fixedPeriodDays} days.");
                     return (int)TimeSpan.FromDays(fixedPeriodDays).TotalMilliseconds;
                 }
 
+                _logger.LogInformation($"Next review check scheduled for {nextRun:dd/MM/yyyy HH:mm:ss}");
                 return (int)milliseconds;
             }
             catch (Exception ex)
