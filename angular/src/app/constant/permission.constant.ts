@@ -102,6 +102,11 @@ export const PERMISSIONS_CONSTANT = {
 
     ViewSendMessageToPunishUserConfigSetting: "Admin.Configuration.SendMessageToPunishUserConfig.ViewSendMessageToPunishUserConfig",
     EditSendMessageToPunishUserConfigSetting: "Admin.Configuration.SendMessageToPunishUserConfig.UpdateSendMessageToPunishUserConfig",
+
+    ViewLateInternReviewSetting: "Admin.Configuration.LateInternReviewConfig.ViewLateInternReviewConfig",
+    EditLateInternReviewSetting: "Admin.Configuration.LateInternReviewConfig.EditLateInternReviewConfig",
+    ViewPMReportSetting: "Admin.Configuration.PMReportConfig.ViewPMReportConfig",
+    EditPMReportSetting: "Admin.Configuration.PMReportConfig.EditPMReportConfig",
     //client
     ViewClients: "Admin.Clients.View",
     AddClient: "Admin.Clients.AddNew",
@@ -145,6 +150,13 @@ export const PERMISSIONS_CONSTANT = {
     UpdateDefaultProjectTask: "Project.UpdateDefaultProjectTask",
     EditTypeWork: "Project.EditTeamWorkType",
     ReleaseUser: "Project.ReleaseUser",
+    
+    // Punishments
+    ViewPunishments: "Admin.Punishments.View",
+    AddPunishments: "Admin.Punishments.AddNew",
+    EditPunishments: "Admin.Punishments.Edit",
+    DeletePunishments: "Admin.Punishments.Delete",
+    PunishmentsChangeStatus: "Admin.Punishments.ChangeStatus",
 
     //my timesheet
     AddMyTimesheet: "MyTimesheet.AddNew",

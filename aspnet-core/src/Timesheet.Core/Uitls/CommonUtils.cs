@@ -163,13 +163,13 @@ namespace Timesheet.Uitls
         {
             return new Dictionary<UserLevel, string>()
             {
-              { UserLevel.Intern_0,"- Hỗ trợ ăn trưa 800.000 VNĐ <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.Intern_1, "- Hỗ trợ 1.000.000 VNĐ <br>- Hỗ trợ ăn trưa 800.000 VNĐ <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.Intern_2, "- Hỗ trợ 2.000.000 VNĐ <br>- Hỗ trợ ăn trưa 800.000 VNĐ <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.Intern_3, "- Hỗ trợ 4.000.000 VNĐ <br>- Hỗ trợ ăn trưa 800.000 VNĐ <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.FresherMinus, "- Hỗ trợ ăn trưa 800.000 VNĐ <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.Fresher, "- Hỗ trợ ăn trưa 800.000 VNĐ <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.FresherPlus, "- Hỗ trợ ăn trưa 800.000 VNĐ <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" }
+              { UserLevel.Intern_0,"- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.Intern_1, "- Hỗ trợ 1.000.000 VNĐ <br>- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.Intern_2, "- Hỗ trợ 2.000.000 VNĐ <br>- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.Intern_3, "- Hỗ trợ 4.000.000 VNĐ <br>- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.FresherMinus, "- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.Fresher, "- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.FresherPlus, "- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" }
             };
 
         }

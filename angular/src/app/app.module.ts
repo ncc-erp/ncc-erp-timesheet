@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { JsonpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
-
+import { MatDialogModule } from '@angular/material/dialog';
 import { ModalModule } from 'ngx-bootstrap';
 import { NgxPaginationModule } from 'ngx-pagination';
 
@@ -12,12 +12,18 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 import { AbpModule } from '@abp/abp.module';
-
 import { ServiceProxyModule } from '@shared/service-proxies/service-proxy.module';
 import { SharedModule } from '@shared/shared.module';
 
-import {MatFormFieldModule} from '@angular/material/form-field';
-
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatListModule } from '@angular/material/list';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { HomeComponent } from '@app/home/home.component';
 import { TopBarComponent } from '@app/layout/topbar.component';
 import { TopBarLanguageSwitchComponent } from '@app/layout/topbar-languageswitch.component';
@@ -43,8 +49,6 @@ import { PopupsComponent } from './home/popups/popups.component';
 import { ConfigurationComponent } from './configuration/configuration.component';
 import { MyTimeSheetsModule } from './modules/mytimesheet/mytimesheets.module';
 import { ImageCropperModule } from 'ngx-image-cropper';
-import {MatListModule} from '@angular/material/list';
-
 
 // google single sign-on
 import { SocialLoginModule, AuthServiceConfig } from 'angularx-social-login';
@@ -57,7 +61,6 @@ import { CreateRoleDialogComponent } from './roles/create-role/create-role-dialo
 import { UpdatePunishMoneyComponent } from './configuration/update-punish-money/update-punish-money.component';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 
-
 let config = new AuthServiceConfig([
   {
     id: GoogleLoginProvider.PROVIDER_ID,
@@ -68,6 +71,7 @@ let config = new AuthServiceConfig([
 export function provideConfig() {
   return config;
 }
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -96,7 +100,6 @@ export function provideConfig() {
     UploadAvatarComponent,
     EditSidebarComponent,
     UpdatePunishMoneyComponent,
-
   ],
   imports: [
     SocialLoginModule,
@@ -106,6 +109,7 @@ export function provideConfig() {
     ReactiveFormsModule,
     HttpClientModule,
     JsonpModule,
+    MatDialogModule,
     ModalModule.forRoot(),
     AbpModule,
     AppRoutingModule,
@@ -117,7 +121,13 @@ export function provideConfig() {
     NgxCurrencyModule,
     MatListModule,
     CollapseModule,
-
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatIconModule,
+    MatButtonModule,
+     MatTooltipModule
   ],
   providers: [
     {
@@ -136,7 +146,7 @@ export function provideConfig() {
     CreateEditUserComponent,
     ResetPasswordDialogComponent,
     UploadAvatarComponent,
-    UpdatePunishMoneyComponent
+    UpdatePunishMoneyComponent,
   ]
 })
 export class AppModule {}

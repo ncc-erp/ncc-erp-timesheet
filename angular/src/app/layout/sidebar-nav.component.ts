@@ -58,6 +58,12 @@ export class SideBarNavComponent extends AppComponentBase {
                     "/app/main/customers"
                 ),
                 new MenuItem(
+                    this.l("Punishments"),
+                    "Admin.Punishments",
+                    "gavel",
+                    "/app/main/punishments"
+                ),
+                new MenuItem(
                     this.l("Tasks"),
                     "Admin.Tasks",
                     "import_contacts",

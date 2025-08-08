@@ -13,6 +13,10 @@ import{CreateEditTimesheetByWeekComponent} from'./create-edit-timesheetByWeek/cr
 import { MytimesheetTardinessComponent } from './mytimesheet-tardiness/mytimesheet-tardiness.component';
 import { TimesheetWarningDialogComponent } from './timesheet-warning-dialog/timesheet-warning-dialog.component';
 import { MytimesheetNormalWorkingComponent } from './mytimesheet-normal-working/mytimesheet-normal-working.component';
+import { ComplainDialogComponent } from './mytimesheet-tardiness/complain-dialog/complain-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 @NgModule({
     declarations: [
       CreateEditTimesheetByWeekComponent,
@@ -20,7 +24,8 @@ import { MytimesheetNormalWorkingComponent } from './mytimesheet-normal-working/
       MyTimeSheetsComponent,
       MytimesheetTardinessComponent,
       TimesheetWarningDialogComponent,
-      MytimesheetNormalWorkingComponent
+      MytimesheetNormalWorkingComponent,
+      ComplainDialogComponent
     ],
     imports: [
       CommonModule,
@@ -33,11 +38,15 @@ import { MytimesheetNormalWorkingComponent } from './mytimesheet-normal-working/
         provide: DateAdapter,
         useFactory: adapterFactory
     }),
+    MatDialogModule,
+    MatIconModule,
+    MatButtonModule
     ],
     entryComponents: [
       CreateEditTimesheetItemComponent,
       CreateEditTimesheetByWeekComponent,
-      TimesheetWarningDialogComponent
+      TimesheetWarningDialogComponent,
+      ComplainDialogComponent
     ]
   })
   export class MyTimeSheetsModule { }

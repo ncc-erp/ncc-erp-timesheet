@@ -1,0 +1,145 @@
+<div class="row clearfix punishment-wrapper" [@routerTransition]>
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Manage Punishments" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button mat-icon-button name="menuBtn" [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item name="refreshBtn" (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+      <div class="body table-responsive">
+        <div class="punishment-header-menu">
+          <div class="d-flex align-items-center">
+            <div class="gr-btn-action" style="display: flex; align-items: center; margin: 10px 0;">
+              <button *ngIf="permission.isGranted(ADD_PUNISHMENT)" 
+                      mat-raised-button 
+                      name="createBtn" 
+                      color="primary"
+                      class="btn-new-punishment"
+                      style="margin: 0 5px 0 0;"
+                      (click)="createPunishment()">
+                <mat-icon>add</mat-icon>{{ 'New Punishment' | localize }}
+              </button>
+              <button mat-raised-button 
+                      name="downloadTemplateBtn" 
+                      class="btn-action"
+                      style="background-color: #2196F3; color: white; margin: 0 5px;"
+                      [disabled]="isDownloading"
+                      (click)="downloadTemplate()">
+                <i class="fa-solid fa-download" *ngIf="!isDownloading"></i>
+                <i class="fa fa-spinner fa-spin" *ngIf="isDownloading"></i>&nbsp; 
+                {{ isDownloading ? ('Downloading...' | localize) : ('Download Template' | localize) }}
+              </button>
+              <button mat-raised-button 
+                      name="importBtn" 
+                      class="btn-action"
+                      style="background-color: #FF9800; color: white; margin: 0 5px;"
+                      (click)="fileInput.click()">
+                <i class="fas fa-upload"></i>&nbsp; {{ 'Import' | localize }}
+              </button>
+              <input hidden type="file" #fileInput style="display: none; width: 0; height: 0; opacity: 0; position: absolute;" (change)="handleFileInput($event.target.files)" accept=".xlsx,.xltx" />
+              <button *ngIf="fileToUpload" 
+                      mat-raised-button 
+                      name="confirmImportBtn" 
+                      class="btn-action"
+                      style="background-color: #4CAF50; color: white; margin: 0 5px;"
+                      (click)="importFromFile()">
+                <i class="fas fa-check"></i>&nbsp; {{ 'Confirm Import' | localize }}
+              </button>
+            </div>
+          </div>
+          <div class="customer-header-search-wrapper">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'Search By Name' | localize }}</mat-label>
+              <input matInput 
+                     [(ngModel)]="searchText" 
+                     name="searchText" 
+                     [placeholder]="'Search By Name' | localize"
+                     (keyup.enter)="searchOrFilter()" 
+                     type="text" 
+                     maxlength="128">
+              <i class="material-icons" matPrefix>search</i>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="punishment-table-wrapper">
+          <table class="table table-hover table-striped" [busy]="isTableLoading">
+            <thead class="bg-light">
+              <tr>
+                <th>{{ 'Name' | localize }}</th>
+                <th>{{ 'Description' | localize }}</th>
+                <th>{{ 'Money' | localize }}</th>
+                <th *ngIf="permission.isGranted(DELETE_PUNISHMENT) || permission.isGranted(EDIT_PUNISHMENT)" class="punishment-table-column-action-label">
+                  {{ 'Actions' | localize }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let punishment of punishments">
+                <td>{{ punishment.name }}</td>
+                <td>{{ punishment.description || '-' }}</td>
+                <td>{{ punishment.money | currency:'VND':'symbol':'1.0-0' }}</td>
+                <td class="punishment-table-column-action punishment-table-column-action_response">
+                  <button *ngIf="permission.isGranted(EDIT_PUNISHMENT) || permission.isGranted(DELETE_PUNISHMENT)"
+                          mat-raised-button
+                          [matMenuTriggerFor]="actionMenu"
+                          [name]="'actionMenuBtn-'+punishment.id"
+                          class="action-menu-button">
+                    {{ 'Actions' | localize }}
+                    <mat-icon>arrow_drop_down</mat-icon>
+                  </button>
+                  <mat-menu #actionMenu="matMenu" xPosition="before" class="action-menu">
+                    <button *ngIf="permission.isGranted(EDIT_PUNISHMENT)"
+                            mat-menu-item
+                            [name]="'editBtn-'+punishment.id"
+                            (click)="editPunishment(punishment)">
+                      <mat-icon>edit</mat-icon>
+                      <span>{{ 'Edit' | localize }}</span>
+                    </button>
+                    <button *ngIf="permission.isGranted(DELETE_PUNISHMENT)"
+                            mat-menu-item
+                            [name]="'deleteBtn-'+punishment.id"
+                            (click)="delete(punishment)">
+                      <mat-icon>delete</mat-icon>
+                      <span>{{ 'Delete' | localize }}</span>
+                    </button>
+                    <button *ngIf="punishment.isActive && permission.isGranted('Admin.Punishments.Edit')"
+                            mat-menu-item
+                            [name]="'deactiveBtn-'+punishment.id"
+                            (click)="deactivatePunishment(punishment)">
+                      <mat-icon>clear</mat-icon>
+                      <span>{{ 'Deactive' | localize }}</span>
+                    </button>
+                    <button *ngIf="!punishment.isActive && permission.isGranted('Admin.Punishments.Edit')"
+                            mat-menu-item
+                            [name]="'activateBtn-'+punishment.id"
+                            (click)="activatePunishment(punishment)">
+                      <mat-icon>check_circle</mat-icon>
+                      <span>{{ 'Active' | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </td>
+              </tr>
+              <tr *ngIf="!punishments || punishments.length === 0">
+                <td colspan="4" class="text-center">{{ 'NoData' | localize }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-align: center;" *ngIf="totalItems > pageSize">
+          <pagination-controls (pageChange)="getDataPage($event)" id="server" class="punishment-pagination-controls"></pagination-controls>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

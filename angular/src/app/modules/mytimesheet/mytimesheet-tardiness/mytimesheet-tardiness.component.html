@@ -24,20 +24,20 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="item">
-            <div class="text-left">
-              <h2>{{ "Total Punished: " | localize }} {{countLate}}</h2>
-            </div>
-          </div>
+
           <div class="item">
             <p class="text-note-complain">
               Click vào button Complain và nhập nội dung khiếu nại nếu bạn thấy không đúng.
             </p>
           </div>
+          <div class="item">
+            <span style="color: #d32f2f; font-size: 14px;"><b>Tổng tiền phạt tháng:</b> {{ totalMonthlyPunishment | number }} VNĐ</span>
+          </div>
         </div>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button name="menuTardinessBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
+            <button name="menuTardinessBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123"
+              class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu123="matMenu">
@@ -53,73 +53,79 @@
         <ng-container *ngTemplateOutlet="headerTardinessMobile"></ng-container>
       </div>
 
+
+
       <div class="table-padding" style="position: relative;" [busy]="isTableLoading">
         <div class="table-responsive">
           <table class="table table-hover table-striped styleUser">
             <thead>
               <tr>
-
-
-                <th style="min-width: 90px; width: 90px;" rowspan="2">
+                <th rowspan="2" style="width: 100px;">
                   {{ "Date" | localize }}
                 </th>
-                <th style="min-width: 160px;" colspan="2">
-                  {{ "Registration Hours" | localize }}
-                </th>
-                <th style="min-width: 160px;" colspan="2">
+                <th colspan="2" style="min-width: 160px;">
                   {{ "Checking time" | localize }}
                 </th>
                 <th style="width: 80px;" rowspan="2">
                   {{ "Tracker Time" | localize }}
                 </th>
-                <th style="min-width: 220px;" colspan="2">
-                  {{ "Result" | localize }}
-                </th>
-                <th rowspan="2" style="min-width: 50px; width: 100px;">
+                <th rowspan="2" class="edited-by-column">
                   {{ "Edited by" | localize }}
                 </th>
-                <th style="min-width: 160px;" colspan="2">
-                  {{"Komu" | localize}}
+
+                <th style="min-width: 490px;" [attr.colspan]="isBasicUser ? 8 : 10">
+                  {{ "Punishments" | localize }}
                 </th>
-                <th style="width: 80px;" rowspan="2">
-                  {{ "Punishment Money" | localize }}
-                </th>
-                <!-- <th style="width: 150px;" rowspan="2">
-                  {{ "Punishment Name" | localize }}
-                </th> -->
                 <th style="min-width: 150px; max-width: 300px; width: 200px;" rowspan="2">
                   {{ "Complain" | localize }}
                 </th>
                 <th style="min-width: 150px; max-width: 300px; width: 200px;" rowspan="2">
                   {{ "Complain Reply" | localize }}
                 </th>
-                <th style="min-width: 150px; " rowspan="2">
+                <th style="min-width: 70px; width: 70px;" rowspan="2">
                   {{ "Action" | localize }}
                 </th>
+
               </tr>
               <tr>
                 <th style="width: 100px;">Check in</th>
                 <th style="width: 100px;">Check out</th>
-                <th style="width: 100px;">Check in</th>
-                <th style="width: 100px;">Check out</th>
-                <th style="width: 130px;">Check in late</th>
-                <th style="width: 130px;">Check out early</th>
-                <th style="width: 100px;">Daily</th>
-                <th style="width: 100px;">Mention</th>
+
+                <th class="punish-col" rowspan="2">
+                  {{ "CheckIn CheckOut" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "Daily" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "Mention" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "Tracker" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2" *ngIf="!isBasicUser">
+                  {{ "Review Intern" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2" *ngIf="!isBasicUser">
+                  {{ "Pm Report" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "Ant" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "UnlockTS Gmail" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "UnlockTS IMS" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "Total" | localize }}
+                </th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of (listTimekeeping), index as i">
-
+              <tr *ngFor="let item of (groupedTimekeeping), index as i">
                 <td style="text-align: center;">{{formatDate(item.date)}}</td>
-                <td style="text-align: center;">
-                  <span>{{item.registrationTimeStart}}</span>
-
-                </td>
-                <td style="text-align: center;">
-                  <span>{{item.registrationTimeEnd}}</span>
-
-                </td>
                 <td style="text-align: center;">
                   <span>{{item.checkIn}}</span>
 
@@ -130,46 +136,115 @@
                 </td>
                 <td style="text-align: center;">
                   <span>{{trackerTimeFormat(item.trackerTime)}}</span>
+                </td>
 
+                <td class="text-center edited-by-cell"><span class="pm" *ngIf="item.editByUserName">{{item.editByUserName}}</span></td>
+
+                <td class="punish-col" style="text-align: center;">
+                  <span [class]="getCssClassByPunish(item.attendancePunish)" 
+                        *ngIf="item.attendancePunish > 0"
+                        [matTooltip]="getAttendancePunishmentTypes(item)">
+                    {{ formatPunishmentAmount(item.attendancePunish) }}
+                  </span>
                 </td>
-                <td style="text-align: center;" [class]="getCss1(item.resultCheckIn)">{{item.resultCheckIn}}</td>
-                <td style="text-align: center;" [class]="getCss1(item.resultCheckOut)">{{item.resultCheckOut}}</td>
-                <td class="text-center"><span class="pm" *ngIf="item.editByUserName">{{item.editByUserName}}</span></td>
-                <td style="text-align: center;" [class]="getCssClassByPunish(item.dailyPunish)">{{item.dailyPunish}}</td>
-                <td style="text-align: center;" [class]="getCssClassByPunish(item.mentionPunish)">{{item.mentionPunish}}</td>
-                <td style="text-align: center;">
-                  <span class="label bg-red" [matTooltip]="item.statusPunish | punishName">{{item.moneyPunish | formatDisplayNumberToK}}</span>
-                  <span *ngIf="item.status && !item.statusPunish > 0" class="label bg-red" matTooltip = "Punish">20K</span>
+
+                <td class="punish-col" style="text-align: center;">
+                  <span [class]="getCssClassByPunish(item.dailyPunish)" *ngIf="item.dailyPunish > 0">
+                    {{ formatPunishmentAmount(item.dailyPunish) }}
+                  </span>
                 </td>
-                <!-- <td style="text-align: center;">
-                  <span *ngIf="!item.statusPunish == 0">{{item.statusPunish | punishName}}</span>
-                </td> -->
-                <td class="text-center" style="word-wrap: break-word; overflow: hidden; max-width: 300px;">
-                  <span *ngIf="!item.isComplain">{{item.userNote}}</span>
-                  <mat-form-field class="example-full-width mt-2 bg-white " appearance="outline"
-                    *ngIf=" item.isComplain">
-                    <mat-label>Leave a comment</mat-label>
-                    <textarea name="comment" style="color: black;" matInput #textArea1 [(ngModel)]="item.userNote"></textarea>
-                  </mat-form-field>
+
+                <td class="punish-col" style="text-align: center;">
+                  <span [class]="getCssClassByPunish(item.mentionPunish)" *ngIf="item.mentionPunish > 0">
+                    {{ formatPunishmentAmount(item.mentionPunish) }}
+                  </span>
                 </td>
-                <td class="text-center" style="word-wrap: break-word; overflow: hidden; max-width: 300px;">
-                  <p style="white-space: pre-line;">{{item.noteReply}}</p>
+
+                <td class="punish-col" style="text-align: center;">
+                  <span [class]="getCssClassByPunish(item.trackerPunish)" *ngIf="item.trackerPunish > 0">
+                    {{ formatPunishmentAmount(item.trackerPunish) }}
+                  </span>
+                </td>
+
+                <td class="punish-col" style="text-align: center;" *ngIf="!isBasicUser">
+                  <span [class]="getCssClassByPunish(item.reviewInternPunish)" *ngIf="item.reviewInternPunish > 0">
+                    {{ formatPunishmentAmount(item.reviewInternPunish) }}
+                  </span>
+                </td>
+
+                <td class="punish-col" style="text-align: center;" *ngIf="!isBasicUser">
+                  <span [class]="getCssClassByPunish(item.pmReportPunish)" *ngIf="item.pmReportPunish > 0">
+                    {{ formatPunishmentAmount(item.pmReportPunish) }}
+                  </span>
+                </td>
+
+                <td class="punish-col" style="text-align: center;">
+                  <span [class]="getCssClassByPunish(item.antPunish)" *ngIf="item.antPunish > 0">
+                    {{ formatPunishmentAmount(item.antPunish) }}
+                  </span>
+                </td>
+
+                <td class="punish-col" style="text-align: center;">
+                  <span [class]="getCssClassByPunish(item.unlockTSGmailPunish)" *ngIf="item.unlockTSGmailPunish > 0">
+                    {{ formatPunishmentAmount(item.unlockTSGmailPunish) }}
+                  </span>
+                </td>
+
+                <td class="punish-col" style="text-align: center;">
+                  <span [class]="getCssClassByPunish(item.unlockTSIMSPunish)" *ngIf="item.unlockTSIMSPunish > 0">
+                    {{ formatPunishmentAmount(item.unlockTSIMSPunish) }}
+                  </span>
+                </td>
+
+                <td class="punish-col" style="text-align: center;">
+                  <span [ngStyle]="{ color: item.totalDayPunishment === 0 ? '#388e3c' : '#d32f2f', 'font-weight': 'bold' }">
+                    {{ formatPunishmentAmount(item.totalDayPunishment) }}
+                  </span>
+                </td>
+                
+                <td class="text-center complain-col" style="word-wrap: break-word; overflow: hidden;">
+                  <p *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && item.userNote" class="complain-text">
+                    {{item.userNote}}
+                  </p>
+                  <span *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && !item.userNote">-</span>
+                  <div *ngIf="item.structuredUserNotes && item.structuredUserNotes.length > 0" class="structured-complaints" style="text-align: left;">
+                    <div class="complain-content" [class.expanded]="item.showAllComplaints">
+                      <div *ngFor="let complaint of item.structuredUserNotes" class="complaint-item">
+                        <div class="punishment-type">{{ complaint.punishmentName }}:</div>
+                        <div class="complain-text">{{ complaint.userNote }}</div>
+                      </div>
+                    </div>
+
+                    <div class="show-more-container" *ngIf="hasMultipleLines(item, 'complaint')">
+                      <button mat-button color="primary" (click)="toggleUserNotes(item); $event.stopPropagation();" class="show-more-button">
+                        <mat-icon>{{ item.showAllComplaints ? 'expand_less' : 'more_horiz' }}</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center complain-reply-col" style="word-wrap: break-word; overflow: hidden;">
+                  <span *ngIf="!item.structuredNoteReplies || item.structuredNoteReplies.length === 0">-</span>
+                  <div *ngIf="item.structuredNoteReplies && item.structuredNoteReplies.length > 0" class="structured-replies">
+                    <div class="complain-content" [class.expanded]="item.showAllReplies">
+                      <div *ngFor="let reply of item.structuredNoteReplies" class="complaint-item">
+                        <div class="punishment-type">{{reply.punishmentName}}:</div>
+                        <div class="complain-text">{{reply.noteReply}}</div>
+                      </div>
+                    </div>
+
+                    <div class="show-more-container" *ngIf="hasMultipleLines(item, 'reply')">
+                      <button mat-button color="primary" (click)="toggleNoteReplies(item); $event.stopPropagation();" class="show-more-button">
+                        <mat-icon>{{ item.showAllReplies ? 'expand_less' : 'more_horiz' }}</mat-icon>
+                      </button>
+                    </div>
+                  </div>
                 </td>
                 <td class="text-center">
-
-                  <button *ngIf=" !item.isComplain && permission.isGranted(Timekeeping_UserNote)"
-                  [name]="'complainBtn-'+item.timekeepingId" class="btn btn-default" (click)="item.isComplain=true;">
-                    Complain
+                  <button *ngIf="permission.isGranted(Timekeeping_UserNote)"
+                    [name]="'complainBtn-'+item.timekeepingId" class="btn btn-icon btn-sm"
+                    (click)="openComplainDialog(item)" matTooltip="Complain" matTooltipPosition="above">
+                    <mat-icon>feedback</mat-icon>
                   </button>
-                  <div *ngIf=" item.isComplain">
-                    <button [name]="'saveBtn-'+item.timekeepingId" mat-mini-fab class="btn-success button24" style="margin-right: 10px;"
-                      (click)="onSave(item)">
-                      <mat-icon class="icon24">done</mat-icon>
-                    </button>
-                    <button [name]="'closeBtn-'+item.timekeepingId" mat-mini-fab class="btn-danger button24" (click)="onCancel(item)">
-                      <mat-icon class="icon24">close</mat-icon>
-                    </button>
-                  </div>
                 </td>
               </tr>
             </tbody>
@@ -184,13 +259,7 @@
   <div class="header">
     <div class="header-tardiness">
       <div class="title-header">{{ "Check in punishments" | localize }}</div>
-      <button
-        name="refreshTardinessBtn"
-        style="height: 40px"
-        mat-flat-button
-        (click)="getData()"
-        color="primary"
-      >
+      <button name="refreshTardinessBtn" style="height: 40px" mat-flat-button (click)="getData()" color="primary">
         Refresh
       </button>
     </div>
@@ -199,11 +268,7 @@
         <div class="item">
           <label>Year: </label>
           <mat-form-field appearance="outline">
-            <mat-select
-              name="yearTardinessSelect"
-              [(value)]="year"
-              (selectionChange)="onDateChange()"
-            >
+            <mat-select name="yearTardinessSelect" [(value)]="year" (selectionChange)="onDateChange()">
               <mat-option *ngFor="let item of years" [value]="item">
                 {{ item }}
               </mat-option>
@@ -213,11 +278,7 @@
         <div class="item">
           <label>Month: </label>
           <mat-form-field appearance="outline">
-            <mat-select
-              name="monthTardinessSelect"
-              [(value)]="month"
-              (selectionChange)="onDateChange()"
-            >
+            <mat-select name="monthTardinessSelect" [(value)]="month" (selectionChange)="onDateChange()">
               <mat-option *ngFor="let item of months" [value]="item">
                 {{ item + 1 }}
               </mat-option>
@@ -227,14 +288,14 @@
       </div>
       <div class="punished">
         <div class="item">
-          <div class="total-punished">
-            {{ "Total Punished: " | localize }} {{ countLate }}
-          </div>
-        </div>
-        <div class="item">
           <p class="text-note-complain">
             Click vào button Complain và nhập nội dung khiếu nại nếu bạn thấy
             không đúng.
+          </p>
+        </div>
+        <div class="item">
+          <p class="text-total-monthly-punishment" style="margin-top: 4px;">
+            Tổng tiền phạt tháng: <b>{{ totalMonthlyPunishment | number }} VNĐ</b>
           </p>
         </div>
       </div>

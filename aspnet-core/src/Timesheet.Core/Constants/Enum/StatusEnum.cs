@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Timesheet.Entities;
@@ -261,6 +261,40 @@ namespace Ncc.Entities.Enum
         {
             Point = 0,
             Note = 1,
+        }
+        public enum UserPunishmentType
+        {
+            NoPunish = 0,
+            Late = 1,
+            NoCheckIn = 2,
+            NoCheckOut = 3,
+            LateAndNoCheckOut = 4,
+            NoCheckInAndNoCheckOut = 5,
+            Daily = 6,
+            Mention = 7,
+            Tracker_20k = 8, 
+            Tracker_50k = 9,
+            Tracker_100k = 10,
+            Tracker_200k = 11,
+            ReviewIntern = 12,
+            PMReport_20k = 13,
+            PMReport_50k = 14,
+            Ant = 15,
+            UnlockTSGmail = 16,
+            UnlockTSIMS = 17
+        }
+        public enum PunishmentGroupType
+        {
+            NoPunish = 0,    
+            CheckInOut = 1, 
+            Tracker = 2,     
+            PmReport = 3,    
+            Daily = 6,      
+            Mention = 7,  
+            ReviewIntern = 12, 
+            Ant = 15,  
+            UnlockTSGmail = 16, 
+            UnlockTSIMS = 17   
         }
         public enum CheckInCheckOutPunishmentType
         {

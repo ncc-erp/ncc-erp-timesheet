@@ -1,8 +1,8 @@
 import { ProjectUserType } from './../../user/user.component';
 import { TaskService } from './../../../service/api/task.service';
-import { Component, OnInit, Optional, Injector, Inject, ViewChild, ChangeDetectionStrategy, Pipe, PipeTransform } from '@angular/core';
+import { Component, OnInit, Optional, Injector, Inject, ViewChild, ChangeDetectionStrategy, Pipe, PipeTransform, ElementRef } from '@angular/core';
 import { ProjectManagerService } from './../../../service/api/project-manager.service';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialog, MatCheckboxChange, MAT_DATE_LOCALE } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialog, MatCheckboxChange, MAT_DATE_LOCALE, MatCheckbox } from '@angular/material';
 import { AppComponentBase } from '@shared/app-component-base';
 import { CustomerService } from '../../../service/api/customer.service';
 import { MemberService } from '../../../service/api/member.service';
@@ -17,6 +17,7 @@ import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { FormControl } from '@angular/forms';
 import { BranchService } from '@app/service/api/branch.service';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
+import { AutoAddUserWarningDialogComponent } from '../auto-add-user-warning-dialog.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,8 +26,8 @@ import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
   styleUrls: ['./create-project.component.css']
 })
 export class CreateProjectComponent extends AppComponentBase implements OnInit {
-
-  project = { users: [], tasks: [], projectTargetUsers: [], isAllUserBelongTo: true, notifyChannel : this.APP_CONSTANT.NotifyChannel.KOMU} as ProjectDto;
+  @ViewChild('allUserCheckbox') allUserCheckbox!: MatCheckbox;
+  project = { users: [], tasks: [], projectTargetUsers: [], isAllUserBelongTo: false, notifyChannel : this.APP_CONSTANT.NotifyChannel.KOMU} as ProjectDto;
   // formCreateEdit: FormGroup;
   title: string;
 
@@ -396,6 +397,27 @@ export class CreateProjectComponent extends AppComponentBase implements OnInit {
     return this.projectMembers && this.projectMembers.some(s => s.ptype == this.APP_CONSTANT.EnumUserType.Shadow);
   }
 
+  onAllUserCheckboxChange(event: any) {
+    if (event.checked) {
+      const dialogRef = this._dialog.open(AutoAddUserWarningDialogComponent, {
+        width: '350px'
+      });
+      
+      dialogRef.afterClosed().subscribe(result => {
+        if (!result) {
+          // Nếu user chọn Huỷ, set lại checkbox về false
+          this.project.isAllUserBelongTo = false;
+          // Force change detection và update checkbox
+          setTimeout(() => {
+            this.project.isAllUserBelongTo = false;
+            if (this.allUserCheckbox) {
+              this.allUserCheckbox.checked = false;
+            }
+          }, 0);
+        }
+      });
+    }
+  }
 
   save() {
 

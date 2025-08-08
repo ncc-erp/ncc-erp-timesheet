@@ -1,0 +1,48 @@
+.import-error-dialog {
+  width: 100%;
+}
+
+.error-title {
+  color: #f44336;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.error-title i {
+  margin-right: 8px;
+}
+
+.table-responsive {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+table {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+th {
+  background-color: #f5f5f5;
+  font-weight: 500;
+}
+
+.error-note {
+  color: #f44336;
+  margin-top: 16px;
+  font-weight: 500;
+  font-style: italic;
+}
+
+mat-dialog-content {
+  width: 100%;
+  max-height: 400px;
+}
+
+::ng-deep .mat-dialog-container {
+  padding: 24px;
+  overflow: hidden;
+  min-width: 450px;
+  max-width: 600px;
+}
