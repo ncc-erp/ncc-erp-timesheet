@@ -67,7 +67,7 @@ namespace Timesheet.DomainServices
 
         public async Task<LateReviewPunishmentResultDto> CheckAndPunishLateReview(ReviewInternsDto input)
         {
-            var review = await WorkScope.GetAll<ReviewIntern>()
+         var review = await WorkScope.GetAll<ReviewIntern>()
                 .Where(x => x.Month == input.Month && x.Year == input.Year && x.IsActive)
                 .FirstOrDefaultAsync();
 
@@ -79,11 +79,10 @@ namespace Timesheet.DomainServices
             var now = Clock.Now;
             var currentDate = now.Date;
 
-            var deadlineDay = int.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDay));
-            var daysToAdd = int.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDaysToAdd));
-            var startDay = int.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.ReviewStartDayOfMonth));
+            var deadlineDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDay));
+            var startDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewStartDayOfMonth));
             var startDate = new DateTime(input.Year, input.Month, startDay);
-            var endDate = startDate.AddDays(daysToAdd);
+            var endDate = startDate.AddDays(deadlineDay - 1);
 
             int weekendDays = 0;
             for (var date = startDate; date <= endDate; date = date.AddDays(1))
@@ -102,7 +101,7 @@ namespace Timesheet.DomainServices
                 deadlineDate = deadlineDate.AddDays(1);
             }
 
-            if (currentDate <= deadlineDate)
+            if (currentDate < deadlineDate)
             {
                 throw new UserFriendlyException($"The penalty check is not yet due. The deadline is on {deadlineDate:dd/MM/yyyy}");
             }
