@@ -1780,6 +1780,68 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.isEditLateInternReviewSetting = true;
   }
 
+  selectedMonth: string = (() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1); 
+    return date.toISOString().slice(0, 7); 
+  })();
+  
+  selectedPmReportMonth: string = new Date().toISOString().slice(0, 7);
+
+  onManualTriggerPMReportPunishment() {
+    abp.message.confirm(
+      'Are you sure you want to apply PM Report Punishment?',
+      'Confirm',
+      (result: boolean) => {
+        if (result) {
+          this.pmReportPunishSettingService.triggerManualPunishment().subscribe(
+            () => {
+              abp.notify.success('PM Report Punishment has been applied successfully');
+            },
+            (error) => {
+              abp.notify.error('Failed to apply PM Report Punishment: ' + 
+                (error.error && error.error.error && error.error.error.message || error.message));
+            }
+          );
+        }
+      }
+    );
+  }
+
+  getMonthName(month: number): string {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return months[month - 1] || '';
+  }
+
+  onManualTriggerPunishment() {
+    if (!this.selectedMonth) {
+      abp.notify.warn('Please select a month/year');
+      return;
+    }
+
+    const [year, month] = this.selectedMonth.split('-').map(Number);
+    
+    abp.message.confirm(
+      `Are you sure you want to trigger punishment for ${month}/${year}?`,
+      'Confirm Punishment Execution',
+      (result: boolean) => {
+        if (result) {
+          this.lateInternReviewSettingService.triggerManualPunishment(month, year).subscribe(
+            () => {
+              abp.notify.success('Punishments applied successfully.');
+            },
+            (error) => {
+              const errorMessage = (error.error && error.error.error && error.error.error.message) 
+                || error.message 
+                || 'An error occurred';
+              abp.notify.error('Error: ' + errorMessage);
+            }
+          );
+        }
+      }
+    );
+  }
+
   saveLateInternReviewSetting() {
     if (!this.permission.isGranted(this.EDIT_LATE_INTERN_REVIEW_SETTING)) {
       abp.message.error("You do not have permission to edit this setting!");

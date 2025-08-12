@@ -214,12 +214,26 @@ namespace Timesheet.DomainServices
             foreach (var user in users)
             {
                 var t = new Timekeeping { };
-                bool isRemoteWork = mapRemoteUsers.ContainsKey(user.UserId);
 
-                var registerCheckInOut = isRemoteWork ?
-                  CaculateCheckInOutTimeNew(mapRemoteUsers, user)
-                  :
-                  CaculateCheckInOutTimeNew(mapAbsenceUsers, user);
+                var combinedAbsenceList = new List<MapAbsenceUserDto>();
+                if (mapAbsenceUsers.ContainsKey(user.UserId))
+                {
+                    combinedAbsenceList.AddRange(mapAbsenceUsers[user.UserId]);
+                }
+                if (mapRemoteUsers.ContainsKey(user.UserId))
+                {
+                    combinedAbsenceList.AddRange(mapRemoteUsers[user.UserId]);
+                }
+
+                var combinedMapAbsenceUsers = new Dictionary<long, List<MapAbsenceUserDto>>();
+                if (combinedAbsenceList.Any())
+                {
+                    combinedMapAbsenceUsers[user.UserId] = combinedAbsenceList.OrderBy(x => x.DateType).ToList();
+                }
+
+                
+                var registerCheckInOut = CaculateCheckInOutTimeNew(combinedMapAbsenceUsers, user);
+                bool isRemoteWork = mapRemoteUsers.ContainsKey(user.UserId);
 
                 float trackerTime = dicUserNameToTrackerTime.ContainsKey(user.UserName) ? dicUserNameToTrackerTime[user.UserName].ActiveMinute : 0;
 
@@ -256,7 +270,10 @@ namespace Timesheet.DomainServices
                 {
                     if (user.UserId == item.Key)
                     {
-                        t.NoteReply = item.Value.Select(s => s.NoteReply).FirstOrDefault();
+                        if (string.IsNullOrEmpty(t.NoteReply))
+                        {
+                            t.NoteReply = item.Value.Select(s => s.NoteReply).FirstOrDefault();
+                        }
                         t.UserNote = item.Value.Select(s => s.UserNote).FirstOrDefault();
                     }
                 });
@@ -556,142 +573,100 @@ namespace Timesheet.DomainServices
         }
         public async System.Threading.Tasks.Task CheckIsPunishedByRule(Timekeeping timekeeping, int limitedMinute, float trackerTime)
         {
-            var registerWorkingHours = CommonUtils.GetEmployeeWorkingHours(timekeeping.RegisterCheckOut, timekeeping.RegisterCheckIn);
-            var NoCheckInAndNoCheckOut = (String.IsNullOrEmpty(timekeeping.CheckOut) && String.IsNullOrEmpty(timekeeping.CheckIn));
-            var NoCheckOut = (String.IsNullOrEmpty(timekeeping.CheckOut));
-            var CheckInLate = (!String.IsNullOrEmpty(timekeeping.CheckIn)) && CommonUtils.SubtractHHmm(timekeeping.CheckIn, timekeeping.RegisterCheckIn) > limitedMinute;
-            var CheckIn = (!String.IsNullOrEmpty(timekeeping.CheckIn)) && CommonUtils.SubtractHHmm(timekeeping.CheckIn, timekeeping.RegisterCheckIn) <= limitedMinute;
-            var CheckOut = (!String.IsNullOrEmpty(timekeeping.CheckOut));
-            var NoCheckIn = (String.IsNullOrEmpty(timekeeping.CheckIn));
+            var absenceInfo = ParseAbsenceInfo(timekeeping.NoteReply);
 
+            if (absenceInfo.HasFullDayAbsence || absenceInfo.HasCombinedAbsence)
+            {
+                await SetPunishmentResult(timekeeping, CheckInCheckOutPunishmentType.NoPunish);
+                return;
+            }
+
+            if (absenceInfo.HasOnsiteOnly && absenceInfo.HasOffCombination)
+            {
+                await SetPunishmentResult(timekeeping, CheckInCheckOutPunishmentType.NoPunish);
+                return;
+            }
+
+            var punishmentType = DetermineStandardPunishment(timekeeping, limitedMinute, trackerTime);
+            await SetPunishmentResult(timekeeping, punishmentType);
+        }
+        
+        private AbsenceInfo ParseAbsenceInfo(string noteReply)
+        {
+            var info = new AbsenceInfo();
+            if (string.IsNullOrEmpty(noteReply)) return info;
+            
+            info.HasOffMorning = noteReply.Contains("Off morning");
+            info.HasOffAfternoon = noteReply.Contains("Off afternoon");
+            info.HasOffFullDay = noteReply.Contains("Off fullday");
+            info.HasOnsiteMorning = noteReply.Contains("Onsite morning");
+            info.HasOnsiteAfternoon = noteReply.Contains("Onsite afternoon");
+            info.HasOnsiteFullDay = noteReply.Contains("Onsite fullday");
+            
+            info.HasFullDayAbsence = info.HasOffFullDay || info.HasOnsiteFullDay;
+            info.HasCombinedAbsence = (info.HasOffMorning && info.HasOnsiteAfternoon) ||
+                                     (info.HasOnsiteMorning && info.HasOffAfternoon) ||
+                                     (info.HasOffMorning && info.HasOffAfternoon) ||
+                                     (info.HasOnsiteMorning && info.HasOnsiteAfternoon);
+            info.HasOnsiteOnly = (info.HasOnsiteMorning || info.HasOnsiteAfternoon) && !info.HasOnsiteFullDay;
+            info.HasOffCombination = (info.HasOnsiteMorning && info.HasOffAfternoon) || (info.HasOnsiteAfternoon && info.HasOffMorning);
+            
+            return info;
+        }
+        
+        private CheckInCheckOutPunishmentType DetermineStandardPunishment(Timekeeping timekeeping, int limitedMinute, float trackerTime)
+        {
+            var registerWorkingHours = CommonUtils.GetEmployeeWorkingHours(timekeeping.RegisterCheckOut, timekeeping.RegisterCheckIn);
             float percentageConfig = getPercentageConfig();
             var trackerTimeByRegisterWorkingHours = percentageConfig * registerWorkingHours;
-            if (!timekeeping.NoteReply.IsNullOrEmpty() && timekeeping.NoteReply.Contains("Off fullday"))
-            {
-                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-            }
-            else if (!timekeeping.NoteReply.IsNullOrEmpty() && timekeeping.NoteReply.Contains("Onsite"))
-            {
-                bool hasOffMorning = timekeeping.NoteReply.Contains("Off morning");
-                bool hasOffAfternoon = timekeeping.NoteReply.Contains("Off afternoon");
-                bool hasOffFullDay = timekeeping.NoteReply.Contains("Off fullday");
-
-                if (hasOffFullDay)
-                {
-                    timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                }
-                else if (timekeeping.NoteReply.Contains("fullday"))
-                {
-                    timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                }
-                else if (timekeeping.NoteReply.Contains("morning", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (hasOffAfternoon)
-                    {
-                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                    }
-                    else
-                    {
-                        if (NoCheckIn && NoCheckOut)
-                        {
-                            timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckInAndNoCheckOut;
-                        }
-                        else if (CheckIn && NoCheckOut)
-                        {
-                            timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckOut;
-                        }
-                        else if (NoCheckIn && CheckOut)
-                        {
-                            timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                        }
-                        else if (CheckInLate)
-                        {
-                            timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                        }
-                        else
-                        {
-                            timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                        }
-                    }
-                }
-                else if (timekeeping.NoteReply.Contains("afternoon", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (hasOffMorning)
-                    {
-                        timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                    }
-                    else
-                    {
-                        if (NoCheckIn && NoCheckOut)
-                        {
-                            timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckInAndNoCheckOut;
-                        }
-                        else if (CheckIn && NoCheckOut)
-                        {
-                            timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckOut;
-                        }
-                        else if (NoCheckIn && CheckOut)
-                        {
-                            timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckIn;
-                        }
-                        else if (CheckInLate)
-                        {
-                            timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                        }
-                        else
-                        {
-                            timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                        }
-                    }
-                }
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-            }
-            else if (NoCheckInAndNoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
-            {
-                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckInAndNoCheckOut;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-            }
-            else if (NoCheckInAndNoCheckOut && trackerTime >= trackerTimeByRegisterWorkingHours)
-            {
-                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckIn;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-            }
-            else if (CheckInLate && NoCheckOut && trackerTime >= trackerTimeByRegisterWorkingHours)
-            {
-                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-            }
-            else if (CheckInLate && timekeeping.CheckOut.HasValue())
-            {
-                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.Late;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-            }
-            else if (CheckInLate && NoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
-            {
-                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.LateAndNoCheckOut;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-            }
-            else if (CheckIn && NoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
-            {
-                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckOut;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-            }
-            else if (CheckIn && CheckOut)
-            {
-                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-            }
-            else if (CheckIn && !timekeeping.CheckOut.HasValue() && trackerTime >= trackerTimeByRegisterWorkingHours)
-            {
-                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-            }
-            else if (NoCheckIn)
-            {
-                timekeeping.StatusPunish = CheckInCheckOutPunishmentType.NoCheckIn;
-                timekeeping.MoneyPunish = await GetMoneyPunishByType(timekeeping.StatusPunish);
-            }
+            
+            var noCheckInAndNoCheckOut = string.IsNullOrEmpty(timekeeping.CheckOut) && string.IsNullOrEmpty(timekeeping.CheckIn);
+            var noCheckOut = string.IsNullOrEmpty(timekeeping.CheckOut);
+            var checkInLate = !string.IsNullOrEmpty(timekeeping.CheckIn) && CommonUtils.SubtractHHmm(timekeeping.CheckIn, timekeeping.RegisterCheckIn) > limitedMinute;
+            var checkIn = !string.IsNullOrEmpty(timekeeping.CheckIn) && CommonUtils.SubtractHHmm(timekeeping.CheckIn, timekeeping.RegisterCheckIn) <= limitedMinute;
+            var checkOut = !string.IsNullOrEmpty(timekeeping.CheckOut);
+            var noCheckIn = string.IsNullOrEmpty(timekeeping.CheckIn);
+            
+            if (noCheckInAndNoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
+                return CheckInCheckOutPunishmentType.NoCheckInAndNoCheckOut;
+            if (noCheckInAndNoCheckOut && trackerTime >= trackerTimeByRegisterWorkingHours)
+                return CheckInCheckOutPunishmentType.NoCheckIn;
+            if (checkInLate && noCheckOut && trackerTime >= trackerTimeByRegisterWorkingHours)
+                return CheckInCheckOutPunishmentType.Late;
+            if (checkInLate && timekeeping.CheckOut.HasValue())
+                return CheckInCheckOutPunishmentType.Late;
+            if (checkInLate && noCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
+                return CheckInCheckOutPunishmentType.LateAndNoCheckOut;
+            if (checkIn && noCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
+                return CheckInCheckOutPunishmentType.NoCheckOut;
+            if (checkIn && checkOut)
+                return CheckInCheckOutPunishmentType.NoPunish;
+            if (checkIn && !timekeeping.CheckOut.HasValue() && trackerTime >= trackerTimeByRegisterWorkingHours)
+                return CheckInCheckOutPunishmentType.NoPunish;
+            if (noCheckIn)
+                return CheckInCheckOutPunishmentType.NoCheckIn;
+                
+            return CheckInCheckOutPunishmentType.NoPunish;
+        }
+        
+        private async System.Threading.Tasks.Task SetPunishmentResult(Timekeeping timekeeping, CheckInCheckOutPunishmentType punishmentType)
+        {
+            timekeeping.StatusPunish = punishmentType;
+            timekeeping.MoneyPunish = await GetMoneyPunishByType(punishmentType);
+        }
+        
+        private class AbsenceInfo
+        {
+            public bool HasOffMorning { get; set; }
+            public bool HasOffAfternoon { get; set; }
+            public bool HasOffFullDay { get; set; }
+            public bool HasOnsiteMorning { get; set; }
+            public bool HasOnsiteAfternoon { get; set; }
+            public bool HasOnsiteFullDay { get; set; }
+            public bool HasFullDayAbsence { get; set; }
+            public bool HasCombinedAbsence { get; set; }
+            public bool HasOnsiteOnly { get; set; }
+            public bool HasOffCombination { get; set; }
         }
 
         private async Task<int> GetMoneyPunishByType(CheckInCheckOutPunishmentType StatusPunish)
@@ -775,30 +750,36 @@ namespace Timesheet.DomainServices
                 return t;
             }
             if (mapAbsenceUsers.ContainsKey(user.UserId))
-            {//leave request
-                foreach (var absenceUser in mapAbsenceUsers[user.UserId])
+            {
+                var absenceList = mapAbsenceUsers[user.UserId];
+                var notes = new List<string>();
+                
+                bool morningCovered = false;
+                bool afternoonCovered = false;
+                bool isFullDayAbsence = false;
+                
+                foreach (var absenceUser in absenceList)
                 {
-                    var note = string.IsNullOrEmpty(t.Note) ? "" : t.Note;
-                    t.Note = note == "" ? "" : t.Note + "\n";
                     if (absenceUser.Type == RequestType.Off)
                     {
                         if (absenceUser.DateType == DayType.Fullday)
                         {
-                            t.CheckIn = "";
-                            t.CheckOut = "";
-                            t.Note += "Off fullday";
+                            isFullDayAbsence = true;
+                            morningCovered = true;
+                            afternoonCovered = true;
+                            notes.Add("Off fullday");
                             t.AbsenceDayType = DayType.Fullday;
                         }
                         else if (absenceUser.DateType == DayType.Morning)
                         {
-                            t.CheckIn = user.AfternoonStartAt;
-                            t.Note += "Off morning";
+                            morningCovered = true;
+                            notes.Add("Off morning");
                             t.AbsenceDayType = DayType.Morning;
                         }
                         else if (absenceUser.DateType == DayType.Afternoon)
                         {
-                            t.CheckOut = user.MorningEndAt;
-                            t.Note += "Off afternoon";
+                            afternoonCovered = true;
+                            notes.Add("Off afternoon");
                             t.AbsenceDayType = DayType.Afternoon;
                         }
                         else if (absenceUser.DateType == DayType.Custom)
@@ -806,13 +787,13 @@ namespace Timesheet.DomainServices
                             if (absenceUser.AbsenceTime == OnDayType.DiMuon)
                             {
                                 t.CheckIn = CommonUtils.AddMoreHourToHHmm(t.CheckIn, absenceUser.Hour);
-                                t.Note += "Xin đến muộn " + absenceUser.Hour + " h";
+                                notes.Add("Xin đến muộn " + absenceUser.Hour + " h");
                                 t.AbsenceDayType = DayType.Custom;
                             }
                             else if (absenceUser.AbsenceTime == OnDayType.VeSom)
                             {
                                 t.CheckOut = CommonUtils.AddMoreHourToHHmm(t.CheckOut, -(absenceUser.Hour));
-                                t.Note += "Xin về sớm " + absenceUser.Hour + " h";
+                                notes.Add("Xin về sớm " + absenceUser.Hour + " h");
                                 t.AbsenceDayType = DayType.Custom;
                             }
                         }
@@ -821,21 +802,22 @@ namespace Timesheet.DomainServices
                     {
                         if (absenceUser.DateType == DayType.Fullday)
                         {
-                            t.CheckIn = "";
-                            t.CheckOut = "";
-                            t.Note += "Onsite fullday";
+                            isFullDayAbsence = true;
+                            morningCovered = true;
+                            afternoonCovered = true;
+                            notes.Add("Onsite fullday");
                             t.AbsenceDayType = DayType.Fullday;
                         }
                         else if (absenceUser.DateType == DayType.Morning)
                         {
-                            t.CheckIn = user.AfternoonStartAt;
-                            t.Note += "Onsite morning";
+                            morningCovered = true;
+                            notes.Add("Onsite morning");
                             t.AbsenceDayType = DayType.Morning;
                         }
                         else if (absenceUser.DateType == DayType.Afternoon)
                         {
-                            t.CheckOut = user.MorningEndAt;
-                            t.Note += "Onsite afternoon";
+                            afternoonCovered = true;
+                            notes.Add("Onsite afternoon");
                             t.AbsenceDayType = DayType.Afternoon;
                         }
                     }
@@ -843,18 +825,42 @@ namespace Timesheet.DomainServices
                     {
                         if (absenceUser.DateType == DayType.Fullday)
                         {
+                            notes.Add("Remote fullday");
                             t.AbsenceDayType = DayType.Fullday;
                         }
                         else if (absenceUser.DateType == DayType.Morning)
                         {
+                            notes.Add("Remote morning");
                             t.AbsenceDayType = DayType.Morning;
                         }
                         else if (absenceUser.DateType == DayType.Afternoon)
                         {
+                            notes.Add("Remote afternoon");
                             t.AbsenceDayType = DayType.Afternoon;
                         }
                     }
                 }
+                
+                if (isFullDayAbsence)
+                {
+                    t.CheckIn = "";
+                    t.CheckOut = "";
+                }
+                else if (morningCovered && afternoonCovered)
+                {
+                    t.CheckIn = "";
+                    t.CheckOut = "";
+                }
+                else if (morningCovered && !afternoonCovered)
+                {
+                    t.CheckIn = user.AfternoonStartAt;
+                }
+                else if (!morningCovered && afternoonCovered)
+                {
+                    t.CheckOut = user.MorningEndAt;
+                }
+                
+                t.Note = string.Join("/", notes);
             }
             return t;
         }
