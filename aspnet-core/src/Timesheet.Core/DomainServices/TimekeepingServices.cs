@@ -100,13 +100,28 @@ namespace Timesheet.DomainServices
             });
             CurrentUnitOfWork.SaveChanges();
 
+            var typesToDelete = new List<UserPunishmentType> {
+              UserPunishmentType.Late,
+              UserPunishmentType.NoCheckIn,
+              UserPunishmentType.NoCheckOut,
+              UserPunishmentType.LateAndNoCheckOut,
+              UserPunishmentType.NoCheckInAndNoCheckOut,
+              UserPunishmentType.Daily,
+              UserPunishmentType.Mention,
+              UserPunishmentType.Tracker_20k,
+              UserPunishmentType.Tracker_50k,
+              UserPunishmentType.Tracker_100k,
+              UserPunishmentType.Tracker_200k
+            };
+
             var oldPunishments = await WorkScope.GetAll<UserPunishment>()
-               .Where(p => p.DateAt.Date == selectedDate.Date)
-               .ToListAsync();
+              .Where(p => p.DateAt.Date == selectedDate.Date &&
+                typesToDelete.Contains(p.Type))
+              .ToListAsync();
+
             if (oldPunishments.Any())
             {
-                oldPunishments.ForEach(p =>
-                {
+                oldPunishments.ForEach(p => {
                     p.IsDeleted = true;
                     p.DeletionTime = DateTimeUtils.GetNow();
                 });
