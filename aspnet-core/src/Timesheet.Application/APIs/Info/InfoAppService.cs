@@ -575,6 +575,23 @@ namespace Timesheet.APIs.Info
                     Type = LockUnlockTimesheetType.ApproveRejectTimesheet,
                     Amount = amount
                 });
+                
+                var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
+                    .Where(p => p.Type == UserPunishmentType.UnlockTSIMS)
+                    .FirstOrDefaultAsync();
+                    
+                if (punishmentSystem != null)
+                {
+                    await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
+                    {
+                        DateAt = DateTime.Now,
+                        UserId = userId,
+                        PunishmentSystemId = punishmentSystem.Id,
+                        Type = UserPunishmentType.UnlockTSIMS,
+                        Count = 1,
+                        TotalMoney = Convert.ToInt32(amount)
+                    });
+                }
             }
             
             //Add unlock pm
