@@ -1,4 +1,4 @@
-﻿using Abp.Configuration;
+using Abp.Configuration;
 using Abp.Dependency;
 using Abp.Timing;
 using Abp.UI;
@@ -73,7 +73,7 @@ namespace Timesheet.DomainServices
 
             if (review == null)
             {
-                throw new UserFriendlyException($"There are no active intern review periods for the current month{input.Month}/{input.Year}");
+                throw new UserFriendlyException($"There are no active intern review periods for the current month {input.Month}/{input.Year}");
             }
 
             var now = Clock.Now;
@@ -105,6 +105,9 @@ namespace Timesheet.DomainServices
             {
                 throw new UserFriendlyException($"The penalty check is not yet due. The deadline is on {deadlineDate:dd/MM/yyyy}");
             }
+
+            review.IsPunishmentProcessed = true;
+            await WorkScope.UpdateAsync(review);
 
             var unreviewedPMs = await WorkScope.GetAll<ReviewDetail>()
                 .Include(x => x.Reviewer)

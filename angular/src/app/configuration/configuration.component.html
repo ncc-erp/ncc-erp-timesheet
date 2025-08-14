@@ -903,17 +903,17 @@
                              <input matInput 
                              type="month" 
                              [(ngModel)]="selectedMonth"
-                             [disabled]="!lateInternReviewSetting.enable"
+                              [disabled]="false"
                              name="selectedMonth"
                              style="width: 100%;">
-                          </mat-form-field>
-                       </div>
-                    </div>
+                            </mat-form-field>
+                         </div>
+                      </div>
                     <div class="row">
                        <div class="col-md-4" style="margin-top: 2px;">
                           <button mat-raised-button 
                           color="warn" 
-                          [disabled]="!lateInternReviewSetting.enable || !selectedMonth"
+                          [disabled]="!selectedMonth"
                           (click)="onManualTriggerPunishment()"
                           style="min-width: 80px;">
                           Get
@@ -997,7 +997,7 @@
                     <mat-form-field>
                       <span class="special-label">Day Of Week *</span> <mat-icon class="special-icon"
                         matTooltip="Day of the week when background worker runs to check PM report punishment, ex: Monday">help</mat-icon>
-                      <mat-select [(ngModel)]="pmReportPunishSetting.dayOfWeek" name="dayOfWeek" required
+                      <mat-select [(ngModel)]="pmReportPunishSetting.dayofweek" name="dayofweek" required
                         [disabled]="!isEditPMReportPunishSetting">
                         <mat-option value="Monday">Monday</mat-option>
                         <mat-option value="Tuesday">Tuesday</mat-option>
@@ -1013,7 +1013,7 @@
                       <div class="col-md-12">
                         <button mat-raised-button 
                           color="warn" 
-                          [disabled]="!pmReportPunishSetting.enable"
+                          [disabled]="false"
                           (click)="onManualTriggerPMReportPunishment()"
                           style="min-width: 80px;">
                           Get
