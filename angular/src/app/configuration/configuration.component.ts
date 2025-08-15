@@ -1780,7 +1780,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.isEditLateInternReviewSetting = true;
   }
 
-  selectedMonth: string = new Date().toISOString().slice(0, 7);
+  selectedMonth: string = (() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1); 
+    return date.toISOString().slice(0, 7); 
+  })();
+  
   selectedPmReportMonth: string = new Date().toISOString().slice(0, 7);
 
   onManualTriggerPMReportPunishment() {

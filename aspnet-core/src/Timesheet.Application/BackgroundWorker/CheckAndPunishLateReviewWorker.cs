@@ -50,9 +50,10 @@ namespace Timesheet.BackgroundWorker
                     return;
                 }
 
-                var now = DateTimeUtils.GetNow();
-                int month = now.Month;
-                int year = now.Year;
+                var now = DateTimeUtils.GetNow();   
+                var previousMonthDate = now.AddMonths(-1);
+                int month = previousMonthDate.Month;
+                int year = previousMonthDate.Year;
                 var input = new ReviewInternsDto { Month = month, Year = year };
 
                 DateTime deadlineDate = CalculateDeadlineDate(input);
