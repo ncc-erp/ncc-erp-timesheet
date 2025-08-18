@@ -1,4 +1,4 @@
-﻿using Ncc;
+using Ncc;
 using Ncc.Entities;
 using System;
 using System.Collections.Generic;
@@ -1055,6 +1055,20 @@ namespace Timesheet.Timesheets.MyTimesheets
 
             if (myTS == null || myTS == default)
             {
+                int workingTime = (int)(input.Hour * 60);
+                const int maxHoursPerDay = 24;
+
+                double sumWorkingTimeOlds = WorkScope.GetAll<MyTimesheet>()
+                   .Where(s => s.UserId == userId && s.DateAt.Date == dateAt.Date)
+                   .Sum(s => s.WorkingTime);
+
+                double sumWorkingTime = sumWorkingTimeOlds + workingTime;
+                
+                if (sumWorkingTime > maxHoursPerDay * 60)
+                {
+                    return $"Failed! Total working time on {dateAt.ToString("yyyy-MM-dd")} can't exceed {maxHoursPerDay} hours";
+                }
+                
                 myTS = new MyTimesheet
                 {
                     DateAt = dateAt,
@@ -1149,6 +1163,19 @@ namespace Timesheet.Timesheets.MyTimesheets
 
             if (myTS == null || myTS == default)
             {
+                const int maxHoursPerDay = 24;
+
+                double sumWorkingTimeOlds = WorkScope.GetAll<MyTimesheet>()
+                   .Where(s => s.UserId == user.Id && s.DateAt.Date == today.Date)
+                   .Sum(s => s.WorkingTime);
+
+                double sumWorkingTime = sumWorkingTimeOlds + workingMinute;
+                
+                if (sumWorkingTime > maxHoursPerDay * 60)
+                {
+                    return $"Failed! Total working time on {today.ToString("yyyy-MM-dd")} can't exceed {maxHoursPerDay} hours";
+                }
+                
                 var timesheet = new MyTimesheet
                 {
                     DateAt = today,
