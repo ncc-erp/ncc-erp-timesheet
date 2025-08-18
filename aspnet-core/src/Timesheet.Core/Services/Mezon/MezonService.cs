@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System;
 using Abp.Configuration;
@@ -14,6 +14,9 @@ using Timesheet.Constants;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Abp.Extensions;
+using Ncc.Authorization.Users;
+using System.Linq;
+using Ncc.IoC;
 
 namespace Timesheet.Services.Mezon
 {
@@ -26,11 +29,14 @@ namespace Timesheet.Services.Mezon
         private readonly string _clientId;
         private readonly string _clientSecret;
         private readonly string _redirectUri;
-        public MezonService(HttpClient httpClient, ISettingManager settingManager, ILogger<MezonService> logger, IConfiguration configuration)
+        private readonly IWorkScope WorkScope;
+        
+        public MezonService(HttpClient httpClient, ISettingManager settingManager, ILogger<MezonService> logger, IConfiguration configuration, IWorkScope workScope)
         {
             this.logger = logger;
             this._settingManager = settingManager;
             this._httpClient = httpClient;
+            this.WorkScope = workScope;
             _clientId = configuration.GetValue<string>($"{serviceName}:ClientId");
             _clientSecret = configuration.GetValue<string>($"{serviceName}:ClientSecret");
             _redirectUri = configuration.GetValue<string>($"{serviceName}:RedirectUri");
@@ -136,14 +142,36 @@ namespace Timesheet.Services.Mezon
 
             foreach (Match match in matches)
             {
+                string username = match.Groups[1].Value;
+                string userId = GetMezonUserIdByUsername(username);
+                
                 mentions.Add(new
                 {
-                    username = match.Groups[1].Value,
+                    username = username,
+                    user_id = userId,
                     s = match.Index,
                     e = match.Index + match.Length
                 });
             }
             return mentions;
+        }
+        
+        public string GetMezonUserIdByUsername(string username)
+        {
+            try
+            {
+                var user = WorkScope.GetAll<User>()
+                    .Where(u => u.UserName == username)
+                    .Select(u => new { u.MezonUserId })
+                    .FirstOrDefault();
+                
+                return user?.MezonUserId;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"GetMezonUserIdByUsername({username}) Error: {ex.Message}");
+                return null;
+            }
         }
 
         public void Post(string url, object input)
