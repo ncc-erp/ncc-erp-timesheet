@@ -1053,21 +1053,22 @@ namespace Timesheet.Timesheets.MyTimesheets
                 .Where(s => s.TypeOfWork == TypeOfWork.NormalWorkingHours)
                 .FirstOrDefault();
 
-            if (myTS == null || myTS == default)
-            {
-                int workingTime = (int)(input.Hour * 60);
-                const int maxHoursPerDay = 24;
+            if (myTS == null || myTS == default) {
+            int workingTime = (int)(input.Hour * 60);
+            // Maximum allowed working hours per day to prevent unrealistic time logging
+            const int maxHoursPerDay = 24;
 
-                double sumWorkingTimeOlds = WorkScope.GetAll<MyTimesheet>()
-                   .Where(s => s.UserId == userId && s.DateAt.Date == dateAt.Date)
-                   .Sum(s => s.WorkingTime);
+            double sumWorkingTimeOlds = WorkScope.GetAll < MyTimesheet > ()
+              .Where(s => s.UserId == userId && s.DateAt.Date == dateAt.Date)
+              .Sum(s => s.WorkingTime);
 
-                double sumWorkingTime = sumWorkingTimeOlds + workingTime;
-                
-                if (sumWorkingTime > maxHoursPerDay * 60)
-                {
-                    return $"Failed! Total working time on {dateAt.ToString("yyyy-MM-dd")} can't exceed {maxHoursPerDay} hours";
-                }
+            double sumWorkingTime = sumWorkingTimeOlds + workingTime;
+
+            // Check if adding this timesheet would exceed the maximum allowed working time for the day
+            if (sumWorkingTime > maxHoursPerDay * 60) {
+              return $ "Failed! Total working time on {dateAt.ToString("
+              yyyy - MM - dd ")} can't exceed {maxHoursPerDay} hours";
+            }
                 
                 myTS = new MyTimesheet
                 {
@@ -1163,6 +1164,7 @@ namespace Timesheet.Timesheets.MyTimesheets
 
             if (myTS == null || myTS == default)
             {
+                // Maximum allowed working hours per day to prevent unrealistic time logging
                 const int maxHoursPerDay = 24;
 
                 double sumWorkingTimeOlds = WorkScope.GetAll<MyTimesheet>()
@@ -1170,7 +1172,8 @@ namespace Timesheet.Timesheets.MyTimesheets
                    .Sum(s => s.WorkingTime);
 
                 double sumWorkingTime = sumWorkingTimeOlds + workingMinute;
-                
+
+                // Check if adding this timesheet would exceed the maximum allowed working time for the day
                 if (sumWorkingTime > maxHoursPerDay * 60)
                 {
                     return $"Failed! Total working time on {today.ToString("yyyy-MM-dd")} can't exceed {maxHoursPerDay} hours";
