@@ -139,12 +139,20 @@ namespace Timesheet.Services.Mezon
             var mentions = new List<object>();
             string mentionPattern = MezonConstant.MENTION_PATTERN;
             var matches = Regex.Matches(message, mentionPattern);
-            if (matches.Count == 0 )  return mentions; 
+            if (matches.Count == 0) return mentions;
+            var usernames = matches.Cast<Match>()
+                                 .Select(m => m.Groups[1].Value)
+                                 .Distinct()
+                                 .ToList();
+
+            var userMap = WorkScope.GetAll<User>()
+                                 .Where(u => usernames.Contains(u.UserName))
+                                 .ToDictionary(u => u.UserName, u => u.MezonUserId);
 
             foreach (Match match in matches)
             {
                 string username = match.Groups[1].Value;
-                string mezonUserId = GetMezonUserIdByUsername(username);
+                userMap.TryGetValue(username, out string mezonUserId);
                 
                 mentions.Add(new
                 {
@@ -155,31 +163,6 @@ namespace Timesheet.Services.Mezon
                 });
             }
             return mentions;
-        }
-        
-        public string GetMezonUserIdByUsername(string username)
-        {
-            if (_mezonUserIdCache.TryGetValue(username, out string cachedUserId))
-            {
-                return cachedUserId;
-            }
-
-            try
-            {
-                var user = WorkScope.GetRepo<User>()
-                    .FirstOrDefault(u => u.UserName == username);
-                
-                string mezonUserId = user?.MezonUserId;
-                
-                _mezonUserIdCache[username] = mezonUserId;
-                
-                return mezonUserId;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError($"GetMezonUserIdByUsername({username}) Error: {ex.Message}");
-                return null;
-            }
         }
 
         public void Post(string url, object input)
