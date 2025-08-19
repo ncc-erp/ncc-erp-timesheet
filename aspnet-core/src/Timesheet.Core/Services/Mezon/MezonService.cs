@@ -22,6 +22,7 @@ namespace Timesheet.Services.Mezon
 {
     public class MezonService : IMezonService
     {
+        private static Dictionary<string, string> _mezonUserIdCache = new Dictionary<string, string>();
         private readonly ILogger<MezonService> logger;
         private readonly ISettingManager _settingManager;
         private HttpClient _httpClient;
@@ -143,12 +144,12 @@ namespace Timesheet.Services.Mezon
             foreach (Match match in matches)
             {
                 string username = match.Groups[1].Value;
-                string userId = GetMezonUserIdByUsername(username);
+                string mezonUserId = GetMezonUserIdByUsername(username);
                 
                 mentions.Add(new
                 {
                     username = username,
-                    user_id = userId,
+                    user_id = mezonUserId,
                     s = match.Index,
                     e = match.Index + match.Length
                 });
@@ -158,14 +159,21 @@ namespace Timesheet.Services.Mezon
         
         public string GetMezonUserIdByUsername(string username)
         {
+            if (_mezonUserIdCache.TryGetValue(username, out string cachedUserId))
+            {
+                return cachedUserId;
+            }
+
             try
             {
-                var user = WorkScope.GetAll<User>()
-                    .Where(u => u.UserName == username)
-                    .Select(u => new { u.MezonUserId })
-                    .FirstOrDefault();
+                var user = WorkScope.GetRepo<User>()
+                    .FirstOrDefault(u => u.UserName == username);
                 
-                return user?.MezonUserId;
+                string mezonUserId = user?.MezonUserId;
+                
+                _mezonUserIdCache[username] = mezonUserId;
+                
+                return mezonUserId;
             }
             catch (Exception ex)
             {
