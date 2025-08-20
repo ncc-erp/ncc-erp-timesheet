@@ -2,7 +2,7 @@
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="card main-content">
       <div class="header">
-        <h2>{{ "Tardiness / Leave Early" | localize }}</h2>
+        <h2>{{ "Punishment" | localize }} <span *ngIf="totalPunishmentAmount > 0" class="total-punishment">(Total: {{ totalPunishmentAmount | number }} VND)</span></h2>
         <ul class="header-dropdown m-r--5">
           <li>
             <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123" class="header-dropdown-mat-icon-button">
@@ -92,20 +92,17 @@
                 <th style="width: 40px; min-width: 0px;">
                   {{ "STT" | localize }}
                 </th>
-                <th style="min-width: 250px;">
-                  {{ "User" | localize }}
+                <th style="min-width: 220px; cursor: pointer;" (click)="sort('userName')">
+                  {{ "User" | localize }} <i class="fas" [ngClass]="{'fa-sort': sortField !== 'userName', 'fa-sort-up': sortField === 'userName' && sortOrder === 'ASC', 'fa-sort-down': sortField === 'userName' && sortOrder === 'DESC'}"></i>
                 </th>
                 <!-- <th style="min-width: 70px;">
                   {{ "User Code" | localize }}
                 </th> -->
-                <th style="min-width: 200px; width: 200px;">
-                  {{ "Email" | localize }}
+                <th style="min-width: 200px; width: 200px; cursor: pointer;" (click)="sort('userEmail')">
+                  {{ "Email" | localize }} <i class="fas" [ngClass]="{'fa-sort': sortField !== 'userEmail', 'fa-sort-up': sortField === 'userEmail' && sortOrder === 'ASC', 'fa-sort-down': sortField === 'userEmail' && sortOrder === 'DESC'}"></i>
                 </th>
-                <th style="min-width: 160px; width: 160px;">
-                  {{ "Check in late" | localize }}
-                </th>
-                <th style="min-width: 160px; width: 160px;">
-                  {{ "Check out early" | localize }}
+                <th style="min-width: 190px; width: 190px; cursor: pointer;" (click)="sort('totalPunishmentAmount')">
+                  {{ "Total Punishment Money" | localize }} <i class="fas" [ngClass]="{'fa-sort': sortField !== 'totalPunishmentAmount', 'fa-sort-up': sortField === 'totalPunishmentAmount' && sortOrder === 'ASC', 'fa-sort-down': sortField === 'totalPunishmentAmount' && sortOrder === 'DESC'}"></i>
                 </th>
               </tr>
             </thead>
@@ -141,8 +138,7 @@
                 </td>
                 <!-- <td style="text-align: center;">{{item.userCode}}</td> -->
                 <td style="text-align: left;">{{item.userEmail}}</td>
-                <td style="text-align: center;" [class]="getCss(item.numberOfTardies)">{{item.numberOfTardies}}</td>
-                <td style="text-align: center;" [class]="getCss(item.numberOfLeaveEarly)">{{item.numberOfLeaveEarly}}</td>
+                <td style="text-align: center;" [class]="getCss(item.totalPunishmentAmount)">{{item.totalPunishmentAmount | number}} VND</td>
               </tr>
             </tbody>
           </table>

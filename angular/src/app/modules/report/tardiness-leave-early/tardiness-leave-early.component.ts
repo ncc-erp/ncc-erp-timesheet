@@ -25,6 +25,7 @@ import {
   TimekeepingSignalRService,
 } from "@app/service/api/timekeeping-signalR.service";
 import { SubscriptionLike } from "rxjs";
+import * as _ from "lodash";
 
 @Component({
   selector: "app-tardiness-leave-early",
@@ -57,6 +58,11 @@ export class TardinessLeaveEarlyComponent
   listSendUser: TardinessDto[] = [];
   name = "";
   userId = 0;
+  
+  sortField: string = '';
+  sortOrder: string = 'ASC';
+
+  totalPunishmentAmount: number = 0;
 
   listBranch: BranchDto[] = [];
   branchSearch: FormControl = new FormControl("");
@@ -103,6 +109,11 @@ export class TardinessLeaveEarlyComponent
     finishedCallback: Function
   ): void {
     request.filterItems = [];
+    
+    if (this.sortField) {
+      request.sort = this.sortField;
+      request.sortDirection = this.sortOrder === 'ASC' ? 0 : 1;
+    }
 
     this.timekeepingService
       .getAllPagging(
@@ -118,8 +129,9 @@ export class TardinessLeaveEarlyComponent
         })
       )
       .subscribe((resp) => {
-        this.listUser = resp.result.items;
-        this.showPaging(resp.result, pageNumber);
+        this.listUser = resp.result.gridResult.items;
+        this.totalPunishmentAmount = resp.result.totalPunishmentAmount;
+        this.showPaging(resp.result.gridResult, pageNumber);
       });
   }
   protected delete(entity: TimekeepingDto): void {
@@ -201,7 +213,7 @@ export class TardinessLeaveEarlyComponent
 
   exportExcel() {
     let fileName =
-      "Report Tardiness " +
+      "Report Punishment " +
       "Month " +
       (this.month + 1) +
       " - Year " +
@@ -303,5 +315,21 @@ export class TardinessLeaveEarlyComponent
         month: this.month + 1,
       },
     });
+  }
+  
+  sort(field: string) {
+    if (this.sortField === field) {
+      if (this.sortOrder === 'ASC') {
+        this.sortOrder = 'DESC';
+      } else if (this.sortOrder === 'DESC') {
+        this.sortField = '';
+        this.sortOrder = 'ASC';
+      }
+    } else {
+      this.sortField = field;
+      this.sortOrder = 'ASC';
+    }
+    
+    this.refresh();
   }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Timesheet.Uitls;
@@ -19,5 +19,6 @@ namespace Timesheet.APIs.Timekeepings.Dto
         public int NumberOfLeaveEarly { get; set; }
         public string BranchColor { get; set; }
         public string BranchDisplayName { get; set; }
+        public int TotalPunishmentAmount { get; set; }
     }
 }

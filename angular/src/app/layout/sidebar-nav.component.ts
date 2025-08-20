@@ -245,7 +245,7 @@ export class SideBarNavComponent extends AppComponentBase {
                         "/app/main/over-time"
                     ),
                     new MenuItem(
-                        this.l("Tardiness"),
+                        this.l("Punishment"),
                         "Report.TardinessLeaveEarly",
                         "wysiwyg",
                         "/app/main/tardiness-leave-early"
