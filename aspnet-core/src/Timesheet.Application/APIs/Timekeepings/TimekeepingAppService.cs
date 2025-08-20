@@ -44,16 +44,30 @@ namespace Timesheet.APIs.Timekeepings
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_View)]
         [HttpPost]
-        public async Task<GridResult<GetTardinessUserDto>> GetAllPagging(GridParam input, int year, int month, long? branchId, long? userId)
+        public async Task<TardinessResultDto> GetAllPagging(GridParam input, int year, int month, long? branchId, long? userId)
         {
             var m = Int64.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
             var viewAll = PermissionChecker.IsGranted(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_View);
+
+            var punishmentAmounts = WorkScope.GetAll<UserPunishment>()
+                .Where(p => p.DateAt.Year == year && p.DateAt.Month == month &&
+                       (!userId.HasValue || p.UserId == userId.Value) &&
+                       (!branchId.HasValue || p.User.BranchId == branchId.Value) &&
+                       p.User.IsActive &&
+                       (viewAll || p.UserId == AbpSession.UserId.Value))
+                .GroupBy(p => p.UserId)
+                .Select(g => new {
+                    UserId = g.Key,
+                    TotalPunishmentAmount = g.Sum(p => p.TotalMoney)
+                })
+                .ToDictionary(k => k.UserId, v => v.TotalPunishmentAmount);
+
             var tk = from t in WorkScope.GetAll<Timekeeping>()
                      where t.DateAt.Year == year && t.DateAt.Month == month &&
-                       (!userId.HasValue || t.UserId == userId) &&
-                       (!branchId.HasValue || t.User.BranchId == branchId) &&
+                       (!userId.HasValue || t.UserId == userId.Value) &&
+                       (!branchId.HasValue || t.User.BranchId == branchId.Value) &&
                        t.User.IsActive &&
-                       (viewAll || t.UserId == AbpSession.UserId)
+                       (viewAll || t.UserId == AbpSession.UserId.Value)
                      group t by new
                      {
                          t.UserId,
@@ -75,9 +89,19 @@ namespace Timesheet.APIs.Timekeepings
                          BranchColor = g.Key.Color,
                          BranchDisplayName = g.Key.DisplayName,
                          NumberOfTardies = g.Count(x => x.IsPunishedCheckIn),
-                         NumberOfLeaveEarly = g.Count(x => x.IsPunishedCheckOut)
+                         NumberOfLeaveEarly = g.Count(x => x.IsPunishedCheckOut),
+                         TotalPunishmentAmount = punishmentAmounts.ContainsKey(g.Key.UserId.Value) ? punishmentAmounts[g.Key.UserId.Value] : 0
                      };
-            return await tk.GetGridResult(tk, input);
+
+            int totalPunishmentAmount = punishmentAmounts.Values.Sum();
+            
+            var gridResult = await tk.GetGridResult(tk, input);
+            
+            return new TardinessResultDto
+            {
+                GridResult = gridResult,
+                TotalPunishmentAmount = totalPunishmentAmount
+            };
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_View)]

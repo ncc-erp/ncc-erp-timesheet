@@ -56,3 +56,10 @@
     right: 10px;
     width: 300px;
 }
+
+.total-punishment {
+    color: #e91e63;
+    font-weight: 500;
+    margin-left: 10px;
+    font-size: 16px;
+}
