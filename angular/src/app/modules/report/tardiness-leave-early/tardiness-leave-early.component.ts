@@ -25,7 +25,6 @@ import {
   TimekeepingSignalRService,
 } from "@app/service/api/timekeeping-signalR.service";
 import { SubscriptionLike } from "rxjs";
-import * as _ from "lodash";
 
 @Component({
   selector: "app-tardiness-leave-early",
