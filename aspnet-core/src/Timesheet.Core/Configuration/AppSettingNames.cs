@@ -46,6 +46,7 @@ namespace Ncc.Configuration
         public const string SendEmailToSaoDo = "App.SendEmailToSaoDo";
         public const string ProjectTaskId = "App.ProjectTaskId";
         public const string SecurityCode = "App.SecurityCode";
+        public const string ClientRootAddress = "App.ClientRootAddress";
         public const string LogoutAllUser = "App.LogoutAllUser";
         public const string LockDayOfUser = "App.LockDayOfUser";
         public const string LockHourOfUser = "App.LockHourOfUser";
@@ -132,9 +133,9 @@ namespace Ncc.Configuration
         public const string PMReportPunishEnable = "Abp.PMReportPunishEnable";
         public const string PMReportPunishAtHour = "Abp.PMReportPunishAtHour";
         public const string PMReportPunishAtDayOfWeek = "Abp.PMReportPunishAtDayOfWeek";
-        public const string BotReportEnable = "Abp.BotReportEnable";
+        public const string BotReportEnable = "Abp.OfficeWorkingReportEnable";
         public const string BotReportEveryday = "Abp.BotReportEveryday";
-        public const string BotReportAtHour = "Abp.BotReportAtHour";
+        public const string BotReportAtHour = "Abp.OfficeWorkingReportAtHour";
         public const string BotReportAtDayOfWeek = "Abp.BotReportAtDayOfWeek";
         public const string BotReportWebhookUrl = "Abp.BotReportWebhookUrl";
 
@@ -179,5 +180,14 @@ namespace Ncc.Configuration
         public const string MoneyPMUnlockTimeSheet = "App.MoneyPMUnlockTimeSheet";
         public const string SendMessageToPunishUserEnableWorker = "App.SendMessageToPunishUserEnableWorker";
         public const string SendMessageToPunishUserAtHour = "App.SendMessageToPunishUserAtHour";
+
+        // Office working report (Mezon)
+        public const string OfficeWorkingReportEnable = "App.OfficeWorkingReport.Enable";
+        public const string OfficeWorkingReportAtHour = "App.OfficeWorkingReport.AtHour"; // default 8 (GMT+7)
+        public const string OfficeWorkingReportAtMinute = "App.OfficeWorkingReport.AtMinute"; // default 0
+        public const string OfficeWorkingReportOfficeIds = "App.OfficeWorkingReport.OfficeIds"; // e.g. "1,2,3"
+        public const string OfficeWorkingReportLimit = "App.OfficeWorkingReport.Limit"; // default 20
+        public const string OfficeWorkingReportMezonUrl = "App.OfficeWorkingReport.MezonUrl";
+        public const string OfficeWorkingEveryday = "App.OfficeWorkingReport.Everyday";
     }
 }

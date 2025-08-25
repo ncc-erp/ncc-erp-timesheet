@@ -812,26 +812,28 @@ namespace Ncc.Configuration
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_View)]
-        public async Task<BotReportSettingDto> GetBotReportSetting()
+        public async Task<OfficeWorkingReportSettingDto> GetOfficeWorkingReportSetting()
         {
-            return new BotReportSettingDto
+            return new OfficeWorkingReportSettingDto
             {
-                enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportEnable)),
-                everyday = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportEveryday)),
-                hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportAtHour)),
-                dayofweek = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportAtDayOfWeek),
-                botUri = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportWebhookUrl)
+                enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportEnable)),
+                everyday = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingEveryday)),
+                hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportAtHour)),
+                officeIds = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportOfficeIds),
+                limit = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportLimit)),
+                mezonUrl = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportMezonUrl)
             };
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_Update)]
-        public async Task<BotReportSettingDto> SetBotReportSetting(BotReportSettingDto input)
+        public async Task<OfficeWorkingReportSettingDto> SetOfficeWorkingReportSetting(OfficeWorkingReportSettingDto input)
         {
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportEnable, input.enable.ToString());
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportEveryday, input.everyday.ToString());
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportAtHour, input.hour.ToString());
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportAtDayOfWeek, input.dayofweek);
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportWebhookUrl, input.botUri);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportEnable, input.enable.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingEveryday, input.everyday.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportAtHour, input.hour.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportOfficeIds, input.officeIds);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportLimit, input.limit.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportMezonUrl, input.mezonUrl);
 
             return input;
         }

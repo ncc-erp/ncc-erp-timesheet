@@ -1029,20 +1029,20 @@
         </mat-expansion-panel>
       </div>
 
-       <!-- Bot report settings -->
+       <!-- Office Working Report settings -->
        <div class="card main-content">
         <mat-expansion-panel>
           <mat-expansion-panel-header class="panel-header">
             <mat-panel-title>
-              <p class="title">{{"Bot report settings"}}</p>
+              <p class="title">{{"Office Working Report"}}</p>
             </mat-panel-title>
           </mat-expansion-panel-header>
 
-          <!-- Bot Report Setting -->
+          <!-- Office Working Report Setting -->
           <mat-expansion-panel *ngIf="permission.isGranted(VIEW_BOT_REPORT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowBotReportSetting">
             <mat-expansion-panel-header (click)="isShowBotReportSetting =!isShowBotReportSetting" class="panel-header">
               <mat-panel-title>
-                <p class="title">{{"Bot Report Setting"}}</p>
+                <p class="title">{{"Office Working Report Setting"}}</p>
                 <div *ngIf="isShowBotReportSetting" class="edit-save">
                   <button *ngIf="!isEditBotReportSetting" large mat-raised-button
                     color="primary" (click)="editBotReportSetting();$event.stopPropagation()">
@@ -1081,48 +1081,50 @@
                     <mat-checkbox [(ngModel)]="botReportSetting.enable" name="enable"
                       [disabled]="!isEditBotReportSetting">
                       <span class="special-label">Enable *</span> <mat-icon class="special-icon"
-                        matTooltip="Enable Bot report notification">help</mat-icon>
+                        matTooltip="Enable Office Working Report notification">help</mat-icon>
                     </mat-checkbox>
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-checkbox [(ngModel)]="botReportSetting.everyday" name="everyday"
                       [disabled]="!isEditBotReportSetting">
                       <span class="special-label">Run everyday *</span> <mat-icon class="special-icon"
-                        matTooltip="Run this bot everyday">help</mat-icon>
+                        matTooltip="Run Office Working Report everyday (if unchecked, runs only on weekdays)">help</mat-icon>
                     </mat-checkbox>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
                       <span class="special-label">Hour *</span> <mat-icon class="special-icon"
-                        matTooltip="Hour to send Bot report notification (0-23)">help</mat-icon>
+                        matTooltip="Hour to send Office Working Report notification (0-23)">help</mat-icon>
                       <input type="number" matInput name="hour" [(ngModel)]="botReportSetting.hour" required
                         [disabled]="!isEditBotReportSetting" min="0" max="23" />
                     </mat-form-field>
                   </div>
 
+
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Day Of Week *</span> <mat-icon class="special-icon"
-                        matTooltip="Day of the week when background worker runs to check Bot report, ex: Monday">help</mat-icon>
-                      <mat-select [(ngModel)]="botReportSetting.dayofweek" name="dayofweek" required
-                        [disabled]="!isEditBotReportSetting || botReportSetting.everyday">
-                        <mat-option value="Monday">Monday</mat-option>
-                        <mat-option value="Tuesday">Tuesday</mat-option>
-                        <mat-option value="Wednesday">Wednesday</mat-option>
-                        <mat-option value="Thursday">Thursday</mat-option>
-                        <mat-option value="Friday">Friday</mat-option>
-                        <mat-option value="Saturday">Saturday</mat-option>
-                        <mat-option value="Sunday">Sunday</mat-option>
-                      </mat-select>
+                      <span class="special-label">Office IDs *</span> <mat-icon class="special-icon"
+                        matTooltip="Office IDs to include in report (use 'ALL' for all offices or comma-separated IDs like '1,2,3')">help</mat-icon>
+                      <input type="text" matInput name="officeIds" [(ngModel)]="botReportSetting.officeIds" required
+                        [disabled]="!isEditBotReportSetting" placeholder="ALL or 1,2,3" />
                     </mat-form-field>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Bot URI *</span> <mat-icon class="special-icon"
-                        matTooltip="Webhook URL for sending Bot report notifications">help</mat-icon>
-                      <input type="text" matInput name="botUri" [(ngModel)]="botReportSetting.botUri" required
+                      <span class="special-label">Limit *</span> <mat-icon class="special-icon"
+                        matTooltip="Number of top employees to show per office">help</mat-icon>
+                      <input type="number" matInput name="limit" [(ngModel)]="botReportSetting.limit" required
+                        [disabled]="!isEditBotReportSetting" min="1" max="100" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Mezon URL *</span> <mat-icon class="special-icon"
+                        matTooltip="Webhook URL for sending Office Working Report notifications to Mezon">help</mat-icon>
+                      <input type="text" matInput name="mezonUrl" [(ngModel)]="botReportSetting.mezonUrl" required
                         [disabled]="!isEditBotReportSetting" />
                     </mat-form-field>
                   </div>

@@ -168,6 +168,15 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.MezonBaseAddress, "http://timejoinopentalk.nccsoft.vn", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.MezonSecurityCode, "12345678", scopes: SettingScopes.Application|SettingScopes.Tenant),
 
+                // Office working report to Mezon
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportEnable, "True", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingEveryday, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportAtHour, "13", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportAtMinute, "38", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportOfficeIds, "ALL", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportLimit, "20", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportMezonUrl, "https://webhook.mezon.ai/webhooks/1957466613359841280/MTc1NTUwMjYxOTY1MjE2MDQxMzoxOTU3NDY2MDQ3NTQ4MjMxNjgwOjE5NTc0NjY2MTMzNTk4NDEyODA6MTk1NzQ2NjY0MDQzNDA3MzYwMA.-npL7W8uxq5kopFAOnq8gpumUVjlfOMaTonoBAU7YuA", scopes: SettingScopes.Application | SettingScopes.Tenant),
+
                 new SettingDefinition(AppSettingNames.SecretRegisterCode, Configuration["DefaultSettings:SecretRegisterCode"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.EmailSaoDo, Configuration["DefaultSettings:EmailSaoDo"], 
@@ -185,6 +194,8 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.EmailHRVinh, Configuration["DefaultSettings:EmailHRVinh"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SecurityCode, Configuration["DefaultSettings:SecurityCode"],
+                scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.ClientRootAddress, Configuration["App:ClientRootAddress"] ?? "http://localhost:4200",
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.LogoutAllUser, "2024-04-01T00:00",
                 scopes: SettingScopes.Application | SettingScopes.Tenant),

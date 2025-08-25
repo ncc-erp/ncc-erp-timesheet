@@ -7,8 +7,9 @@ export interface BotReportSettingDto {
   enable: boolean;
   everyday: boolean;
   hour: number;
-  dayofweek: string;
-  botUri: string;
+  officeIds: string;
+  limit: number;
+  mezonUrl: string;
 }
 
 @Injectable({
@@ -25,10 +26,10 @@ export class BotReportSettingService extends BaseApiService {
   }
 
   get(): Observable<any> {
-    return this.http.get<any>(this.rootUrl + '/GetBotReportSetting');
+    return this.http.get<any>(this.rootUrl + '/GetOfficeWorkingReportSetting');
   }
 
   change(input: BotReportSettingDto): Observable<BotReportSettingDto> {
-    return this.http.post<BotReportSettingDto>(this.rootUrl + '/SetBotReportSetting', input);
+    return this.http.post<BotReportSettingDto>(this.rootUrl + '/SetOfficeWorkingReportSetting', input);
   }
 }

@@ -211,7 +211,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   isShowBotReportSetting: boolean = false;
   isEditBotReportSetting: boolean = false;
-  botReportSetting = { everyday: false, botUri: '' } as BotReportSettingDto;
+  botReportSetting = { enable: false, everyday: false, hour: 8, officeIds: 'ALL', limit: 20, mezonUrl: '' } as BotReportSettingDto;
 
   unlockSetting = {} as UnlockTimesheetConfigDto;
   timesCanLateAndEarlyInMonthSetting = {} as TimesCanLateAndEarlyInMonthSettingDto;
@@ -1942,8 +1942,19 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       return;
     }
     
-    if (!this.botReportSetting.everyday && !this.botReportSetting.dayofweek) {
-      abp.message.error("Day of week is required!");
+    
+    if (!this.botReportSetting.officeIds || this.botReportSetting.officeIds.trim() === '') {
+      abp.message.error("Office IDs is required!");
+      return;
+    }
+    
+    if (this.botReportSetting.limit < 1 || this.botReportSetting.limit > 100) {
+      abp.message.error("Limit must be between 1 and 100!");
+      return;
+    }
+    
+    if (!this.botReportSetting.mezonUrl || this.botReportSetting.mezonUrl.trim() === '') {
+      abp.message.error("Mezon URL is required!");
       return;
     }
     
