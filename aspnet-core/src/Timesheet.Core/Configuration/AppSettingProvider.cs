@@ -146,6 +146,12 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.PMReportPunishAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.PMReportPunishAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
 
+                new SettingDefinition(AppSettingNames.BotReportEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.BotReportEveryday, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.BotReportAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.BotReportAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.BotReportWebhookUrl, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
+
                 new SettingDefinition(AppSettingNames.ReviewEnableWorker, "true", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ReviewDeadlineDay, "5", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ReviewStartDayOfMonth, "1", scopes: SettingScopes.Application | SettingScopes.Tenant),
