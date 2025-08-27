@@ -211,7 +211,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   isShowBotReportSetting: boolean = false;
   isEditBotReportSetting: boolean = false;
-  botReportSetting = { enable: false, everyday: false, hour: 8, officeIds: 'ALL', limit: 20, mezonUrl: '' } as BotReportSettingDto;
+  botReportSetting = { enable: false, everyday: false, hour: 8, minute: 0, officeIds: 'ALL', limit: 20, mezonUrl: '' } as BotReportSettingDto;
 
   unlockSetting = {} as UnlockTimesheetConfigDto;
   timesCanLateAndEarlyInMonthSetting = {} as TimesCanLateAndEarlyInMonthSettingDto;
@@ -1942,6 +1942,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       return;
     }
     
+    if (this.botReportSetting.minute < 0 || this.botReportSetting.minute > 59) {
+      abp.message.error("Minute must be between 0 and 59!");
+      return;
+    }
     
     if (!this.botReportSetting.officeIds || this.botReportSetting.officeIds.trim() === '') {
       abp.message.error("Office IDs is required!");

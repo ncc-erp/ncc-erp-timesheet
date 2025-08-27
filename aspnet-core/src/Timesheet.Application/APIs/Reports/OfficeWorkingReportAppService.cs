@@ -350,8 +350,9 @@ namespace Timesheet.APIs.Reports
                 {
                     
                     sb.AppendLine("```");
-                    sb.AppendLine("STT  |   Họ và Tên                   |    LW Total    |   LW Office   |   LW WFH  |   LM Total    |   LM Office   |   LM WFH  ");
-                    sb.AppendLine("------------------------------------------------------------------------------------------------------------------------------------------------");
+                    sb.AppendLine("┌─────┬───────────────────────────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐");
+                    sb.AppendLine("│ STT │           Họ và Tên           │ LW Total │ LW Office│  LW WFH  │ LM Total │ LM Office│  LM WFH  │");
+                    sb.AppendLine("├─────┼───────────────────────────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤");
                     
                     int idx = 1;
                     
@@ -364,10 +365,11 @@ namespace Timesheet.APIs.Reports
                         if (name.Length > 29) name = name.Substring(0, 26) + "...";
                         
                         
-                        sb.AppendLine($"{idx,4} | {name,-30} | {item.TotalAllLWHours,12:F1} | {item.OfficeLWHours,11:F1} | {item.WfhLWHours,11:F1} | {item.TotalAllLMHours,15:F1} | {item.OfficeLMHours,15:F1} | {item.WfhLMHours,13:F1}");
+                        sb.AppendLine($"│{idx,4} │ {name,-29}   {item.TotalAllLWHours,15:F1}     {item.OfficeLWHours,15:F1}   {item.WfhLWHours,15:F1}  {item.TotalAllLMHours,15:F1}     {item.OfficeLMHours,15:F1}   {item.WfhLMHours,15:F1} │");
                         idx++;
                     }
                     
+                    sb.AppendLine("└─────┴───────────────────────────────┴──────────┴──────────┴──────────┴──────────┴──────────┴──────────┘");
                     sb.AppendLine($"Hiển thị: {itemsToShow.Count()}/{combined.Count} nhân viên");
                     sb.AppendLine("```");
                     sb.AppendLine();
@@ -460,21 +462,6 @@ namespace Timesheet.APIs.Reports
             Logger.Error($"DEBUG: LM Range: {lmStart:yyyy-MM-dd} to {lmEnd:yyyy-MM-dd}");
             Logger.Error($"DEBUG: Query Range: {minStart:yyyy-MM-dd} to {maxEnd:yyyy-MM-dd}");
             Logger.Error($"DEBUG: OfficeId: {officeId}, UserId: {userId}");
-            
-            // Debug: Check all remote requests in the system
-            var allRemoteRequests = await WorkScope.GetAll<AbsenceDayDetail>()
-                .Include(d => d.Request)
-                .Where(d => d.Request.Type == RequestType.Remote)
-                .OrderByDescending(d => d.DateAt)
-                .Take(10)
-                .AsNoTracking()
-                .ToListAsync();
-            
-            Logger.Error($"DEBUG: Total remote requests in system (last 10): {allRemoteRequests.Count}");
-            foreach (var req in allRemoteRequests)
-            {
-                Logger.Error($"DEBUG: All Remote - UserId: {req.Request.UserId}, Date: {req.DateAt:yyyy-MM-dd}, Status: {req.Request.Status}, Type: {req.DateType}");
-            }
 
             var tkList = await WorkScope.GetAll<Timekeeping>()
                 .Where(t => t.DateAt >= minStart && t.DateAt <= maxEnd)
@@ -484,6 +471,23 @@ namespace Timesheet.APIs.Reports
             Logger.Error($"DEBUG: Found {tkList.Count} timekeeping records");
             Logger.Error($"DEBUG: Found {users.Count} users in office");
 
+            // Debug remote data
+            var allRemoteRequests = await WorkScope.GetAll<AbsenceDayDetail>()
+                .Include(d => d.Request)
+                .Where(d => d.DateAt >= minStart && d.DateAt <= maxEnd)
+                .AsNoTracking()
+                .ToListAsync();
+            
+            Logger.Error($"DEBUG: Total AbsenceDayDetail records in range: {allRemoteRequests.Count}");
+            Logger.Error($"DEBUG: Remote type requests: {allRemoteRequests.Count(x => x.Request.Type == RequestType.Remote)}");
+            Logger.Error($"DEBUG: Approved remote requests: {allRemoteRequests.Count(x => x.Request.Type == RequestType.Remote && x.Request.Status == RequestStatus.Approved)}");
+            
+            // Log some sample data
+            foreach (var sample in allRemoteRequests.Take(5))
+            {
+                Logger.Error($"DEBUG Sample: UserId={sample.Request.UserId}, Date={sample.DateAt:yyyy-MM-dd}, Type={sample.Request.Type}, Status={sample.Request.Status}, DateType={sample.DateType}");
+            }
+
             // Remote map from AbsenceDayDetail (Request.Type == Remote, Approved)
             var remoteDetails = await WorkScope.GetAll<AbsenceDayDetail>()
                 .Include(d => d.Request)
@@ -492,12 +496,6 @@ namespace Timesheet.APIs.Reports
                 .Where(d => d.Request.Type == RequestType.Remote)
                 .AsNoTracking()
                 .ToListAsync();
-
-            Logger.Error($"DEBUG: Found {remoteDetails.Count} remote details");
-            foreach (var rd in remoteDetails.Take(5))
-            {
-                Logger.Error($"DEBUG: Remote - UserId: {rd.Request.UserId}, Date: {rd.DateAt:yyyy-MM-dd}, Type: {rd.DateType}, Status: {rd.Request.Status}");
-            }
 
             var remoteMap = new Dictionary<(long userId, DateTime date), RemoteFlags>();
             foreach (var d in remoteDetails)
@@ -542,8 +540,15 @@ namespace Timesheet.APIs.Reports
                 if (uinfo == null || !uid.HasValue) continue;
                 if (userId.HasValue && uid.Value != userId.Value) continue;
 
+                // Parse tracker time to get actual working minutes
+                var trackerMinutes = 0;
+                if (!string.IsNullOrWhiteSpace(t.TrackerTime) && TimeSpan.TryParse(t.TrackerTime, out var trackerSpan))
+                {
+                    trackerMinutes = (int)trackerSpan.TotalMinutes;
+                }
+                
                 var (mMin, aMin) = ComputeSplitWorkingMinutes(t.CheckIn, t.CheckOut);
-                if (mMin + aMin <= 0) continue;
+                if (mMin + aMin + trackerMinutes <= 0) continue;
 
                 if (!agg.ContainsKey(uid.Value))
                 {
@@ -566,24 +571,36 @@ namespace Timesheet.APIs.Reports
 
                 if (inLW)
                 {
-                    row.TotalAllLW += mMin + aMin;
-                    row.OfficeLW += (remoteFlags.Morning ? 0 : mMin) + (remoteFlags.Afternoon ? 0 : aMin);
-                    row.WfhLW += (remoteFlags.Morning ? mMin : 0) + (remoteFlags.Afternoon ? aMin : 0);
-                    
                     if (remoteFlags.Morning || remoteFlags.Afternoon)
                     {
-                        Logger.Error($"DEBUG: WFH LW - User {uid}, Date {t.DateAt:yyyy-MM-dd}, Morning: {remoteFlags.Morning}, Afternoon: {remoteFlags.Afternoon}, WfhMinutes: {(remoteFlags.Morning ? mMin : 0) + (remoteFlags.Afternoon ? aMin : 0)}");
+                        // WFH: use tracker time as WFH time
+                        row.TotalAllLW += trackerMinutes;
+                        row.WfhLW += trackerMinutes;
+                        // Office time = 0 when WFH
+                    }
+                    else
+                    {
+                        // Office: use check-in/out (with break logic) + tracker time
+                        int officeTime = mMin + aMin; // Already calculated with break exclusion
+                        row.TotalAllLW += officeTime + trackerMinutes;
+                        row.OfficeLW += officeTime + trackerMinutes;
                     }
                 }
                 if (inLM)
                 {
-                    row.TotalAllLM += mMin + aMin;
-                    row.OfficeLM += (remoteFlags.Morning ? 0 : mMin) + (remoteFlags.Afternoon ? 0 : aMin);
-                    row.WfhLM += (remoteFlags.Morning ? mMin : 0) + (remoteFlags.Afternoon ? aMin : 0);
-                    
                     if (remoteFlags.Morning || remoteFlags.Afternoon)
                     {
-                        Logger.Error($"DEBUG: WFH LM - User {uid}, Date {t.DateAt:yyyy-MM-dd}, Morning: {remoteFlags.Morning}, Afternoon: {remoteFlags.Afternoon}, WfhMinutes: {(remoteFlags.Morning ? mMin : 0) + (remoteFlags.Afternoon ? aMin : 0)}");
+                        // WFH: use tracker time as WFH time
+                        row.TotalAllLM += trackerMinutes;
+                        row.WfhLM += trackerMinutes;
+                        // Office time = 0 when WFH
+                    }
+                    else
+                    {
+                        // Office: use check-in/out (with break logic) + tracker time
+                        int officeTime = mMin + aMin; // Already calculated with break exclusion
+                        row.TotalAllLM += officeTime + trackerMinutes;
+                        row.OfficeLM += officeTime + trackerMinutes;
                     }
                 }
             }
@@ -664,8 +681,9 @@ namespace Timesheet.APIs.Reports
                     else
                     {
                         sb.AppendLine("```");
-                        sb.AppendLine("STT  |   Họ và Tên                   |    LW Total    |   LW Office   |   LW WFH  |   LM Total    |   LM Office   |   LM WFH  ");
-                        sb.AppendLine("------------------------------------------------------------------------------------------------------------------------------------------------");
+                        sb.AppendLine("┌─────┬───────────────────────────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐");
+                        sb.AppendLine("│ STT │           Họ và Tên           │ LW Total │ LW Office│  LW WFH  │ LM Total │ LM Office│  LM WFH  │");
+                        sb.AppendLine("├─────┼───────────────────────────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤");
                         
                         var topItems = combined.Take(actualLimit); // Hiển thị theo limit cho mỗi office
                         int idx = 1;
@@ -675,9 +693,11 @@ namespace Timesheet.APIs.Reports
                             var name = item.UserName ?? "N/A";
                             if (name.Length > 29) name = name.Substring(0, 26) + "...";
                             
-                            sb.AppendLine($"{idx,4} | {name,-29} | {item.TotalAllLWHours,14:F1} | {item.OfficeLWHours,13:F1} | {item.WfhLWHours,9:F1} | {item.TotalAllLMHours,13:F1} | {item.OfficeLMHours,13:F1} | {item.WfhLMHours,9:F1}");
+                            sb.AppendLine($"│{idx,4} │ {name,-29}   {item.TotalAllLWHours,15:F1}   {item.OfficeLWHours,15:F1}   {item.WfhLWHours,15:F1}   {item.TotalAllLMHours,15:F1}   {item.OfficeLMHours,15:F1}  │{item.WfhLMHours,15:F1} │");
                             idx++;
                         }
+                        
+                        sb.AppendLine("└─────┴───────────────────────────────┴──────────┴──────────┴──────────┴──────────┴──────────┴──────────┘");
                         
                         if (combined.Count > actualLimit)
                         {

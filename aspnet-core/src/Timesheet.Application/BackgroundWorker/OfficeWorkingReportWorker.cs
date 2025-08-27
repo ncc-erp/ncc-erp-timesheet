@@ -49,7 +49,7 @@ namespace Timesheet.BackgroundWorker
                 string everydayStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingEveryday);
                 string hourStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportAtHour);
 
-                _logger.LogInformation($"Configured hour: {hourStr}, Current time: {now.Hour}:{now.Minute}, Everyday: {everydayStr}");
+                _logger.LogInformation($"Configured time: {hourStr}:00, Current time: {now.Hour}:{now.Minute}, Everyday: {everydayStr}");
 
                 if (!int.TryParse(hourStr, out int configuredHour))
                 {
@@ -58,8 +58,8 @@ namespace Timesheet.BackgroundWorker
 
                 bool isEveryday = string.Equals(everydayStr, "True", StringComparison.OrdinalIgnoreCase);
 
-                // Check time match (only check hour, trigger at minute 0)
-                if (now.Hour != configuredHour || now.Minute != 0)
+                // Check time match - run every minute starting from configured hour
+                if (now.Hour < configuredHour)
                 {
                     return;
                 }
