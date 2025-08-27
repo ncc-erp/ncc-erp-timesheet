@@ -130,15 +130,8 @@ export class CreateEditTimesheetItemComponent extends AppComponentBase implement
     }
   }
 
-  private processSpecialTask(){
-    if (this.isSpecialTask()){
-      this.strWorkingTime = 4;
-    }
-  }
-
   private onCreateTimesheet() {
     this.processDefaultProjectTask();
-    this.processSpecialTask();
   }
 
   onProjectChange() {
@@ -164,7 +157,7 @@ export class CreateEditTimesheetItemComponent extends AppComponentBase implement
 
   onTaskChange(): void {
     if (this.isSpecialTask()) {
-      this.strWorkingTime = 4;
+      this.strWorkingTime = 1;
       this.myTimesheet.typeOfWork = APP_CONFIG.EnumTypeOfWork[0].value;
     }
 

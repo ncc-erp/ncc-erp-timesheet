@@ -218,6 +218,10 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
   }
 
   onSaveAndClose() {
+    if (this.saving) {
+      return;
+    }
+    
     if (this.selectedCheckboxCount === 0) {
       abp.notify.error("Need to select at least one record");
     }
@@ -277,12 +281,13 @@ export class PmSendRequestComponent extends CreateEditRequestComponentBase imple
         (response) => {
           if (response) {
             abp.notify.success("PM send request successful");
-            this.saving = false;
             this.dialogRef.close(true);
           }
+          this.saving = false; 
         },
-        () => {
-          this.saving = false
+        (error) => {
+          abp.notify.error("An error occurred while processing your request");
+          this.saving = false; 
         }
       );
     }
