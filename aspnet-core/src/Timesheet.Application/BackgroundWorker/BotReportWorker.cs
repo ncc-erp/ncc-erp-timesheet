@@ -5,24 +5,26 @@ using Abp.Threading.BackgroundWorkers;
 using Abp.Threading.Timers;
 using Ncc.Configuration;
 using System;
+using System.Threading;
+using Timesheet.APIs.Reports;
+using Timesheet.DomainServices;
 using Timesheet.Services.Mezon;
 using Timesheet.Uitls;
-using Timesheet.DomainServices;
 
 namespace Timesheet.BackgroundWorker
 {
     public class BotReportWorker : PeriodicBackgroundWorkerBase, ISingletonDependency
     {
-        private readonly IUserPunishmentServices _userPunishmentService;
+        private readonly UserTimeReport_BotAppService _userTimeReportBot;
 
         public BotReportWorker(
             AbpTimer timer,
-            IUserPunishmentServices userPunishmentService
+            UserTimeReport_BotAppService userTimeReportBot
         ) : base(timer)
         {
-            _userPunishmentService = userPunishmentService;
+            _userTimeReportBot = userTimeReportBot;
 
-            Timer.Period = 1000 * 60 ;
+            Timer.Period = 1000 * 60*60;
         }
 
         [UnitOfWork]
@@ -74,22 +76,64 @@ namespace Timesheet.BackgroundWorker
 
             Logger.Info($"RunBotReportJob() running... [Mode: {(isEveryday ? "Everyday" : dayOfWeek)}]");
             
-            ExecuteBotReport();
+            ExecuteBotReportWithRetry();
             
             Logger.Info("RunBotReportJob() finished.");
         }
+        private const int MAX_RETRY_ATTEMPTS = 5;
+        private const int RETRY_DELAY_MS = 2000; 
+        private void ExecuteBotReportWithRetry()
+        {
+            int attempt = 0;
+            bool success = false;
+            Exception lastException = null;
 
-        private void ExecuteBotReport()
+            while (attempt < MAX_RETRY_ATTEMPTS && !success)
+            {
+                attempt++;
+
+                try
+                {
+                    Logger.Info($"ExecuteBotReport() - Attempt {attempt}/{MAX_RETRY_ATTEMPTS}");
+
+                    _userTimeReportBot.ProcessTimesheetCommand(DateTime.Today);
+
+                    Logger.Info($"Bot Report executed successfully on attempt {attempt}");
+                    success = true;
+                }
+                catch (Exception ex)
+                {
+                    lastException = ex;
+                    Logger.Warn($"ExecuteBotReport() failed on attempt {attempt}/{MAX_RETRY_ATTEMPTS}: {ex.Message}");
+                    if (attempt < MAX_RETRY_ATTEMPTS)
+                    {
+                        Logger.Info($"Waiting {RETRY_DELAY_MS}ms before retry...");
+                        Thread.Sleep(RETRY_DELAY_MS);
+                    }
+                }
+            }
+
+            if (!success)
+            {
+                string errorMessage = $"ExecuteBotReport() failed after {MAX_RETRY_ATTEMPTS} attempts. Last error: {lastException?.Message}";
+                Logger.Error(errorMessage, lastException);
+                NotifyFailure(errorMessage);
+            }
+        }
+
+        private void NotifyFailure(string errorMessage)
         {
             try
             {
-                _userPunishmentService.ApplyPMReportPunishmentsAsync().GetAwaiter().GetResult();
-                
-                Logger.Info("Bot Report executed successfully");
+                Logger.Fatal($"CRITICAL: Bot Report Worker failed completely - {errorMessage}");
+                _userTimeReportBot.NotifyFailure($" BOT REPORT WORKER FAILED\n" +
+                    $" Error: {errorMessage}\n" +
+                    $" Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}\n" +
+                    $" Attempted: {MAX_RETRY_ATTEMPTS} times\n");
             }
             catch (Exception ex)
             {
-                Logger.Error($"ExecuteBotReport() error: {ex.Message}", ex);
+                Logger.Error($"Failed to send failure notification: {ex.Message}", ex);
             }
         }
     }

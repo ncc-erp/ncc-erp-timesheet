@@ -42,6 +42,7 @@ namespace Ncc.Web.Host.Startup
             workManager.Add(IocManager.Resolve<CheckAndPunishLateReviewWorker>());
             workManager.Add(IocManager.Resolve<ApplyPMReportPunishmentWorker>());
             workManager.Add(IocManager.Resolve<BotReportWorker>());
+
         }
     }
 }

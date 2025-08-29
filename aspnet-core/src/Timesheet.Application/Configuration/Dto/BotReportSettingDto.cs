@@ -11,5 +11,7 @@ namespace Timesheet.Configuration.Dto
         public int hour { get; set; } 
         public string dayofweek { get; set; }
         public string botUri { get; set; }
+        public string botCommand { get; set; }
+
     }
 }

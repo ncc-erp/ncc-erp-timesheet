@@ -1126,7 +1126,17 @@
                         [disabled]="!isEditBotReportSetting" />
                     </mat-form-field>
                   </div>
+                          <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Bot URI *</span> <mat-icon class="special-icon"
+                        matTooltip="Webhook URL for sending Bot report notifications">help</mat-icon>
+                      <input type="text" matInput name="botUri" [(ngModel)]="botReportSetting.botCommand" required
+                        [disabled]="!isEditBotReportSetting" />
+                    </mat-form-field>
+                  </div>
                 </div>
+
+                
               </form>
             </div>
           </mat-expansion-panel>
