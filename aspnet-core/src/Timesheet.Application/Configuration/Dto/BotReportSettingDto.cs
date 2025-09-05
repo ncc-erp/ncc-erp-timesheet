@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,5 +11,8 @@ namespace Timesheet.Configuration.Dto
         public int hour { get; set; } 
         public string dayofweek { get; set; }
         public string botUri { get; set; }
+        public int officeId { get; set; } 
+        public double? minHours { get; set; }
+        public int? topN { get; set; } 
     }
 }

@@ -814,15 +814,21 @@ namespace Ncc.Configuration
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_View)]
         public async Task<BotReportSettingDto> GetBotReportSetting()
         {
-            return new BotReportSettingDto
+            var result = new BotReportSettingDto
             {
                 enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportEnable)),
                 everyday = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportEveryday)),
                 hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportAtHour)),
                 dayofweek = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportAtDayOfWeek),
-                botUri = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportWebhookUrl)
+                botUri = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportWebhookUrl),
+                officeId = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportOfficeId)),
+                minHours = double.TryParse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportMinHours), out var minH) ? (double?)minH : null,
+                topN = int.TryParse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportTopN), out var tN) ? (int?)tN : null
             };
+
+            return result;
         }
+
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_Update)]
         public async Task<BotReportSettingDto> SetBotReportSetting(BotReportSettingDto input)
@@ -832,6 +838,9 @@ namespace Ncc.Configuration
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportAtHour, input.hour.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportAtDayOfWeek, input.dayofweek);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportWebhookUrl, input.botUri);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportOfficeId, input.officeId.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportMinHours, input.minHours?.ToString() ?? string.Empty);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportTopN, input.topN?.ToString() ?? string.Empty);
 
             return input;
         }

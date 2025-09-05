@@ -9,6 +9,9 @@ export interface BotReportSettingDto {
   hour: number;
   dayofweek: string;
   botUri: string;
+  officeId: number;
+  minHours: number;
+  topN: number;
 }
 
 @Injectable({

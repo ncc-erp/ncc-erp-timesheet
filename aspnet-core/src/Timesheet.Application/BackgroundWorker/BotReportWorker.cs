@@ -13,16 +13,16 @@ namespace Timesheet.BackgroundWorker
 {
     public class BotReportWorker : PeriodicBackgroundWorkerBase, ISingletonDependency
     {
-        private readonly IUserPunishmentServices _userPunishmentService;
+        private readonly IBotReportDailyService _botReportDailyService;
 
         public BotReportWorker(
             AbpTimer timer,
-            IUserPunishmentServices userPunishmentService
+            IBotReportDailyService botReportDailyService
         ) : base(timer)
         {
-            _userPunishmentService = userPunishmentService;
+            _botReportDailyService = botReportDailyService;
 
-            Timer.Period = 1000 * 60 ;
+            Timer.Period = 1000 * 60 * 60;
         }
 
         [UnitOfWork]
@@ -83,7 +83,7 @@ namespace Timesheet.BackgroundWorker
         {
             try
             {
-                _userPunishmentService.ApplyPMReportPunishmentsAsync().GetAwaiter().GetResult();
+                _botReportDailyService.SendDailyProjectTimelogToMezon().GetAwaiter().GetResult();
                 
                 Logger.Info("Bot Report executed successfully");
             }

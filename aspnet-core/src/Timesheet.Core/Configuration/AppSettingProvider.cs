@@ -78,7 +78,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.UnassignedTaskId, "20077", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendEmailTimesheet, "true", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendEmailRequest, "true", scopes:SettingScopes.Application| SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.SendKomuSubmitTimesheet, "true", scopes:SettingScopes.Application| SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.SendKomuSubmitTimesheet, "false", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.EnableNofityKomuCheckInOutPunishment, "false", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendKomuRequest, "true", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NRITNotifyEnableWorker,"false",scopes:SettingScopes.Application|SettingScopes.Tenant),
@@ -151,6 +151,9 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.BotReportAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportWebhookUrl, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.BotReportOfficeId, "1", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.BotReportMinHours, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.BotReportTopN, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
 
                 new SettingDefinition(AppSettingNames.ReviewEnableWorker, "true", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ReviewDeadlineDay, "5", scopes: SettingScopes.Application | SettingScopes.Tenant),

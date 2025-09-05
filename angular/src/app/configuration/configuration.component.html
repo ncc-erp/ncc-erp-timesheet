@@ -1126,6 +1126,33 @@
                         [disabled]="!isEditBotReportSetting" />
                     </mat-form-field>
                   </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Office ID</span> <mat-icon class="special-icon"
+                        matTooltip="Office ID for filtering report data">help</mat-icon>
+                      <input type="number" matInput name="officeId" [(ngModel)]="botReportSetting.officeId"
+                        [disabled]="!isEditBotReportSetting" min="0" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Minimum Hours</span> <mat-icon class="special-icon"
+                        matTooltip="Minimum hours threshold for report">help</mat-icon>
+                      <input type="number" matInput name="minHours" [(ngModel)]="botReportSetting.minHours"
+                        [disabled]="!isEditBotReportSetting" min="0" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Top N</span> <mat-icon class="special-icon"
+                        matTooltip="Number of top records to include in report">help</mat-icon>
+                      <input type="number" matInput name="topN" [(ngModel)]="botReportSetting.topN"
+                        [disabled]="!isEditBotReportSetting" min="0" />
+                    </mat-form-field>
+                  </div>
                 </div>
               </form>
             </div>

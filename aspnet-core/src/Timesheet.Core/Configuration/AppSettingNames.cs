@@ -137,6 +137,9 @@ namespace Ncc.Configuration
         public const string BotReportAtHour = "Abp.BotReportAtHour";
         public const string BotReportAtDayOfWeek = "Abp.BotReportAtDayOfWeek";
         public const string BotReportWebhookUrl = "Abp.BotReportWebhookUrl";
+        public const string BotReportOfficeId = "Abp.BotReportOfficeId";
+        public const string BotReportMinHours = "Abp.BotReportMinHours";
+        public const string BotReportTopN = "Abp.BotReportTopN";
 
         public const string ReviewDeadlineDay = "App.Review.DeadlineDay";
         public const string ReviewStartDayOfMonth = "App.Review.StartDayOfMonth";
