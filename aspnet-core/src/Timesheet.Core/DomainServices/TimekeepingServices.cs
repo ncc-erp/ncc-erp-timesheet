@@ -354,7 +354,7 @@ namespace Timesheet.DomainServices
                         }
                     }
 
-                    if (trackerTime > 0 && isRemoteWork)
+                    if (isRemoteWork)
                     {
                         var registerWorkingMinutes = CommonUtils.GetEmployeeWorkingHours(t.RegisterCheckOut, t.RegisterCheckIn);
                         var dayOffType = registerCheckInOut.AbsenceDayType;

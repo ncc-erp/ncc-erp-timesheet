@@ -243,7 +243,7 @@ namespace Timesheet.APIs.HRMv2
                 {
                     NormalizeEmailAddress = x.Email,
                     
-                    OpenTalkDates = x.ListDate.Where(s => s.Date.DayOfWeek == DayOfWeek.Saturday && s.WorkingMinute >= 120)
+                    OpenTalkDates = x.ListDate.Where(s => s.Date.DayOfWeek == DayOfWeek.Saturday && s.WorkingMinute >= 60)
                     .Select(s => s.Date).ToList(),
                     
                     NormalWorkingDates = x.ListDate.Where(s => s.Date.DayOfWeek != DayOfWeek.Saturday).Where(s => s.ProjectTaskId.Any(p => p != opentalkTaskId)).Where(s => s.WorkingMinute > 0)
