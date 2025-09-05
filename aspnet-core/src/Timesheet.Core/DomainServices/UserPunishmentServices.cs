@@ -1,4 +1,4 @@
-﻿using Abp.Dependency;
+using Abp.Dependency;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Abp.Timing;
@@ -38,6 +38,18 @@ namespace Timesheet.DomainServices
         [UnitOfWork]
         public async Task<List<PMReportItemDto>> ApplyPMReportPunishmentsAsync()
         {
+            var selectedDate = Clock.Now.Date;
+            
+            var isOffDate = await WorkScope.GetAll<DayOffSetting>()
+                .Where(s => s.DayOff.Date == selectedDate)
+                .AnyAsync();
+
+            if (isOffDate)
+            {
+                _logger.LogInformation($"{selectedDate:MM/dd/yyyy} is Off Date => Skip PM Report punishment");
+                return new List<PMReportItemDto>();
+            }
+            
             var users = WorkScope.GetAll<User>()
               .Where(u => u.IsActive)
               .Select(u => new {
@@ -46,7 +58,6 @@ namespace Timesheet.DomainServices
                   u.EmailAddress
               })
               .ToList();
-            var selectedDate = Clock.Now.Date;
 
             var oldPunishments = await WorkScope.GetAll<UserPunishment>()
               .Where(p => p.DateAt.Date == selectedDate &&
