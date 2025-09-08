@@ -26,7 +26,7 @@ namespace Timesheet.BackgroundWorker
         {
             _reportAppService = reportAppService;
             _logger = logger;
-            Timer.Period = 1000 * 60; // every minute
+            Timer.Period = 1000 * 60 * 60 * 24; // every 24 hours
         }
 
         [UnitOfWork]
@@ -83,13 +83,13 @@ namespace Timesheet.BackgroundWorker
 
                 _logger.LogInformation($"Settings - OfficeIds: {officeIdsStr}, Limit: {limitStr}, MezonUrl: {(!string.IsNullOrEmpty(mezonUrl) ? "SET" : "EMPTY")}");
 
-                // Sửa logic xử lý limit
-                int limit = 20; // default
+                
+                int limit = 20; 
                 if (int.TryParse(limitStr, out var parsedLimit))
                 {
                     if (parsedLimit <= 0)
                     {
-                        limit = int.MaxValue; // Lấy tất cả
+                        limit = int.MaxValue; 
                         _logger.LogInformation("Using unlimited mode (show all records)");
                     }
                     else
@@ -110,7 +110,7 @@ namespace Timesheet.BackgroundWorker
 
                         Task.Run(async () =>
                         {
-                            await _reportAppService.NotifyTopByOffice(
+                            await _reportAppService.SendTopOfficeUsersNotification(
                                 officeId: null,
                                 limit: limit,
                                 reportDate: now.Date,
@@ -156,7 +156,7 @@ namespace Timesheet.BackgroundWorker
 
                             Task.Run(async () =>
                             {
-                                await _reportAppService.NotifyTopByOffice(
+                                await _reportAppService.SendTopOfficeUsersNotification(
                                     officeId: officeId,
                                     limit: limit,
                                     reportDate: now.Date,

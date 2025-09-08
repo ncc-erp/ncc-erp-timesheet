@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using Timesheet.Entities;
 using Timesheet.Services.Mezon;
 using Timesheet.Uitls;
+using Timesheet.APIs.Reports.Dto;
+
 using static Ncc.Entities.Enum.StatusEnum;
 using Branch = Timesheet.Entities.Branch;
 
@@ -29,37 +31,6 @@ namespace Timesheet.APIs.Reports
         {
             _mezonService = mezonService;
         }
-
-        public class OfficeWorkingTopDto
-        {
-            public long UserId { get; set; }
-            public string UserName { get; set; }
-            public string OfficeName { get; set; }
-            public string OfficeCode { get; set; }
-            public int TotalMinutesLW { get; set; }
-            public double TotalHoursLW => Math.Round(TotalMinutesLW / 60.0, 2);
-        }
-
-        public class OfficeWorkingTopLWLMDto
-        {
-            public long UserId { get; set; }
-            public string UserName { get; set; }
-            public string OfficeName { get; set; }
-            public string OfficeCode { get; set; }
-            public int TotalAllLW { get; set; }
-            public int OfficeLW { get; set; }
-            public int WfhLW { get; set; }
-            public int TotalAllLM { get; set; }
-            public int OfficeLM { get; set; }
-            public int WfhLM { get; set; }
-            public double TotalAllLWHours => Math.Round(TotalAllLW / 60.0, 2);
-            public double OfficeLWHours => Math.Round(OfficeLW / 60.0, 2);
-            public double WfhLWHours => Math.Round(WfhLW / 60.0, 2);
-            public double TotalAllLMHours => Math.Round(TotalAllLM / 60.0, 2);
-            public double OfficeLMHours => Math.Round(OfficeLM / 60.0, 2);
-            public double WfhLMHours => Math.Round(WfhLM / 60.0, 2);
-        }
-
         public struct RemoteFlags
         {
             public bool Morning { get; set; }
@@ -76,7 +47,7 @@ namespace Timesheet.APIs.Reports
         {
             var thisWeekStart = DateTimeUtils.FirstDayOfWeek(reportDate);
             var lwStart = thisWeekStart.AddDays(-7).Date;
-            var lwEnd = thisWeekStart.AddDays(-1).Date;
+            var lwEnd = thisWeekStart.AddDays(-1).Date.AddDays(1).AddTicks(-1);
             return (lwStart, lwEnd);
         }
 
@@ -149,7 +120,7 @@ namespace Timesheet.APIs.Reports
 
         [AbpAuthorize]
         [HttpGet, HttpPost]
-        public async Task<List<OfficeWorkingTopDto>> GetTopByOffice(
+        public async Task<List<OfficeWorkingTopDto>> ListTopOfficeWorkingTime(
             [FromQuery] long officeId,
             [FromQuery] int limit = 20,
             [FromQuery] DateTime? reportDate = null,
@@ -172,7 +143,6 @@ namespace Timesheet.APIs.Reports
                 rangeEnd = lw.end;
             }
 
-            // Lấy danh sách user thuộc officeId
             var users = await (from u in WorkScope.GetAll<Ncc.Authorization.Users.User>()
                                join b in WorkScope.GetAll<Branch>() on u.BranchId equals b.Id into bj
                                from b in bj.DefaultIfEmpty()
@@ -180,7 +150,9 @@ namespace Timesheet.APIs.Reports
                                select new
                                {
                                    u.Id,
-                                   u.Name,
+                                   Name = !string.IsNullOrEmpty(u.UserName)
+                                       ? u.UserName
+                                       : (!string.IsNullOrEmpty(u.Name) ? u.Name : "Unknown"),
                                    u.EmailAddress,
                                    OfficeName = b != null ? b.Name : string.Empty,
                                    OfficeCode = b != null ? b.Code : string.Empty
@@ -222,11 +194,11 @@ namespace Timesheet.APIs.Reports
 
                 if (!matched || !uId.HasValue)
                 {
-                    continue; // ngoài office hoặc không map được user
+                    continue;
                 }
                 if (userId.HasValue && uId.Value != userId.Value)
                 {
-                    continue; // lọc 1 user cụ thể
+                    continue;
                 }
 
                 var minutes = ComputeWorkingMinutes(t.CheckIn, t.CheckOut);
@@ -250,9 +222,9 @@ namespace Timesheet.APIs.Reports
                     OfficeCode = kv.Value.officeCode,
                     TotalMinutesLW = kv.Value.minutes
                 })
-                .OrderByDescending(x => x.TotalMinutesLW); // Sắp xếp từ lớn xuống nhỏ
+                .OrderByDescending(x => x.TotalMinutesLW);
 
-            // Nếu limit = int.MaxValue thì lấy tất cả, không cần Take()
+
             if (limit == int.MaxValue)
             {
                 return result.ToList();
@@ -265,7 +237,7 @@ namespace Timesheet.APIs.Reports
 
         [AbpAuthorize]
         [HttpGet, HttpPost]
-        public async Task<string> NotifyTopByOffice(
+        public async Task<string> SendTopOfficeUsersNotification(
             [FromQuery] long? officeId = null,
             [FromQuery] int limit = 20,
             [FromQuery] DateTime? reportDate = null,
@@ -276,16 +248,16 @@ namespace Timesheet.APIs.Reports
             [FromQuery] bool showAll = false,
             [FromQuery] bool allOffices = false)
         {
-            // Nếu showAll = true, set limit = int.MaxValue để lấy tất cả
+
             var actualLimit = showAll ? int.MaxValue : limit;
 
             var sb = new StringBuilder();
 
-            // Nếu allOffices = true, hiển thị tất cả văn phòng
+
             if (allOffices)
             {
                 var allOfficesReport = await GetAllOfficesReport(actualLimit, reportDate, userId, startDate, endDate);
-                
+
                 // Send notification to Mezon
                 var notificationUrl = mezonUrl;
                 if (string.IsNullOrWhiteSpace(notificationUrl))
@@ -295,19 +267,84 @@ namespace Timesheet.APIs.Reports
 
                 if (!string.IsNullOrWhiteSpace(notificationUrl))
                 {
-                    _mezonService.NotifyToChannel(notificationUrl, allOfficesReport);
+                    var messageText = allOfficesReport;
+
+                    var mkList = new List<object>();
+
+                    string titleToFind = "📊 **BÁO CÁO TẤT CẢ VĂN PHÒNG**";
+                    int titlePos = messageText.IndexOf("📊 **BÁO CÁO TẤT CẢ VĂN PHÒNG**");
+                    if (titlePos >= 0)
+                    {
+                        mkList.Add(new
+                        {
+                            type = "b",
+                            s = titlePos,
+                            e = titlePos + titleToFind.Length
+                        });
+                    }
+
+                    string totalEmployeesText = "📈 **Tổng số văn phòng:**";
+                    int totalEmployeesPos = messageText.IndexOf(totalEmployeesText);
+                    if (totalEmployeesPos >= 0)
+                    {
+                        mkList.Add(new
+                        {
+                            type = "b",
+                            s = totalEmployeesPos,
+                            e = totalEmployeesPos + totalEmployeesText.Length
+                        });
+                    }
+
+                    string timeText = "📅 **Thời gian:**";
+                    int timePos = messageText.IndexOf(timeText);
+                    if (timePos >= 0)
+                    {
+                        mkList.Add(new
+                        {
+                            type = "b",
+                            s = timePos,
+                            e = timePos + timeText.Length
+                        });
+                    }
+
+                    int currentPos = 0;
+                    while (true)
+                    {
+                        int officePos = messageText.IndexOf("🏢 **VP ", currentPos);
+                        if (officePos == -1) break;
+
+                        int officeEndPos = messageText.IndexOf("**", officePos + 8);
+                        if (officeEndPos == -1) break;
+
+                        mkList.Add(new
+                        {
+                            type = "b",
+                            s = officePos,
+                            e = officeEndPos + 2
+                        });
+
+                        currentPos = officeEndPos + 2;
+                    }
+
+                    _mezonService.Post(notificationUrl, new
+                    {
+                        type = "hook",
+                        message = new
+                        {
+                            t = messageText,
+                            mk = mkList
+                        }
+                    });
                 }
-                
+
                 return allOfficesReport;
             }
-
-            // Nếu không có officeId, báo lỗi
             if (!officeId.HasValue)
             {
                 return "❌ Vui lòng cung cấp officeId hoặc sử dụng allOffices=true";
             }
 
-            var items = await GetTopByOffice(officeId.Value, actualLimit, reportDate, userId, startDate, endDate);
+            var items = await ListTopOfficeWorkingTime(officeId.Value, actualLimit, reportDate, userId, startDate, endDate);
 
             var branchInfo = await WorkScope.GetAll<Branch>()
                 .Where(b => b.Id == officeId.Value)
@@ -327,17 +364,16 @@ namespace Timesheet.APIs.Reports
                 var lw = GetLastWeekRange(now);
                 s = lw.start; e = lw.end;
             }
-            // Nếu không truyền start/end → hiển thị bảng cả LW & LM
             if (!startDate.HasValue || !endDate.HasValue)
             {
-                // Sử dụng reportDate nếu có, nếu không thì dùng thời gian hiện tại
+
                 var baseTime = reportDate?.Date ?? DateTimeUtils.GetNow().Date;
                 var (lwStart, lwEnd) = GetLastWeekRange(baseTime);
                 var lmStart = DateTimeUtils.FirstDayOfMonth(baseTime.AddMonths(-1));
                 var lmEnd = DateTimeUtils.LastDayOfMonth(baseTime.AddMonths(-1));
-                var combined = await GetTopByOfficeLWLM(officeId.Value, actualLimit, reportDate, userId);
+                var combined = await ListTopOfficeWorkingTimeLWLM(officeId.Value, actualLimit, reportDate, userId);
 
-                
+
                 sb.AppendLine($"**{(actualLimit == int.MaxValue ? "Tất cả" : $"Top {actualLimit}")} – VP {vpName}**");
                 sb.AppendLine($"**LW ({lwStart:dd/MM}–{lwEnd:dd/MM}) | LM ({lmStart:dd/MM}–{lmEnd:dd/MM})**");
                 sb.AppendLine();
@@ -348,30 +384,29 @@ namespace Timesheet.APIs.Reports
                 }
                 else
                 {
-                    
-                    sb.AppendLine("```");
-                    sb.AppendLine("┌─────┬───────────────────────────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐");
-                    sb.AppendLine("│ STT │           Họ và Tên           │ LW Total │ LW Office│  LW WFH  │ LM Total │ LM Office│  LM WFH  │");
-                    sb.AppendLine("├─────┼───────────────────────────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤");
-                    
+
                     int idx = 1;
-                    
                     var itemsToShow = showAll ? combined : combined.Take(actualLimit);
-                    
+
                     foreach (var item in itemsToShow)
                     {
-                        var name = item.UserName ?? "N/A";
-                        
-                        if (name.Length > 29) name = name.Substring(0, 26) + "...";
-                        
-                        
-                        sb.AppendLine($"│{idx,4} │ {name,-29}   {item.TotalAllLWHours,15:F1}     {item.OfficeLWHours,15:F1}   {item.WfhLWHours,15:F1}  {item.TotalAllLMHours,15:F1}     {item.OfficeLMHours,15:F1}   {item.WfhLMHours,15:F1} │");
+                        var username = item.UserName ?? "N/A";
+                        var atIndex = username.IndexOf('@');
+                        if (atIndex >= 0)
+                        {
+                            username = username.Substring(0, atIndex);
+                        }
+
+                        sb.AppendLine($"{idx}. **{username}**");
+                        sb.AppendLine($"   **Last Week:** {item.TotalAllLWHours:F1}h (**Office:** {item.OfficeLWHours:F1}h, **WFH:** {item.WfhLWHours:F1}h)");
+                        sb.AppendLine($"   **Last Month:** {item.TotalAllLMHours:F1}h (**Office:** {item.OfficeLMHours:F1}h, **WFH:** {item.WfhLMHours:F1}h)");
                         idx++;
                     }
-                    
-                    sb.AppendLine("└─────┴───────────────────────────────┴──────────┴──────────┴──────────┴──────────┴──────────┴──────────┘");
-                    sb.AppendLine($"Hiển thị: {itemsToShow.Count()}/{combined.Count} nhân viên");
-                    sb.AppendLine("```");
+
+                    if (combined.Count > itemsToShow.Count())
+                    {
+                        sb.AppendLine($"... và {combined.Count - itemsToShow.Count()} người khác");
+                    }
                     sb.AppendLine();
                     sb.AppendLine($"📈 **Tổng số nhân viên:** {combined.Count}");
                     sb.AppendLine($"📅 **Thời gian:** LW ({lwStart:dd/MM}–{lwEnd:dd/MM}) | LM ({lmStart:dd/MM}–{lmEnd:dd/MM})");
@@ -379,7 +414,7 @@ namespace Timesheet.APIs.Reports
             }
             else
             {
-                
+
                 if (userId.HasValue)
                 {
                     sb.AppendLine($"Báo cáo theo TotalTime – VP {vpName} – UserId {userId.Value} ({s:dd/MM}–{e:dd/MM})");
@@ -413,7 +448,74 @@ namespace Timesheet.APIs.Reports
 
             if (!string.IsNullOrWhiteSpace(url))
             {
-                _mezonService.NotifyToChannel(url, sb.ToString());
+                var messageText = sb.ToString();
+
+                var mkList = new List<object>();
+
+                string titleToFind = "📊 **Top Office Working Report**";
+                int titlePos = messageText.IndexOf("📊 **Top Office Working Report**");
+                if (titlePos >= 0)
+                {
+                    mkList.Add(new
+                    {
+                        type = "b",
+                        s = titlePos,
+                        e = titlePos + titleToFind.Length
+                    });
+                }
+
+                string totalEmployeesText = "📈 **Tổng số nhân viên:**";
+                int totalEmployeesPos = messageText.IndexOf(totalEmployeesText);
+                if (totalEmployeesPos >= 0)
+                {
+                    mkList.Add(new
+                    {
+                        type = "b",
+                        s = totalEmployeesPos,
+                        e = totalEmployeesPos + totalEmployeesText.Length
+                    });
+                }
+
+                string timeText = "📅 **Thời gian:**";
+                int timePos = messageText.IndexOf(timeText);
+                if (timePos >= 0)
+                {
+                    mkList.Add(new
+                    {
+                        type = "b",
+                        s = timePos,
+                        e = timePos + timeText.Length
+                    });
+                }
+
+                int currentPos = 0;
+                while (true)
+                {
+                    int officePos = messageText.IndexOf("🏢 **VP ", currentPos);
+                    if (officePos == -1) break;
+
+                    int officeEndPos = messageText.IndexOf("**", officePos + 8);
+                    if (officeEndPos == -1) break;
+
+                    mkList.Add(new
+                    {
+                        type = "b",
+                        s = officePos,
+                        e = officeEndPos + 2
+                    });
+
+                    currentPos = officeEndPos + 2;
+                }
+
+                _mezonService.Post(url, new
+                {
+                    type = "hook",
+                    message = new
+                    {
+                        t = messageText,
+                        mk = mkList
+                    }
+                });
             }
 
             return sb.ToString();
@@ -421,7 +523,7 @@ namespace Timesheet.APIs.Reports
 
         [AbpAuthorize]
         [HttpGet, HttpPost]
-        public async Task<List<OfficeWorkingTopLWLMDto>> GetTopByOfficeLWLM(
+        public async Task<List<OfficeWorkingTopLWLMDto>> ListTopOfficeWorkingTimeLWLM(
             [FromQuery] long officeId,
             [FromQuery] int limit = int.MaxValue,
             [FromQuery] DateTime? reportDate = null,
@@ -440,9 +542,10 @@ namespace Timesheet.APIs.Reports
                                select new
                                {
                                    u.Id,
-                                   Name = !string.IsNullOrEmpty(u.Surname) && !string.IsNullOrEmpty(u.Name) 
-                                          ? $"{u.Surname} {u.Name}" 
-                                          : (!string.IsNullOrEmpty(u.Name) ? u.Name : u.Surname),
+
+                                   Name = !string.IsNullOrEmpty(u.UserName)
+                                     ? u.UserName
+                                     : (!string.IsNullOrEmpty(u.Name) ? u.Name : "Unknown"),
                                    u.EmailAddress,
                                    OfficeName = b != null ? b.Name : string.Empty,
                                    OfficeCode = b != null ? b.Code : string.Empty
@@ -457,19 +560,12 @@ namespace Timesheet.APIs.Reports
             var minStart = lwStart < lmStart ? lwStart : lmStart;
             var maxEnd = lwEnd > lmEnd ? lwEnd : lmEnd;
 
-            // Debug logging
-            Logger.Error($"DEBUG: LW Range: {lwStart:yyyy-MM-dd} to {lwEnd:yyyy-MM-dd}");
-            Logger.Error($"DEBUG: LM Range: {lmStart:yyyy-MM-dd} to {lmEnd:yyyy-MM-dd}");
-            Logger.Error($"DEBUG: Query Range: {minStart:yyyy-MM-dd} to {maxEnd:yyyy-MM-dd}");
-            Logger.Error($"DEBUG: OfficeId: {officeId}, UserId: {userId}");
 
             var tkList = await WorkScope.GetAll<Timekeeping>()
                 .Where(t => t.DateAt >= minStart && t.DateAt <= maxEnd)
                 .AsNoTracking()
                 .ToListAsync();
 
-            Logger.Error($"DEBUG: Found {tkList.Count} timekeeping records");
-            Logger.Error($"DEBUG: Found {users.Count} users in office");
 
             // Debug remote data
             var allRemoteRequests = await WorkScope.GetAll<AbsenceDayDetail>()
@@ -477,11 +573,8 @@ namespace Timesheet.APIs.Reports
                 .Where(d => d.DateAt >= minStart && d.DateAt <= maxEnd)
                 .AsNoTracking()
                 .ToListAsync();
-            
-            Logger.Error($"DEBUG: Total AbsenceDayDetail records in range: {allRemoteRequests.Count}");
-            Logger.Error($"DEBUG: Remote type requests: {allRemoteRequests.Count(x => x.Request.Type == RequestType.Remote)}");
-            Logger.Error($"DEBUG: Approved remote requests: {allRemoteRequests.Count(x => x.Request.Type == RequestType.Remote && x.Request.Status == RequestStatus.Approved)}");
-            
+
+
             // Log some sample data
             foreach (var sample in allRemoteRequests.Take(5))
             {
@@ -546,7 +639,7 @@ namespace Timesheet.APIs.Reports
                 {
                     trackerMinutes = (int)trackerSpan.TotalMinutes;
                 }
-                
+
                 var (mMin, aMin) = ComputeSplitWorkingMinutes(t.CheckIn, t.CheckOut);
                 if (mMin + aMin + trackerMinutes <= 0) continue;
 
@@ -607,7 +700,7 @@ namespace Timesheet.APIs.Reports
 
             Logger.Error($"DEBUG: Final aggregated users: {agg.Count}");
 
-            
+
             foreach (var user in users)
             {
                 if (!agg.ContainsKey(user.Id))
@@ -629,8 +722,8 @@ namespace Timesheet.APIs.Reports
             }
 
             var rs = agg.Values
-                .OrderByDescending(x => x.TotalAllLW) // Sắp xếp theo tổng giờ LW từ lớn xuống nhỏ
-                .ThenByDescending(x => x.TotalAllLM); // Nếu LW bằng nhau thì sắp xếp theo LM
+                .OrderByDescending(x => x.TotalAllLW)
+                .ThenByDescending(x => x.TotalAllLM);
 
             var result = limit == int.MaxValue ? rs.ToList() : rs.Take(limit).ToList();
             Logger.Error($"DEBUG: Returning {result.Count} results");
@@ -641,7 +734,7 @@ namespace Timesheet.APIs.Reports
         private async Task<string> GetAllOfficesReport(int actualLimit, DateTime? reportDate, long? userId, DateTime? startDate, DateTime? endDate)
         {
             var sb = new StringBuilder();
-            
+
             // Lấy tất cả văn phòng
             var offices = await WorkScope.GetAll<Branch>()
                 .Where(b => b.Id > 0)
@@ -669,44 +762,41 @@ namespace Timesheet.APIs.Reports
             {
                 try
                 {
-                    var combined = await GetTopByOfficeLWLM(office.Id, int.MaxValue, reportDate, userId);
+                    var combined = await ListTopOfficeWorkingTimeLWLM(office.Id, int.MaxValue, reportDate, userId);
                     var officeName = office.Code ?? office.Name ?? $"Office#{office.Id}";
-                    
-                    sb.AppendLine($"🏢 **VP {officeName}** ({combined.Count} nhân viên)");
-                    
+
+                    sb.AppendLine($"🏢 **VP {officeName} ({combined.Count} nhân viên)**");
+
                     if (combined.Count == 0)
                     {
                         sb.AppendLine("   _Không có dữ liệu_");
                     }
                     else
                     {
-                        sb.AppendLine("```");
-                        sb.AppendLine("┌─────┬───────────────────────────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐");
-                        sb.AppendLine("│ STT │           Họ và Tên           │ LW Total │ LW Office│  LW WFH  │ LM Total │ LM Office│  LM WFH  │");
-                        sb.AppendLine("├─────┼───────────────────────────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤");
-                        
-                        var topItems = combined.Take(actualLimit); // Hiển thị theo limit cho mỗi office
+                        var topItems = combined.Take(actualLimit);
                         int idx = 1;
-                        
+
                         foreach (var item in topItems)
                         {
-                            var name = item.UserName ?? "N/A";
-                            if (name.Length > 29) name = name.Substring(0, 26) + "...";
-                            
-                            sb.AppendLine($"│{idx,4} │ {name,-29}   {item.TotalAllLWHours,15:F1}   {item.OfficeLWHours,15:F1}   {item.WfhLWHours,15:F1}   {item.TotalAllLMHours,15:F1}   {item.OfficeLMHours,15:F1}  │{item.WfhLMHours,15:F1} │");
+                            var username = item.UserName ?? "N/A";
+                            var atIndex = username.IndexOf('@');
+                            if (atIndex >= 0)
+                            {
+                                username = username.Substring(0, atIndex);
+                            }
+
+                            sb.AppendLine($"{idx}. **{username}**");
+                            sb.AppendLine($"   - LW: Total {item.TotalAllLWHours:F1}h (Office {item.OfficeLWHours:F1}h, WFH {item.WfhLWHours:F1}h)");
+                            sb.AppendLine($"   - LM: Total {item.TotalAllLMHours:F1}h (Office {item.OfficeLMHours:F1}h, WFH {item.WfhLMHours:F1}h)");
                             idx++;
                         }
-                        
-                        sb.AppendLine("└─────┴───────────────────────────────┴──────────┴──────────┴──────────┴──────────┴──────────┴──────────┘");
-                        
+
                         if (combined.Count > actualLimit)
                         {
                             sb.AppendLine($"... và {combined.Count - actualLimit} người khác");
                         }
-                        
-                        sb.AppendLine("```");
                     }
-                    
+
                     sb.AppendLine();
                 }
                 catch (Exception ex)
@@ -718,7 +808,7 @@ namespace Timesheet.APIs.Reports
 
             sb.AppendLine($"📈 **Tổng cộng: {offices.Count} văn phòng**");
             sb.AppendLine($"📅 **Thời gian: LW ({lwStart:dd/MM}–{lwEnd:dd/MM}) | LM ({lmStart:dd/MM}–{lmEnd:dd/MM})**");
-            
+
             return sb.ToString();
         }
     }
