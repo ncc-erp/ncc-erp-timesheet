@@ -81,7 +81,7 @@ namespace Timesheet.DomainServices
 
             var deadlineDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDay));
             var startDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewStartDayOfMonth));
-            var startDate = new DateTime(input.Year, input.Month, startDay);
+            var startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, startDay);
             var endDate = startDate.AddDays(deadlineDay - 1);
 
             int weekendDays = 0;
@@ -94,7 +94,7 @@ namespace Timesheet.DomainServices
             }
 
             deadlineDay += weekendDays;
-            var deadlineDate = new DateTime(input.Year, input.Month, 1).AddDays(deadlineDay - 1);
+            var deadlineDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddDays(deadlineDay - 1);
 
             if (deadlineDate.DayOfWeek == DayOfWeek.Sunday)
             {

@@ -56,7 +56,7 @@ namespace Timesheet.BackgroundWorker
                 int year = previousMonthDate.Year;
                 var input = new ReviewInternsDto { Month = month, Year = year };
 
-                DateTime deadlineDate = CalculateDeadlineDate(input);
+                DateTime deadlineDate = CalculateDeadlineDate();
 
                 if (now.Date < deadlineDate.Date)
                 {
@@ -133,10 +133,10 @@ namespace Timesheet.BackgroundWorker
             }
         }
 
-        private DateTime CalculateDeadlineDate(ReviewInternsDto input) {
+        private DateTime CalculateDeadlineDate() {
           var deadlineDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewDeadlineDay));
           var startDay = int.Parse(SettingManager.GetSettingValueForApplication(AppSettingNames.ReviewStartDayOfMonth));
-          var startDate = new DateTime(input.Year, input.Month, startDay);
+          var startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, startDay);
           var endDate = startDate.AddDays(deadlineDay - 1);
 
           int weekendDays = 0;
