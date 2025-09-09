@@ -1156,13 +1156,18 @@
                   
                   <div class="col-md-12" style="margin-top: 15px;">
                     <mat-form-field style="width: 100%;">
-                      <mat-label>Select Projects (leave empty for all)</mat-label>
+                      <div class="label-with-icon">
+                        <mat-label>Select Projects (leave empty for all)</mat-label>
+                        <mat-icon class="special-icon"
+                          matTooltip="Select projects to include in the report. If none selected, all active projects will be included.">
+                          help
+                        </mat-icon>
+                      </div>
                       <mat-select multiple [disabled]="!isEditBotReportSetting" [(ngModel)]="selectedProjects" name="selectedProjects">
                         <mat-option *ngFor="let project of projects" [value]="project.id">
                           {{project.name}} ({{project.code}})
                         </mat-option>
                       </mat-select>
-                      <mat-hint>Select projects to include in the report. If none selected, all active projects will be included.</mat-hint>
                     </mat-form-field>
                   </div>
                 </div>
