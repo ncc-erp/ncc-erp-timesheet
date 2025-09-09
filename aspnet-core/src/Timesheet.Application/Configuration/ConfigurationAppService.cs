@@ -819,7 +819,6 @@ namespace Ncc.Configuration
                 enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportEnable)),
                 everyday = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingEveryday)),
                 hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportAtHour)),
-                minute = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportAtMinute)),
                 officeIds = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportOfficeIds),
                 limit = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportLimit)),
                 mezonUrl = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportMezonUrl)
@@ -832,7 +831,6 @@ namespace Ncc.Configuration
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportEnable, input.enable.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingEveryday, input.everyday.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportAtHour, input.hour.ToString());
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportAtMinute, input.minute.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportOfficeIds, input.officeIds);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportLimit, input.limit.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportMezonUrl, input.mezonUrl);

@@ -184,7 +184,6 @@ namespace Ncc.Configuration
         // Office working report (Mezon)
         public const string OfficeWorkingReportEnable = "App.OfficeWorkingReport.Enable";
         public const string OfficeWorkingReportAtHour = "App.OfficeWorkingReport.AtHour"; // default 8 (GMT+7)
-        public const string OfficeWorkingReportAtMinute = "App.OfficeWorkingReport.AtMinute"; // default 0
         public const string OfficeWorkingReportOfficeIds = "App.OfficeWorkingReport.OfficeIds"; // e.g. "1,2,3"
         public const string OfficeWorkingReportLimit = "App.OfficeWorkingReport.Limit"; // default 20
         public const string OfficeWorkingReportMezonUrl = "App.OfficeWorkingReport.MezonUrl";

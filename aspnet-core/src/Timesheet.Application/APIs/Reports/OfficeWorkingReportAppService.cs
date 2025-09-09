@@ -326,6 +326,40 @@ namespace Timesheet.APIs.Reports
                         currentPos = officeEndPos + 2;
                     }
 
+                    // Add markup for LW labels
+                    currentPos = 0;
+                    while (true)
+                    {
+                        int lwPos = messageText.IndexOf("**LW:**", currentPos);
+                        if (lwPos == -1) break;
+
+                        mkList.Add(new
+                        {
+                            type = "b",
+                            s = lwPos,
+                            e = lwPos + 7 // "**LW:**".Length
+                        });
+
+                        currentPos = lwPos + 7;
+                    }
+
+                    // Add markup for LM labels
+                    currentPos = 0;
+                    while (true)
+                    {
+                        int lmPos = messageText.IndexOf("**LM:**", currentPos);
+                        if (lmPos == -1) break;
+
+                        mkList.Add(new
+                        {
+                            type = "b",
+                            s = lmPos,
+                            e = lmPos + 7 // "**LM:**".Length
+                        });
+
+                        currentPos = lmPos + 7;
+                    }
+
                     _mezonService.Post(notificationUrl, new
                     {
                         type = "hook",
@@ -398,8 +432,9 @@ namespace Timesheet.APIs.Reports
                         }
 
                         sb.AppendLine($"{idx}. **{username}**");
-                        sb.AppendLine($"   **Last Week:** {item.TotalAllLWHours:F1}h (**Office:** {item.OfficeLWHours:F1}h, **WFH:** {item.WfhLWHours:F1}h)");
-                        sb.AppendLine($"   **Last Month:** {item.TotalAllLMHours:F1}h (**Office:** {item.OfficeLMHours:F1}h, **WFH:** {item.WfhLMHours:F1}h)");
+                        sb.AppendLine($"   - **LW:** Total {item.TotalAllLWHours:F1}h (Office {item.OfficeLWHours:F1}h, WFH {item.WfhLWHours:F1}h)");
+                        sb.AppendLine($"   - **LM:** Total {item.TotalAllLMHours:F1}h (Office {item.OfficeLMHours:F1}h, WFH {item.WfhLMHours:F1}h)");
+                        sb.AppendLine("   -------------------------");
                         idx++;
                     }
 
@@ -505,6 +540,40 @@ namespace Timesheet.APIs.Reports
                     });
 
                     currentPos = officeEndPos + 2;
+                }
+
+                // Add markup for LW labels
+                currentPos = 0;
+                while (true)
+                {
+                    int lwPos = messageText.IndexOf("**LW:**", currentPos);
+                    if (lwPos == -1) break;
+
+                    mkList.Add(new
+                    {
+                        type = "b",
+                        s = lwPos,
+                        e = lwPos + 7 // "**LW:**".Length
+                    });
+
+                    currentPos = lwPos + 7;
+                }
+
+                // Add markup for LM labels
+                currentPos = 0;
+                while (true)
+                {
+                    int lmPos = messageText.IndexOf("**LM:**", currentPos);
+                    if (lmPos == -1) break;
+
+                    mkList.Add(new
+                    {
+                        type = "b",
+                        s = lmPos,
+                        e = lmPos + 7 // "**LM:**".Length
+                    });
+
+                    currentPos = lmPos + 7;
                 }
 
                 _mezonService.Post(url, new
@@ -788,6 +857,7 @@ namespace Timesheet.APIs.Reports
                             sb.AppendLine($"{idx}. **{username}**");
                             sb.AppendLine($"   - LW: Total {item.TotalAllLWHours:F1}h (Office {item.OfficeLWHours:F1}h, WFH {item.WfhLWHours:F1}h)");
                             sb.AppendLine($"   - LM: Total {item.TotalAllLMHours:F1}h (Office {item.OfficeLMHours:F1}h, WFH {item.WfhLMHours:F1}h)");
+                            sb.AppendLine("   -------------------------");
                             idx++;
                         }
 

@@ -171,8 +171,8 @@ namespace Ncc.Configuration
                 // Office working report to Mezon
                 new SettingDefinition(AppSettingNames.OfficeWorkingReportEnable, "True", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.OfficeWorkingEveryday, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.OfficeWorkingReportAtHour, "13", scopes: SettingScopes.Application | SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.OfficeWorkingReportAtMinute, "38", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportAtHour, "8", scopes: SettingScopes.Application | SettingScopes.Tenant),
+               
                 new SettingDefinition(AppSettingNames.OfficeWorkingReportOfficeIds, "ALL", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.OfficeWorkingReportLimit, "20", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.OfficeWorkingReportMezonUrl, "https://webhook.mezon.ai/webhooks/1957466613359841280/MTc1NTUwMjYxOTY1MjE2MDQxMzoxOTU3NDY2MDQ3NTQ4MjMxNjgwOjE5NTc0NjY2MTMzNTk4NDEyODA6MTk1NzQ2NjY0MDQzNDA3MzYwMA.-npL7W8uxq5kopFAOnq8gpumUVjlfOMaTonoBAU7YuA", scopes: SettingScopes.Application | SettingScopes.Tenant),
