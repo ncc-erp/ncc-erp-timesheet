@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -34,6 +34,7 @@ namespace Timesheet.DomainServices.Dto
             public long OfficeId { get; set; }
             public double? MinHours { get; set; } = 0;
             public int? TopN { get; set; }
+            public List<long> ProjectIds { get; set; } = new List<long>();
         }
 
 }

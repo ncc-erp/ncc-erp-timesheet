@@ -154,6 +154,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.BotReportOfficeId, "1", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportMinHours, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportTopN, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.BotReportProjectIds, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
 
                 new SettingDefinition(AppSettingNames.ReviewEnableWorker, "true", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ReviewDeadlineDay, "5", scopes: SettingScopes.Application | SettingScopes.Tenant),

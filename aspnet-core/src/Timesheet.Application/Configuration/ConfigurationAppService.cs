@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Web.Http;
 using Abp.Authorization;
 using Abp.Runtime.Session;
 using Abp.UI;
@@ -11,6 +6,12 @@ using Microsoft.Extensions.Configuration;
 using Ncc.Authorization.Users;
 using Ncc.Configuration.Dto;
 using Ncc.IoC;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web.Http;
 using Timesheet.Configuration.Dto;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Services.HRMv2;
@@ -823,16 +824,21 @@ namespace Ncc.Configuration
                 botUri = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportWebhookUrl),
                 officeId = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportOfficeId)),
                 minHours = double.TryParse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportMinHours), out var minH) ? (double?)minH : null,
-                topN = int.TryParse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportTopN), out var tN) ? (int?)tN : null
+                topN = int.TryParse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportTopN), out var tN) ? (int?)tN : null,
+                projectIds = JsonConvert.DeserializeObject<List<long>>(
+                    await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportProjectIds)
+                    ?? "[]")
             };
 
             return result;
         }
 
 
+
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_Update)]
         public async Task<BotReportSettingDto> SetBotReportSetting(BotReportSettingDto input)
         {
+            var projectIdsJson = JsonConvert.SerializeObject(input.projectIds ?? new List<long>());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportEnable, input.enable.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportEveryday, input.everyday.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportAtHour, input.hour.ToString());
@@ -841,6 +847,7 @@ namespace Ncc.Configuration
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportOfficeId, input.officeId.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportMinHours, input.minHours?.ToString() ?? string.Empty);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportTopN, input.topN?.ToString() ?? string.Empty);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportProjectIds, projectIdsJson);
 
             return input;
         }

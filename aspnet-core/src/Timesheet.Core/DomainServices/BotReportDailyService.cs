@@ -2,6 +2,7 @@ using Abp.Configuration;
 using Abp.Dependency;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Ncc.Authorization.Users;
 using Ncc.Configuration;
 using Ncc.Entities;
@@ -66,8 +67,15 @@ namespace Timesheet.DomainServices
                 };
             }
 
-            var allProjects = await _workScope.GetAll<Project>()
-                .Where(p => !p.IsDeleted && p.Status == Ncc.Entities.Enum.StatusEnum.ProjectStatus.Active)
+            var projectQuery = _workScope.GetAll<Project>()
+                .Where(p => !p.IsDeleted && p.Status == Ncc.Entities.Enum.StatusEnum.ProjectStatus.Active);
+
+            if (input.ProjectIds != null && input.ProjectIds.Any())
+            {
+                projectQuery = projectQuery.Where(p => input.ProjectIds.Contains(p.Id));
+            }
+
+            var allProjects = await projectQuery
                 .Select(p => new { p.Id, p.Name })
                 .ToListAsync();
 
@@ -264,12 +272,27 @@ namespace Timesheet.DomainServices
             var officeIdStr = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportOfficeId);
             var minHoursStr = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportMinHours);
             var topNStr = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportTopN);
+            var projectIdsJson = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportProjectIds);
+
+            List<long> projectIds = null;
+            if (!string.IsNullOrEmpty(projectIdsJson))
+            {
+                try
+                {
+                    projectIds = JsonConvert.DeserializeObject<List<long>>(projectIdsJson);
+                }
+                catch
+                {
+                    Logger.Error($"Failed to deserialize project IDs: {projectIdsJson}");
+                }
+            }
 
             var input = new GetDailyProjectTimelogReportInput
             {
                 OfficeId = int.Parse(officeIdStr), 
                 MinHours = double.TryParse(minHoursStr, out var minHours) ? (double?)minHours : null,
-                TopN = int.TryParse(topNStr, out var topN) ? (int?)topN : null
+                TopN = int.TryParse(topNStr, out var topN) ? (int?)topN : null,
+                ProjectIds = projectIds
             };
 
             return await SendDailyProjectTimelogToMezon(input);

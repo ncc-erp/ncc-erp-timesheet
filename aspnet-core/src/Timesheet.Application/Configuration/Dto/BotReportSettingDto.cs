@@ -13,6 +13,8 @@ namespace Timesheet.Configuration.Dto
         public string botUri { get; set; }
         public int officeId { get; set; } 
         public double? minHours { get; set; }
-        public int? topN { get; set; } 
+        public int? topN { get; set; }
+        public List<long> projectIds { get; set; } = new List<long>();
+        public List<string> projectNames { get; set; } = new List<string>();
     }
 }

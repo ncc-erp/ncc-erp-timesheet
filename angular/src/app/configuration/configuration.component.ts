@@ -27,8 +27,7 @@ import { MezonSettingService } from '@app/service/api/mezon-setting.service';
 import { LogoutAllUserService } from '@app/service/api/logout-all-user.service';
 import { LateInternReviewSettingService, LateInternReviewSettingDto } from '@app/service/api/late-intern-review-setting.service';
 import { PMReportPunishSettingService, PMReportPunishSettingDto } from '@app/service/api/pm-report-punish-setting.service';
-import { BotReportSettingService, BotReportSettingDto } from '@app/service/api/bot-report-setting.service';
-
+import { BotReportSettingService, BotReportSettingDto, ProjectDto } from '../service/api/bot-report-setting.service';
 
 @Component({
   selector: 'app-configuration',
@@ -211,7 +210,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   isShowBotReportSetting: boolean = false;
   isEditBotReportSetting: boolean = false;
-  botReportSetting = { everyday: false, botUri: '' } as BotReportSettingDto;
+  botReportSetting = { everyday: false, botUri: '', projectIds: [] } as BotReportSettingDto;
+  projects: ProjectDto[] = [];
+  selectedProjects: number[] = [];
 
   unlockSetting = {} as UnlockTimesheetConfigDto;
   timesCanLateAndEarlyInMonthSetting = {} as TimesCanLateAndEarlyInMonthSettingDto;
@@ -1922,8 +1923,21 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   getBotReportSetting() {
     if (this.permission.isGranted(this.VIEW_BOT_REPORT_SETTING)) {
+      this.projects = [];
+
       this.botReportSettingService.get().subscribe((data: any) => {
         this.botReportSetting = data.result;
+        this.selectedProjects = this.botReportSetting.projectIds || [];
+      });
+
+      this.botReportSettingService.getActiveProjects().subscribe({
+        next: (response: any) => {
+          this.projects = response.result || [];
+        },
+        error: (error) => {
+          console.error('Error loading projects:', error);
+          this.projects = [];
+        }
       });
     }
   }
@@ -1946,6 +1960,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Day of week is required!");
       return;
     }
+
+    this.botReportSetting.projectIds = this.selectedProjects;
     
     this.botReportSettingService.change(this.botReportSetting).subscribe((res: any) => {
       this.isEditBotReportSetting = false;
