@@ -343,7 +343,7 @@ namespace Timesheet.DomainServices
                 .Select(b => b.DisplayName)
                 .FirstOrDefaultAsync() ?? $"Office ID: {input.OfficeId}";
 
-            sb.AppendLine("📊 Top Projects Summary ");
+            sb.AppendLine("Top Projects Summary📊");
             sb.AppendLine($"Report Period:   Last Week  ({lastWeekStart:MM/dd/yyyy} - {lastWeekEnd:MM/dd/yyyy}) |  Last Month  ({lastMonthStart:MM/yyyy})");
             sb.AppendLine($"Office: {officeName}");
             sb.AppendLine("-------------------------------------");
