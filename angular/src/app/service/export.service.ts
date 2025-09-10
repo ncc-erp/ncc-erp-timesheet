@@ -305,31 +305,29 @@ export class ExportService {
         this.saveAsExcelFile(excelBuffer, fileName);
     }
 
-    exportReportTardiness(listReports: TardinessDto[], fileName) {
-        let workbook: XLSX.WorkBook = { Sheets: {}, SheetNames: [] };
-        let listRowExcell = [];
-        let index = 1;
-        listReports.map(x => {
-            let res = {
-                STT: index++,
-                UserName: x.userName,
-                UserEmail: x.userEmail,
-                NumberOfTardies: x.numberOfTardies,
-                NumberOfLeaveEarly: x.numberOfLeaveEarly,
-            };
+        exportReportTardiness(listReports: TardinessDto[], fileName) {
+            let workbook: XLSX.WorkBook = { Sheets: {}, SheetNames: [] };
+            let listRowExcell = [];
+            let index = 1;
+            listReports.map(x => {
+                let res = {
+                    STT: index++,
+                    UserName: x.userName,
+                    UserEmail: x.userEmail,
+                    TotalPunishmentAmount: (x as any).totalPunishmentAmount || 0, 
+                };
 
-            listRowExcell.push(res);
-        });
-        const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(listRowExcell);
-        worksheet['B1'].v = 'Full Name';
-        worksheet['C1'].v = 'Email';
-        worksheet['D1'].v = 'Number of tardies';
-        worksheet['E1'].v = 'Number of leave early';
-        workbook.SheetNames.push("Report Tardiness");
-        workbook.Sheets["Report Tardiness"] = worksheet;
-        const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        this.saveAsExcelFile(excelBuffer, fileName);
-    }
+                listRowExcell.push(res);
+            });
+            const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(listRowExcell);
+            worksheet['B1'].v = 'Full Name';
+            worksheet['C1'].v = 'Email';
+            worksheet['D1'].v = 'Total Punishment Money(VND)';
+            workbook.SheetNames.push("Report Punishment");
+            workbook.Sheets["Report Punishment"] = worksheet;
+            const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            this.saveAsExcelFile(excelBuffer, fileName);
+        }
 
     exportLogTimeSheetDay(data: ExportTimeSheetOrRemote[], fileName){
         let workbook: XLSX.WorkBook = { Sheets: {}, SheetNames: [] };

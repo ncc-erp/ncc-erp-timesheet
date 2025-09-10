@@ -162,6 +162,13 @@ namespace Timesheet.APIs.Public
             return status.FirstOrDefault();
         }
 
+        public async Task<List<WorkingStatusUserDto>> GetWorkingStatusByUserV2(string emailAddress, DateTime? date)
+        {
+            DateTime dateAt = date.HasValue ? date.Value.Date : DateTimeUtils.GetNow().Date;
+            var status = await queryAbsenceDay(dateAt).Where(s => s.EmailAddress == emailAddress).ToListAsync();
+            return status;
+        }
+
         private IQueryable<WorkingStatusUserDto> queryAbsenceDay(DateTime dateAt)
         {
             return WorkScope.GetAll<AbsenceDayDetail>()
