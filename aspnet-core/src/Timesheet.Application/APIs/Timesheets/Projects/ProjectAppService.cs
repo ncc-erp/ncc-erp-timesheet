@@ -875,6 +875,29 @@ namespace Timesheet.Timesheets.Projects
             projectUser.Type = ProjectUserType.DeActive;
             await WorkScope.UpdateAsync(projectUser);
         }
+
+        [HttpPut]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Project_Edit)]
+        public async Task<ProjectNotificationSettingsDto> UpdateNotificationSettings(ProjectNotificationSettingsDto input)
+        {
+            var project = await WorkScope.GetAsync<Project>(input.ProjectId);
+            if (project == null)
+            {
+                throw new UserFriendlyException($"Project with id {input.ProjectId} not found");
+            }
+
+            project.KomuChannelId = input.KomuChannelId;
+            project.IsNoticeKMSubmitTS = input.IsNoticeKMSubmitTS;
+            project.IsNoticeKMApproveRejectTimesheet = input.IsNoticeKMApproveRejectTimesheet;
+            project.IsNoticeKMRequestOffDate = input.IsNoticeKMRequestOffDate;
+            project.IsNoticeKMApproveRequestOffDate = input.IsNoticeKMApproveRequestOffDate;
+            project.IsNoticeKMRequestChangeWorkingTime = input.IsNoticeKMRequestChangeWorkingTime;
+            project.IsNoticeKMApproveChangeWorkingTime = input.IsNoticeKMApproveChangeWorkingTime;
+
+            await WorkScope.UpdateAsync(project);
+
+            return input;
+        }
     }
 
     public class StartEndDate
