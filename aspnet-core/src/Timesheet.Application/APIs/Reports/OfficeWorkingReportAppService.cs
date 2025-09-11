@@ -43,6 +43,49 @@ namespace Timesheet.APIs.Reports
             }
         }
 
+        private static void AddBold(List<object> mkList, int start, int end)
+        {
+            if (start >= 0 && end > start)
+            {
+                mkList.Add(new { type = "b", s = start, e = end });
+            }
+        }
+
+        private static void AddBoldForLabel(List<object> mkList, string messageText, string label)
+        {
+            var pos = messageText.IndexOf(label);
+            if (pos >= 0)
+            {
+                AddBold(mkList, pos, pos + label.Length);
+            }
+        }
+
+        private static void AddBoldForAllOccurrences(List<object> mkList, string messageText, string token)
+        {
+            int current = 0;
+            while (true)
+            {
+                int idx = messageText.IndexOf(token, current);
+                if (idx == -1) break;
+                AddBold(mkList, idx, idx + token.Length);
+                current = idx + token.Length;
+            }
+        }
+
+        private static void AddBoldForOfficeTitles(List<object> mkList, string messageText)
+        {
+            int current = 0;
+            while (true)
+            {
+                int start = messageText.IndexOf("🏢 **VP ", current);
+                if (start == -1) break;
+                int end = messageText.IndexOf("**", start + 8);
+                if (end == -1) break;
+                AddBold(mkList, start, end + 2);
+                current = end + 2;
+            }
+        }
+
         private static (DateTime start, DateTime end) GetLastWeekRange(DateTime reportDate)
         {
             var thisWeekStart = DateTimeUtils.FirstDayOfWeek(reportDate);
@@ -55,19 +98,16 @@ namespace Timesheet.APIs.Reports
         {
             minutes = 0;
             if (string.IsNullOrWhiteSpace(input)) return false;
-            // Try standard formats
-            if (TimeSpan.TryParseExact(input, new[] { @"hh\:mm", @"h\:mm", @"hh\:mm\:ss", @"h\:mm\:ss" }, CultureInfo.InvariantCulture, out var ts))
+            if (TimeSpan.TryParseExact(input, new[] { @"hh\:mm", @"h\:mm" }, CultureInfo.InvariantCulture, out var ts))
             {
                 minutes = (int)ts.TotalMinutes;
                 return true;
             }
-            // Try flexible DateTime parse (e.g., HH:mm:ss.fffffff)
             if (DateTime.TryParse(input, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
             {
                 minutes = dt.Hour * 60 + dt.Minute;
                 return true;
             }
-            // Try cut first 5 chars (HH:mm)
             if (input.Length >= 5 && input[2] == ':')
             {
                 if (int.TryParse(input.Substring(0, 2), out var h) && int.TryParse(input.Substring(3, 2), out var m))
@@ -88,7 +128,6 @@ namespace Timesheet.APIs.Reports
             if (coMin <= ciMin) return 0;
 
             var total = coMin - ciMin;
-            // Subtract lunch break 60 minutes if crosses 12:00-13:00 window
             var noonStartMin = 12 * 60;
             var noonEndMin = 13 * 60;
             if (ciMin < noonStartMin && coMin > noonEndMin)
@@ -120,13 +159,13 @@ namespace Timesheet.APIs.Reports
 
         [AbpAuthorize]
         [HttpGet, HttpPost]
-        public async Task<List<OfficeWorkingTopDto>> ListTopOfficeWorkingTime(
-            [FromQuery] long officeId,
-            [FromQuery] int limit = 20,
-            [FromQuery] DateTime? reportDate = null,
-            [FromQuery] long? userId = null,
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null)
+        public async Task<List<OfficeWorkingTopLWLMDto>> ListTopOfficeWorkingTime(
+            long officeId,
+            int limit = 20,
+            DateTime? reportDate = null,
+            long? userId = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null)
         {
             var now = reportDate?.Date ?? DateTimeUtils.GetNow().Date;
             DateTime rangeStart;
@@ -214,15 +253,20 @@ namespace Timesheet.APIs.Reports
             }
 
             var result = aggMap
-                .Select(kv => new OfficeWorkingTopDto
+                .Select(kv => new OfficeWorkingTopLWLMDto
                 {
                     UserId = kv.Key,
                     UserName = kv.Value.name,
                     OfficeName = kv.Value.officeName,
                     OfficeCode = kv.Value.officeCode,
-                    TotalMinutesLW = kv.Value.minutes
+                    TotalAllLW = kv.Value.minutes / 60.0,
+                    OfficeLW = kv.Value.minutes / 60.0,
+                    WfhLW = 0,
+                    TotalAllLM = 0,
+                    OfficeLM = 0,
+                    WfhLM = 0
                 })
-                .OrderByDescending(x => x.TotalMinutesLW);
+                .OrderByDescending(x => x.TotalAllLW);
 
 
             if (limit == int.MaxValue)
@@ -238,15 +282,15 @@ namespace Timesheet.APIs.Reports
         [AbpAuthorize]
         [HttpGet, HttpPost]
         public async Task<string> SendTopOfficeUsersNotification(
-            [FromQuery] long? officeId = null,
-            [FromQuery] int limit = 20,
-            [FromQuery] DateTime? reportDate = null,
-            [FromQuery] string mezonUrl = null,
-            [FromQuery] long? userId = null,
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null,
-            [FromQuery] bool showAll = false,
-            [FromQuery] bool allOffices = false)
+            long? officeId = null,
+            int limit = 20,
+            DateTime? reportDate = null,
+            string mezonUrl = null,
+            long? userId = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            bool showAll = false,
+            bool allOffices = false)
         {
 
             var actualLimit = showAll ? int.MaxValue : limit;
@@ -257,8 +301,6 @@ namespace Timesheet.APIs.Reports
             if (allOffices)
             {
                 var allOfficesReport = await GetAllOfficesReport(actualLimit, reportDate, userId, startDate, endDate);
-
-                // Send notification to Mezon
                 var notificationUrl = mezonUrl;
                 if (string.IsNullOrWhiteSpace(notificationUrl))
                 {
@@ -268,97 +310,13 @@ namespace Timesheet.APIs.Reports
                 if (!string.IsNullOrWhiteSpace(notificationUrl))
                 {
                     var messageText = allOfficesReport;
-
                     var mkList = new List<object>();
-
-                    string titleToFind = "📊 **BÁO CÁO TẤT CẢ VĂN PHÒNG**";
-                    int titlePos = messageText.IndexOf("📊 **BÁO CÁO TẤT CẢ VĂN PHÒNG**");
-                    if (titlePos >= 0)
-                    {
-                        mkList.Add(new
-                        {
-                            type = "b",
-                            s = titlePos,
-                            e = titlePos + titleToFind.Length
-                        });
-                    }
-
-                    string totalEmployeesText = "📈 **Tổng số văn phòng:**";
-                    int totalEmployeesPos = messageText.IndexOf(totalEmployeesText);
-                    if (totalEmployeesPos >= 0)
-                    {
-                        mkList.Add(new
-                        {
-                            type = "b",
-                            s = totalEmployeesPos,
-                            e = totalEmployeesPos + totalEmployeesText.Length
-                        });
-                    }
-
-                    string timeText = "📅 **Thời gian:**";
-                    int timePos = messageText.IndexOf(timeText);
-                    if (timePos >= 0)
-                    {
-                        mkList.Add(new
-                        {
-                            type = "b",
-                            s = timePos,
-                            e = timePos + timeText.Length
-                        });
-                    }
-
-                    int currentPos = 0;
-                    while (true)
-                    {
-                        int officePos = messageText.IndexOf("🏢 **VP ", currentPos);
-                        if (officePos == -1) break;
-
-                        int officeEndPos = messageText.IndexOf("**", officePos + 8);
-                        if (officeEndPos == -1) break;
-
-                        mkList.Add(new
-                        {
-                            type = "b",
-                            s = officePos,
-                            e = officeEndPos + 2
-                        });
-
-                        currentPos = officeEndPos + 2;
-                    }
-
-                    // Add markup for LW labels
-                    currentPos = 0;
-                    while (true)
-                    {
-                        int lwPos = messageText.IndexOf("**LW:**", currentPos);
-                        if (lwPos == -1) break;
-
-                        mkList.Add(new
-                        {
-                            type = "b",
-                            s = lwPos,
-                            e = lwPos + 7 // "**LW:**".Length
-                        });
-
-                        currentPos = lwPos + 7;
-                    }
-
-                    // Add markup for LM labels
-                    currentPos = 0;
-                    while (true)
-                    {
-                        int lmPos = messageText.IndexOf("**LM:**", currentPos);
-                        if (lmPos == -1) break;
-
-                        mkList.Add(new
-                        {
-                            type = "b",
-                            s = lmPos,
-                            e = lmPos + 7 // "**LM:**".Length
-                        });
-
-                        currentPos = lmPos + 7;
-                    }
+                    AddBoldForLabel(mkList, messageText, "📊 **BÁO CÁO TẤT CẢ VĂN PHÒNG**");
+                    AddBoldForLabel(mkList, messageText, "📈 **Tổng số văn phòng:**");
+                    AddBoldForLabel(mkList, messageText, "📅 **Thời gian:**");
+                    AddBoldForOfficeTitles(mkList, messageText);
+                    AddBoldForAllOccurrences(mkList, messageText, "**LW:**");
+                    AddBoldForAllOccurrences(mkList, messageText, "**LM:**");
 
                     _mezonService.Post(notificationUrl, new
                     {
@@ -432,8 +390,8 @@ namespace Timesheet.APIs.Reports
                         }
 
                         sb.AppendLine($"{idx}. **{username}**");
-                        sb.AppendLine($"   - **LW:** Total {item.TotalAllLWHours:F1}h (Office {item.OfficeLWHours:F1}h, WFH {item.WfhLWHours:F1}h)");
-                        sb.AppendLine($"   - **LM:** Total {item.TotalAllLMHours:F1}h (Office {item.OfficeLMHours:F1}h, WFH {item.WfhLMHours:F1}h)");
+                        sb.AppendLine($"   - **LW:** Total {item.TotalAllLWHours}h (Office {item.OfficeLWHours}h, WFH {item.WfhLWHours}h)");
+                        sb.AppendLine($"   - **LM:** Total {item.TotalAllLMHours}h (Office {item.OfficeLMHours}h, WFH {item.WfhLMHours}h)");
                         sb.AppendLine("   -------------------------");
                         idx++;
                     }
@@ -468,7 +426,7 @@ namespace Timesheet.APIs.Reports
                     foreach (var i in items)
                     {
                         var officeShown = string.IsNullOrWhiteSpace(i.OfficeCode) ? i.OfficeName : i.OfficeCode;
-                        sb.AppendLine($"{idx}) {i.UserName} | {officeShown} | {i.TotalHoursLW}h");
+                        sb.AppendLine($"{idx}) {i.UserName} | {officeShown} | {i.TotalAllLW}h");
                         idx++;
                     }
                 }
@@ -477,104 +435,19 @@ namespace Timesheet.APIs.Reports
             var url = mezonUrl;
             if (string.IsNullOrWhiteSpace(url))
             {
-                // fallback to app setting if provided
                 url = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportMezonUrl);
             }
 
             if (!string.IsNullOrWhiteSpace(url))
             {
                 var messageText = sb.ToString();
-
                 var mkList = new List<object>();
-
-                string titleToFind = "📊 **Top Office Working Report**";
-                int titlePos = messageText.IndexOf("📊 **Top Office Working Report**");
-                if (titlePos >= 0)
-                {
-                    mkList.Add(new
-                    {
-                        type = "b",
-                        s = titlePos,
-                        e = titlePos + titleToFind.Length
-                    });
-                }
-
-                string totalEmployeesText = "📈 **Tổng số nhân viên:**";
-                int totalEmployeesPos = messageText.IndexOf(totalEmployeesText);
-                if (totalEmployeesPos >= 0)
-                {
-                    mkList.Add(new
-                    {
-                        type = "b",
-                        s = totalEmployeesPos,
-                        e = totalEmployeesPos + totalEmployeesText.Length
-                    });
-                }
-
-                string timeText = "📅 **Thời gian:**";
-                int timePos = messageText.IndexOf(timeText);
-                if (timePos >= 0)
-                {
-                    mkList.Add(new
-                    {
-                        type = "b",
-                        s = timePos,
-                        e = timePos + timeText.Length
-                    });
-                }
-
-                int currentPos = 0;
-                while (true)
-                {
-                    int officePos = messageText.IndexOf("🏢 **VP ", currentPos);
-                    if (officePos == -1) break;
-
-                    int officeEndPos = messageText.IndexOf("**", officePos + 8);
-                    if (officeEndPos == -1) break;
-
-                    mkList.Add(new
-                    {
-                        type = "b",
-                        s = officePos,
-                        e = officeEndPos + 2
-                    });
-
-                    currentPos = officeEndPos + 2;
-                }
-
-                // Add markup for LW labels
-                currentPos = 0;
-                while (true)
-                {
-                    int lwPos = messageText.IndexOf("**LW:**", currentPos);
-                    if (lwPos == -1) break;
-
-                    mkList.Add(new
-                    {
-                        type = "b",
-                        s = lwPos,
-                        e = lwPos + 7 // "**LW:**".Length
-                    });
-
-                    currentPos = lwPos + 7;
-                }
-
-                // Add markup for LM labels
-                currentPos = 0;
-                while (true)
-                {
-                    int lmPos = messageText.IndexOf("**LM:**", currentPos);
-                    if (lmPos == -1) break;
-
-                    mkList.Add(new
-                    {
-                        type = "b",
-                        s = lmPos,
-                        e = lmPos + 7 // "**LM:**".Length
-                    });
-
-                    currentPos = lmPos + 7;
-                }
+                AddBoldForLabel(mkList, messageText, "📊 **Top Office Working Report**");
+                AddBoldForLabel(mkList, messageText, "📈 **Tổng số nhân viên:**");
+                AddBoldForLabel(mkList, messageText, "📅 **Thời gian:**");
+                AddBoldForOfficeTitles(mkList, messageText);
+                AddBoldForAllOccurrences(mkList, messageText, "**LW:**");
+                AddBoldForAllOccurrences(mkList, messageText, "**LM:**");
 
                 _mezonService.Post(url, new
                 {
@@ -593,17 +466,16 @@ namespace Timesheet.APIs.Reports
         [AbpAuthorize]
         [HttpGet, HttpPost]
         public async Task<List<OfficeWorkingTopLWLMDto>> ListTopOfficeWorkingTimeLWLM(
-            [FromQuery] long officeId,
-            [FromQuery] int limit = int.MaxValue,
-            [FromQuery] DateTime? reportDate = null,
-            [FromQuery] long? userId = null)
+            long officeId,
+            int limit = int.MaxValue,
+            DateTime? reportDate = null,
+            long? userId = null)
         {
             var now = reportDate?.Date ?? DateTimeUtils.GetNow().Date;
             var (lwStart, lwEnd) = GetLastWeekRange(now);
             var lmStart = DateTimeUtils.FirstDayOfMonth(now.AddMonths(-1));
             var lmEnd = DateTimeUtils.LastDayOfMonth(now.AddMonths(-1));
 
-            // Users in office
             var users = await (from u in WorkScope.GetAll<Ncc.Authorization.Users.User>()
                                join b in WorkScope.GetAll<Branch>() on u.BranchId equals b.Id into bj
                                from b in bj.DefaultIfEmpty()
@@ -625,7 +497,6 @@ namespace Timesheet.APIs.Reports
                                 .GroupBy(x => x.EmailAddress.Trim().ToLower())
                                 .ToDictionary(g => g.Key, g => g.First());
 
-            // Timekeepings in both ranges
             var minStart = lwStart < lmStart ? lwStart : lmStart;
             var maxEnd = lwEnd > lmEnd ? lwEnd : lmEnd;
 
@@ -635,22 +506,17 @@ namespace Timesheet.APIs.Reports
                 .AsNoTracking()
                 .ToListAsync();
 
-
-            // Debug remote data
             var allRemoteRequests = await WorkScope.GetAll<AbsenceDayDetail>()
                 .Include(d => d.Request)
                 .Where(d => d.DateAt >= minStart && d.DateAt <= maxEnd)
                 .AsNoTracking()
                 .ToListAsync();
 
-
-            // Log some sample data
             foreach (var sample in allRemoteRequests.Take(5))
             {
                 Logger.Error($"DEBUG Sample: UserId={sample.Request.UserId}, Date={sample.DateAt:yyyy-MM-dd}, Type={sample.Request.Type}, Status={sample.Request.Status}, DateType={sample.DateType}");
             }
 
-            // Remote map from AbsenceDayDetail (Request.Type == Remote, Approved)
             var remoteDetails = await WorkScope.GetAll<AbsenceDayDetail>()
                 .Include(d => d.Request)
                 .Where(d => d.DateAt >= minStart && d.DateAt <= maxEnd)
@@ -702,7 +568,6 @@ namespace Timesheet.APIs.Reports
                 if (uinfo == null || !uid.HasValue) continue;
                 if (userId.HasValue && uid.Value != userId.Value) continue;
 
-                // Parse tracker time to get actual working minutes
                 var trackerMinutes = 0;
                 if (!string.IsNullOrWhiteSpace(t.TrackerTime) && TimeSpan.TryParse(t.TrackerTime, out var trackerSpan))
                 {
@@ -735,34 +600,30 @@ namespace Timesheet.APIs.Reports
                 {
                     if (remoteFlags.Morning || remoteFlags.Afternoon)
                     {
-                        // WFH: use tracker time as WFH time
-                        row.TotalAllLW += trackerMinutes;
-                        row.WfhLW += trackerMinutes;
-                        // Office time = 0 when WFH
+                        row.TotalAllLW += (trackerMinutes / 60.0);
+                        row.WfhLW += (trackerMinutes / 60.0);
                     }
                     else
                     {
-                        // Office: use check-in/out (with break logic) + tracker time
-                        int officeTime = mMin + aMin; // Already calculated with break exclusion
-                        row.TotalAllLW += officeTime + trackerMinutes;
-                        row.OfficeLW += officeTime + trackerMinutes;
+                        int officeTime = mMin + aMin; 
+                        var officeHours = (officeTime + trackerMinutes) / 60.0;
+                        row.TotalAllLW += officeHours;
+                        row.OfficeLW += officeHours;
                     }
                 }
                 if (inLM)
                 {
                     if (remoteFlags.Morning || remoteFlags.Afternoon)
                     {
-                        // WFH: use tracker time as WFH time
-                        row.TotalAllLM += trackerMinutes;
-                        row.WfhLM += trackerMinutes;
-                        // Office time = 0 when WFH
+                        row.TotalAllLM += (trackerMinutes / 60.0);
+                        row.WfhLM += (trackerMinutes / 60.0);
                     }
                     else
                     {
-                        // Office: use check-in/out (with break logic) + tracker time
-                        int officeTime = mMin + aMin; // Already calculated with break exclusion
-                        row.TotalAllLM += officeTime + trackerMinutes;
-                        row.OfficeLM += officeTime + trackerMinutes;
+                        int officeTime = mMin + aMin; 
+                        var officeHoursLM = (officeTime + trackerMinutes) / 60.0;
+                        row.TotalAllLM += officeHoursLM;
+                        row.OfficeLM += officeHoursLM;
                     }
                 }
             }
@@ -804,7 +665,6 @@ namespace Timesheet.APIs.Reports
         {
             var sb = new StringBuilder();
 
-            // Lấy tất cả văn phòng
             var offices = await WorkScope.GetAll<Branch>()
                 .Where(b => b.Id > 0)
                 .Select(b => new { b.Id, b.Name, b.Code, b.DisplayName })
@@ -855,8 +715,8 @@ namespace Timesheet.APIs.Reports
                             }
 
                             sb.AppendLine($"{idx}. **{username}**");
-                            sb.AppendLine($"   - LW: Total {item.TotalAllLWHours:F1}h (Office {item.OfficeLWHours:F1}h, WFH {item.WfhLWHours:F1}h)");
-                            sb.AppendLine($"   - LM: Total {item.TotalAllLMHours:F1}h (Office {item.OfficeLMHours:F1}h, WFH {item.WfhLMHours:F1}h)");
+                            sb.AppendLine($"   - **LW:** Total {item.TotalAllLWHours:F1}h (Office {item.OfficeLWHours:F1}h, WFH {item.WfhLWHours:F1}h)");
+                            sb.AppendLine($"   - **LM:** Total {item.TotalAllLMHours:F1}h (Office {item.OfficeLMHours:F1}h, WFH {item.WfhLMHours:F1}h)");
                             sb.AppendLine("   -------------------------");
                             idx++;
                         }

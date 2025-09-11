@@ -10,17 +10,17 @@ namespace Timesheet.APIs.Reports.Dto
         public string UserName { get; set; }
         public string OfficeName { get; set; }
         public string OfficeCode { get; set; }
-        public int TotalAllLW { get; set; }
-        public int OfficeLW { get; set; }
-        public int WfhLW { get; set; }
-        public int TotalAllLM { get; set; }
-        public int OfficeLM { get; set; }
-        public int WfhLM { get; set; }
-        public double TotalAllLWHours => Math.Round(TotalAllLW / 60.0, 2);
-        public double OfficeLWHours => Math.Round(OfficeLW / 60.0, 2);
-        public double WfhLWHours => Math.Round(WfhLW / 60.0, 2);
-        public double TotalAllLMHours => Math.Round(TotalAllLM / 60.0, 2);
-        public double OfficeLMHours => Math.Round(OfficeLM / 60.0, 2);
-        public double WfhLMHours => Math.Round(WfhLM / 60.0, 2);
+        public double TotalAllLW { get; set; } 
+        public double OfficeLW { get; set; } 
+        public double WfhLW { get; set; }
+        public double TotalAllLM { get; set; } 
+        public double OfficeLM { get; set; } 
+        public double WfhLM { get; set; } 
+        public double TotalAllLWHours => TotalAllLW;
+        public double OfficeLWHours => OfficeLW;
+        public double WfhLWHours => WfhLW;
+        public double TotalAllLMHours => TotalAllLM;
+        public double OfficeLMHours => OfficeLM;
+        public double WfhLMHours => WfhLM;
     }
 }
