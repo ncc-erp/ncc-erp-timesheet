@@ -17,7 +17,7 @@ export interface BotReportSettingDto {
   hour: number;
   dayofweek: string;
   botUri: string;
-  officeId: number;
+  branchCode?: string;
   minHours: number;
   topN: number;
   projectIds?: number[];

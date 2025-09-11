@@ -151,7 +151,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.BotReportAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportWebhookUrl, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.BotReportOfficeId, "1", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.BotReportBranchCode, "HN1", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportMinHours, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportTopN, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportProjectIds, "", scopes: SettingScopes.Application|SettingScopes.Tenant),

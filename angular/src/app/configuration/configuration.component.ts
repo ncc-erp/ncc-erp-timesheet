@@ -10,6 +10,7 @@ import { EmailSaoDoSettingService } from './../service/api/email-sao-do-setting.
 import { LevelSettingService } from './../service/api/level-setting.service';
 import { Component, Injector, OnInit } from '@angular/core';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
+import { BRANCH_CODES } from '@app/constant/api.constants';
 import { AutoLockTimesheetService } from '@app/service/api/auto-lock-timesheet.service';
 import { AutoSubmitTimesheetSettingService } from '@app/service/api/auto-submit-timesheet-setting.service';
 import { EmailSettingService } from '@app/service/api/email-setting.service';
@@ -213,6 +214,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   botReportSetting = { everyday: false, botUri: '', projectIds: [] } as BotReportSettingDto;
   projects: ProjectDto[] = [];
   selectedProjects: number[] = [];
+  branchCodes = BRANCH_CODES;
 
   unlockSetting = {} as UnlockTimesheetConfigDto;
   timesCanLateAndEarlyInMonthSetting = {} as TimesCanLateAndEarlyInMonthSettingDto;

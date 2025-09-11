@@ -1129,10 +1129,14 @@
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Office ID</span> <mat-icon class="special-icon"
-                        matTooltip="Office ID for filtering report data">help</mat-icon>
-                      <input type="number" matInput name="officeId" [(ngModel)]="botReportSetting.officeId"
-                        [disabled]="!isEditBotReportSetting" min="0" />
+                      <span class="special-label">Branch Code</span> <mat-icon class="special-icon"
+                        matTooltip="Branch Code for filtering report data (e.g., HN1, HN2, SG1, etc.)">help</mat-icon>
+                      <mat-select [(ngModel)]="botReportSetting.branchCode" name="branchCode"
+                        [disabled]="!isEditBotReportSetting">
+                        <mat-option *ngFor="let code of branchCodes" [value]="code">
+                          {{code}}
+                        </mat-option>
+                      </mat-select>
                     </mat-form-field>
                   </div>
 

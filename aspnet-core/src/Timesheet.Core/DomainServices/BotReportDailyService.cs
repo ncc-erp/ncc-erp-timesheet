@@ -36,10 +36,6 @@ namespace Timesheet.DomainServices
 
         public async Task<DailyProjectTimelogReportDto> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input)
         {
-            if (input.OfficeId <= 0)
-            {
-                throw new UserFriendlyException("Office ID is required and must be greater than 0");
-            }
 
             var today = DateTime.Now.Date;
 
@@ -53,8 +49,17 @@ namespace Timesheet.DomainServices
             var lastMonthEnd = new DateTime(today.Year, today.Month, 1).AddDays(-1);
             var lastMonthStart = new DateTime(lastMonthEnd.Year, lastMonthEnd.Month, 1);
 
+            var branch = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                .Where(b => b.Code == input.BranchCode)
+                .FirstOrDefaultAsync();
+
+            if (branch == null)
+            {
+                throw new UserFriendlyException($"Branch with code '{input.BranchCode}' not found");
+            }
+
             var officeUsers = await _workScope.GetAll<User>()
-                .Where(u => u.BranchId == input.OfficeId && !u.IsDeleted)
+                .Where(u => u.BranchId == branch.Id && !u.IsDeleted)
                 .Select(u => u.Id)
                 .ToListAsync();
 
@@ -269,7 +274,7 @@ namespace Timesheet.DomainServices
 
         public async Task<bool> SendDailyProjectTimelogToMezon()
         {
-            var officeIdStr = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportOfficeId);
+            var branchCodeStr = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportBranchCode);
             var minHoursStr = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportMinHours);
             var topNStr = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportTopN);
             var projectIdsJson = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportProjectIds);
@@ -289,11 +294,16 @@ namespace Timesheet.DomainServices
 
             var input = new GetDailyProjectTimelogReportInput
             {
-                OfficeId = int.Parse(officeIdStr), 
+                BranchCode = branchCodeStr,
                 MinHours = double.TryParse(minHoursStr, out var minHours) ? (double?)minHours : null,
                 TopN = int.TryParse(topNStr, out var topN) ? (int?)topN : null,
                 ProjectIds = projectIds
             };
+            
+            if (string.IsNullOrEmpty(input.BranchCode))
+            {
+                Logger.Warn("No branch code specified for Bot Report. Report may be empty.");
+            }
 
             return await SendDailyProjectTimelogToMezon(input);
         }
@@ -338,14 +348,30 @@ namespace Timesheet.DomainServices
             string lastWeekPeriod = $"{lastWeekStart:dd/MM/yyyy} - {lastWeekEnd:dd/MM/yyyy}";
             string lastMonthPeriod = $"{lastMonthStart:MM/yyyy}";
 
-            var officeName = await _workScope.GetAll<Timesheet.Entities.Branch>()
-                .Where(b => b.Id == input.OfficeId)
-                .Select(b => b.DisplayName)
-                .FirstOrDefaultAsync() ?? $"Office ID: {input.OfficeId}";
+            string branchInfo;
+            if (!string.IsNullOrEmpty(input.BranchCode))
+            {
+                var branch = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                    .Where(b => b.Code == input.BranchCode)
+                    .FirstOrDefaultAsync();
+                
+                if (branch != null)
+                {
+                    branchInfo = $"{branch.DisplayName}";
+                }
+                else
+                {
+                    branchInfo = $"Branch Code: {input.BranchCode}";
+                }
+            }
+            else
+            {
+                branchInfo = "Unknown Branch";
+            }
 
-            sb.AppendLine("Top Projects Summary📊");
+            sb.AppendLine("📊 Top Projects Summary");
             sb.AppendLine($"Report Period:   Last Week  ({lastWeekStart:MM/dd/yyyy} - {lastWeekEnd:MM/dd/yyyy}) |  Last Month  ({lastMonthStart:MM/yyyy})");
-            sb.AppendLine($"Office: {officeName}");
+            sb.AppendLine($"Office: {branchInfo}");
             sb.AppendLine("-------------------------------------");
 
             foreach (var item in projectData)

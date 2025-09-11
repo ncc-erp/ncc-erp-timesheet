@@ -10,8 +10,8 @@ namespace Timesheet.Configuration.Dto
         public bool everyday { get; set; }
         public int hour { get; set; } 
         public string dayofweek { get; set; }
-        public string botUri { get; set; }
-        public int officeId { get; set; } 
+        public string botUri { get; set; } 
+        public string branchCode { get; set; }
         public double? minHours { get; set; }
         public int? topN { get; set; }
         public List<long> projectIds { get; set; } = new List<long>();
