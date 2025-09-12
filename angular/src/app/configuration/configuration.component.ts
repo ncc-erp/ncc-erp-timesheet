@@ -211,9 +211,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   isShowBotReportSetting: boolean = false;
   isEditBotReportSetting: boolean = false;
-  botReportSetting = { everyday: false, botUri: '', projectIds: [] } as BotReportSettingDto;
+  botReportSetting = { everyday: false, botUri: '', projectIds: [], branchCodes: [] } as BotReportSettingDto;
   projects: ProjectDto[] = [];
   selectedProjects: number[] = [];
+  selectedBranches: string[] = [];
+  isAllProjectsSelected: boolean = false;
+  isAllBranchesSelected: boolean = false;
   branchCodes = BRANCH_CODES;
 
   unlockSetting = {} as UnlockTimesheetConfigDto;
@@ -1930,6 +1933,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       this.botReportSettingService.get().subscribe((data: any) => {
         this.botReportSetting = data.result;
         this.selectedProjects = this.botReportSetting.projectIds || [];
+
+        if (this.botReportSetting.branchCodes && this.botReportSetting.branchCodes.length > 0) {
+          this.selectedBranches = [...this.botReportSetting.branchCodes];
+        } else {
+          this.selectedBranches = [];
+        }
       });
 
       this.botReportSettingService.getActiveProjects().subscribe({
@@ -1937,8 +1946,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
           this.projects = response.result || [];
         },
         error: (error) => {
-          console.error('Error loading projects:', error);
-          this.projects = [];
+          console.error('Error fetching projects:', error);
         }
       });
     }
@@ -1963,6 +1971,13 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       return;
     }
 
+    if (!this.selectedBranches || this.selectedBranches.length === 0) {
+      abp.message.error("Phải chọn ít nhất một branch!");
+      return;
+    }
+    
+    this.botReportSetting.branchCodes = [...this.selectedBranches];
+
     this.botReportSetting.projectIds = this.selectedProjects;
     
     this.botReportSettingService.change(this.botReportSetting).subscribe((res: any) => {
@@ -1978,6 +1993,32 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.isEditBotReportSetting = false;
   }
 
+  toggleAllProjects() {
+    this.selectedProjects = this.selectedProjects.filter(id => id !== -1);
+    
+    if (!this.isAllProjectsSelected) {
+      this.selectedProjects = this.projects.map(project => project.id);
+      this.isAllProjectsSelected = true;
+    } else {
+      this.selectedProjects = [];
+      this.isAllProjectsSelected = false;
+    }
+  }
+
+  toggleAllBranches() {
+    this.selectedBranches = this.selectedBranches.filter(code => code !== '-1');
+    
+    if (!this.isAllBranchesSelected) {
+      // Chọn tất cả các branch
+      this.selectedBranches = [...this.branchCodes];
+      this.isAllBranchesSelected = true;
+    } else {
+      // Không cho phép bỏ chọn tất cả, giữ lại ít nhất branch HN1
+      this.selectedBranches = ['HN1'];
+      this.isAllBranchesSelected = false;
+      abp.notify.info('Phải chọn ít nhất một branch. Branch HN1 đã được chọn mặc định.');
+    }
+  }
 }
 
 export class EmailSettingDto {

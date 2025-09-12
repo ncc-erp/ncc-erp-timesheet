@@ -1127,12 +1127,22 @@
                     </mat-form-field>
                   </div>
 
-                  <div class="col-md-12" style="max-width: 880px;">
-                    <mat-form-field>
-                      <span class="special-label">Branch Code</span> <mat-icon class="special-icon"
-                        matTooltip="Branch Code for filtering report data (e.g., HN1, HN2, SG1, etc.)">help</mat-icon>
-                      <mat-select [(ngModel)]="botReportSetting.branchCode" name="branchCode"
+
+                  <div class="col-md-12" style="max-width: 880px; margin-top: 15px;">
+                    <mat-form-field style="width: 100%;">
+                      <div class="label-with-icon">
+                        <mat-label>Select Branches</mat-label>
+                        <mat-icon class="special-icon"
+                          matTooltip="Select branches for filtering report data (e.g., HN1, HN2, SG1, etc.)">help</mat-icon>
+                      </div>
+                      <mat-select multiple [(ngModel)]="selectedBranches" name="branchCodes"
                         [disabled]="!isEditBotReportSetting">
+                        <div class="select-all-option">
+                          <mat-option [value]="-1" (click)="toggleAllBranches()">
+                            <strong>{{ isAllBranchesSelected ? 'Deselect All' : 'Select All' }}</strong>
+                          </mat-option>
+                        </div>
+                        <mat-divider></mat-divider>
                         <mat-option *ngFor="let code of branchCodes" [value]="code">
                           {{code}}
                         </mat-option>
@@ -1168,6 +1178,12 @@
                         </mat-icon>
                       </div>
                       <mat-select multiple [disabled]="!isEditBotReportSetting" [(ngModel)]="selectedProjects" name="selectedProjects">
+                        <div class="select-all-option">
+                          <mat-option [value]="-1" (click)="toggleAllProjects()">
+                            <strong>{{ isAllProjectsSelected ? 'Deselect All' : 'Select All' }}</strong>
+                          </mat-option>
+                        </div>
+                        <mat-divider></mat-divider>
                         <mat-option *ngFor="let project of projects" [value]="project.id">
                           {{project.name}} ({{project.code}})
                         </mat-option>

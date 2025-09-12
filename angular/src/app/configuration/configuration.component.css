@@ -18,6 +18,16 @@
     margin-top: 6px;
 }
 
+.select-all-option {
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.select-all-option .mat-option {
+    font-weight: 500;
+    color: #3f51b5;
+}
+
 .edit-save button{
     margin-right: 10px;
     margin-top: 20px;

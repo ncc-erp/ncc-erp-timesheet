@@ -822,11 +822,13 @@ namespace Ncc.Configuration
                 hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportAtHour)),
                 dayofweek = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportAtDayOfWeek),
                 botUri = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportWebhookUrl),
-                branchCode = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportBranchCode) ?? "",
                 minHours = double.TryParse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportMinHours), out var minH) ? (double?)minH : null,
                 topN = int.TryParse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportTopN), out var tN) ? (int?)tN : null,
                 projectIds = JsonConvert.DeserializeObject<List<long>>(
                     await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportProjectIds)
+                    ?? "[]"),
+                branchCodes = JsonConvert.DeserializeObject<List<string>>(
+                    await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportBranchCodes)
                     ?? "[]")
             };
 
@@ -839,12 +841,14 @@ namespace Ncc.Configuration
         public async Task<BotReportSettingDto> SetBotReportSetting(BotReportSettingDto input)
         {
             var projectIdsJson = JsonConvert.SerializeObject(input.projectIds ?? new List<long>());
+            var branchCodesJson = JsonConvert.SerializeObject(input.branchCodes ?? new List<string>());
+            
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportEnable, input.enable.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportEveryday, input.everyday.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportAtHour, input.hour.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportAtDayOfWeek, input.dayofweek);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportWebhookUrl, input.botUri);
-            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportBranchCode, input.branchCode ?? string.Empty);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportBranchCodes, branchCodesJson); 
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportMinHours, input.minHours?.ToString() ?? string.Empty);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportTopN, input.topN?.ToString() ?? string.Empty);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportProjectIds, projectIdsJson);

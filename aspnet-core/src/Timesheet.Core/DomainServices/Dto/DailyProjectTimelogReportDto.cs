@@ -31,7 +31,7 @@ namespace Timesheet.DomainServices.Dto
 
         public class GetDailyProjectTimelogReportInput
         {
-            public string BranchCode { get; set; }
+            public List<string> BranchCodes { get; set; } = new List<string>();
             public double? MinHours { get; set; } = 0;
             public int? TopN { get; set; }
             public List<long> ProjectIds { get; set; } = new List<long>();

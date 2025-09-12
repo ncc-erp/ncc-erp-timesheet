@@ -22,20 +22,25 @@ namespace Timesheet.BackgroundWorker
         {
             _botReportDailyService = botReportDailyService;
 
-            Timer.Period = 1000 * 60 * 60;
+            Timer.Period = 1000 * 60;
         }
 
         [UnitOfWork]
         protected override void DoWork()
         {
             DateTime now = DateTimeUtils.GetNow();
-            try
+
+            if (now.Minute == 0)
             {
-                RunBotReportJob(now);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("RunBotReportJob() error: " + ex.Message, ex);
+                try
+                {
+                    Logger.Info($"BotReportWorker running at {now:yyyy-MM-dd HH:mm:ss}");
+                    RunBotReportJob(now);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("RunBotReportJob() error: " + ex.Message, ex);
+                }
             }
         }
 
@@ -65,7 +70,7 @@ namespace Timesheet.BackgroundWorker
             }
 
             bool isEveryday = everyday == "True";
-            
+
             if (!isEveryday && !string.Equals(now.DayOfWeek.ToString(), dayOfWeek, StringComparison.OrdinalIgnoreCase))
             {
                 Logger.Info($"RunBotReportJob() skipped: Today is {now.DayOfWeek}, Configured = {dayOfWeek}");
@@ -73,9 +78,9 @@ namespace Timesheet.BackgroundWorker
             }
 
             Logger.Info($"RunBotReportJob() running... [Mode: {(isEveryday ? "Everyday" : dayOfWeek)}]");
-            
+
             ExecuteBotReport();
-            
+
             Logger.Info("RunBotReportJob() finished.");
         }
 
@@ -84,7 +89,7 @@ namespace Timesheet.BackgroundWorker
             try
             {
                 _botReportDailyService.SendDailyProjectTimelogToMezon().GetAwaiter().GetResult();
-                
+
                 Logger.Info("Bot Report executed successfully");
             }
             catch (Exception ex)

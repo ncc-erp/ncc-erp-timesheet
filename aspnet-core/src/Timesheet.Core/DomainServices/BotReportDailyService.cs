@@ -36,7 +36,6 @@ namespace Timesheet.DomainServices
 
         public async Task<DailyProjectTimelogReportDto> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input)
         {
-
             var today = DateTime.Now.Date;
 
             var lastWeekEnd = today.AddDays(-(int)today.DayOfWeek);
@@ -49,19 +48,49 @@ namespace Timesheet.DomainServices
             var lastMonthEnd = new DateTime(today.Year, today.Month, 1).AddDays(-1);
             var lastMonthStart = new DateTime(lastMonthEnd.Year, lastMonthEnd.Month, 1);
 
-            var branch = await _workScope.GetAll<Timesheet.Entities.Branch>()
-                .Where(b => b.Code == input.BranchCode)
-                .FirstOrDefaultAsync();
+            var officeUsers = new List<long>();
+            var branchNames = new List<string>();
 
-            if (branch == null)
+            if (input.BranchCodes == null || !input.BranchCodes.Any())
             {
-                throw new UserFriendlyException($"Branch with code '{input.BranchCode}' not found");
+                input.BranchCodes = new List<string> { "HN1" };
+                Logger.Warn("No branch codes provided, using default branch HN1");
             }
 
-            var officeUsers = await _workScope.GetAll<User>()
-                .Where(u => u.BranchId == branch.Id && !u.IsDeleted)
-                .Select(u => u.Id)
+            var allBranchCodes = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                .Select(b => b.Code)
                 .ToListAsync();
+                
+            bool isAllBranchesSelected = input.BranchCodes.Count == allBranchCodes.Count && 
+                input.BranchCodes.All(code => allBranchCodes.Contains(code));
+                
+            if (isAllBranchesSelected)
+            {
+                officeUsers = await _workScope.GetAll<User>()
+                    .Where(u => !u.IsDeleted && u.BranchId.HasValue)
+                    .Select(u => u.Id)
+                    .ToListAsync();
+                branchNames.Add("All Branches");
+            }
+            else
+            {
+                var branchIds = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                    .Where(b => input.BranchCodes.Contains(b.Code))
+                    .Select(b => new { b.Id, b.DisplayName })
+                    .ToListAsync();
+
+                if (branchIds.Count == 0)
+                {
+                    throw new UserFriendlyException("Invalid branch codes provided. None of the specified branch codes exist in the system.");
+                }
+
+                officeUsers = await _workScope.GetAll<User>()
+                    .Where(u => !u.IsDeleted && u.BranchId.HasValue && branchIds.Select(b => b.Id).Contains(u.BranchId.Value))
+                    .Select(u => u.Id)
+                    .ToListAsync();
+
+                branchNames.AddRange(branchIds.Select(b => b.DisplayName));
+            }
 
             if (!officeUsers.Any())
             {
@@ -86,37 +115,9 @@ namespace Timesheet.DomainServices
 
             var activeProjectIds = allProjects.Select(p => p.Id).ToList();
 
-            var timekeepingRecords = await _workScope.GetAll<Timekeeping>()
-                .Where(t => officeUsers.Contains(t.UserId.Value) &&
-                           ((t.DateAt >= lastWeekStart && t.DateAt <= lastWeekEnd) ||
-                            (t.DateAt >= lastMonthStart && t.DateAt <= lastMonthEnd)))
-                .ToListAsync();
-
-            var projectUsers = await _workScope.GetAll<ProjectUser>()
-                .Where(pu => !pu.IsDeleted &&
-                       pu.Type != ProjectUserType.DeActive &&
-                       activeProjectIds.Contains(pu.ProjectId))
-                .ToListAsync();
-
             var allUsers = await _workScope.GetAll<User>()
                 .Where(u => !u.IsDeleted)
                 .Select(u => new { u.Id, u.UserName })
-                .ToListAsync();
-
-            var absenceRecords = await _workScope.GetAll<AbsenceDayDetail>()
-                .Include(s => s.Request)
-                .Where(s => officeUsers.Contains(s.Request.UserId) &&
-                       ((s.DateAt >= lastWeekStart && s.DateAt <= lastWeekEnd) ||
-                        (s.DateAt >= lastMonthStart && s.DateAt <= lastMonthEnd)) &&
-                       s.Request.Status == Ncc.Entities.Enum.StatusEnum.RequestStatus.Approved)
-                .Select(s => new
-                {
-                    UserId = s.Request.UserId,
-                    DateAt = s.DateAt,
-                    DateType = s.DateType,
-                    AbsenceTime = s.AbsenceTime,
-                    Type = s.Request.Type
-                })
                 .ToListAsync();
 
             var myTimesheetData = await _workScope.GetAll<MyTimesheet>()
@@ -125,127 +126,30 @@ namespace Timesheet.DomainServices
                         (mt.DateAt >= lastMonthStart && mt.DateAt <= lastMonthEnd)) &&
                        mt.Status == Ncc.Entities.Enum.StatusEnum.TimesheetStatus.Approve)
                 .Include(mt => mt.ProjectTask)
+                .ThenInclude(pt => pt.Project)
                 .ToListAsync();
 
-            var userProjectMap = myTimesheetData
-                .Where(mt => mt.ProjectTask != null && activeProjectIds.Contains(mt.ProjectTask.ProjectId))
-                .GroupBy(mt => new { mt.UserId, mt.DateAt })
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.GroupBy(mt => mt.ProjectTask.ProjectId)
-                         .Select(pg => new
-                         {
-                             ProjectId = pg.Key,
-                             TotalMinutes = pg.Sum(mt => mt.WorkingTime)
-                         })
-                         .OrderByDescending(p => p.TotalMinutes)
-                         .FirstOrDefault()?.ProjectId
-                );
-
-            var timekeepingMinutes = new List<(long UserId, DateTime DateAt, long? ProjectId, double Minutes)>();
-
-            foreach (var record in timekeepingRecords)
-            {
-                if (!record.UserId.HasValue) continue;
-
-                var userDateKey = new { UserId = record.UserId.Value, DateAt = record.DateAt };
-                var mostLoggedProjectId = userProjectMap.ContainsKey(userDateKey) ? userProjectMap[userDateKey] : null;
-
-                if (mostLoggedProjectId == null)
-                {
-                    var userProject = projectUsers.FirstOrDefault(pu =>
-                        pu.UserId == record.UserId.Value &&
-                        record.DateAt >= pu.CreationTime &&
-                        (pu.IsDeleted == false || record.DateAt <= pu.DeletionTime));
-
-                    if (userProject != null)
-                    {
-                        mostLoggedProjectId = userProject.ProjectId;
-                    }
-                }
-
-                if (mostLoggedProjectId != null)
-                {
-                    double minutes = 0;
-                    bool isRemote = false;
-
-                    var remoteRequests = absenceRecords
-                        .Where(r => r.Type == RequestType.Remote && r.UserId == record.UserId.Value && r.DateAt.Date == record.DateAt.Date)
-                        .ToList();
-                    isRemote = remoteRequests.Any();
-
-                    if (isRemote)
-                    {
-                        if (!string.IsNullOrEmpty(record.TrackerTime) && TimeSpan.TryParse(record.TrackerTime, out TimeSpan trackerTimeSpan))
-                        {
-                            minutes = trackerTimeSpan.TotalMinutes;
-                        }
-                    }
-                    else if (string.IsNullOrEmpty(record.CheckOut) && !string.IsNullOrEmpty(record.CheckIn) &&
-                             !string.IsNullOrEmpty(record.TrackerTime) && TimeSpan.TryParse(record.TrackerTime, out TimeSpan trackerTimeSpan))
-                    {
-                        minutes = trackerTimeSpan.TotalMinutes;
-                    }
-                    else if (!string.IsNullOrEmpty(record.CheckIn) && !string.IsNullOrEmpty(record.CheckOut))
-                    {
-                        if (TimeSpan.TryParse(record.CheckIn, out TimeSpan checkInTime) &&
-                            TimeSpan.TryParse(record.CheckOut, out TimeSpan checkOutTime))
-                        {
-                            minutes = (checkOutTime - checkInTime).TotalMinutes;
-
-                            if (minutes > 240)
-                            {
-                                minutes -= 60;
-                            }
-                        }
-                    }
-
-                    if (minutes > 0)
-                    {
-                        timekeepingMinutes.Add((record.UserId.Value, record.DateAt, mostLoggedProjectId, minutes));
-                    }
-                }
-            }
-
-            var projectUserMap = myTimesheetData
-                .Where(mt => mt.ProjectTask != null && activeProjectIds.Contains(mt.ProjectTask.ProjectId))
+            var projectTimesheets = myTimesheetData
+                .Where(mt => mt.ProjectTask != null && 
+                       mt.ProjectTask.Project != null && 
+                       !mt.ProjectTask.Project.IsDeleted && 
+                       activeProjectIds.Contains(mt.ProjectTask.ProjectId))
                 .GroupBy(mt => mt.ProjectTask.ProjectId)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(mt => mt.UserId).Distinct().ToList()
-                );
-
-            var validUserDateProjectCombinations = new HashSet<(long UserId, DateTime DateAt, long ProjectId)>();
-            foreach (var userDateKey in userProjectMap)
-            {
-                if (userDateKey.Value.HasValue)
-                {
-                    validUserDateProjectCombinations.Add((userDateKey.Key.UserId, userDateKey.Key.DateAt, userDateKey.Value.Value));
-                }
-            }
-
-            var filteredTimekeepingMinutes = timekeepingMinutes
-                .Where(t => t.ProjectId.HasValue && validUserDateProjectCombinations.Contains((t.UserId, t.DateAt, t.ProjectId.Value)))
-                .ToList();
-
-            var projectTimelogData = filteredTimekeepingMinutes
-                .GroupBy(t => t.ProjectId)
                 .Select(g => new
                 {
                     ProjectId = g.Key,
-                    TotalMinutesLW = g.Where(t => t.DateAt >= lastWeekStart && t.DateAt <= lastWeekEnd).Sum(t => t.Minutes),
-                    TotalMinutesLM = g.Where(t => t.DateAt >= lastMonthStart && t.DateAt <= lastMonthEnd).Sum(t => t.Minutes),
-                    UserIds = g.Key.HasValue && projectUserMap.ContainsKey(g.Key.Value) ?
-                              projectUserMap[g.Key.Value].Intersect(g.Select(t => t.UserId).Distinct()).ToList() :
-                              new List<long>()
+                    TotalMinutesLW = g.Where(mt => mt.DateAt >= lastWeekStart && mt.DateAt <= lastWeekEnd)
+                                      .Sum(mt => mt.WorkingTime),
+                    TotalMinutesLM = g.Where(mt => mt.DateAt >= lastMonthStart && mt.DateAt <= lastMonthEnd)
+                                      .Sum(mt => mt.WorkingTime),
+                    UserIds = g.Select(mt => mt.UserId).Distinct().ToList()
                 })
-                .Where(p => p.ProjectId.HasValue)
                 .ToList();
 
             var result = new DailyProjectTimelogReportDto
             {
                 ReportDate = today.ToString("yyyy-MM-dd"),
-                Projects = projectTimelogData
+                Projects = projectTimesheets
                     .Select(p => new ProjectTimelogDto
                     {
                         Name = allProjects.FirstOrDefault(proj => proj.Id == p.ProjectId)?.Name ?? "Unknown Project",
@@ -254,8 +158,8 @@ namespace Timesheet.DomainServices
                             .Select(u => u.UserName)
                             .OrderBy(name => name)
                             .ToList(),
-                        TotalTimelogLW = Math.Round(p.TotalMinutesLW / 60, 2),
-                        TotalTimelogLM = Math.Round(p.TotalMinutesLM / 60, 2)
+                        TotalTimelogLW = Math.Round(p.TotalMinutesLW / 60.0, 2),
+                        TotalTimelogLM = Math.Round(p.TotalMinutesLM / 60.0, 2)
                     })
                     .Where(p => p.TotalTimelogLW >= (input.MinHours ?? 0))
                     .OrderByDescending(p => p.TotalTimelogLW)
@@ -274,7 +178,7 @@ namespace Timesheet.DomainServices
 
         public async Task<bool> SendDailyProjectTimelogToMezon()
         {
-            var branchCodeStr = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportBranchCode);
+            var branchCodesJson = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportBranchCodes);
             var minHoursStr = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportMinHours);
             var topNStr = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportTopN);
             var projectIdsJson = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportProjectIds);
@@ -291,18 +195,31 @@ namespace Timesheet.DomainServices
                     Logger.Error($"Failed to deserialize project IDs: {projectIdsJson}");
                 }
             }
+            
+            List<string> branchCodes = null;
+            if (!string.IsNullOrEmpty(branchCodesJson))
+            {
+                try
+                {
+                    branchCodes = JsonConvert.DeserializeObject<List<string>>(branchCodesJson);
+                }
+                catch
+                {
+                    Logger.Error($"Failed to deserialize branch codes: {branchCodesJson}");
+                }
+            }
 
             var input = new GetDailyProjectTimelogReportInput
             {
-                BranchCode = branchCodeStr,
+                BranchCodes = branchCodes ?? new List<string>(),
                 MinHours = double.TryParse(minHoursStr, out var minHours) ? (double?)minHours : null,
                 TopN = int.TryParse(topNStr, out var topN) ? (int?)topN : null,
                 ProjectIds = projectIds
             };
             
-            if (string.IsNullOrEmpty(input.BranchCode))
+            if (input.BranchCodes == null || !input.BranchCodes.Any())
             {
-                Logger.Warn("No branch code specified for Bot Report. Report may be empty.");
+                Logger.Warn("No branch selection criteria specified for Bot Report. Report may be empty.");
             }
 
             return await SendDailyProjectTimelogToMezon(input);
@@ -349,19 +266,35 @@ namespace Timesheet.DomainServices
             string lastMonthPeriod = $"{lastMonthStart:MM/yyyy}";
 
             string branchInfo;
-            if (!string.IsNullOrEmpty(input.BranchCode))
+
+            if (input.BranchCodes != null && input.BranchCodes.Any())
             {
-                var branch = await _workScope.GetAll<Timesheet.Entities.Branch>()
-                    .Where(b => b.Code == input.BranchCode)
-                    .FirstOrDefaultAsync();
+                var allBranchCodes = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                    .Select(b => b.Code)
+                    .ToListAsync();
+                    
+                bool isAllBranchesSelected = input.BranchCodes.Count == allBranchCodes.Count && 
+                    input.BranchCodes.All(code => allBranchCodes.Contains(code));
                 
-                if (branch != null)
+                if (isAllBranchesSelected)
                 {
-                    branchInfo = $"{branch.DisplayName}";
+                    branchInfo = "All Branches";
                 }
                 else
                 {
-                    branchInfo = $"Branch Code: {input.BranchCode}";
+                    var branches = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                        .Where(b => input.BranchCodes.Contains(b.Code))
+                        .Select(b => b.DisplayName)
+                        .ToListAsync();
+                    
+                    if (branches.Any())
+                    {
+                        branchInfo = string.Join(", ", branches);
+                    }
+                    else
+                    {
+                        branchInfo = string.Join(", ", input.BranchCodes);
+                    }
                 }
             }
             else
