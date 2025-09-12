@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Timesheet.Entities;
 using Timesheet.Services.Mezon;
@@ -69,6 +70,31 @@ namespace Timesheet.APIs.Reports
                 if (idx == -1) break;
                 AddBold(mkList, idx, idx + token.Length);
                 current = idx + token.Length;
+            }
+        }
+
+        private static void AddBoldForUsernames(List<object> mkList, string messageText)
+        {
+            var lines = messageText.Split('\n');
+            int currentPos = 0;
+            
+            foreach (var line in lines)
+            {
+               
+                if (Regex.IsMatch(line.Trim(), @"^\d+\.\s"))
+                {
+                    var dotIndex = line.IndexOf('.');
+                    if (dotIndex >= 0)
+                    {
+                        var startPos = currentPos + dotIndex + 2; 
+                        var endPos = line.Length;
+                        if (startPos < currentPos + line.Length)
+                        {
+                            AddBold(mkList, startPos, currentPos + endPos);
+                        }
+                    }
+                }
+                currentPos += line.Length + 1; 
             }
         }
 
@@ -315,8 +341,9 @@ namespace Timesheet.APIs.Reports
                     AddBoldForLabel(mkList, messageText, "📈 **Tổng số văn phòng:**");
                     AddBoldForLabel(mkList, messageText, "📅 **Thời gian:**");
                     AddBoldForOfficeTitles(mkList, messageText);
-                    AddBoldForAllOccurrences(mkList, messageText, "**LW:**");
-                    AddBoldForAllOccurrences(mkList, messageText, "**LM:**");
+                    AddBoldForUsernames(mkList, messageText);
+                    AddBoldForAllOccurrences(mkList, messageText, "LW:");
+                    AddBoldForAllOccurrences(mkList, messageText, "LM:");
 
                     _mezonService.Post(notificationUrl, new
                     {
@@ -389,9 +416,9 @@ namespace Timesheet.APIs.Reports
                             username = username.Substring(0, atIndex);
                         }
 
-                        sb.AppendLine($"{idx}. **{username}**");
-                        sb.AppendLine($"   - **LW:** Total {item.TotalAllLWHours}h (Office {item.OfficeLWHours}h, WFH {item.WfhLWHours}h)");
-                        sb.AppendLine($"   - **LM:** Total {item.TotalAllLMHours}h (Office {item.OfficeLMHours}h, WFH {item.WfhLMHours}h)");
+                        sb.AppendLine($"{idx}. {username}");
+                        sb.AppendLine($"   - LW: Total {item.TotalAllLWHours:F1}h (Office {item.OfficeLWHours:F1}h, WFH {item.WfhLWHours:F1}h)");
+                        sb.AppendLine($"   - LM: Total {item.TotalAllLMHours:F1}h (Office {item.OfficeLMHours:F1}h, WFH {item.WfhLMHours:F1}h)");
                         sb.AppendLine("   -------------------------");
                         idx++;
                     }
@@ -446,8 +473,9 @@ namespace Timesheet.APIs.Reports
                 AddBoldForLabel(mkList, messageText, "📈 **Tổng số nhân viên:**");
                 AddBoldForLabel(mkList, messageText, "📅 **Thời gian:**");
                 AddBoldForOfficeTitles(mkList, messageText);
-                AddBoldForAllOccurrences(mkList, messageText, "**LW:**");
-                AddBoldForAllOccurrences(mkList, messageText, "**LM:**");
+                AddBoldForUsernames(mkList, messageText);
+                AddBoldForAllOccurrences(mkList, messageText, "LW:");
+                AddBoldForAllOccurrences(mkList, messageText, "LM:");
 
                 _mezonService.Post(url, new
                 {
@@ -714,9 +742,9 @@ namespace Timesheet.APIs.Reports
                                 username = username.Substring(0, atIndex);
                             }
 
-                            sb.AppendLine($"{idx}. **{username}**");
-                            sb.AppendLine($"   - **LW:** Total {item.TotalAllLWHours:F1}h (Office {item.OfficeLWHours:F1}h, WFH {item.WfhLWHours:F1}h)");
-                            sb.AppendLine($"   - **LM:** Total {item.TotalAllLMHours:F1}h (Office {item.OfficeLMHours:F1}h, WFH {item.WfhLMHours:F1}h)");
+                            sb.AppendLine($"{idx}. {username}");
+                            sb.AppendLine($"   - LW: Total {item.TotalAllLWHours:F1}h (Office {item.OfficeLWHours:F1}h, WFH {item.WfhLWHours:F1}h)");
+                            sb.AppendLine($"   - LM: Total {item.TotalAllLMHours:F1}h (Office {item.OfficeLMHours:F1}h, WFH {item.WfhLMHours:F1}h)");
                             sb.AppendLine("   -------------------------");
                             idx++;
                         }
