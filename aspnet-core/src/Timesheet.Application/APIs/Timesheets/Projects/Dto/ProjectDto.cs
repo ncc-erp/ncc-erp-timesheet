@@ -15,7 +15,7 @@ namespace Timesheet.Timesheets.Projects.Dto
     {
         public string Name { get; set; }
         public string Code { get; set; }
-        public ProjectStatus Status { get; set; }       
+        public ProjectStatus Status { get; set; }
         public DateTime TimeStart { get; set; }
         public DateTime? TimeEnd { get; set; }
         public string Note { get; set; }
@@ -28,13 +28,25 @@ namespace Timesheet.Timesheets.Projects.Dto
         public string mezonUrl { get; set; }
         public string KomuChannelId { get; set; }
         public bool IsNotifyToKomu { get; set; }
-        public bool IsNoticeKMSubmitTS { get; set; } = false;
-        public bool IsNoticeKMApproveRejectTimesheet { get; set; } = false;
-        public bool IsNoticeKMRequestOffDate { get; set; } = false;
-        public bool IsNoticeKMApproveRequestOffDate { get; set; } = false;
-        public bool IsNoticeKMRequestChangeWorkingTime { get; set; } = false;
-        public bool IsNoticeKMApproveChangeWorkingTime { get; set; } = false;
+        public bool IsNoticeKMSubmitTS { get; set; }
+        public bool IsNoticeKMApproveRejectTimesheet { get; set; }
+        public bool IsNoticeKMRequestOffDate { get; set; }
+        public bool IsNoticeKMApproveRequestOffDate { get; set; }
+        public bool IsNoticeKMRequestChangeWorkingTime { get; set; }
+        public bool IsNoticeKMApproveChangeWorkingTime { get; set; }
         public bool isAllUserBelongTo { get; set; }
-        public bool IsAllowTeamBuilding { get; set; } 
+        public bool IsAllowTeamBuilding { get; set; }
+    }
+
+    public class ProjectNotificationSettingsDto
+    {
+        public long ProjectId { get; set; }
+        public string KomuChannelId { get; set; }
+        public bool IsNoticeKMSubmitTS { get; set; }
+        public bool IsNoticeKMApproveRejectTimesheet { get; set; }
+        public bool IsNoticeKMRequestOffDate { get; set; }
+        public bool IsNoticeKMApproveRequestOffDate { get; set; }
+        public bool IsNoticeKMRequestChangeWorkingTime { get; set; }
+        public bool IsNoticeKMApproveChangeWorkingTime { get; set; }
     }
 }
