@@ -619,7 +619,7 @@ namespace TimesheetApplication.UserPunishment
         }
 
         [HttpGet]
-        //[NccAuthentication]
+        [NccAuthentication]
         [AbpAllowAnonymous]
         public async Task<object> GetCompanyPunishmentComparisonAsync(string username)
         {
