@@ -35,7 +35,8 @@ using Timesheet.Entities;
 using Timesheet.Services.Project.Dto;
 using Timesheet.Users.Dto;
 using TimesheetApplication.PunishmentSystem;
-using static Ncc.Entities.Enum.StatusEnum;
+using static Ncc.Entities.Enum.StatusEnum;  
+using Timesheet.NCCAuthen;
 
 namespace TimesheetApplication.UserPunishment
 {
@@ -618,19 +619,12 @@ namespace TimesheetApplication.UserPunishment
         }
 
         [HttpGet]
+        //[NccAuthentication]
         [AbpAllowAnonymous]
         public async Task<object> GetCompanyPunishmentComparisonAsync(string username)
         {
             try
             {
-                string securityCode = _httpContextAccessor.HttpContext.Request.Headers["Security-Code"].FirstOrDefault();
-                string validSecurityCode = await _settingManager.GetSettingValueAsync(AppSettingNames.MezonSecurityCode);
-
-                if ((string.IsNullOrEmpty(securityCode) || securityCode != validSecurityCode) && !AbpSession.UserId.HasValue)
-                {
-                    throw new UserFriendlyException("Unauthorized access");
-                }
-
                 var now = DateTime.Now;
                 var startOfMonth = new DateTime(now.Year, now.Month, 1);
                 var endOfMonth = now; 
@@ -675,7 +669,6 @@ namespace TimesheetApplication.UserPunishment
                     .CountAsync();
 
                 var userTotalPunishmentAmount = userPunishments.Sum(p => p.TotalMoney);
-
                 var companyTotalPunishmentAmount = companyPunishments.Sum(p => p.TotalMoney);
                 var companyAverageTotalPunishmentAmount = companyTotalPunishmentAmount / (employeeCount - 1);
 
@@ -766,8 +759,6 @@ namespace TimesheetApplication.UserPunishment
                     punishmentDetails.Add(new
                     {
                         punishmentType = punishmentType.ToString(),
-                        userAmount,
-                        companyAverageAmount,
                         userBarPercentage,
                         companyBarPercentage
                     });
@@ -775,12 +766,10 @@ namespace TimesheetApplication.UserPunishment
 
                 var response = new
                 {
-                    title = $"Tiền phạt của bạn so với trung bình công ty (VNĐ)",
+                    title = $"Tỷ lệ phạt của bạn so với trung bình công ty",
                     year = now.Year,
                     month = now.Month,
                     punishmentDetails,
-                    userTotalPunishmentAmount,
-                    companyAverageTotalPunishmentAmount,
                     totalBarPercentage = new
                     {
                         user = userTotalBarPercentage,
