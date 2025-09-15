@@ -75,7 +75,7 @@ export class BotReportSettingService extends BaseApiService {
     return this.get().pipe(
       switchMap(setting => {
         if (!setting || !setting.result) {
-          throw new Error('Không thể lấy cấu hình hiện tại');
+          throw new Error('Unable to retrieve current configuration');
         }
         const numericProjectIds = projectIds ? projectIds.map(id => Number(id)) : [];
         const updatedSetting: BotReportSettingDto = {
@@ -85,8 +85,8 @@ export class BotReportSettingService extends BaseApiService {
         return this.change(updatedSetting);
       }),
       catchError(error => {
-        console.error('Lỗi khi cập nhật danh sách project:', error);
-        return of({ success: false, error: error.message || 'Có lỗi xảy ra' });
+        console.error('Error updating project list:', error);
+        return of({ success: false, error: error.message || 'An error occurred' });
       })
     );
   }

@@ -48,48 +48,51 @@ namespace Timesheet.DomainServices
             var lastMonthEnd = new DateTime(today.Year, today.Month, 1).AddDays(-1);
             var lastMonthStart = new DateTime(lastMonthEnd.Year, lastMonthEnd.Month, 1);
 
-            var officeUsers = new List<long>();
-            var branchNames = new List<string>();
-
-            if (input.BranchCodes == null || !input.BranchCodes.Any())
-            {
-                input.BranchCodes = new List<string> { "HN1" };
-                Logger.Warn("No branch codes provided, using default branch HN1");
-            }
-
-            var allBranchCodes = await _workScope.GetAll<Timesheet.Entities.Branch>()
-                .Select(b => b.Code)
+            var allBranches = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                .Select(b => new { b.Id, b.Code, b.DisplayName })
                 .ToListAsync();
-                
-            bool isAllBranchesSelected = input.BranchCodes.Count == allBranchCodes.Count && 
-                input.BranchCodes.All(code => allBranchCodes.Contains(code));
-                
+
+            var allUsers = await _workScope.GetAll<User>()
+                .Where(u => !u.IsDeleted)
+                .Select(u => new { u.Id, u.UserName, u.BranchId, u.IsActive })
+                .ToListAsync();
+
+            var allProjects = await _workScope.GetAll<Project>()
+                .Where(p => !p.IsDeleted && p.Status == Ncc.Entities.Enum.StatusEnum.ProjectStatus.Active)
+                .Select(p => new { p.Id, p.Name })
+                .ToListAsync();
+
+            var branchNames = new List<string>();
+            List<long> officeUsers;
+
+            bool isAllBranchesSelected = input.BranchCodes.Count == allBranches.Count &&
+                                         input.BranchCodes.All(code => allBranches.Select(b => b.Code).Contains(code));
+
             if (isAllBranchesSelected)
             {
-                officeUsers = await _workScope.GetAll<User>()
-                    .Where(u => !u.IsDeleted && u.BranchId.HasValue)
+                officeUsers = allUsers
+                    .Where(u => u.IsActive && u.BranchId.HasValue)
                     .Select(u => u.Id)
-                    .ToListAsync();
+                    .ToList();
                 branchNames.Add("All Branches");
             }
             else
             {
-                var branchIds = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                var branchDict = allBranches
                     .Where(b => input.BranchCodes.Contains(b.Code))
-                    .Select(b => new { b.Id, b.DisplayName })
-                    .ToListAsync();
+                    .ToDictionary(b => b.Id, b => b.DisplayName);
 
-                if (branchIds.Count == 0)
+                if (!branchDict.Any())
                 {
                     throw new UserFriendlyException("Invalid branch codes provided. None of the specified branch codes exist in the system.");
                 }
 
-                officeUsers = await _workScope.GetAll<User>()
-                    .Where(u => !u.IsDeleted && u.BranchId.HasValue && branchIds.Select(b => b.Id).Contains(u.BranchId.Value))
+                officeUsers = allUsers
+                    .Where(u => u.IsActive && u.BranchId.HasValue && branchDict.ContainsKey(u.BranchId.Value))
                     .Select(u => u.Id)
-                    .ToListAsync();
+                    .ToList();
 
-                branchNames.AddRange(branchIds.Select(b => b.DisplayName));
+                branchNames.AddRange(branchDict.Values);
             }
 
             if (!officeUsers.Any())
@@ -101,47 +104,35 @@ namespace Timesheet.DomainServices
                 };
             }
 
-            var projectQuery = _workScope.GetAll<Project>()
-                .Where(p => !p.IsDeleted && p.Status == Ncc.Entities.Enum.StatusEnum.ProjectStatus.Active);
-
-            if (input.ProjectIds != null && input.ProjectIds.Any())
-            {
-                projectQuery = projectQuery.Where(p => input.ProjectIds.Contains(p.Id));
-            }
-
-            var allProjects = await projectQuery
-                .Select(p => new { p.Id, p.Name })
-                .ToListAsync();
-
-            var activeProjectIds = allProjects.Select(p => p.Id).ToList();
-
-            var allUsers = await _workScope.GetAll<User>()
-                .Where(u => !u.IsDeleted)
-                .Select(u => new { u.Id, u.UserName })
-                .ToListAsync();
+            var activeProjectIds = (input.ProjectIds != null && input.ProjectIds.Any())
+                ? allProjects.Where(p => input.ProjectIds.Contains(p.Id)).Select(p => p.Id).ToList()
+                : allProjects.Select(p => p.Id).ToList();
 
             var myTimesheetData = await _workScope.GetAll<MyTimesheet>()
                 .Where(mt => officeUsers.Contains(mt.UserId) &&
                        ((mt.DateAt >= lastWeekStart && mt.DateAt <= lastWeekEnd) ||
                         (mt.DateAt >= lastMonthStart && mt.DateAt <= lastMonthEnd)) &&
-                       mt.Status == Ncc.Entities.Enum.StatusEnum.TimesheetStatus.Approve)
-                .Include(mt => mt.ProjectTask)
-                .ThenInclude(pt => pt.Project)
+                       mt.Status == Ncc.Entities.Enum.StatusEnum.TimesheetStatus.Approve &&
+                       mt.ProjectTask != null &&
+                       mt.ProjectTask.Project != null &&
+                       !mt.ProjectTask.Project.IsDeleted &&
+                       activeProjectIds.Contains(mt.ProjectTask.ProjectId))
+                .Select(mt => new
+                {
+                    mt.UserId,
+                    mt.DateAt,
+                    mt.WorkingTime,
+                    ProjectId = mt.ProjectTask.ProjectId
+                })
                 .ToListAsync();
 
             var projectTimesheets = myTimesheetData
-                .Where(mt => mt.ProjectTask != null && 
-                       mt.ProjectTask.Project != null && 
-                       !mt.ProjectTask.Project.IsDeleted && 
-                       activeProjectIds.Contains(mt.ProjectTask.ProjectId))
-                .GroupBy(mt => mt.ProjectTask.ProjectId)
+                .GroupBy(mt => mt.ProjectId)
                 .Select(g => new
                 {
                     ProjectId = g.Key,
-                    TotalMinutesLW = g.Where(mt => mt.DateAt >= lastWeekStart && mt.DateAt <= lastWeekEnd)
-                                      .Sum(mt => mt.WorkingTime),
-                    TotalMinutesLM = g.Where(mt => mt.DateAt >= lastMonthStart && mt.DateAt <= lastMonthEnd)
-                                      .Sum(mt => mt.WorkingTime),
+                    TotalMinutesLW = g.Where(mt => mt.DateAt >= lastWeekStart && mt.DateAt <= lastWeekEnd).Sum(mt => mt.WorkingTime),
+                    TotalMinutesLM = g.Where(mt => mt.DateAt >= lastMonthStart && mt.DateAt <= lastMonthEnd).Sum(mt => mt.WorkingTime),
                     UserIds = g.Select(mt => mt.UserId).Distinct().ToList()
                 })
                 .ToList();
@@ -269,32 +260,31 @@ namespace Timesheet.DomainServices
 
             if (input.BranchCodes != null && input.BranchCodes.Any())
             {
-                var allBranchCodes = await _workScope.GetAll<Timesheet.Entities.Branch>()
-                    .Select(b => b.Code)
+                var allBranches = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                    .Select(b => new { b.Code, b.DisplayName })
                     .ToListAsync();
-                    
-                bool isAllBranchesSelected = input.BranchCodes.Count == allBranchCodes.Count && 
+
+                var allBranchCodes = new HashSet<string>(allBranches.Select(b => b.Code));
+                var branchDict = allBranches.ToDictionary(b => b.Code, b => b.DisplayName);
+
+                bool isAllBranchesSelected =
+                    input.BranchCodes.Count == allBranchCodes.Count &&
                     input.BranchCodes.All(code => allBranchCodes.Contains(code));
-                
+
                 if (isAllBranchesSelected)
                 {
                     branchInfo = "All Branches";
                 }
                 else
                 {
-                    var branches = await _workScope.GetAll<Timesheet.Entities.Branch>()
-                        .Where(b => input.BranchCodes.Contains(b.Code))
-                        .Select(b => b.DisplayName)
-                        .ToListAsync();
-                    
-                    if (branches.Any())
-                    {
-                        branchInfo = string.Join(", ", branches);
-                    }
-                    else
-                    {
-                        branchInfo = string.Join(", ", input.BranchCodes);
-                    }
+                    var matchedBranches = input.BranchCodes
+                        .Where(code => branchDict.ContainsKey(code))
+                        .Select(code => branchDict[code])
+                        .ToList();
+
+                    branchInfo = matchedBranches.Any()
+                        ? string.Join(", ", matchedBranches)
+                        : string.Join(", ", input.BranchCodes);
                 }
             }
             else

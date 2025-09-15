@@ -1972,7 +1972,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     }
 
     if (!this.selectedBranches || this.selectedBranches.length === 0) {
-      abp.message.error("Phải chọn ít nhất một branch!");
+      abp.message.error("You must select at least one branch!");
       return;
     }
     
@@ -2009,14 +2009,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.selectedBranches = this.selectedBranches.filter(code => code !== '-1');
     
     if (!this.isAllBranchesSelected) {
-      // Chọn tất cả các branch
       this.selectedBranches = [...this.branchCodes];
       this.isAllBranchesSelected = true;
     } else {
-      // Không cho phép bỏ chọn tất cả, giữ lại ít nhất branch HN1
       this.selectedBranches = ['HN1'];
       this.isAllBranchesSelected = false;
-      abp.notify.info('Phải chọn ít nhất một branch. Branch HN1 đã được chọn mặc định.');
+      abp.notify.info('At least one branch must be selected. Branch HN1 has been selected by default.');
     }
   }
 }
