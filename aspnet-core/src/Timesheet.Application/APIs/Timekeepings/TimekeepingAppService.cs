@@ -14,6 +14,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Dynamic.Core;
@@ -37,6 +38,10 @@ namespace Timesheet.APIs.Timekeepings
     public class TimekeepingAppService : AppServiceBase
     {
         private readonly ITimekeepingServices timekeepingServices;
+        private static readonly SemaphoreSlim _globalSemaphore = new SemaphoreSlim(1, 1);
+        private static bool _isProcessing = false;
+        private static DateTime? _processingDate = null;
+        
         public TimekeepingAppService(TimekeepingServices timekeepingServices, IWorkScope workScope) : base(workScope)
         {
             this.timekeepingServices = timekeepingServices;
@@ -1168,12 +1173,50 @@ namespace Timesheet.APIs.Timekeepings
         {
             if (string.IsNullOrEmpty(date))
                 throw new UserFriendlyException(String.Format("Selected date is null!"));
+            
             DateTime selectedDate = DateTime.Parse(date);
             if (selectedDate.Date > DateTimeUtils.GetNow().Date)
             {
                 throw new UserFriendlyException(String.Format("The selected date cannot greater than the current date!"));
             }
-            return await timekeepingServices.AddTimekeepingByDay(selectedDate.Date);
+
+            bool lockAcquired = false;
+            try
+            {
+                lockAcquired = await _globalSemaphore.WaitAsync(TimeSpan.FromSeconds(5));
+                
+                if (!lockAcquired)
+                {
+                    throw new UserFriendlyException($"There is a process running for date {_processingDate?.ToString("dd/MM/yyyy") ?? "undefined"}. Please try again later.");
+                }
+
+                if (_isProcessing)
+                {
+                    throw new UserFriendlyException($"There is a process running for date {_processingDate?.ToString("dd/MM/yyyy") ?? "undefined"}. Please try again later.");
+                }
+
+                _isProcessing = true;
+                _processingDate = selectedDate.Date;
+                
+                Logger.Info($"Starting AddTimekeepingByDay for date {selectedDate.Date:yyyy-MM-dd}");
+                var result = await timekeepingServices.AddTimekeepingByDay(selectedDate.Date);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Error in AddTimekeepingByDay for date {selectedDate.Date:yyyy-MM-dd}: {ex.Message}", ex);
+                throw;
+            }
+            finally
+            {
+                _isProcessing = false;
+                _processingDate = null;
+
+                if (lockAcquired)
+                {
+                    _globalSemaphore.Release();
+                }
+            }
         }
 
         [HttpGet]
