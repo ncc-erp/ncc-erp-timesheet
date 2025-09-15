@@ -232,10 +232,12 @@ namespace Timesheet.APIs.MyWorkingTimes
             }
 
 
-            var userInfo = await WorkScope.GetAll<User>()
-                .Where(u => u.Id == requester.UserId)
-                .Select(u => new { u.FullName, u.EmailAddress, u.KomuUserId })
-                .FirstOrDefaultAsync();
+            var user = await WorkScope.GetAsync<User>(requester.UserId);
+            var userInfo = new { 
+                user.FullName, 
+                user.EmailAddress, 
+                user.KomuUserId 
+            };
 
             var alreadySentToPMIds = new HashSet<long>();
             foreach (var project in receivers)
@@ -271,10 +273,12 @@ namespace Timesheet.APIs.MyWorkingTimes
         {
 
 
-            var userInfo = await WorkScope.GetAll<User>()
-                .Where(u => u.Id == requester.UserId)
-                .Select(u => new { u.FullName, u.EmailAddress, u.KomuUserId })
-                .FirstOrDefaultAsync();
+            var user = await WorkScope.GetAsync<User>(requester.UserId);
+            var userInfo = new { 
+                user.FullName, 
+                user.EmailAddress, 
+                user.KomuUserId 
+            };
 
             foreach (var project in receivers)
             {
