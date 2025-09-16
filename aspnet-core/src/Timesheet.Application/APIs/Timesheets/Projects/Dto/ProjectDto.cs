@@ -38,15 +38,4 @@ namespace Timesheet.Timesheets.Projects.Dto
         public bool IsAllowTeamBuilding { get; set; }
     }
 
-    public class ProjectNotificationSettingsDto
-    {
-        public long ProjectId { get; set; }
-        public string KomuChannelId { get; set; }
-        public bool IsNoticeKMSubmitTS { get; set; }
-        public bool IsNoticeKMApproveRejectTimesheet { get; set; }
-        public bool IsNoticeKMRequestOffDate { get; set; }
-        public bool IsNoticeKMApproveRequestOffDate { get; set; }
-        public bool IsNoticeKMRequestChangeWorkingTime { get; set; }
-        public bool IsNoticeKMApproveChangeWorkingTime { get; set; }
-    }
 }
