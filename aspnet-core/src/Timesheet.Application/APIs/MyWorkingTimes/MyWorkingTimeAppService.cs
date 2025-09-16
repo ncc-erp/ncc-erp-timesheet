@@ -244,12 +244,12 @@ namespace Timesheet.APIs.MyWorkingTimes
             {
                 if (!project.IsNoticeKMRequestChangeWorkingTime)
                 {
+                    Logger.Info($"notifyKomuWhenSubmitRequest() skip: projectId={project.ProjectId}, IsNoticeKMRequestChangeWorkingTime={project.IsNoticeKMRequestChangeWorkingTime}, notifyChannel={project.notifyChannel}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
                     var Message = $"PM {project.KomuPMsTag(alreadySentToPMIds)}: **{userInfo?.FullName}** ({userInfo?.EmailAddress}) " +
                         $"has sent a request to change working time:" +
-                        // $"\n ```RequestId: #{input.Id}" +
                         $"\nMorning: {input.MorningStartTime} - {input.MorningEndTime}" +
                         $"\nAfternoon: {input.AfternoonStartTime} - {input.AfternoonEndTime}" +
                         $"\nApply date: {input.ApplyDate.ToString("dd/MM/yyyy")}```";
