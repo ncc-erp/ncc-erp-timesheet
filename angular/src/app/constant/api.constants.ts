@@ -4,6 +4,16 @@ export const PROJECT_MANAGER = {
   searchProject: '/api/services/app/ProjectService/Filter',
 };
 
+export const BRANCH_CODES = [
+  'HN1',
+  'HN2',
+  'SG1',
+  'SG2',
+  'ĐN',
+  'Vinh',
+  'QN',
+  'HN3'
+];
 export const APP_CONSTANT = {
   EnumProjectStatus: {
     Active: 0,

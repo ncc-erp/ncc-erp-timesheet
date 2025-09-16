@@ -51,6 +51,7 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_NRITConfig = "Admin.Configuration.NRITConfig";
         public const string Admin_Configuration_LateInternReviewConfig = "Admin.Configuration.LateInternReviewConfig";
         public const string Admin_Configuration_PMReportConfig = "Admin.Configuration.PMReportConfig";
+        public const string Admin_Configuration_BotReportConfig = "Admin.Configuration.BotReportConfig";
         public const string Admin_Configuration_NHPMAPRITConfig = "Admin.Configuration.NHPMAPRITConfig";
         public const string Admin_Configuration_UnlockTimesheetSetting = "Admin.Configuration.UnlockTimesheetSetting";
         public const string Admin_Configuration_TeamBuilding = "Admin.Configuration.TeamBuilding";
@@ -144,6 +145,8 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_LateInternReviewConfig_Update = "Admin.Configuration.LateInternReviewConfig.EditLateInternReviewConfig";
         public const string Admin_Configuration_PMReportConfig_View = "Admin.Configuration.PMReportConfig.ViewPMReportConfig";
         public const string Admin_Configuration_PMReportConfig_Update = "Admin.Configuration.PMReportConfig.EditPMReportConfig";
+        public const string Admin_Configuration_BotReportConfig_View = "Admin.Configuration.BotReportConfig.ViewBotReportConfig";
+        public const string Admin_Configuration_BotReportConfig_Update = "Admin.Configuration.BotReportConfig.EditBotReportConfig";
 
         public const string Admin_Clients = "Admin.Clients";
         public const string Admin_Clients_View = "Admin.Clients.View";
@@ -285,7 +288,7 @@ namespace Ncc.Authorization
         public const string Report_TardinessLeaveEarly_Edit = "Report.TardinessLeaveEarly.Edit";
 
         public const string Timekeeping_UserNote = "Timekeeping.UserNote";
-        public const string Timekeeping_ReplyUserNote = "Timekeeping.ReplyUserNote";
+        public const string Timekeeping_ViewAnomaliesList = "Timekeeping.ViewAnomaliesList";
 
         public const string ReviewIntern = "ReviewIntern";
         public const string ReviewIntern_ViewAllReport = "ReviewIntern.ViewAllReport";
@@ -476,6 +479,8 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_Configuration_LateInternReviewConfig_Update,
                     PermissionNames.Admin_Configuration_PMReportConfig_View,
                     PermissionNames.Admin_Configuration_PMReportConfig_Update,
+                    PermissionNames.Admin_Configuration_BotReportConfig_View,
+                    PermissionNames.Admin_Configuration_BotReportConfig_Update,
                     PermissionNames.Admin_Configuration_NRITVMAEConfig_View,
                     PermissionNames.Admin_Configuration_NRITVMAEConfig_Update,
                     PermissionNames.Admin_Configuration_UnlockTimesheetSetting_View,
@@ -685,6 +690,7 @@ namespace Ncc.Authorization
                     PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern,
 
                     PermissionNames.Timekeeping_UserNote,
+                    PermissionNames.Timekeeping_ViewAnomaliesList,
                     PermissionNames.ManageWorkingTime_ViewAll,
 
                     PermissionNames.OverTimeSetting,
@@ -994,6 +1000,8 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LateInternReviewConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Late Intern Review Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View PM Report Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update PM Report Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_BotReportConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Bot Report Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_BotReportConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Bot Report Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITVMAEConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Notify Review Intern via Mezon and Email Setting"},
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITVMAEConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notify Review Intern via Mezon and Email Setting"},
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notify Review Intern Setting" },
@@ -1042,7 +1050,7 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Tasks_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit task" },
             new SystemPermission{ Name =  PermissionNames.Admin_Tasks_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete task" },
             new SystemPermission{ Name =  PermissionNames.Admin_Tasks_ChangeStatus, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Change status task" },
-            
+
             new SystemPermission{ Name =  PermissionNames.Admin_Punishments, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Punishments" },
             new SystemPermission{ Name =  PermissionNames.Admin_Punishments_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View punishments" },
             new SystemPermission{ Name =  PermissionNames.Admin_Punishments_AddNew, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add new punishment" },
@@ -1169,7 +1177,7 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Report_TardinessLeaveEarly_ExportExcel, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Export excel" },
             new SystemPermission{ Name =  PermissionNames.Report_TardinessLeaveEarly_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit checkin, checkout time of user" },
             new SystemPermission{ Name =  PermissionNames.Timekeeping_UserNote, MultiTenancySides = MultiTenancySides.Host , DisplayName = "User khiếu lại đi muộn" },
-            new SystemPermission{ Name =  PermissionNames.Timekeeping_ReplyUserNote, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Trả lời khiếu lại, chốt phạt user" },
+            new SystemPermission{ Name =  PermissionNames.Timekeeping_ViewAnomaliesList, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View anomalies list" },
 
             new SystemPermission{ Name =  PermissionNames.ReviewIntern, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Review interns" },
             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ViewAllReport, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View all report" },
@@ -1475,7 +1483,7 @@ namespace Ncc.Authorization
                                  {
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_CreateNewRetroConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View" },
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_CreateNewRetroConfig_Update, MultiTenancySides = MultiTenancySides.Host ,DisplayName = "Edit"},
-                                 }                            
+                                 }
                             },
                             new SystemPermission { Name = PermissionNames.Admin_Configuration_GenerateRetroResultConfig, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Retro result Setting",
                                  Childrens = new List<SystemPermission>()
@@ -1567,6 +1575,13 @@ namespace Ncc.Authorization
                                 {
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View"},
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_Update, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Update"},
+                                }
+                            },
+                             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_BotReportConfig, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Setting Time for Bot Report",
+                                Childrens = new List<SystemPermission>
+                                {
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_BotReportConfig_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View"},
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_BotReportConfig_Update, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Update"},
                                 }
                             },
                         }
@@ -1711,7 +1726,8 @@ namespace Ncc.Authorization
                     new SystemPermission{ Name =  PermissionNames.MyTimesheet_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit timesheet" },
                     new SystemPermission{ Name =  PermissionNames.MyTimesheet_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete timesheet" },
                     new SystemPermission{ Name =  PermissionNames.MyTimesheet_Submit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Submit timesheet" },
-                    new SystemPermission{ Name =  PermissionNames.Timekeeping_UserNote, MultiTenancySides = MultiTenancySides.Host , DisplayName = "User khiếu lại đi muộn" },
+                    new SystemPermission{ Name =  PermissionNames.Timekeeping_UserNote, MultiTenancySides = MultiTenancySides.Host , DisplayName = "User khiếu nại đi muộn" },
+                    new SystemPermission{ Name =  PermissionNames.Timekeeping_ViewAnomaliesList, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View anomalies list"},
                     new SystemPermission{ Name =  PermissionNames.MyTimeSheet_ViewMyTardinessDetail, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View my tardiness detail" },
                     new SystemPermission{ Name =  PermissionNames.Project_UpdateDefaultProjectTask, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Set default project task" },
                 }
@@ -1891,7 +1907,7 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.Report_TardinessLeaveEarly_GetData, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Get data from FaceID" },
                             new SystemPermission{ Name =  PermissionNames.Report_TardinessLeaveEarly_ExportExcel, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Export excel" },
                             new SystemPermission{ Name =  PermissionNames.Report_TardinessLeaveEarly_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit checkin, checkout time of user" },
-                            new SystemPermission{ Name =  PermissionNames.Timekeeping_ReplyUserNote, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Trả lời khiếu lại, chốt phạt user" },
+                            new SystemPermission{ Name =  PermissionNames.Timekeeping_ViewAnomaliesList, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View anomalies list"},
                             new SystemPermission{ Name =  PermissionNames.Admin_UserPunishments_AddNew, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add user punishment" },
                             new SystemPermission{ Name =  PermissionNames.Admin_UserPunishments_Import, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Import user punishment" },
                             new SystemPermission{ Name =  PermissionNames.Admin_UserPunishments_DownloadTemplate, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Download user punishment template" },

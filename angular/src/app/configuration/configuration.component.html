@@ -1029,6 +1029,140 @@
         </mat-expansion-panel>
       </div>
 
+      <div class="card main-content">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header class="panel-header">
+            <mat-panel-title>
+              <p class="title">{{"Bot report settings"}}</p>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <!-- Anomalies Setting -->
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_BOT_REPORT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowBotReportSetting">
+            <mat-expansion-panel-header (click)="isShowBotReportSetting = !isShowBotReportSetting" class="panel-header">
+              <mat-panel-title>
+                <p class="title">{{"Anomalies setting"}}</p>
+                <div *ngIf="isShowBotReportSetting" class="edit-save">
+                  <button *ngIf="!isEditBotReportSetting" large mat-raised-button color="primary" (click)="editBotReportSetting();$event.stopPropagation()">
+                    <mat-icon>edit</mat-icon>Edit
+                  </button>
+                  <button *ngIf="isEditBotReportSetting" large mat-raised-button color="primary" (click)="saveBotReportSetting();$event.stopPropagation()">
+                    <mat-icon>save</mat-icon>Save
+                  </button>
+                  <button *ngIf="isEditBotReportSetting" large mat-raised-button color="primary" (click)="refreshBotReportSetting();$event.stopPropagation()">
+                    <mat-icon>cancel</mat-icon>Cancel
+                  </button>
+                </div>
+              </mat-panel-title>
+
+              <ul class="header-dropdown m-r--5" *ngIf="isShowBotReportSetting">
+                <li>
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenuBotReport" (click)="$event.stopPropagation()" class="header-dropdown-mat-icon-button">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #headerMenuBotReport="matMenu">
+                    <button mat-menu-item (click)="refreshBotReportSetting();$event.stopPropagation()">
+                      <mat-icon>refresh</mat-icon>
+                      <span>{{ "Refresh" | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </li>
+              </ul>
+            </mat-expansion-panel-header>
+            <div class="body">
+              <form>
+                <div class="row">
+                  <!-- Enable Anomalies Report -->
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <div class="col-md-12" style="max-width: 880px;">
+                      <mat-checkbox 
+                        [(ngModel)]="botReportSetting.enable" 
+                        name="Enable"
+                        [disabled]="!isEditBotReportSetting">
+                        <span class="special-label">Enable Anomalies Report *</span>
+                        <mat-icon class="special-icon" matTooltip="Enable sending anomalies report for both yesterday and last week">help</mat-icon>
+                      </mat-checkbox>
+                    </div>
+                  </div>
+
+                  <!-- Report Settings -->
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Report Hour *</span>
+                      <mat-icon class="special-icon" matTooltip="Hour to send anomalies report (0-23)">help</mat-icon>
+                      <input 
+                        type="number" 
+                        matInput 
+                        name="hour" 
+                        [(ngModel)]="botReportSetting.hour" 
+                        [required]="botReportSetting.enable"
+                        [disabled]="!isEditBotReportSetting || !botReportSetting.enable" 
+                        min="0" 
+                        max="23" />
+                    </mat-form-field>
+                  </div>
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Last Week Report Day Of Week *</span>
+                      <mat-icon class="special-icon" matTooltip="Day of the week when background worker runs to check last week anomalies">help</mat-icon>
+                      <mat-select 
+                        [(ngModel)]="botReportSetting.dayofweek" 
+                        name="dayofweek" 
+                        [required]="botReportSetting.enable"
+                        [disabled]="!isEditBotReportSetting || !botReportSetting.enable">
+                        <mat-option value="Monday">Monday</mat-option>
+                        <mat-option value="Tuesday">Tuesday</mat-option>
+                        <mat-option value="Wednesday">Wednesday</mat-option>
+                        <mat-option value="Thursday">Thursday</mat-option>
+                        <mat-option value="Friday">Friday</mat-option>
+                        <mat-option value="Saturday">Saturday</mat-option>
+                        <mat-option value="Sunday">Sunday</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Webhook URL *</span>
+                      <mat-icon class="special-icon" matTooltip="Webhook URL to send anomalies report messages">help</mat-icon>
+                      <input 
+                        matInput 
+                        name="botUri" 
+                        [(ngModel)]="botReportSetting.botUri" 
+                        required
+                        [disabled]="!isEditBotReportSetting || !botReportSetting.enable" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Branch Names *</span>
+                      <mat-icon class="special-icon" matTooltip="Select branches to filter anomalies report">help</mat-icon>
+                      <mat-select 
+                        [(ngModel)]="selectedBranches" 
+                        name="branchCodes" 
+                        multiple
+                        required
+                        [disabled]="!isEditBotReportSetting">
+                        <div class="select-all-option">
+                          <mat-option [value]="-1" (click)="toggleAllBranches()">
+                            <strong>{{ isAllBranchesSelected ? 'Deselect All' : 'Select All' }}</strong>
+                          </mat-option>
+                        </div>
+                        <mat-divider></mat-divider>
+                        <!-- Danh sách các branch -->
+                        <mat-option *ngFor="let name of branchNames" [value]="name">
+                          {{ name }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </mat-expansion-panel>
+        </mat-expansion-panel>
+      </div>
+
       <!-- Checkin and checkout punishment settings -->
       <div class="card main-content">
         <mat-expansion-panel>

@@ -132,6 +132,15 @@ namespace Ncc.Configuration
         public const string PMReportPunishEnable = "Abp.PMReportPunishEnable";
         public const string PMReportPunishAtHour = "Abp.PMReportPunishAtHour";
         public const string PMReportPunishAtDayOfWeek = "Abp.PMReportPunishAtDayOfWeek";
+        public const string BotReportEnable = "Abp.BotReportEnable";
+        public const string BotReportEveryday = "Abp.BotReportEveryday";
+        public const string BotReportAtHour = "Abp.BotReportAtHour";
+        public const string BotReportAtDayOfWeek = "Abp.BotReportAtDayOfWeek";
+        public const string BotReportWebhookUrl = "Abp.BotReportWebhookUrl";
+        public const string BotReportBranchCodes = "Abp.BotReportBranchCodes";
+        public const string BotReportMinHours = "Abp.BotReportMinHours";
+        public const string BotReportTopN = "Abp.BotReportTopN";
+        public const string BotReportProjectIds = "Abp.BotReportProjectIds";
 
         public const string ReviewDeadlineDay = "App.Review.DeadlineDay";
         public const string ReviewStartDayOfMonth = "App.Review.StartDayOfMonth";

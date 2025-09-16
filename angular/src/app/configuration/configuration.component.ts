@@ -9,7 +9,9 @@ import { WfhSettingService } from './../service/api/wfh-setting.service';
 import { EmailSaoDoSettingService } from './../service/api/email-sao-do-setting.service';
 import { LevelSettingService } from './../service/api/level-setting.service';
 import { Component, Injector, OnInit } from '@angular/core';
+import { MatSelectChange } from '@angular/material/select';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
+import { BRANCH_CODES } from '@app/constant/api.constants';
 import { AutoLockTimesheetService } from '@app/service/api/auto-lock-timesheet.service';
 import { AutoSubmitTimesheetSettingService } from '@app/service/api/auto-submit-timesheet-setting.service';
 import { EmailSettingService } from '@app/service/api/email-setting.service';
@@ -27,6 +29,8 @@ import { MezonSettingService } from '@app/service/api/mezon-setting.service';
 import { LogoutAllUserService } from '@app/service/api/logout-all-user.service';
 import { LateInternReviewSettingService, LateInternReviewSettingDto } from '@app/service/api/late-intern-review-setting.service';
 import { PMReportPunishSettingService, PMReportPunishSettingDto } from '@app/service/api/pm-report-punish-setting.service';
+import { BotReportSettingService, BotReportSettingDto } from '@app/service/api/bot-report-setting.service';
+import { BranchService } from '@app/service/api/branch.service';
 
 
 @Component({
@@ -81,6 +85,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_LATE_INTERN_REVIEW_SETTING = PERMISSIONS_CONSTANT.EditLateInternReviewSetting;
   VIEW_PM_REPORT_PUNISH_SETTING = PERMISSIONS_CONSTANT.ViewPMReportSetting;
   EDIT_PM_REPORT_PUNISH_SETTING = PERMISSIONS_CONSTANT.EditPMReportSetting;
+  VIEW_BOT_REPORT_SETTING = PERMISSIONS_CONSTANT.ViewBotReportSetting;
+  EDIT_BOT_REPORT_SETTING = PERMISSIONS_CONSTANT.EditBotReportSetting;
   VIEW_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.ViewUnlockTimesheetSetting;
   UPDATE_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.UpdateUnlockTimesheetSetting;
   VIEW_PUNISHCHECKIN_CONFIG = PERMISSIONS_CONSTANT.ViewSendKomuPunishedCheckIn;
@@ -206,6 +212,16 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditPMReportPunishSetting: boolean = false;
   pmReportPunishSetting = {} as PMReportPunishSettingDto;
 
+  isShowBotReportSetting: boolean = false;
+  isEditBotReportSetting: boolean = false;
+  botReportSetting = { everyday: false, botUri: '', projectIds: [], branchCodes: [] } as BotReportSettingDto;
+  selectedProjects: number[] = [];
+  selectedBranches: string[] = [];
+  isAllProjectsSelected: boolean = false;
+  isAllBranchesSelected: boolean = false;
+  branchCodes = BRANCH_CODES;
+  branchNames: string[] = [];
+
   unlockSetting = {} as UnlockTimesheetConfigDto;
   timesCanLateAndEarlyInMonthSetting = {} as TimesCanLateAndEarlyInMonthSettingDto;
   percentOfTrackerOnWorking: string = "";
@@ -283,6 +299,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     private timeStartChangingCheckinToCheckoutSettingService:TimeStartChangingCheckinToCheckoutSettingService,
     private lateInternReviewSettingService: LateInternReviewSettingService,
     private pmReportPunishSettingService: PMReportPunishSettingService,
+    private botReportSettingService: BotReportSettingService,
+    private branchService: BranchService,
     private dialog : MatDialog,
     injector: Injector) {
     super(injector);
@@ -326,6 +344,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getResetDataTeamBuildingConfig();
     this.getLateInternReviewSetting();
     this.getPMReportPunishSetting();
+    this.getBotReportSetting();
+    this.getBranchNames();
     
     this.getSendMessageToPunishUserConfig();
     this.getNRITVMAEConfig();
@@ -1910,6 +1930,87 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   refreshPMReportPunishSetting() {
     this.getPMReportPunishSetting();
     this.isEditPMReportPunishSetting = false;
+  }
+
+  getBotReportSetting() {
+    if (this.permission.isGranted(this.VIEW_BOT_REPORT_SETTING)) {
+      this.botReportSettingService.getAnomaliesSetting().subscribe((data: any) => {
+        this.botReportSetting = data.result || this.botReportSetting;
+        this.selectedBranches = this.botReportSetting.branchCodes ? [...this.botReportSetting.branchCodes] : [];
+        this.getBranchNames(); // Gọi getBranchNames để tải danh sách branch
+        this.updateInitialState(); // Cập nhật trạng thái ban đầu
+      });
+    }
+  }
+
+  editBotReportSetting() {
+    this.isEditBotReportSetting = true;
+  }
+
+  saveBotReportSetting() {
+    if (!this.permission.isGranted(this.EDIT_BOT_REPORT_SETTING)) {
+      abp.message.error("You do not have permission to edit this setting!");
+      return;
+    }
+
+    if (this.botReportSetting.hour < 0 || this.botReportSetting.hour > 23) {
+      abp.message.error("Hour must be between 0 and 23!");
+      return;
+    }
+    
+    if (!this.botReportSetting.everyday && !this.botReportSetting.dayofweek) {
+      abp.message.error("Day of week is required!");
+      return;
+    }
+
+    if (!this.selectedBranches || this.selectedBranches.length === 0) {
+      abp.message.error("You must select at least one branch!");
+      return;
+    }
+    
+    this.botReportSetting.branchCodes = [...this.selectedBranches];
+
+    this.botReportSettingService.updateAnomaliesSetting(this.botReportSetting).subscribe((res: any) => {
+      this.isEditBotReportSetting = false;
+      abp.message.success('Settings saved successfully.');
+    });
+  }
+
+  refreshBotReportSetting() {
+    this.getBotReportSetting();
+    this.isEditBotReportSetting = false;
+  }
+
+  toggleAllBranches() {
+    this.selectedBranches = this.selectedBranches.filter(code => code !== '-1');
+    
+    if (!this.isAllBranchesSelected) {
+      this.selectedBranches = [...this.branchNames]; // Chọn tất cả branch
+      this.isAllBranchesSelected = true;
+    } else {
+      this.selectedBranches = ['HN1']; // Giữ ít nhất một branch
+      this.isAllBranchesSelected = false;
+      abp.notify.info('At least one branch must be selected. Branch HN1 has been selected by default.');
+    }
+  }
+
+  private updateInitialState() {
+    // Cập nhật trạng thái ban đầu khi tải dữ liệu
+    if (this.selectedBranches.length === this.branchNames.length) {
+      this.isAllBranchesSelected = true;
+    } else if (this.selectedBranches.length === 0 || (this.selectedBranches.length === 1 && this.selectedBranches[0] === 'HN1')) {
+      this.selectedBranches = ['HN1'];
+      this.isAllBranchesSelected = false;
+    } else {
+      this.isAllBranchesSelected = false;
+    }
+  }
+
+  getBranchNames() {
+    this.branchService.GetAllNotPagging().subscribe((data: any) => {
+      this.branchNames = data.result.map((branch: any) => branch.name);
+      this.updateInitialState();
+    });
   }
 }
 
