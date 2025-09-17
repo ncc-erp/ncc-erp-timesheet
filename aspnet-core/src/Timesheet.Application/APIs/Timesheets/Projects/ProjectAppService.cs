@@ -74,7 +74,7 @@ namespace Timesheet.Timesheets.Projects
             {
                 throw new UserFriendlyException("Start time cannot be greater than end time !");
             }
-            
+
             if (input.Id <= 0)//insert 3 bang project, projectTask, projectUser
             {
                 var project = ObjectMapper.Map<Project>(input);
@@ -397,25 +397,25 @@ namespace Timesheet.Timesheets.Projects
             var projects = qproject.Where(s => projectIds.Contains(s.Id)).AsNoTracking().AsEnumerable();
 
             var results = (from p in projects
-                          join members in projectMembers 
-                                on p.Id equals members.ProjectId into projectMembersGj
-                          from projectMembersSubGroup in projectMembersGj.DefaultIfEmpty()
-                          join pms in PMs
-                                on p.Id equals pms.ProjectId into projectPmsGj
-                          from projectPms in projectPmsGj.DefaultIfEmpty()
-                          select new GetProjectDto
-                          {
-                              CustomerName = p.CustomerName,
-                              Id = p.Id,
-                              Name = p.Name,
-                              Code = p.Code,
-                              Status = p.Status,
-                              ProjectType = p.ProjectType,
-                              Pms = projectPms?.PMs ?? new List<string>(),
-                              ActiveMember = projectMembersSubGroup?.Count ?? 0,
-                              TimeStart = p.TimeStart,
-                              TimeEnd = p.TimeEnd
-                          }).ToList();
+                           join members in projectMembers
+                                 on p.Id equals members.ProjectId into projectMembersGj
+                           from projectMembersSubGroup in projectMembersGj.DefaultIfEmpty()
+                           join pms in PMs
+                                 on p.Id equals pms.ProjectId into projectPmsGj
+                           from projectPms in projectPmsGj.DefaultIfEmpty()
+                           select new GetProjectDto
+                           {
+                               CustomerName = p.CustomerName,
+                               Id = p.Id,
+                               Name = p.Name,
+                               Code = p.Code,
+                               Status = p.Status,
+                               ProjectType = p.ProjectType,
+                               Pms = projectPms?.PMs ?? new List<string>(),
+                               ActiveMember = projectMembersSubGroup?.Count ?? 0,
+                               TimeStart = p.TimeStart,
+                               TimeEnd = p.TimeEnd
+                           }).ToList();
             return results;
         }
 
@@ -869,12 +869,15 @@ namespace Timesheet.Timesheets.Projects
             if (projectUser.Type == ProjectUserType.PM)
             {
                 throw new UserFriendlyException("You can't deactive PM of this project!");
-            } else {
+            }
+            else
+            {
                 projectUser.Type = ProjectUserType.DeActive;
             }
             projectUser.Type = ProjectUserType.DeActive;
             await WorkScope.UpdateAsync(projectUser);
         }
+
     }
 
     public class StartEndDate
