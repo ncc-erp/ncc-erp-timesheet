@@ -10,6 +10,7 @@ import { EmailSaoDoSettingService } from './../service/api/email-sao-do-setting.
 import { LevelSettingService } from './../service/api/level-setting.service';
 import { Component, Injector, OnInit } from '@angular/core';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
+import { BRANCH_CODES } from '@app/constant/api.constants';
 import { AutoLockTimesheetService } from '@app/service/api/auto-lock-timesheet.service';
 import { AutoSubmitTimesheetSettingService } from '@app/service/api/auto-submit-timesheet-setting.service';
 import { EmailSettingService } from '@app/service/api/email-setting.service';
@@ -27,7 +28,7 @@ import { MezonSettingService } from '@app/service/api/mezon-setting.service';
 import { LogoutAllUserService } from '@app/service/api/logout-all-user.service';
 import { LateInternReviewSettingService, LateInternReviewSettingDto } from '@app/service/api/late-intern-review-setting.service';
 import { PMReportPunishSettingService, PMReportPunishSettingDto } from '@app/service/api/pm-report-punish-setting.service';
-
+import { BotReportSettingService, BotReportSettingDto, ProjectDto } from '../service/api/bot-report-setting.service';
 
 @Component({
   selector: 'app-configuration',
@@ -81,6 +82,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_LATE_INTERN_REVIEW_SETTING = PERMISSIONS_CONSTANT.EditLateInternReviewSetting;
   VIEW_PM_REPORT_PUNISH_SETTING = PERMISSIONS_CONSTANT.ViewPMReportSetting;
   EDIT_PM_REPORT_PUNISH_SETTING = PERMISSIONS_CONSTANT.EditPMReportSetting;
+  VIEW_BOT_REPORT_SETTING = PERMISSIONS_CONSTANT.ViewBotReportSetting;
+  EDIT_BOT_REPORT_SETTING = PERMISSIONS_CONSTANT.EditBotReportSetting;
   VIEW_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.ViewUnlockTimesheetSetting;
   UPDATE_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.UpdateUnlockTimesheetSetting;
   VIEW_PUNISHCHECKIN_CONFIG = PERMISSIONS_CONSTANT.ViewSendKomuPunishedCheckIn;
@@ -206,6 +209,16 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditPMReportPunishSetting: boolean = false;
   pmReportPunishSetting = {} as PMReportPunishSettingDto;
 
+  isShowBotReportSetting: boolean = false;
+  isEditBotReportSetting: boolean = false;
+  botReportSetting = { everyday: false, botUri: '', projectIds: [], branchCodes: [] } as BotReportSettingDto;
+  projects: ProjectDto[] = [];
+  selectedProjects: number[] = [];
+  selectedBranches: string[] = [];
+  isAllProjectsSelected: boolean = false;
+  isAllBranchesSelected: boolean = false;
+  branchCodes = BRANCH_CODES;
+
   unlockSetting = {} as UnlockTimesheetConfigDto;
   timesCanLateAndEarlyInMonthSetting = {} as TimesCanLateAndEarlyInMonthSettingDto;
   percentOfTrackerOnWorking: string = "";
@@ -283,6 +296,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     private timeStartChangingCheckinToCheckoutSettingService:TimeStartChangingCheckinToCheckoutSettingService,
     private lateInternReviewSettingService: LateInternReviewSettingService,
     private pmReportPunishSettingService: PMReportPunishSettingService,
+    private botReportSettingService: BotReportSettingService,
     private dialog : MatDialog,
     injector: Injector) {
     super(injector);
@@ -326,6 +340,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getResetDataTeamBuildingConfig();
     this.getLateInternReviewSetting();
     this.getPMReportPunishSetting();
+    this.getBotReportSetting();
     
     this.getSendMessageToPunishUserConfig();
     this.getNRITVMAEConfig();
@@ -1906,10 +1921,101 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       }
     })
   }
-
   refreshPMReportPunishSetting() {
     this.getPMReportPunishSetting();
     this.isEditPMReportPunishSetting = false;
+  }
+
+  getBotReportSetting() {
+    if (this.permission.isGranted(this.VIEW_BOT_REPORT_SETTING)) {
+      this.projects = [];
+
+      this.botReportSettingService.get().subscribe((data: any) => {
+        this.botReportSetting = data.result;
+        this.selectedProjects = this.botReportSetting.projectIds || [];
+
+        if (this.botReportSetting.branchCodes && this.botReportSetting.branchCodes.length > 0) {
+          this.selectedBranches = [...this.botReportSetting.branchCodes];
+        } else {
+          this.selectedBranches = [];
+        }
+      });
+
+      this.botReportSettingService.getActiveProjects().subscribe({
+        next: (response: any) => {
+          this.projects = response.result || [];
+        },
+        error: (error) => {
+          console.error('Error fetching projects:', error);
+        }
+      });
+    }
+  }
+
+  editBotReportSetting() {
+    this.isEditBotReportSetting = true;
+  }
+
+  saveBotReportSetting() {
+    if (!this.permission.isGranted(this.EDIT_BOT_REPORT_SETTING)) {
+      abp.message.error("You do not have permission to edit this setting!");
+      return;
+    }
+    if (this.botReportSetting.hour < 0 || this.botReportSetting.hour > 23) {
+      abp.message.error("Hour must be between 0 and 23!");
+      return;
+    }
+    
+    if (!this.botReportSetting.everyday && !this.botReportSetting.dayofweek) {
+      abp.message.error("Day of week is required!");
+      return;
+    }
+
+    if (!this.selectedBranches || this.selectedBranches.length === 0) {
+      abp.message.error("You must select at least one branch!");
+      return;
+    }
+    
+    this.botReportSetting.branchCodes = [...this.selectedBranches];
+
+    this.botReportSetting.projectIds = this.selectedProjects;
+    
+    this.botReportSettingService.change(this.botReportSetting).subscribe((res: any) => {
+      this.isEditBotReportSetting = false;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
+
+  refreshBotReportSetting() {
+    this.getBotReportSetting();
+    this.isEditBotReportSetting = false;
+  }
+
+  toggleAllProjects() {
+    this.selectedProjects = this.selectedProjects.filter(id => id !== -1);
+    
+    if (!this.isAllProjectsSelected) {
+      this.selectedProjects = this.projects.map(project => project.id);
+      this.isAllProjectsSelected = true;
+    } else {
+      this.selectedProjects = [];
+      this.isAllProjectsSelected = false;
+    }
+  }
+
+  toggleAllBranches() {
+    this.selectedBranches = this.selectedBranches.filter(code => code !== '-1');
+    
+    if (!this.isAllBranchesSelected) {
+      this.selectedBranches = [...this.branchCodes];
+      this.isAllBranchesSelected = true;
+    } else {
+      this.selectedBranches = ['HN1'];
+      this.isAllBranchesSelected = false;
+      abp.notify.info('At least one branch must be selected. Branch HN1 has been selected by default.');
+    }
   }
 }
 

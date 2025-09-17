@@ -51,6 +51,7 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_NRITConfig = "Admin.Configuration.NRITConfig";
         public const string Admin_Configuration_LateInternReviewConfig = "Admin.Configuration.LateInternReviewConfig";
         public const string Admin_Configuration_PMReportConfig = "Admin.Configuration.PMReportConfig";
+        public const string Admin_Configuration_BotReportConfig = "Admin.Configuration.BotReportConfig";
         public const string Admin_Configuration_NHPMAPRITConfig = "Admin.Configuration.NHPMAPRITConfig";
         public const string Admin_Configuration_UnlockTimesheetSetting = "Admin.Configuration.UnlockTimesheetSetting";
         public const string Admin_Configuration_TeamBuilding = "Admin.Configuration.TeamBuilding";
@@ -144,6 +145,8 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_LateInternReviewConfig_Update = "Admin.Configuration.LateInternReviewConfig.EditLateInternReviewConfig";
         public const string Admin_Configuration_PMReportConfig_View = "Admin.Configuration.PMReportConfig.ViewPMReportConfig";
         public const string Admin_Configuration_PMReportConfig_Update = "Admin.Configuration.PMReportConfig.EditPMReportConfig";
+        public const string Admin_Configuration_BotReportConfig_View = "Admin.Configuration.BotReportConfig.ViewBotReportConfig";
+        public const string Admin_Configuration_BotReportConfig_Update = "Admin.Configuration.BotReportConfig.EditBotReportConfig";
 
         public const string Admin_Clients = "Admin.Clients";
         public const string Admin_Clients_View = "Admin.Clients.View";
@@ -476,6 +479,8 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_Configuration_LateInternReviewConfig_Update,
                     PermissionNames.Admin_Configuration_PMReportConfig_View,
                     PermissionNames.Admin_Configuration_PMReportConfig_Update,
+                    PermissionNames.Admin_Configuration_BotReportConfig_View,
+                    PermissionNames.Admin_Configuration_BotReportConfig_Update,
                     PermissionNames.Admin_Configuration_NRITVMAEConfig_View,
                     PermissionNames.Admin_Configuration_NRITVMAEConfig_Update,
                     PermissionNames.Admin_Configuration_UnlockTimesheetSetting_View,
@@ -994,6 +999,8 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_LateInternReviewConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Late Intern Review Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View PM Report Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update PM Report Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_BotReportConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Bot Report Setting" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_BotReportConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Bot Report Setting" },
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITVMAEConfig_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View Notify Review Intern via Mezon and Email Setting"},
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITVMAEConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notify Review Intern via Mezon and Email Setting"},
             new SystemPermission{ Name =  PermissionNames.Admin_Configuration_NRITConfig_Update, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update Notify Review Intern Setting" },
@@ -1567,6 +1574,13 @@ namespace Ncc.Authorization
                                 {
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View"},
                                      new SystemPermission{ Name =  PermissionNames.Admin_Configuration_PMReportConfig_Update, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Update"},
+                                }
+                            },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Configuration_BotReportConfig, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Setting Time for Bot Report",
+                                Childrens = new List<SystemPermission>
+                                {
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_BotReportConfig_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View"},
+                                     new SystemPermission{ Name =  PermissionNames.Admin_Configuration_BotReportConfig_Update, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Update"},
                                 }
                             },
                         }
