@@ -813,9 +813,9 @@ namespace Ncc.Configuration
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_View)]
-        public async Task<BotReportSettingDto> GetBotReportSetting()
+        public async Task<Timesheet.Configuration.Dto.BotReportSettingDto> GetBotReportSetting()
         {
-            var result = new BotReportSettingDto
+            var result = new Timesheet.Configuration.Dto.BotReportSettingDto
             {
                 enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportEnable)),
                 everyday = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportEveryday)),
@@ -838,7 +838,7 @@ namespace Ncc.Configuration
 
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_Update)]
-        public async Task<BotReportSettingDto> SetBotReportSetting(BotReportSettingDto input)
+        public async Task<Timesheet.Configuration.Dto.BotReportSettingDto> SetBotReportSetting(Timesheet.Configuration.Dto.BotReportSettingDto input)
         {
             var projectIdsJson = JsonConvert.SerializeObject(input.projectIds ?? new List<long>());
             var branchCodesJson = JsonConvert.SerializeObject(input.branchCodes ?? new List<string>());

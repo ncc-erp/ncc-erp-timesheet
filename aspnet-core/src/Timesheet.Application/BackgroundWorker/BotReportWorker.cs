@@ -22,16 +22,15 @@ namespace Timesheet.BackgroundWorker
         {
             _botReportDailyService = botReportDailyService;
 
-            Timer.Period = 1000 * 60;
+            Timer.Period = 1000 * 30;
         }
 
         [UnitOfWork]
         protected override void DoWork()
         {
             DateTime now = DateTimeUtils.GetNow();
-
             if (now.Minute == 0)
-            {
+                {
                 try
                 {
                     Logger.Info($"BotReportWorker running at {now:yyyy-MM-dd HH:mm:ss}");
