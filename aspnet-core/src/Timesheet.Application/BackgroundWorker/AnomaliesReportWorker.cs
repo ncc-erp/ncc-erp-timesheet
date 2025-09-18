@@ -23,7 +23,6 @@ namespace Timesheet.BackgroundWorker
         ) : base(timer)
         {
             _absenceDayServices = absenceDayServices;
-            Timer.Period = 1000 * 30;
         }
 
         [UnitOfWork]
@@ -31,7 +30,7 @@ namespace Timesheet.BackgroundWorker
         {
             DateTime now = DateTimeUtils.GetNow();
             if (now.Minute == 0)
-                {
+            {
                 try
                 {
                     Logger.Info($"BotReportWorker running at {now:yyyy-MM-dd HH:mm:ss}");
@@ -46,75 +45,98 @@ namespace Timesheet.BackgroundWorker
 
         private void RunBotReportJob(DateTime now)
         {
+            string enable = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportEnable);
+            string everyday = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportEveryday);
+            string hourStr = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtHour);
+            string dayOfWeek = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtDayOfWeek);
             var projectIdsString = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportProjectIds);
-            Logger.Debug($"Raw projectIds setting: '{projectIdsString}'");
-
             var branchCodesString = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportBranchCodes);
-            Logger.Debug($"Raw branchCodes setting: '{branchCodesString}'");
+            string botUri = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportWebhookUrl) ?? string.Empty;
+            string minHoursStr = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportMinHours);
+            string topNStr = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportTopN);
 
-            var anomaliesSetting = new BotReportSettingDto
-            {
-                enable = bool.TryParse(
-                    SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportEnable),
-                    out var enable) ? enable : false,
-                everyday = bool.TryParse(
-                    SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportEveryday),
-                    out var everyday) ? everyday : false,
-                hour = int.TryParse(
-                    SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtHour),
-                    out var hourParsed) ? hourParsed : 0,
-                dayofweek = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtDayOfWeek),
-                botUri = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportWebhookUrl) ?? string.Empty,
-                branchCodes = branchCodesString != null
-                    ? branchCodesString
-                        .Replace("[", "")
-                        .Replace("]", "")
-                        .Replace("\"", "")
-                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => s.Trim())
-                        .Where(s => !string.IsNullOrWhiteSpace(s))
-                        .ToList()
-                    : new List<string>(),
-                minHours = double.TryParse(
-                    SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportMinHours),
-                    out var minHours) ? minHours : (double?)null,
-                topN = int.TryParse(
-                    SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportTopN),
-                    out var topN) ? topN : (int?)null,
-                projectIds = projectIdsString != null
-                    ? projectIdsString.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Where(s => long.TryParse(s.Trim(), out _))
-                        .Select(s => long.Parse(s.Trim())).ToList()
-                    : new List<long>()
-            };
-
-            Logger.Debug($"Parsed projectIds: [{string.Join(", ", anomaliesSetting.projectIds)}]");
-
-            if (!anomaliesSetting.enable)
+            if (enable != "True")
             {
                 Logger.Info("RunBotReportJob() skipped: Disabled via settings (Enable = false).");
                 return;
             }
 
-            if (anomaliesSetting.hour != now.Hour)
+            if (!int.TryParse(hourStr, out int configuredHour))
             {
-                Logger.Info($"RunBotReportJob() skipped: Current hour = {now.Hour}, Configured = {anomaliesSetting.hour}");
+                Logger.Error("RunBotReportJob() error: Invalid hour setting.");
                 return;
             }
 
-            Logger.Info($"Running Daily report for branches: {string.Join(", ", anomaliesSetting.branchCodes)}");
-            ExecuteBotReport(anomaliesSetting, isWeekly: false);
-            ExecuteBotReport(anomaliesSetting, isWeekly: true);
-
-            if (!string.IsNullOrEmpty(anomaliesSetting.dayofweek) &&
-                string.Equals(now.DayOfWeek.ToString(), anomaliesSetting.dayofweek, StringComparison.OrdinalIgnoreCase))
+            if (configuredHour != now.Hour)
             {
-                Logger.Info($"Running Weekly report for branches: {string.Join(", ", anomaliesSetting.branchCodes)}");
-                ExecuteBotReport(anomaliesSetting, isWeekly: true);
+                Logger.Info($"RunBotReportJob() skipped: Current hour = {now.Hour}, Configured = {configuredHour}");
+                return;
+            }
+
+            bool isEveryday = everyday == "True";
+
+            if (!isEveryday && !string.Equals(now.DayOfWeek.ToString(), dayOfWeek, StringComparison.OrdinalIgnoreCase))
+            {
+                Logger.Info($"Weekly report skipped: Today is {now.DayOfWeek}, Configured = {dayOfWeek}");
+                return;
+            }
+
+            var branchCodes = branchCodesString != null
+                ? branchCodesString
+                    .Replace("[", "")
+                    .Replace("]", "")
+                    .Replace("\"", "")
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim())
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .ToList()
+                : new List<string>();
+
+            var projectIds = projectIdsString != null
+                ? projectIdsString.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Where(s => long.TryParse(s.Trim(), out _))
+                    .Select(s => long.Parse(s.Trim())).ToList()
+                : new List<long>();
+
+            double? minHours = double.TryParse(minHoursStr, out var parsedMinHours) ? parsedMinHours : (double?)null;
+            int? topN = int.TryParse(topNStr, out var parsedTopN) ? parsedTopN : (int?)null;
+
+            Logger.Debug($"Parsed projectIds: [{string.Join(", ", projectIds)}]");
+
+            Logger.Info($"Running Daily report for branches: {string.Join(", ", branchCodes)}");
+            ExecuteBotReport(new BotReportSettingDto
+            {
+                enable = true,
+                everyday = isEveryday,
+                hour = configuredHour,
+                dayofweek = dayOfWeek,
+                botUri = botUri,
+                branchCodes = branchCodes,
+                minHours = minHours,
+                topN = topN,
+                projectIds = projectIds
+            }, isWeekly: false);
+
+            if (!string.IsNullOrEmpty(dayOfWeek) &&
+                string.Equals(now.DayOfWeek.ToString(), dayOfWeek, StringComparison.OrdinalIgnoreCase))
+            {
+                Logger.Info($"Running Weekly report for branches: {string.Join(", ", branchCodes)}");
+                ExecuteBotReport(new BotReportSettingDto
+                {
+                    enable = true,
+                    everyday = isEveryday,
+                    hour = configuredHour,
+                    dayofweek = dayOfWeek,
+                    botUri = botUri,
+                    branchCodes = branchCodes,
+                    minHours = minHours,
+                    topN = topN,
+                    projectIds = projectIds
+                }, isWeekly: true);
             }
             else
             {
-                Logger.Info($"Weekly report skipped: Today is {now.DayOfWeek}, Configured = {anomaliesSetting.dayofweek}");
+                Logger.Info($"Weekly report skipped: Today is {now.DayOfWeek}, Configured = {dayOfWeek}");
             }
 
             Logger.Info("RunBotReportJob() finished.");

@@ -1,5 +1,4 @@
 ﻿using Abp.Dependency;
-using Amazon.Runtime.Internal.Util;
 using Microsoft.EntityFrameworkCore;
 using Ncc.Authorization.Users;
 using Ncc.IoC;
@@ -11,7 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
-using Timesheet.Extension;
 using Timesheet.Services.Mezon;
 using static Ncc.Entities.Enum.StatusEnum;
 
@@ -46,27 +44,158 @@ namespace Timesheet.Core
                 .ToListAsync();
 
             var absenceRequests = await _workScope.GetAll<AbsenceDayRequest>()
-                .Where(r => userIds.Contains(r.UserId) && r.Status == RequestStatus.Approved)
-                .Select(r => new { r.Id, r.UserId, r.Status, r.Type })
-                .ToListAsync();
-
-            var requestIds = absenceRequests.Select(r => r.Id).ToList();
-
-            var absenceDetails = await _workScope.GetAll<AbsenceDayDetail>()
-                .Where(d => requestIds.Contains(d.RequestId) && d.DateAt >= startDate && d.DateAt <= endDate)
-                .Select(d => new { d.RequestId, d.DateAt, d.DateType, d.AbsenceTime, d.Hour })
-                .ToListAsync();
-
-            var allAbsenceRequests = await _workScope.GetAll<AbsenceDayRequest>()
                 .Where(r => userIds.Contains(r.UserId))
                 .Select(r => new { r.Id, r.UserId, r.Status, r.Type })
                 .ToListAsync();
+
+            var absenceRequestDict = absenceRequests
+                .GroupBy(r => r.UserId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Cast<dynamic>().ToList()
+                );
+
+            var absenceDetails = await _workScope.GetAll<AbsenceDayDetail>()
+                .Where(d => absenceRequests.Select(r => r.Id).Contains(d.RequestId) && d.DateAt >= startDate && d.DateAt <= endDate)
+                .Select(d => new { d.RequestId, d.DateAt, d.DateType, d.AbsenceTime, d.Hour })
+                .ToListAsync();
+
+            var absenceDetailDict = absenceDetails
+                .GroupBy(d => (d.RequestId, d.DateAt))
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Cast<dynamic>().ToList()
+                );
 
             var yesterdayAnomalies = new List<YesterdayAnomalyDTO>();
             var lastWeekAnomalies = new List<LastWeekAnomalyDTO>();
             const double breakTime = 1.0;
             const double wfhThreshold = 0.85;
             const double gracePeriodMinutes = 15.0;
+
+            TimeSpan? ParseTimeSpan(string input)
+            {
+                return TimeSpan.TryParse(input, out var result) ? result : (TimeSpan?)null;
+            }
+
+            bool IsWFHForDayType(dynamic[] userAbsenceRequests, (long RequestId, DateTime DateAt) absenceDetailDictKey, DayType dayType)
+            {
+                return userAbsenceRequests.Any(r => r.Type == RequestType.Remote && r.Status == RequestStatus.Approved
+                    && absenceDetailDict.ContainsKey((r.Id, absenceDetailDictKey.DateAt))
+                    && absenceDetailDict[(r.Id, absenceDetailDictKey.DateAt)].Any(d => d.DateType == dayType));
+            }
+
+            double CalculateLateMinutes(TimeSpan? checkInTime, TimeSpan? morningStartAt, TimeSpan? afternoonStartAt, double minutes)
+            {
+                double lateMinutes = 0.0;
+                if (checkInTime.HasValue)
+                {
+                    if (morningStartAt.HasValue && checkInTime > morningStartAt)
+                    {
+                        var delay = checkInTime.Value - morningStartAt.Value;
+                        if (delay.TotalMinutes <= minutes)
+                        {
+                            lateMinutes = Math.Min(delay.TotalMinutes, minutes);
+                        }
+                    }
+                    else if (afternoonStartAt.HasValue && checkInTime > afternoonStartAt)
+                    {
+                        var delay = checkInTime.Value - afternoonStartAt.Value;
+                        if (delay.TotalMinutes <= minutes)
+                        {
+                            lateMinutes = Math.Min(delay.TotalMinutes, minutes);
+                        }
+                    }
+                }
+                return lateMinutes;
+            }
+
+            void AddOrUpdateAnomaly(long userId, string employeeName, string date, double? totalWorkingTime, string notes, bool isYesterdayInFunction,
+                List<YesterdayAnomalyDTO> yesterday, List<LastWeekAnomalyDTO> lastWeek, string violationType = "DatesBelowThreshold")
+            {
+                if (isYesterdayInFunction)
+                {
+                    var yesterdayDto = new YesterdayAnomalyDTO
+                    {
+                        UserId = userId,
+                        EmployeeName = employeeName,
+                        Date = date,
+                        ActualHours = totalWorkingTime.HasValue ? $"{totalWorkingTime.Value.ToString("F2", CultureInfo.InvariantCulture)}h" : "0h",
+                        Notes = notes
+                    };
+                    yesterday.Add(yesterdayDto);
+                }
+                else
+                {
+                    var lastWeekDto = lastWeek.FirstOrDefault(a => a.UserId == userId) ?? new LastWeekAnomalyDTO { UserId = userId, EmployeeName = employeeName };
+                    if (violationType == "DatesMissed")
+                        lastWeekDto.DatesMissed.Add(date);
+                    else if (violationType == "DatesNoTrackerTime")
+                        lastWeekDto.DatesNoTrackerTime.Add(date);
+                    else
+                        lastWeekDto.DatesBelowThreshold.Add(date);
+                    lastWeekDto.Count++;
+                    lastWeekDto.Notes = notes;
+                    if (!lastWeek.Any(a => a.UserId == userId))
+                        lastWeek.Add(lastWeekDto);
+                }
+            }
+
+            bool IsValidAbsenceForCase(dynamic[] userAbsenceRequests, (long RequestId, DateTime DateAt) absenceDetailDictKey,
+                bool isFullDayAbsence, bool isMorningAbsence, bool isAfternoonAbsence, bool isMorningPresentAfternoonAbsent, bool isAfternoonPresentMorningAbsent,
+                Dictionary<(long RequestId, DateTime DateAt), List<dynamic>> absenceDetailDynamicList)
+            {
+                foreach (var request in userAbsenceRequests)
+                {
+                    if (absenceDetailDynamicList.ContainsKey((request.Id, absenceDetailDictKey.DateAt)))
+                    {
+                        var detail = absenceDetailDynamicList[(request.Id, absenceDetailDictKey.DateAt)].FirstOrDefault();
+                        if (detail != null)
+                        {
+                            if (isFullDayAbsence && detail.DateType == DayType.Fullday)
+                                return true;
+                            if (isFullDayAbsence && (detail.DateType == DayType.Morning || detail.DateType == DayType.Afternoon))
+                            {
+                                var otherDetail = absenceDetailDynamicList[(request.Id, absenceDetailDictKey.DateAt)]
+                                    .FirstOrDefault(d => d.DateType != detail.DateType && (d.DateType == DayType.Morning || d.DateType == DayType.Afternoon));
+                                if (otherDetail != null)
+                                    return true;
+                            }
+                            if (isMorningAbsence && detail.DateType == DayType.Morning)
+                                return true;
+                            if (isAfternoonAbsence && detail.DateType == DayType.Afternoon)
+                                return true;
+                            if (isMorningPresentAfternoonAbsent && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved
+                                && detail.DateType == DayType.Afternoon)
+                                return true;
+                            if (isAfternoonPresentMorningAbsent && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved
+                                && detail.DateType == DayType.Morning)
+                                return true;
+                        }
+                        else if (isFullDayAbsence && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            void SortAnomalyDates(List<LastWeekAnomalyDTO> lastWeek)
+            {
+                foreach (var anomaly in lastWeek)
+                {
+                    anomaly.DatesMissed = anomaly.DatesMissed
+                        .OrderBy(date => DateTime.ParseExact(date, "yyyy/MM/dd", CultureInfo.InvariantCulture))
+                        .ToList();
+                    anomaly.DatesNoTrackerTime = anomaly.DatesNoTrackerTime
+                        .OrderBy(date => DateTime.ParseExact(date, "yyyy/MM/dd", CultureInfo.InvariantCulture))
+                        .ToList();
+                    anomaly.DatesBelowThreshold = anomaly.DatesBelowThreshold
+                        .OrderBy(date => DateTime.ParseExact(date, "yyyy/MM/dd", CultureInfo.InvariantCulture))
+                        .ToList();
+                }
+            }
 
             foreach (var tk in timekeepings)
             {
@@ -78,44 +207,27 @@ namespace Timesheet.Core
                 double? trackerActualHours = null;
                 double? trackerTimeHours = null;
 
-                TimeSpan? morningStartAt = TimeSpan.TryParse(user.MorningStartAt, out var msa) ? msa : (TimeSpan?)null;
-                TimeSpan? morningEndAt = TimeSpan.TryParse(user.MorningEndAt, out var mea) ? mea : (TimeSpan?)null;
-                TimeSpan? afternoonStartAt = TimeSpan.TryParse(user.AfternoonStartAt, out var asa) ? asa : (TimeSpan?)null;
-                TimeSpan? afternoonEndAt = TimeSpan.TryParse(user.AfternoonEndAt, out var aea) ? aea : (TimeSpan?)null;
-                TimeSpan? checkInTime = TimeSpan.TryParse(tk.CheckIn, out var ci) ? ci : (TimeSpan?)null;
-                TimeSpan? checkOutTime = tk.CheckOut != null && TimeSpan.TryParse(tk.CheckOut, out var co) ? co : (TimeSpan?)null;
+                TimeSpan? morningStartAt = ParseTimeSpan(user.MorningStartAt);
+                TimeSpan? morningEndAt = ParseTimeSpan(user.MorningEndAt);
+                TimeSpan? afternoonStartAt = ParseTimeSpan(user.AfternoonStartAt);
+                TimeSpan? afternoonEndAt = ParseTimeSpan(user.AfternoonEndAt);
+                TimeSpan? checkInTime = ParseTimeSpan(tk.CheckIn);
+                TimeSpan? checkOutTime = tk.CheckOut != null ? ParseTimeSpan(tk.CheckOut) : null;
 
-                bool isWFHFullday = absenceRequests.Any(r => r.UserId == tk.UserId && r.Type == RequestType.Remote && r.Status == RequestStatus.Approved
-                    && absenceDetails.Any(d => d.RequestId == r.Id && d.DateAt == tk.DateAt && d.DateType == DayType.Fullday));
-                bool isWFHMorning = absenceRequests.Any(r => r.UserId == tk.UserId && r.Type == RequestType.Remote && r.Status == RequestStatus.Approved
-                    && absenceDetails.Any(d => d.RequestId == r.Id && d.DateAt == tk.DateAt && d.DateType == DayType.Morning));
-                bool isWFHAfternoon = absenceRequests.Any(r => r.UserId == tk.UserId && r.Type == RequestType.Remote && r.Status == RequestStatus.Approved
-                    && absenceDetails.Any(d => d.RequestId == r.Id && d.DateAt == tk.DateAt && d.DateType == DayType.Afternoon));
+                var userAbsenceRequests = tk.UserId.HasValue && absenceRequestDict.ContainsKey(tk.UserId.Value)
+                                ? absenceRequestDict[tk.UserId.Value].ToArray()
+                                : Array.Empty<dynamic>();
+
+                bool isWFHFullday = IsWFHForDayType(userAbsenceRequests, (0, tk.DateAt), DayType.Fullday);
+                bool isWFHMorning = IsWFHForDayType(userAbsenceRequests, (0, tk.DateAt), DayType.Morning);
+                bool isWFHAfternoon = IsWFHForDayType(userAbsenceRequests, (0, tk.DateAt), DayType.Afternoon);
 
                 if (!string.IsNullOrEmpty(tk.TrackerTime) && (isWFHFullday || isWFHMorning || isWFHAfternoon))
                 {
                     if (TimeSpan.TryParse(tk.TrackerTime, out var trackerTimeSpan))
                     {
                         trackerTimeHours = Math.Round(trackerTimeSpan.TotalHours, 2);
-                        double lateMinutes = 0.0;
-
-                        if (morningStartAt.HasValue && checkInTime > morningStartAt)
-                        {
-                            var delay = checkInTime.Value - morningStartAt.Value;
-                            if (delay.TotalMinutes <= gracePeriodMinutes)
-                            {
-                                lateMinutes = Math.Min(delay.TotalMinutes, gracePeriodMinutes);
-                            }
-                        }
-                        else if (afternoonStartAt.HasValue && checkInTime > afternoonStartAt)
-                        {
-                            var delay = checkInTime.Value - afternoonStartAt.Value;
-                            if (delay.TotalMinutes <= gracePeriodMinutes)
-                            {
-                                lateMinutes = Math.Min(delay.TotalMinutes, gracePeriodMinutes);
-                            }
-                        }
-
+                        double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt, gracePeriodMinutes);
                         trackerTimeHours += lateMinutes / 60.0;
                         if (isWFHFullday)
                         {
@@ -136,25 +248,7 @@ namespace Timesheet.Core
                 if (checkInTime.HasValue && checkOutTime.HasValue)
                 {
                     var workingTime = (checkOutTime.Value - checkInTime.Value).TotalHours;
-                    double lateMinutes = 0.0;
-
-                    if (morningStartAt.HasValue && checkInTime > morningStartAt)
-                    {
-                        var delay = checkInTime.Value - morningStartAt.Value;
-                        if (delay.TotalMinutes <= gracePeriodMinutes)
-                        {
-                            lateMinutes = Math.Min(delay.TotalMinutes, gracePeriodMinutes);
-                        }
-                    }
-                    else if (afternoonStartAt.HasValue && checkInTime > afternoonStartAt)
-                    {
-                        var delay = checkInTime.Value - afternoonStartAt.Value;
-                        if (delay.TotalMinutes <= gracePeriodMinutes)
-                        {
-                            lateMinutes = Math.Min(delay.TotalMinutes, gracePeriodMinutes);
-                        }
-                    }
-
+                    double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt, gracePeriodMinutes);
                     workingTime += lateMinutes / 60.0;
                     if (!(isMorningPresentAfternoonAbsent || isAfternoonPresentMorningAbsent))
                     {
@@ -163,18 +257,19 @@ namespace Timesheet.Core
                     officeActualHours = Math.Round(workingTime, 2);
                 }
 
-                var relatedRequests = allAbsenceRequests.Where(r => r.UserId == tk.UserId).ToList();
                 double tardinessHour = 0, leaveEarlyHour = 0;
-
-                foreach (var request in relatedRequests)
+                foreach (var request in userAbsenceRequests)
                 {
-                    var details = absenceDetails.Where(d => d.RequestId == request.Id && d.DateAt == tk.DateAt && d.AbsenceTime != null).ToList();
-                    foreach (var detail in details)
+                    if (absenceDetailDict.ContainsKey((request.Id, tk.DateAt)))
                     {
-                        if (detail.AbsenceTime == OnDayType.DiMuon && detail.Hour > 0)
-                            tardinessHour += detail.Hour;
-                        if (detail.AbsenceTime == OnDayType.VeSom && detail.Hour > 0)
-                            leaveEarlyHour += detail.Hour;
+                        var details = absenceDetailDict[(request.Id, tk.DateAt)];
+                        foreach (var detail in details)
+                        {
+                            if (detail.AbsenceTime == OnDayType.DiMuon && detail.Hour > 0)
+                                tardinessHour += detail.Hour;
+                            if (detail.AbsenceTime == OnDayType.VeSom && detail.Hour > 0)
+                                leaveEarlyHour += detail.Hour;
+                        }
                     }
                 }
 
@@ -202,70 +297,36 @@ namespace Timesheet.Core
                         requiredHours -= (tardinessHour + leaveEarlyHour);
 
                     bool isMorningOfficeAfternoonWFH = false;
-                    var userRequest = absenceRequests.FirstOrDefault(r => r.UserId == tk.UserId);
-                    if (userRequest != null && absenceDetails.Any(d => d.RequestId == userRequest.Id && d.DateType == DayType.Afternoon && d.DateAt == tk.DateAt)
-                        && timekeepings.Any(t => t.UserId == tk.UserId && TimeSpan.TryParse(t.CheckIn, out var ci1) && TimeSpan.TryParse(t.CheckOut, out var co1)
-                            && ci1 < morningEndAt && co1 < afternoonStartAt && !string.IsNullOrEmpty(t.TrackerTime) && double.TryParse(t.TrackerTime, out var tr) && tr > 0))
+                    var userRequestAfternoonWFH = userAbsenceRequests.FirstOrDefault(r => r.Status == RequestStatus.Approved);
+                    if (userRequestAfternoonWFH != null && absenceDetailDict.ContainsKey((userRequestAfternoonWFH.Id, tk.DateAt))
+                        && absenceDetailDict[(userRequestAfternoonWFH.Id, tk.DateAt)].Any(d => d.DateType == DayType.Afternoon)
+                        && timekeepings.Any(t => t.UserId == tk.UserId && TimeSpan.TryParse(t.CheckIn, out var checkInMorning) && TimeSpan.TryParse(t.CheckOut, out var checkOutMorning)
+                            && checkInMorning < morningEndAt && checkOutMorning < afternoonStartAt && !string.IsNullOrEmpty(t.TrackerTime) && double.TryParse(t.TrackerTime, out var tr) && tr > 0))
                     {
                         isMorningOfficeAfternoonWFH = true;
                         double morningRequiredHours = (user.MorningWorking ?? 0) - tardinessHour - leaveEarlyHour;
                         double afternoonRequiredTrackerHours = (user.AfternoonWorking ?? 0) * wfhThreshold - tardinessHour - leaveEarlyHour;
                         if ((officeActualHours ?? 0) < morningRequiredHours || (trackerTimeHours.HasValue && trackerTimeHours.Value < afternoonRequiredTrackerHours))
                         {
-                            if (isYesterday)
-                            {
-                                var yesterdayDto = new YesterdayAnomalyDTO
-                                {
-                                    UserId = (long)tk.UserId,
-                                    EmployeeName = user.FullName,
-                                    Date = tk.DateAt.ToString("yyyy/MM/dd"),
-                                    ActualHours = totalWorkingTime.HasValue ? $"{totalWorkingTime.Value.ToString("F2", CultureInfo.InvariantCulture)}h" : "0h",
-                                    Notes = "Violation: Morning office, Afternoon WFH time mismatch"
-                                };
-                                yesterdayAnomalies.Add(yesterdayDto);
-                            }
-                            else
-                            {
-                                var lastWeekDto = lastWeekAnomalies.FirstOrDefault(a => a.UserId == tk.UserId) ?? new LastWeekAnomalyDTO { UserId = (long)tk.UserId, EmployeeName = user.FullName };
-                                lastWeekDto.DatesBelowThreshold.Add(tk.DateAt.ToString("yyyy/MM/dd"));
-                                lastWeekDto.Count++;
-                                lastWeekDto.Notes = "Violation: Morning office, Afternoon WFH time mismatch";
-                                if (!lastWeekAnomalies.Any(a => a.UserId == tk.UserId))
-                                    lastWeekAnomalies.Add(lastWeekDto);
-                            }
+                            AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), totalWorkingTime,
+                                "Violation: Morning office, Afternoon WFH time mismatch", isYesterday, yesterdayAnomalies, lastWeekAnomalies);
                         }
                     }
 
                     bool isMorningWFHAfternoonOffice = false;
-                    if (timekeepings.Any(t => t.UserId == tk.UserId && TimeSpan.TryParse(t.CheckIn, out var ci2) && TimeSpan.TryParse(t.CheckOut, out var co2)
-                        && co2 > afternoonEndAt && ci2 > morningEndAt && !string.IsNullOrEmpty(t.TrackerTime) && double.TryParse(t.TrackerTime, out var tr) && tr > 0))
+                    var userRequestMorningWFH = userAbsenceRequests.FirstOrDefault(r => r.Status == RequestStatus.Approved);
+                    if (userRequestMorningWFH != null && absenceDetailDict.ContainsKey((userRequestMorningWFH.Id, tk.DateAt))
+                        && absenceDetailDict[(userRequestMorningWFH.Id, tk.DateAt)].Any(d => d.DateType == DayType.Morning)
+                        && timekeepings.Any(t => t.UserId == tk.UserId && TimeSpan.TryParse(t.CheckIn, out var checkInAfternoon) && TimeSpan.TryParse(t.CheckOut, out var checkOutAfternoon)
+                            && checkOutAfternoon > afternoonEndAt && checkInAfternoon > morningEndAt && !string.IsNullOrEmpty(t.TrackerTime) && double.TryParse(t.TrackerTime, out var tr) && tr > 0))
                     {
                         isMorningWFHAfternoonOffice = true;
                         double afternoonRequiredHours = (user.AfternoonWorking ?? 0) - tardinessHour - leaveEarlyHour;
                         double morningRequiredTrackerHours = (user.MorningWorking ?? 0) * wfhThreshold - tardinessHour - leaveEarlyHour;
                         if ((officeActualHours ?? 0) < afternoonRequiredHours || (trackerTimeHours.HasValue && trackerTimeHours.Value < morningRequiredTrackerHours))
                         {
-                            if (isYesterday)
-                            {
-                                var yesterdayDto = new YesterdayAnomalyDTO
-                                {
-                                    UserId = (long)tk.UserId,
-                                    EmployeeName = user.FullName,
-                                    Date = tk.DateAt.ToString("yyyy/MM/dd"),
-                                    ActualHours = totalWorkingTime.HasValue ? $"{totalWorkingTime.Value.ToString("F2", CultureInfo.InvariantCulture)}h" : "0h",
-                                    Notes = "Violation: Morning WFH, Afternoon office time mismatch"
-                                };
-                                yesterdayAnomalies.Add(yesterdayDto);
-                            }
-                            else
-                            {
-                                var lastWeekDto = lastWeekAnomalies.FirstOrDefault(a => a.UserId == tk.UserId) ?? new LastWeekAnomalyDTO { UserId = (long)tk.UserId, EmployeeName = user.FullName };
-                                lastWeekDto.DatesBelowThreshold.Add(tk.DateAt.ToString("yyyy/MM/dd"));
-                                lastWeekDto.Count++;
-                                lastWeekDto.Notes = "Violation: Morning WFH, Afternoon office time mismatch";
-                                if (!lastWeekAnomalies.Any(a => a.UserId == tk.UserId))
-                                    lastWeekAnomalies.Add(lastWeekDto);
-                            }
+                            AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), totalWorkingTime,
+                                "Violation: Morning WFH, Afternoon office time mismatch", isYesterday, yesterdayAnomalies, lastWeekAnomalies);
                         }
                     }
 
@@ -279,107 +340,21 @@ namespace Timesheet.Core
 
                     if (isWorkingTimeViolation || isTrackerTimeViolation)
                     {
-                        if (isYesterday)
-                        {
-                            var yesterdayDto = new YesterdayAnomalyDTO
-                            {
-                                UserId = (long)tk.UserId,
-                                EmployeeName = user.FullName,
-                                Date = tk.DateAt.ToString("yyyy/MM/dd"),
-                                ActualHours = totalWorkingTime.HasValue ? $"{totalWorkingTime.Value.ToString("F2", CultureInfo.InvariantCulture)}h" : "0h",
-                                Notes = isZeroTrackerTimeViolation ? "No tracker time for approved WFH" : "No early leave/late arrival approval"
-                            };
-                            yesterdayAnomalies.Add(yesterdayDto);
-                        }
-                        else
-                        {
-                            var lastWeekDto = lastWeekAnomalies.FirstOrDefault(a => a.UserId == tk.UserId) ?? new LastWeekAnomalyDTO { UserId = (long)tk.UserId, EmployeeName = user.FullName };
-                            lastWeekDto.DatesBelowThreshold.Add(tk.DateAt.ToString("yyyy/MM/dd"));
-                            lastWeekDto.Count++;
-                            lastWeekDto.Notes = isZeroTrackerTimeViolation ? "No tracker time for approved WFH" : "No early leave/late arrival approval";
-                            if (!lastWeekAnomalies.Any(a => a.UserId == tk.UserId))
-                                lastWeekAnomalies.Add(lastWeekDto);
-                        }
+                        string notes = isZeroTrackerTimeViolation ? "No tracker time for approved WFH" : "No early leave/late arrival approval";
+                        AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), totalWorkingTime,
+                            notes, isYesterday, yesterdayAnomalies, lastWeekAnomalies);
                     }
                 }
 
                 if (isFullDayAbsence || isMorningAbsence || isAfternoonAbsence || isMorningPresentAfternoonAbsent || isAfternoonPresentMorningAbsent)
                 {
-                    foreach (var request in allAbsenceRequests.Where(r => r.UserId == tk.UserId))
-                    {
-                        var detail = absenceDetails.FirstOrDefault(d => d.RequestId == request.Id && d.DateAt == tk.DateAt);
-                        if (detail != null)
-                        {
-                            if (isFullDayAbsence && detail.DateType == DayType.Fullday)
-                            {
-                                isValidAbsence = true;
-                                break;
-                            }
-                            else if (isFullDayAbsence && (detail.DateType == DayType.Morning || detail.DateType == DayType.Afternoon))
-                            {
-                                var otherDetail = absenceDetails.FirstOrDefault(d => d.RequestId == request.Id
-                                    && d.DateAt == tk.DateAt
-                                    && d.DateType != detail.DateType
-                                    && (d.DateType == DayType.Morning || d.DateType == DayType.Afternoon));
-                                if (otherDetail != null)
-                                {
-                                    isValidAbsence = true;
-                                    break;
-                                }
-                            }
-                            else if (isMorningAbsence && detail.DateType == DayType.Morning)
-                            {
-                                isValidAbsence = true;
-                                break;
-                            }
-                            else if (isAfternoonAbsence && detail.DateType == DayType.Afternoon)
-                            {
-                                isValidAbsence = true;
-                                break;
-                            }
-                            else if (isMorningPresentAfternoonAbsent && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved
-                                && detail.DateType == DayType.Afternoon)
-                            {
-                                isValidAbsence = true;
-                                break;
-                            }
-                            else if (isAfternoonPresentMorningAbsent && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved
-                                && detail.DateType == DayType.Morning)
-                            {
-                                isValidAbsence = true;
-                                break;
-                            }
-                        }
-                        else if (isFullDayAbsence && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved
-                            && absenceDetails.Any(d => d.RequestId == request.Id && d.DateAt == tk.DateAt))
-                        {
-                            isValidAbsence = true;
-                            break;
-                        }
-                    }
+                    isValidAbsence = IsValidAbsenceForCase(userAbsenceRequests, (0, tk.DateAt), isFullDayAbsence, isMorningAbsence, isAfternoonAbsence,
+                        isMorningPresentAfternoonAbsent, isAfternoonPresentMorningAbsent, absenceDetailDict);
 
                     if (!isValidAbsence)
                     {
-                        if (isYesterday)
-                        {
-                            var yesterdayDto = new YesterdayAnomalyDTO
-                            {
-                                UserId = (long)tk.UserId,
-                                EmployeeName = user.FullName,
-                                Date = tk.DateAt.ToString("yyyy/MM/dd"),
-                                ActualHours = officeActualHours.HasValue ? $"{officeActualHours.Value.ToString("F2", CultureInfo.InvariantCulture)}h" : "0h",
-                                Notes = "No leave/WFH record"
-                            };
-                            yesterdayAnomalies.Add(yesterdayDto);
-                        }
-                        else
-                        {
-                            var lastWeekDto = lastWeekAnomalies.FirstOrDefault(a => a.UserId == tk.UserId) ?? new LastWeekAnomalyDTO { UserId = (long)tk.UserId, EmployeeName = user.FullName };
-                            lastWeekDto.DatesMissed.Add(tk.DateAt.ToString("yyyy/MM/dd"));
-                            lastWeekDto.Notes = "No leave/WFH record";
-                            if (!lastWeekAnomalies.Any(a => a.UserId == tk.UserId))
-                                lastWeekAnomalies.Add(lastWeekDto);
-                        }
+                        AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), officeActualHours,
+                            "No leave/WFH record", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesMissed");
                     }
                 }
 
@@ -388,49 +363,19 @@ namespace Timesheet.Core
                     bool isZeroTrackerTimeViolation = TimeSpan.TryParse(tk.TrackerTime, out var zeroTrackerTimeSpan) && zeroTrackerTimeSpan.TotalHours == 0;
                     if (isZeroTrackerTimeViolation)
                     {
-                        if (isYesterday)
-                        {
-                            var yesterdayDto = new YesterdayAnomalyDTO
-                            {
-                                UserId = (long)tk.UserId,
-                                EmployeeName = user.FullName,
-                                Date = tk.DateAt.ToString("yyyy/MM/dd"),
-                                ActualHours = officeActualHours.HasValue ? $"{officeActualHours.Value.ToString("F2", CultureInfo.InvariantCulture)}h" : "0h",
-                                Notes = "No tracker time for approved WFH"
-                            };
-                            yesterdayAnomalies.Add(yesterdayDto);
-                        }
-                        else
-                        {
-                            var lastWeekDto = lastWeekAnomalies.FirstOrDefault(a => a.UserId == tk.UserId) ?? new LastWeekAnomalyDTO { UserId = (long)tk.UserId, EmployeeName = user.FullName };
-                            lastWeekDto.DatesNoTrackerTime.Add(tk.DateAt.ToString("yyyy/MM/dd"));
-                            lastWeekDto.Notes = "No tracker time for approved WFH";
-                            if (!lastWeekAnomalies.Any(a => a.UserId == tk.UserId))
-                                lastWeekAnomalies.Add(lastWeekDto);
-                        }
+                        AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), officeActualHours,
+                            "No tracker time for approved WFH", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesNoTrackerTime");
                     }
                 }
             }
 
-            foreach (var anomaly in lastWeekAnomalies)
-            {
-                anomaly.DatesMissed = anomaly.DatesMissed
-                    .OrderBy(date => DateTime.ParseExact(date, "yyyy/MM/dd", CultureInfo.InvariantCulture))
-                    .ToList();
-                anomaly.DatesNoTrackerTime = anomaly.DatesNoTrackerTime
-                    .OrderBy(date => DateTime.ParseExact(date, "yyyy/MM/dd", CultureInfo.InvariantCulture))
-                    .ToList();
-                anomaly.DatesBelowThreshold = anomaly.DatesBelowThreshold
-                    .OrderBy(date => DateTime.ParseExact(date, "yyyy/MM/dd", CultureInfo.InvariantCulture))
-                    .ToList();
-            }
-
+            SortAnomalyDates(lastWeekAnomalies);
             yesterdayAnomalies = yesterdayAnomalies.OrderBy(a => a.EmployeeName).ToList();
             lastWeekAnomalies = lastWeekAnomalies.OrderBy(a => a.EmployeeName).ToList();
             return (yesterdayAnomalies, lastWeekAnomalies);
         }
 
-        public async Task<List<YesterdayAnomalyDTO>> GetYesterdayAnomalies(string branchName, DateTime date)
+        private async Task<object> GetBranchDataAsync(string branchName, DateTime? startDate = null, DateTime? endDate = null, string mode = "Branch")
         {
             var branch = await _workScope.GetAll<Timesheet.Entities.Branch>()
                 .Where(b => b.Name == branchName)
@@ -441,38 +386,156 @@ namespace Timesheet.Core
                 throw new ArgumentException($"Branch with name '{branchName}' not found.");
             }
 
+            switch (mode)
+            {
+                case "Yesterday":
+                    if (!startDate.HasValue || !endDate.HasValue)
+                    {
+                        throw new ArgumentException("startDate and endDate are required for Yesterday mode.");
+                    }
+                    var (yesterdayAnomalies, _) = await ProcessAnomalies(branch.Id, startDate.Value, endDate.Value, true);
+                    return yesterdayAnomalies;
+                case "LastWeek":
+                    if (!startDate.HasValue || !endDate.HasValue)
+                    {
+                        throw new ArgumentException("startDate and endDate are required for LastWeek mode.");
+                    }
+                    var (_, lastWeekAnomalies) = await ProcessAnomalies(branch.Id, startDate.Value, endDate.Value, false);
+                    return lastWeekAnomalies;
+                case "Branch":
+                default:
+                    return branch;
+            }
+        }
+
+        public async Task<List<YesterdayAnomalyDTO>> GetYesterdayAnomalies(string branchName, DateTime date)
+        {
             var startDate = date.Date;
             var endDate = startDate.AddDays(1).AddSeconds(-1);
-            var (yesterdayAnomalies, _) = await ProcessAnomalies(branch.Id, startDate, endDate, true);
-            return yesterdayAnomalies;
+            var result = await GetBranchDataAsync(branchName, startDate, endDate, "Yesterday");
+            return (List<YesterdayAnomalyDTO>)result;
         }
 
         public async Task<List<LastWeekAnomalyDTO>> GetLastWeekAnomalies(string branchName, DateTime startDate, DateTime endDate)
         {
-            var branch = await _workScope.GetAll<Timesheet.Entities.Branch>()
-                .Where(b => b.Name == branchName)
-                .FirstOrDefaultAsync();
-
-            if (branch == null)
-            {
-                throw new ArgumentException($"Branch with name '{branchName}' not found.");
-            }
-
-            var (_, lastWeekAnomalies) = await ProcessAnomalies(branch.Id, startDate, endDate, false);
-            return lastWeekAnomalies;
+            var result = await GetBranchDataAsync(branchName, startDate, endDate, "LastWeek");
+            return (List<LastWeekAnomalyDTO>)result;
         }
 
-        private async Task<Timesheet.Entities.Branch> GetBranchByNameAsync(string branchName)
+        private void AddBoldMarkup(StringBuilder messageBuilder, List<object> mkList, ref int currentPos, string title)
         {
-            var branch = await _workScope.GetAll<Timesheet.Entities.Branch>()
-                .FirstOrDefaultAsync(b => b.Name == branchName);
+            int titlePos = currentPos;
+            messageBuilder.AppendLine(title);
+            currentPos += title.Length + Environment.NewLine.Length;
+            mkList.Add(new { type = "b", s = titlePos, e = titlePos + title.Length });
+        }
 
-            if (branch == null)
+        private void BuildReportHeader(StringBuilder messageBuilder, List<object> mkList, ref int currentPos, string title, string reportPeriod, string office)
+        {
+            AddBoldMarkup(messageBuilder, mkList, ref currentPos, title);
+            int reportPeriodPos = currentPos;
+            messageBuilder.AppendLine(reportPeriod);
+            currentPos += reportPeriod.Length + Environment.NewLine.Length;
+            mkList.Add(new { type = "b", s = reportPeriodPos, e = reportPeriodPos + "Report Period:".Length });
+
+            int officePos = currentPos;
+            messageBuilder.AppendLine(office);
+            currentPos += office.Length + Environment.NewLine.Length;
+            mkList.Add(new { type = "b", s = officePos, e = officePos + "Office:".Length });
+
+            messageBuilder.AppendLine("════════════════════════════════════");
+            currentPos += "════════════════════════════════════".Length + Environment.NewLine.Length;
+        }
+
+        private void AppendAnomaliesSection<T>(StringBuilder messageBuilder, List<object> mkList, ref int currentPos, string sectionTitle, List<T> anomalies, string notes, bool isYesterday)
+        {
+            AddBoldMarkup(messageBuilder, mkList, ref currentPos, sectionTitle);
+
+            if (anomalies.Any())
             {
-                throw new ArgumentException($"Branch with name '{branchName}' not found.");
+                int index = 1;
+                foreach (var anomaly in anomalies)
+                {
+                    string employeeName = $"{index}. Employee Name: {(isYesterday ? (anomaly as YesterdayAnomalyDTO).EmployeeName : (anomaly as LastWeekAnomalyDTO).EmployeeName)}";
+                    int employeeNamePos = currentPos;
+                    messageBuilder.AppendLine(employeeName);
+                    currentPos += employeeName.Length + Environment.NewLine.Length;
+                    mkList.Add(new { type = "b", s = employeeNamePos, e = employeeNamePos + $"{index}. Employee Name:".Length });
+
+                    if (isYesterday)
+                    {
+                        var yesterdayAnomaly = anomaly as YesterdayAnomalyDTO;
+                        string date = $"Date: {yesterdayAnomaly.Date}";
+                        int datePos = currentPos;
+                        messageBuilder.AppendLine(date);
+                        currentPos += date.Length + Environment.NewLine.Length;
+                        mkList.Add(new { type = "b", s = datePos, e = datePos + "Date:".Length });
+
+                        if (notes == "No early leave/late arrival approval")
+                        {
+                            string actualHours = $"Actual Hours: {yesterdayAnomaly.ActualHours}";
+                            int actualHoursPos = currentPos;
+                            messageBuilder.AppendLine(actualHours);
+                            currentPos += actualHours.Length + Environment.NewLine.Length;
+                            mkList.Add(new { type = "b", s = actualHoursPos, e = actualHoursPos + "Actual Hours:".Length });
+                        }
+                    }
+                    else
+                    {
+                        var lastWeekAnomaly = anomaly as LastWeekAnomalyDTO;
+                        string datesKey = notes == "No leave/WFH record" ? "Dates Missed" :
+                                         notes == "No early leave/late arrival approval" ? "Dates Below Threshold" : "Dates With No Tracker Time";
+                        var dates = notes == "No leave/WFH record" ? lastWeekAnomaly.DatesMissed :
+                                    notes == "No early leave/late arrival approval" ? lastWeekAnomaly.DatesBelowThreshold : lastWeekAnomaly.DatesNoTrackerTime;
+                        string datesLine = $"{datesKey}: {string.Join(", ", dates)}";
+                        int datesPos = currentPos;
+                        messageBuilder.AppendLine(datesLine);
+                        currentPos += datesLine.Length + Environment.NewLine.Length;
+                        mkList.Add(new { type = "b", s = datesPos, e = datesPos + $"{datesKey}:".Length });
+
+                        string count = $"Count: {dates.Count}";
+                        int countPos = currentPos;
+                        messageBuilder.AppendLine(count);
+                        currentPos += count.Length + Environment.NewLine.Length;
+                        mkList.Add(new { type = "b", s = countPos, e = countPos + "Count:".Length });
+                    }
+
+                    int notesPos = currentPos;
+                    messageBuilder.AppendLine($"Notes: {notes}");
+                    currentPos += $"Notes: {notes}".Length + Environment.NewLine.Length;
+                    mkList.Add(new { type = "b", s = notesPos, e = notesPos + "Notes:".Length });
+
+                    messageBuilder.AppendLine();
+                    currentPos += Environment.NewLine.Length;
+                    index++;
+                }
+            }
+            else
+            {
+                string noDataMessage = $"No {(isYesterday ? sectionTitle.ToLower().Replace("yesterday – ", "") : sectionTitle.ToLower().Replace("last week – ", ""))} found";
+                messageBuilder.AppendLine(noDataMessage);
+                currentPos += noDataMessage.Length + Environment.NewLine.Length;
             }
 
-            return branch;
+            messageBuilder.AppendLine("════════════════════════════════════");
+            currentPos += "════════════════════════════════════".Length + Environment.NewLine.Length;
+        }
+
+        private void SendMezonMessage(string botUri, StringBuilder messageBuilder, List<object> mkList)
+        {
+            var messageText = messageBuilder.ToString();
+            if (!string.IsNullOrEmpty(messageText))
+            {
+                _mezonService.Post(botUri, new
+                {
+                    type = "hook",
+                    message = new
+                    {
+                        t = messageText,
+                        mk = mkList
+                    }
+                });
+            }
         }
 
         public async Task<bool> SendDailyAnomaliesToMezon(BotReportSettingDto input, bool isWeekly)
@@ -486,7 +549,8 @@ namespace Timesheet.Core
 
             foreach (var branchName in input.branchCodes)
             {
-                var branch = await GetBranchByNameAsync(branchName);
+                var branchResult = await GetBranchDataAsync(branchName);
+                var branch = (Timesheet.Entities.Branch)branchResult;
                 if (branch == null)
                 {
                     continue;
@@ -494,363 +558,51 @@ namespace Timesheet.Core
 
                 if (!isWeekly)
                 {
+                    var messageBuilder = new StringBuilder();
+                    var mkList = new List<object>();
+                    int currentPos = 0;
+
                     List<YesterdayAnomalyDTO> yesterdayAnomalies = await GetYesterdayAnomalies(branchName, now.AddDays(-1).Date);
-                    var messageBuilderYesterday = new StringBuilder();
-                    var mkListYesterday = new List<object>();
-                    int currentPosYesterday = 0;
-
-                    void AddBoldMarkupYesterday(string title)
-                    {
-                        int titlePos = currentPosYesterday;
-                        messageBuilderYesterday.AppendLine(title);
-                        currentPosYesterday += title.Length + Environment.NewLine.Length;
-                        mkListYesterday.Add(new { type = "b", s = titlePos, e = titlePos + title.Length });
-                    }
-
-                    AddBoldMarkupYesterday("🤖 Daily Anomalies Report");
-                    string reportPeriodYesterday = $"Report Period: {now.AddDays(-1):yyyy/MM/dd}";
-                    int reportPeriodPosYesterday = currentPosYesterday;
-                    messageBuilderYesterday.AppendLine(reportPeriodYesterday);
-                    currentPosYesterday += reportPeriodYesterday.Length + Environment.NewLine.Length;
-                    mkListYesterday.Add(new { type = "b", s = reportPeriodPosYesterday, e = reportPeriodPosYesterday + "Report Period:".Length });
-
-                    string officeYesterday = $"Office: {branch.Name}";
-                    int officePosYesterday = currentPosYesterday;
-                    messageBuilderYesterday.AppendLine(officeYesterday);
-                    currentPosYesterday += officeYesterday.Length + Environment.NewLine.Length;
-                    mkListYesterday.Add(new { type = "b", s = officePosYesterday, e = officePosYesterday + "Office:".Length });
-
-                    messageBuilderYesterday.AppendLine("════════════════════════════════════");
-                    currentPosYesterday += "════════════════════════════════════".Length + Environment.NewLine.Length;
-
                     var yesterdayUnplannedAbsences = yesterdayAnomalies?.Where(a => a.Notes == "No leave/WFH record").ToList() ?? new List<YesterdayAnomalyDTO>();
                     var yesterdayUnapprovedShortHours = yesterdayAnomalies?.Where(a => a.Notes == "No early leave/late arrival approval").ToList() ?? new List<YesterdayAnomalyDTO>();
                     var yesterdayNoTrackerTimeWFH = yesterdayAnomalies?.Where(a => a.Notes == "No tracker time for approved WFH").ToList() ?? new List<YesterdayAnomalyDTO>();
 
-                    if (yesterdayUnplannedAbsences.Any())
-                    {
-                        AddBoldMarkupYesterday("📅 Yesterday – Unplanned Absences");
-                        int index = 1;
-                        foreach (var anomaly in yesterdayUnplannedAbsences)
-                        {
-                            string employeeName = $"{index}. Employee Name: {anomaly.EmployeeName}";
-                            int employeeNamePos = currentPosYesterday;
-                            messageBuilderYesterday.AppendLine(employeeName);
-                            currentPosYesterday += employeeName.Length + Environment.NewLine.Length;
-                            mkListYesterday.Add(new { type = "b", s = employeeNamePos, e = employeeNamePos + $"{index}. Employee Name:".Length });
+                    BuildReportHeader(messageBuilder, mkList, ref currentPos, "Daily Anomalies Report",
+                        $"Report Period: {now.AddDays(-1):yyyy/MM/dd}", $"Office: {branch.Name}");
+                    AppendAnomaliesSection(messageBuilder, mkList, ref currentPos, "Yesterday – Unplanned Absences",
+                        yesterdayUnplannedAbsences, "No leave/WFH record", true);
+                    AppendAnomaliesSection(messageBuilder, mkList, ref currentPos, "Yesterday – Unapproved Short Working Hours",
+                        yesterdayUnapprovedShortHours, "No early leave/late arrival approval", true);
+                    AppendAnomaliesSection(messageBuilder, mkList, ref currentPos, "Yesterday – Missing tracker time for approved WFH",
+                        yesterdayNoTrackerTimeWFH, "No tracker time for approved WFH", true);
 
-                            string date = $"Date: {anomaly.Date}";
-                            int datePos = currentPosYesterday;
-                            messageBuilderYesterday.AppendLine(date);
-                            currentPosYesterday += date.Length + Environment.NewLine.Length;
-                            mkListYesterday.Add(new { type = "b", s = datePos, e = datePos + "Date:".Length });
-
-                            string notes = $"Notes: No leave/WFH record";
-                            int notesPos = currentPosYesterday;
-                            messageBuilderYesterday.AppendLine(notes);
-                            currentPosYesterday += notes.Length + Environment.NewLine.Length;
-                            mkListYesterday.Add(new { type = "b", s = notesPos, e = notesPos + "Notes:".Length });
-
-                            messageBuilderYesterday.AppendLine();
-                            currentPosYesterday += Environment.NewLine.Length;
-                            index++;
-                        }
-                    }
-                    else
-                    {
-                        AddBoldMarkupYesterday("📅 Yesterday – Unplanned Absences");
-                        messageBuilderYesterday.AppendLine("No unplanned absences found");
-                        currentPosYesterday += "No unplanned absences found".Length + Environment.NewLine.Length;
-                    }
-
-                    messageBuilderYesterday.AppendLine("════════════════════════════════════");
-                    currentPosYesterday += "════════════════════════════════════".Length + Environment.NewLine.Length;
-
-                    if (yesterdayUnapprovedShortHours.Any())
-                    {
-                        AddBoldMarkupYesterday("⏰ Yesterday – Unapproved Short Working Hours");
-                        int index = 1;
-                        foreach (var anomaly in yesterdayUnapprovedShortHours)
-                        {
-                            string employeeName = $"{index}. Employee Name: {anomaly.EmployeeName}";
-                            int employeeNamePos = currentPosYesterday;
-                            messageBuilderYesterday.AppendLine(employeeName);
-                            currentPosYesterday += employeeName.Length + Environment.NewLine.Length;
-                            mkListYesterday.Add(new { type = "b", s = employeeNamePos, e = employeeNamePos + $"{index}. Employee Name:".Length });
-
-                            string date = $"Date: {anomaly.Date}";
-                            int datePos = currentPosYesterday;
-                            messageBuilderYesterday.AppendLine(date);
-                            currentPosYesterday += date.Length + Environment.NewLine.Length;
-                            mkListYesterday.Add(new { type = "b", s = datePos, e = datePos + "Date:".Length });
-
-                            string actualHours = $"Actual Hours: {anomaly.ActualHours}";
-                            int actualHoursPos = currentPosYesterday;
-                            messageBuilderYesterday.AppendLine(actualHours);
-                            currentPosYesterday += actualHours.Length + Environment.NewLine.Length;
-                            mkListYesterday.Add(new { type = "b", s = actualHoursPos, e = actualHoursPos + "Actual Hours:".Length });
-
-                            string notes = $"Notes: No early leave/late arrival approval";
-                            int notesPos = currentPosYesterday;
-                            messageBuilderYesterday.AppendLine(notes);
-                            currentPosYesterday += notes.Length + Environment.NewLine.Length;
-                            mkListYesterday.Add(new { type = "b", s = notesPos, e = notesPos + "Notes:".Length });
-
-                            messageBuilderYesterday.AppendLine();
-                            currentPosYesterday += Environment.NewLine.Length;
-                            index++;
-                        }
-                    }
-                    else
-                    {
-                        AddBoldMarkupYesterday("⏰ Yesterday – Unapproved Short Working Hours");
-                        messageBuilderYesterday.AppendLine("No unapproved short working hours found");
-                        currentPosYesterday += "No unapproved short working hours found".Length + Environment.NewLine.Length;
-                    }
-
-                    messageBuilderYesterday.AppendLine("════════════════════════════════════");
-                    currentPosYesterday += "════════════════════════════════════".Length + Environment.NewLine.Length;
-
-                    if (yesterdayNoTrackerTimeWFH.Any())
-                    {
-                        AddBoldMarkupYesterday("🏠 Yesterday – No tracker time for approved WFH");
-                        int index = 1;
-                        foreach (var anomaly in yesterdayNoTrackerTimeWFH)
-                        {
-                            string employeeName = $"{index}. Employee Name: {anomaly.EmployeeName}";
-                            int employeeNamePos = currentPosYesterday;
-                            messageBuilderYesterday.AppendLine(employeeName);
-                            currentPosYesterday += employeeName.Length + Environment.NewLine.Length;
-                            mkListYesterday.Add(new { type = "b", s = employeeNamePos, e = employeeNamePos + $"{index}. Employee Name:".Length });
-
-                            string date = $"Date: {anomaly.Date}";
-                            int datePos = currentPosYesterday;
-                            messageBuilderYesterday.AppendLine(date);
-                            currentPosYesterday += date.Length + Environment.NewLine.Length;
-                            mkListYesterday.Add(new { type = "b", s = datePos, e = datePos + "Date:".Length });
-
-                            string notes = $"Notes: No tracker time for approved WFH";
-                            int notesPos = currentPosYesterday;
-                            messageBuilderYesterday.AppendLine(notes);
-                            currentPosYesterday += notes.Length + Environment.NewLine.Length;
-                            mkListYesterday.Add(new { type = "b", s = notesPos, e = notesPos + "Notes:".Length });
-
-                            messageBuilderYesterday.AppendLine();
-                            currentPosYesterday += Environment.NewLine.Length;
-                            index++;
-                        }
-                    }
-                    else
-                    {
-                        AddBoldMarkupYesterday("🏠 Yesterday – No tracker time for approved WFH");
-                        messageBuilderYesterday.AppendLine("No WFH tracker time issues found");
-                        currentPosYesterday += "No WFH tracker time issues found".Length + Environment.NewLine.Length;
-                    }
-
-                    messageBuilderYesterday.AppendLine("════════════════════════════════════");
-                    currentPosYesterday += "════════════════════════════════════".Length + Environment.NewLine.Length;
-
-                    var messageTextYesterday = messageBuilderYesterday.ToString();
-                    if (!string.IsNullOrEmpty(messageTextYesterday))
-                    {
-                        _mezonService.Post(input.botUri, new
-                        {
-                            type = "hook",
-                            message = new
-                            {
-                                t = messageTextYesterday,
-                                mk = mkListYesterday
-                            }
-                        });
-                    }
+                    SendMezonMessage(input.botUri, messageBuilder, mkList);
                 }
                 else
                 {
+                    var messageBuilder = new StringBuilder();
+                    var mkList = new List<object>();
+                    int currentPos = 0;
+
                     DateTime lastMonday = now.AddDays(-(int)now.DayOfWeek - 6).Date;
                     DateTime lastWeekStart = lastMonday;
                     DateTime lastWeekEnd = lastMonday.AddDays(5).Date.AddSeconds(-1);
                     List<LastWeekAnomalyDTO> lastWeekAnomalies = await GetLastWeekAnomalies(branchName, lastWeekStart, lastWeekEnd);
 
-                    var messageBuilderLastWeek = new StringBuilder();
-                    var mkListLastWeek = new List<object>();
-                    int currentPosLastWeek = 0;
-
-                    void AddBoldMarkupLastWeek(string title)
-                    {
-                        int titlePos = currentPosLastWeek;
-                        messageBuilderLastWeek.AppendLine(title);
-                        currentPosLastWeek += title.Length + Environment.NewLine.Length;
-                        mkListLastWeek.Add(new { type = "b", s = titlePos, e = titlePos + title.Length });
-                    }
-
-                    AddBoldMarkupLastWeek("🤖 Weekly Anomalies Report");
-                    string reportPeriodLastWeek = $"Report Period: {lastWeekStart:yyyy/MM/dd} - {lastWeekEnd:yyyy/MM/dd}";
-                    int reportPeriodPosLastWeek = currentPosLastWeek;
-                    messageBuilderLastWeek.AppendLine(reportPeriodLastWeek);
-                    currentPosLastWeek += reportPeriodLastWeek.Length + Environment.NewLine.Length;
-                    mkListLastWeek.Add(new { type = "b", s = reportPeriodPosLastWeek, e = reportPeriodPosLastWeek + "Report Period:".Length });
-
-                    string officeLastWeek = $"Office: {branch.Name}";
-                    int officePosLastWeek = currentPosLastWeek;
-                    messageBuilderLastWeek.AppendLine(officeLastWeek);
-                    currentPosLastWeek += officeLastWeek.Length + Environment.NewLine.Length;
-                    mkListLastWeek.Add(new { type = "b", s = officePosLastWeek, e = officePosLastWeek + "Office:".Length });
-
-                    messageBuilderLastWeek.AppendLine("════════════════════════════════════");
-                    currentPosLastWeek += "════════════════════════════════════".Length + Environment.NewLine.Length;
-
                     var lastWeekUnplannedAbsences = lastWeekAnomalies?.Where(a => a.Notes == "No leave/WFH record" && a.DatesMissed.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
                     var lastWeekUnapprovedShortHours = lastWeekAnomalies?.Where(a => a.Notes == "No early leave/late arrival approval" && a.DatesBelowThreshold.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
                     var lastWeekNoTrackerTimeWFH = lastWeekAnomalies?.Where(a => a.Notes == "No tracker time for approved WFH" && a.DatesNoTrackerTime.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
 
-                    if (lastWeekUnplannedAbsences.Any())
-                    {
-                        AddBoldMarkupLastWeek("📅 Last Week – Unplanned Absences");
-                        int index = 1;
-                        foreach (var anomaly in lastWeekUnplannedAbsences)
-                        {
-                            string employeeName = $"{index}. Employee Name: {anomaly.EmployeeName}";
-                            int employeeNamePos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(employeeName);
-                            currentPosLastWeek += employeeName.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = employeeNamePos, e = employeeNamePos + $"{index}. Employee Name:".Length });
+                    BuildReportHeader(messageBuilder, mkList, ref currentPos, "Weekly Anomalies Report",
+                        $"Report Period: {lastWeekStart:yyyy/MM/dd} - {lastWeekEnd:yyyy/MM/dd}", $"Office: {branch.Name}");
+                    AppendAnomaliesSection(messageBuilder, mkList, ref currentPos, "Last Week – Unplanned Absences",
+                        lastWeekUnplannedAbsences, "No leave/WFH record", false);
+                    AppendAnomaliesSection(messageBuilder, mkList, ref currentPos, "Last Week – Unapproved Short Working Hours",
+                        lastWeekUnapprovedShortHours, "No early leave/late arrival approval", false);
+                    AppendAnomaliesSection(messageBuilder, mkList, ref currentPos, "Last Week – Missing tracker time for approved WFH",
+                        lastWeekNoTrackerTimeWFH, "No tracker time for approved WFH", false);
 
-                            string datesMissed = $"Dates Missed: {string.Join(", ", anomaly.DatesMissed)}";
-                            int datesMissedPos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(datesMissed);
-                            currentPosLastWeek += datesMissed.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = datesMissedPos, e = datesMissedPos + "Dates Missed:".Length });
-
-                            string count = $"Count: {anomaly.DatesMissed.Count}";
-                            int countPos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(count);
-                            currentPosLastWeek += count.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = countPos, e = countPos + "Count:".Length });
-
-                            string notes = $"Notes: No leave/WFH record";
-                            int notesPos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(notes);
-                            currentPosLastWeek += notes.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = notesPos, e = notesPos + "Notes:".Length });
-
-                            messageBuilderLastWeek.AppendLine();
-                            currentPosLastWeek += Environment.NewLine.Length;
-                            index++;
-                        }
-                    }
-                    else
-                    {
-                        AddBoldMarkupLastWeek("📅 Last Week – Unplanned Absences");
-                        messageBuilderLastWeek.AppendLine("No unplanned absences found");
-                        currentPosLastWeek += "No unplanned absences found".Length + Environment.NewLine.Length;
-                    }
-
-                    messageBuilderLastWeek.AppendLine("════════════════════════════════════");
-                    currentPosLastWeek += "════════════════════════════════════".Length + Environment.NewLine.Length;
-
-                    if (lastWeekUnapprovedShortHours.Any())
-                    {
-                        AddBoldMarkupLastWeek("⏰ Last Week – Unapproved Short Working Hours");
-                        int index = 1;
-                        foreach (var anomaly in lastWeekUnapprovedShortHours)
-                        {
-                            string employeeName = $"{index}. Employee Name: {anomaly.EmployeeName}";
-                            int employeeNamePos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(employeeName);
-                            currentPosLastWeek += employeeName.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = employeeNamePos, e = employeeNamePos + $"{index}. Employee Name:".Length });
-
-                            string datesBelowThreshold = $"Dates Below Threshold: {string.Join(", ", anomaly.DatesBelowThreshold)}";
-                            int datesBelowThresholdPos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(datesBelowThreshold);
-                            currentPosLastWeek += datesBelowThreshold.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = datesBelowThresholdPos, e = datesBelowThresholdPos + "Dates Below Threshold:".Length });
-
-                            string count = $"Count: {anomaly.DatesBelowThreshold.Count}";
-                            int countPos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(count);
-                            currentPosLastWeek += count.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = countPos, e = countPos + "Count:".Length });
-
-                            string notes = $"Notes: No early leave/late arrival approval";
-                            int notesPos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(notes);
-                            currentPosLastWeek += notes.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = notesPos, e = notesPos + "Notes:".Length });
-
-                            messageBuilderLastWeek.AppendLine();
-                            currentPosLastWeek += Environment.NewLine.Length;
-                            index++;
-                        }
-                    }
-                    else
-                    {
-                        AddBoldMarkupLastWeek("⏰ Last Week – Unapproved Short Working Hours");
-                        messageBuilderLastWeek.AppendLine("No unapproved short working hours found");
-                        currentPosLastWeek += "No unapproved short working hours found".Length + Environment.NewLine.Length;
-                    }
-
-                    messageBuilderLastWeek.AppendLine("════════════════════════════════════");
-                    currentPosLastWeek += "════════════════════════════════════".Length + Environment.NewLine.Length;
-
-                    if (lastWeekNoTrackerTimeWFH.Any())
-                    {
-                        AddBoldMarkupLastWeek("🏠 Last Week – No tracker time for approved WFH");
-                        int index = 1;
-                        foreach (var anomaly in lastWeekNoTrackerTimeWFH)
-                        {
-                            string employeeName = $"{index}. Employee Name: {anomaly.EmployeeName}";
-                            int employeeNamePos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(employeeName);
-                            currentPosLastWeek += employeeName.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = employeeNamePos, e = employeeNamePos + $"{index}. Employee Name:".Length });
-
-                            string datesNoTrackerTime = $"Dates With No Tracker Time: {string.Join(", ", anomaly.DatesNoTrackerTime)}";
-                            int datesNoTrackerTimePos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(datesNoTrackerTime);
-                            currentPosLastWeek += datesNoTrackerTime.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = datesNoTrackerTimePos, e = datesNoTrackerTimePos + "Dates With No Tracker Time:".Length });
-
-                            string count = $"Count: {anomaly.DatesNoTrackerTime.Count}";
-                            int countPos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(count);
-                            currentPosLastWeek += count.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = countPos, e = countPos + "Count:".Length });
-
-                            string notes = $"Notes: No tracker time for approved WFH";
-                            int notesPos = currentPosLastWeek;
-                            messageBuilderLastWeek.AppendLine(notes);
-                            currentPosLastWeek += notes.Length + Environment.NewLine.Length;
-                            mkListLastWeek.Add(new { type = "b", s = notesPos, e = notesPos + "Notes:".Length });
-
-                            messageBuilderLastWeek.AppendLine();
-                            currentPosLastWeek += Environment.NewLine.Length;
-                            index++;
-                        }
-                    }
-                    else
-                    {
-                        AddBoldMarkupLastWeek("🏠 Last Week – No tracker time for approved WFH");
-                        messageBuilderLastWeek.AppendLine("No WFH tracker time issues found");
-                        currentPosLastWeek += "No WFH tracker time issues found".Length + Environment.NewLine.Length;
-                    }
-
-                    messageBuilderLastWeek.AppendLine("════════════════════════════════════");
-                    currentPosLastWeek += "════════════════════════════════════".Length + Environment.NewLine.Length;
-
-                    var messageTextLastWeek = messageBuilderLastWeek.ToString();
-                    if (!string.IsNullOrEmpty(messageTextLastWeek))
-                    {
-                        _mezonService.Post(input.botUri, new
-                        {
-                            type = "hook",
-                            message = new
-                            {
-                                t = messageTextLastWeek,
-                                mk = mkListLastWeek
-                            }
-                        });
-                    }
+                    SendMezonMessage(input.botUri, messageBuilder, mkList);
                 }
             }
 
