@@ -136,7 +136,8 @@ namespace Timesheet.DomainServices
                 var absenceDayDetails = WorkScope.GetAll<AbsenceDayDetail>()
                     .Include(s => s.Request)
                     .Where(s => s.DateAt.Date == selectedDate.Date
-                        && s.Request.Status == RequestStatus.Approved)
+                        && s.Request.Status == RequestStatus.Approved
+                        && !s.IsDeleted)
                     .ToList();
 
                 var absenceRecords = absenceDayDetails.Select(s => new
