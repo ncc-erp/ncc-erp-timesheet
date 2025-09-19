@@ -23,6 +23,7 @@ namespace Timesheet.BackgroundWorker
         ) : base(timer)
         {
             _absenceDayServices = absenceDayServices;
+            Timer.Period = 1000 * 60 * 60 * 24;
         }
 
         [UnitOfWork]
