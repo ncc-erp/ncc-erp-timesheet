@@ -21,13 +21,15 @@ namespace Timesheet.BackgroundWorker
         ) : base(timer)
         {
             _botReportDailyService = botReportDailyService;
-            Timer.Period = 1000 * 60 * 60 * 24;
+
+            Timer.Period = 1000 * 60;
         }
 
         [UnitOfWork]
         protected override void DoWork()
         {
             DateTime now = DateTimeUtils.GetNow();
+
             if (now.Minute == 0)
             {
                 try
