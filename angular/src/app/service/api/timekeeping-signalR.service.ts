@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import { AppConsts } from '@shared/AppConsts';
 import { UtilsService } from 'abp-ng2-module/dist/src/utils/utils.service';
 import { BehaviorSubject } from 'rxjs';
+import { AppAuthService } from '@shared/auth/app-auth.service';
 
 @Injectable({
     providedIn: 'root'
   })
 
 export class TimekeepingSignalRService {
+    constructor (private _authService: AppAuthService) {}
 
     timekeepingHub = null;
     public listProcessingDays: string[] = [];
@@ -62,6 +64,10 @@ export class TimekeepingSignalRService {
     initSignalR(callback): void {
 
         const encryptedAuthToken = new UtilsService().getCookieValue(AppConsts.authorization.encrptedAuthTokenName);
+        if (!encryptedAuthToken) {
+            abp.notify.error("Login expired!")
+            this._authService.logout();
+        }
 
         abp.signalr = {
             autoConnect: true,
