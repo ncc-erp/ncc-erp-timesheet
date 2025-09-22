@@ -38,7 +38,14 @@ namespace Timesheet.DomainServices
         private readonly ProjectService _projectService;
         private readonly ISettingManager _settingManager;
 
-        public TimekeepingServices(KomuService komuService, TrackerService trackerService, IWorkScope workScope, FaceIdService faceIdService, ProjectService projectService, ISettingManager settingManager) : base(workScope)
+        public TimekeepingServices(
+            KomuService komuService,
+            TrackerService trackerService,
+            IWorkScope workScope,
+            FaceIdService faceIdService,
+            ProjectService projectService,
+            ISettingManager settingManager)
+            : base(workScope)
         {
             _komuService = komuService;
             _trackerService = trackerService;
@@ -105,18 +112,19 @@ namespace Timesheet.DomainServices
         private async System.Threading.Tasks.Task SoftDeleteOldPunishments(DateTime selectedDate)
         {
             var now = DateTimeUtils.GetNow();
-            var typesToDelete = new List<UserPunishmentType> {
-              UserPunishmentType.Late,
-              UserPunishmentType.NoCheckIn,
-              UserPunishmentType.NoCheckOut,
-              UserPunishmentType.LateAndNoCheckOut,
-              UserPunishmentType.NoCheckInAndNoCheckOut,
-              UserPunishmentType.Daily,
-              UserPunishmentType.Mention,
-              UserPunishmentType.Tracker_20k,
-              UserPunishmentType.Tracker_50k,
-              UserPunishmentType.Tracker_100k,
-              UserPunishmentType.Tracker_200k
+            var typesToDelete = new List<UserPunishmentType>
+            {
+                UserPunishmentType.Late,
+                UserPunishmentType.NoCheckIn,
+                UserPunishmentType.NoCheckOut,
+                UserPunishmentType.LateAndNoCheckOut,
+                UserPunishmentType.NoCheckInAndNoCheckOut,
+                UserPunishmentType.Daily,
+                UserPunishmentType.Mention,
+                UserPunishmentType.Tracker_20k,
+                UserPunishmentType.Tracker_50k,
+                UserPunishmentType.Tracker_100k,
+                UserPunishmentType.Tracker_200k
             };
 
             var olds = await WorkScope.GetAll<UserPunishment>()
@@ -283,7 +291,7 @@ namespace Timesheet.DomainServices
                     PunishmentSystemId = dailyPunishment.Id,
                     Type = dailyPunishment.Type,
                     Count = mapDailyUsers[user.UserName],
-                    TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money,
+                    TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money
                 });
             }
 
@@ -377,7 +385,15 @@ namespace Timesheet.DomainServices
                 {
                     var registerWorkingMinutes = CommonUtils.GetEmployeeWorkingHours(t.RegisterCheckOut, t.RegisterCheckIn);
                     var dayOffType = registerCheckInOut.AbsenceDayType;
-                    var trackerPunishment = await CreateTrackerTimePunishment(selectedDate, user.UserId, trackerTime, registerWorkingMinutes, t.UserNote, t.NoteReply, dayOffType, punishmentSystems);
+                    var trackerPunishment = await CreateTrackerTimePunishment(
+                        selectedDate, 
+                        user.UserId, 
+                        trackerTime, 
+                        registerWorkingMinutes, 
+                        t.UserNote, 
+                        t.NoteReply, 
+                        dayOffType, 
+                        punishmentSystems);
                     if (trackerPunishment != null)
                     {
                         userPunishmentsToInsert.Add(trackerPunishment);
@@ -405,13 +421,7 @@ namespace Timesheet.DomainServices
             await SoftDeleteOldPunishments(selectedDate);
 
             var (mapAbsenceUsers, mapRemoteUsers) = await GetAbsenceAndRemoteUsers(selectedDate);
-            var (
-            mapCheckInUsers,
-            mapDailyUsers,
-            mapMentionUsers,
-            dicUserNameToTracker,
-            punishmentSystems
-            ) = await LoadExternalData(selectedDate, users);
+            var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
 
             var allTimekeepings = new List<Timekeeping>();
             var allPunishments = new List<UserPunishment>();
@@ -464,8 +474,8 @@ namespace Timesheet.DomainServices
             // TODO: check again
             var userEmail = users.Select(u => u.EmailAddress).ToHashSet();
             var checkInUsersOnly = mapCheckInUsers.Values
-    .Where(u => !userEmail.Contains(u.Email))
-    .ToList();
+                .Where(u => !userEmail.Contains(u.Email))
+                .ToList();
 
             foreach (var checkIn in checkInUsersOnly)
             {
@@ -526,7 +536,7 @@ namespace Timesheet.DomainServices
                         PunishmentSystemId = dailyPunishment.Id,
                         Type = dailyPunishment.Type,
                         Count = mapDailyUsers[user.UserName],
-                        TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money,
+                        TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money
                     });
                 }
 
@@ -540,7 +550,7 @@ namespace Timesheet.DomainServices
                         PunishmentSystemId = mentionPunishment.Id,
                         Type = mentionPunishment.Type,
                         Count = mapMentionUsers[user.UserName],
-                        TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
+                        TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money
                     });
                 }
             }
@@ -551,19 +561,27 @@ namespace Timesheet.DomainServices
             }
         }
 
-        public async Task<UserPunishment> CreateTrackerTimePunishment(DateTime selectedDate, long userId, float trackerTime, double registerWorkingMinutes, string userNote, string noteReply, DayType? dayOffType, Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems)
+        public async Task<UserPunishment> CreateTrackerTimePunishment(
+            DateTime selectedDate, 
+            long userId, 
+            float trackerTime, 
+            double registerWorkingMinutes, 
+            string userNote, 
+            string noteReply, 
+            DayType? dayOffType, 
+            Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems)
         {
             var punishmentLevels = new List<(UserPunishmentType Type, double MinPercentage, double? MaxPercentage)> {
-              (UserPunishmentType.Tracker_200k,
+                (UserPunishmentType.Tracker_200k,
                 double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker200kPunishment).Split('-')[0]),
                 double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker200kPunishment).Split('-')[1])),
-              (UserPunishmentType.Tracker_100k,
+                (UserPunishmentType.Tracker_100k,
                 double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker100kPunishment).Split('-')[0]),
                 double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker100kPunishment).Split('-')[1])),
-              (UserPunishmentType.Tracker_50k,
+                (UserPunishmentType.Tracker_50k,
                 double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker50kPunishment).Split('-')[0]),
                 double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker50kPunishment).Split('-')[1])),
-              (UserPunishmentType.Tracker_20k,
+                (UserPunishmentType.Tracker_20k,
                 double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker20kPunishment).Split('-')[0]),
                 double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker20kPunishment).Split('-')[1]))
             };
@@ -574,7 +592,7 @@ namespace Timesheet.DomainServices
             var punishmentLevel = punishmentLevels.FirstOrDefault(x => percentage >= x.MinPercentage && (x.MaxPercentage == null || percentage < x.MaxPercentage));
 
             if (punishmentLevel !=
-              default && punishmentSystems.TryGetValue(punishmentLevel.Type, out
+                default && punishmentSystems.TryGetValue(punishmentLevel.Type, out
                 var punishmentSystem))
             {
                 return new UserPunishment
@@ -721,9 +739,9 @@ namespace Timesheet.DomainServices
 
             info.HasFullDayAbsence = info.HasOffFullDay || info.HasOnsiteFullDay;
             info.HasCombinedAbsence = (info.HasOffMorning && info.HasOnsiteAfternoon) ||
-                                     (info.HasOnsiteMorning && info.HasOffAfternoon) ||
-                                     (info.HasOffMorning && info.HasOffAfternoon) ||
-                                     (info.HasOnsiteMorning && info.HasOnsiteAfternoon);
+                                    (info.HasOnsiteMorning && info.HasOffAfternoon) ||
+                                    (info.HasOffMorning && info.HasOffAfternoon) ||
+                                    (info.HasOnsiteMorning && info.HasOnsiteAfternoon);
             info.HasOnsiteOnly = (info.HasOnsiteMorning || info.HasOnsiteAfternoon) && !info.HasOnsiteFullDay;
             info.HasOffCombination = (info.HasOnsiteMorning && info.HasOffAfternoon) || (info.HasOnsiteAfternoon && info.HasOffMorning);
 
@@ -805,7 +823,7 @@ namespace Timesheet.DomainServices
                 return t;
             }
             if (mapAbsenceUsers.ContainsKey(user.UserId))
-            {//leave request
+            {
                 var absenceUser = mapAbsenceUsers[user.UserId];
                 if (absenceUser.DateType == DayType.Fullday)
                 {
