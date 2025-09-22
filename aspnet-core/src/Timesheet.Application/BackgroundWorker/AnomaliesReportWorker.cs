@@ -74,14 +74,6 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
 
-            bool isEveryday = everyday == "True";
-
-            if (!isEveryday && !string.Equals(now.DayOfWeek.ToString(), dayOfWeek, StringComparison.OrdinalIgnoreCase))
-            {
-                Logger.Info($"Weekly report skipped: Today is {now.DayOfWeek}, Configured = {dayOfWeek}");
-                return;
-            }
-
             var branchCodes = branchCodesString != null
                 ? branchCodesString
                     .Replace("[", "")
@@ -108,7 +100,7 @@ namespace Timesheet.BackgroundWorker
             ExecuteBotReport(new BotReportSettingDto
             {
                 enable = true,
-                everyday = isEveryday,
+                everyday = true,
                 hour = configuredHour,
                 dayofweek = dayOfWeek,
                 botUri = botUri,
@@ -125,7 +117,7 @@ namespace Timesheet.BackgroundWorker
                 ExecuteBotReport(new BotReportSettingDto
                 {
                     enable = true,
-                    everyday = isEveryday,
+                    everyday = true,
                     hour = configuredHour,
                     dayofweek = dayOfWeek,
                     botUri = botUri,
