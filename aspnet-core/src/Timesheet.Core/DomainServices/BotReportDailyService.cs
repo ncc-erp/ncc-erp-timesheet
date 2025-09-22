@@ -292,7 +292,7 @@ namespace Timesheet.DomainServices
                 branchInfo = "Unknown Branch";
             }
 
-            sb.AppendLine("📊 Top Projects Summary");
+            sb.AppendLine("Top Projects Summary");
             sb.AppendLine($"Report Period:   Last Week  ({lastWeekStart:MM/dd/yyyy} - {lastWeekEnd:MM/dd/yyyy}) |  Last Month  ({lastMonthStart:MM/yyyy})");
             sb.AppendLine($"Office: {branchInfo}");
             sb.AppendLine("════════════════════════════════════");
