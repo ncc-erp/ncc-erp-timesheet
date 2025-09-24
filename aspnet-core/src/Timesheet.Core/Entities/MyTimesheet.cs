@@ -37,6 +37,7 @@ namespace Timesheet.Entities
         public int TargetUserWorkingTime { get; set; }
         public bool? IsUnlockedByEmployee { get; set; }
         public bool IsTemp { get; set; }
+        public WorkingLocationType? WorkLocation { get; set; }
     }
 
 }

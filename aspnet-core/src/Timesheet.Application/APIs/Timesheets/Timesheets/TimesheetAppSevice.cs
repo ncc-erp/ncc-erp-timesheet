@@ -52,12 +52,13 @@ namespace Timesheet.Timesheets.Timesheets
         }
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_View)]
-        public async Task<List<MyTimeSheetDto>> GetAll(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, TimesheetStatus status, long? projectId, HaveCheckInFilter? checkInFilter, long? branchId = null, string searchText = "")
+        public async Task<List<MyTimeSheetDto>> GetAll(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, TimesheetStatus status, long? projectId, HaveCheckInFilter? checkInFilter, long? branchId = null, string searchText = "", WorkingLocationType? workLocation = null)
         {
             var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
+
             var dayOffSettings = await WorkScope.GetAll<DayOffSetting>()
-             .Where(s => s.DayOff.Date >= startDate && s.DayOff.Date <= endDate)
-             .Select(s => s.DayOff).ToListAsync();
+                .Where(s => s.DayOff.Date >= startDate && s.DayOff.Date <= endDate)
+                .Select(s => s.DayOff).ToListAsync();
 
             var projectIds = await WorkScope.GetAll<ProjectUser>()
                 .Where(s => s.UserId == AbpSession.UserId.Value && s.Type == ProjectUserType.PM)
@@ -68,20 +69,37 @@ namespace Timesheet.Timesheets.Timesheets
                 .Where(s => projectIds.Contains(s.ProjectId))
                 .Select(s => s.UserId).Distinct().ToListAsync();
 
-
             var absencedays = await WorkScope.GetAll<AbsenceDayDetail>()
-                 .Where(s => !startDate.HasValue || s.DateAt >= startDate.Value.Date)
-                 .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
-                 .Where(s => userIds.Contains(s.Request.UserId))
-                 .Where(s => s.Request.Status == RequestStatus.Approved)
-                 .Where(s => s.Request.Type == RequestType.Off)
-                 .Select(s => new
-                 {
-                     UserId = s.Request.UserId,
-                     DateAt = s.DateAt,
-                     Hour = s.Hour
-                 })
-                  .ToListAsync();
+                .Where(s => !startDate.HasValue || s.DateAt >= startDate.Value.Date)
+                .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
+                .Where(s => userIds.Contains(s.Request.UserId))
+                .Where(s => s.Request.Status == RequestStatus.Approved)
+                .Where(s => s.Request.Type == RequestType.Off)
+                .Select(s => new
+                {
+                    UserId = s.Request.UserId,
+                    DateAt = s.DateAt,
+                    Hour = s.Hour
+                })
+                .ToListAsync();
+
+            var userWorkLocations = await WorkScope.GetAll<AbsenceDayDetail>()
+                .Where(s => !startDate.HasValue || s.DateAt >= startDate.Value.Date)
+                .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
+                .Where(s => userIds.Contains(s.Request.UserId))
+                .Where(s => s.Request.Status == RequestStatus.Approved)
+                .Where(s => s.Request.Type == RequestType.Off ||
+                           s.Request.Type == RequestType.Onsite ||
+                           s.Request.Type == RequestType.Remote)
+                .Select(s => new
+                {
+                    UserId = s.Request.UserId,
+                    DateAt = s.DateAt.Date,
+                    WorkLocation = s.Request.Type == RequestType.Off ? (WorkingLocationType?)null :
+                                  s.Request.Type == RequestType.Onsite ? WorkingLocationType.Onsite :
+                                  s.Request.Type == RequestType.Remote ? WorkingLocationType.Remote : WorkingLocationType.Office
+                })
+                .ToListAsync();
 
             var q = from a in WorkScope.GetRepo<MyTimesheet>().GetAllIncluding(
                        s => s.ProjectTask,
@@ -89,8 +107,7 @@ namespace Timesheet.Timesheets.Timesheets
                        s => s.ProjectTask.Project,
                        s => s.ProjectTask.Project.Customer
                        )
-                    where (status == TimesheetStatus.All)
-                    || (a.Status == status)
+                    where (status == TimesheetStatus.All) || (a.Status == status)
                     where (userIds.Contains(a.UserId))
                     where (!startDate.HasValue || a.DateAt >= startDate)
                     where (!endDate.HasValue || a.DateAt.Date <= endDate)
@@ -108,7 +125,6 @@ namespace Timesheet.Timesheets.Timesheets
                         EmailAddress = a.User.EmailAddress,
                         UserId = a.User.Id,
                         AvatarPath = a.User.AvatarPath,
-                        //Level = a.User.Level,
                         Type = a.User.Type,
                         TaskName = a.ProjectTask.Task.Name,
                         TaskId = a.ProjectTask.TaskId,
@@ -120,7 +136,7 @@ namespace Timesheet.Timesheets.Timesheets
                         IsCharged = a.IsCharged,
                         TypeOfWork = a.TypeOfWork,
                         IsTemp = a.IsTemp,
-                        IsUserInProject = true, // projectIds.Contains(a.ProjectTask.ProjectId)
+                        IsUserInProject = true,
                         LastModificationTime = a.LastModificationTime,
                         BranchColor = a.User.Branch.Color,
                         BranchDisplayName = a.User.Branch.DisplayName,
@@ -130,21 +146,43 @@ namespace Timesheet.Timesheets.Timesheets
                         projectTargetUser = a.ProjectTargetUser.User.FullName,
                         workingTimeTargetUser = a.TargetUserWorkingTime,
                         openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == a.User.Id && a.DateAt == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault(),
-                        ProjectTargetRoleName = a.ProjectTargetUser.RoleName
+                        ProjectTargetRoleName = a.ProjectTargetUser.RoleName,
+                        WorkLocation = userWorkLocations
+                        .Where(w => w.UserId == a.User.Id && w.DateAt.Date == a.DateAt.Date)
+                        .Select(w => (WorkingLocationType?)w.WorkLocation)
+                        .FirstOrDefault() ?? WorkingLocationType.Office
+
                     };
-            var query = q.WhereIf(opentalkTime.HasValue, s => opentalkTimeType.Value ? s.openTalkTime >= opentalkTime : s.openTalkTime < opentalkTime).OrderBy(i => i.EmailAddress).ThenByDescending(s => s.DateAt).ToList();
-            var listTimekeeping = WorkScope.GetAll<Timekeeping>()
-            .Select(s => new
+
+            var query = q.WhereIf(workLocation.HasValue, s =>
             {
-                UserId = s.UserId,
-                CheckIn = s.CheckIn,
-                CheckOut = s.CheckOut,
-                DateAt = s.DateAt.Date
+                var userLocationOnDate = userWorkLocations
+                    .Where(w => w.UserId == s.UserId && w.DateAt.Date == s.DateAt.Date)
+                    .FirstOrDefault();
+
+                var actualWorkLocation = userLocationOnDate?.WorkLocation != null
+                    ? (WorkingLocationType)userLocationOnDate.WorkLocation
+                    : WorkingLocationType.Office;
+
+                return actualWorkLocation == workLocation;
             })
-            .Where(s => !startDate.HasValue || s.DateAt >= startDate)
-            .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
-            .Where(s => s.UserId.HasValue)
-            .ToList();
+                .WhereIf(opentalkTime.HasValue, s => opentalkTimeType.Value ? s.openTalkTime >= opentalkTime : s.openTalkTime < opentalkTime)
+                .OrderBy(i => i.EmailAddress)
+                .ThenByDescending(s => s.DateAt)
+                .ToList();
+
+            var listTimekeeping = WorkScope.GetAll<Timekeeping>()
+                .Select(s => new
+                {
+                    UserId = s.UserId,
+                    CheckIn = s.CheckIn,
+                    CheckOut = s.CheckOut,
+                    DateAt = s.DateAt.Date
+                })
+                .Where(s => !startDate.HasValue || s.DateAt >= startDate)
+                .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
+                .Where(s => s.UserId.HasValue)
+                .ToList();
 
             foreach (var item in query)
             {
@@ -183,8 +221,6 @@ namespace Timesheet.Timesheets.Timesheets
 
             return query;
         }
-
-        [HttpPost]
         public async Task<List<TimeSheetWarningDto>> GetTimesheetWarning(long[] myTimesheetIds)
         {
             var listMyTimesheetByIds = WorkScope.GetAll<MyTimesheet>()

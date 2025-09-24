@@ -53,6 +53,7 @@ namespace Timesheet.Timesheets.Timesheets.Dto
         public string CheckIn { get; set; }
         public string CheckOut { get; set; }
         public string ProjectTargetRoleName { get; set; }
+        public WorkingLocationType? WorkLocation { get; set; }
     }
     public class RequestDetail
     {

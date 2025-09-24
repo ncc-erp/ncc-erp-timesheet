@@ -245,6 +245,13 @@ namespace Ncc.Entities.Enum
             HaveCheckInOrHaveCheckOut = 4,
             NoCheckInAndNoCheckOut = 5,
         }
+
+        public enum WorkingLocationType
+        {
+            Office = 0,
+            Remote = 1,
+            Onsite = 2
+        }
         public enum RetroStatus : byte
         {
             Public = 0,
