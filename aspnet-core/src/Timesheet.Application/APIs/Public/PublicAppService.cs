@@ -833,49 +833,41 @@ namespace Timesheet.APIs.Public
             {
                 IQueryable<ProjectUser> ApplyFilter(IQueryable<ProjectUser> query)
                 {
-                    if (!startDate.HasValue && !endDate.HasValue)
+                    if (startDate.HasValue || endDate.HasValue)
                     {
-                        return query.Where(s => s.Type != ProjectUserType.DeActive && !s.IsDeleted);
+                        query = query.Where(x => (!startDate.HasValue || x.CreationTime.Date >= startDate.Value.Date) &&
+                          (!endDate.HasValue || x.CreationTime.Date <= endDate.Value.Date));
                     }
-
-                    if (startDate.HasValue)
-                        query = query.Where(x => x.CreationTime.Date >= startDate.Value.Date);
-                    if (endDate.HasValue)
-                        query = query.Where(x => x.CreationTime.Date <= endDate.Value.Date);
-
                     return query;
                 }
-                var userProjects = ApplyFilter(
-                    WorkScope.GetAll<ProjectUser>()
-                        .Where(s => s.Project.Status == ProjectStatus.Active)
-                        .Where(x => x.User.EmailAddress == email)
-                ).Select(x => x.ProjectId).Distinct();
-
+                var baseQuery = ApplyFilter(WorkScope.GetAll<ProjectUser>()
+                  .Where(s => s.Project.Status == ProjectStatus.Active));
+                var userProjects = baseQuery
+                  .Where(x => x.User.EmailAddress == email)
+                  .Select(x => x.ProjectId)
+                  .Distinct();
                 if (!userProjects.Any())
                 {
                     return new List<PMsOfUser>();
                 }
-                var result = ApplyFilter(
-                    WorkScope.GetAll<ProjectUser>()
-                        .Where(p => p.Type == ProjectUserType.PM)
-                        .Where(p => userProjects.Contains(p.ProjectId))
-                )
-                .GroupBy(p => p.Project)
-                .Select(g => new PMsOfUser
-                {
-                    ProjectName = g.Key.Name,
-                    ProjectCode = g.Key.Code,
-                    PMs = g.Select(pm => new UserInfo
-                    {
-                        UserType = pm.User.Type,
-                        FullName = pm.User.FullName,
-                        BranchName = pm.User.Branch.Name,
-                        EmailAddress = pm.User.EmailAddress,
-                        AvatarPath = pm.User.AvatarPath
-                    }).ToList()
-                })
-                .ToList();
-
+                var result = baseQuery
+                  .Where(p => p.Type == ProjectUserType.PM)
+                  .Where(p => userProjects.Contains(p.ProjectId))
+                  .GroupBy(p => p.Project)
+                  .Select(g => new PMsOfUser
+                  {
+                      ProjectName = g.Key.Name,
+                      ProjectCode = g.Key.Code,
+                      PMs = g.Select(pm => new UserInfo
+                      {
+                          UserType = pm.User.Type,
+                          FullName = pm.User.FullName,
+                          BranchName = pm.User.Branch.Name,
+                          EmailAddress = pm.User.EmailAddress,
+                          AvatarPath = pm.User.AvatarPath
+                      }).ToList()
+                  })
+                  .ToList();
                 return result;
             }
         }
