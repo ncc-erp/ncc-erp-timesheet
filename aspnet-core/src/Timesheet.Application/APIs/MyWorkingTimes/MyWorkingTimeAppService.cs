@@ -307,7 +307,8 @@ namespace Timesheet.APIs.MyWorkingTimes
                         continue;
                     }
 
-                    _komuService.SendMessageToUser(userMessage.ToString(), pm.UserName);
+                    
+                    _komuService.SendSimpleNotificationToUser(userMessage.ToString(), pm.UserName);
                 }
             }
         }
