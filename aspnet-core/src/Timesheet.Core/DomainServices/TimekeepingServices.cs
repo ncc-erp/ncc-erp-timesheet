@@ -250,7 +250,7 @@ namespace Timesheet.DomainServices
             }
 
             // combined
-            if (combinedAbsenceList.Any() && combinedMapAbsenceUsers.ContainsKey(user.UserId))
+            if (combinedAbsenceList.Any())
             {
                 combinedMapAbsenceUsers[user.UserId] = combinedAbsenceList.OrderBy(x => x.DateType).ToList();
             }
@@ -263,6 +263,9 @@ namespace Timesheet.DomainServices
             t.RegisterCheckIn = registerCheckInOut.CheckIn;
             t.RegisterCheckOut = registerCheckInOut.CheckOut;
             t.NoteReply = registerCheckInOut.Note;
+
+            if (registerCheckInOut.Note != "Off fullday")
+            {
 
             if (mapCheckInUsers.ContainsKey(user.EmailAddress))
             {
@@ -309,13 +312,23 @@ namespace Timesheet.DomainServices
                     TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
                 });
             }
+            }
+
 
             if (oldTimekeepingNotes.ContainsKey(user.UserId))
             {
                 oldTimekeepingNotes[user.UserId].ForEach(item =>
                 {
+                    if (!string.IsNullOrEmpty(item.NoteReply))
+                    {
                     t.NoteReply = item.NoteReply;
+                    }
+
+                    if (!string.IsNullOrEmpty(item.UserNote))
+                    {
                     t.UserNote = item.UserNote;
+
+                    }
                 });
 
             }
