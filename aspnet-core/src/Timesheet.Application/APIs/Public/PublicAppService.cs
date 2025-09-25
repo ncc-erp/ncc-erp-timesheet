@@ -1,7 +1,6 @@
 ﻿using Abp.Authorization;
 using Abp.Collections.Extensions;
 using Abp.Configuration;
-using Abp.Domain.Uow;
 using Abp.UI;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -829,52 +828,71 @@ namespace Timesheet.APIs.Public
         [HttpGet]
         public List<PMsOfUser> GetPMsOfUser(string email, DateTime? startDate = null, DateTime? endDate = null)
         {
-            using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete))
+            var query = WorkScope.GetAll<ProjectUser>()
+                .Where(s => s.Project.Status == ProjectStatus.Active)
+                .Where(x => x.User.EmailAddress == email);
+            if (!startDate.HasValue && !endDate.HasValue)
             {
-                IQueryable<ProjectUser> ApplyFilter(IQueryable<ProjectUser> query)
-                {
-                    if (startDate.HasValue || endDate.HasValue)
-                    {
-                        query = query.Where(x => (!startDate.HasValue || x.CreationTime.Date >= startDate.Value.Date) &&
-                          (!endDate.HasValue || x.CreationTime.Date <= endDate.Value.Date));
-                    }
-                    return query;
-                }
-
-                var baseQuery = ApplyFilter(WorkScope.GetAll<ProjectUser>()
-                  .Where(s => s.Project.Status == ProjectStatus.Active));
-
-                var userProjects = baseQuery
-                  .Where(x => x.User.EmailAddress == email)
-                  .Select(x => x.ProjectId)
-                  .Distinct();
-
-                if (!userProjects.Any())
-                {
-                    return new List<PMsOfUser>();
-                }
-
-                var result = baseQuery
-                  .Where(p => p.Type == ProjectUserType.PM)
-                  .Where(p => userProjects.Contains(p.ProjectId))
-                  .GroupBy(p => p.Project)
-                  .Select(g => new PMsOfUser
-                  {
-                      ProjectName = g.Key.Name,
-                      ProjectCode = g.Key.Code,
-                      PMs = g.Select(pm => new UserInfo
-                      {
-                          UserType = pm.User.Type,
-                          FullName = pm.User.FullName,
-                          BranchName = pm.User.Branch.Name,
-                          EmailAddress = pm.User.EmailAddress,
-                          AvatarPath = pm.User.AvatarPath
-                      }).ToList()
-                  })
-                  .ToList();
-
-                return result;
+                query = query.Where(s => s.Type != ProjectUserType.DeActive && !s.IsDeleted);
             }
+            else
+            {
+                if (startDate.HasValue)
+                {
+                    query = query.Where(x => x.CreationTime.Date >= startDate.Value.Date);
+                }
+
+                if (endDate.HasValue)
+                {
+                    query = query.Where(x => x.CreationTime.Date <= endDate.Value.Date);
+                }
+            }
+            var projectData = query
+                .Select(x => new
+                {
+                    ProjectId = x.ProjectId,
+                    ProjectName = x.Project.Name,
+                    ProjectCode = x.Project.Code
+                })
+                .Distinct()
+                .ToList();
+
+            if (!projectData.Any())
+            {
+                return new List<PMsOfUser>();
+            }
+
+            var projectIds = projectData.Select(p => p.ProjectId).ToList();
+            var projectPMs = WorkScope.GetAll<ProjectUser>()
+                .Where(p => p.Type == ProjectUserType.PM && projectIds.Contains(p.ProjectId))
+                .Select(p => new
+                {
+                    ProjectId = p.ProjectId,
+                    UserType = p.User.Type,
+                    FullName = p.User.FullName,
+                    BranchName = p.User.Branch.Name,
+                    EmailAddress = p.User.EmailAddress,
+                    AvatarPath = p.User.AvatarPath
+                })
+                .ToList()
+                .GroupBy(p => p.ProjectId)
+                .ToDictionary(g => g.Key, g => g.Select(p => new UserInfo
+                {
+                    UserType = p.UserType,
+                    FullName = p.FullName,
+                    BranchName = p.BranchName,
+                    EmailAddress = p.EmailAddress,
+                    AvatarPath = p.AvatarPath
+                }).ToList());
+
+            return projectData
+                .Select(p => new PMsOfUser
+                {
+                    ProjectName = p.ProjectName,
+                    ProjectCode = p.ProjectCode,
+                    PMs = projectPMs.ContainsKey(p.ProjectId) ? projectPMs[p.ProjectId] : new List<UserInfo>()
+                })
+                .ToList();
         }
 
         [AbpAllowAnonymous]
