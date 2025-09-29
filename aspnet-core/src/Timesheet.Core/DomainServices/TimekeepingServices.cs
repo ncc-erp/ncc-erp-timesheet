@@ -321,13 +321,12 @@ namespace Timesheet.DomainServices
                 {
                     if (!string.IsNullOrEmpty(item.NoteReply))
                     {
-                    t.NoteReply = item.NoteReply;
+                        t.NoteReply = item.NoteReply;
                     }
 
                     if (!string.IsNullOrEmpty(item.UserNote))
                     {
-                    t.UserNote = item.UserNote;
-
+                        t.UserNote = item.UserNote;
                     }
                 });
 

@@ -29,6 +29,7 @@ import { LogoutAllUserService } from '@app/service/api/logout-all-user.service';
 import { LateInternReviewSettingService, LateInternReviewSettingDto } from '@app/service/api/late-intern-review-setting.service';
 import { PMReportPunishSettingService, PMReportPunishSettingDto } from '@app/service/api/pm-report-punish-setting.service';
 import { BotReportSettingService, BotReportSettingDto, ProjectDto } from '../service/api/bot-report-setting.service';
+import { BranchService } from '@app/service/api/branch.service';
 
 @Component({
   selector: 'app-configuration',
@@ -297,6 +298,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     private lateInternReviewSettingService: LateInternReviewSettingService,
     private pmReportPunishSettingService: PMReportPunishSettingService,
     private botReportSettingService: BotReportSettingService,
+    private branchService: BranchService,
     private dialog : MatDialog,
     injector: Injector) {
     super(injector);
@@ -1939,6 +1941,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
         } else {
           this.selectedBranches = [];
         }
+        this.updateInitialState();
       });
 
       this.botReportSettingService.getActiveProjects().subscribe({
@@ -1977,7 +1980,6 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     }
     
     this.botReportSetting.branchCodes = [...this.selectedBranches];
-
     this.botReportSetting.projectIds = this.selectedProjects;
     
     this.botReportSettingService.change(this.botReportSetting).subscribe((res: any) => {
@@ -1986,11 +1988,23 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
         this.notify.success(this.l('Update Successfully!'));
       }
     })
+
   }
 
   refreshBotReportSetting() {
     this.getBotReportSetting();
     this.isEditBotReportSetting = false;
+  }
+
+  private updateInitialState() {
+    if (this.selectedBranches.length === this.branchCodes.length) {
+      this.isAllBranchesSelected = true;
+    } else if (this.selectedBranches.length === 0 || (this.selectedBranches.length === 1 && this.selectedBranches[0] === 'HN1')) {
+      this.selectedBranches = ['HN1'];
+      this.isAllBranchesSelected = false;
+    } else {
+      this.isAllBranchesSelected = false;
+    }
   }
 
   toggleAllProjects() {

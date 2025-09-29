@@ -292,10 +292,10 @@ namespace Timesheet.DomainServices
                 branchInfo = "Unknown Branch";
             }
 
-            sb.AppendLine("📊 Top Projects Summary");
+            sb.AppendLine("Top Projects Summary");
             sb.AppendLine($"Report Period:   Last Week  ({lastWeekStart:MM/dd/yyyy} - {lastWeekEnd:MM/dd/yyyy}) |  Last Month  ({lastMonthStart:MM/yyyy})");
             sb.AppendLine($"Office: {branchInfo}");
-            sb.AppendLine("-------------------------------------");
+            sb.AppendLine("════════════════════════════════════");
 
             foreach (var item in projectData)
             {
@@ -303,12 +303,12 @@ namespace Timesheet.DomainServices
                 sb.AppendLine($" Members:  {item.Members}");
                 sb.AppendLine($" Last Week:  {item.LastWeekHours}");
                 sb.AppendLine($" Last Month:  {item.LastMonthHours}");
-                sb.AppendLine("-------------------------------------");
+                sb.AppendLine("════════════════════════════════════");
             }
 
             if (projectData.Any())
             {
-                sb.Length -= "-------------------------------------\r\n".Length;
+                sb.Length -= "════════════════════════════════════\r\n".Length;
             }
 
             var messageText = sb.ToString();
