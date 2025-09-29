@@ -298,20 +298,20 @@ namespace Timesheet.DomainServices
                     });
                 }
 
-                if (mapMentionUsers.ContainsKey(user.UserName))
+            if (mapMentionUsers.ContainsKey(user.UserName))
+            {
+                t.CountPunishMention = mapMentionUsers[user.UserName];
+                var mentionPunishment = punishmentSystems[UserPunishmentType.Mention];
+                userPunishmentsToInsert.Add(new UserPunishment
                 {
-                    t.CountPunishMention = mapMentionUsers[user.UserName];
-                    var mentionPunishment = punishmentSystems[UserPunishmentType.Mention];
-                    userPunishmentsToInsert.Add(new UserPunishment
-                    {
-                        DateAt = selectedDate,
-                        UserId = user.UserId,
-                        PunishmentSystemId = mentionPunishment.Id,
-                        Type = mentionPunishment.Type,
-                        Count = mapMentionUsers[user.UserName],
-                        TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
-                    });
-                }
+                    DateAt = selectedDate,
+                    UserId = user.UserId,
+                    PunishmentSystemId = mentionPunishment.Id,
+                    Type = mentionPunishment.Type,
+                    Count = mapMentionUsers[user.UserName],
+                    TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
+                });
+            }
             }
 
 
@@ -321,12 +321,12 @@ namespace Timesheet.DomainServices
                 {
                     if (!string.IsNullOrEmpty(item.NoteReply))
                     {
-                        t.NoteReply = item.NoteReply;
+                    t.NoteReply = item.NoteReply;
                     }
 
                     if (!string.IsNullOrEmpty(item.UserNote))
                     {
-                        t.UserNote = item.UserNote;
+                    t.UserNote = item.UserNote;
 
                     }
                 });
