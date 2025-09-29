@@ -45,6 +45,7 @@ namespace Ncc.IoC
             var resolveMethod = _iocManager.GetType()
                 .GetMethods()
                 .First(s => s.Name == "Resolve" && !s.IsGenericMethod && s.GetParameters().Length == 1 && s.GetParameters()[0].ParameterType == typeof(Type));
+            
             var repo = resolveMethod.Invoke(_iocManager, new object[] { repoGenericType });
             return repo as IRepository<TEntity, TPrimaryKey>;
         }

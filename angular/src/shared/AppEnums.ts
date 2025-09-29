@@ -46,20 +46,19 @@ export enum EComparisionOperator {
   GreaterThan,
   GreaterThanOrEqual,
   NotEqual,
-  Contains, //for strings  
-  StartsWith, //for strings  
-  EndsWith, //for strings  
-  In // for list item
+  Contains, //for strings
+  StartsWith, //for strings
+  EndsWith, //for strings
+  In, // for list item
 }
 export enum CapabilityUserType {
   Staff = 0,
   Internship = 1,
   Collaborators = 2,
   ProbationaryStaff = 3,
-  Vendor = 5
+  Vendor = 5,
 }
 export enum SortDirectionEnum {
   Ascending = 0,
-  Descending = 1
+  Descending = 1,
 }
-
