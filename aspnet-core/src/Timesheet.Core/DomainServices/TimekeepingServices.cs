@@ -250,7 +250,7 @@ namespace Timesheet.DomainServices
             }
 
             // combined
-            if (combinedAbsenceList.Any() && combinedMapAbsenceUsers.ContainsKey(user.UserId))
+            if (combinedAbsenceList.Any())
             {
                 combinedMapAbsenceUsers[user.UserId] = combinedAbsenceList.OrderBy(x => x.DateType).ToList();
             }
@@ -264,36 +264,39 @@ namespace Timesheet.DomainServices
             t.RegisterCheckOut = registerCheckInOut.CheckOut;
             t.NoteReply = registerCheckInOut.Note;
 
-            if (mapCheckInUsers.ContainsKey(user.EmailAddress))
+            if (registerCheckInOut.Note != "Off fullday")
             {
-                var checkInUser = mapCheckInUsers[user.EmailAddress];
-                t.CheckIn = checkInUser?.VerifyStartTimeStr;
-                t.CheckOut = checkInUser?.VerifyEndTimeStr;
 
-                if (registerCheckInOut.AbsenceDayType == DayType.Afternoon)
+                if (mapCheckInUsers.ContainsKey(user.EmailAddress))
                 {
-                    ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(t);
-                }
-                else
-                {
-                    ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
-                }
-            }
+                    var checkInUser = mapCheckInUsers[user.EmailAddress];
+                    t.CheckIn = checkInUser?.VerifyStartTimeStr;
+                    t.CheckOut = checkInUser?.VerifyEndTimeStr;
 
-            if (mapDailyUsers.ContainsKey(user.UserName))
-            {
-                t.CountPunishDaily = mapDailyUsers[user.UserName];
-                var dailyPunishment = punishmentSystems[UserPunishmentType.Daily];
-                userPunishmentsToInsert.Add(new UserPunishment
+                    if (registerCheckInOut.AbsenceDayType == DayType.Afternoon)
+                    {
+                        ChangeCheckInCheckOutTimeIfCheckOutIsEmptyCaseOffAfternoon(t);
+                    }
+                    else
+                    {
+                        ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
+                    }
+                }
+
+                if (mapDailyUsers.ContainsKey(user.UserName))
                 {
-                    DateAt = selectedDate,
-                    UserId = user.UserId,
-                    PunishmentSystemId = dailyPunishment.Id,
-                    Type = dailyPunishment.Type,
-                    Count = mapDailyUsers[user.UserName],
-                    TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money
-                });
-            }
+                    t.CountPunishDaily = mapDailyUsers[user.UserName];
+                    var dailyPunishment = punishmentSystems[UserPunishmentType.Daily];
+                    userPunishmentsToInsert.Add(new UserPunishment
+                    {
+                        DateAt = selectedDate,
+                        UserId = user.UserId,
+                        PunishmentSystemId = dailyPunishment.Id,
+                        Type = dailyPunishment.Type,
+                        Count = mapDailyUsers[user.UserName],
+                        TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money
+                    });
+                }
 
             if (mapMentionUsers.ContainsKey(user.UserName))
             {
@@ -309,13 +312,22 @@ namespace Timesheet.DomainServices
                     TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
                 });
             }
+            }
+
 
             if (oldTimekeepingNotes.ContainsKey(user.UserId))
             {
                 oldTimekeepingNotes[user.UserId].ForEach(item =>
                 {
-                    t.NoteReply = item.NoteReply;
-                    t.UserNote = item.UserNote;
+                    if (!string.IsNullOrEmpty(item.NoteReply))
+                    {
+                        t.NoteReply = item.NoteReply;
+                    }
+
+                    if (!string.IsNullOrEmpty(item.UserNote))
+                    {
+                        t.UserNote = item.UserNote;
+                    }
                 });
 
             }
@@ -386,13 +398,13 @@ namespace Timesheet.DomainServices
                     var registerWorkingMinutes = CommonUtils.GetEmployeeWorkingHours(t.RegisterCheckOut, t.RegisterCheckIn);
                     var dayOffType = registerCheckInOut.AbsenceDayType;
                     var trackerPunishment = await CreateTrackerTimePunishment(
-                        selectedDate, 
-                        user.UserId, 
-                        trackerTime, 
-                        registerWorkingMinutes, 
-                        t.UserNote, 
-                        t.NoteReply, 
-                        dayOffType, 
+                        selectedDate,
+                        user.UserId,
+                        trackerTime,
+                        registerWorkingMinutes,
+                        t.UserNote,
+                        t.NoteReply,
+                        dayOffType,
                         punishmentSystems);
                     if (trackerPunishment != null)
                     {
@@ -562,13 +574,13 @@ namespace Timesheet.DomainServices
         }
 
         public async Task<UserPunishment> CreateTrackerTimePunishment(
-            DateTime selectedDate, 
-            long userId, 
-            float trackerTime, 
-            double registerWorkingMinutes, 
-            string userNote, 
-            string noteReply, 
-            DayType? dayOffType, 
+            DateTime selectedDate,
+            long userId,
+            float trackerTime,
+            double registerWorkingMinutes,
+            string userNote,
+            string noteReply,
+            DayType? dayOffType,
             Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems)
         {
             var punishmentLevels = new List<(UserPunishmentType Type, double MinPercentage, double? MaxPercentage)> {
