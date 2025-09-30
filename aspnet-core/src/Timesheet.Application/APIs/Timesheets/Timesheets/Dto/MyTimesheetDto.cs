@@ -53,6 +53,7 @@ namespace Timesheet.Timesheets.Timesheets.Dto
         public string CheckIn { get; set; }
         public string CheckOut { get; set; }
         public string ProjectTargetRoleName { get; set; }
+        public RequestType? WorkLocation { get; set; }
     }
     public class RequestDetail
     {
@@ -147,6 +148,7 @@ namespace Timesheet.Timesheets.Timesheets.Dto
         public TimesheetStatus Status { get; set; }
         public string CheckIn { get; set; }
         public string CheckOut { get; set; }
+        public RequestType? WorkLocation { get; set; }
     }
 
 }
