@@ -95,20 +95,20 @@ namespace Timesheet.Core
 
         private bool IsValidAbsenceForCase(dynamic[] userAbsenceRequests, (long RequestId, DateTime DateAt) absenceDetailDictKey,
             bool isFullDayAbsence, bool isMorningAbsence, bool isAfternoonAbsence, bool isMorningPresentAfternoonAbsent, bool isAfternoonPresentMorningAbsent,
-            Dictionary<(long RequestId, DateTime DateAt), List<dynamic>> absenceDetailDynamicList)
+            Dictionary<(long RequestId, DateTime DateAt), List<dynamic>> absenceDetailList)
         {
             foreach (var request in userAbsenceRequests)
             {
-                if (absenceDetailDynamicList.ContainsKey((request.Id, absenceDetailDictKey.DateAt)))
+                if (absenceDetailList.ContainsKey((request.Id, absenceDetailDictKey.DateAt)))
                 {
-                    var detail = absenceDetailDynamicList[(request.Id, absenceDetailDictKey.DateAt)].FirstOrDefault();
-                    if (detail != null)
+                    var detail = absenceDetailList[(request.Id, absenceDetailDictKey.DateAt)].FirstOrDefault();
+                    if (detail != null && request.Status == RequestStatus.Approved)
                     {
                         if (isFullDayAbsence && detail.DateType == DayType.Fullday)
                             return true;
                         if (isFullDayAbsence && (detail.DateType == DayType.Morning || detail.DateType == DayType.Afternoon))
                         {
-                            var otherDetail = absenceDetailDynamicList[(request.Id, absenceDetailDictKey.DateAt)]
+                            var otherDetail = absenceDetailList[(request.Id, absenceDetailDictKey.DateAt)]
                                 .FirstOrDefault(d => d.DateType != detail.DateType && (d.DateType == DayType.Morning || d.DateType == DayType.Afternoon));
                             if (otherDetail != null)
                                 return true;
@@ -124,7 +124,7 @@ namespace Timesheet.Core
                             && detail.DateType == DayType.Morning)
                             return true;
                     }
-                    else if (isFullDayAbsence && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved)
+                    else if (isFullDayAbsence && (request.Type == RequestType.Remote || request.Type == RequestType.Onsite) && request.Status == RequestStatus.Approved)
                     {
                         return true;
                     }
@@ -537,7 +537,7 @@ namespace Timesheet.Core
             }
         }
 
-        public async Task<bool> SendDailyAnomaliesToMezon(BotReportSettingDto input, bool isWeekly)
+        public async Task<bool> SendDailyAnomaliesToMezon(AnomaliesReportSettingDto input, bool isWeekly)
         {
             DateTime now = DateTime.Now;
 

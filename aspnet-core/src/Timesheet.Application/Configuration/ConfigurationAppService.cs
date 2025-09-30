@@ -855,5 +855,36 @@ namespace Ncc.Configuration
 
             return input;
         }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_AnomaliesReportConfig_View)]
+        public async Task<Timesheet.Configuration.Dto.AnomaliesReportSettingDto> GetAnomaliesReportSetting()
+        {
+            var result = new Timesheet.Configuration.Dto.AnomaliesReportSettingDto
+            {
+                enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AnomaliesReportEnable)),
+                hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AnomaliesReportAtHour)),
+                dayofweek = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AnomaliesReportAtDayOfWeek),
+                botUri = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AnomaliesReportWebhookUrl),
+                branchCodes = JsonConvert.DeserializeObject<List<string>>(
+                    await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AnomaliesReportBranchCodes)
+                    ?? "[]")
+            };
+
+            return result;
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_AnomaliesReportConfig_Update)]
+        public async Task<Timesheet.Configuration.Dto.AnomaliesReportSettingDto> SetAnomaliesReportSetting(Timesheet.Configuration.Dto.AnomaliesReportSettingDto input)
+        {
+            var branchCodesJson = JsonConvert.SerializeObject(input.branchCodes ?? new List<string>());
+
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AnomaliesReportEnable, input.enable.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AnomaliesReportAtHour, input.hour.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AnomaliesReportAtDayOfWeek, input.dayofweek);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AnomaliesReportWebhookUrl, input.botUri);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AnomaliesReportBranchCodes, branchCodesJson);
+
+            return input;
+        }
     }
 }
