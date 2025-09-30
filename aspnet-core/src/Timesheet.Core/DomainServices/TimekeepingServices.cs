@@ -903,6 +903,8 @@ namespace Timesheet.DomainServices
                 bool morningCovered = false;
                 bool afternoonCovered = false;
                 bool isFullDayAbsence = false;
+                bool isLateRequest = false;
+                double lateHours = 0;
 
                 foreach (var absenceUser in absenceList)
                 {
@@ -932,7 +934,8 @@ namespace Timesheet.DomainServices
                         {
                             if (absenceUser.AbsenceTime == OnDayType.DiMuon)
                             {
-                                t.CheckIn = CommonUtils.AddMoreHourToHHmm(t.CheckIn, absenceUser.Hour);
+                                isLateRequest = true;
+                                lateHours = absenceUser.Hour;
                                 notes.Add("Xin đến muộn " + absenceUser.Hour + " h");
                                 t.AbsenceDayType = DayType.Custom;
                             }
@@ -1000,10 +1003,18 @@ namespace Timesheet.DomainServices
                 else if (morningCovered && !afternoonCovered)
                 {
                     t.CheckIn = user.AfternoonStartAt;
+                    if (isLateRequest)
+                    {
+                        t.CheckIn = CommonUtils.AddMoreHourToHHmm(user.AfternoonStartAt, lateHours);
+                    }
                 }
                 else if (!morningCovered && afternoonCovered)
                 {
                     t.CheckOut = user.MorningEndAt;
+                }
+                else if (isLateRequest && !morningCovered)
+                {
+                    t.CheckIn = CommonUtils.AddMoreHourToHHmm(user.MorningStartAt, lateHours);
                 }
 
                 t.Note = string.Join("/", notes);
