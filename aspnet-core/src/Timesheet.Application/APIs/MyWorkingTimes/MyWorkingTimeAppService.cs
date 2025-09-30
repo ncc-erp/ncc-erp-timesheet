@@ -268,18 +268,25 @@ namespace Timesheet.APIs.MyWorkingTimes
                 }
             }
         }
-
         private async System.Threading.Tasks.Task notifyKomuWhenSubmitRequestToUser(NotifyUserInfoDto requester, ChangeWorkingTimeDto input, List<ProjectPMDto> receivers)
         {
-
-
             var user = await WorkScope.GetAsync<User>(requester.UserId);
-            var userInfo = new { 
-                user.FullName, 
-                user.EmailAddress, 
-                user.KomuUserId 
+            var userInfo = new
+            {
+                user.FullName,
+                user.EmailAddress,
+                user.KomuUserId
             };
 
+            var userMessage = new StringBuilder();
+            userMessage.AppendLine($"**{userInfo?.FullName}** ({userInfo?.EmailAddress}) has sent a request to change working time");
+            userMessage.AppendLine("```");
+            userMessage.AppendLine($"Morning: {input.MorningStartTime} - {input.MorningEndTime}");
+            userMessage.AppendLine($"Afternoon: {input.AfternoonStartTime} - {input.AfternoonEndTime}");
+            userMessage.AppendLine($"Apply date: {input.ApplyDate.ToString("dd/MM/yyyy")}");
+            userMessage.AppendLine("```");
+
+            var alreadySentToPMIds = new HashSet<long>();
             foreach (var project in receivers)
             {
                 if (!project.IsNoticeKMRequestChangeWorkingTime)
@@ -287,16 +294,13 @@ namespace Timesheet.APIs.MyWorkingTimes
                     continue;
                 }
 
-                var userMessage = new StringBuilder();
-                userMessage.AppendLine($"**{userInfo?.FullName}** ({userInfo?.EmailAddress}) has sent a request to change working time");
-                userMessage.AppendLine("```");
-                userMessage.AppendLine($"Morning: {input.MorningStartTime} - {input.MorningEndTime}");
-                userMessage.AppendLine($"Afternoon: {input.AfternoonStartTime} - {input.AfternoonEndTime}");
-                userMessage.AppendLine($"Apply date: {input.ApplyDate.ToString("dd/MM/yyyy")}");
-                userMessage.AppendLine("```");
-
                 foreach (var pm in project.PMs)
                 {
+                    if (alreadySentToPMIds.Contains(pm.UserId))
+                    {
+                        continue;
+                    }
+
                     if (string.IsNullOrWhiteSpace(pm?.EmailAddress))
                     {
                         continue;
@@ -307,7 +311,8 @@ namespace Timesheet.APIs.MyWorkingTimes
                         continue;
                     }
 
-                    _komuService.SendMessageToUser(userMessage.ToString(), pm.UserName);
+                    _komuService.SendSimpleNotificationToUser(userMessage.ToString(), pm.UserName);
+                    alreadySentToPMIds.Add(pm.UserId);
                 }
             }
         }
