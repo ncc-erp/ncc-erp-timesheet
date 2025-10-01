@@ -117,14 +117,12 @@ namespace Timesheet.Core
                             return true;
                         if (isAfternoonAbsence && detail.DateType == DayType.Afternoon)
                             return true;
-                        if (isMorningPresentAfternoonAbsent && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved
-                            && detail.DateType == DayType.Afternoon)
+                        if ((isMorningAbsence || isAfternoonPresentMorningAbsent) && detail.DateType == DayType.Morning)
                             return true;
-                        if (isAfternoonPresentMorningAbsent && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved
-                            && detail.DateType == DayType.Morning)
+                        if ((isAfternoonAbsence || isMorningPresentAfternoonAbsent) && detail.DateType == DayType.Afternoon)
                             return true;
                     }
-                    else if (isFullDayAbsence && (request.Type == RequestType.Remote || request.Type == RequestType.Onsite) && request.Status == RequestStatus.Approved)
+                    else if (isFullDayAbsence && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved)
                     {
                         return true;
                     }
@@ -228,10 +226,6 @@ namespace Timesheet.Core
                         trackerTimeHours = Math.Round(trackerTimeSpan.TotalHours, 2);
                         double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt, gracePeriodMinutes);
                         trackerTimeHours += lateMinutes / 60.0;
-                        if (isWFHFullday)
-                        {
-                            trackerTimeHours -= breakTime;
-                        }
                     }
                     trackerActualHours = trackerTimeHours > 0 ? trackerTimeHours : 0;
                 }
@@ -340,8 +334,9 @@ namespace Timesheet.Core
                     if (isWorkingTimeViolation || isTrackerTimeViolation)
                     {
                         string notes = isZeroTrackerTimeViolation ? "No tracker time for approved WFH" : "No early leave/late arrival approval";
+                        string violationType = isZeroTrackerTimeViolation ? "DatesNoTrackerTime" : "DatesBelowThreshold";
                         AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), totalWorkingTime,
-                            notes, isYesterday, yesterdayAnomalies, lastWeekAnomalies);
+                            notes, isYesterday, yesterdayAnomalies, lastWeekAnomalies, violationType);
                     }
                 }
 
@@ -354,16 +349,6 @@ namespace Timesheet.Core
                     {
                         AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), officeActualHours,
                             "No leave/WFH record", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesMissed");
-                    }
-                }
-
-                if (isWFHFullday || isWFHMorning || isWFHAfternoon)
-                {
-                    bool isZeroTrackerTimeViolation = TimeSpan.TryParse(tk.TrackerTime, out var zeroTrackerTimeSpan) && zeroTrackerTimeSpan.TotalHours == 0;
-                    if (isZeroTrackerTimeViolation)
-                    {
-                        AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), officeActualHours,
-                            "No tracker time for approved WFH", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesNoTrackerTime");
                     }
                 }
             }
