@@ -228,7 +228,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
         this.onSelectedTypeOfWorkChange();
         this.isLoading = false;
       });
-
+    this.getQuantiyTimesheetStatus();
   }
   getQuantiyTimesheetStatus() {
      this.timesheetService

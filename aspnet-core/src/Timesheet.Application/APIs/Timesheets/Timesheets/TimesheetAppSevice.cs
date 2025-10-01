@@ -1,36 +1,37 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Abp.Application.Services.Dto;
+using Abp.Authorization;
+using Abp.BackgroundJobs;
+using Abp.Collections.Extensions;
+using Abp.Configuration;
+using Abp.Domain.Entities;
+using Abp.Extensions;
+using Abp.UI;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ncc;
+using Ncc.Authorization.Users;
+using Ncc.Configuration;
+using Ncc.Entities;
+using Ncc.IoC;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Timesheet.Entities;
-using Timesheet.Timesheets.Timesheets.Dto;
-using System.Linq;
-using static Ncc.Entities.Enum.StatusEnum;
-using Abp.Authorization;
-using Ncc.Entities;
-using Ncc.Authorization.Users;
-using Abp.BackgroundJobs;
-using Timesheet.BackgroundJob;
-using System.Text;
-using Abp.UI;
-using Timesheet.APIs.Timesheets.Timesheets.Dto;
-using Abp.Domain.Entities;
-using Abp.Application.Services.Dto;
-using Timesheet.Uitls;
-using Timesheet.DomainServices;
 using System.Globalization;
-using Ncc.Configuration;
-using Ncc.IoC;
-using Abp.Extensions;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Timesheet.APIs.Timesheets.MyTimesheets.Dto;
+using Timesheet.APIs.Timesheets.Timesheets.Dto;
+using Timesheet.BackgroundJob;
+using Timesheet.Constants;
+using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
-using Abp.Configuration;
+using Timesheet.Entities;
 using Timesheet.Services.Komu;
-using Timesheet.Timesheets.MyTimesheets;
-using Abp.Collections.Extensions;
 using Timesheet.Services.Mezon;
+using Timesheet.Timesheets.MyTimesheets;
+using Timesheet.Timesheets.Timesheets.Dto;
+using Timesheet.Uitls;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.Timesheets.Timesheets
 {
@@ -153,11 +154,15 @@ namespace Timesheet.Timesheets.Timesheets
 
             foreach (var item in query)
             {
-                var isOffDay = absencedays.Any(x => x.UserId == item.UserId && x.DateAt.Date == item.DateAt.Date);
+                var totalOffHours = absencedays
+                    .Where(x => x.UserId == item.UserId && x.DateAt.Date == item.DateAt.Date)
+                    .Sum(x => x.Hour);
 
-                if (isOffDay)
+                var isFullDayOff = totalOffHours >= ConstantUploadFile.FullDay;
+
+                if (isFullDayOff)
                 {
-                    item.WorkLocation = null; // Off day => null
+                    item.WorkLocation = null; // off => null
                 }
                 else
                 {
@@ -934,10 +939,15 @@ namespace Timesheet.Timesheets.Timesheets
                     .Where(s => s.DateAt.Date == item.DateAt.Date)
                     .FirstOrDefault();
 
-                var isOffDay = absencedays.Any(s => s.UserId == item.UserId && s.DateAt.Date == item.DateAt.Date);
+                var totalOffHours = absencedays
+                .Where(s => s.UserId == item.UserId && s.DateAt.Date == item.DateAt.Date)
+                .Sum(s => s.Hour);
+
+                var isFullDayOff = totalOffHours >= ConstantUploadFile.FullDay;
+
                 RequestType? itemWorkLocation = null;
 
-                if (!isOffDay)
+                if (!isFullDayOff) 
                 {
                     var workLocationRecord = userWorkLocations
                         .Where(s => s.UserId == item.UserId && s.DateAt.Date == item.DateAt.Date)

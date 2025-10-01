@@ -237,8 +237,8 @@ export const APP_CONSTANT = {
   },
   WorkLocation: {
     All: -1,
-    Remote: 1,
-    Onsite: 2,
+    Onsite: 1,
+    Remote: 2,
     Office: 3,
   },
     PunishRules: [
