@@ -122,6 +122,8 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
 
   checkInFilter = this.APP_CONSTANT.FILTER_DEFAULT['All'];
   checkInFilterList = Object.keys(this.APP_CONSTANT.HaveCheckInFilter)
+  workLocationFilter = this.APP_CONSTANT.WorkLocation.All;
+  workLocationFilterList = Object.keys(this.APP_CONSTANT.WorkLocation);
 
   public searchText: string = "";
   public OpenTalkJoinTime: number;
@@ -202,31 +204,63 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
 
   getTimesheets() {
     this.isLoading = true;
-    this.timesheetService.getAllTimesheets(this.fromDate, this.toDate, this.filterStatus, Number(this.projectId),Number(this.checkInFilter), this.searchText, Number(this.branchId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType).subscribe(obj => {
-      //this.timesheets = obj.result;
-      this.rawData = obj.result;
-      this.totalCount = this.rawData.filter(ts => ts.isUserInProject).length;
-      this.updateCheckedCount();
-      //this.convertData(this.rawData);
-      this.onSelectedTypeOfWorkChange();
-      this.isLoading = false;
-    });
+    this.timesheetService
+      .getAllTimesheets(
+        this.fromDate,
+        this.toDate,
+        this.filterStatus,
+        Number(this.projectId),
+        Number(this.checkInFilter),
+        this.searchText,
+        Number(this.branchId),
+        this.OpenTalkJoinTime,
+        this.OpenTalkJoinTimeType,
+        this.workLocationFilter
+      )
+      .subscribe((obj) => {
+        //this.timesheets = obj.result;
+        this.rawData = obj.result;
+        this.totalCount = this.rawData.filter(
+          (ts) => ts.isUserInProject
+        ).length;
+        this.updateCheckedCount();
+        //this.convertData(this.rawData);
+        this.onSelectedTypeOfWorkChange();
+        this.isLoading = false;
+      });
     this.getQuantiyTimesheetStatus();
-
   }
   getQuantiyTimesheetStatus() {
-    this.timesheetService.getQuantiyTimesheetStatus(this.fromDate, this.toDate, Number(this.projectId), Number(this.checkInFilter), this.searchText, this.branchId, this.OpenTalkJoinTime, this.OpenTalkJoinTimeType).subscribe((obj: any) => {
-      this.Timesheet_Statuses.forEach(item => {
-        if(item.value === this.APP_CONSTANT.TimesheetStatus.All) {
-          item.count = obj.result.reduce((previousValue, currentValue) => previousValue + currentValue.quantity, 0);
-        } else {
-          const resultListByStatus = obj.result.filter(s => s.status === item.value);
-          if (resultListByStatus.length > 0) {
-            item.count = resultListByStatus[0].quantity;
+     this.timesheetService
+      .getQuantiyTimesheetStatus(
+        this.fromDate,
+        this.toDate,
+        Number(this.projectId),
+        Number(this.checkInFilter),
+        this.searchText,
+        this.branchId,
+        this.OpenTalkJoinTime,
+        this.OpenTalkJoinTimeType,
+        this.workLocationFilter
+      )
+      .subscribe((obj: any) => {
+        this.Timesheet_Statuses.forEach((item) => {
+          if (item.value === this.APP_CONSTANT.TimesheetStatus.All) {
+            item.count = obj.result.reduce(
+              (previousValue, currentValue) =>
+                previousValue + currentValue.quantity,
+              0
+            );
+          } else {
+            const resultListByStatus = obj.result.filter(
+              (s) => s.status === item.value
+            );
+            if (resultListByStatus.length > 0) {
+              item.count = resultListByStatus[0].quantity;
+            }
           }
-        }
-      })
-    })
+        });
+      });
   }
 
   onSelectedTypeOfWorkChange() {

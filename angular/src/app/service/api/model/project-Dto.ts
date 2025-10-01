@@ -31,6 +31,7 @@ export interface ProjectDto {
     isNoticeKMRequestChangeWorkingTime: boolean;
     isNoticeKMApproveChangeWorkingTime: boolean;
     isAllowTeamBuilding: boolean;
+    workLocation: number;
 }
 export interface CustomerProjectDto {
     customerName: string;

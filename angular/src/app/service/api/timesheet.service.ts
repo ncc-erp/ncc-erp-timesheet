@@ -20,7 +20,7 @@ export class TimesheetService extends BaseApiService {
     return 'Timesheet';
   }
 
-  getAllTimesheets(startDate: string, endDate: string, status: number,projectId: number,checkInFilter: number, searchText: string, branchId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean): Observable<any> {
+  getAllTimesheets(startDate: string, endDate: string, status: number,projectId: number,checkInFilter: number, searchText: string, branchId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, workLocation: number): Observable<any> {
     let params : HttpParams = new HttpParams();
     params = params.append("startDate", startDate);
     params = params.append("endDate", endDate);
@@ -31,6 +31,7 @@ export class TimesheetService extends BaseApiService {
     params = params.append("branchId", this.getPara(branchId));
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
+    params = params.append("workLocation", this.getPara(workLocation));
     return this.http.get(this.getUrl("GetAll"), { params : params });
     // return this.http.get(this.getUrl(`GetAll?startDate=${startDate}&endDate=${endDate}&status=${status}&projectId=${this.getPara(projectId)}&checkInFilter=${this.getPara(checkInFilter)}&searchText=${searchText}&branchId=${this.getPara(branchId)}`));
   }
@@ -97,7 +98,7 @@ export class TimesheetService extends BaseApiService {
   getAllTimeSheetOrRemote(day, type): Observable<any>{
     return this.http.get(this.getUrl(`GetAllTimeSheetOrRemote?day=${day}&type=${type}`));
   }
-  getQuantiyTimesheetStatus(fromDate, toDate, projectId: number, checkInFilter: number, searchText: string, branchId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean){
+  getQuantiyTimesheetStatus(fromDate, toDate, projectId: number, checkInFilter: number, searchText: string, branchId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, workLocation: number): Observable<any> {
     let params : HttpParams = new HttpParams();
     params = params.append("startDate", fromDate);
     params = params.append("endDate", toDate);
@@ -107,6 +108,7 @@ export class TimesheetService extends BaseApiService {
     params = params.append("branchId", branchId.toString());
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
+    params = params.append("workLocation", this.getPara(workLocation));
     return this.http.get(this.getUrl("GetQuantiyTimesheetStatus"), { params : params });
   }
 
