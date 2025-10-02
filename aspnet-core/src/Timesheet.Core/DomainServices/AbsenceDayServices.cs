@@ -204,7 +204,7 @@ namespace Timesheet.Core
                 double? trackerActualHours = null;
                 double? trackerTimeHours = null;
 
-                TimeSpan? morningStartAt = ParseTimeSpan(user.MorningStartAt);
+                TimeSpan? morningStartAt = ParseTimeSpan(user.MorningStartAt); // Shift + F11
                 TimeSpan? morningEndAt = ParseTimeSpan(user.MorningEndAt);
                 TimeSpan? afternoonStartAt = ParseTimeSpan(user.AfternoonStartAt);
                 TimeSpan? afternoonEndAt = ParseTimeSpan(user.AfternoonEndAt);
@@ -251,7 +251,7 @@ namespace Timesheet.Core
                 }
 
                 double tardinessHour = 0, leaveEarlyHour = 0;
-                foreach (var request in userAbsenceRequests)
+                foreach (var request in userAbsenceRequests) // F10, đặt trỏ chuột ở trước foreach
                 {
                     if (absenceDetailDict.ContainsKey((request.Id, tk.DateAt)))
                     {
@@ -323,20 +323,49 @@ namespace Timesheet.Core
                         }
                     }
 
-                    bool isWorkingTimeViolation = (totalWorkingTime ?? 0) < requiredHours && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice && !(isWFHFullday || isWFHMorning || isWFHAfternoon);
                     bool isTrackerTimeViolation = (isWFHFullday || isWFHMorning || isWFHAfternoon) && (
                         (string.IsNullOrEmpty(tk.TrackerTime) ||
                         (TimeSpan.TryParse(tk.TrackerTime, out var trackerTimeSpan) && trackerTimeSpan.TotalHours == 0)) ||
                         (trackerTimeHours.HasValue && trackerTimeHours.Value < requiredHours)
                     ) && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice;
-                    bool isZeroTrackerTimeViolation = (isWFHFullday || isWFHMorning || isWFHAfternoon) && TimeSpan.TryParse(tk.TrackerTime, out var zeroTrackerTimeSpan) && zeroTrackerTimeSpan.TotalHours == 0;
+                    bool isZeroTrackerTimeViolation = (isWFHFullday || isWFHMorning || isWFHAfternoon) &&
+                        (string.IsNullOrEmpty(tk.TrackerTime) || (TimeSpan.TryParse(tk.TrackerTime, out var zeroTrackerTimeSpan) && zeroTrackerTimeSpan.TotalHours == 0));
 
-                    if (isWorkingTimeViolation || isTrackerTimeViolation)
+                    if (isTrackerTimeViolation)
                     {
                         string notes = isZeroTrackerTimeViolation ? "No tracker time for approved WFH" : "No early leave/late arrival approval";
                         string violationType = isZeroTrackerTimeViolation ? "DatesNoTrackerTime" : "DatesBelowThreshold";
                         AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), totalWorkingTime,
                             notes, isYesterday, yesterdayAnomalies, lastWeekAnomalies, violationType);
+                    }
+
+                    bool isWorkingTimeViolation = (totalWorkingTime ?? 0) < requiredHours && !isWFHFullday && !isWFHMorning && !isWFHAfternoon && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice;
+                    if (isWorkingTimeViolation)
+                    {
+                        AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), totalWorkingTime,
+                            "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold");
+                    }
+
+                    if (isWFHMorning && isAfternoonPresentMorningAbsent && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice)
+                    {
+                        double afternoonRequiredHours = (user.AfternoonWorking ?? 0) - tardinessHour - leaveEarlyHour;
+                        bool isAfternoonWorkingTimeViolation = (officeActualHours ?? 0) < afternoonRequiredHours;
+                        if (isAfternoonWorkingTimeViolation)
+                        {
+                            AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), officeActualHours,
+                                "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold");
+                        }
+                    }
+
+                    if (isWFHAfternoon && isMorningPresentAfternoonAbsent && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice)
+                    {
+                        double morningRequiredHours = (user.MorningWorking ?? 0) - tardinessHour - leaveEarlyHour;
+                        bool isMorningWorkingTimeViolation = (officeActualHours ?? 0) < morningRequiredHours;
+                        if (isMorningWorkingTimeViolation)
+                        {
+                            AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), officeActualHours,
+                                "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold");
+                        }
                     }
                 }
 
