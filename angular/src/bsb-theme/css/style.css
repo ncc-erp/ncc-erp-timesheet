@@ -3035,6 +3035,13 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
 }
 
+h2 {
+  margin-top: 16px !important;
+  padding-left: 15px !important;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+}
+
 button, input, select, a {
   outline: none !important;
 }

@@ -165,73 +165,116 @@ file-upload>span {
     justify-content: center;
 }
 
-.user-wrapper .user-header-wrapper {
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: left;
-}
-
-.user-wrapper .user-header-wrapper .user-header-wrapper_action {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-
-.user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper {
-    display: flex;
-    justify-content: end;
-    flex: 1;
-    align-items: center;
-}
-
-.user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper .user-header-wrapper_search-input {
-    width: 460px;
-}
-
-::ng-deep .user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper .mat-form-field-appearance-outline .mat-form-field-wrapper {
-    padding: 0px !important;
-    margin: 0px !important;
-}
-
-.table-user-wrapper {
-    position: relative; 
-    padding: 20px;
-}
-
-@media screen and (max-width: 600px) {
-
-    .table-user-wrapper {
-        padding: 12px;
-    }
-    
     .user-wrapper .user-header-wrapper {
+        padding: 20px 20px 15px 20px; 
         display: flex;
-        flex-direction: column;
-        padding: 10px;
-        gap: 10px;
-        width: 100%;
+        align-items: center;
+        justify-content: space-between; 
+        gap: 30px; 
     }
 
     .user-wrapper .user-header-wrapper .user-header-wrapper_action {
         display: flex;
-        flex-wrap: wrap;
+        align-items: center;
         gap: 10px;
-        width: 100%;
-    }
-    .user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper{
-        width: 100%;
-    }
-    .user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper .user-header-wrapper_search-input{
-        width: 100%;
-        padding: 0px;
+        padding-left: 10px;
     }
 
-    ::ng-deep .user-list-select-wrapper .mat-form-field{
-        width: 100%;
-        padding-left: 8px;
-        padding-right: 8px;
+    .user-wrapper .user-header-wrapper .user-header-wrapper_action button {
+        height: 48px; 
+        padding: 0 20px; 
+        font-size: 15px;
+    }
+
+    .user-wrapper .user-header-wrapper .user-header-wrapper_action button mat-icon {
+        font-size: 22px; 
+        width: 22px;
+        height: 22px;
+    }
+
+    .user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper {
+        display: flex;
+        justify-content: flex-end; 
+        align-items: center;
+    }
+
+    .user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper .user-header-wrapper_search-input {
+        width: 420px; 
+        margin: 0;
+    }
+
+    .user-header-wrapper_search-input{
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    ::ng-deep .user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper .mat-form-field-appearance-outline .mat-form-field-wrapper {
+        padding: 0px !important;
+        margin: 0px !important;
+    }
+
+    ::ng-deep .user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper .mat-form-field-appearance-outline .mat-form-field-flex {
+        height: 48px; 
+    }
+
+    .user-list-select-wrapper {
+        padding: 10px 20px 0px 20px !important;
+        margin: 0 !important;
+    }
+
+    ::ng-deep .user-list-select-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    ::ng-deep .user-list-select-wrapper .mat-form-field {
+        flex: 1 1 calc(16.666% - 8px); /* 6 columns */
+        min-width: 150px;
+        margin: 0;
+        padding: 0 !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        ::ng-deep .user-list-select-wrapper .mat-form-field {
+            flex: 1 1 calc(33.333% - 8px);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .user-wrapper .user-header-wrapper {
+            gap: 15px;
+        }
+        
+        .user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper .user-header-wrapper_search-input {
+            width: 320px;
+        }
+        
+        ::ng-deep .user-list-select-wrapper .mat-form-field {
+            flex: 1 1 calc(50% - 8px);
+        }
+    }
+
+    @media screen and (max-width: 600px) {
+        .user-wrapper .user-header-wrapper {
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+        }
+        
+        .user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper {
+            width: 100%;
+            justify-content: stretch;
+        }
+        
+        .user-wrapper .user-header-wrapper .user-header-wrapper_search-wrapper .user-header-wrapper_search-input {
+            width: 100%;
+        }
+        
+        ::ng-deep .user-list-select-wrapper .mat-form-field {
+            flex: 1 1 100%;
+        }
     }
     .user-wrapper .user-table-button{
         display: none;
@@ -247,7 +290,7 @@ file-upload>span {
     .arrow-down {
         font-size: 20px;
     }
-}
+
 
 @media (min-width: 768px) {
     .col-sm-5ths {
