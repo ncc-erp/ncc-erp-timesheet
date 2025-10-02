@@ -201,10 +201,12 @@ namespace Timesheet.DomainServices
             }
             var listDaily = dailyAndMentionPunishs.daily.ToList();
             var listMention = dailyAndMentionPunishs.mention.ToList();
+            var listWFH = dailyAndMentionPunishs.wfh.ToList();
 
             var mapCheckInUsers = checkInUsers.ToDictionary(s => s.Email, s => s);
             var mapDailyUsers = listDaily.ToDictionary(s => s.email, s => s.count);
-            var mapMentionUsers = listMention.ToDictionary(s => s.email, s => s.count);
+            var mapMentionUsers = listMention.ToDictionary(s => s.name, s => s.count);
+            var mapWFHUsers = listWFH.ToDictionary(s => s.name, s => s.total);
 
             var listUserName = users.Select(x => x.UserName).Distinct().ToList();
             var userTrackerTimes = _trackerService.GetTimeTrackerToDay(selectedDate, listUserName);
@@ -279,6 +281,11 @@ namespace Timesheet.DomainServices
                 if (mapMentionUsers.ContainsKey(user.UserName))
                 {
                     t.CountPunishMention = mapMentionUsers[user.UserName];
+                }
+
+                if (mapWFHUsers.ContainsKey(user.UserName))
+                {
+                    t.CountPunishMention += mapWFHUsers[user.UserName];
                 }
 
                 listDicUserIdToNote.ForEach(item =>
@@ -403,13 +410,13 @@ namespace Timesheet.DomainServices
                 }
             }
 
-            await SaveDailyAndMentionPunishments(selectedDate, users, mapDailyUsers, mapMentionUsers, punishmentSystems);
+            await SaveDailyAndMentionPunishments(selectedDate, users, mapDailyUsers, mapMentionUsers, mapWFHUsers, punishmentSystems);
             Logger.Info($"Successfully processed timekeeping for date {selectedDate:yyyy-MM-dd}. Processed {rs.Count} records.");
             return rs;
         }
 
         public async System.Threading.Tasks.Task SaveDailyAndMentionPunishments(DateTime selectedDate, List<TimesheetUserDto> users,
-          Dictionary<string, int> mapDailyUsers, Dictionary<string, int> mapMentionUsers, Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems)
+          Dictionary<string, int> mapDailyUsers, Dictionary<string, int> mapMentionUsers, Dictionary<string, int> mapWFHUsers, Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems)
         {
             var dailyMentionPunishments = new List<UserPunishment>();
 
@@ -441,6 +448,31 @@ namespace Timesheet.DomainServices
                         Count = mapMentionUsers[user.UserName],
                         TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
                     });
+                }
+
+                if (mapWFHUsers.ContainsKey(user.UserName) && mapWFHUsers[user.UserName] > 0)
+                {
+                    var mentionPunishment = punishmentSystems[UserPunishmentType.Mention];
+                    var existingMention = dailyMentionPunishments
+                        .FirstOrDefault(p => p.UserId == user.UserId && p.Type == UserPunishmentType.Mention);
+
+                    if (existingMention != null)
+                    {
+                        existingMention.Count += mapWFHUsers[user.UserName];
+                        existingMention.TotalMoney = existingMention.Count * mentionPunishment.Money;
+                    }
+                    else
+                    {
+                        dailyMentionPunishments.Add(new UserPunishment
+                        {
+                            DateAt = selectedDate,
+                            UserId = user.UserId,
+                            PunishmentSystemId = mentionPunishment.Id,
+                            Type = mentionPunishment.Type,
+                            Count = mapWFHUsers[user.UserName],
+                            TotalMoney = mapWFHUsers[user.UserName] * mentionPunishment.Money,
+                        });
+                    }
                 }
             }
 
