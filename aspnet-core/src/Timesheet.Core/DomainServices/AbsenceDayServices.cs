@@ -446,6 +446,7 @@ namespace Timesheet.Core
                     }
                 }
 
+                
                 if (isFullDayAbsence || isMorningAbsence || isAfternoonAbsence || isMorningPresentAfternoonAbsent || isAfternoonPresentMorningAbsent)
                 {
                     isValidAbsence = IsValidAbsenceForCase(userAbsenceRequests, (0, tk.DateAt), isFullDayAbsence, isMorningAbsence, isAfternoonAbsence,
@@ -679,9 +680,9 @@ namespace Timesheet.Core
                     DateTime lastWeekEnd = lastMonday.AddDays(5).Date.AddSeconds(-1);
                     List<LastWeekAnomalyDTO> lastWeekAnomalies = await GetLastWeekAnomalies(branchName, lastWeekStart, lastWeekEnd);
 
-                    var lastWeekUnplannedAbsences = lastWeekAnomalies?.Where(a => a.Notes == "No leave/WFH record" && a.DatesMissed.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
-                    var lastWeekUnapprovedShortHours = lastWeekAnomalies?.Where(a => a.Notes == "No early leave/late arrival approval" && a.DatesBelowThreshold.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
-                    var lastWeekNoTrackerTimeWFH = lastWeekAnomalies?.Where(a => a.Notes == "No tracker time for approved WFH" && a.DatesNoTrackerTime.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
+                    var lastWeekUnplannedAbsences = lastWeekAnomalies?.Where(a => a.DatesMissed.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
+                    var lastWeekUnapprovedShortHours = lastWeekAnomalies?.Where(a => a.DatesBelowThreshold.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
+                    var lastWeekNoTrackerTimeWFH = lastWeekAnomalies?.Where(a => a.DatesNoTrackerTime.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
 
                     BuildReportHeader(messageBuilder, mkList, ref currentPos, "Weekly Anomalies Report",
                         $"Report Period: {lastWeekStart:yyyy/MM/dd} - {lastWeekEnd:yyyy/MM/dd}", $"Office: {branch.Name}");
