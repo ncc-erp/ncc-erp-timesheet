@@ -85,8 +85,7 @@
             (pageChange)="getDataPage($event)" id="server">
           </abp-pagination-controls>
         </div>
-        <!-- permission.isGranted(ADD_ROLE) -->
-        <button *ngIf="true" mat-fab color="primary" class="pull-right" 
+        <button *ngIf="permission.isGranted(ADD_ROLE)" mat-fab color="primary" class="pull-right" 
           (click)="createRole()" name="createBtn">
           <mat-icon>add</mat-icon>
         </button>

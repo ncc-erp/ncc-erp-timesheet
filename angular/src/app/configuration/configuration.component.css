@@ -115,8 +115,8 @@ ul {
     font-size: 12px !important;
     white-space: pre-line !important;
 }
-
 .configuration-tab-content {
+    padding-top: 20px;
     width: 100%;
     height: calc(100vh - 150px);
     overflow: auto;
