@@ -48,13 +48,14 @@ namespace Timesheet.APIs.MyWorkingTimes
         {
             var user = await WorkScope.GetAsync<User>(AbpSession.UserId.Value);
 
-            return new GetMyWorkingTimeDto {
-            AfternoonEndTime =  user.AfternoonEndAt,
-            AfternoonStartTime = user.AfternoonStartAt,
-            AfternoonWorkingTime = user.AfternoonWorking.Value,
-            MorningEndTime = user.MorningEndAt,
-            MorningStartTime = user.MorningStartAt,
-            MorningWorkingTime = user.MorningWorking.Value
+            return new GetMyWorkingTimeDto
+            {
+                AfternoonEndTime = user.AfternoonEndAt,
+                AfternoonStartTime = user.AfternoonStartAt,
+                AfternoonWorkingTime = user.AfternoonWorking.Value,
+                MorningEndTime = user.MorningEndAt,
+                MorningStartTime = user.MorningStartAt,
+                MorningWorkingTime = user.MorningWorking.Value
             };
         }
 
@@ -88,13 +89,13 @@ namespace Timesheet.APIs.MyWorkingTimes
 
             string stringRegex = "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
 
-            if(!Regex.IsMatch(newData.MorningStartTime, stringRegex) ||
-                !Regex.IsMatch(newData.MorningEndTime, stringRegex) ||               
+            if (!Regex.IsMatch(newData.MorningStartTime, stringRegex) ||
+                !Regex.IsMatch(newData.MorningEndTime, stringRegex) ||
                 !Regex.IsMatch(newData.AfternoonStartTime, stringRegex) ||
-                !Regex.IsMatch(newData.AfternoonEndTime, stringRegex) )
+                !Regex.IsMatch(newData.AfternoonEndTime, stringRegex))
             {
                 throw new UserFriendlyException("Wrong working time format must be (HH:mm)");
-            } 
+            }
 
             if (newData.ApplyDate.Date <= DateTimeUtils.GetNow().Date)
             {
@@ -112,6 +113,8 @@ namespace Timesheet.APIs.MyWorkingTimes
             data.ApplyDate = newData.ApplyDate;
             data.Status = RequestStatus.Pending;
             newData.Id = await WorkScope.GetRepo<HistoryWorkingTime>().InsertAndGetIdAsync(data);
+
+            Logger.Info($"SubmitNewWorkingTime() created requestId={newData.Id} by userId={id}, applyDate={newData.ApplyDate:dd/MM/yyyy}");
 
             await notifySubmitNewMyWorkingTime(requester, newData);
 
@@ -181,9 +184,9 @@ namespace Timesheet.APIs.MyWorkingTimes
             string stringRegex = "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
 
             if (!Regex.IsMatch(newData.MorningStartTime, stringRegex) ||
-                !Regex.IsMatch(newData.MorningEndTime, stringRegex) ||                
+                !Regex.IsMatch(newData.MorningEndTime, stringRegex) ||
                 !Regex.IsMatch(newData.AfternoonStartTime, stringRegex) ||
-                !Regex.IsMatch(newData.AfternoonEndTime, stringRegex) 
+                !Regex.IsMatch(newData.AfternoonEndTime, stringRegex)
                 )
             {
                 throw new UserFriendlyException("Wrong working time format must be (HH:mm)");
@@ -204,6 +207,8 @@ namespace Timesheet.APIs.MyWorkingTimes
 
             await WorkScope.GetRepo<HistoryWorkingTime>().UpdateAsync(data);
 
+            Logger.Info($"EditWorkingTime() updated requestId={newData.Id} by userId={id}, applyDate={newData.ApplyDate:dd/MM/yyyy}");
+
             await notifySubmitNewMyWorkingTime(requester, newData);
 
             return newData;
@@ -213,7 +218,9 @@ namespace Timesheet.APIs.MyWorkingTimes
         {
             var receivers = await getReceiverListSubmit(requester.UserId);
 
+
             await notifyKomuWhenSubmitRequest(requester, input, receivers);
+            await notifyKomuWhenSubmitRequestToUser(requester, input, receivers);
         }
 
         private async System.Threading.Tasks.Task notifyKomuWhenSubmitRequest(NotifyUserInfoDto requester, ChangeWorkingTimeDto input, List<ProjectPMDto> receivers)
@@ -221,22 +228,28 @@ namespace Timesheet.APIs.MyWorkingTimes
             var enableNotify = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendKomuRequest);
             if (enableNotify != "true")
             {
-                Logger.Info("notifyKomuWhenSubmitRequest() SendKomuRequest=" + enableNotify + ", AbpSessionUserId=" + AbpSession.UserId);
                 return;
             }
+
+
+            var user = await WorkScope.GetAsync<User>(requester.UserId);
+            var userInfo = new { 
+                user.FullName, 
+                user.EmailAddress, 
+                user.KomuUserId 
+            };
 
             var alreadySentToPMIds = new HashSet<long>();
             foreach (var project in receivers)
             {
                 if (!project.IsNoticeKMRequestChangeWorkingTime)
                 {
-                    Logger.Info($"notifyKomuWhenSubmitRequest() projectId={project.ProjectId}, IsNotifyKomu={project.IsNoticeKMRequestChangeWorkingTime}, KomuChannelId={project.KomuChannelId}");
+                    Logger.Info($"notifyKomuWhenSubmitRequest() skip: projectId={project.ProjectId}, IsNoticeKMRequestChangeWorkingTime={project.IsNoticeKMRequestChangeWorkingTime}, notifyChannel={project.notifyChannel}, KomuChannelId={project.KomuChannelId}");
                 }
                 else
                 {
-                    var Message = $"PM {project.KomuPMsTag(alreadySentToPMIds)}: {requester.KomuAccountInfo(project.notifyChannel)} " +
+                    var Message = $"PM {project.KomuPMsTag(alreadySentToPMIds)}: **{userInfo?.FullName}** ({userInfo?.EmailAddress}) " +
                         $"has sent a request to change working time:" +
-                        $"\n ```RequestId: #{input.Id}" +
                         $"\nMorning: {input.MorningStartTime} - {input.MorningEndTime}" +
                         $"\nAfternoon: {input.AfternoonStartTime} - {input.AfternoonEndTime}" +
                         $"\nApply date: {input.ApplyDate.ToString("dd/MM/yyyy")}```";
@@ -250,8 +263,56 @@ namespace Timesheet.APIs.MyWorkingTimes
                             _mezonService.NotifyToChannel(project.mezonUrl, Message);
                             break;
                     }
-                    
+
                     processAlreadySentToPMs(alreadySentToPMIds, project.PMs);
+                }
+            }
+        }
+        private async System.Threading.Tasks.Task notifyKomuWhenSubmitRequestToUser(NotifyUserInfoDto requester, ChangeWorkingTimeDto input, List<ProjectPMDto> receivers)
+        {
+            var user = await WorkScope.GetAsync<User>(requester.UserId);
+            var userInfo = new
+            {
+                user.FullName,
+                user.EmailAddress,
+                user.KomuUserId
+            };
+
+            var userMessage = new StringBuilder();
+            userMessage.AppendLine($"**{userInfo?.FullName}** ({userInfo?.EmailAddress}) has sent a request to change working time");
+            userMessage.AppendLine("```");
+            userMessage.AppendLine($"Morning: {input.MorningStartTime} - {input.MorningEndTime}");
+            userMessage.AppendLine($"Afternoon: {input.AfternoonStartTime} - {input.AfternoonEndTime}");
+            userMessage.AppendLine($"Apply date: {input.ApplyDate.ToString("dd/MM/yyyy")}");
+            userMessage.AppendLine("```");
+
+            var alreadySentToPMIds = new HashSet<long>();
+            foreach (var project in receivers)
+            {
+                if (!project.IsNoticeKMRequestChangeWorkingTime)
+                {
+                    continue;
+                }
+
+                foreach (var pm in project.PMs)
+                {
+                    if (alreadySentToPMIds.Contains(pm.UserId))
+                    {
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(pm?.EmailAddress))
+                    {
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(pm.UserName))
+                    {
+                        continue;
+                    }
+
+                    _komuService.SendSimpleNotificationToUser(userMessage.ToString(), pm.UserName);
+                    alreadySentToPMIds.Add(pm.UserId);
                 }
             }
         }
@@ -269,6 +330,18 @@ namespace Timesheet.APIs.MyWorkingTimes
 
         public async Task<List<ProjectPMDto>> getReceiverListSubmit(long requesterId)
         {
+            var allUserProjects = await WorkScope.GetAll<ProjectUser>()
+                .Where(s => s.UserId == requesterId)
+                .Where(s => s.Project.Status == ProjectStatus.Active)
+                .Where(s => s.Type != ProjectUserType.DeActive)
+                .Select(s => new {
+                    s.ProjectId,
+                    s.Project.Name,
+                    s.Project.isAllUserBelongTo,
+                    s.Project.IsNoticeKMRequestChangeWorkingTime
+                }).ToListAsync();
+
+            var filteredProjects = allUserProjects.Where(p => !p.isAllUserBelongTo).ToList();
             var queryPMs = WorkScope.GetAll<ProjectUser>().Include(s => s.User)
             .Where(s => s.Project.Status == ProjectStatus.Active)
             .Where(s => s.Type == ProjectUserType.PM)
@@ -285,6 +358,7 @@ namespace Timesheet.APIs.MyWorkingTimes
             .Where(s => s.UserId == requesterId)
             .Where(s => s.Project.Status == ProjectStatus.Active)
             .Where(s => s.Type != ProjectUserType.DeActive)
+            .Where(s => !s.Project.isAllUserBelongTo)
             .Select(s => new ProjectPMDto
             {
                 ProjectId = s.ProjectId,
