@@ -94,9 +94,86 @@ namespace Timesheet.Core
         }
 
         private bool IsValidAbsenceForCase(dynamic[] userAbsenceRequests, (long RequestId, DateTime DateAt) absenceDetailDictKey,
-            bool isFullDayAbsence, bool isMorningAbsence, bool isAfternoonAbsence, bool isMorningPresentAfternoonAbsent, bool isAfternoonPresentMorningAbsent,
-            Dictionary<(long RequestId, DateTime DateAt), List<dynamic>> absenceDetailList)
+                    bool isFullDayAbsence, bool isMorningAbsence, bool isAfternoonAbsence, bool isMorningPresentAfternoonAbsent, bool isAfternoonPresentMorningAbsent,
+                    Dictionary<(long RequestId, DateTime DateAt), List<dynamic>> absenceDetailList)
         {
+            // When the admin approves all user requests for the week, the last week's anomalies message will only return the days with the status "No tracker time for approved WFH"
+            var relevantRequests = userAbsenceRequests
+                .Where(r => absenceDetailList.ContainsKey((r.Id, absenceDetailDictKey.DateAt)))
+                .ToList();
+
+            var morningRequests = relevantRequests
+                .Where(r => absenceDetailList[(r.Id, absenceDetailDictKey.DateAt)].Any(d => d.DateType == DayType.Morning))
+                .ToList();
+            var afternoonRequests = relevantRequests
+                .Where(r => absenceDetailList[(r.Id, absenceDetailDictKey.DateAt)].Any(d => d.DateType == DayType.Afternoon))
+                .ToList();
+
+            bool hasMorningApproved = false;
+            bool hasAfternoonApproved = false;
+            bool hasMorningRequest = false;
+            bool hasAfternoonRequest = false;
+
+            foreach (var request in relevantRequests)
+            {
+                if (absenceDetailList.ContainsKey((request.Id, absenceDetailDictKey.DateAt)))
+                {
+                    var details = absenceDetailList[(request.Id, absenceDetailDictKey.DateAt)];
+                    foreach (var detail in details)
+                    {
+                        if (request.Status == RequestStatus.Approved)
+                        {
+                            if (detail.DateType == DayType.Morning)
+                            {
+                                hasMorningRequest = true;
+                                if (request.Type == RequestType.Off || request.Type == RequestType.Onsite || request.Type == RequestType.Remote)
+                                {
+                                    hasMorningApproved = true;
+                                }
+                            }
+                            else if (detail.DateType == DayType.Afternoon)
+                            {
+                                hasAfternoonRequest = true;
+                                if (request.Type == RequestType.Off || request.Type == RequestType.Onsite || request.Type == RequestType.Remote)
+                                {
+                                    hasAfternoonApproved = true;
+                                }
+                            }
+                            else if (detail.DateType == DayType.Fullday && isFullDayAbsence)
+                            {
+                                if (request.Type == RequestType.Off || request.Type == RequestType.Onsite || request.Type == RequestType.Remote)
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (hasMorningRequest && hasAfternoonRequest &&
+                morningRequests.Any(r => (r.Type == RequestType.Off || r.Type == RequestType.Onsite)) &&
+                afternoonRequests.Any(r => (r.Type == RequestType.Off || r.Type == RequestType.Onsite)))
+            {
+                if (hasMorningApproved && hasAfternoonApproved)
+                {
+                    return true;
+                }
+            }
+
+            bool hasMorningRemote = hasMorningRequest && morningRequests.Any(r => r.Type == RequestType.Remote);
+            bool hasAfternoonRemote = hasAfternoonRequest && afternoonRequests.Any(r => r.Type == RequestType.Remote);
+            bool hasMorningOffOnsite = hasMorningRequest && morningRequests.Any(r => r.Type == RequestType.Off || r.Type == RequestType.Onsite);
+            bool hasAfternoonOffOnsite = hasAfternoonRequest && afternoonRequests.Any(r => r.Type == RequestType.Off || r.Type == RequestType.Onsite);
+
+            if ((hasMorningRemote && hasAfternoonOffOnsite) || (hasAfternoonRemote && hasMorningOffOnsite))
+            {
+                if (hasMorningApproved && hasAfternoonApproved)
+                {
+                    return true;
+                }
+            }
+
             foreach (var request in userAbsenceRequests)
             {
                 if (absenceDetailList.ContainsKey((request.Id, absenceDetailDictKey.DateAt)))
@@ -165,8 +242,8 @@ namespace Timesheet.Core
                 .ToListAsync();
 
             var absenceRequests = await _workScope.GetAll<AbsenceDayRequest>()
-                .Where(r => userIds.Contains(r.UserId))
-                .Select(r => new { r.Id, r.UserId, r.Status, r.Type })
+                .Where(r => userIds.Contains(r.UserId) && r.IsDeleted == false)
+                .Select(r => new { r.Id, r.UserId, r.Status, r.Type, r.IsDeleted })
                 .ToListAsync();
 
             var absenceRequestDict = absenceRequests
@@ -204,7 +281,7 @@ namespace Timesheet.Core
                 double? trackerActualHours = null;
                 double? trackerTimeHours = null;
 
-                TimeSpan? morningStartAt = ParseTimeSpan(user.MorningStartAt); // Shift + F11
+                TimeSpan? morningStartAt = ParseTimeSpan(user.MorningStartAt);
                 TimeSpan? morningEndAt = ParseTimeSpan(user.MorningEndAt);
                 TimeSpan? afternoonStartAt = ParseTimeSpan(user.AfternoonStartAt);
                 TimeSpan? afternoonEndAt = ParseTimeSpan(user.AfternoonEndAt);
@@ -251,7 +328,7 @@ namespace Timesheet.Core
                 }
 
                 double tardinessHour = 0, leaveEarlyHour = 0;
-                foreach (var request in userAbsenceRequests) // F10, đặt trỏ chuột ở trước foreach
+                foreach (var request in userAbsenceRequests)
                 {
                     if (absenceDetailDict.ContainsKey((request.Id, tk.DateAt)))
                     {
