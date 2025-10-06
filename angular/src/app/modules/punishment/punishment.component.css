@@ -51,14 +51,19 @@
 }
 
 /* Action buttons */
-.punishment-table-column-action,
-.punishment-table-column-action-label {
+.punishment-table-column-action {
   display: flex;
   justify-content: flex-end;
   padding: 8px 16px;
-  text-align: right;
-  width: 140px; /* Slightly wider to accommodate the button */
+  width: 140px;
 }
+
+.punishment-table-column-action-label {
+  text-align: center !important;
+  width: 140px;
+  vertical-align: middle;
+}
+
 
 /* Action menu button */
 .action-menu-button {

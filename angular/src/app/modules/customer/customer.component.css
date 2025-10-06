@@ -1,5 +1,5 @@
 .customer-wrapper .customer-table-column-action-label {
-    text-align: right;
+    text-align: center;
 }
 
 .custom-dialog-container {
@@ -11,6 +11,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-bottom: 10px;
 }
 
 .customer-wrapper .customer-header-menu .customer-header-search-wrapper{
@@ -22,7 +23,7 @@
 .customer-wrapper .customer-table-column-action{
     display: flex;
     gap: 10px;
-    justify-content: end;
+    justify-content: center;
 }
 .customer-wrapper .customer-table-column-action_response{
     display: none;
@@ -63,6 +64,7 @@
 
     .customer-wrapper .customer-table-column-action_response{
         display: flex;
+        justify-content: center;
     }
 
     .customer-table-column-action .customer-table-action-label{
@@ -89,10 +91,11 @@
     .customer-table-column-action {
         display: flex;
         gap: 10px;
+        justify-content: center;
     }
 
     .customer-wrapper .customer-table-column-action-label {
-        text-align: left;
+        text-align: center;
     }
 
     .customer-table-wrapper {

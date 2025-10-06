@@ -6,10 +6,19 @@
     padding: 20px;
 }
 
+.full-view {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+}
+
 @media screen and (max-width: 768px) {
     .action-wrapper {
-        display: flex;
-        flex-flow: row-reverse;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
     }
 
     .full-view {

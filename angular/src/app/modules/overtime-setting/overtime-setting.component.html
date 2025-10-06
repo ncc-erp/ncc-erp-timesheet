@@ -63,17 +63,17 @@
           <thead class="bg-light">
             <tr>
               <th>Name project</th>
-              <th>Date At</th>
+              <th class="text-center">Date At</th>
               <th class="text-center">Coefficient </th>
               <th>Note </th>
-              <th *ngIf="permission.isGranted(DELETE) || permission.isGranted(EDIT)" style="text-align:right">Actions</th>
+              <th *ngIf="permission.isGranted(DELETE) || permission.isGranted(EDIT)" style="text-align:center">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr
               *ngFor="let overtimeSetting of overtimeSettings | paginate: { id: 'server', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems } ">
               <td>{{ overtimeSetting.projectName }}</td>
-              <td>{{ formatDate(overtimeSetting.dateAt) }}</td>
+              <td class="text-center">{{ formatDate(overtimeSetting.dateAt) }}</td>
               <td class="text-center">{{ overtimeSetting.coefficient }}</td>
               <td>{{ overtimeSetting.note }}</td>
               <td class="full-view">

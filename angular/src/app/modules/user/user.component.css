@@ -61,6 +61,8 @@ file-upload>span {
 
 .styleUser>tbody>tr>td {
     padding: 4px 4px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
     border: 0.2px solid rgba(204, 204, 204, 0.35);
 }
 
