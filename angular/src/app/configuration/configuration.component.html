@@ -12,7 +12,8 @@
           </mat-expansion-panel-header>
 
           <!-- Working Time Setting -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_WORKING_TIME_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowWorkingTime">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_WORKING_TIME_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowWorkingTime">
             <mat-expansion-panel-header (click)="isShowWorkingTime =!isShowWorkingTime" class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Working time setting"}}</p>
@@ -79,7 +80,8 @@
           </mat-expansion-panel>
 
           <!--Time Start Changing Checkin To Checkout Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_TIMESTARTCHANGINGCHECKINTOCHECKOUT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowTimeStartChangingCheckinToCheckoutSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_TIMESTARTCHANGINGCHECKINTOCHECKOUT_SETTING)"
+            style="margin-bottom: 10px;" [expanded]="isShowTimeStartChangingCheckinToCheckoutSetting">
             <mat-expansion-panel-header
               (click)="isShowTimeStartChangingCheckinToCheckoutSetting =!isShowTimeStartChangingCheckinToCheckoutSetting"
               class="panel-header">
@@ -92,11 +94,12 @@
                     (click)="editTimeStartChangingCheckinToCheckoutSetting();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
                   </button>
-                  <button *ngIf="isEditTimeStartChangingCheckinToCheckoutSetting" large mat-raised-button color="primary"
-                    (click)="saveTimeStartChangingCheckinToCheckoutSetting();$event.stopPropagation()">
+                  <button *ngIf="isEditTimeStartChangingCheckinToCheckoutSetting" large mat-raised-button
+                    color="primary" (click)="saveTimeStartChangingCheckinToCheckoutSetting();$event.stopPropagation()">
                     <mat-icon>save</mat-icon>Save
                   </button>
-                  <button *ngIf="isEditTimeStartChangingCheckinToCheckoutSetting" large mat-raised-button color="primary"
+                  <button *ngIf="isEditTimeStartChangingCheckinToCheckoutSetting" large mat-raised-button
+                    color="primary"
                     (click)="refreshTimeStartChangingCheckinToCheckoutSetting();$event.stopPropagation()">
                     <mat-icon>cancel</mat-icon>Cancel
                   </button>
@@ -125,7 +128,8 @@
                   <div class="col-md-12">
                     <mat-checkbox style="padding: 0;" class="autoSubmit"
                       [checked]="TimeStartChangingCheckinToCheckoutSetting.enableTimeStartChangingToCheckout == 'true'?true:false"
-                      name="enableTimeStartChangingToCheckout" (change)="toggleEnableTimeStartChangingToCheckout($event)"
+                      name="enableTimeStartChangingToCheckout"
+                      (change)="toggleEnableTimeStartChangingToCheckout($event)"
                       [disabled]="!isEditTimeStartChangingCheckinToCheckoutSetting">
                       Enable</mat-checkbox>
                   </div>
@@ -143,8 +147,8 @@
                       <span class="special-label">Time start to Checkout Case Off Afternoon *</span> <mat-icon
                         class="special-icon" matTooltip="string format: hh:mm">help</mat-icon>
                       <input type="text" matInput name="timeStartCheckOutCaseOffAfternoon"
-                        [(ngModel)]="TimeStartChangingCheckinToCheckoutSetting.timeStartCheckOutCaseOffAfternoon" required
-                        [disabled]="!isEditTimeStartChangingCheckinToCheckoutSetting" />
+                        [(ngModel)]="TimeStartChangingCheckinToCheckoutSetting.timeStartCheckOutCaseOffAfternoon"
+                        required [disabled]="!isEditTimeStartChangingCheckinToCheckoutSetting" />
                     </mat-form-field>
                   </div>
                 </div>
@@ -153,7 +157,8 @@
           </mat-expansion-panel>
 
           <!--Notify HR the employee may have left Setting  -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_NOTIFYHRTHEEMPLOYEEMAYHAVELEFT_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowNotifyHRTheEmployeeMayHaveLeftSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_NOTIFYHRTHEEMPLOYEEMAYHAVELEFT_CONFIG)"
+            style="margin-bottom: 10px;" [expanded]="isShowNotifyHRTheEmployeeMayHaveLeftSetting">
             <mat-expansion-panel-header
               (click)="isShowNotifyHRTheEmployeeMayHaveLeftSetting =!isShowNotifyHRTheEmployeeMayHaveLeftSetting"
               class="panel-header">
@@ -257,7 +262,8 @@
           </mat-expansion-panel-header>
 
           <!--AUTO LOCK TIMESHEET-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_AUTO_LOCK_TIMESHEET_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowAutoLogTimesheet">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_AUTO_LOCK_TIMESHEET_SETTING)"
+            style="margin-bottom: 10px;" [expanded]="isShowAutoLogTimesheet">
             <mat-expansion-panel-header class="panel-header" (click)="isShowAutoLogTimesheet =! isShowAutoLogTimesheet">
               <mat-panel-title>
                 <p class="title">{{"Auto Lock Timesheet Setting"}}</p>
@@ -327,8 +333,8 @@
                       </div>
                       <div class="col-md-4 working">
                         <mat-form-field style="max-width: 400px;">
-                          <input matInput type="number" placeholder="Minute" [(ngModel)]="lockTimesheet.lockMinuteOfUser"
-                            [readonly]="!isEditLockTimesheet" />
+                          <input matInput type="number" placeholder="Minute"
+                            [(ngModel)]="lockTimesheet.lockMinuteOfUser" [readonly]="!isEditLockTimesheet" />
                         </mat-form-field>
                       </div>
                     </div>
@@ -391,8 +397,8 @@
                       </div>
                       <div class="col-md-4 working">
                         <mat-form-field style="max-width: 400px;">
-                          <input matInput type="number" placeholder="Hour" [(ngModel)]="lockTimesheet.lockHourAfterUnlock"
-                            [readonly]="!isEditLockTimesheet" />
+                          <input matInput type="number" placeholder="Hour"
+                            [(ngModel)]="lockTimesheet.lockHourAfterUnlock" [readonly]="!isEditLockTimesheet" />
                         </mat-form-field>
                       </div>
                       <div class="col-md-4 working">
@@ -410,15 +416,16 @@
           </mat-expansion-panel>
 
           <!--Unlock Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_UNLOCK_TIMESHEET_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowUnlockSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_UNLOCK_TIMESHEET_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowUnlockSetting">
             <mat-expansion-panel-header (click)="isShowUnlockSetting =!isShowUnlockSetting" class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Unlock Timesheet Setting"}}</p>
                 <div *ngIf="isShowUnlockSetting">
                   <div>
                     <div class="edit-save">
-                      <button *ngIf="!isEditUnlockSetting && permission.isGranted(UPDATE_UNLOCK_TIMESHEET_SETTING)" large
-                        mat-raised-button color="primary" (click)="editUnlockSetting();$event.stopPropagation()">
+                      <button *ngIf="!isEditUnlockSetting && permission.isGranted(UPDATE_UNLOCK_TIMESHEET_SETTING)"
+                        large mat-raised-button color="primary" (click)="editUnlockSetting();$event.stopPropagation()">
                         <mat-icon>edit</mat-icon>Edit
                       </button>
                       <button *ngIf="isEditUnlockSetting" large mat-raised-button color="primary"
@@ -464,7 +471,8 @@
           </mat-expansion-panel>
 
           <!-- Money Pm Unlock TimeSheet -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_MONEYPMUNLOCKTIMESHEET_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowMoneyPMUnlockTimeSheetSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_MONEYPMUNLOCKTIMESHEET_CONFIG)"
+            style="margin-bottom: 10px;" [expanded]="isShowMoneyPMUnlockTimeSheetSetting">
             <mat-expansion-panel-header
               (click)="isShowMoneyPMUnlockTimeSheetSetting =!isShowMoneyPMUnlockTimeSheetSetting" class="panel-header">
               <mat-panel-title>
@@ -531,7 +539,8 @@
           </mat-expansion-panel-header>
 
           <!-- Level Setting -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_LEVEL_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowLevelSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_LEVEL_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowLevelSetting">
             <mat-expansion-panel-header class="panel-header" (click)="isShowLevelSetting =!isShowLevelSetting">
               <mat-panel-title>
                 <p class="title">{{"Add level Setting For Review Intern"}}</p>
@@ -576,7 +585,8 @@
                   <div class="col-md-12">
                     <mat-form-field style="max-width: 880px;">
                       <input matInput name="percentSalaryProbationary" [disabled]="!isLevelSetting"
-                        placeholder="Percent Salary Probationary" [(ngModel)]="levelSetting.percentSalaryProbationary" />
+                        placeholder="Percent Salary Probationary"
+                        [(ngModel)]="levelSetting.percentSalaryProbationary" />
                     </mat-form-field>
                     <mat-form-field style="max-width: 880px;">
                       <textarea matInput name="userLevelSetting" rows="5" [disabled]="!isLevelSetting"
@@ -589,7 +599,8 @@
           </mat-expansion-panel>
 
           <!--Notify Review Intern Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_NRIT_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowNRITSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_NRIT_CONFIG)" style="margin-bottom: 10px;"
+            [expanded]="isShowNRITSetting">
             <mat-expansion-panel-header (click)="isShowNRITSetting =!isShowNRITSetting" class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Notify Review Intern Setting"}}</p>
@@ -640,12 +651,12 @@
                       Fullday: from 10am to midnight
                       Working time: individual working time">help</mat-icon>
                     </div>
-                    <mat-radio-group matInput name="notifyAtHour" [(ngModel)]="NRITConfig.notifyAtHourType" required 
-                    [disabled]="!isEditNRITConfig" style="display: flex; flex-direction: column; gap: 10px;">
+                    <mat-radio-group matInput name="notifyAtHour" [(ngModel)]="NRITConfig.notifyAtHourType" required
+                      [disabled]="!isEditNRITConfig" style="display: flex; flex-direction: column; gap: 10px;">
                       <mat-radio-button value="Fullday">Fullday</mat-radio-button>
                       <mat-radio-button value="Working_Time">Working time</mat-radio-button>
-                    </mat-radio-group>   
-                  </div>                                                           
+                    </mat-radio-group>
+                  </div>
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
                       <span class="special-label">Notify on dates *</span> <mat-icon class="special-icon"
@@ -683,14 +694,15 @@
             </div>
           </mat-expansion-panel>
 
-          <!-- Notify Review Intern via Mezon and Email Setting --> 
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_NRITVMAE_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowNRITVMAEConfig">
+          <!-- Notify Review Intern via Mezon and Email Setting -->
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_NRITVMAE_CONFIG)" style="margin-bottom: 10px;"
+            [expanded]="isShowNRITVMAEConfig">
             <mat-expansion-panel-header (click)="isShowNRITVMAEConfig =!isShowNRITVMAEConfig" class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Notify Review Intern via Mezon and Email Setting"}}</p>
                 <div *ngIf="isShowNRITVMAEConfig" class="edit-save">
-                  <button *ngIf="!isEditNRITVMAEConfig &&permission.isGranted(EDIT_NRITVMAE_CONFIG )" large mat-raised-button
-                    color="primary" (click)="editNRITVMAEConfig();$event.stopPropagation()">
+                  <button *ngIf="!isEditNRITVMAEConfig &&permission.isGranted(EDIT_NRITVMAE_CONFIG )" large
+                    mat-raised-button color="primary" (click)="editNRITVMAEConfig();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
                   </button>
                   <button *ngIf="isEditNRITVMAEConfig" large mat-raised-button color="primary"
@@ -724,16 +736,19 @@
                 <div class="row">
                   <div class="col-md-12">
                     <mat-checkbox style="padding: 0;" class="autoSubmit"
-                      [checked]="NRITVMAEConfig.notifyReviewInternEnableWorker == 'true'?true:false" name="notifyReviewInternEnableWorker"
-                      (change)="onNHPMAPRITEnableWorker($event)" [disabled]="!isEditNRITVMAEConfig">
+                      [checked]="NRITVMAEConfig.notifyReviewInternEnableWorker == 'true'?true:false"
+                      name="notifyReviewInternEnableWorker" (change)="onNHPMAPRITEnableWorker($event)"
+                      [disabled]="!isEditNRITVMAEConfig">
                       Enable worker</mat-checkbox>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Notify Review Intern Interval Minutes *</span> <mat-icon class="special-icon"
+                      <span class="special-label">Notify Review Intern Interval Minutes *</span> <mat-icon
+                        class="special-icon"
                         matTooltip="interval between each cronjob run ex: 30, meaning once every 30 minutes">help</mat-icon>
-                      <input type="text" matInput name="notifyReviewInternIntervalMinutes" [(ngModel)]="NRITVMAEConfig.notifyReviewInternIntervalMinutes" required
+                      <input type="text" matInput name="notifyReviewInternIntervalMinutes"
+                        [(ngModel)]="NRITVMAEConfig.notifyReviewInternIntervalMinutes" required
                         [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
@@ -742,25 +757,30 @@
                     <mat-form-field>
                       <span class="special-label">Notify at hour *</span> <mat-icon class="special-icon"
                         matTooltip="Time to send mail to headPm and President, ex: 14 mean at 14h o'clock">help</mat-icon>
-                      <input type="text" matInput name="notifyReviewInternAtHour" [(ngModel)]="NRITVMAEConfig.notifyReviewInternAtHour" required
+                      <input type="text" matInput name="notifyReviewInternAtHour"
+                        [(ngModel)]="NRITVMAEConfig.notifyReviewInternAtHour" required
                         [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Notify HeadPm Review Intern on date *</span> <mat-icon class="special-icon"
+                      <span class="special-label">Notify HeadPm Review Intern on date *</span> <mat-icon
+                        class="special-icon"
                         matTooltip="Date of notification to headPm, ex: 10 mean: 10th">help</mat-icon>
-                      <input type="text" matInput name="notifyHeadPMReviewInternOnDate" [(ngModel)]="NRITVMAEConfig.notifyHeadPMReviewInternOnDate" required
+                      <input type="text" matInput name="notifyHeadPMReviewInternOnDate"
+                        [(ngModel)]="NRITVMAEConfig.notifyHeadPMReviewInternOnDate" required
                         [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Notify President Review Intern on date *</span> <mat-icon class="special-icon"
+                      <span class="special-label">Notify President Review Intern on date *</span> <mat-icon
+                        class="special-icon"
                         matTooltip="Date of notification to President, ex: 10 mean: 10th">help</mat-icon>
-                      <input type="text" matInput name="notifyPresidentReviewInternOnDate" [(ngModel)]="NRITVMAEConfig.notifyPresidentReviewInternOnDate" required
+                      <input type="text" matInput name="notifyPresidentReviewInternOnDate"
+                        [(ngModel)]="NRITVMAEConfig.notifyPresidentReviewInternOnDate" required
                         [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
@@ -769,8 +789,8 @@
                     <mat-form-field>
                       <span class="special-label">Notify HeadPM Mail *</span> <mat-icon class="special-icon"
                         matTooltip="HeadPm's email, ex: tien.nguyenhuu@ncc.asia">help</mat-icon>
-                      <input type="text" matInput name="notifyHeadPmMail" [(ngModel)]="NRITVMAEConfig.notifyHeadPmMail" required
-                        [disabled]="!isEditNRITVMAEConfig" />
+                      <input type="text" matInput name="notifyHeadPmMail" [(ngModel)]="NRITVMAEConfig.notifyHeadPmMail"
+                        required [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
 
@@ -778,8 +798,8 @@
                     <mat-form-field>
                       <span class="special-label">Notify President Mail *</span> <mat-icon class="special-icon"
                         matTooltip="President's email, ex: nhan.nguyen@ncc.asia">help</mat-icon>
-                      <input type="text" matInput name="notifyPresidentEmail" [(ngModel)]="NRITVMAEConfig.notifyPresidentEmail" required
-                        [disabled]="!isEditNRITVMAEConfig" />
+                      <input type="text" matInput name="notifyPresidentEmail"
+                        [(ngModel)]="NRITVMAEConfig.notifyPresidentEmail" required [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
 
@@ -787,8 +807,8 @@
                     <mat-form-field>
                       <span class="special-label">Notify Hr Mail *</span> <mat-icon class="special-icon"
                         matTooltip="Hr's email, ex: hien.ngothu@ncc.asia">help</mat-icon>
-                      <input type="text" matInput name="notifyHrEmail" [(ngModel)]="NRITVMAEConfig.notifyHrEmail" required
-                        [disabled]="!isEditNRITVMAEConfig" />
+                      <input type="text" matInput name="notifyHrEmail" [(ngModel)]="NRITVMAEConfig.notifyHrEmail"
+                        required [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
 
@@ -796,7 +816,8 @@
                     <mat-form-field>
                       <span class="special-label">Update Time Cronjob At Hour *</span> <mat-icon class="special-icon"
                         matTooltip="Cronjob update time review monthly interns, ex:  1 mean at 1h o'clock">help</mat-icon>
-                      <input type="text" matInput name="updateTimeCronjobAtHour" [(ngModel)]="NRITVMAEConfig.updateTimeCronjobAtHour" required
+                      <input type="text" matInput name="updateTimeCronjobAtHour"
+                        [(ngModel)]="NRITVMAEConfig.updateTimeCronjobAtHour" required
                         [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
@@ -805,16 +826,19 @@
                     <mat-form-field>
                       <span class="special-label">Update Time Cronjob On Date *</span> <mat-icon class="special-icon"
                         matTooltip="Cronjob update time review monthly interns, ex: 1 mean: 1st.">help</mat-icon>
-                      <input type="text" matInput name="updateTimeCronjobOnDate" [(ngModel)]="NRITVMAEConfig.updateTimeCronjobOnDate" required
+                      <input type="text" matInput name="updateTimeCronjobOnDate"
+                        [(ngModel)]="NRITVMAEConfig.updateTimeCronjobOnDate" required
                         [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Notify Pm Review Intern On Dates *</span> <mat-icon class="special-icon"
+                      <span class="special-label">Notify Pm Review Intern On Dates *</span> <mat-icon
+                        class="special-icon"
                         matTooltip="Date of notification to Pm, ex: 1,2,3 mean: 1st,2nd,3rd.">help</mat-icon>
-                      <input type="text" matInput name="notifyPmReviewInternOnDates" [(ngModel)]="NRITVMAEConfig.notifyPmReviewInternOnDates" required
+                      <input type="text" matInput name="notifyPmReviewInternOnDates"
+                        [(ngModel)]="NRITVMAEConfig.notifyPmReviewInternOnDates" required
                         [disabled]="!isEditNRITVMAEConfig" />
                     </mat-form-field>
                   </div>
@@ -824,13 +848,15 @@
           </mat-expansion-panel>
 
           <!-- Late Intern Review Setting -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_LATE_INTERN_REVIEW_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowLateInternReviewSetting">
-            <mat-expansion-panel-header (click)="isShowLateInternReviewSetting =!isShowLateInternReviewSetting" class="panel-header">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_LATE_INTERN_REVIEW_SETTING)"
+            style="margin-bottom: 10px;" [expanded]="isShowLateInternReviewSetting">
+            <mat-expansion-panel-header (click)="isShowLateInternReviewSetting =!isShowLateInternReviewSetting"
+              class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Late Intern Review Punishment Setting"}}</p>
                 <div *ngIf="isShowLateInternReviewSetting" class="edit-save">
-                  <button *ngIf="!isEditLateInternReviewSetting" large mat-raised-button
-                    color="primary" (click)="editLateInternReviewSetting();$event.stopPropagation()">
+                  <button *ngIf="!isEditLateInternReviewSetting" large mat-raised-button color="primary"
+                    (click)="editLateInternReviewSetting();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
                   </button>
                   <button *ngIf="isEditLateInternReviewSetting" large mat-raised-button color="primary"
@@ -846,8 +872,8 @@
 
               <ul class="header-dropdown m-r--5" *ngIf="isShowLateInternReviewSetting">
                 <li>
-                  <button mat-icon-button [matMenuTriggerFor]="headerMenuLateInternReview" (click)="$event.stopPropagation()"
-                    class="header-dropdown-mat-icon-button">
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenuLateInternReview"
+                    (click)="$event.stopPropagation()" class="header-dropdown-mat-icon-button">
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #headerMenuLateInternReview="matMenu">
@@ -863,10 +889,10 @@
               <form>
                 <div class="row">
                   <div class="col-md-12" style="max-width: 880px;">
-                    <mat-checkbox [(ngModel)]="lateInternReviewSetting.enable" name="enable" 
+                    <mat-checkbox [(ngModel)]="lateInternReviewSetting.enable" name="enable"
                       [disabled]="!isEditLateInternReviewSetting">
                       <span class="special-label">Enable Late Intern Review Punishment</span>
-                      <mat-icon class="special-icon" 
+                      <mat-icon class="special-icon"
                         matTooltip="Enable/disable the background worker that checks and punishes late intern reviews">help</mat-icon>
                     </mat-checkbox>
                   </div>
@@ -875,8 +901,8 @@
                     <mat-form-field>
                       <span class="special-label">Review Deadline Day *</span> <mat-icon class="special-icon"
                         matTooltip="Number of days from Start Day when review deadline occurs, ex: 6 means 6 days from Start Day">help</mat-icon>
-                      <input type="number" matInput name="deadlineDay" [(ngModel)]="lateInternReviewSetting.deadlineDay" required
-                        [disabled]="!isEditLateInternReviewSetting" />
+                      <input type="number" matInput name="deadlineDay" [(ngModel)]="lateInternReviewSetting.deadlineDay"
+                        required [disabled]="!isEditLateInternReviewSetting" />
                     </mat-form-field>
                   </div>
 
@@ -884,43 +910,37 @@
                     <mat-form-field>
                       <span class="special-label">Start Day Of Month *</span> <mat-icon class="special-icon"
                         matTooltip="Day of the month when review starts, ex: 1 means 1st of the month">help</mat-icon>
-                      <input type="number" matInput name="startDayOfMonth" [(ngModel)]="lateInternReviewSetting.startDayOfMonth" required
+                      <input type="number" matInput name="startDayOfMonth"
+                        [(ngModel)]="lateInternReviewSetting.startDayOfMonth" required
                         [disabled]="!isEditLateInternReviewSetting" />
                     </mat-form-field>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                       <span class="special-label">Next Run Date *</span> 
-                       <mat-icon class="special-icon"
-                          matTooltip="Day of the month when background worker runs to check late review interns, ex: 15 means 15th of every month">help</mat-icon>
-                       <input type="number" matInput name="nextRunDate" [(ngModel)]="lateInternReviewSetting.nextRunDate" required
-                       [disabled]="!isEditLateInternReviewSetting" min="1" max="31" />
+                      <span class="special-label">Next Run Date *</span>
+                      <mat-icon class="special-icon"
+                        matTooltip="Day of the month when background worker runs to check late review interns, ex: 15 means 15th of every month">help</mat-icon>
+                      <input type="number" matInput name="nextRunDate" [(ngModel)]="lateInternReviewSetting.nextRunDate"
+                        required [disabled]="!isEditLateInternReviewSetting" min="1" max="31" />
                     </mat-form-field>
                     <div class="row" style="margin-top: 10px;">
-                       <div class="col-md-4">
-                          <mat-form-field style="width: 100%;">
-                             <input matInput 
-                             type="month" 
-                             [(ngModel)]="selectedMonth"
-                              [disabled]="false"
-                             name="selectedMonth"
-                             style="width: 100%;">
-                            </mat-form-field>
-                         </div>
+                      <div class="col-md-4">
+                        <mat-form-field style="width: 100%;">
+                          <input matInput type="month" [(ngModel)]="selectedMonth" [disabled]="false"
+                            name="selectedMonth" style="width: 100%;">
+                        </mat-form-field>
                       </div>
+                    </div>
                     <div class="row">
-                       <div class="col-md-4" style="margin-top: 2px;">
-                          <button mat-raised-button 
-                          color="warn" 
-                          [disabled]="!selectedMonth"
-                          (click)="onManualTriggerPunishment()"
-                          style="min-width: 80px;">
+                      <div class="col-md-4" style="margin-top: 2px;">
+                        <button mat-raised-button color="warn" [disabled]="!selectedMonth"
+                          (click)="onManualTriggerPunishment()" style="min-width: 80px;">
                           Get
                         </button>
-                       </div>
+                      </div>
                     </div>
-                 </div>
+                  </div>
                 </div>
               </form>
             </div>
@@ -938,13 +958,15 @@
           </mat-expansion-panel-header>
 
           <!-- PM Report Punishment Setting -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_PM_REPORT_PUNISH_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowPMReportPunishSetting">
-            <mat-expansion-panel-header (click)="isShowPMReportPunishSetting =!isShowPMReportPunishSetting" class="panel-header">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_PM_REPORT_PUNISH_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowPMReportPunishSetting">
+            <mat-expansion-panel-header (click)="isShowPMReportPunishSetting =!isShowPMReportPunishSetting"
+              class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"PM Report Punishment Setting"}}</p>
                 <div *ngIf="isShowPMReportPunishSetting" class="edit-save">
-                  <button *ngIf="!isEditPMReportPunishSetting" large mat-raised-button
-                    color="primary" (click)="editPMReportPunishSetting();$event.stopPropagation()">
+                  <button *ngIf="!isEditPMReportPunishSetting" large mat-raised-button color="primary"
+                    (click)="editPMReportPunishSetting();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
                   </button>
                   <button *ngIf="isEditPMReportPunishSetting" large mat-raised-button color="primary"
@@ -960,8 +982,8 @@
 
               <ul class="header-dropdown m-r--5" *ngIf="isShowPMReportPunishSetting">
                 <li>
-                  <button mat-icon-button [matMenuTriggerFor]="headerMenuPMReportPunish" (click)="$event.stopPropagation()"
-                    class="header-dropdown-mat-icon-button">
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenuPMReportPunish"
+                    (click)="$event.stopPropagation()" class="header-dropdown-mat-icon-button">
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #headerMenuPMReportPunish="matMenu">
@@ -1008,14 +1030,11 @@
                         <mat-option value="Sunday">Sunday</mat-option>
                       </mat-select>
                     </mat-form-field>
-                    
+
                     <div class="row" style="margin-top: 10px; align-items: center;">
                       <div class="col-md-12">
-                        <button mat-raised-button 
-                          color="warn" 
-                          [disabled]="false"
-                          (click)="onManualTriggerPMReportPunishment()"
-                          style="min-width: 80px;">
+                        <button mat-raised-button color="warn" [disabled]="false"
+                          (click)="onManualTriggerPMReportPunishment()" style="min-width: 80px;">
                           Get
                         </button>
                       </div>
@@ -1038,26 +1057,140 @@
             </mat-panel-title>
           </mat-expansion-panel-header>
 
+          <!-- Office Working Report Setting -->
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_BOT_REPORT_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowOfficeWorkingReportSetting">
+            <mat-expansion-panel-header (click)="isShowOfficeWorkingReportSetting =!isShowOfficeWorkingReportSetting"
+              class="panel-header">
+              <mat-panel-title>
+                <p class="title">{{"Office Working Report Setting"}}</p>
+                <div *ngIf="isShowOfficeWorkingReportSetting" class="edit-save">
+                  <button *ngIf="!isEditOfficeWorkingReportSetting" large mat-raised-button color="primary"
+                    (click)="editOfficeWorkingReportSetting();$event.stopPropagation()">
+                    <mat-icon>edit</mat-icon>Edit
+                  </button>
+                  <button *ngIf="isEditOfficeWorkingReportSetting" large mat-raised-button color="primary"
+                    (click)="saveOfficeWorkingReportSetting();$event.stopPropagation()">
+                    <mat-icon>save</mat-icon>Save
+                  </button>
+                  <button *ngIf="isEditOfficeWorkingReportSetting" large mat-raised-button color="primary"
+                    (click)="refreshOfficeWorkingReportSetting();$event.stopPropagation()">
+                    <mat-icon>cancel</mat-icon>Cancel
+                  </button>
+                </div>
+              </mat-panel-title>
+
+              <ul class="header-dropdown m-r--5" *ngIf="isShowOfficeWorkingReportSetting">
+                <li>
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenuOfficeReport"
+                    (click)="$event.stopPropagation()" class="header-dropdown-mat-icon-button">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #headerMenuOfficeReport="matMenu">
+                    <button mat-menu-item (click)="refreshOfficeWorkingReportSetting();$event.stopPropagation()">
+                      <mat-icon>refresh</mat-icon>
+                      <span>{{ "Refresh" | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </li>
+              </ul>
+            </mat-expansion-panel-header>
+            <div class="body">
+              <form>
+                <div class="row">
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-checkbox [(ngModel)]="officeWorkingReportSetting.enable" name="officeEnable"
+                      [disabled]="!isEditOfficeWorkingReportSetting">
+                      <span class="special-label">Enable *</span> <mat-icon class="special-icon"
+                        matTooltip="Enable Office Working Report notification">help</mat-icon>
+                    </mat-checkbox>
+                  </div>
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-checkbox [(ngModel)]="officeWorkingReportSetting.everyday" name="officeEveryday"
+                      [disabled]="!isEditOfficeWorkingReportSetting">
+                      <span class="special-label">Run everyday *</span> <mat-icon class="special-icon"
+                        matTooltip="Run Office Working Report everyday (if unchecked, runs only on weekdays)">help</mat-icon>
+                    </mat-checkbox>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Hour *</span> <mat-icon class="special-icon"
+                        matTooltip="Hour to send Office Working Report notification (0-23)">help</mat-icon>
+                      <input type="number" matInput name="officeHour" [(ngModel)]="officeWorkingReportSetting.hour"
+                        required [disabled]="!isEditOfficeWorkingReportSetting" min="0" max="23" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px; margin-top: 15px;">
+                    <mat-form-field style="width: 100%;">
+                      <div class="label-with-icon">
+                        <mat-label>Select Branches</mat-label>
+                        <mat-icon class="special-icon"
+                          matTooltip="Select branches for filtering report data (e.g., HN1, HN2, SG1, etc.)">help</mat-icon>
+                      </div>
+                      <mat-select multiple [(ngModel)]="selectedOfficeWorkingBranches" name="officeBranchCodes"
+                        [disabled]="!isEditOfficeWorkingReportSetting">
+                        <div class="select-all-option">
+                          <mat-option [value]="-1" (click)="toggleAllOfficeWorkingBranches()">
+                            <strong>{{ isAllOfficeWorkingBranchesSelected ? 'Deselect All' : 'Select All' }}</strong>
+                          </mat-option>
+                        </div>
+                        <mat-divider></mat-divider>
+                        <mat-option *ngFor="let code of branchCodes" [value]="code">
+                          {{code}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Limit *</span> <mat-icon class="special-icon"
+                        matTooltip="Number of top employees to show per office">help</mat-icon>
+                      <input type="number" matInput name="officeLimit" [(ngModel)]="officeWorkingReportSetting.limit"
+                        required [disabled]="!isEditOfficeWorkingReportSetting" min="1" max="100" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <span class="special-label">Mezon URL *</span> <mat-icon class="special-icon"
+                        matTooltip="Webhook URL for sending Office Working Report notifications to Mezon">help</mat-icon>
+                      <input type="text" matInput name="officeMezonUrl"
+                        [(ngModel)]="officeWorkingReportSetting.mezonUrl" required
+                        [disabled]="!isEditOfficeWorkingReportSetting" />
+                    </mat-form-field>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </mat-expansion-panel>
           <!-- Merged Bot Report Setting Panel -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_BOT_REPORT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowBotReportSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_BOT_REPORT_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowBotReportSetting">
             <mat-expansion-panel-header (click)="isShowBotReportSetting = !isShowBotReportSetting" class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Bot Report Setting"}}</p>
                 <div *ngIf="isShowBotReportSetting" class="edit-save">
-                  <button *ngIf="!isEditBotReportSetting" large mat-raised-button color="primary" (click)="editBotReportSetting();$event.stopPropagation()">
+                  <button *ngIf="!isEditBotReportSetting" large mat-raised-button color="primary"
+                    (click)="editBotReportSetting();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
                   </button>
-                  <button *ngIf="isEditBotReportSetting" large mat-raised-button color="primary" (click)="saveBotReportSetting();$event.stopPropagation()">
+                  <button *ngIf="isEditBotReportSetting" large mat-raised-button color="primary"
+                    (click)="saveBotReportSetting();$event.stopPropagation()">
                     <mat-icon>save</mat-icon>Save
                   </button>
-                  <button *ngIf="isEditBotReportSetting" large mat-raised-button color="primary" (click)="refreshBotReportSetting();$event.stopPropagation()">
+                  <button *ngIf="isEditBotReportSetting" large mat-raised-button color="primary"
+                    (click)="refreshBotReportSetting();$event.stopPropagation()">
                     <mat-icon>cancel</mat-icon>Cancel
                   </button>
                 </div>
               </mat-panel-title>
               <ul class="header-dropdown m-r--5" *ngIf="isShowBotReportSetting">
                 <li>
-                  <button mat-icon-button [matMenuTriggerFor]="headerMenuBotReport" (click)="$event.stopPropagation()" class="header-dropdown-mat-icon-button">
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenuBotReport" (click)="$event.stopPropagation()"
+                    class="header-dropdown-mat-icon-button">
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #headerMenuBotReport="matMenu">
@@ -1073,28 +1206,36 @@
               <form>
                 <div class="row">
                   <div class="col-md-12" style="max-width: 880px;">
-                    <mat-checkbox [(ngModel)]="botReportSetting.enable" name="enable" [disabled]="!isEditBotReportSetting">
-                      <span class="special-label">Enable *</span> <mat-icon class="special-icon" matTooltip="Enable Bot report notification and Anomalies report">help</mat-icon>
+                    <mat-checkbox [(ngModel)]="botReportSetting.enable" name="enable"
+                      [disabled]="!isEditBotReportSetting">
+                      <span class="special-label">Enable *</span> <mat-icon class="special-icon"
+                        matTooltip="Enable Bot report notification and Anomalies report">help</mat-icon>
                     </mat-checkbox>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
-                    <mat-checkbox [(ngModel)]="botReportSetting.everyday" name="everyday" [disabled]="!isEditBotReportSetting">
-                      <span class="special-label">Run everyday (only for Daily Project Report) *</span> <mat-icon class="special-icon" matTooltip="Run this bot everyday for project report">help</mat-icon>
+                    <mat-checkbox [(ngModel)]="botReportSetting.everyday" name="everyday"
+                      [disabled]="!isEditBotReportSetting">
+                      <span class="special-label">Run everyday (only for Daily Project Report) *</span> <mat-icon
+                        class="special-icon" matTooltip="Run this bot everyday for project report">help</mat-icon>
                     </mat-checkbox>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Hour *</span> <mat-icon class="special-icon" matTooltip="Hour to send Bot report notification (0-23)">help</mat-icon>
-                      <input type="number" matInput name="hour" [(ngModel)]="botReportSetting.hour" required [disabled]="!isEditBotReportSetting" min="0" max="23" />
+                      <span class="special-label">Hour *</span> <mat-icon class="special-icon"
+                        matTooltip="Hour to send Bot report notification (0-23)">help</mat-icon>
+                      <input type="number" matInput name="hour" [(ngModel)]="botReportSetting.hour" required
+                        [disabled]="!isEditBotReportSetting" min="0" max="23" />
                     </mat-form-field>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Day Of Week *</span> <mat-icon class="special-icon" matTooltip="Day of the week when background worker runs to check Bot report, ex: Monday">help</mat-icon>
-                      <mat-select [(ngModel)]="botReportSetting.dayofweek" name="dayofweek" required [disabled]="!isEditBotReportSetting || botReportSetting.everyday">
+                      <span class="special-label">Day Of Week *</span> <mat-icon class="special-icon"
+                        matTooltip="Day of the week when background worker runs to check Bot report, ex: Monday">help</mat-icon>
+                      <mat-select [(ngModel)]="botReportSetting.dayofweek" name="dayofweek" required
+                        [disabled]="!isEditBotReportSetting || botReportSetting.everyday">
                         <mat-option value="Monday">Monday</mat-option>
                         <mat-option value="Tuesday">Tuesday</mat-option>
                         <mat-option value="Wednesday">Wednesday</mat-option>
@@ -1108,8 +1249,10 @@
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Bot URI *</span> <mat-icon class="special-icon" matTooltip="Webhook URL for sending Bot report notifications">help</mat-icon>
-                      <input type="text" matInput name="botUri" [(ngModel)]="botReportSetting.botUri" required [disabled]="!isEditBotReportSetting" />
+                      <span class="special-label">Bot URI *</span> <mat-icon class="special-icon"
+                        matTooltip="Webhook URL for sending Bot report notifications">help</mat-icon>
+                      <input type="text" matInput name="botUri" [(ngModel)]="botReportSetting.botUri" required
+                        [disabled]="!isEditBotReportSetting" />
                     </mat-form-field>
                   </div>
 
@@ -1117,9 +1260,11 @@
                     <mat-form-field style="width: 100%;">
                       <div class="label-with-icon">
                         <mat-label>Select Branches</mat-label>
-                        <mat-icon class="special-icon" matTooltip="Select branches for filtering report data (e.g., HN1, HN2, SG1, etc.)">help</mat-icon>
+                        <mat-icon class="special-icon"
+                          matTooltip="Select branches for filtering report data (e.g., HN1, HN2, SG1, etc.)">help</mat-icon>
                       </div>
-                      <mat-select multiple [(ngModel)]="selectedBranches" name="branchCodes" [disabled]="!isEditBotReportSetting">
+                      <mat-select multiple [(ngModel)]="selectedBranches" name="branchCodes"
+                        [disabled]="!isEditBotReportSetting">
                         <div class="select-all-option">
                           <mat-option [value]="-1" (click)="toggleAllBranches()">
                             <strong>{{ isAllBranchesSelected ? 'Deselect All' : 'Select All' }}</strong>
@@ -1135,15 +1280,20 @@
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Minimum Hours (only for Daily Project Report)</span> <mat-icon class="special-icon" matTooltip="Minimum hours threshold for project report">help</mat-icon>
-                      <input type="number" matInput name="minHours" [(ngModel)]="botReportSetting.minHours" [disabled]="!isEditBotReportSetting" min="0" />
+                      <span class="special-label">Minimum Hours (only for Daily Project Report)</span> <mat-icon
+                        class="special-icon" matTooltip="Minimum hours threshold for project report">help</mat-icon>
+                      <input type="number" matInput name="minHours" [(ngModel)]="botReportSetting.minHours"
+                        [disabled]="!isEditBotReportSetting" min="0" />
                     </mat-form-field>
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Top N (only for Daily Project Report)</span> <mat-icon class="special-icon" matTooltip="Number of top records to include in project report">help</mat-icon>
-                      <input type="number" matInput name="topN" [(ngModel)]="botReportSetting.topN" [disabled]="!isEditBotReportSetting" min="0" />
+                      <span class="special-label">Top N (only for Daily Project Report)</span> <mat-icon
+                        class="special-icon"
+                        matTooltip="Number of top records to include in project report">help</mat-icon>
+                      <input type="number" matInput name="topN" [(ngModel)]="botReportSetting.topN"
+                        [disabled]="!isEditBotReportSetting" min="0" />
                     </mat-form-field>
                   </div>
 
@@ -1151,11 +1301,13 @@
                     <mat-form-field style="width: 100%;">
                       <div class="label-with-icon">
                         <mat-label>Select Projects (leave empty for all, only for Daily Project Report)</mat-label>
-                        <mat-icon class="special-icon" matTooltip="Select projects to include in the project report. If none selected, all active projects will be included.">
+                        <mat-icon class="special-icon"
+                          matTooltip="Select projects to include in the project report. If none selected, all active projects will be included.">
                           help
                         </mat-icon>
                       </div>
-                      <mat-select multiple [disabled]="!isEditBotReportSetting" [(ngModel)]="selectedProjects" name="selectedProjects">
+                      <mat-select multiple [disabled]="!isEditBotReportSetting" [(ngModel)]="selectedProjects"
+                        name="selectedProjects">
                         <div class="select-all-option">
                           <mat-option [value]="-1" (click)="toggleAllProjects()">
                             <strong>{{ isAllProjectsSelected ? 'Deselect All' : 'Select All' }}</strong>
@@ -1185,7 +1337,8 @@
           </mat-expansion-panel-header>
 
           <!-- Checkin Checkout Punish Setting  -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_PUNISHCHECKIN_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowPunishByRule">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_PUNISHCHECKIN_CONFIG)" style="margin-bottom: 10px;"
+            [expanded]="isShowPunishByRule">
             <mat-expansion-panel-header class="panel-header" (click)="isShowPunishByRule =!isShowPunishByRule">
               <mat-panel-title>
                 <p class="title">{{"Check In Check Out Punishment Setting"}}</p>
@@ -1282,9 +1435,11 @@
           </mat-expansion-panel>
 
           <!--Send Message To Punish User Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_SENDMESSAGETOPUNISHUSER_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowSendMessageToPunishUserSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_SENDMESSAGETOPUNISHUSER_CONFIG)"
+            style="margin-bottom: 10px;" [expanded]="isShowSendMessageToPunishUserSetting">
             <mat-expansion-panel-header
-              (click)="isShowSendMessageToPunishUserSetting =!isShowSendMessageToPunishUserSetting" class="panel-header">
+              (click)="isShowSendMessageToPunishUserSetting =!isShowSendMessageToPunishUserSetting"
+              class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Send Message To Punish User Setting"}}</p>
                 <div *ngIf="isShowSendMessageToPunishUserSetting" class="edit-save">
@@ -1325,7 +1480,8 @@
                   <div class="col-md-12">
                     <mat-checkbox style="padding: 0;" class="autoSubmit"
                       [checked]="sendMessageToPunishUserConfig.sendMessageToPunishUserEnableWorker == 'true'?true:false"
-                      name="sendMessageToPunishUserEnableWorker" (change)="onSendMessageToPunishUserEnableWorker($event)"
+                      name="sendMessageToPunishUserEnableWorker"
+                      (change)="onSendMessageToPunishUserEnableWorker($event)"
                       [disabled]="!isEditSendMessageToPunishUserConfig">
                       Enable worker</mat-checkbox>
                   </div>
@@ -1356,7 +1512,8 @@
           </mat-expansion-panel-header>
 
           <!--LOG TIMESHEET IN FUTURE -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_LOG_TIMESHEET_IN_FUTURE)" style="margin-bottom: 10px;" [expanded]=" isShowLogTSInFuture">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_LOG_TIMESHEET_IN_FUTURE)" style="margin-bottom: 10px;"
+            [expanded]=" isShowLogTSInFuture">
             <mat-expansion-panel-header class="panel-header" (click)=" isShowLogTSInFuture =! isShowLogTSInFuture">
               <mat-panel-title>
                 <p class="title">{{"Log timesheet setting"}}</p>
@@ -1410,7 +1567,8 @@
                         [disabled]="!checkEditDayAllow()" />
                     </mat-form-field>
                     <mat-form-field style="max-width: 250px;">
-                      <input matInput type="number" name="dayUnlock" placeholder="The Day to log timesheet in last month"
+                      <input matInput type="number" name="dayUnlock"
+                        placeholder="The Day to log timesheet in last month"
                         [(ngModel)]="logTimesheetInFuture.dateToLockTimesheetOfLastMonth"
                         [disabled]="!checkEditDayAllow()" />
                     </mat-form-field>
@@ -1426,7 +1584,8 @@
           </mat-expansion-panel>
 
           <!--AUTO SUBMIT TIMESHEET SETTING -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_AUTO_SUBMIT_TIMESHEET)" style="margin-bottom: 10px;" [expanded]="isShowAutoSubmitTS">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_AUTO_SUBMIT_TIMESHEET)" style="margin-bottom: 10px;"
+            [expanded]="isShowAutoSubmitTS">
             <mat-expansion-panel-header class="panel-header" (click)="isShowAutoSubmitTS =!isShowAutoSubmitTS">
               <mat-panel-title>
                 <p class="title">{{"Auto submit timesheet"}}</p>
@@ -1450,49 +1609,52 @@
                 </div>
               </mat-panel-title>
 
-          <ul class="header-dropdown m-r--5" *ngIf="isShowAutoSubmitTS">
-            <li>
-              <button mat-icon-button [matMenuTriggerFor]="headerMenu3" (click)="$event.stopPropagation()" class="header-dropdown-mat-icon-button">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #headerMenu3="matMenu">
-                <button mat-menu-item (click)="refreshAutoSubmitTimesheet();$event.stopPropagation()">
-                  <mat-icon>refresh</mat-icon>
-                  <span>{{ "Refresh" | localize }}</span>
-                </button>
-              </mat-menu>
-            </li>
-          </ul>
-        </mat-expansion-panel-header>
-        <div class="body">
-          <form>
-            <div class="row">
-              <div class="col-md-12" style="display: flex;">
-                <mat-checkbox style="padding: 0; margin-right: 20px;" class="autoSubmit"
-                  [checked]="autoSubmitTimesheet.autoSubmitTimesheet == 'true'?true:false" name="autoSubmitTimesheet"
-                  (change)="onAutoSubmitTimesheetEnableWorker($event)" [disabled]="!isEditAutoSubmitTimesheet">
-                  Auto submit timesheet on
-                </mat-checkbox>
-                <mat-form-field>
-                  <mat-select [(ngModel)]="autoSubmitTimesheet.autoSubmitAt" name="autoSubmitAt"
-                    [disabled]="!isEditAutoSubmitTimesheet">
-                    <mat-option value="Monday">Monday</mat-option>
-                    <mat-option value="Tuesday">Tuesday</mat-option>
-                    <mat-option value="Wednesday">Wednesday</mat-option>
-                    <mat-option value="Thursday">Thursday</mat-option>
-                    <mat-option value="Friday">Friday</mat-option>
-                    <mat-option value="Saturday">Saturday</mat-option>
-                    <mat-option value="Sunday">Sunday</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
+              <ul class="header-dropdown m-r--5" *ngIf="isShowAutoSubmitTS">
+                <li>
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenu3" (click)="$event.stopPropagation()"
+                    class="header-dropdown-mat-icon-button">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #headerMenu3="matMenu">
+                    <button mat-menu-item (click)="refreshAutoSubmitTimesheet();$event.stopPropagation()">
+                      <mat-icon>refresh</mat-icon>
+                      <span>{{ "Refresh" | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </li>
+              </ul>
+            </mat-expansion-panel-header>
+            <div class="body">
+              <form>
+                <div class="row">
+                  <div class="col-md-12" style="display: flex;">
+                    <mat-checkbox style="padding: 0; margin-right: 20px;" class="autoSubmit"
+                      [checked]="autoSubmitTimesheet.autoSubmitTimesheet == 'true'?true:false"
+                      name="autoSubmitTimesheet" (change)="onAutoSubmitTimesheetEnableWorker($event)"
+                      [disabled]="!isEditAutoSubmitTimesheet">
+                      Auto submit timesheet on
+                    </mat-checkbox>
+                    <mat-form-field>
+                      <mat-select [(ngModel)]="autoSubmitTimesheet.autoSubmitAt" name="autoSubmitAt"
+                        [disabled]="!isEditAutoSubmitTimesheet">
+                        <mat-option value="Monday">Monday</mat-option>
+                        <mat-option value="Tuesday">Tuesday</mat-option>
+                        <mat-option value="Wednesday">Wednesday</mat-option>
+                        <mat-option value="Thursday">Thursday</mat-option>
+                        <mat-option value="Friday">Friday</mat-option>
+                        <mat-option value="Saturday">Saturday</mat-option>
+                        <mat-option value="Sunday">Sunday</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </form>
             </div>
-          </form>
-        </div>
           </mat-expansion-panel>
 
           <!--Special Project Task Config-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_SPECIAL_PROJECT_TASK_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowSpecialProjectTaskSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_SPECIAL_PROJECT_TASK_CONFIG)"
+            style="margin-bottom: 10px;" [expanded]="isShowSpecialProjectTaskSetting">
             <mat-expansion-panel-header (click)="isShowSpecialProjectTaskSetting =! isShowSpecialProjectTaskSetting"
               class="panel-header">
               <mat-panel-title>
@@ -1547,7 +1709,8 @@
           </mat-expansion-panel>
 
           <!--Notify Approve Timesheet Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_APPROVETIMESHEETNOTIFY_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowApproveTimesheetNotifySetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_APPROVETIMESHEETNOTIFY_CONFIG)"
+            style="margin-bottom: 10px;" [expanded]="isShowApproveTimesheetNotifySetting">
             <mat-expansion-panel-header
               (click)="isShowApproveTimesheetNotifySetting =!isShowApproveTimesheetNotifySetting" class="panel-header">
               <mat-panel-title>
@@ -1623,8 +1786,8 @@
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Time period with pending request *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: 30 days ago to present">help</mat-icon>
+                      <span class="special-label">Time period with pending request *</span> <mat-icon
+                        class="special-icon" matTooltip="ex: 30 days ago to present">help</mat-icon>
                       <input type="text" matInput name="approveTimesheetNotifyTimePeriodWithPendingRequest"
                         [(ngModel)]="ApproveTimesheetNotifyConfig.approveTimesheetNotifyTimePeriodWithPendingRequest"
                         required [disabled]="!isEditApproveTimesheetNotifyConfig" />
@@ -1648,7 +1811,8 @@
           </mat-expansion-panel-header>
 
           <!--WFH Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_WFH_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowWFHSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_WFH_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowWFHSetting">
             <mat-expansion-panel-header (click)="isShowWFHSetting =!isShowWFHSetting" class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"WFH Setting"}}</p>
@@ -1714,7 +1878,8 @@
           </mat-expansion-panel>
 
           <!-- TimesCanLateAndEarlyInMonth -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_TIMECANLATEANDEARLY_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowTimesCanLateAndEarlyInMonthSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_TIMECANLATEANDEARLY_CONFIG)"
+            style="margin-bottom: 10px;" [expanded]="isShowTimesCanLateAndEarlyInMonthSetting">
             <mat-expansion-panel-header
               (click)="isShowTimesCanLateAndEarlyInMonthSetting =! isShowTimesCanLateAndEarlyInMonthSetting"
               class="panel-header">
@@ -1744,7 +1909,8 @@
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #headerMenu3="matMenu">
-                    <button mat-menu-item (click)="refreshTimesCanLateAndEarlyInMonthSetting();$event.stopPropagation()">
+                    <button mat-menu-item
+                      (click)="refreshTimesCanLateAndEarlyInMonthSetting();$event.stopPropagation()">
                       <mat-icon>refresh</mat-icon>
                       <span>{{ "Refresh" | localize }}</span>
                     </button>
@@ -1779,9 +1945,11 @@
           </mat-expansion-panel>
 
           <!--Notify Approve Request Off Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_APPROVEREQUESTOFFNOTIFY_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowApproveRequestOffNotifySetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_APPROVEREQUESTOFFNOTIFY_CONFIG)"
+            style="margin-bottom: 10px;" [expanded]="isShowApproveRequestOffNotifySetting">
             <mat-expansion-panel-header
-              (click)="isShowApproveRequestOffNotifySetting =!isShowApproveRequestOffNotifySetting" class="panel-header">
+              (click)="isShowApproveRequestOffNotifySetting =!isShowApproveRequestOffNotifySetting"
+              class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Notify Approve Request Off Setting"}}</p>
                 <div *ngIf="isShowApproveRequestOffNotifySetting" class="edit-save">
@@ -1822,7 +1990,8 @@
                   <div class="col-md-12">
                     <mat-checkbox style="padding: 0;" class="autoSubmit"
                       [checked]="ApproveRequestOffNotifyConfig.approveRequestOffNotifyEnableWorker == 'true'?true:false"
-                      name="approveRequestOffNotifyEnableWorker" (change)="onApproveRequestOffNotifyEnableWorker($event)"
+                      name="approveRequestOffNotifyEnableWorker"
+                      (change)="onApproveRequestOffNotifyEnableWorker($event)"
                       [disabled]="!isEditApproveRequestOffNotifyConfig">
                       Enable worker</mat-checkbox>
                   </div>
@@ -1846,8 +2015,8 @@
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Time period with pending request *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: 30 days ago to present">help</mat-icon>
+                      <span class="special-label">Time period with pending request *</span> <mat-icon
+                        class="special-icon" matTooltip="ex: 30 days ago to present">help</mat-icon>
                       <input type="text" matInput name="approveRequestOffNotifyTimePeriodWithPendingRequest"
                         [(ngModel)]="ApproveRequestOffNotifyConfig.approveRequestOffNotifyTimePeriodWithPendingRequest"
                         required [disabled]="!isEditApproveRequestOffNotifyConfig" />
@@ -1871,7 +2040,8 @@
           </mat-expansion-panel-header>
 
           <!--Team building Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_TEAMBUILDING_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowTeamBuildingSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_TEAMBUILDING_CONFIG)" style="margin-bottom: 10px;"
+            [expanded]="isShowTeamBuildingSetting">
             <mat-expansion-panel-header (click)="isShowTeamBuildingSetting =!isShowTeamBuildingSetting"
               class="panel-header">
               <mat-panel-title>
@@ -1933,8 +2103,8 @@
                     <mat-form-field>
                       <span class="special-label">VAT *</span> <mat-icon class="special-icon"
                         matTooltip="ex: Value added tax is 10%">help</mat-icon>
-                      <input type="text" matInput name="VAT" [(ngModel)]="TeamBuildingConfig.vat"
-                        required [disabled]="!isEditTeamBuildingConfig" />
+                      <input type="text" matInput name="VAT" [(ngModel)]="TeamBuildingConfig.vat" required
+                        [disabled]="!isEditTeamBuildingConfig" />
                     </mat-form-field>
                   </div>
                 </div>
@@ -1943,7 +2113,8 @@
           </mat-expansion-panel>
 
           <!--Send message request pending teambuilding to HR Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_SENDMESSAGEREQUESTPENDINGTEAMBUILDINGTOHR_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowSendMessageRequestPendingTeamBuildingToHRSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_SENDMESSAGEREQUESTPENDINGTEAMBUILDINGTOHR_CONFIG)"
+            style="margin-bottom: 10px;" [expanded]="isShowSendMessageRequestPendingTeamBuildingToHRSetting">
             <mat-expansion-panel-header
               (click)="isShowSendMessageRequestPendingTeamBuildingToHRSetting =!isShowSendMessageRequestPendingTeamBuildingToHRSetting"
               class="panel-header">
@@ -2028,14 +2199,17 @@
           </mat-expansion-panel>
 
           <!-- Reset Data  -->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_RESETDATATEAMBUILDING_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowResetDataTeambuildingSetting">
-            <mat-expansion-panel-header (click)="isShowResetDataTeambuildingSetting =!isShowResetDataTeambuildingSetting"
-              class="panel-header">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_RESETDATATEAMBUILDING_CONFIG)"
+            style="margin-bottom: 10px;" [expanded]="isShowResetDataTeambuildingSetting">
+            <mat-expansion-panel-header
+              (click)="isShowResetDataTeambuildingSetting =!isShowResetDataTeambuildingSetting" class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Reset data Setting"}}</p>
                 <div *ngIf="isShowResetDataTeambuildingSetting" class="edit-save">
-                  <button *ngIf="!isEditResetDataTeambuildingConfig &&permission.isGranted(EDIT_RESETDATATEAMBUILDING_CONFIG)" large
-                    mat-raised-button color="primary" (click)="editResetDataTeamBuildingConfig();$event.stopPropagation()">
+                  <button
+                    *ngIf="!isEditResetDataTeambuildingConfig &&permission.isGranted(EDIT_RESETDATATEAMBUILDING_CONFIG)"
+                    large mat-raised-button color="primary"
+                    (click)="editResetDataTeamBuildingConfig();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
                   </button>
                   <button *ngIf="isEditResetDataTeambuildingConfig" large mat-raised-button color="primary"
@@ -2092,7 +2266,7 @@
                         [disabled]="!isEditResetDataTeambuildingConfig" />
                     </mat-form-field>
                   </div>
-                 
+
                 </div>
               </form>
             </div>
@@ -2111,7 +2285,8 @@
           </mat-expansion-panel-header>
 
           <!--Notification Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_NOTIFICATION_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowNotificationSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_NOTIFICATION_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowNotificationSetting">
             <mat-expansion-panel-header (click)="isShowNotificationSetting =!isShowNotificationSetting"
               class="panel-header">
               <mat-panel-title>
@@ -2196,7 +2371,8 @@
           </mat-expansion-panel-header>
 
           <!--Notify Retro Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_RETRONOTIFY_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowRetroNotifySetting"> 
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_RETRONOTIFY_CONFIG)" style="margin-bottom: 10px;"
+            [expanded]="isShowRetroNotifySetting">
             <mat-expansion-panel-header (click)="isShowRetroNotifySetting =!isShowRetroNotifySetting"
               class="panel-header">
               <mat-panel-title>
@@ -2242,7 +2418,7 @@
                       Enable worker</mat-checkbox>
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
-                      <mat-form-field>
+                    <mat-form-field>
                       <span class="special-label">Notify at hour *</span> <mat-icon class="special-icon"
                         matTooltip="ex: 14 mean at 14h o'clock,">help</mat-icon>
                       <input type="text" matInput name="notifyAtHour" [(ngModel)]="RetroNotifyConfig.retroNotifyAtHour"
@@ -2279,15 +2455,16 @@
                 </div>
               </form>
             </div>
-          </mat-expansion-panel>  
+          </mat-expansion-panel>
           <!--Create New Retro Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_CREATENEWRETRO_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowCreateNewRetroSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_CREATENEWRETRO_CONFIG)" style="margin-bottom: 10px;"
+            [expanded]="isShowCreateNewRetroSetting">
             <mat-expansion-panel-header (click)="isShowCreateNewRetroSetting =!isShowCreateNewRetroSetting"
               class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Create New Retro Setting"}}</p>
                 <div *ngIf="isShowCreateNewRetroSetting" class="edit-save">
-                  <button *ngIf="!isEditCreateNewRetroConfig && permission.isGranted(EDIT_CREATENEWRETRO_CONFIG)"  large
+                  <button *ngIf="!isEditCreateNewRetroConfig && permission.isGranted(EDIT_CREATENEWRETRO_CONFIG)" large
                     mat-raised-button color="primary" (click)="editCreateNewRetroConfig();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
                   </button>
@@ -2327,17 +2504,19 @@
                       Enable worker</mat-checkbox>
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
-                      <mat-form-field>
-                    <div>
-                      <div><span style="color: red;">*Retro creation time must be earlier than generate retro result </span></div>
-                      <div><span class="special-label">Create new retro at hour *</span>
-                        <mat-icon class="special-icon"
-                          matTooltip="ex: 14 mean at 14h o'clock">help</mat-icon></div>
-                    </div>
-                      <input type="text" matInput name="createNewRetroAtHour" [(ngModel)]="CreateNewRetroConfig.createNewRetroAtHour"
-                        required [disabled]="!isEditCreateNewRetroConfig" />
-                      </mat-form-field>
-                    
+                    <mat-form-field>
+                      <div>
+                        <div><span style="color: red;">*Retro creation time must be earlier than generate retro result
+                          </span></div>
+                        <div><span class="special-label">Create new retro at hour *</span>
+                          <mat-icon class="special-icon" matTooltip="ex: 14 mean at 14h o'clock">help</mat-icon>
+                        </div>
+                      </div>
+                      <input type="text" matInput name="createNewRetroAtHour"
+                        [(ngModel)]="CreateNewRetroConfig.createNewRetroAtHour" required
+                        [disabled]="!isEditCreateNewRetroConfig" />
+                    </mat-form-field>
+
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
@@ -2347,18 +2526,21 @@
                         [(ngModel)]="CreateNewRetroConfig.createNewRetroOnDate" required
                         [disabled]="!isEditCreateNewRetroConfig" />
                     </mat-form-field>
-                  </div>  
+                  </div>
                 </div>
               </form>
             </div>
           </mat-expansion-panel>
           <!--Generate Retro Result Setting-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_GENERATERETRORESULT_CONFIG)" style="margin-bottom: 10px;" [expanded]="isShowGenerateRetroResultSetting">
-            <mat-expansion-panel-header (click)="isShowGenerateRetroResultSetting =!isShowGenerateRetroResultSetting" class="panel-header">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_GENERATERETRORESULT_CONFIG)"
+            style="margin-bottom: 10px;" [expanded]="isShowGenerateRetroResultSetting">
+            <mat-expansion-panel-header (click)="isShowGenerateRetroResultSetting =!isShowGenerateRetroResultSetting"
+              class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Generate Data Retro Result Setting"}}</p>
                 <div *ngIf="isShowGenerateRetroResultSetting" class="edit-save">
-                  <button *ngIf="!isEditGenerateRetroResult && permission.isGranted(EDIT_GENERATERETRORESULT_CONFIG)" large mat-raised-button color="primary"
+                  <button *ngIf="!isEditGenerateRetroResult && permission.isGranted(EDIT_GENERATERETRORESULT_CONFIG)"
+                    large mat-raised-button color="primary"
                     (click)="editGenerateRetroResultConfig();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
                   </button>
@@ -2392,24 +2574,27 @@
                 <div class="row">
                   <div class="col-md-12">
                     <mat-checkbox style="padding: 0;" class="autoSubmit"
-                      [checked]="GenerateRetroResultConfig.generateRetroResultEnableWorker == 'true'?true:false" name="createNewRetroEnableWorker"
-                      (change)="onRetroResultEnableWorker($event)" [disabled]="!isEditGenerateRetroResult">
+                      [checked]="GenerateRetroResultConfig.generateRetroResultEnableWorker == 'true'?true:false"
+                      name="createNewRetroEnableWorker" (change)="onRetroResultEnableWorker($event)"
+                      [disabled]="!isEditGenerateRetroResult">
                       Enable worker</mat-checkbox>
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Generate Data Retro Result at hour *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: 14 mean at 14h o'clock">help</mat-icon>
-                      <input type="text" matInput name="generateRetroResultAtHour" [(ngModel)]="GenerateRetroResultConfig.generateRetroResultAtHour"
-                        required [disabled]="!isEditGenerateRetroResult" />
+                      <span class="special-label">Generate Data Retro Result at hour *</span> <mat-icon
+                        class="special-icon" matTooltip="ex: 14 mean at 14h o'clock">help</mat-icon>
+                      <input type="text" matInput name="generateRetroResultAtHour"
+                        [(ngModel)]="GenerateRetroResultConfig.generateRetroResultAtHour" required
+                        [disabled]="!isEditGenerateRetroResult" />
                     </mat-form-field>
                   </div>
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Generate Data Retro Result on date *</span> <mat-icon class="special-icon"
-                        matTooltip="ex: 10,13,15 mean: 10th, 13th, 15th">help</mat-icon>
-                      <input type="text" matInput name="generateRetroResultOnDate" [(ngModel)]="GenerateRetroResultConfig.generateRetroResultOnDate"
-                        required [disabled]="!isEditGenerateRetroResult" />
+                      <span class="special-label">Generate Data Retro Result on date *</span> <mat-icon
+                        class="special-icon" matTooltip="ex: 10,13,15 mean: 10th, 13th, 15th">help</mat-icon>
+                      <input type="text" matInput name="generateRetroResultOnDate"
+                        [(ngModel)]="GenerateRetroResultConfig.generateRetroResultOnDate" required
+                        [disabled]="!isEditGenerateRetroResult" />
                     </mat-form-field>
                   </div>
                 </div>
@@ -2429,7 +2614,8 @@
           </mat-expansion-panel-header>
 
           <!--SERCURITY CODE-->
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_SERCURITY_CODE_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowSecurityCodeSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_SERCURITY_CODE_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowSecurityCodeSetting">
             <mat-expansion-panel-header class="panel-header"
               (click)="isShowSecurityCodeSetting =! isShowSecurityCodeSetting">
               <mat-panel-title>
@@ -2494,7 +2680,8 @@
             </mat-panel-title>
           </mat-expansion-panel-header>
 
-          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_LOGOUT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowLogoutAllUserSetting">
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_LOGOUT_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowLogoutAllUserSetting">
             <mat-expansion-panel-header class="panel-header"
               (click)="isShowLogoutAllUserSetting = !isShowLogoutAllUserSetting">
               <mat-panel-title>
@@ -2539,8 +2726,9 @@
                 <div class="row">
                   <div class="col-md-12">
                     <mat-form-field style="max-width: 880px;">
-                      <input type="datetime-local" matInput name="loginBefore" placeholder="Logout all user is logined before:"
-                        [(ngModel)]="loginBefore.loginBefore" [readonly]="!isEditLogoutAllUser" />
+                      <input type="datetime-local" matInput name="loginBefore"
+                        placeholder="Logout all user is logined before:" [(ngModel)]="loginBefore.loginBefore"
+                        [readonly]="!isEditLogoutAllUser" />
                     </mat-form-field>
                   </div>
                 </div>
@@ -2874,16 +3062,15 @@
               <div class="row">
                 <div class="col-md-12">
                   <mat-checkbox class="example-margin" (change)="mezonSetting.enable = !mezonSetting.enable;"
-                    [checked]="mezonSetting.enable"
-                    [disabled]="!isEditMezonSetting">
+                    [checked]="mezonSetting.enable" [disabled]="!isEditMezonSetting">
                     Enable
                   </mat-checkbox>
                 </div>
                 <div class="col-md-6">
                   <mat-form-field style="width: 300px;">
                     <mat-label>Get data OpenTalk from Mezon at (Hour)</mat-label>
-                    <input type="number" matInput name="addDataToOpenTalkAtHour" [(ngModel)]="mezonSetting.hour" required
-                      [disabled]="!isEditMezonSetting" min="0" max="23" />
+                    <input type="number" matInput name="addDataToOpenTalkAtHour" [(ngModel)]="mezonSetting.hour"
+                      required [disabled]="!isEditMezonSetting" min="0" max="23" />
                   </mat-form-field>
                 </div>
                 <div class="col-md-6">
@@ -2921,10 +3108,11 @@
               <div class="row">
                 <div class="col-md-3">
                   <mat-form-field>
-                    <input matInput type="date" name="ManualGetOpenTalkAtDate" placeholder="Manual Get Time Joined OpenTalk" [(ngModel)]="manualOpenTalk">
+                    <input matInput type="date" name="ManualGetOpenTalkAtDate"
+                      placeholder="Manual Get Time Joined OpenTalk" [(ngModel)]="manualOpenTalk">
                   </mat-form-field>
                   <div mat-dialog-actions>
-                    <button mat-flat-button type="submit" color="primary">GET</button> 
+                    <button mat-flat-button type="submit" color="primary">GET</button>
                   </div>
                 </div>
               </div>

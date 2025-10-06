@@ -43,6 +43,7 @@ namespace Ncc.Web.Host.Startup
             workManager.Add(IocManager.Resolve<ApplyPMReportPunishmentWorker>());
             workManager.Add(IocManager.Resolve<BotReportWorker>());
             workManager.Add(IocManager.Resolve<AnomaliesReportWorker>());
+             workManager.Add(IocManager.Resolve<OfficeWorkingReportWorker>());
         }
     }
 }

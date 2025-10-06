@@ -147,7 +147,9 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_PMReportConfig_Update = "Admin.Configuration.PMReportConfig.EditPMReportConfig";
         public const string Admin_Configuration_BotReportConfig_View = "Admin.Configuration.BotReportConfig.ViewBotReportConfig";
         public const string Admin_Configuration_BotReportConfig_Update = "Admin.Configuration.BotReportConfig.EditBotReportConfig";
-
+        public const string Admin_Configuration_OfficeWorkingReportSetting = "Admin.Configuration.OfficeWorkingReportSetting";
+        public const string Admin_Configuration_OfficeWorkingReportSetting_View = "Admin.Configuration.OfficeWorkingReportSetting.View";
+        public const string Admin_Configuration_OfficeWorkingReportSetting_Update = "Admin.Configuration.OfficeWorkingReportSetting.Update";
         public const string Admin_Clients = "Admin.Clients";
         public const string Admin_Clients_View = "Admin.Clients.View";
         public const string Admin_Clients_AddNew = "Admin.Clients.AddNew";
