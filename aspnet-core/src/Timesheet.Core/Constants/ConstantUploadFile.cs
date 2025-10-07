@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.Constants
 {
@@ -16,5 +17,7 @@ namespace Timesheet.Constants
 
         public static string AvatarFolder { get; set; }
         public const string APP_NAME = "timesheet";
+
+        public const int FullDay = 8;
     }
 }

@@ -30,6 +30,7 @@ namespace Timesheet.BackgroundWorker
         protected override void DoWork()
         {
             DateTime now = DateTimeUtils.GetNow();
+            
             if (now.Minute == 0)
             {
                 try
@@ -46,15 +47,11 @@ namespace Timesheet.BackgroundWorker
 
         private void RunBotReportJob(DateTime now)
         {
-            string enable = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportEnable);
-            string everyday = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportEveryday);
-            string hourStr = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtHour);
-            string dayOfWeek = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtDayOfWeek);
-            var projectIdsString = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportProjectIds);
-            var branchCodesString = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportBranchCodes);
-            string botUri = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportWebhookUrl) ?? string.Empty;
-            string minHoursStr = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportMinHours);
-            string topNStr = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportTopN);
+            string enable = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportEnable);
+            string hourStr = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportAtHour);
+            string dayOfWeek = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportAtDayOfWeek);
+            var branchCodesString = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportBranchCodes);
+            string botUri = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportWebhookUrl) ?? string.Empty;
 
             if (enable != "True")
             {
@@ -85,46 +82,27 @@ namespace Timesheet.BackgroundWorker
                     .ToList()
                 : new List<string>();
 
-            var projectIds = projectIdsString != null
-                ? projectIdsString.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Where(s => long.TryParse(s.Trim(), out _))
-                    .Select(s => long.Parse(s.Trim())).ToList()
-                : new List<long>();
-
-            double? minHours = double.TryParse(minHoursStr, out var parsedMinHours) ? parsedMinHours : (double?)null;
-            int? topN = int.TryParse(topNStr, out var parsedTopN) ? parsedTopN : (int?)null;
-
-            Logger.Debug($"Parsed projectIds: [{string.Join(", ", projectIds)}]");
-
             Logger.Info($"Running Daily report for branches: {string.Join(", ", branchCodes)}");
-            ExecuteBotReport(new BotReportSettingDto
+            ExecuteBotReport(new AnomaliesReportSettingDto
             {
                 enable = true,
-                everyday = true,
                 hour = configuredHour,
                 dayofweek = dayOfWeek,
                 botUri = botUri,
-                branchCodes = branchCodes,
-                minHours = minHours,
-                topN = topN,
-                projectIds = projectIds
+                branchCodes = branchCodes
             }, isWeekly: false);
 
             if (!string.IsNullOrEmpty(dayOfWeek) &&
                 string.Equals(now.DayOfWeek.ToString(), dayOfWeek, StringComparison.OrdinalIgnoreCase))
             {
                 Logger.Info($"Running Weekly report for branches: {string.Join(", ", branchCodes)}");
-                ExecuteBotReport(new BotReportSettingDto
+                ExecuteBotReport(new AnomaliesReportSettingDto
                 {
                     enable = true,
-                    everyday = true,
                     hour = configuredHour,
                     dayofweek = dayOfWeek,
                     botUri = botUri,
-                    branchCodes = branchCodes,
-                    minHours = minHours,
-                    topN = topN,
-                    projectIds = projectIds
+                    branchCodes = branchCodes
                 }, isWeekly: true);
             }
             else
@@ -135,7 +113,7 @@ namespace Timesheet.BackgroundWorker
             Logger.Info("RunBotReportJob() finished.");
         }
 
-        private void ExecuteBotReport(BotReportSettingDto anomaliesSetting, bool isWeekly)
+        private void ExecuteBotReport(AnomaliesReportSettingDto anomaliesSetting, bool isWeekly)
         {
             try
             {

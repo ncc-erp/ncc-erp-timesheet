@@ -141,6 +141,11 @@ namespace Ncc.Configuration
         public const string BotReportMinHours = "Abp.BotReportMinHours";
         public const string BotReportTopN = "Abp.BotReportTopN";
         public const string BotReportProjectIds = "Abp.BotReportProjectIds";
+        public const string AnomaliesReportEnable = "Abp.AnomaliesReportEnable";
+        public const string AnomaliesReportAtHour = "Abp.AnomaliesReportAtHour";
+        public const string AnomaliesReportAtDayOfWeek = "Abp.AnomaliesReportAtDayOfWeek";
+        public const string AnomaliesReportWebhookUrl = "Abp.AnomaliesReportWebhookUrl";
+        public const string AnomaliesReportBranchCodes = "Abp.AnomaliesReportBranchCodes";
 
         public const string ReviewDeadlineDay = "App.Review.DeadlineDay";
         public const string ReviewStartDayOfMonth = "App.Review.StartDayOfMonth";

@@ -182,6 +182,7 @@ namespace Timesheet.DomainServices
         private async Task<(Dictionary<string, UserCheckInDto> mapCheckInUsers,
             Dictionary<string, int> mapDailyUsers,
             Dictionary<string, int> mapMentionUsers,
+            Dictionary<string, int> mapWFHUsers,
             Dictionary<string, (float ActiveMinute, string active_time)> dicUserNameToTracker,
             Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems)> LoadExternalData(DateTime selectedDate, List<TimesheetUserDto> users)
         {
@@ -204,7 +205,8 @@ namespace Timesheet.DomainServices
 
             var mapCheckInUsers = checkInUsers.ToDictionary(s => s.Email);
             var mapDailyUsers = dailyAndMention.daily.ToDictionary(s => s.email, s => s.count);
-            var mapMentionUsers = dailyAndMention.mention.ToDictionary(s => s.email, s => s.count);
+            var mapMentionUsers = dailyAndMention.mention.ToDictionary(s => s.name, s => s.count);
+            var mapWFHUsers = dailyAndMention.wfh.ToDictionary(s => s.name, s => s.total);
             var dicUserNameToTracker = trackerTimes.ToDictionary(s => s.email, s => (s.ActiveMinute, s.active_time));
             var PunishmentSystems = punishmentSystems;
             return
@@ -212,6 +214,7 @@ namespace Timesheet.DomainServices
                 mapCheckInUsers,
                 mapDailyUsers,
                 mapMentionUsers,
+                mapWFHUsers,
                 dicUserNameToTracker,
                 punishmentSystems
             );
@@ -223,6 +226,7 @@ namespace Timesheet.DomainServices
             Dictionary<string, UserCheckInDto> mapCheckInUsers,
             Dictionary<string, int> mapDailyUsers,
             Dictionary<string, int> mapMentionUsers,
+            Dictionary<string, int> mapWFHUsers,
             Dictionary<string, (float ActiveMinute, string active_time)> dicUserNameToTracker,
             Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems,
             Dictionary<long, List<(string NoteReply, string UserNote)>> oldTimekeepingNotes,
@@ -298,20 +302,46 @@ namespace Timesheet.DomainServices
                     });
                 }
 
-            if (mapMentionUsers.ContainsKey(user.UserName))
-            {
-                t.CountPunishMention = mapMentionUsers[user.UserName];
-                var mentionPunishment = punishmentSystems[UserPunishmentType.Mention];
-                userPunishmentsToInsert.Add(new UserPunishment
+                if (mapMentionUsers.ContainsKey(user.UserName))
                 {
-                    DateAt = selectedDate,
-                    UserId = user.UserId,
-                    PunishmentSystemId = mentionPunishment.Id,
-                    Type = mentionPunishment.Type,
-                    Count = mapMentionUsers[user.UserName],
-                    TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
-                });
-            }
+                    t.CountPunishMention = mapMentionUsers[user.UserName];
+                    var mentionPunishment = punishmentSystems[UserPunishmentType.Mention];
+                    userPunishmentsToInsert.Add(new UserPunishment
+                    {
+                        DateAt = selectedDate,
+                        UserId = user.UserId,
+                        PunishmentSystemId = mentionPunishment.Id,
+                        Type = mentionPunishment.Type,
+                        Count = mapMentionUsers[user.UserName],
+                        TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
+                    });
+                }
+
+                if (mapWFHUsers.ContainsKey(user.UserName))
+                {
+                    t.CountPunishMention += mapWFHUsers[user.UserName];
+                    var mentionPunishment = punishmentSystems[UserPunishmentType.Mention];
+                    var existingMention = userPunishmentsToInsert
+                        .FirstOrDefault(p => p.UserId == user.UserId && p.Type == UserPunishmentType.Mention);
+
+                    if (existingMention != null)
+                    {
+                        existingMention.Count += mapWFHUsers[user.UserName];
+                        existingMention.TotalMoney = existingMention.Count * mentionPunishment.Money;
+                    }
+                    else
+                    {
+                        userPunishmentsToInsert.Add(new UserPunishment
+                        {
+                            DateAt = selectedDate,
+                            UserId = user.UserId,
+                            PunishmentSystemId = mentionPunishment.Id,
+                            Type = mentionPunishment.Type,
+                            Count = mapWFHUsers[user.UserName],
+                            TotalMoney = mapWFHUsers[user.UserName] * mentionPunishment.Money,
+                        });
+                    }
+                }
             }
 
 
@@ -433,7 +463,7 @@ namespace Timesheet.DomainServices
             await SoftDeleteOldPunishments(selectedDate);
 
             var (mapAbsenceUsers, mapRemoteUsers) = await GetAbsenceAndRemoteUsers(selectedDate);
-            var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
+            var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, mapWFHUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
 
             var allTimekeepings = new List<Timekeeping>();
             var allPunishments = new List<UserPunishment>();
@@ -454,6 +484,7 @@ namespace Timesheet.DomainServices
                             mapCheckInUsers,
                             mapDailyUsers,
                             mapMentionUsers,
+                            mapWFHUsers,
                             dicUserNameToTracker,
                             punishmentSystems,
                             oldTimekeepingNotes,
@@ -903,6 +934,8 @@ namespace Timesheet.DomainServices
                 bool morningCovered = false;
                 bool afternoonCovered = false;
                 bool isFullDayAbsence = false;
+                bool isLateRequest = false;
+                double lateHours = 0;
 
                 foreach (var absenceUser in absenceList)
                 {
@@ -932,7 +965,8 @@ namespace Timesheet.DomainServices
                         {
                             if (absenceUser.AbsenceTime == OnDayType.DiMuon)
                             {
-                                t.CheckIn = CommonUtils.AddMoreHourToHHmm(t.CheckIn, absenceUser.Hour);
+                                isLateRequest = true;
+                                lateHours = absenceUser.Hour;
                                 notes.Add("Xin đến muộn " + absenceUser.Hour + " h");
                                 t.AbsenceDayType = DayType.Custom;
                             }
@@ -1000,10 +1034,18 @@ namespace Timesheet.DomainServices
                 else if (morningCovered && !afternoonCovered)
                 {
                     t.CheckIn = user.AfternoonStartAt;
+                    if (isLateRequest)
+                    {
+                        t.CheckIn = CommonUtils.AddMoreHourToHHmm(user.AfternoonStartAt, lateHours);
+                    }
                 }
                 else if (!morningCovered && afternoonCovered)
                 {
                     t.CheckOut = user.MorningEndAt;
+                }
+                else if (isLateRequest && !morningCovered)
+                {
+                    t.CheckIn = CommonUtils.AddMoreHourToHHmm(user.MorningStartAt, lateHours);
                 }
 
                 t.Note = string.Join("/", notes);
