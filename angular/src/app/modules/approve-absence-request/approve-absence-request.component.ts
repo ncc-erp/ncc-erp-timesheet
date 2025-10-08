@@ -28,7 +28,9 @@ export class ApproveAbsenceRequestComponent extends AppComponentBase implements 
   userTypes = [
     { value: 0, label: 'Staff' },
     { value: 1, label: 'Internship' },
-    { value: 2, label: 'Collaborator' }
+    { value: 2, label: 'CTV' },
+    { value: 3, label: 'Probation' },
+    { value: 5, label: 'Vendor'}
   ];
   absenceRequests: AbsenceRequest[];
   backupAbsenceRequests: AbsenceRequest[];

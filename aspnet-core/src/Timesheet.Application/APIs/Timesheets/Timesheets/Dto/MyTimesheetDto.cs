@@ -27,7 +27,7 @@ namespace Timesheet.Timesheets.Timesheets.Dto
         public bool IsUserInProject { get; set; } //true - timesheet cua user thuoc project co PM la Abp.Session.UserId
         public string BranchName { get; set; } //HN, ĐN
         public Branch? Branch { get; set; }
-        public Usertype? Type { get; set; } // Staff, Intern, CTV
+        public Usertype? Type { get; set; } // Staff, Intern, CTV, Probation, Vendor
         public string AvatarPath { get; set; }
         public string AvatarFullPath => FileUtils.FullFilePath(AvatarPath);
         public UserLevel? Level { get; set; }

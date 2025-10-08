@@ -452,20 +452,31 @@
                                 style="margin-left: 10px"
                                 *ngIf="member.type == 0"
                                 class="label status-label bg-red"
-                                >{{ userTypes[member.type].label }}</span
+                                >{{getLabel(member.type)}}</span
                               >
                               <span
                                 style="margin-left: 10px"
                                 *ngIf="member.type == 1"
                                 class="label status-label bg-green"
-                                >{{ userTypes[member.type].label }}</span
+                                >{{getLabel(member.type)}}</span
                               >
                               <span
                                 style="margin-left: 10px"
                                 *ngIf="member.type == 2"
                                 class="label status-label bg-blue"
-                                >{{ userTypes[member.type].label }}</span
+                                >{{getLabel(member.type)}}</span
                               >
+                              <span
+                                style="margin-left: 10px"
+                                *ngIf="member.type == 3"
+                                class="label status-label bg-orange"
+                                >{{getLabel(member.type)}}</span
+                              >
+                              <span
+                                style="margin-left: 10px"
+                                *ngIf="member.type == 5"
+                                class="label status-label bg-purple"
+                                >{{getLabel(member.type)}}</span>
 
                               <span *ngIf="member.level != null">
                                 <span
@@ -649,19 +660,31 @@
                                 style="margin-left: 10px"
                                 *ngIf="mem.type == 0"
                                 class="label status-label bg-red"
-                                >{{ userTypes[mem.type].label }}</span
+                                >{{userTypes[mem.type].label}}</span
                               >
                               <span
                                 style="margin-left: 10px"
                                 *ngIf="mem.type == 1"
                                 class="label status-label bg-green"
-                                >{{ userTypes[mem.type].label }}</span
+                                >{{userTypes[mem.type].label}}</span
                               >
                               <span
                                 style="margin-left: 10px"
                                 *ngIf="mem.type == 2"
                                 class="label status-label bg-blue"
-                                >{{ userTypes[mem.type].label }}</span
+                                >{{userTypes[mem.type].label}}</span
+                              >
+                              <span
+                                style="margin-left: 10px"
+                                *ngIf="mem.type == 3"
+                                class="label status-label bg-orange"
+                                >{{userTypes[mem.type].label}}</span
+                              >
+                              <span
+                                style="margin-left: 10px"
+                                *ngIf="mem.type == 5"
+                                class="label status-label bg-purple"
+                                >{{userTypes[mem.type].label}}</span
                               >
                               <span
                                 style="margin-left: 10px; font-weight: bold"

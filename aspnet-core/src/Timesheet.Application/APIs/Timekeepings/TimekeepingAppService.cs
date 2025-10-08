@@ -718,8 +718,12 @@ namespace Timesheet.APIs.Timekeepings
             t.RegisterCheckIn = input.RegisterCheckIn;
             t.RegisterCheckOut = input.RegisterCheckOut;
             t.TrackerTime = input.TrackerTime;
-            await timekeepingServices.CheckIsPunished(t);
-            await timekeepingServices.CheckIsPunishedByRule(t, LimitedMinute, DateTimeUtils.ConvertHHmmssToMinutes(input.TrackerTime));
+            var user = await WorkScope.GetAsync<User>(t.UserId ?? 0);
+            if (user.Type != Usertype.Vendor)
+            {
+                await timekeepingServices.CheckIsPunished(t);
+                await timekeepingServices.CheckIsPunishedByRule(t, LimitedMinute, DateTimeUtils.ConvertHHmmssToMinutes(input.TrackerTime));
+            }
             await WorkScope.GetRepo<Timekeeping>().UpdateAsync(t);
             return t;
         }

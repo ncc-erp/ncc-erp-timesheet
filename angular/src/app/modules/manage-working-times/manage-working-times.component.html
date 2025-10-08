@@ -79,10 +79,20 @@
                         <div class="fullName">{{u.fullName}}</div>
                         <div>
                           <ng-container *ngIf="u.type || u.type == 0">
-                            <span class="label status-label"
-                              [ngClass]="u.type == 0 ? 'bg-red' : u.type == 1 ? 'bg-green' : 'bg-blue'">
+                            <!-- <span class="label status-label"
+                              [ngClass]="u.type == 0 ? 'bg-red' : u.type == 1 ? 'bg-green' : u.type == 2 ? 'bg-blue' : u.type == 3 ? 'bg-orange' : u.type == 5 ? 'bg-purple' : ''">
                               {{userTypes[u.type]?.label}}
-                            </span>
+                            </span> -->
+                            <span *ngIf="u.type == 0"
+                            class="label bg-red">{{getLabel(u.type)}}</span>
+                            <span *ngIf="u.type == 1"
+                            class="label bg-green">{{getLabel(u.type)}}</span>
+                            <span *ngIf="u.type == 2"
+                            class="label bg-blue">{{getLabel(u.type)}}</span>
+                            <span *ngIf="u.type == 3"
+                            class="label bg-orange">{{getLabel(u.type)}}</span>
+                            <span *ngIf="u.type == 5"
+                            class="label bg-purple">{{getLabel(u.type)}}</span>
                           </ng-container>
                           <ng-container *ngIf="u.level != null">
                             <span class="label status-label mr-left"
