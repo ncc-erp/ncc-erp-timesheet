@@ -82,10 +82,6 @@
                     </div>
                     <div>
                       <ng-container *ngIf="item.type || item.type == 0">
-                        <!-- <span class="label "
-                          [ngClass]="item.type == 0 ? 'bg-red' : item.type == 1 ? 'bg-green' : item.type == 2 ? 'bg-blue' : item.type == 3 ? 'bg-orange' : item.type == 5 ? 'bg-purple' : ''">
-                          {{userTypes[item.type]?.label}}
-                        </span> -->
                         <span *ngIf="item.type == 0"
                         class="label bg-red">{{getLabel(item.type)}}</span>
                         <span *ngIf="item.type == 1"
