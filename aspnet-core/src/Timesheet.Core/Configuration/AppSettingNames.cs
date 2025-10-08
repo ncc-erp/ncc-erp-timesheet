@@ -64,6 +64,7 @@ namespace Ncc.Configuration
         public const string AutoSubmitAtHour = "App.AutoSubmitAtHour";
         public const string WFHSetting = "App.WFHSetting";
         public const string AllowInternToWorkRemote = "App.AllowInternToWorkRemote";
+        public const string AllowProbationToWorkRemote = "App.AllowProbationToWorkRemote";
         public const string OpenTalkTaskId = "App.OpenTalkTaskId";
         public const string UnassignedTaskId = "App.UnassignedTaskId";
         public const string DateToLockTimesheetOfLastMonth = "App.DateToLockTimesheetOfLastMonth";

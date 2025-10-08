@@ -108,7 +108,9 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
   userTypes = [
     { value: 0, label: "Staff" },
     { value: 1, label: "Intern" },
-    { value: 2, label: "CTV" }
+    { value: 2, label: "CTV" },
+    { value: 3, label: "Probation" },
+    { value: 5, label: "Vendor" }
   ];
 
 
@@ -261,6 +263,10 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
           }
         });
       });
+  }
+  getLabel(userType: number): string {
+    const found = this.userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
   }
 
   onSelectedTypeOfWorkChange() {

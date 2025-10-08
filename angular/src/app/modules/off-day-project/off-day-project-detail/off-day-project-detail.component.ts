@@ -25,7 +25,9 @@ export class OffDayProjectDetailComponent extends AppComponentBase implements On
   public userTypes = [
     { value: 0, label: 'Staff' },
     { value: 1, label: 'Intern' },
-    { value: 2, label: 'CTV' }
+    { value: 2, label: 'CTV' },
+    { value: 3, label: 'Probation' },
+    { value: 5, label: 'Vendor' }
   ];
  public isLoading: boolean = false;
 
@@ -115,6 +117,11 @@ export class OffDayProjectDetailComponent extends AppComponentBase implements On
       return ['text-primary', 'day-chip-full-day'];
     }
     return ['text-primary', 'day-chip-morning'];
+  }
+
+  getLabel(userType: number): string {
+    const found = this.userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
   }
 
   onApproveAbsence(item) {

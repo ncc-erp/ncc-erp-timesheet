@@ -74,6 +74,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.KomuUserNameDevMode, "", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.WFHSetting, "3", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AllowInternToWorkRemote, "false", scopes:SettingScopes.Application| SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AllowProbationToWorkRemote, "false", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.OpenTalkTaskId, "20078", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.UnassignedTaskId, "20077", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendEmailTimesheet, "true", scopes:SettingScopes.Application| SettingScopes.Tenant),

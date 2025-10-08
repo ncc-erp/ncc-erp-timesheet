@@ -976,6 +976,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.wfhSetting.allowInternToWorkRemote = value.toString();
   }
 
+  onAllowProbationToWorkRemote(value) {
+    this.wfhSetting.allowProbationToWorkRemote = value.toString();
+  }
+
   // HRM setting
   refreshHRMConfig() {
     this.getHRMConfig();
@@ -2176,6 +2180,7 @@ export class LogoutAllUserDTO {
 export class WFHSettingDTO {
   numOfRemoteDays: string;
   allowInternToWorkRemote: string;
+  allowProbationToWorkRemote: string;
   totalTimeTardinessAndEarlyLeave : string;
 }
 

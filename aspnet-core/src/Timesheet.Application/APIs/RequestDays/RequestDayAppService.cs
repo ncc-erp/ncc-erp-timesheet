@@ -344,7 +344,14 @@ namespace Timesheet.APIs.RequestDays
 
             if (allowInternToWorkRemote != "true" && user.NotiUserInfo.Type == Usertype.Internship && input.Type == RequestType.Remote)
             {
-                throw new UserFriendlyException("Intern is not allow to work REMOTE at this time");
+                throw new UserFriendlyException("Intern is not allowêd to work REMOTE at this time");
+            }
+
+            var allowProbationToWorkRemote = await SettingManager.GetSettingValueAsync(AppSettingNames.AllowProbationToWorkRemote);
+
+            if (allowProbationToWorkRemote != "true" && user.NotiUserInfo.Type == Usertype.ProbationaryStaff && input.Type == RequestType.Remote)
+            {
+                throw new UserFriendlyException("Probation is not allowed to work REMOTE at this time");
             }
 
             var requestDateAts = input.Absences.Select(s => s.DateAt.Date).ToList();
@@ -495,7 +502,14 @@ namespace Timesheet.APIs.RequestDays
 
             if (allowInternToWorkRemote != "true" && requester.Type == Usertype.Internship && input.Type == RequestType.Remote)
             {
-                throw new UserFriendlyException("Intern is not allow to work REMOTE at this time");
+                throw new UserFriendlyException("Intern is not allowed to work REMOTE at this time");
+            }
+
+            var allowProbationToWorkRemote = await SettingManager.GetSettingValueAsync(AppSettingNames.AllowProbationToWorkRemote);
+
+            if (allowProbationToWorkRemote != "true" && requester.Type == Usertype.ProbationaryStaff && input.Type == RequestType.Remote)
+            {
+                throw new UserFriendlyException("Probation is not allowed to work REMOTE at this time");
             }
 
             if (input.Type != RequestType.Remote && string.IsNullOrEmpty(input.Reason))

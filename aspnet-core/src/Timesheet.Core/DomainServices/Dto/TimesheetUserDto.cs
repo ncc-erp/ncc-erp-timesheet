@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.DomainServices.Dto
 {
@@ -17,5 +18,6 @@ namespace Timesheet.DomainServices.Dto
         public string AfternoonEndAt { get; set; }
         public double? AfternoonWorking { get; set; }
         public string UserName => EmailAddress.Contains("@") ? EmailAddress.Substring(0, EmailAddress.IndexOf("@")) : EmailAddress;
+        public Usertype? Type { get; set; }
     }
 }
