@@ -177,11 +177,11 @@
                         </button>
                                                 <img [src]="getAvatar(mem)" class="avatar" alt="Member" style="border-radius: 50%;" /> {{mem.name}}
                                                 <span class="label status-label" [style.backgroundColor]="mem.branchColor">{{ mem.branchDisplayName}}</span>
-                                                <span style="margin-left: 10px;" *ngIf="mem.type == 0" class="label status-label bg-red">{{userTypes[mem.type].label}}</span>
-                                                <span style="margin-left: 10px;" *ngIf="mem.type == 1" class="label status-label bg-green">{{userTypes[mem.type].label}}</span>
-                                                <span style="margin-left: 10px;" *ngIf="mem.type == 2" class="label status-label bg-blue">{{userTypes[mem.type].label}}</span>
-                                                <span style="margin-left: 10px;" *ngIf="mem.type == 3" class="label status-label bg-orange">{{userTypes[mem.type].label}}</span>
-                                                <span style="margin-left: 10px;" *ngIf="mem.type == 5" class="label status-label bg-purple">{{userTypes[mem.type].label}}</span>
+                                                <span style="margin-left: 10px;" *ngIf="mem.type == 0" class="label status-label bg-red">{{getLabel(mem.type)}}</span>
+                                                <span style="margin-left: 10px;" *ngIf="mem.type == 1" class="label status-label bg-green">{{getLabel(mem.type)}}</span>
+                                                <span style="margin-left: 10px;" *ngIf="mem.type == 2" class="label status-label bg-blue">{{getLabel(mem.type)}}</span>
+                                                <span style="margin-left: 10px;" *ngIf="mem.type == 3" class="label status-label bg-orange">{{getLabel(mem.type)}}</span>
+                                                <span style="margin-left: 10px;" *ngIf="mem.type == 5" class="label status-label bg-purple">{{getLabel(mem.type)}}</span>
                                                 <span *ngIf="mem.level != null">
                           <span class="label status-label mr-left"
                             [ngStyle]=" userLevels[mem.level].style">{{userLevels[mem.level].name}}</span>
