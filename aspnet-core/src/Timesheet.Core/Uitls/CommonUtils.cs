@@ -280,7 +280,7 @@ namespace Timesheet.Uitls
             };
             if (userTypeMap.ContainsKey(typeFromHrmV2))
             {
-                return userTypeMap[(int)typeFromHrmV2];
+                return userTypeMap[typeFromHrmV2];
             }
             throw new ArgumentOutOfRangeException(nameof(typeFromHrmV2), $"Invalid user type value from HRM V2: {typeFromHrmV2}");
         }
