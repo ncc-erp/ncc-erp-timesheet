@@ -144,6 +144,10 @@ namespace Timesheet.Uitls
                     return "TTS";
                 case Usertype.Collaborators:
                     return "CTV";
+                case Usertype.ProbationaryStaff:
+                    return "Probationary Staff";
+                case Usertype.Vendor:
+                    return "Vendor";
             }
             return Enum.GetName(typeof(Usertype), type);
         }
@@ -266,7 +270,7 @@ namespace Timesheet.Uitls
         }
         public static Usertype GetUserTypeByTypeFromHrmV2(Usertype typeFromHrmV2)
         {
-            var userTypeMapers = new Usertype[] { Usertype.Internship, Usertype.Collaborators, Usertype.Staff, Usertype.Staff };
+            var userTypeMapers = new Usertype[] { Usertype.Internship, Usertype.Collaborators, Usertype.Staff, Usertype.ProbationaryStaff, Usertype.Vendor };
             return userTypeMapers[(int)typeFromHrmV2];
         }
         public static Sex GetSexBySexFromHrmV2(Sex sexFromHrmV2)

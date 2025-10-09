@@ -11,6 +11,6 @@ namespace Timesheet.Core
     {
         Task<List<YesterdayAnomalyDTO>> GetYesterdayAnomalies(string branchName, DateTime date);
         Task<List<LastWeekAnomalyDTO>> GetLastWeekAnomalies(string branchName, DateTime startDate, DateTime endDate);
-        Task<bool> SendDailyAnomaliesToMezon(BotReportSettingDto input, bool isWeekly);
+        Task<bool> SendDailyAnomaliesToMezon(AnomaliesReportSettingDto input, bool isWeekly);
     }
 }

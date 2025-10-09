@@ -33,6 +33,7 @@ export class TimeSheetDto {
     projectTargetUser: string;
     workingTimeTargetUser: number;
     openTalkTime : number;
+    workLocation: number;
 }
 
 export class TimeSheetGroupDto {

@@ -46,7 +46,9 @@ export class ReviewReportComponent extends AppComponentBase {
   public userTypes = [
     { value: 0, label: 'Staff' },
     { value: 1, label: 'Intern' },
-    { value: 2, label: 'CTV' }
+    { value: 2, label: 'CTV' },
+    { value: 3, label: 'Probation' },
+    { value: 5, label: 'Vendor' }
   ];
   getTimeDefault() {
     const now = new Date();
@@ -84,6 +86,10 @@ export class ReviewReportComponent extends AppComponentBase {
     }, () => {
       this.isLoading = false
     })
+  }
+  getLabel(userType: number): string {
+    const found = this.userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
   }
   searchIntern() {
     this.getReviewReport()

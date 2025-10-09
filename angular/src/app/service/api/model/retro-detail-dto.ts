@@ -115,6 +115,8 @@ export enum EnumUserType {
   Staff = 0,
   Internship = 1,
   Collaborator = 2,
+  Probation = 3,
+  Vendor = 5
 }
 
 export enum EnumLevel {

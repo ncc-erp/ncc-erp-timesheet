@@ -16,7 +16,7 @@ namespace Timesheet.APIs.RequestDays.Dto
         public RequestStatus Status { get; set; }
         public string Reason { get; set; }
         public Ncc.Entities.Enum.StatusEnum.Branch? Branch { get; set; }
-        public Usertype? Type { get; set; } // Staff, Intern, CTV
+        public Usertype? Type { get; set; } // Staff, Intern, CTV, Probation, Vendor
         public string AvatarPath { get; set; }
         public string AvatarFullPath => FileUtils.FullFilePath(AvatarPath);
         public UserLevel? Level { get; set; }

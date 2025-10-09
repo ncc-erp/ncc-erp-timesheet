@@ -61,7 +61,9 @@ export class NormalWorkingComponent extends PagedListingComponentBase<WorkingRep
   public userTypes = [
     { value: 0, label: 'Staff' },
     { value: 1, label: 'Intern' },
-    { value: 2, label: 'CTV' }
+    { value: 2, label: 'CTV' },
+    { value: 3, label: 'Probation' },
+    { value: 5, label: 'Vendor' }
   ];
 
   projectFilter = []

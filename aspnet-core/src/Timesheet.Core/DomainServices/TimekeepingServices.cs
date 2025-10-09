@@ -80,6 +80,7 @@ namespace Timesheet.DomainServices
                     AfternoonStartAt = u.AfternoonStartAt,
                     AfternoonEndAt = u.AfternoonEndAt,
                     AfternoonWorking = u.AfternoonWorking,
+                    Type = u.Type,
                 }).ToListAsync();
 
             if (!users.Any())
@@ -124,7 +125,10 @@ namespace Timesheet.DomainServices
                 UserPunishmentType.Tracker_20k,
                 UserPunishmentType.Tracker_50k,
                 UserPunishmentType.Tracker_100k,
-                UserPunishmentType.Tracker_200k
+                UserPunishmentType.Tracker_200k,
+                UserPunishmentType.ReviewIntern,
+                UserPunishmentType.PMReport_20k,
+                UserPunishmentType.PMReport_50k,
             };
 
             var olds = await WorkScope.GetAll<UserPunishment>()
@@ -182,6 +186,7 @@ namespace Timesheet.DomainServices
         private async Task<(Dictionary<string, UserCheckInDto> mapCheckInUsers,
             Dictionary<string, int> mapDailyUsers,
             Dictionary<string, int> mapMentionUsers,
+            Dictionary<string, int> mapWFHUsers,
             Dictionary<string, (float ActiveMinute, string active_time)> dicUserNameToTracker,
             Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems)> LoadExternalData(DateTime selectedDate, List<TimesheetUserDto> users)
         {
@@ -204,7 +209,8 @@ namespace Timesheet.DomainServices
 
             var mapCheckInUsers = checkInUsers.ToDictionary(s => s.Email);
             var mapDailyUsers = dailyAndMention.daily.ToDictionary(s => s.email, s => s.count);
-            var mapMentionUsers = dailyAndMention.mention.ToDictionary(s => s.email, s => s.count);
+            var mapMentionUsers = dailyAndMention.mention.ToDictionary(s => s.name, s => s.count);
+            var mapWFHUsers = dailyAndMention.wfh.ToDictionary(s => s.name, s => s.total);
             var dicUserNameToTracker = trackerTimes.ToDictionary(s => s.email, s => (s.ActiveMinute, s.active_time));
             var PunishmentSystems = punishmentSystems;
             return
@@ -212,6 +218,7 @@ namespace Timesheet.DomainServices
                 mapCheckInUsers,
                 mapDailyUsers,
                 mapMentionUsers,
+                mapWFHUsers,
                 dicUserNameToTracker,
                 punishmentSystems
             );
@@ -223,6 +230,7 @@ namespace Timesheet.DomainServices
             Dictionary<string, UserCheckInDto> mapCheckInUsers,
             Dictionary<string, int> mapDailyUsers,
             Dictionary<string, int> mapMentionUsers,
+            Dictionary<string, int> mapWFHUsers,
             Dictionary<string, (float ActiveMinute, string active_time)> dicUserNameToTracker,
             Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems,
             Dictionary<long, List<(string NoteReply, string UserNote)>> oldTimekeepingNotes,
@@ -283,35 +291,64 @@ namespace Timesheet.DomainServices
                     }
                 }
 
-                if (mapDailyUsers.ContainsKey(user.UserName))
+                if (user.Type != Usertype.Vendor)
                 {
-                    t.CountPunishDaily = mapDailyUsers[user.UserName];
-                    var dailyPunishment = punishmentSystems[UserPunishmentType.Daily];
-                    userPunishmentsToInsert.Add(new UserPunishment
+                    if (mapDailyUsers.ContainsKey(user.UserName))
                     {
-                        DateAt = selectedDate,
-                        UserId = user.UserId,
-                        PunishmentSystemId = dailyPunishment.Id,
-                        Type = dailyPunishment.Type,
-                        Count = mapDailyUsers[user.UserName],
-                        TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money
-                    });
-                }
+                        t.CountPunishDaily = mapDailyUsers[user.UserName];
+                        var dailyPunishment = punishmentSystems[UserPunishmentType.Daily];
+                        userPunishmentsToInsert.Add(new UserPunishment
+                        {
+                            DateAt = selectedDate,
+                            UserId = user.UserId,
+                            PunishmentSystemId = dailyPunishment.Id,
+                            Type = dailyPunishment.Type,
+                            Count = mapDailyUsers[user.UserName],
+                            TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money
+                        });
+                    }
 
-            if (mapMentionUsers.ContainsKey(user.UserName))
-            {
-                t.CountPunishMention = mapMentionUsers[user.UserName];
-                var mentionPunishment = punishmentSystems[UserPunishmentType.Mention];
-                userPunishmentsToInsert.Add(new UserPunishment
-                {
-                    DateAt = selectedDate,
-                    UserId = user.UserId,
-                    PunishmentSystemId = mentionPunishment.Id,
-                    Type = mentionPunishment.Type,
-                    Count = mapMentionUsers[user.UserName],
-                    TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
-                });
-            }
+                    if (mapMentionUsers.ContainsKey(user.UserName))
+                    {
+                        t.CountPunishMention = mapMentionUsers[user.UserName];
+                        var mentionPunishment = punishmentSystems[UserPunishmentType.Mention];
+                        userPunishmentsToInsert.Add(new UserPunishment
+                        {
+                            DateAt = selectedDate,
+                            UserId = user.UserId,
+                            PunishmentSystemId = mentionPunishment.Id,
+                            Type = mentionPunishment.Type,
+                            Count = mapMentionUsers[user.UserName],
+                            TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
+                        });
+                    }
+
+                    if (mapWFHUsers.ContainsKey(user.UserName))
+                    {
+                        t.CountPunishMention += mapWFHUsers[user.UserName];
+                        var mentionPunishment = punishmentSystems[UserPunishmentType.Mention];
+                        var existingMention = userPunishmentsToInsert
+                            .FirstOrDefault(p => p.UserId == user.UserId && p.Type == UserPunishmentType.Mention);
+
+                        if (existingMention != null)
+                        {
+                            existingMention.Count += mapWFHUsers[user.UserName];
+                            existingMention.TotalMoney = existingMention.Count * mentionPunishment.Money;
+                        }
+                        else
+                        {
+                            userPunishmentsToInsert.Add(new UserPunishment
+                            {
+                                DateAt = selectedDate,
+                                UserId = user.UserId,
+                                PunishmentSystemId = mentionPunishment.Id,
+                                Type = mentionPunishment.Type,
+                                Count = mapWFHUsers[user.UserName],
+                                TotalMoney = mapWFHUsers[user.UserName] * mentionPunishment.Money,
+                            });
+                        }
+                    }
+                }
             }
 
 
@@ -337,8 +374,18 @@ namespace Timesheet.DomainServices
             t.DateAt = selectedDate;
             t.UserId = user.UserId;
 
-            await CheckIsPunished(t, LimitedMinute);
-            await CheckIsPunishedByRule(t, LimitedMinute, trackerTime);
+            if (user.Type != Usertype.Vendor)
+            {
+                await CheckIsPunished(t, LimitedMinute);
+                await CheckIsPunishedByRule(t, LimitedMinute, trackerTime);
+            }
+            else
+            {
+                t.IsPunishedCheckIn = false;
+                t.IsPunishedCheckOut = false;
+                t.StatusPunish = CheckInCheckOutPunishmentType.NoPunish;
+                t.MoneyPunish = 0;
+            }
 
             if (user.IsStopWork || (user.StopWorkingDate.HasValue && user.StopWorkingDate.Value.Date < selectedDate))
             {
@@ -373,7 +420,7 @@ namespace Timesheet.DomainServices
             {
                 rs.Add(t);
 
-                if (t.StatusPunish != CheckInCheckOutPunishmentType.NoPunish)
+                if (t.StatusPunish != CheckInCheckOutPunishmentType.NoPunish && user.Type != Usertype.Vendor)
                 {
                     var punishmentSystem = punishmentSystems.Values.FirstOrDefault(x =>
                     (StatusEnum.CheckInCheckOutPunishmentType)x.Type == t.StatusPunish);
@@ -393,7 +440,7 @@ namespace Timesheet.DomainServices
                     }
                 }
 
-                if (isRemoteWork)
+                if (isRemoteWork && user.Type != Usertype.Vendor)
                 {
                     var registerWorkingMinutes = CommonUtils.GetEmployeeWorkingHours(t.RegisterCheckOut, t.RegisterCheckIn);
                     var dayOffType = registerCheckInOut.AbsenceDayType;
@@ -433,7 +480,7 @@ namespace Timesheet.DomainServices
             await SoftDeleteOldPunishments(selectedDate);
 
             var (mapAbsenceUsers, mapRemoteUsers) = await GetAbsenceAndRemoteUsers(selectedDate);
-            var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
+            var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, mapWFHUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
 
             var allTimekeepings = new List<Timekeeping>();
             var allPunishments = new List<UserPunishment>();
@@ -454,6 +501,7 @@ namespace Timesheet.DomainServices
                             mapCheckInUsers,
                             mapDailyUsers,
                             mapMentionUsers,
+                            mapWFHUsers,
                             dicUserNameToTracker,
                             punishmentSystems,
                             oldTimekeepingNotes,
@@ -903,6 +951,8 @@ namespace Timesheet.DomainServices
                 bool morningCovered = false;
                 bool afternoonCovered = false;
                 bool isFullDayAbsence = false;
+                bool isLateRequest = false;
+                double lateHours = 0;
 
                 foreach (var absenceUser in absenceList)
                 {
@@ -932,7 +982,8 @@ namespace Timesheet.DomainServices
                         {
                             if (absenceUser.AbsenceTime == OnDayType.DiMuon)
                             {
-                                t.CheckIn = CommonUtils.AddMoreHourToHHmm(t.CheckIn, absenceUser.Hour);
+                                isLateRequest = true;
+                                lateHours = absenceUser.Hour;
                                 notes.Add("Xin đến muộn " + absenceUser.Hour + " h");
                                 t.AbsenceDayType = DayType.Custom;
                             }
@@ -1000,10 +1051,18 @@ namespace Timesheet.DomainServices
                 else if (morningCovered && !afternoonCovered)
                 {
                     t.CheckIn = user.AfternoonStartAt;
+                    if (isLateRequest)
+                    {
+                        t.CheckIn = CommonUtils.AddMoreHourToHHmm(user.AfternoonStartAt, lateHours);
+                    }
                 }
                 else if (!morningCovered && afternoonCovered)
                 {
                     t.CheckOut = user.MorningEndAt;
+                }
+                else if (isLateRequest && !morningCovered)
+                {
+                    t.CheckIn = CommonUtils.AddMoreHourToHHmm(user.MorningStartAt, lateHours);
                 }
 
                 t.Note = string.Join("/", notes);
@@ -1062,7 +1121,7 @@ namespace Timesheet.DomainServices
                 .ToList();
 
             var workingUserIds = WorkScope.GetAll<User>()
-                .Where(s => !s.IsStopWork || (s.IsStopWork && s.EndDateAt > dateAt.Date))
+                .Where(s => s.Type != Usertype.Vendor && (!s.IsStopWork || s.EndDateAt > dateAt.Date))
                 .Select(s => s.Id)
                 .ToList();
 

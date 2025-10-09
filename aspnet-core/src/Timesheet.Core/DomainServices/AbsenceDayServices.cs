@@ -94,21 +94,98 @@ namespace Timesheet.Core
         }
 
         private bool IsValidAbsenceForCase(dynamic[] userAbsenceRequests, (long RequestId, DateTime DateAt) absenceDetailDictKey,
-            bool isFullDayAbsence, bool isMorningAbsence, bool isAfternoonAbsence, bool isMorningPresentAfternoonAbsent, bool isAfternoonPresentMorningAbsent,
-            Dictionary<(long RequestId, DateTime DateAt), List<dynamic>> absenceDetailDynamicList)
+                    bool isFullDayAbsence, bool isMorningAbsence, bool isAfternoonAbsence, bool isMorningPresentAfternoonAbsent, bool isAfternoonPresentMorningAbsent,
+                    Dictionary<(long RequestId, DateTime DateAt), List<dynamic>> absenceDetailList)
         {
+            // When the admin approves all user requests for the week, the last week's anomalies message will only return the days with the status "No tracker time for approved WFH"
+            var relevantRequests = userAbsenceRequests
+                .Where(r => absenceDetailList.ContainsKey((r.Id, absenceDetailDictKey.DateAt)))
+                .ToList();
+
+            var morningRequests = relevantRequests
+                .Where(r => absenceDetailList[(r.Id, absenceDetailDictKey.DateAt)].Any(d => d.DateType == DayType.Morning))
+                .ToList();
+            var afternoonRequests = relevantRequests
+                .Where(r => absenceDetailList[(r.Id, absenceDetailDictKey.DateAt)].Any(d => d.DateType == DayType.Afternoon))
+                .ToList();
+
+            bool hasMorningApproved = false;
+            bool hasAfternoonApproved = false;
+            bool hasMorningRequest = false;
+            bool hasAfternoonRequest = false;
+
+            foreach (var request in relevantRequests)
+            {
+                if (absenceDetailList.ContainsKey((request.Id, absenceDetailDictKey.DateAt)))
+                {
+                    var details = absenceDetailList[(request.Id, absenceDetailDictKey.DateAt)];
+                    foreach (var detail in details)
+                    {
+                        if (request.Status == RequestStatus.Approved)
+                        {
+                            if (detail.DateType == DayType.Morning)
+                            {
+                                hasMorningRequest = true;
+                                if (request.Type == RequestType.Off || request.Type == RequestType.Onsite || request.Type == RequestType.Remote)
+                                {
+                                    hasMorningApproved = true;
+                                }
+                            }
+                            else if (detail.DateType == DayType.Afternoon)
+                            {
+                                hasAfternoonRequest = true;
+                                if (request.Type == RequestType.Off || request.Type == RequestType.Onsite || request.Type == RequestType.Remote)
+                                {
+                                    hasAfternoonApproved = true;
+                                }
+                            }
+                            else if (detail.DateType == DayType.Fullday && isFullDayAbsence)
+                            {
+                                if (request.Type == RequestType.Off || request.Type == RequestType.Onsite || request.Type == RequestType.Remote)
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (hasMorningRequest && hasAfternoonRequest &&
+                morningRequests.Any(r => (r.Type == RequestType.Off || r.Type == RequestType.Onsite)) &&
+                afternoonRequests.Any(r => (r.Type == RequestType.Off || r.Type == RequestType.Onsite)))
+            {
+                if (hasMorningApproved && hasAfternoonApproved)
+                {
+                    return true;
+                }
+            }
+
+            bool hasMorningRemote = hasMorningRequest && morningRequests.Any(r => r.Type == RequestType.Remote);
+            bool hasAfternoonRemote = hasAfternoonRequest && afternoonRequests.Any(r => r.Type == RequestType.Remote);
+            bool hasMorningOffOnsite = hasMorningRequest && morningRequests.Any(r => r.Type == RequestType.Off || r.Type == RequestType.Onsite);
+            bool hasAfternoonOffOnsite = hasAfternoonRequest && afternoonRequests.Any(r => r.Type == RequestType.Off || r.Type == RequestType.Onsite);
+
+            if ((hasMorningRemote && hasAfternoonOffOnsite) || (hasAfternoonRemote && hasMorningOffOnsite))
+            {
+                if (hasMorningApproved && hasAfternoonApproved)
+                {
+                    return true;
+                }
+            }
+
             foreach (var request in userAbsenceRequests)
             {
-                if (absenceDetailDynamicList.ContainsKey((request.Id, absenceDetailDictKey.DateAt)))
+                if (absenceDetailList.ContainsKey((request.Id, absenceDetailDictKey.DateAt)))
                 {
-                    var detail = absenceDetailDynamicList[(request.Id, absenceDetailDictKey.DateAt)].FirstOrDefault();
-                    if (detail != null)
+                    var detail = absenceDetailList[(request.Id, absenceDetailDictKey.DateAt)].FirstOrDefault();
+                    if (detail != null && request.Status == RequestStatus.Approved)
                     {
                         if (isFullDayAbsence && detail.DateType == DayType.Fullday)
                             return true;
                         if (isFullDayAbsence && (detail.DateType == DayType.Morning || detail.DateType == DayType.Afternoon))
                         {
-                            var otherDetail = absenceDetailDynamicList[(request.Id, absenceDetailDictKey.DateAt)]
+                            var otherDetail = absenceDetailList[(request.Id, absenceDetailDictKey.DateAt)]
                                 .FirstOrDefault(d => d.DateType != detail.DateType && (d.DateType == DayType.Morning || d.DateType == DayType.Afternoon));
                             if (otherDetail != null)
                                 return true;
@@ -117,11 +194,9 @@ namespace Timesheet.Core
                             return true;
                         if (isAfternoonAbsence && detail.DateType == DayType.Afternoon)
                             return true;
-                        if (isMorningPresentAfternoonAbsent && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved
-                            && detail.DateType == DayType.Afternoon)
+                        if ((isMorningAbsence || isAfternoonPresentMorningAbsent) && detail.DateType == DayType.Morning)
                             return true;
-                        if (isAfternoonPresentMorningAbsent && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved
-                            && detail.DateType == DayType.Morning)
+                        if ((isAfternoonAbsence || isMorningPresentAfternoonAbsent) && detail.DateType == DayType.Afternoon)
                             return true;
                     }
                     else if (isFullDayAbsence && request.Type == RequestType.Remote && request.Status == RequestStatus.Approved)
@@ -167,8 +242,8 @@ namespace Timesheet.Core
                 .ToListAsync();
 
             var absenceRequests = await _workScope.GetAll<AbsenceDayRequest>()
-                .Where(r => userIds.Contains(r.UserId))
-                .Select(r => new { r.Id, r.UserId, r.Status, r.Type })
+                .Where(r => userIds.Contains(r.UserId) && r.IsDeleted == false)
+                .Select(r => new { r.Id, r.UserId, r.Status, r.Type, r.IsDeleted })
                 .ToListAsync();
 
             var absenceRequestDict = absenceRequests
@@ -228,10 +303,6 @@ namespace Timesheet.Core
                         trackerTimeHours = Math.Round(trackerTimeSpan.TotalHours, 2);
                         double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt, gracePeriodMinutes);
                         trackerTimeHours += lateMinutes / 60.0;
-                        if (isWFHFullday)
-                        {
-                            trackerTimeHours -= breakTime;
-                        }
                     }
                     trackerActualHours = trackerTimeHours > 0 ? trackerTimeHours : 0;
                 }
@@ -329,22 +400,53 @@ namespace Timesheet.Core
                         }
                     }
 
-                    bool isWorkingTimeViolation = (totalWorkingTime ?? 0) < requiredHours && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice && !(isWFHFullday || isWFHMorning || isWFHAfternoon);
                     bool isTrackerTimeViolation = (isWFHFullday || isWFHMorning || isWFHAfternoon) && (
                         (string.IsNullOrEmpty(tk.TrackerTime) ||
                         (TimeSpan.TryParse(tk.TrackerTime, out var trackerTimeSpan) && trackerTimeSpan.TotalHours == 0)) ||
                         (trackerTimeHours.HasValue && trackerTimeHours.Value < requiredHours)
                     ) && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice;
-                    bool isZeroTrackerTimeViolation = (isWFHFullday || isWFHMorning || isWFHAfternoon) && TimeSpan.TryParse(tk.TrackerTime, out var zeroTrackerTimeSpan) && zeroTrackerTimeSpan.TotalHours == 0;
+                    bool isZeroTrackerTimeViolation = (isWFHFullday || isWFHMorning || isWFHAfternoon) &&
+                        (string.IsNullOrEmpty(tk.TrackerTime) || (TimeSpan.TryParse(tk.TrackerTime, out var zeroTrackerTimeSpan) && zeroTrackerTimeSpan.TotalHours == 0));
 
-                    if (isWorkingTimeViolation || isTrackerTimeViolation)
+                    if (isTrackerTimeViolation)
                     {
                         string notes = isZeroTrackerTimeViolation ? "No tracker time for approved WFH" : "No early leave/late arrival approval";
+                        string violationType = isZeroTrackerTimeViolation ? "DatesNoTrackerTime" : "DatesBelowThreshold";
                         AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), totalWorkingTime,
-                            notes, isYesterday, yesterdayAnomalies, lastWeekAnomalies);
+                            notes, isYesterday, yesterdayAnomalies, lastWeekAnomalies, violationType);
+                    }
+
+                    bool isWorkingTimeViolation = (totalWorkingTime ?? 0) < requiredHours && !isWFHFullday && !isWFHMorning && !isWFHAfternoon && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice;
+                    if (isWorkingTimeViolation)
+                    {
+                        AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), totalWorkingTime,
+                            "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold");
+                    }
+
+                    if (isWFHMorning && isAfternoonPresentMorningAbsent && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice)
+                    {
+                        double afternoonRequiredHours = (user.AfternoonWorking ?? 0) - tardinessHour - leaveEarlyHour;
+                        bool isAfternoonWorkingTimeViolation = (officeActualHours ?? 0) < afternoonRequiredHours;
+                        if (isAfternoonWorkingTimeViolation)
+                        {
+                            AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), officeActualHours,
+                                "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold");
+                        }
+                    }
+
+                    if (isWFHAfternoon && isMorningPresentAfternoonAbsent && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice)
+                    {
+                        double morningRequiredHours = (user.MorningWorking ?? 0) - tardinessHour - leaveEarlyHour;
+                        bool isMorningWorkingTimeViolation = (officeActualHours ?? 0) < morningRequiredHours;
+                        if (isMorningWorkingTimeViolation)
+                        {
+                            AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), officeActualHours,
+                                "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold");
+                        }
                     }
                 }
 
+                
                 if (isFullDayAbsence || isMorningAbsence || isAfternoonAbsence || isMorningPresentAfternoonAbsent || isAfternoonPresentMorningAbsent)
                 {
                     isValidAbsence = IsValidAbsenceForCase(userAbsenceRequests, (0, tk.DateAt), isFullDayAbsence, isMorningAbsence, isAfternoonAbsence,
@@ -354,16 +456,6 @@ namespace Timesheet.Core
                     {
                         AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), officeActualHours,
                             "No leave/WFH record", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesMissed");
-                    }
-                }
-
-                if (isWFHFullday || isWFHMorning || isWFHAfternoon)
-                {
-                    bool isZeroTrackerTimeViolation = TimeSpan.TryParse(tk.TrackerTime, out var zeroTrackerTimeSpan) && zeroTrackerTimeSpan.TotalHours == 0;
-                    if (isZeroTrackerTimeViolation)
-                    {
-                        AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("yyyy/MM/dd"), officeActualHours,
-                            "No tracker time for approved WFH", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesNoTrackerTime");
                     }
                 }
             }
@@ -537,7 +629,7 @@ namespace Timesheet.Core
             }
         }
 
-        public async Task<bool> SendDailyAnomaliesToMezon(BotReportSettingDto input, bool isWeekly)
+        public async Task<bool> SendDailyAnomaliesToMezon(AnomaliesReportSettingDto input, bool isWeekly)
         {
             DateTime now = DateTime.Now;
 
@@ -588,9 +680,9 @@ namespace Timesheet.Core
                     DateTime lastWeekEnd = lastMonday.AddDays(5).Date.AddSeconds(-1);
                     List<LastWeekAnomalyDTO> lastWeekAnomalies = await GetLastWeekAnomalies(branchName, lastWeekStart, lastWeekEnd);
 
-                    var lastWeekUnplannedAbsences = lastWeekAnomalies?.Where(a => a.Notes == "No leave/WFH record" && a.DatesMissed.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
-                    var lastWeekUnapprovedShortHours = lastWeekAnomalies?.Where(a => a.Notes == "No early leave/late arrival approval" && a.DatesBelowThreshold.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
-                    var lastWeekNoTrackerTimeWFH = lastWeekAnomalies?.Where(a => a.Notes == "No tracker time for approved WFH" && a.DatesNoTrackerTime.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
+                    var lastWeekUnplannedAbsences = lastWeekAnomalies?.Where(a => a.DatesMissed.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
+                    var lastWeekUnapprovedShortHours = lastWeekAnomalies?.Where(a => a.DatesBelowThreshold.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
+                    var lastWeekNoTrackerTimeWFH = lastWeekAnomalies?.Where(a => a.DatesNoTrackerTime.Any()).ToList() ?? new List<LastWeekAnomalyDTO>();
 
                     BuildReportHeader(messageBuilder, mkList, ref currentPos, "Weekly Anomalies Report",
                         $"Report Period: {lastWeekStart:yyyy/MM/dd} - {lastWeekEnd:yyyy/MM/dd}", $"Office: {branch.Name}");

@@ -221,9 +221,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditOfficeWorkingReportSetting: boolean = false;
   botReportSetting = { everyday: false, botUri: '', projectIds: [], branchCodes: [] } as BotReportSettingDto;
   anomaliesReportSetting = { hour: 0, dayofweek: 'Monday', botUri: '', branchCodes: [] } as AnomaliesReportSettingDto;
-  // Dòng 218
   officeWorkingReportSetting = { enable: false, everyday: false, hour: 8, officeIds: '', limit: 10, mezonUrl: '' } as OfficeWorkingReportSettingDto;
   selectedOfficeWorkingBranches: string[] = [];
+  botReportSetting = { everyday: false, botUri: '', projectIds: [], branchCodes: [] } as BotReportSettingDto;
+  anomaliesReportSetting = { hour: 0, dayofweek: 'Monday', botUri: '', branchCodes: [] } as AnomaliesReportSettingDto;
   projects: ProjectDto[] = [];
   selectedProjects: number[] = [];
   selectedBranches: string[] = [];
@@ -233,8 +234,6 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isAllBranchesSelected: boolean = false;
   isAllAnomaliesBranchesSelected: boolean = false;
   branchCodes = BRANCH_CODES;
-  // ...existing code...
-
   toggleAllOfficeWorkingBranches() {
     if (this.isAllOfficeWorkingBranchesSelected) {
       this.selectedOfficeWorkingBranches = [];

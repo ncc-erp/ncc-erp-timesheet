@@ -1169,6 +1169,8 @@
           <!-- Merged Bot Report Setting Panel -->
           <mat-expansion-panel *ngIf="permission.isGranted(VIEW_BOT_REPORT_SETTING)" style="margin-bottom: 10px;"
             [expanded]="isShowBotReportSetting">
+          <!-- Daily Project Report Setting Panel -->
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_BOT_REPORT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowBotReportSetting">
             <mat-expansion-panel-header (click)="isShowBotReportSetting = !isShowBotReportSetting" class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Daily Project Report Setting"}}</p>
