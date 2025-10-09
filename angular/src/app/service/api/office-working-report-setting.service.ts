@@ -12,6 +12,7 @@ export interface OfficeWorkingReportSettingDto {
     mezonUrl: string;
 }
 
+
 @Injectable({
     providedIn: 'root'
 })

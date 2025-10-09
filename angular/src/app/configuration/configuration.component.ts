@@ -29,6 +29,7 @@ import { LogoutAllUserService } from '@app/service/api/logout-all-user.service';
 import { LateInternReviewSettingService, LateInternReviewSettingDto } from '@app/service/api/late-intern-review-setting.service';
 import { PMReportPunishSettingService, PMReportPunishSettingDto } from '@app/service/api/pm-report-punish-setting.service';
 import { BotReportSettingService, BotReportSettingDto, ProjectDto } from '../service/api/bot-report-setting.service';
+import { AnomaliesReportSettingService, AnomaliesReportSettingDto } from '../service/api/anomalies-report-setting.service';
 import { BranchService } from '@app/service/api/branch.service';
 import { OfficeWorkingReportSettingDto, OfficeWorkingReportSettingService } from '@app/service/api/office-working-report-setting.service';
 @Component({
@@ -85,6 +86,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_PM_REPORT_PUNISH_SETTING = PERMISSIONS_CONSTANT.EditPMReportSetting;
   VIEW_BOT_REPORT_SETTING = PERMISSIONS_CONSTANT.ViewBotReportSetting;
   EDIT_BOT_REPORT_SETTING = PERMISSIONS_CONSTANT.EditBotReportSetting;
+  VIEW_ANOMALIES_REPORT_SETTING = PERMISSIONS_CONSTANT.ViewAnomaliesReportSetting;
+  EDIT_ANOMALIES_REPORT_SETTING = PERMISSIONS_CONSTANT.EditAnomaliesReportSetting;
   VIEW_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.ViewUnlockTimesheetSetting;
   UPDATE_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.UpdateUnlockTimesheetSetting;
   VIEW_PUNISHCHECKIN_CONFIG = PERMISSIONS_CONSTANT.ViewSendKomuPunishedCheckIn;
@@ -212,18 +215,23 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   isShowBotReportSetting: boolean = false;
   isEditBotReportSetting: boolean = false;
+  isShowAnomaliesReportSetting: boolean = false;
+  isEditAnomaliesReportSetting: boolean = false;
   isShowOfficeWorkingReportSetting: boolean = false;
   isEditOfficeWorkingReportSetting: boolean = false;
   botReportSetting = { everyday: false, botUri: '', projectIds: [], branchCodes: [] } as BotReportSettingDto;
+  anomaliesReportSetting = { hour: 0, dayofweek: 'Monday', botUri: '', branchCodes: [] } as AnomaliesReportSettingDto;
   // Dòng 218
   officeWorkingReportSetting = { enable: false, everyday: false, hour: 8, officeIds: '', limit: 10, mezonUrl: '' } as OfficeWorkingReportSettingDto;
   selectedOfficeWorkingBranches: string[] = [];
   projects: ProjectDto[] = [];
   selectedProjects: number[] = [];
   selectedBranches: string[] = [];
+  selectedAnomaliesBranches: string[] = [];
   isAllOfficeWorkingBranchesSelected: boolean = false;
   isAllProjectsSelected: boolean = false;
   isAllBranchesSelected: boolean = false;
+  isAllAnomaliesBranchesSelected: boolean = false;
   branchCodes = BRANCH_CODES;
   // ...existing code...
 
@@ -314,6 +322,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     private lateInternReviewSettingService: LateInternReviewSettingService,
     private pmReportPunishSettingService: PMReportPunishSettingService,
     private botReportSettingService: BotReportSettingService,
+    private anomaliesReportSettingService: AnomaliesReportSettingService,
     private branchService: BranchService,
     private dialog: MatDialog,
     private officeWorkingReportSettingService: OfficeWorkingReportSettingService,
@@ -360,6 +369,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getLateInternReviewSetting();
     this.getPMReportPunishSetting();
     this.getBotReportSetting();
+    this.getAnomaliesReportSetting();
+    
     this.getOfficeWorkingReportSetting();
     this.getSendMessageToPunishUserConfig();
     this.getNRITVMAEConfig();
@@ -1028,6 +1039,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   onAllowInternToWorkRemote(value) {
     this.wfhSetting.allowInternToWorkRemote = value.toString();
+  }
+
+  onAllowProbationToWorkRemote(value) {
+    this.wfhSetting.allowProbationToWorkRemote = value.toString();
   }
 
   // HRM setting
@@ -1996,7 +2011,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     if (this.permission.isGranted(this.VIEW_BOT_REPORT_SETTING)) {
       this.projects = [];
 
-      this.botReportSettingService.get().subscribe((data: any) => {
+      this.botReportSettingService.getBotReportSetting().subscribe((data: any) => {
         this.botReportSetting = data.result;
         this.selectedProjects = this.botReportSetting.projectIds || [];
 
@@ -2019,8 +2034,26 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     }
   }
 
+  getAnomaliesReportSetting() {
+    if (this.permission.isGranted(this.VIEW_ANOMALIES_REPORT_SETTING)) {
+      this.anomaliesReportSettingService.getAnomaliesReportSetting().subscribe((data: any) => {
+        this.anomaliesReportSetting = data.result;
+        if (this.anomaliesReportSetting.branchCodes && this.anomaliesReportSetting.branchCodes.length > 0) {
+          this.selectedAnomaliesBranches = [...this.anomaliesReportSetting.branchCodes];
+        } else {
+          this.selectedAnomaliesBranches = [];
+        }
+        this.updateInitialAnomaliesState();
+      });
+    }
+  }
+
   editBotReportSetting() {
     this.isEditBotReportSetting = true;
+  }
+
+  editAnomaliesReportSetting() {
+    this.isEditAnomaliesReportSetting = true;
   }
 
   saveBotReportSetting() {
@@ -2045,8 +2078,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
     this.botReportSetting.branchCodes = [...this.selectedBranches];
     this.botReportSetting.projectIds = this.selectedProjects;
-
-    this.botReportSettingService.change(this.botReportSetting).subscribe((res: any) => {
+    
+    this.botReportSettingService.setBotReportSetting(this.botReportSetting).subscribe((res: any) => {
       this.isEditBotReportSetting = false;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -2055,9 +2088,42 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   }
 
+  saveAnomaliesReportSetting() {
+    if (!this.permission.isGranted(this.EDIT_ANOMALIES_REPORT_SETTING)) {
+      abp.message.error("You do not have permission to edit this setting!");
+      return;
+    }
+    if (this.anomaliesReportSetting.hour < 0 || this.anomaliesReportSetting.hour > 23) {
+      abp.message.error("Hour must be between 0 and 23!");
+      return;
+    }
+    if (!this.anomaliesReportSetting.dayofweek) {
+      abp.message.error("Day of week is required!");
+      return;
+    }
+    if (!this.selectedAnomaliesBranches || this.selectedAnomaliesBranches.length === 0) {
+      abp.message.error("You must select at least one branch!");
+      return;
+    }
+
+    this.anomaliesReportSetting.branchCodes = [...this.selectedAnomaliesBranches];
+
+    this.anomaliesReportSettingService.setAnomaliesReportSetting(this.anomaliesReportSetting).subscribe((res: any) => {
+      this.isEditAnomaliesReportSetting = false;
+      if (res) {
+        this.notify.success(this.localization.localize('Update Successfully!', ''));
+      }
+    });
+  }
+
   refreshBotReportSetting() {
     this.getBotReportSetting();
     this.isEditBotReportSetting = false;
+  }
+
+  refreshAnomaliesReportSetting() {
+    this.getAnomaliesReportSetting();
+    this.isEditAnomaliesReportSetting = false;
   }
 
   private updateInitialState() {
@@ -2068,6 +2134,17 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       this.isAllBranchesSelected = false;
     } else {
       this.isAllBranchesSelected = false;
+    }
+  }
+
+  private updateInitialAnomaliesState() {
+    if (this.selectedAnomaliesBranches.length === this.branchCodes.length) {
+      this.isAllAnomaliesBranchesSelected = true;
+    } else if (this.selectedAnomaliesBranches.length === 0 || (this.selectedAnomaliesBranches.length === 1 && this.selectedAnomaliesBranches[0] === 'HN1')) {
+      this.selectedAnomaliesBranches = ['HN1'];
+      this.isAllAnomaliesBranchesSelected = false;
+    } else {
+      this.isAllAnomaliesBranchesSelected = false;
     }
   }
 
@@ -2092,6 +2169,18 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     } else {
       this.selectedBranches = ['HN1'];
       this.isAllBranchesSelected = false;
+      abp.notify.info('At least one branch must be selected. Branch HN1 has been selected by default.');
+    }
+  }
+
+  toggleAllAnomaliesBranches() {
+    this.selectedAnomaliesBranches = this.selectedAnomaliesBranches.filter(code => code !== '-1');
+    if (!this.isAllAnomaliesBranchesSelected) {
+      this.selectedAnomaliesBranches = [...this.branchCodes];
+      this.isAllAnomaliesBranchesSelected = true;
+    } else {
+      this.selectedAnomaliesBranches = ['HN1'];
+      this.isAllAnomaliesBranchesSelected = false;
       abp.notify.info('At least one branch must be selected. Branch HN1 has been selected by default.');
     }
   }
@@ -2156,7 +2245,8 @@ export class LogoutAllUserDTO {
 export class WFHSettingDTO {
   numOfRemoteDays: string;
   allowInternToWorkRemote: string;
-  totalTimeTardinessAndEarlyLeave: string;
+  allowProbationToWorkRemote: string;
+  totalTimeTardinessAndEarlyLeave : string;
 }
 
 export class UnlockSettingDTO {

@@ -22,5 +22,6 @@ namespace Timesheet.APIs.Reports.Dto
         public double TotalAllLMHours => TotalAllLM;
         public double OfficeLMHours => OfficeLM;
         public double WfhLMHours => WfhLM;
+        
     }
 }

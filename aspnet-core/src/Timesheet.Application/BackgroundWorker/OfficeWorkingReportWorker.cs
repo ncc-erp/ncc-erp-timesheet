@@ -28,6 +28,7 @@ namespace Timesheet.BackgroundWorker
             ILogger<OfficeWorkingReportWorker> logger,
             IWorkScope workScope
         ) : base(timer)
+        
         {
             _reportAppService = reportAppService;
             _logger = logger;
