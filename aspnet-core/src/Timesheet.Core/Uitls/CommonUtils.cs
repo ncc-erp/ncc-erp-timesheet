@@ -270,8 +270,19 @@ namespace Timesheet.Uitls
         }
         public static Usertype GetUserTypeByTypeFromHrmV2(Usertype typeFromHrmV2)
         {
-            var userTypeMapers = new Usertype[] { Usertype.Internship, Usertype.Collaborators, Usertype.Staff, Usertype.ProbationaryStaff, Usertype.Vendor };
-            return userTypeMapers[(int)typeFromHrmV2];
+            var userTypeMap = new Dictionary<Usertype, Usertype>
+            {
+                { Usertype.Staff, Usertype.Staff },
+                { Usertype.Internship, Usertype.Internship },
+                { Usertype.Collaborators, Usertype.Collaborators },
+                { Usertype.ProbationaryStaff, Usertype.ProbationaryStaff },
+                { Usertype.Vendor, Usertype.Vendor }
+            };
+            if (userTypeMap.ContainsKey(typeFromHrmV2))
+            {
+                return userTypeMap[typeFromHrmV2];
+            }
+            throw new ArgumentOutOfRangeException(nameof(typeFromHrmV2), $"Invalid user type value from HRM V2: {typeFromHrmV2}");
         }
         public static Sex GetSexBySexFromHrmV2(Sex sexFromHrmV2)
         {

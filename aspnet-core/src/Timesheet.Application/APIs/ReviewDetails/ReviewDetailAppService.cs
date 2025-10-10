@@ -346,8 +346,10 @@ namespace Timesheet.APIs.ReviewDetails
             Dictionary<UserLevel, string> levelDetail = CommonUtils.UserLevelDetail();
             Dictionary<Usertype, string> typeDetail = new Dictionary<Usertype, string>()
             {
-                { Usertype.Staff, "-Thử việc <br>"},
-                { Usertype.Collaborators, "-Cộng tác viên <br>" }
+                { Usertype.Staff, "-Nhân viên <br>"},
+                { Usertype.Collaborators, "-Cộng tác viên <br>" },
+                { Usertype.ProbationaryStaff, "-Thử việc <br>" },
+                { Usertype.Vendor, "-Nhà cung cấp <br>" }
             };
             var levelSettings = await GetLevelSetting();
             var detail = (from rv in WorkScope.GetAll<ReviewDetail>()
@@ -676,8 +678,10 @@ namespace Timesheet.APIs.ReviewDetails
             Dictionary<UserLevel, string> levelDetail = CommonUtils.UserLevelDetail();
             Dictionary<Usertype, string> typeDetail = new Dictionary<Usertype, string>()
             {
-                { Usertype.Staff, "- Thử việc <br>"},
-                { Usertype.Collaborators, "- Cộng tác viên <br>" }
+                { Usertype.Staff, "- Nhân viên <br>"},
+                { Usertype.Collaborators, "- Cộng tác viên <br>" },
+                { Usertype.ProbationaryStaff, "-Thử việc <br>" },
+                { Usertype.Vendor, "-Nhà cung cấp <br>" }
             };
             var detail = (from rv in WorkScope.GetAll<ReviewDetail>()
                           .Where(x => x.Id == Id)

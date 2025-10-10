@@ -367,9 +367,7 @@
                                         Send Email
                                     </button>
                                     <button *ngIf="
-                      permission.isGranted(
-                        ReviewIntern_ReviewDetail_UpdateToHRMForOneIntern
-                      ) && checkStatus(item.status, 'update to HRM')
+                                    isShowSendToHrm(item)
                     " class="choices btn-email" mat-menu-item="mat-menu-item" [name]="'sendToHRMBtn-'+item.id"
                                         (click)="UpdateLevelHRMv2ForOne(item.id)">
                                         <mat-icon class="mat-18" style="color: green">upload</mat-icon>
@@ -486,12 +484,7 @@
                             <!-- New Level -->
                             <td class="block-format">
                                 <span class="branch label status-label ng-star-inserted" *ngIf="item.type != 1"
-                                    [ngClass]="
-                    item.type == 0
-                      ? 'label-default'
-                      : item.type == 1
-                      ? 'label-danger'
-                      : 'label-warning'
+                                    [ngClass]="item.type == 0 ? 'bg-red' : item.type == 1 ? 'bg-green' : item.type == 2 ? 'bg-blue' : item.type == 3 ? 'bg-orange' : item.type == 5 ? 'bg-purple' : ''
                   ">{{ getType(item.type) }} <br /></span>
                                 <span *ngIf="item.newLevel != null">
                                     <span *ngIf="isShowLevel(item)" class="label status-label mr-left"
