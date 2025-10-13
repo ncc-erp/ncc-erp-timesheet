@@ -1185,5 +1185,31 @@ namespace Timesheet.APIs.Timekeepings
         {
             return await timekeepingServices.NoticePunishUserCheckInOut(date);
         }
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Timekeeping_UserNote)]
+        [HttpPost]
+        public async Task DeleteComplaint(DeleteComplaintDto input)
+        {
+            var userPunishment = await WorkScope.GetAsync<UserPunishment>(input.UserPunishmentId);
+            if (userPunishment == null)
+            {
+                throw new UserFriendlyException("Punishment record not found!");
+            }
+            if (userPunishment.UserId != AbpSession.UserId.Value)
+            {
+                throw new UserFriendlyException("You can only delete complaints for your own records");
+            }
+            userPunishment.UserNote = null;
+            await WorkScope.GetRepo<UserPunishment>().UpdateAsync(userPunishment);
+            var timekeeping = await WorkScope.GetAll<Timekeeping>()
+                .Where(t => t.UserId == userPunishment.UserId &&
+                         t.DateAt.Date == userPunishment.DateAt.Date)
+                .FirstOrDefaultAsync();
+            
+            if (timekeeping != null)
+            {
+                timekeeping.UserNote = null;
+                await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
+            }
+        }
     }
 }
