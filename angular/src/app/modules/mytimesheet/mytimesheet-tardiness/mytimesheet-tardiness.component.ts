@@ -289,58 +289,120 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   }
 
   openComplainDialog(item: TimekeepingDto) {
-    const currentDate = item.date;
-    const userPunishmentTypes = [];
+  const currentDate = item.date;
+  const userPunishmentTypes = [];
 
-    const dayOfMonth = parseInt(item.date.split('-')[2]);
-    const filteredUserPunishments = this.listTimekeeping.filter(up => {
-      const punishmentDate = new Date(up.date);
-      return punishmentDate.getDate() === dayOfMonth && up.userPunishmentType > 0;
-    });
-  
-    filteredUserPunishments.forEach(up => {
-      if (up.userPunishmentType > 0) {
-        const punishmentType = this.APP_CONSTANT.PUNISHMENT_TYPES.find(p => p.value === up.userPunishmentType);
-        if (punishmentType && !userPunishmentTypes.some(p => p.value === punishmentType.value)) {
-          userPunishmentTypes.push(punishmentType);
-        }
+  const dayOfMonth = parseInt(item.date.split('-')[2]);
+  const filteredUserPunishments = this.listTimekeeping.filter(up => {
+    const punishmentDate = new Date(up.date);
+    return punishmentDate.getDate() === dayOfMonth && up.userPunishmentType > 0;
+  });
+
+  console.log('=== OPENING DIALOG ===');
+  console.log('Item date:', item.date);
+  console.log('Day of month:', dayOfMonth);
+  console.log('Filtered user punishments:', filteredUserPunishments);
+
+  filteredUserPunishments.forEach(up => {
+    if (up.userPunishmentType > 0) {
+      const punishmentType = this.APP_CONSTANT.PUNISHMENT_TYPES.find(p => p.value === up.userPunishmentType);
+      if (punishmentType && !userPunishmentTypes.some(p => p.value === punishmentType.value)) {
+        userPunishmentTypes.push(punishmentType);
       }
-    });
-
-    if (userPunishmentTypes.length === 0) {
-      this.notify.info('Không có loại phạt nào cho ngày này');
-      return; 
     }
+  });
 
-    const dialogRef = this.dialog.open(ComplainDialogComponent, {
-      width: '650px',
-      data: {
-        timekeeping: item,
-        punishmentTypes: userPunishmentTypes,
-        structuredUserNotes: item.structuredUserNotes || [],
-        userPunishments: filteredUserPunishments
-      }
-    });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && result.length > 0) {
-        const promises = result.map(complaint => {
-          return this.timekeepingService.addComplain({
+  console.log('User punishment types:', userPunishmentTypes);
+  console.log('Structured user notes:', item.structuredUserNotes);
+
+  if (userPunishmentTypes.length === 0) {
+    this.notify.info('Không có loại phạt nào cho ngày này');
+    return; 
+  }
+
+  const dialogRef = this.dialog.open(ComplainDialogComponent, {
+    width: '650px',
+    data: {
+      timekeeping: item,
+      punishmentTypes: userPunishmentTypes,
+      structuredUserNotes: item.structuredUserNotes || [],
+      userPunishments: filteredUserPunishments
+    }
+  });
+  
+  dialogRef.afterClosed().subscribe(result => {
+
+    if (result) {
+      const complaintsToDelete: number[] = (result.complaintsToDelete || []).filter((id: any) => id !== null && id !== undefined && id !== 0);
+      const complaintsToAdd = (result.complaints || []).filter((c: any) => c && c.userPunishmentId);
+
+
+      const promises: Promise<any>[] = [];
+
+      // Xử lý xóa complaints
+      complaintsToDelete.forEach((userPunishmentId: number) => {
+        promises.push(
+          this.timekeepingService.deleteComplain(userPunishmentId).toPromise()
+            .then(res => {
+              return res;
+            })
+            .catch(err => {
+              console.error('Delete error for ID:', userPunishmentId, err);
+              throw err;
+            })
+        );
+      });
+
+      // Xử lý thêm/update complaints
+      complaintsToAdd.forEach((complaint: any) => {
+        promises.push(
+          this.timekeepingService.addComplain({
             userPunishmentId: complaint.userPunishmentId,
             userNote: complaint.userNote
-          }).toPromise();
-        });
+          }).toPromise()
+            .then(res => {
+              return res;
+            })
+            .catch(err => {
+              console.error('Add/Update error:', err);
+              throw err;
+            })
+        );
+      });
 
+
+      if (promises.length > 0) {
         Promise.all(promises)
           .then(() => {
-            this.notify.success('Complaints submitted successfully');
+            this.notify.success('Complaint updated successfully.');
             this.getData();
           })
-          .catch(error => {
-            this.notify.error('Failed to submit complaints');
+          .catch((error: any) => {
+            console.error('❌ Error in operations:', error);
+            console.error('Error response:', error && error.error);
+            console.error('Error status:', error && error.status);
+
+            let msg = 'Lỗi không xác định';
+            try {
+              if (error && error.error && error.error.message) {
+                msg = error.error.message;
+              } else if (error && error.message) {
+                msg = error.message;
+              } else {
+                msg = JSON.stringify(error);
+              }
+            } catch (e) {
+              msg = String(error);
+            }
+
+            this.notify.error('Không thể cập nhật khiếu nại: ' + msg);
           });
+      } else {
       }
-    });
-  }
+    } else {
+    }
+  });
+}
   
   toggleNoteReplies(item: TimekeepingDto) {
     item.showAllReplies = !item.showAllReplies;
