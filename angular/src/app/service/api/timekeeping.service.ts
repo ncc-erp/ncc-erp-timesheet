@@ -89,4 +89,9 @@ export class TimekeepingService extends BaseApiService {
     return this.http.post<any>(this.rootUrl + '/RespondToComplaint', param);
 
   }
+  deleteComplain(userPunishmentId: number): Observable<any> {
+  return this.http.post(`${this.rootUrl}/DeleteComplaint`, { 
+    UserPunishmentId: userPunishmentId  
+  });
+}
 }

@@ -20,6 +20,10 @@ export class ComplainDialogComponent implements OnInit {
   userNotes: { [key: number]: string } = {};
   selectedPunishmentType: number;
   userPunishments: any[] = [];
+  
+  // Tracking initial state
+  initialUserNotes: { [key: number]: string } = {};
+  checkedPunishments: Set<number> = new Set();
 
   constructor(
     public dialogRef: MatDialogRef<ComplainDialogComponent>,
@@ -32,6 +36,8 @@ export class ComplainDialogComponent implements OnInit {
     if (data.structuredUserNotes && data.structuredUserNotes.length > 0) {
       data.structuredUserNotes.forEach(note => {
         this.userNotes[note.punishmentType] = note.userNote;
+        this.initialUserNotes[note.punishmentType] = note.userNote;
+        this.checkedPunishments.add(note.punishmentType);
       });
     }
   }
@@ -39,11 +45,25 @@ export class ComplainDialogComponent implements OnInit {
   ngOnInit() {
   }
 
+  isPunishmentSelected(typeValue: number): boolean {
+    return this.checkedPunishments.has(typeValue);
+  }
+
+  shouldShowTextarea(typeValue: number): boolean {
+    return this.checkedPunishments.has(typeValue);
+  }
+
   onCheckboxChange(event: any, typeValue: number): void {
     if (event.checked) {
-      this.userNotes[typeValue] = this.userNotes[typeValue] || '';
+      this.checkedPunishments.add(typeValue);
+      if (this.initialUserNotes[typeValue]) {
+        this.userNotes[typeValue] = this.initialUserNotes[typeValue];
+      } else {
+        this.userNotes[typeValue] = '';
+      }
     } else {
-      delete this.userNotes[typeValue];
+      this.checkedPunishments.delete(typeValue);
+      this.userNotes[typeValue] = '';
     }
   }
 
@@ -52,15 +72,19 @@ export class ComplainDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
-    const result = Object.keys(this.userNotes).map(key => {
-      const punishmentType = parseInt(key);
-
+    const complaintsToAdd = [];
+    const complaintsToDelete = [];
+    this.punishmentTypes.forEach(type => {
+      const punishmentType = type.value;
+      const isChecked = this.checkedPunishments.has(punishmentType);
+      const hadInitialComplaint = this.initialUserNotes.hasOwnProperty(punishmentType);
+      const currentNote = (this.userNotes[punishmentType] || '').trim();
       let userPunishment = this.userPunishments.find(up => {
         return up.type === punishmentType || 
                up.userPunishmentType === punishmentType || 
                up.Type === punishmentType;
       });
-
+  
       if (!userPunishment && this.data.userPunishments) {
         userPunishment = this.data.userPunishments.find(up => {
           return up.type === punishmentType || 
@@ -70,20 +94,31 @@ export class ComplainDialogComponent implements OnInit {
       }
       
       const userPunishmentId = userPunishment ? 
-        (userPunishment.id || userPunishment.Id || userPunishment.userPunishmentId || userPunishment.UserPunishmentId) : 
+        (userPunishment.userPunishmentId || userPunishment.id || userPunishment.Id || userPunishment.UserPunishmentId) : 
         null;
-      
-      return {
-        punishmentType: punishmentType,
-        userNote: this.userNotes[punishmentType],
-        userPunishmentId: userPunishmentId
-      };
-    }).filter(item => item.userPunishmentId);  
-
-    if (result.length > 0) {
-      this.dialogRef.close(result);
-    } else {
-      alert('Không thể gửi khiếu nại. Vui lòng kiểm tra lại thông tin và đảm bảo bạn đã chọn loại phạt hợp lệ.');
-    }
+  
+  
+      if (!userPunishmentId) {
+        return; 
+      }
+      if (hadInitialComplaint && !isChecked) {
+        complaintsToDelete.push(userPunishmentId);
+      }
+      else if (isChecked && currentNote) {
+        complaintsToAdd.push({
+          punishmentType: punishmentType,
+          userNote: currentNote,
+          userPunishmentId: userPunishmentId
+        });
+      }
+      else if (isChecked && !currentNote && hadInitialComplaint) {
+        complaintsToDelete.push(userPunishmentId);
+      }
+    });
+  
+    this.dialogRef.close({
+      complaints: complaintsToAdd,
+      complaintsToDelete: complaintsToDelete
+    });
   }
 }
