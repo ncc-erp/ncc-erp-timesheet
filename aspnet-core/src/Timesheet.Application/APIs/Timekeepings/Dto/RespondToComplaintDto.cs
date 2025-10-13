@@ -25,4 +25,8 @@ namespace Timesheet.APIs.Timekeepings.Dto
         public int PunishmentMoney { get; set; }
         public int? RemainingCount { get; set; } 
     }
+    public class DeleteComplaintDto
+    {
+        public long UserPunishmentId { get; set; }
+    }
 }
