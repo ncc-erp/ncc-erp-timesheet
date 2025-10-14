@@ -1,3 +1,40 @@
+/* Header menu */
+.position-header-menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Button wrapper */
+.position-header-button-wrapper {
+    display: flex;
+    align-items: stretch;
+}
+
+/* Button style */
+.btn-new-position {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0 20px;
+}
+
+/* Search wrapper */
+.position-header-search-wrapper {
+    flex: 1;
+    max-width: 450px;
+}
+
+/* Remove mat-form-field padding/margin */
+::ng-deep .position-header-search-wrapper .mat-form-field-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
 .table thead th,
 .table tbody td {
     text-align: center !important;
@@ -24,6 +61,21 @@
 }
 
 @media screen and (max-width: 730px) { 
+    /* Header menu responsive */
+    .position-header-menu {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .position-header-button-wrapper {
+        width: 100%;
+    }
+    
+    .position-header-search-wrapper {
+        max-width: 100%;
+        width: 100%;
+    }
+    
     .btn-action-desktop {
         display: none;
     }

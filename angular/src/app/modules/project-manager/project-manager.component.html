@@ -24,7 +24,7 @@
               <mat-icon>add</mat-icon>New Project
             </button>
           </div>
-          <div class="col-lg-3 col-md-3 col-sm-3 col-sx-3 btn-project">
+          <div class="col-lg-3 col-md-3 col-sm-3 col-sx-3 btn-project" style="padding-right: 0px;">
             <mat-form-field appearance="outline" class="select--status">
               <mat-select [(value)]="status" name="Project Status" (selectionChange)=getProjects()>
                 <mat-option *ngFor="let pStatus of APP_CONFIG.EnumProjectStatus" [value]="pStatus.value">
@@ -57,10 +57,15 @@
                     <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
                     [style.top]="contextMenuPosition.y" #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="actionsMenu">
                     </div>
-                    <span align="start" style="line-height: 3; padding-left: 5px;">
+                    <span align="start" style="line-height: 3; padding-left: 5px; margin-right: 5px;">
                       {{project.name}} [{{project.code}}]
                     </span>
-                    <span class="pm">{{project.pms.length ? project.pms.join(', ') : 'null'}} </span>
+                    <span 
+                      class="pm"
+                      [matTooltip]="project.pms.length ? project.pms.join(', ') : 'null'">
+                      {{ project.pms.length ? project.pms.join(', ') : 'null' }}
+                    </span>
+
                     <span class="member">{{project.activeMember}} members</span>
                     <span *ngIf="project.projectType == 3" class="pType">ODC</span>
                     <span *ngIf="project.projectType == 2" class="pType">NB</span>

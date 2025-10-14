@@ -18,24 +18,26 @@
         </ul>
       </div>
       <div class="body">
-        <div class="row clearfix">
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-            <button name="createBtn" *ngIf="permission.isGranted(ADD)" mat-raised-button color="primary" class="pull-left"
-              (click)="create()">
+        <div class="branch-header-menu">
+          <div class="branch-button-wrapper">
+            <button name="createBtn" 
+                    *ngIf="permission.isGranted(ADD)" 
+                    mat-raised-button 
+                    color="primary" 
+                    class="btn-new-branch"
+                    (click)="create()">
               <mat-icon>add</mat-icon>New
             </button>
           </div>
 
-
-          <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 pull-right">
-            <mat-form-field appearance="outline">
+          <div class="branch-search-wrapper">
+            <mat-form-field appearance="outline" class="w-100">
               <mat-label>Search by name, code, display name of branch</mat-label>
               <input matInput [(ngModel)]="searchText" name="searchText" placeholder="{{l('Search by name, code, display name of branch')}}"
                 (keyup.enter)="searchOrFilter()" type="text" maxlength="128">
               <i class="icon-32 material-icons" matPrefix>search</i>
             </mat-form-field>
           </div>
-
         </div>
         <div class="table-responsive" style="border: 0;">
           <table class="table table-hover table-striped">

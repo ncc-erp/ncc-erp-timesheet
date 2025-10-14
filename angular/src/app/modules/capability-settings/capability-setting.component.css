@@ -1,3 +1,70 @@
+/* Header menu */
+.capability-setting-header-menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* Filters wrapper */
+.capability-setting-filters {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+/* Search wrapper */
+.capability-setting-search-wrapper {
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+  display: flex;
+}
+
+/* Type filter wrapper */
+.capability-setting-type-wrapper {
+  flex: 0 0 180px;
+  display: flex;
+}
+
+/* User type filter wrapper */
+.capability-setting-usertype-wrapper {
+  flex: 0 0 180px;
+  display: flex;
+}
+
+/* Position filter wrapper */
+.capability-setting-position-wrapper {
+  flex: 0 0 180px;
+  display: flex;
+}
+
+/* Button wrapper */
+.capability-setting-button-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+
+/* Button style */
+.btn-new-capability-setting {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 20px;
+}
+
+/* Remove mat-form-field padding/margin */
+::ng-deep .capability-setting-header-menu .mat-form-field-wrapper {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .footer {
   display: block;
   min-height: 80px;
@@ -56,7 +123,6 @@ thead th:nth-child(2) {
   list-style: none;
 }
 
-
 .item-note {
   white-space: pre-line;
   word-break: break-word;
@@ -71,5 +137,29 @@ thead th:nth-child(2) {
   .clearfix {
     padding-left: 15px;
     padding-right: 15px;
+  }
+
+  /* Header menu responsive */
+  .capability-setting-header-menu {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .capability-setting-filters {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .capability-setting-search-wrapper,
+  .capability-setting-type-wrapper,
+  .capability-setting-usertype-wrapper,
+  .capability-setting-position-wrapper {
+    max-width: 100%;
+    width: 100%;
+    flex: 1;
+  }
+
+  .capability-setting-button-wrapper {
+    width: 100%;
   }
 }

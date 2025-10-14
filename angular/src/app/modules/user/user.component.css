@@ -56,6 +56,7 @@ file-upload>span {
     padding: 4px 4px !important;
     min-width: 50px;
     text-align: center;
+    vertical-align: middle !important;
     border: 0.2px solid rgba(204, 204, 204, 0.35);
 }
 
@@ -64,6 +65,10 @@ file-upload>span {
     text-align: center !important;
     vertical-align: middle !important;
     border: 0.2px solid rgba(204, 204, 204, 0.35);
+}
+
+.styleUser>tbody>tr>td.text-left {
+    text-align: left !important;
 }
 
 .styleUser {
