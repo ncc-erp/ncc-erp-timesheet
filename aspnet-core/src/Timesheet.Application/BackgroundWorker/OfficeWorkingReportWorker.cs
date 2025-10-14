@@ -84,7 +84,7 @@ protected override void DoWork()
 
         if (!int.TryParse(hourStr, out int configuredHour))
         {
-            configuredHour = 14;
+            throw new Exception(" Vui lòng thiết lập giờ chạy (0-23).");
         }
 
         bool isEveryday = string.Equals(everydayStr, "True", StringComparison.OrdinalIgnoreCase);
