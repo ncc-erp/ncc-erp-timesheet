@@ -86,7 +86,7 @@ namespace Ncc.Configuration
         public const string SendEmailTimesheet = "App.SendEmailTimesheet";
         public const string SendEmailRequest = "App.SendEmailRequest";
         public const string SendKomuSubmitTimesheet = "App.SendKomuSubmitTimesheet";
-        public const string EnableNofityKomuCheckInOutPunishment  = "App.EnableNofityKomuCheckInOutPunishment ";
+        public const string EnableNofityKomuCheckInOutPunishment = "App.EnableNofityKomuCheckInOutPunishment ";
         public const string SendKomuRequest = "App.SendKomuRequest";
         public const string NRITNotifyEnableWorker = "App.NotifyEnableWorker";
         public const string NRITNotifyAtHourType = "App.NRITNotifyAtHourType";
@@ -189,5 +189,15 @@ namespace Ncc.Configuration
         public const string MoneyPMUnlockTimeSheet = "App.MoneyPMUnlockTimeSheet";
         public const string SendMessageToPunishUserEnableWorker = "App.SendMessageToPunishUserEnableWorker";
         public const string SendMessageToPunishUserAtHour = "App.SendMessageToPunishUserAtHour";
+        
+
+
+        // Office working report (Mezon)
+        public const string OfficeWorkingReportEnable = "App.OfficeWorkingReport.Enable";
+        public const string OfficeWorkingReportAtHour = "App.OfficeWorkingReport.AtHour"; // default 8 (GMT+7)
+        public const string OfficeWorkingReportOfficeIds = "App.OfficeWorkingReport.OfficeIds"; // e.g. "1,2,3"
+        public const string OfficeWorkingReportLimit = "App.OfficeWorkingReport.Limit"; // default 20
+        public const string OfficeWorkingReportMezonUrl = "App.OfficeWorkingReport.MezonUrl";
+        public const string OfficeWorkingEveryday = "App.OfficeWorkingReport.Everyday";
     }
 }

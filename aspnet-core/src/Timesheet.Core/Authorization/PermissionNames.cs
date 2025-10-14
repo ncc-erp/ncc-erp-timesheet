@@ -151,6 +151,9 @@ namespace Ncc.Authorization
         public const string Admin_Configuration_AnomaliesReportConfig_View = "Admin.Configuration.AnomaliesReportConfig.ViewAnomaliesReportConfig";
         public const string Admin_Configuration_AnomaliesReportConfig_Update = "Admin.Configuration.AnomaliesReportConfig.EditAnomaliesReportConfig";
 
+        public const string Admin_Configuration_OfficeWorkingReportSetting = "Admin.Configuration.OfficeWorkingReportSetting";
+        public const string Admin_Configuration_OfficeWorkingReportSetting_View = "Admin.Configuration.OfficeWorkingReportSetting.View";
+        public const string Admin_Configuration_OfficeWorkingReportSetting_Update = "Admin.Configuration.OfficeWorkingReportSetting.Update";
         public const string Admin_Clients = "Admin.Clients";
         public const string Admin_Clients_View = "Admin.Clients.View";
         public const string Admin_Clients_AddNew = "Admin.Clients.AddNew";

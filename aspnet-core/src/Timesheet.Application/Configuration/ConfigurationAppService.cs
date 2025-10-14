@@ -801,7 +801,6 @@ namespace Ncc.Configuration
                 dayofweek = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.PMReportPunishAtDayOfWeek)
             };
         }
-
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_PMReportConfig_Update)]
         public async Task<PMReportPunishSettingDto> SetPMReportPunishSetting(PMReportPunishSettingDto input)
         {
@@ -811,7 +810,6 @@ namespace Ncc.Configuration
 
             return input;
         }
-
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_View)]
         public async Task<Timesheet.Configuration.Dto.BotReportSettingDto> GetBotReportSetting()
         {
@@ -835,14 +833,11 @@ namespace Ncc.Configuration
             return result;
         }
 
-
-
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_Update)]
         public async Task<Timesheet.Configuration.Dto.BotReportSettingDto> SetBotReportSetting(Timesheet.Configuration.Dto.BotReportSettingDto input)
         {
             var projectIdsJson = JsonConvert.SerializeObject(input.projectIds ?? new List<long>());
-            var branchCodesJson = JsonConvert.SerializeObject(input.branchCodes ?? new List<string>());
-            
+            var branchCodesJson = JsonConvert.SerializeObject(input.branchCodes ?? new List<string>());          
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportEnable, input.enable.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportEveryday, input.everyday.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportAtHour, input.hour.ToString());
@@ -852,6 +847,32 @@ namespace Ncc.Configuration
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportMinHours, input.minHours?.ToString() ?? string.Empty);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportTopN, input.topN?.ToString() ?? string.Empty);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportProjectIds, projectIdsJson);
+
+            return input;
+        }
+         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_View)]
+        public async Task<OfficeWorkingReportSettingDto> GetOfficeWorkingReportSetting()
+        {
+            return new OfficeWorkingReportSettingDto
+            {
+                enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportEnable)),
+                everyday = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingEveryday)),
+                hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportAtHour)),
+                officeIds = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportOfficeIds),
+                limit = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportLimit)),
+                mezonUrl = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportMezonUrl)
+            };
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_Update)]
+        public async Task<OfficeWorkingReportSettingDto> SetOfficeWorkingReportSetting(OfficeWorkingReportSettingDto input)
+        {
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportEnable, input.enable.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingEveryday, input.everyday.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportAtHour, input.hour.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportOfficeIds, input.officeIds);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportLimit, input.limit.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportMezonUrl, input.mezonUrl);
 
             return input;
         }
