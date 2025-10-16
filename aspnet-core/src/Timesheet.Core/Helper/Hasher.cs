@@ -29,5 +29,20 @@ namespace Timesheet.Helper
             var valueBytes = System.Convert.FromBase64String(value);
             return Encoding.UTF8.GetString(valueBytes);
         }
+
+        public static byte[] MD5Hash(byte[] data)
+        {
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                return md5.ComputeHash(data);
+            }
+        }
+
+        public static string MD5Hash(string input)
+        {
+            var data = Encoding.UTF8.GetBytes(input);
+            var hashBytes = MD5Hash(data);
+            return HEX(hashBytes);
+        }
     }
 }
