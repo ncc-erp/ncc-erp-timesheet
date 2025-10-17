@@ -32,7 +32,6 @@ namespace Timesheet.BackgroundWorker
             DateTime now = DateTimeUtils.GetNow();
             try
             {
-                Logger.Info($"BotReportWorker running at {now:yyyy-MM-dd HH:mm:ss}");
                 RunBotReportJob(now);
             }
             catch (Exception ex)
