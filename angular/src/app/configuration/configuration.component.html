@@ -1227,15 +1227,15 @@
                   <div class="col-md-6" style="max-width: 440px;">
                     <mat-form-field>
                       <span class="special-label">Hour *</span>
-                      <mat-icon class="special-icon" matTooltip="Hour to send Office Working Report notification (0-23)">help</mat-icon>
-                      <input type="number" matInput name="officeHour" [(ngModel)]="botReportSetting.hour" required [disabled]="!isEditBotReportSetting" min="0" max="23" />
+                      <mat-icon class="special-icon" matTooltip="Hour to send Bot Report notification (0-23)">help</mat-icon>
+                      <input type="number" matInput name="botHour" [(ngModel)]="botReportSetting.hour" required [disabled]="!isEditBotReportSetting" min="0" max="23" />
                     </mat-form-field>
                   </div>
                   <div class="col-md-6" style="max-width: 440px;">
                     <mat-form-field>
                       <span class="special-label">Minute *</span>
-                      <mat-icon class="special-icon" matTooltip="Minute to send Office Working Report notification (0-59)">help</mat-icon>
-                      <input type="number" matInput name="officeMinute" [(ngModel)]="botReportSetting.minute" required [disabled]="!isEditBotReportSetting" min="0" max="59" />
+                      <mat-icon class="special-icon" matTooltip="Minute to send Bot Report notification (0-59)">help</mat-icon>
+                      <input type="number" matInput name="botMinute" [(ngModel)]="botReportSetting.minute" required [disabled]="!isEditBotReportSetting" min="0" max="59" />
                     </mat-form-field>
                   </div>
 
