@@ -20,7 +20,6 @@ namespace Timesheet.BackgroundWorker
         private readonly OfficeWorkingReportAppService _reportAppService;
         private readonly ILogger<OfficeWorkingReportWorker> _logger;
         private readonly IWorkScope _workScope;
-        private DateTime _lastSentDate = DateTime.MinValue;
 
         public OfficeWorkingReportWorker(
             AbpTimer timer,
@@ -74,6 +73,7 @@ namespace Timesheet.BackgroundWorker
                 string enable = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportEnable);
                 if (!string.Equals(enable, "True", StringComparison.OrdinalIgnoreCase))
                 {
+                    _logger.LogInformation("OfficeWorkingReportWorker: Đã tắt");
                     return;
                 }
 
@@ -89,11 +89,7 @@ namespace Timesheet.BackgroundWorker
                 bool isEveryday = string.Equals(everydayStr, "True", StringComparison.OrdinalIgnoreCase);
                 if (now.Hour != configuredHour || now.Minute != configuredMinute)
                 {
-                    return;
-                }
-
-                if (_lastSentDate.Date == now.Date)
-                {
+                    Logger.Info($"RunBotReportJob() skipped: Current hour = {now.Hour}, Configured = {configuredHour}, Current minute = {now.Minute}, Configured minute = {configuredMinute}");
                     return;
                 }
 
@@ -182,11 +178,6 @@ namespace Timesheet.BackgroundWorker
                             allSuccessful = false;
                         }
                     }
-                }
-
-                if (allSuccessful)
-                {
-                    _lastSentDate = now.Date;
                 }
             }
             catch (Exception ex)
