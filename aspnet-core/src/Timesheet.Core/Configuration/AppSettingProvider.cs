@@ -150,6 +150,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.BotReportEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportEveryday, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.BotReportAtMinute, "0", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportWebhookUrl, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportBranchCodes, "[\"HN1\"]", scopes: SettingScopes.Application|SettingScopes.Tenant),
@@ -158,6 +159,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.BotReportProjectIds, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AnomaliesReportEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AnomaliesReportAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AnomaliesReportAtMinute, "0", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AnomaliesReportAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AnomaliesReportWebhookUrl, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AnomaliesReportBranchCodes, "[\"HN1\"]", scopes: SettingScopes.Application|SettingScopes.Tenant),
@@ -229,12 +231,12 @@ namespace Ncc.Configuration
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NotifyHRTheEmployeeMayHaveLeftToHREmail, Configuration["DefaultSettings:NotifyHRTheEmployeeMayHaveLeftToHREmail"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
-                 // Office working report to Mezon
 
 
                 new SettingDefinition(AppSettingNames.OfficeWorkingReportEnable, "True", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.OfficeWorkingEveryday, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.OfficeWorkingReportAtHour, "8", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportAtMinute, "0", scopes: SettingScopes.Application | SettingScopes.Tenant),
 
                 new SettingDefinition(AppSettingNames.OfficeWorkingReportOfficeIds, "ALL", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.OfficeWorkingReportLimit, "20", scopes: SettingScopes.Application | SettingScopes.Tenant),

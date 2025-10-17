@@ -7,6 +7,7 @@ import { BaseApiService } from './base-api.service';
 export interface AnomaliesReportSettingDto {
   enable: boolean;
   hour: number;
+  minute: number;
   dayofweek: string;
   botUri: string;
   branchCodes?: string[];
