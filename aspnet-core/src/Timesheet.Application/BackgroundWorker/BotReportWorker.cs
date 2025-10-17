@@ -31,7 +31,6 @@ namespace Timesheet.BackgroundWorker
             DateTime now = DateTimeUtils.GetNow();
             try
             {
-                Logger.Info($"BotReportWorker running at {now:yyyy-MM-dd HH:mm:ss}");
                 RunBotReportJob(now);
             }
             catch (Exception ex)
@@ -69,11 +68,11 @@ namespace Timesheet.BackgroundWorker
 
             if (!isEveryday && !string.Equals(now.DayOfWeek.ToString(), dayOfWeek, StringComparison.OrdinalIgnoreCase))
             {
-                Logger.Info($"RunBotReportJob() skipped: Today is {now.DayOfWeek}, Configured = {dayOfWeek}");
+                // Logger.Info($"RunBotReportJob() skipped: Today is {now.DayOfWeek}, Configured = {dayOfWeek}");
                 return;
             }
 
-            Logger.Info($"RunBotReportJob() running... [Mode: {(isEveryday ? "Everyday" : dayOfWeek)}]");
+            // Logger.Info($"RunBotReportJob() running... [Mode: {(isEveryday ? "Everyday" : dayOfWeek)}]");
 
             ExecuteBotReport();
 
