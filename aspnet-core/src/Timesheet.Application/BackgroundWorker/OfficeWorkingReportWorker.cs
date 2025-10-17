@@ -50,13 +50,12 @@ namespace Timesheet.BackgroundWorker
             {
                 { "HN1", 1 },
                 { "HN2", 2 },
-                { "HN3", 3 },
-                { "SG1", 4 },
-                { "SG2", 5 },
-                { "ĐN", 6 },
-                { "DN", 6 },
-                { "VINH", 7 },
-                { "QN", 8 }
+                { "SG1", 3 },
+                { "SG2", 4 },
+                { "ĐN", 5 },
+                { "VINH", 6 },
+                { "QN", 7 },
+                { "HN3", 8 }
             };
 
             return codes
@@ -66,134 +65,136 @@ namespace Timesheet.BackgroundWorker
                 .ToList();
         }
 
-    [UnitOfWork]
-protected override void DoWork()
-{
-    var now = DateTimeUtils.GetNow();
-    try
-    {
-        string enable = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportEnable);
-        if (!string.Equals(enable, "True", StringComparison.OrdinalIgnoreCase))
+        [UnitOfWork]
+        protected override void DoWork()
         {
-            _logger.LogInformation("OfficeWorkingReportWorker: Đã tắt");
-            return;
-        }
-
-        string everydayStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingEveryday);
-        string hourStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportAtHour);
-
-        if (!int.TryParse(hourStr, out int configuredHour))
-        {
-            throw new Exception(" Vui lòng thiết lập giờ chạy (0-23).");
-        }
-
-        bool isEveryday = string.Equals(everydayStr, "True", StringComparison.OrdinalIgnoreCase);
-        if (now.Hour != configuredHour || now.Minute != 0)
-        {
-            return;
-        }
-
-        if (_lastSentDate.Date == now.Date)
-        {
-            return;
-        }
-
-        if (!isEveryday && (now.DayOfWeek == DayOfWeek.Saturday || now.DayOfWeek == DayOfWeek.Sunday))
-        {
-            return;
-        }
-
-        string officeIdsStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportOfficeIds);
-        string limitStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportLimit);
-        string mezonUrl = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportMezonUrl);
-
-        int limit = 20; 
-        if (int.TryParse(limitStr, out var parsedLimit) && parsedLimit > 0)
-        {
-            limit = parsedLimit;
-        }
-
-        bool allSuccessful = true;
-        
-        if (string.Equals(officeIdsStr?.Trim(), "ALL", StringComparison.OrdinalIgnoreCase))
-        {
+            var now = DateTimeUtils.GetNow();
             try
             {
-                Task.Run(async () =>
+                string enable = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportEnable);
+                if (!string.Equals(enable, "True", StringComparison.OrdinalIgnoreCase))
                 {
-                    await _reportAppService.SendTopOfficeUsersNotification(
-                        officeId: null,
-                        limit: limit,
-                        reportDate: now.Date,
-                        mezonUrl: mezonUrl,
-                        userId: null,
-                        startDate: null,
-                        endDate: null,
-                        showAll: false,
-                        allOffices: true
-                    );
-                }).GetAwaiter().GetResult();
+                    _logger.LogInformation("OfficeWorkingReportWorker: Đã tắt");
+                    return;
+                }
+
+                string everydayStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingEveryday);
+                string hourStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportAtHour);
+                string minuteStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportAtMinute);
+
+                if (!int.TryParse(hourStr, out int configuredHour) || !int.TryParse(minuteStr, out int configuredMinute))
+                {
+                    throw new Exception(" Vui lòng thiết lập giờ chạy (0-23) và phút (0-59).");
+                }
+
+                bool isEveryday = string.Equals(everydayStr, "True", StringComparison.OrdinalIgnoreCase);
+                if (now.Hour != configuredHour || now.Minute != configuredMinute)
+                {
+                    // Logger.Info($"RunBotReportJob() skipped: Current hour = {now.Hour}, Configured = {configuredHour}, Current minute = {now.Minute}, Configured minute = {configuredMinute}");
+                    return;
+                }
+
+                if (_lastSentDate.Date == now.Date)
+                {
+                    return;
+                }
+
+                if (!isEveryday && (now.DayOfWeek == DayOfWeek.Saturday || now.DayOfWeek == DayOfWeek.Sunday))
+                {
+                    return;
+                }
+
+                string officeIdsStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportOfficeIds);
+                string limitStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportLimit);
+                string mezonUrl = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportMezonUrl);
+
+                int limit = 20; 
+                if (int.TryParse(limitStr, out var parsedLimit) && parsedLimit > 0)
+                {
+                    limit = parsedLimit;
+                }
+
+                bool allSuccessful = true;
+
+                if (string.Equals(officeIdsStr?.Trim(), "ALL", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        Task.Run(async () =>
+                        {
+                            await _reportAppService.SendTopOfficeUsersNotification(
+                                officeId: null,
+                                limit: limit,
+                                reportDate: now.Date,
+                                mezonUrl: mezonUrl,
+                                userId: null,
+                                startDate: null,
+                                endDate: null,
+                                showAll: false,
+                                allOffices: true
+                            );
+                        }).GetAwaiter().GetResult();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Lỗi khi gửi báo cáo tổng hợp");
+                        allSuccessful = false;
+                    }
+                }
+                else
+                {
+                    var ids = (officeIdsStr ?? string.Empty)
+                        .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim())
+                        .Select(part => long.TryParse(part, out long numId) ? numId : (long?)null)
+                        .Where(id => id.HasValue)
+                        .Select(id => id.Value)
+                        .ToList();
+
+                    if (ids.Count == 0)
+                    {
+                        ids = ConvertBranchCodesToOfficeIds(officeIdsStr);
+                    }
+
+                    if (ids.Count == 0)
+                    {
+                        return;
+                    }
+
+                    foreach (var officeId in ids)
+                    {
+                        try
+                        {
+                            Task.Run(async () =>
+                            {
+                                await _reportAppService.SendTopOfficeUsersNotification(
+                                    officeId: officeId,
+                                    limit: limit,
+                                    reportDate: now.Date,
+                                    mezonUrl: mezonUrl,
+                                    userId: null,
+                                    startDate: null,
+                                    endDate: null
+                                );
+                            }).GetAwaiter().GetResult();
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"Lỗi khi gửi báo cáo cho văn phòng {officeId}");
+                            allSuccessful = false;
+                        }
+                    }
+                }
+
+                if (allSuccessful)
+                {
+                    _lastSentDate = now.Date;
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi gửi báo cáo tổng hợp");
-                allSuccessful = false;
+                _logger.LogError(ex, $"Lỗi trong quá trình xử lý: {now}");
             }
         }
-        else
-        {
-            var ids = (officeIdsStr ?? string.Empty)
-                .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim())
-                .Select(part => long.TryParse(part, out long numId) ? numId : (long?)null)
-                .Where(id => id.HasValue)
-                .Select(id => id.Value)
-                .ToList();
-
-            if (ids.Count == 0)
-            {
-                ids = ConvertBranchCodesToOfficeIds(officeIdsStr);
-            }
-
-            if (ids.Count == 0)
-            {
-                return;
-            }
-
-            foreach (var officeId in ids)
-            {
-                try
-                {
-                    Task.Run(async () =>
-                    {
-                        await _reportAppService.SendTopOfficeUsersNotification(
-                            officeId: officeId,
-                            limit: limit,
-                            reportDate: now.Date,
-                            mezonUrl: mezonUrl,
-                            userId: null,
-                            startDate: null,
-                            endDate: null
-                        );
-                    }).GetAwaiter().GetResult();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Lỗi khi gửi báo cáo cho văn phòng {officeId}");
-                    allSuccessful = false;
-                }
-            }
-        }
-
-        if (allSuccessful)
-        {
-            _lastSentDate = now.Date;
-        }
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, $"Lỗi trong quá trình xử lý: {now}");
-    }
-}
     }
 }

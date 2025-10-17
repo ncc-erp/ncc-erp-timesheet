@@ -30,18 +30,14 @@ namespace Timesheet.BackgroundWorker
         protected override void DoWork()
         {
             DateTime now = DateTimeUtils.GetNow();
-            
-            if (now.Minute == 0)
+            try
             {
-                try
-                {
-                    Logger.Info($"BotReportWorker running at {now:yyyy-MM-dd HH:mm:ss}");
-                    RunBotReportJob(now);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("RunBotReportJob() error: " + ex.Message, ex);
-                }
+                Logger.Info($"BotReportWorker running at {now:yyyy-MM-dd HH:mm:ss}");
+                RunBotReportJob(now);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("RunBotReportJob() error: " + ex.Message, ex);
             }
         }
 
@@ -49,25 +45,25 @@ namespace Timesheet.BackgroundWorker
         {
             string enable = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportEnable);
             string hourStr = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportAtHour);
+            string minuteStr = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportAtMinute);
             string dayOfWeek = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportAtDayOfWeek);
             var branchCodesString = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportBranchCodes);
             string botUri = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportWebhookUrl) ?? string.Empty;
 
             if (enable != "True")
             {
-                Logger.Info("RunBotReportJob() skipped: Disabled via settings (Enable = false).");
                 return;
             }
 
-            if (!int.TryParse(hourStr, out int configuredHour))
+            if (!int.TryParse(hourStr, out int configuredHour) || !int.TryParse(minuteStr, out int configuredMinute))
             {
                 Logger.Error("RunBotReportJob() error: Invalid hour setting.");
                 return;
             }
 
-            if (configuredHour != now.Hour)
+            if (configuredHour != now.Hour || configuredMinute != now.Minute)
             {
-                Logger.Info($"RunBotReportJob() skipped: Current hour = {now.Hour}, Configured = {configuredHour}");
+                //Logger.Info($"RunBotReportJob() skipped: Current hour = {now.Hour}, Configured = {configuredHour}, Current minute = {now.Minute}, Configured = {configuredMinute}");
                 return;
             }
 
@@ -87,6 +83,7 @@ namespace Timesheet.BackgroundWorker
             {
                 enable = true,
                 hour = configuredHour,
+                minute = configuredMinute,
                 dayofweek = dayOfWeek,
                 botUri = botUri,
                 branchCodes = branchCodes
@@ -100,6 +97,7 @@ namespace Timesheet.BackgroundWorker
                 {
                     enable = true,
                     hour = configuredHour,
+                    minute = configuredMinute,
                     dayofweek = dayOfWeek,
                     botUri = botUri,
                     branchCodes = branchCodes
