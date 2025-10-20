@@ -580,7 +580,7 @@ namespace Timesheet.DomainServices
         }
 
         public async System.Threading.Tasks.Task SaveDailyAndMentionPunishments(DateTime selectedDate, List<TimesheetUserDto> users,
-          Dictionary<string, int> mapDailyUsers, Dictionary<string, int> mapMentionUsers, Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems)
+          Dictionary<string, int> mapDailyUsers, Dictionary<string, int> mapMentionUsers, Dictionary<string, int> mapWFHUsers, Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems)
         {
             var dailyMentionPunishments = new List<UserPunishment>();
 
@@ -612,6 +612,31 @@ namespace Timesheet.DomainServices
                         Count = mapMentionUsers[user.UserName],
                         TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money
                     });
+                }
+
+                if (mapWFHUsers.ContainsKey(user.UserName) && mapWFHUsers[user.UserName] > 0)
+                {
+                    var mentionPunishment = punishmentSystems[UserPunishmentType.Mention];
+                    var existingMention = dailyMentionPunishments
+                        .FirstOrDefault(p => p.UserId == user.UserId && p.Type == UserPunishmentType.Mention);
+
+                    if (existingMention != null)
+                    {
+                        existingMention.Count += mapWFHUsers[user.UserName];
+                        existingMention.TotalMoney = existingMention.Count * mentionPunishment.Money;
+                    }
+                    else
+                    {
+                        dailyMentionPunishments.Add(new UserPunishment
+                        {
+                            DateAt = selectedDate,
+                            UserId = user.UserId,
+                            PunishmentSystemId = mentionPunishment.Id,
+                            Type = mentionPunishment.Type,
+                            Count = mapWFHUsers[user.UserName],
+                            TotalMoney = mapWFHUsers[user.UserName] * mentionPunishment.Money,
+                        });
+                    }
                 }
             }
 
