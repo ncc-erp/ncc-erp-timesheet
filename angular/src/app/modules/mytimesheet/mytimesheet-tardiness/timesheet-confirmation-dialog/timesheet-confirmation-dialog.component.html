@@ -1,0 +1,93 @@
+<div class="timesheet-confirmation-dialog">
+  <div class="dialog-header">
+    <h2>Timesheet Confirmation – Week {{weekNumber}} ({{weekRange}})</h2>
+    <div class="currency">Currency: MNM (group)</div>
+  </div>
+
+  <div class="summary-section">
+    <div class="summary-item">
+      <div class="summary-label">Total Errors</div>
+      <div class="summary-value">{{totalErrors}}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">Total Fine</div>
+      <div class="summary-value">{{totalFine | number}}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">Status</div>
+      <div class="summary-value" [ngClass]="{'paid': isPaid, 'not-paid': !isPaid}">
+        {{isPaid ? 'Paid' : 'Not Paid'}}
+      </div>
+    </div>
+  </div>
+
+  <div class="error-summary">
+    <h3>Error Summary</h3>
+    <table class="error-table">
+      <thead>
+        <tr>
+          <th>DATE</th>
+          <th>ERROR TYPE</th>
+          <th>DESCRIPTION</th>
+          <th>FINE (points)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of punishmentItems">
+          <td>{{item.date | date:'MMM dd'}}</td>
+          <td>
+            <!-- Attendance Punishments -->
+            <span *ngIf="item.attendancePunish > 0">
+              <span *ngIf="!item.checkIn && !item.checkOut">No CheckIn & Out</span>
+              <span *ngIf="item.checkIn && !item.checkOut">No Check-out</span>
+              <span *ngIf="!item.checkIn && item.checkOut">No Check-in</span>
+              <span *ngIf="item.checkIn && item.checkOut && item.attendancePunish > 0">Late</span>
+            </span>
+            
+            <!-- Daily Punishments -->
+            <span *ngIf="item.dailyPunish > 0">Daily</span>
+            
+            <!-- Mention Punishments -->
+            <span *ngIf="item.mentionPunish > 0">Mention</span>
+            
+            <!-- Tracker Punishments -->
+            <span *ngIf="item.trackerPunish > 0">Tracker</span>
+            
+            <!-- Ant Punishments -->
+            <span *ngIf="item.antPunish > 0">Ant</span>
+            
+            <!-- UnlockTS Gmail Punishments -->
+            <span *ngIf="item.unlockTSGmailPunish > 0">UnlockTS Gmail</span>
+            
+            <!-- UnlockTS IMS Punishments -->
+            <span *ngIf="item.unlockTSIMSPunish > 0">UnlockTS IMS</span>
+            
+            <!-- No punishment -->
+            <span *ngIf="item.totalDayPunishment === 0">No Punish</span>
+          </td>
+          <td>{{item.noteReply || 'No description'}}</td>
+          <td>{{item.totalDayPunishment / 1000}}</td>
+          <td>
+            <mat-checkbox [checked]="true" disabled></mat-checkbox>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="contribution-section">
+    <mat-checkbox [(ngModel)]="contributeToFund">
+      I want to contribute my fine to: <strong>{{selectedFund}}</strong>
+    </mat-checkbox>
+  </div>
+
+  <div class="dialog-footer">
+    <button mat-raised-button color="primary" [disabled]="!contributeToFund" (click)="donate()" class="donate-button">
+      Donate on doing mission.ai
+    </button>
+    <button mat-raised-button color="accent" (click)="markAsPaid()" class="paid-button">
+      Mark as Paid
+    </button>
+  </div>
+</div>

@@ -1,0 +1,115 @@
+.timesheet-confirmation-dialog {
+  width: 800px;
+  max-width: 100%;
+  padding: 20px;
+  background-color: #fff;
+  color: #333;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+}
+
+.currency {
+  font-size: 12px;
+  color: #666;
+}
+
+.summary-section {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.summary-item {
+  text-align: center;
+  flex: 1;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.paid {
+  color: #4caf50;
+}
+
+.not-paid {
+  color: #d32f2f;
+}
+
+.error-summary h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  font-weight: 500;
+  color: #333;
+}
+
+.error-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+}
+
+.error-table th, .error-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.error-table th {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  background-color: #f9f9f9;
+}
+
+.contribution-section {
+  margin-bottom: 30px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+.donate-button {
+  background-color: #673ab7 !important;
+  color: white !important;
+}
+
+.donate-button[disabled] {
+  background-color: rgba(103, 58, 183, 0.5) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.paid-button {
+  background-color: #4caf50 !important;
+  color: white !important;
+}

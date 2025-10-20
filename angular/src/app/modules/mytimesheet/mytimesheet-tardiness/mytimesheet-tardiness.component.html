@@ -30,8 +30,11 @@
               Click vào button Complain và nhập nội dung khiếu nại nếu bạn thấy không đúng.
             </p>
           </div>
-          <div class="item">
-            <span style="color: #d32f2f; font-size: 14px;"><b>Tổng tiền phạt tháng:</b> {{ totalMonthlyPunishment | number }} VNĐ</span>
+          <div _ngcontent-c9="" class="item">
+            <div class="d-flex align-items-center">
+              <span _ngcontent-c9="" style="color: #d32f2f; font-size: 14px; margin-right: 10px;"><b _ngcontent-c9="">Tổng tiền phạt tháng:</b> {{ totalMonthlyPunishment | number }} VNĐ</span>
+              <button mat-raised-button color="primary" class="btn-confirm-punishment" (click)="openConfirmationDialog()">Confirm</button>
+            </div>
           </div>
         </div>
         <ul class="header-dropdown m-r--5">
@@ -294,9 +297,12 @@
           </p>
         </div>
         <div class="item">
-          <p class="text-total-monthly-punishment" style="margin-top: 4px;">
-            Tổng tiền phạt tháng: <b>{{ totalMonthlyPunishment | number }} VNĐ</b>
-          </p>
+          <div class="d-flex align-items-center">
+            <p class="text-total-monthly-punishment" style="margin-top: 4px; margin-right: 10px;">
+              Tổng tiền phạt tháng: <b>{{ totalMonthlyPunishment | number }} VNĐ</b>
+            </p>
+            <button mat-raised-button color="primary" class="btn-confirm-punishment" (click)="openConfirmationDialog()">Confirm</button>
+          </div>
         </div>
       </div>
     </div>

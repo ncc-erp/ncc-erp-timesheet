@@ -14,9 +14,12 @@ import { MytimesheetTardinessComponent } from './mytimesheet-tardiness/mytimeshe
 import { TimesheetWarningDialogComponent } from './timesheet-warning-dialog/timesheet-warning-dialog.component';
 import { MytimesheetNormalWorkingComponent } from './mytimesheet-normal-working/mytimesheet-normal-working.component';
 import { ComplainDialogComponent } from './mytimesheet-tardiness/complain-dialog/complain-dialog.component';
+import { TimesheetConfirmationDialogComponent } from './mytimesheet-tardiness/timesheet-confirmation-dialog/timesheet-confirmation-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+
 @NgModule({
     declarations: [
       CreateEditTimesheetByWeekComponent,
@@ -25,7 +28,8 @@ import { MatButtonModule } from '@angular/material/button';
       MytimesheetTardinessComponent,
       TimesheetWarningDialogComponent,
       MytimesheetNormalWorkingComponent,
-      ComplainDialogComponent
+      ComplainDialogComponent,
+      TimesheetConfirmationDialogComponent
     ],
     imports: [
       CommonModule,
@@ -40,13 +44,15 @@ import { MatButtonModule } from '@angular/material/button';
     }),
     MatDialogModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatCheckboxModule
     ],
     entryComponents: [
       CreateEditTimesheetItemComponent,
       CreateEditTimesheetByWeekComponent,
       TimesheetWarningDialogComponent,
-      ComplainDialogComponent
+      ComplainDialogComponent,
+      TimesheetConfirmationDialogComponent
     ]
   })
   export class MyTimeSheetsModule { }
