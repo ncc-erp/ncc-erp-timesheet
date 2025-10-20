@@ -270,6 +270,7 @@ namespace Timesheet.DomainServices
                 .FirstOrDefault();
 
         }
+
         public async Task<User> CreateUserFromHrmv2Async(CreateUpdateByHRMV2Dto input)
         {
             var hadUser = WorkScope.GetAll<User>()
@@ -289,7 +290,7 @@ namespace Timesheet.DomainServices
                 NormalizedUserName = input.EmailAddress?.Replace("@ncc.asia", "").ToLower(),
                 NormalizedEmailAddress = input.EmailAddress.ToLower(),
                 Sex = input.GetSex,
-                Type = input.UserType,
+                Type = (Usertype)MapHrmv2UserTypeToTimesheet(input.UserType),
                 EmailAddress = input.EmailAddress,
                 Surname = input.Surname,
                 Name = input.Name,
@@ -348,7 +349,7 @@ namespace Timesheet.DomainServices
             var user = await WorkScope.GetAll<User>()
                 .Where(x => x.EmailAddress.ToLower().Trim() == input.EmailAddress.ToLower().Trim()).FirstOrDefaultAsync();
 
-            user.Type = input.UserType;
+            user.Type = (Usertype)MapHrmv2UserTypeToTimesheet(input.UserType);
             user.Sex = input.GetSex;
             user.Name = input.Name;
             user.Surname = input.Surname;
@@ -366,6 +367,21 @@ namespace Timesheet.DomainServices
             await CurrentUnitOfWork.SaveChangesAsync();
 
             return user;
+        }
+
+        private byte MapHrmv2UserTypeToTimesheet(Usertype hrmv2UserType)
+        {
+            byte hrmv2Value = (byte)hrmv2UserType;
+            switch (hrmv2Value)
+            {
+                case 0: return 1; // HRMv2 Internship (0) → Timesheet Internship (1)
+                case 1: return 2; // HRMv2 Collaborators (1) → Timesheet Collaborators (2)
+                case 2: return 0; // HRMv2 Staff (2) → Timesheet Staff (0)
+                case 3: return 3; // HRMv2 ProbationaryStaff (3) → Timesheet ProbationaryStaff (3)
+                case 5: return 5; // HRMv2 Vendor (5) → Timesheet Vendor (5)
+                default:
+                    throw new UserFriendlyException($"Invalid UserType from HRMv2: {hrmv2Value}. Please check the input data.");
+            }
         }
 
         public User GetUserByEmail(string email)

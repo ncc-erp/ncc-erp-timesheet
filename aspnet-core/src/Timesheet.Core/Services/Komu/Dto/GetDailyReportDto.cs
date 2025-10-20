@@ -16,7 +16,6 @@ namespace Timesheet.Services.Komu.Dto
         public string email { get; set; }
         public int count { get; set; }
     }
-
     public class MentionDto
     {
         public string name { get; set; }

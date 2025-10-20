@@ -62,7 +62,9 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   userTypes = [
     { value: 0, label: 'Staff' },
     { value: 1, label: 'Internship' },
-    { value: 2, label: 'Collaborator' }
+    { value: 2, label: 'CTV' },
+    { value: 3, label: 'Probation' },
+    { value: 5, label: 'Vendor' }
   ];
  
   ngOnInit() {
@@ -151,7 +153,9 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     switch (userType) {
       case 0: return 'bg-red';
       case 1: return 'bg-green';
-      default: return 'bg-blue';
+      case 2: return 'bg-blue';
+      case 3: return 'bg-orange';
+      case 5: return 'bg-purple';
     }
   }
 

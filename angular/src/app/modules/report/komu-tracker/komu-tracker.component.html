@@ -109,10 +109,16 @@
                          {{item.fullName}}
                         </div>
                         <ng-container *ngIf="item.userType || item.userType == 0">
-                          <div class="label"
-                            [ngClass]="item.userType == 0 ? 'bg-red' : item.userType == 1 ? 'bg-green' : 'bg-blue'">
-                            {{userTypes[item.userType]?.label}}
-                          </div>
+                          <span *ngIf="item.userType == 0"
+                          class="label bg-red">{{getLabel(item.userType)}}</span>
+                          <span *ngIf="item.userType == 1"
+                          class="label bg-green">{{getLabel(item.userType)}}</span>
+                          <span *ngIf="item.userType == 2"
+                          class="label bg-blue">{{getLabel(item.userType)}}</span>
+                          <span *ngIf="item.userType == 3"
+                          class="label bg-orange">{{getLabel(item.userType)}}</span>
+                          <span *ngIf="item.userType == 5"
+                          class="label bg-purple">{{getLabel(item.userType)}}</span>
                         </ng-container>
                         <div class="label status-label"
                           [style.backgroundColor]="item.branchColor">

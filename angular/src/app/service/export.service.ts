@@ -270,7 +270,9 @@ export class ExportService {
         let UserType = {
             Staff: 0,
             Intern: 1,
-            Collaborator: 2
+            Collaborator: 2,
+            Probation: 3,
+            Vendor: 5
         };
         listReports.map(x => {
             let res = {

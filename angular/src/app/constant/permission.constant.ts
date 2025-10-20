@@ -107,6 +107,10 @@ export const PERMISSIONS_CONSTANT = {
     EditLateInternReviewSetting: "Admin.Configuration.LateInternReviewConfig.EditLateInternReviewConfig",
     ViewPMReportSetting: "Admin.Configuration.PMReportConfig.ViewPMReportConfig",
     EditPMReportSetting: "Admin.Configuration.PMReportConfig.EditPMReportConfig",
+    ViewBotReportSetting: "Admin.Configuration.BotReportConfig.ViewBotReportConfig",
+    EditBotReportSetting: "Admin.Configuration.BotReportConfig.EditBotReportConfig",
+    ViewAnomaliesReportSetting: "Admin.Configuration.AnomaliesReportConfig.ViewAnomaliesReportConfig",
+    EditAnomaliesReportSetting: "Admin.Configuration.AnomaliesReportConfig.EditAnomaliesReportConfig",
     //client
     ViewClients: "Admin.Clients.View",
     AddClient: "Admin.Clients.AddNew",

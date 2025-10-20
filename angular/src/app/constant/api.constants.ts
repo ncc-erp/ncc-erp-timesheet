@@ -4,6 +4,17 @@ export const PROJECT_MANAGER = {
   searchProject: '/api/services/app/ProjectService/Filter',
 };
 
+export const BRANCH_CODES = [
+  'HN1',
+  'HN2',
+  'SG1',
+  'SG2',
+  'ĐN',
+  'Vinh',
+  'QN',
+  'HN3'
+];
+
 export const APP_CONSTANT = {
   EnumProjectStatus: {
     Active: 0,
@@ -107,7 +118,10 @@ export const APP_CONSTANT = {
   },
   TYPE: {
     Staff : 0,
+    Internship : 1,
     Collaborator : 2,
+    Probation : 3,
+    Vendor : 5
   },
   HISTORYLEVEL: {
     Intern_0 : 0,
@@ -223,6 +237,12 @@ export const APP_CONSTANT = {
     'Have Check In & Have Check Out': 3,
     'Have Check In or Have Check Out': 4,
     'No Check In & No Check Out': 5
+  },
+  WorkLocation: {
+    All: -1,
+    Onsite: 1,
+    Remote: 2,
+    Office: 3,
   },
     PunishRules: [
     { "name": "No Punish", "value": 0 },

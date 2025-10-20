@@ -718,8 +718,12 @@ namespace Timesheet.APIs.Timekeepings
             t.RegisterCheckIn = input.RegisterCheckIn;
             t.RegisterCheckOut = input.RegisterCheckOut;
             t.TrackerTime = input.TrackerTime;
-            await timekeepingServices.CheckIsPunished(t);
-            await timekeepingServices.CheckIsPunishedByRule(t, LimitedMinute, DateTimeUtils.ConvertHHmmssToMinutes(input.TrackerTime));
+            var user = await WorkScope.GetAsync<User>(t.UserId ?? 0);
+            if (user.Type != Usertype.Vendor)
+            {
+                await timekeepingServices.CheckIsPunished(t);
+                await timekeepingServices.CheckIsPunishedByRule(t, LimitedMinute, DateTimeUtils.ConvertHHmmssToMinutes(input.TrackerTime));
+            }
             await WorkScope.GetRepo<Timekeeping>().UpdateAsync(t);
             return t;
         }
@@ -1180,6 +1184,32 @@ namespace Timesheet.APIs.Timekeepings
         public async Task<object> NoticePunishUserCheckInOut(DateTime date)
         {
             return await timekeepingServices.NoticePunishUserCheckInOut(date);
+        }
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Timekeeping_UserNote)]
+        [HttpPost]
+        public async Task DeleteComplaint(DeleteComplaintDto input)
+        {
+            var userPunishment = await WorkScope.GetAsync<UserPunishment>(input.UserPunishmentId);
+            if (userPunishment == null)
+            {
+                throw new UserFriendlyException("Punishment record not found!");
+            }
+            if (userPunishment.UserId != AbpSession.UserId.Value)
+            {
+                throw new UserFriendlyException("You can only delete complaints for your own records");
+            }
+            userPunishment.UserNote = null;
+            await WorkScope.GetRepo<UserPunishment>().UpdateAsync(userPunishment);
+            var timekeeping = await WorkScope.GetAll<Timekeeping>()
+                .Where(t => t.UserId == userPunishment.UserId &&
+                         t.DateAt.Date == userPunishment.DateAt.Date)
+                .FirstOrDefaultAsync();
+            
+            if (timekeeping != null)
+            {
+                timekeeping.UserNote = null;
+                await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
+            }
         }
     }
 }

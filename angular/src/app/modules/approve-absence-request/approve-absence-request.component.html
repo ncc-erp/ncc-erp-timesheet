@@ -75,6 +75,10 @@
                           class="label status-label bg-green">{{userTypes[req.type].label}}</span>
                         <span *ngIf="req.type == 2"
                           class="label status-label bg-blue">{{userTypes[req.type].label}}</span>
+                        <span *ngIf="req.type == 3"
+                          class="label status-label bg-orange">{{userTypes[req.type].label}}</span>
+                        <span *ngIf="req.type == 5"
+                          class="label status-label bg-purple">{{userTypes[req.type].label}}</span>
                         <span *ngIf="req.level != null">
                           <span class="label status-label mr-left"
                             [ngStyle]=" userLevels[req.level].style">{{userLevels[req.level].name}}</span>

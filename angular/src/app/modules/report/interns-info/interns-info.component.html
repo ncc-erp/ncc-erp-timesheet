@@ -103,10 +103,16 @@
                         </div>
                         <div>
                           <ng-container *ngIf="item.myInfo.type || item.myInfo.type == 0">
-                            <span class="label "
-                              [ngClass]="item.myInfo.type == 0 ? 'bg-red' : item.myInfo.type == 1 ? 'bg-green' : 'bg-blue'">
-                              {{userTypes[item.myInfo.type]?.label}}
-                            </span>
+                            <span *ngIf="item.myInfo.type == 0"
+                            class="label bg-red">{{getLabel(item.myInfo.type)}}</span>
+                            <span *ngIf="item.myInfo.type == 1"
+                            class="label bg-green">{{getLabel(item.myInfo.type)}}</span>
+                            <span *ngIf="item.myInfo.type == 2"
+                            class="label bg-blue">{{getLabel(item.myInfo.type)}}</span>
+                            <span *ngIf="item.myInfo.type == 3"
+                            class="label bg-orange">{{getLabel(item.myInfo.type)}}</span>
+                            <span *ngIf="item.myInfo.type == 5"
+                            class="label bg-purple">{{getLabel(item.myInfo.type)}}</span>
                           </ng-container>
                           <span class="label" [ngStyle]="userLevels[item.myInfo.level].style" *ngIf = "item.myInfo.level && permission.isGranted(InternsInfo_ViewLevelIntern)">
                             {{item.myInfo.level | level}}

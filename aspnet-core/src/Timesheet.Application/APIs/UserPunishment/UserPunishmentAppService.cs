@@ -1,6 +1,8 @@
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Authorization;
+using Abp.Authorization.Roles;
+using Abp.Authorization.Users;
 using Abp.Configuration;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
@@ -13,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Ncc;
 using Ncc.Authorization.Users;
+using Ncc.Authorization.Roles;
 using Ncc.Configuration;
 using Ncc.IoC;
 using Ncc.Net.MimeTypes;
@@ -32,7 +35,8 @@ using Timesheet.Entities;
 using Timesheet.Services.Project.Dto;
 using Timesheet.Users.Dto;
 using TimesheetApplication.PunishmentSystem;
-using static Ncc.Entities.Enum.StatusEnum;
+using static Ncc.Entities.Enum.StatusEnum;  
+using Timesheet.NCCAuthen;
 
 namespace TimesheetApplication.UserPunishment
 {
@@ -48,12 +52,14 @@ namespace TimesheetApplication.UserPunishment
 
         private readonly string templateFolder = Path.Combine("wwwroot", "template");
 
-        public UserPunishmentAppService(IWorkScope workScope, ILogger<UserPunishmentAppService> logger, IUserPunishmentServices userPunishmentServices, IUserServices userServices) : base(workScope)
+        public UserPunishmentAppService(IWorkScope workScope, ILogger<UserPunishmentAppService> logger, IUserPunishmentServices userPunishmentServices, IUserServices userServices, IHttpContextAccessor httpContextAccessor, ISettingManager settingManager) : base(workScope)
         {
             _workScope = workScope;
             _logger = logger;
             _userPunishmentServices = userPunishmentServices;
             _userServices = userServices;
+            _httpContextAccessor = httpContextAccessor;
+            _settingManager = settingManager;
         }
 
         [HttpPost]
@@ -610,6 +616,174 @@ namespace TimesheetApplication.UserPunishment
         public async Task<List<PMReportItemDto>> ApplyPMReportPunishmentsAsync()
         {
             return await _userPunishmentServices.ApplyPMReportPunishmentsAsync();
+        }
+
+        [HttpGet]
+        [NccAuthentication]
+        [AbpAllowAnonymous]
+        public async Task<object> GetCompanyPunishmentComparisonAsync(string username)
+        {
+            try
+            {
+                var now = DateTime.Now;
+                var startOfMonth = new DateTime(now.Year, now.Month, 1);
+                var endOfMonth = now; 
+
+                var user = await _workScope.GetAll<User>()
+                    .Where(u => u.UserName == username)
+                    .FirstOrDefaultAsync();
+                
+                if (user == null)
+                {
+                    throw new UserFriendlyException($"Không tìm thấy người dùng với username: {username}");
+                }
+
+                long userId = user.Id;
+
+                var userRoles = await _workScope.GetRepo<UserRole, long>()
+                    .GetAll()
+                    .Where(ur => ur.UserId == userId)
+                    .Join(_workScope.GetRepo<Ncc.Authorization.Roles.Role, int>()
+                        .GetAll(),
+                        userRole => userRole.RoleId,
+                        role => role.Id,
+                        (userRole, role) => role.Name)
+                    .ToListAsync();
+
+                bool isOnlyBasicUser = userRoles.Count == 1 && userRoles[0] == "BasicUser";
+
+                var userPunishments = await _workScope.GetAll<Timesheet.Entities.UserPunishment>()
+                    .Where(p => p.UserId == userId && 
+                           p.DateAt >= startOfMonth && 
+                           p.DateAt <= endOfMonth)
+                    .ToListAsync();
+
+                var companyPunishments = await _workScope.GetAll<Timesheet.Entities.UserPunishment>()
+                    .Where(p => p.UserId != userId && 
+                           p.DateAt >= startOfMonth && 
+                           p.DateAt <= endOfMonth)
+                    .ToListAsync();
+
+                var employeeCount = await _workScope.GetAll<User>()
+                    .Where(u => u.IsActive)
+                    .CountAsync();
+
+                var userTotalPunishmentAmount = userPunishments.Sum(p => p.TotalMoney);
+                var companyTotalPunishmentAmount = companyPunishments.Sum(p => p.TotalMoney);
+                var companyAverageTotalPunishmentAmount = companyTotalPunishmentAmount / (employeeCount - 1);
+
+                var maxAmount = Math.Max(
+                    Math.Max(userTotalPunishmentAmount, companyAverageTotalPunishmentAmount),
+                    1);
+
+                var userTotalBarPercentage = (userTotalPunishmentAmount * 100.0) / maxAmount;
+                var companyTotalBarPercentage = (companyAverageTotalPunishmentAmount * 100.0) / maxAmount;
+
+                UserPunishmentType[] punishmentTypes;
+                
+                if (isOnlyBasicUser)
+                {
+                    punishmentTypes = new[] {
+                        UserPunishmentType.Late,           
+                        UserPunishmentType.NoCheckIn,      
+                        UserPunishmentType.NoCheckOut,       
+                        UserPunishmentType.LateAndNoCheckOut, 
+                        UserPunishmentType.NoCheckInAndNoCheckOut, 
+                        UserPunishmentType.Daily,          
+                        UserPunishmentType.Mention,       
+                        UserPunishmentType.Tracker_20k,    
+                        UserPunishmentType.Tracker_50k,    
+                        UserPunishmentType.Tracker_100k,    
+                        UserPunishmentType.Tracker_200k,  
+                        UserPunishmentType.Ant,            
+                        UserPunishmentType.UnlockTSGmail, 
+                        UserPunishmentType.UnlockTSIMS     
+                    };
+                }
+                else
+                {
+                    punishmentTypes = new[] {
+                        UserPunishmentType.Late,           
+                        UserPunishmentType.NoCheckIn,      
+                        UserPunishmentType.NoCheckOut,       
+                        UserPunishmentType.LateAndNoCheckOut, 
+                        UserPunishmentType.NoCheckInAndNoCheckOut, 
+                        UserPunishmentType.Daily,          
+                        UserPunishmentType.Mention,       
+                        UserPunishmentType.Tracker_20k,    
+                        UserPunishmentType.Tracker_50k,    
+                        UserPunishmentType.Tracker_100k,    
+                        UserPunishmentType.Tracker_200k,  
+                        UserPunishmentType.ReviewIntern,    
+                        UserPunishmentType.PMReport_20k, 
+                        UserPunishmentType.PMReport_50k,   
+                        UserPunishmentType.Ant,            
+                        UserPunishmentType.UnlockTSGmail, 
+                        UserPunishmentType.UnlockTSIMS     
+                    };
+                }
+
+                var punishmentDetails = new List<object>();
+
+                var maxPunishmentTypeAmount = 1.0; 
+
+                foreach (var punishmentType in punishmentTypes)
+                {
+                    var userAmount = userPunishments
+                        .Where(p => p.Type == punishmentType)
+                        .Sum(p => p.TotalMoney);
+
+                    var companyAmount = companyPunishments
+                        .Where(p => p.Type == punishmentType)
+                        .Sum(p => p.TotalMoney);
+                    var companyAverageAmount = companyAmount / (employeeCount - 1);
+
+                    maxPunishmentTypeAmount = Math.Max(maxPunishmentTypeAmount, 
+                        Math.Max(userAmount, companyAverageAmount));
+                }
+
+                foreach (var punishmentType in punishmentTypes)
+                {
+                    var userAmount = userPunishments
+                        .Where(p => p.Type == punishmentType)
+                        .Sum(p => p.TotalMoney);
+
+                    var companyAmount = companyPunishments
+                        .Where(p => p.Type == punishmentType)
+                        .Sum(p => p.TotalMoney);
+                    var companyAverageAmount = companyAmount / (employeeCount - 1);
+
+                    var userBarPercentage = (userAmount * 100.0) / maxPunishmentTypeAmount;
+                    var companyBarPercentage = (companyAverageAmount * 100.0) / maxPunishmentTypeAmount;
+
+                    punishmentDetails.Add(new
+                    {
+                        punishmentType = punishmentType.ToString(),
+                        userBarPercentage,
+                        companyBarPercentage
+                    });
+                }
+
+                var response = new
+                {
+                    title = $"Tỷ lệ phạt của bạn so với trung bình công ty",
+                    year = now.Year,
+                    month = now.Month,
+                    punishmentDetails,
+                    totalBarPercentage = new
+                    {
+                        user = userTotalBarPercentage,
+                        company = companyTotalBarPercentage
+                    }
+                };
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetCompanyPunishmentComparisonAsync");
+                throw new UserFriendlyException("An error occurred while getting punishment comparison data.");
+            }
         }
     }
 }

@@ -249,6 +249,31 @@ namespace Timesheet.Services.Komu
             }
         }
 
+        public void SendSimpleNotificationToUser(string message, string userName)
+        {
+            if (_isNotifyToKomu != "true")
+            {
+                logger.LogInformation("SendSimpleNotificationToUser: _isNotifyToKomu=" + _isNotifyToKomu + " => stop");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                logger.LogWarning("SendSimpleNotificationToUser: userName is null or empty");
+                return;
+            }
+
+            try
+            {
+                Post(KomuUrlConstant.KOMU_USER_ONLY, new KomuSendMessageToUserDto { message = message, username = userName });
+                logger.LogInformation($"SendSimpleNotificationToUser: Sent to user {userName}");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"SendSimpleNotificationToUser: Failed to send to user {userName}");
+            }
+        }
+
         public void SendMessageReviewInternToUser(string komuMessage, string userName, string interns = null)
         {
             if (_isNotifyToKomu != "true")

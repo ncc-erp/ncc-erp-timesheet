@@ -12,12 +12,12 @@
         <div class="punishment-list">
           <div *ngFor="let type of punishmentTypes" class="punishment-item">
             <div class="punishment-header">
-              <mat-checkbox [checked]="userNotes[type.value] !== undefined && userNotes[type.value] !== ''" 
+              <mat-checkbox [checked]="isPunishmentSelected(type.value)" 
                             (change)="onCheckboxChange($event, type.value)">
                 {{type.name}}
               </mat-checkbox>
             </div>
-            <div *ngIf="userNotes[type.value] !== undefined && userNotes[type.value] !== null" class="punishment-note">
+            <div *ngIf="shouldShowTextarea(type.value)" class="punishment-note">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Your complaint</mat-label>
                 <textarea matInput [(ngModel)]="userNotes[type.value]" 

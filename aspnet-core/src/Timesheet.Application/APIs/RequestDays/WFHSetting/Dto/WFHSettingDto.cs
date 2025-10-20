@@ -8,6 +8,7 @@ namespace Timesheet.APIs.MyAbsenceDays.WFHSetting.Dto
     {
         public string numOfRemoteDays {get; set;}
         public string allowInternToWorkRemote { get; set;}
+        public string allowProbationToWorkRemote { get; set; }
         public string totalTimeTardinessAndEarlyLeave  { get; set; }
         
     }

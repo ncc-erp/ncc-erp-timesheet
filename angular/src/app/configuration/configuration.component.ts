@@ -10,6 +10,7 @@ import { EmailSaoDoSettingService } from './../service/api/email-sao-do-setting.
 import { LevelSettingService } from './../service/api/level-setting.service';
 import { Component, Injector, OnInit } from '@angular/core';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
+import { BRANCH_CODES } from '@app/constant/api.constants';
 import { AutoLockTimesheetService } from '@app/service/api/auto-lock-timesheet.service';
 import { AutoSubmitTimesheetSettingService } from '@app/service/api/auto-submit-timesheet-setting.service';
 import { EmailSettingService } from '@app/service/api/email-setting.service';
@@ -27,8 +28,10 @@ import { MezonSettingService } from '@app/service/api/mezon-setting.service';
 import { LogoutAllUserService } from '@app/service/api/logout-all-user.service';
 import { LateInternReviewSettingService, LateInternReviewSettingDto } from '@app/service/api/late-intern-review-setting.service';
 import { PMReportPunishSettingService, PMReportPunishSettingDto } from '@app/service/api/pm-report-punish-setting.service';
-
-
+import { BotReportSettingService, BotReportSettingDto, ProjectDto } from '../service/api/bot-report-setting.service';
+import { AnomaliesReportSettingService, AnomaliesReportSettingDto } from '../service/api/anomalies-report-setting.service';
+import { BranchService } from '@app/service/api/branch.service';
+import { OfficeWorkingReportSettingDto, OfficeWorkingReportSettingService } from '../service/api/office-working-report-setting.service';
 @Component({
   selector: 'app-configuration',
   templateUrl: './configuration.component.html',
@@ -59,20 +62,20 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_PUNISHBYRULE_SETTING = PERMISSIONS_CONSTANT.EditCheckInCheckOutPunishmentSetting;
   VIEW_PROJECT_CONFIG = PERMISSIONS_CONSTANT.ViewProjectConfig;
   UPDATE_PROJECT_CONFIG = PERMISSIONS_CONSTANT.UpdateProjectConfig;
-  VIEW_WFH_SETTING=PERMISSIONS_CONSTANT.ViewWFHSetting;
-  EDIT_WFH_SETTING= PERMISSIONS_CONSTANT.EditWFHSetting;
-  VIEW_KOMU_CONFIG=PERMISSIONS_CONSTANT.ViewKomuConfig
-  UPDATE_KOMU_CONFIG= PERMISSIONS_CONSTANT.UpdateKomuConfig
-  VIEW_SPECIAL_PROJECT_TASK_CONFIG=PERMISSIONS_CONSTANT.ViewSpecialProjectTaskSetting
-  EDIT_SPECIAL_PROJECT_TASK_CONFIG= PERMISSIONS_CONSTANT.EditSpecialProjectTaskSetting
-  VIEW_NOTIFICATION_SETTING= PERMISSIONS_CONSTANT.ViewNotificationSetting
-  EDIT_NOTIFICATION_SETTING= PERMISSIONS_CONSTANT.EditNotificationSetting
-  VIEW_EMAIL_SAO_DO_SETTING= PERMISSIONS_CONSTANT.ViewEmailSaoDo
-  EDIT_EMAIL_SAO_DO_SETTING= PERMISSIONS_CONSTANT.EditEmailSaoDo
-  VIEW_CHECKIN_SETTING= PERMISSIONS_CONSTANT.ViewCheckInSetting
-  EDIT_CHECKIN_SETTNG = PERMISSIONS_CONSTANT. UpdateCheckInSetting
-  VIEW_MEZON_SETTING= PERMISSIONS_CONSTANT.ViewMezonSetting
-  EDIT_MEZON_SETTNG = PERMISSIONS_CONSTANT. EditMezonSetting
+  VIEW_WFH_SETTING = PERMISSIONS_CONSTANT.ViewWFHSetting;
+  EDIT_WFH_SETTING = PERMISSIONS_CONSTANT.EditWFHSetting;
+  VIEW_KOMU_CONFIG = PERMISSIONS_CONSTANT.ViewKomuConfig
+  UPDATE_KOMU_CONFIG = PERMISSIONS_CONSTANT.UpdateKomuConfig
+  VIEW_SPECIAL_PROJECT_TASK_CONFIG = PERMISSIONS_CONSTANT.ViewSpecialProjectTaskSetting
+  EDIT_SPECIAL_PROJECT_TASK_CONFIG = PERMISSIONS_CONSTANT.EditSpecialProjectTaskSetting
+  VIEW_NOTIFICATION_SETTING = PERMISSIONS_CONSTANT.ViewNotificationSetting
+  EDIT_NOTIFICATION_SETTING = PERMISSIONS_CONSTANT.EditNotificationSetting
+  VIEW_EMAIL_SAO_DO_SETTING = PERMISSIONS_CONSTANT.ViewEmailSaoDo
+  EDIT_EMAIL_SAO_DO_SETTING = PERMISSIONS_CONSTANT.EditEmailSaoDo
+  VIEW_CHECKIN_SETTING = PERMISSIONS_CONSTANT.ViewCheckInSetting
+  EDIT_CHECKIN_SETTNG = PERMISSIONS_CONSTANT.UpdateCheckInSetting
+  VIEW_MEZON_SETTING = PERMISSIONS_CONSTANT.ViewMezonSetting
+  EDIT_MEZON_SETTNG = PERMISSIONS_CONSTANT.EditMezonSetting
   VIEW_NRIT_CONFIG = PERMISSIONS_CONSTANT.ViewNRITSetting;
   EDIT_NRIT_CONFIG = PERMISSIONS_CONSTANT.EditNRITSetting;
   VIEW_NRITVMAE_CONFIG = PERMISSIONS_CONSTANT.ViewNRITVMAESetting;
@@ -81,6 +84,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_LATE_INTERN_REVIEW_SETTING = PERMISSIONS_CONSTANT.EditLateInternReviewSetting;
   VIEW_PM_REPORT_PUNISH_SETTING = PERMISSIONS_CONSTANT.ViewPMReportSetting;
   EDIT_PM_REPORT_PUNISH_SETTING = PERMISSIONS_CONSTANT.EditPMReportSetting;
+  VIEW_BOT_REPORT_SETTING = PERMISSIONS_CONSTANT.ViewBotReportSetting;
+  EDIT_BOT_REPORT_SETTING = PERMISSIONS_CONSTANT.EditBotReportSetting;
+  VIEW_ANOMALIES_REPORT_SETTING = PERMISSIONS_CONSTANT.ViewAnomaliesReportSetting;
+  EDIT_ANOMALIES_REPORT_SETTING = PERMISSIONS_CONSTANT.EditAnomaliesReportSetting;
   VIEW_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.ViewUnlockTimesheetSetting;
   UPDATE_UNLOCK_TIMESHEET_SETTING = PERMISSIONS_CONSTANT.UpdateUnlockTimesheetSetting;
   VIEW_PUNISHCHECKIN_CONFIG = PERMISSIONS_CONSTANT.ViewSendKomuPunishedCheckIn;
@@ -104,9 +111,9 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   VIEW_TIMECANLATEANDEARLY_CONFIG = PERMISSIONS_CONSTANT.ViewTimesCanLateAndEarlyInMonthSetting;
   EDIT_TIMECANLATEANDEARLY_CONFIG = PERMISSIONS_CONSTANT.EditTimesCanLateAndEarlyInMonthSetting;
 
-  VIEW_TIMESTARTCHANGINGCHECKINTOCHECKOUT_SETTING=PERMISSIONS_CONSTANT.ViewTimeStartChangingCheckInToCheckoutSetting;
-  EDIT_TIMESTARTCHANGINGCHECKINTOCHECKOUT_SETTING=PERMISSIONS_CONSTANT.EditTimeStartChangingCheckInToCheckoutSetting;
-  VIEW_TIMESTARTCHANGINGCHECKINTOCHECKOUTCASEOFFAFTERNOON_SETTING=PERMISSIONS_CONSTANT.ViewTimeStartChangingCheckInToCheckoutCaseOffAfternoonSetting;
+  VIEW_TIMESTARTCHANGINGCHECKINTOCHECKOUT_SETTING = PERMISSIONS_CONSTANT.ViewTimeStartChangingCheckInToCheckoutSetting;
+  EDIT_TIMESTARTCHANGINGCHECKINTOCHECKOUT_SETTING = PERMISSIONS_CONSTANT.EditTimeStartChangingCheckInToCheckoutSetting;
+  VIEW_TIMESTARTCHANGINGCHECKINTOCHECKOUTCASEOFFAFTERNOON_SETTING = PERMISSIONS_CONSTANT.ViewTimeStartChangingCheckInToCheckoutCaseOffAfternoonSetting;
 
   VIEW_SENDMESSAGEREQUESTPENDINGTEAMBUILDINGTOHR_CONFIG = PERMISSIONS_CONSTANT.ViewSendMessageRequestPendingTeamBuildingToHRConfigSetting;
   EDIT_SENDMESSAGEREQUESTPENDINGTEAMBUILDINGTOHR_CONFIG = PERMISSIONS_CONSTANT.EditSendMessageRequestPendingTeamBuildingToHRConfigSetting;
@@ -172,12 +179,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isShowWorkingTime: boolean = false;
   isShowGoogleSetting: boolean = false;
   isShowAutoLogTimesheet: boolean = false;
-  isShowSecurityCodeSetting: boolean =false;
-  isShowLogoutAllUserSetting: boolean =false;
+  isShowSecurityCodeSetting: boolean = false;
+  isShowLogoutAllUserSetting: boolean = false;
   isShowLevelSetting: boolean = false;
   isShowPunishByRule: boolean = false;
   isShowLogTSInFuture: boolean = false;
-  isShowAutoSubmitTS: boolean= false;
+  isShowAutoSubmitTS: boolean = false;
   isShowFaceIDSetting: boolean = false;
   isShowMezonSetting: boolean = false;
   isShowHRMSetting: boolean = false;
@@ -193,10 +200,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditNRITConfig: boolean = false;
   isShowNoticePunishedCheckIn: boolean = false;
   NRITConfig = {} as NRITConfigDto;
-  
+
   isShowNRITVMAEConfig: boolean = false;
   isEditNRITVMAEConfig: boolean = false;
-  NRITVMAEConfig= {} as NotifyReviewInternViaMezonAndEmailConfigDto;
+  NRITVMAEConfig = {} as NotifyReviewInternViaMezonAndEmailConfigDto;
 
   isShowLateInternReviewSetting: boolean = false;
   isEditLateInternReviewSetting: boolean = false;
@@ -205,6 +212,34 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isShowPMReportPunishSetting: boolean = false;
   isEditPMReportPunishSetting: boolean = false;
   pmReportPunishSetting = {} as PMReportPunishSettingDto;
+
+  isShowBotReportSetting: boolean = false;
+  isEditBotReportSetting: boolean = false;
+  isShowAnomaliesReportSetting: boolean = false;
+  isEditAnomaliesReportSetting: boolean = false;
+  isShowOfficeWorkingReportSetting: boolean = false;
+  isEditOfficeWorkingReportSetting: boolean = false;
+  botReportSetting = { everyday: false, botUri: '', projectIds: [], branchCodes: [] } as BotReportSettingDto;
+  anomaliesReportSetting = { hour: 0, dayofweek: 'Monday', botUri: '', branchCodes: [] } as AnomaliesReportSettingDto;
+  officeWorkingReportSetting = { enable: false, everyday: false, hour: 8, minute: 0, officeIds: '', limit: 10, mezonUrl: '' } as OfficeWorkingReportSettingDto;
+  selectedOfficeWorkingBranches: string[] = [];
+  projects: ProjectDto[] = [];
+  selectedProjects: number[] = [];
+  selectedBranches: string[] = [];
+  selectedAnomaliesBranches: string[] = [];
+  isAllOfficeWorkingBranchesSelected: boolean = false;
+  isAllProjectsSelected: boolean = false;
+  isAllBranchesSelected: boolean = false;
+  isAllAnomaliesBranchesSelected: boolean = false;
+  branchCodes = BRANCH_CODES;
+  toggleAllOfficeWorkingBranches() {
+    if (this.isAllOfficeWorkingBranchesSelected) {
+      this.selectedOfficeWorkingBranches = [];
+    } else {
+      this.selectedOfficeWorkingBranches = [...this.branchCodes];
+    }
+    this.isAllOfficeWorkingBranchesSelected = !this.isAllOfficeWorkingBranchesSelected;
+  }
 
   unlockSetting = {} as UnlockTimesheetConfigDto;
   timesCanLateAndEarlyInMonthSetting = {} as TimesCanLateAndEarlyInMonthSettingDto;
@@ -223,7 +258,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isShowTeamBuildingSetting: boolean = false;
   isEditTeamBuildingConfig: boolean = false;
   TeamBuildingConfig = {} as TeamBuildingConfigDto;
-  
+
   isShowResetDataTeambuildingSetting: boolean = false;
   isEditResetDataTeambuildingConfig: boolean = false;
   ResetDataTeamBuildingConfig = {} as ResetDataTeamBuildingConfigDto;
@@ -259,7 +294,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditSendMessageToPunishUserConfig: boolean = false;
   sendMessageToPunishUserConfig: SendMessageToPunishUserConfigDto = {};
 
-  manualOpenTalk = new Date().toISOString().substring(0,10);
+  manualOpenTalk = new Date().toISOString().substring(0, 10);
 
   constructor(
     private logTimesheetService: LogTimesheetInFutureSettingService,
@@ -273,17 +308,21 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     private wfhService: WfhSettingService,
     private autoSubmitService: AutoSubmitTimesheetSettingService,
     private getDataFromFaceIdService: GetDataFromFaceIdSettingService,
-    private mezonSettingService : MezonSettingService,
+    private mezonSettingService: MezonSettingService,
     private emailSaoDoSerivice: EmailSaoDoSettingService,
     private specialProjectTaskService: SpecialProjectTaskSettingService,
     private sendKomuPunishedCheckInService: SendKomuPunishedCheckInService,
     private punishByRulesService: CheckInCheckOutPunishmentSettingService,
     private timekeepingService: TimekeepingService,
-    private timesCanLateAndEarlyInMonthSettingService :TimesCanLateAndEarlyInMonthSettingService,
-    private timeStartChangingCheckinToCheckoutSettingService:TimeStartChangingCheckinToCheckoutSettingService,
+    private timesCanLateAndEarlyInMonthSettingService: TimesCanLateAndEarlyInMonthSettingService,
+    private timeStartChangingCheckinToCheckoutSettingService: TimeStartChangingCheckinToCheckoutSettingService,
     private lateInternReviewSettingService: LateInternReviewSettingService,
     private pmReportPunishSettingService: PMReportPunishSettingService,
-    private dialog : MatDialog,
+    private botReportSettingService: BotReportSettingService,
+    private anomaliesReportSettingService: AnomaliesReportSettingService,
+    private branchService: BranchService,
+    private dialog: MatDialog,
+    private officeWorkingReportSettingService: OfficeWorkingReportSettingService,
     injector: Injector) {
     super(injector);
   }
@@ -326,7 +365,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getResetDataTeamBuildingConfig();
     this.getLateInternReviewSetting();
     this.getPMReportPunishSetting();
+    this.getBotReportSetting();
+    this.getAnomaliesReportSetting();
     
+    this.getOfficeWorkingReportSetting();
     this.getSendMessageToPunishUserConfig();
     this.getNRITVMAEConfig();
     this.getLateInternReviewSetting();
@@ -338,19 +380,67 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       });
     }
   }
+  editOfficeWorkingReportSetting() {
+    this.isEditOfficeWorkingReportSetting = true;
+  }
+  getOfficeWorkingReportSetting() {
+    this.officeWorkingReportSettingService.get().subscribe((response) => {
+      if (response.result) {
+        this.officeWorkingReportSetting = {
+          enable: response.result.enable,
+          everyday: response.result.everyday,
+          hour: response.result.hour,
+          minute: response.result.minute,
+          officeIds: response.result.officeIds || '',
+          limit: response.result.limit,
+          mezonUrl: response.result.mezonUrl || ''
+        };
+        this.selectedOfficeWorkingBranches = response.result.officeIds
+          ? response.result.officeIds.split(',').filter(id => id)
+          : [];
+      }
+    });
+  }
+  saveOfficeWorkingReportSetting() {
+    if (!this.permission.isGranted(this.EDIT_BOT_REPORT_SETTING)) {
+      abp.message.error("You do not have permission to edit this setting!");
+      return;
+    }
+    if (this.officeWorkingReportSetting.hour < 0 || this.officeWorkingReportSetting.hour > 23 || this.officeWorkingReportSetting.minute < 0 || this.officeWorkingReportSetting.minute > 59) {
+      abp.message.error("Hour must be between 0 and 23, minute must be between 0 and 59!");
+      return;
+    }
 
-  onChangeUseDefaultCredentials(value){
+    if (!this.selectedOfficeWorkingBranches || this.selectedOfficeWorkingBranches.length === 0) {
+      abp.message.error("You must select at least one branch!");
+      return;
+    }
+    this.officeWorkingReportSetting.officeIds = this.selectedOfficeWorkingBranches.join(',');
+
+    this.officeWorkingReportSettingService.change(this.officeWorkingReportSetting).subscribe((res: any) => {
+      this.isEditOfficeWorkingReportSetting = false;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
+  refreshOfficeWorkingReportSetting() {
+    this.isEditOfficeWorkingReportSetting = false;
+    this.getOfficeWorkingReportSetting();
+  }
+
+  onChangeUseDefaultCredentials(value) {
     this.emailsetting.useDefaultCredentials = value.toString();
   }
 
-  checkConnectToProject(){
+  checkConnectToProject() {
     this.projectConnectResult = {} as GetConnectResultDto;
     this.configurationService.checkConnectToProject().subscribe((data) => {
       this.projectConnectResult = data.result;
     })
   }
 
-  checkConnectToHRM(){
+  checkConnectToHRM() {
     this.hrmConnectResult = {} as GetConnectResultDto;
     this.configurationService.checkConnectToHRM().subscribe((data) => {
       this.hrmConnectResult = data.result;
@@ -677,7 +767,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Số lần có thể đi muộn về sớm trong 1 tuần không được để trống!")
       return;
     }
-    this.timesCanLateAndEarlyInMonthSettingService.setTimesCanLateAndEarlyInMonthSetting(this.timesCanLateAndEarlyInMonthSetting).subscribe((res:any) => {
+    this.timesCanLateAndEarlyInMonthSettingService.setTimesCanLateAndEarlyInMonthSetting(this.timesCanLateAndEarlyInMonthSetting).subscribe((res: any) => {
       this.isEditTimesCanLateAndEarlyInMonthSetting = !this.isEditTimesCanLateAndEarlyInMonthSetting;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -949,6 +1039,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.wfhSetting.allowInternToWorkRemote = value.toString();
   }
 
+  onAllowProbationToWorkRemote(value) {
+    this.wfhSetting.allowProbationToWorkRemote = value.toString();
+  }
+
   // HRM setting
   refreshHRMConfig() {
     this.getHRMConfig();
@@ -984,10 +1078,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       });
     }
   }
-  editKomu() : any{
+  editKomu(): any {
     this.isEditingKomu = true;
   }
-  saveKomu() : any{
+  saveKomu(): any {
     this.configurationService.SetKomuConfig(this.komuSetting).subscribe((res: any) => {
       this.isEditingKomu = !this.isEditingKomu;
       if (res) {
@@ -996,12 +1090,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     })
 
   }
-  refreshKomuSetting(): any{
+  refreshKomuSetting(): any {
     this.getKomu();
     this.isEditingKomu = false;
   }
 
-  saveChannelSendPunishCheckIn(): any{
+  saveChannelSendPunishCheckIn(): any {
     this.sendKomuPunishedCheckInService.changePunishedCheckInConfig(this.punishedCheckInSetting).subscribe((res: any) => {
       this.isEditNotifyPunishCheckIn = false;
       if (res) {
@@ -1010,20 +1104,20 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     })
   }
 
-  getChannelSendPunishCheckIn(): any{
-    if(this.permission.isGranted(this.VIEW_PUNISHCHECKIN_CONFIG)){
-      this.sendKomuPunishedCheckInService.getPunishedCheckInConfig().subscribe((result: any)=>{
+  getChannelSendPunishCheckIn(): any {
+    if (this.permission.isGranted(this.VIEW_PUNISHCHECKIN_CONFIG)) {
+      this.sendKomuPunishedCheckInService.getPunishedCheckInConfig().subscribe((result: any) => {
         this.punishedCheckInSetting = result.result;
       })
     }
   }
 
-  editChannelSendPunishCheckIn(): any{
+  editChannelSendPunishCheckIn(): any {
     this.isEditNotifyPunishCheckIn = true;
     this.getChannelSendPunishCheckIn();
   }
 
-  refreshChannelSendPunishCheckIn(): any{
+  refreshChannelSendPunishCheckIn(): any {
     this.getChannelSendPunishCheckIn();
     this.isEditNotifyPunishCheckIn = false;
   }
@@ -1032,7 +1126,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   public maskTime = [/[\d]/, /\d/, ':', /\d/, /\d/]
 
   // Project Setting
-  refreshProjectConfig(){
+  refreshProjectConfig() {
     this.getProjectConfig();
     this.isEditProjectSetting = false;
   }
@@ -1044,11 +1138,11 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     }
 
   }
-  editProjectConfig(){
+  editProjectConfig() {
     this.isEditProjectSetting = true;
   }
-  SaveProjectConfig(){
-    this.configurationService.SetProjectConfig(this.ProjectConfig).subscribe(()=>{
+  SaveProjectConfig() {
+    this.configurationService.SetProjectConfig(this.ProjectConfig).subscribe(() => {
       this.isEditProjectSetting = !this.isEditProjectSetting;
     })
   }
@@ -1105,7 +1199,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     }
     const NRITConfigToSend = { ...this.NRITConfig };
     NRITConfigToSend.notifyReviewDeadline = NRITConfigToSend.notifyReviewDeadline.split(' ')[0];
-    this.configurationService.SetNRITConfig(NRITConfigToSend).subscribe((res:any) => {
+    this.configurationService.SetNRITConfig(NRITConfigToSend).subscribe((res: any) => {
       this.isEditNRITConfig = !this.isEditNRITConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1198,7 +1292,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     const NRITVMAEConfigToSend = { ...this.NRITVMAEConfig };
     NRITVMAEConfigToSend.notifyHeadPMReviewInternOnDate = NRITVMAEConfigToSend.notifyHeadPMReviewInternOnDate.split(' ')[0];
     NRITVMAEConfigToSend.notifyPresidentReviewInternOnDate = NRITVMAEConfigToSend.notifyPresidentReviewInternOnDate.split(' ')[0];
-    this.configurationService.SetNRITVMAEConfig(NRITVMAEConfigToSend).subscribe((res:any) => {
+    this.configurationService.SetNRITVMAEConfig(NRITVMAEConfigToSend).subscribe((res: any) => {
       this.isEditNRITVMAEConfig = !this.isEditNRITVMAEConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1262,7 +1356,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("VAT required!")
       return;
     }
-    this.configurationService.SetTeamBuildingConfig(this.TeamBuildingConfig).subscribe((res:any) => {
+    this.configurationService.SetTeamBuildingConfig(this.TeamBuildingConfig).subscribe((res: any) => {
       this.isEditTeamBuildingConfig = !this.isEditTeamBuildingConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1287,7 +1381,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Notify to channels required!")
       return;
     }
-    this.configurationService.setRetroNotifyConfig(this.RetroNotifyConfig).subscribe((res:any) => {
+    this.configurationService.setRetroNotifyConfig(this.RetroNotifyConfig).subscribe((res: any) => {
       this.isEditRetroNotifyConfig = !this.isEditRetroNotifyConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1297,7 +1391,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   //TimeStartChangingCheckinToCheckout setting
   refreshTimeStartChangingCheckinToCheckoutSetting() {
     this.getTimeStartChangingCheckinToCheckoutSetting();
-    this.isEditTimeStartChangingCheckinToCheckoutSetting=false;
+    this.isEditTimeStartChangingCheckinToCheckoutSetting = false;
   }
   getTimeStartChangingCheckinToCheckoutSetting() {
     if (this.permission.isGranted(this.VIEW_TIMESTARTCHANGINGCHECKINTOCHECKOUT_SETTING)) {
@@ -1371,7 +1465,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Time period with pending request required!")
       return;
     }
-    this.configurationService.setApproveTimesheetNotifyConfig(this.ApproveTimesheetNotifyConfig).subscribe((res:any) => {
+    this.configurationService.setApproveTimesheetNotifyConfig(this.ApproveTimesheetNotifyConfig).subscribe((res: any) => {
       this.isEditApproveTimesheetNotifyConfig = !this.isEditApproveTimesheetNotifyConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1423,7 +1517,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Time period with pending request required!")
       return;
     }
-    this.configurationService.setApproveRequestOffNotifyConfig(this.ApproveRequestOffNotifyConfig).subscribe((res:any) => {
+    this.configurationService.setApproveRequestOffNotifyConfig(this.ApproveRequestOffNotifyConfig).subscribe((res: any) => {
       this.isEditApproveRequestOffNotifyConfig = !this.isEditApproveRequestOffNotifyConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1471,7 +1565,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Email required!")
       return;
     }
-    this.configurationService.setSendMessageRequestPendingTeamBuildingToHRConfig(this.sendMessageRequestPendingTeamBuildingToHRConfig).subscribe((res:any) => {
+    this.configurationService.setSendMessageRequestPendingTeamBuildingToHRConfig(this.sendMessageRequestPendingTeamBuildingToHRConfig).subscribe((res: any) => {
       this.isEditSendMessageRequestPendingTeamBuildingToHRConfig = !this.isEditSendMessageRequestPendingTeamBuildingToHRConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1493,16 +1587,16 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   }
   editResetDataTeamBuildingConfig() {
     this.isEditResetDataTeambuildingConfig = true;
-  } 
-  
-  onResetDataTeamBuildingEnableWorker(e){
-    if(e.checked == true){
+  }
+
+  onResetDataTeamBuildingEnableWorker(e) {
+    if (e.checked == true) {
       this.ResetDataTeamBuildingConfig.resetDataTeamBuildingEnableWorker = "true";
     }
-    else{
+    else {
       this.ResetDataTeamBuildingConfig.resetDataTeamBuildingEnableWorker = "false";
     }
-  } 
+  }
 
   saveResetDataTeamBuildingConfig() {
     if (_.isEmpty(this.ResetDataTeamBuildingConfig.resetDataTeamBuildingAtHour)) {
@@ -1513,7 +1607,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Reset data on date and month required!")
       return;
     }
-    this.configurationService.setResetDataTeamBuildingConfig(this.ResetDataTeamBuildingConfig).subscribe((res:any) => {
+    this.configurationService.setResetDataTeamBuildingConfig(this.ResetDataTeamBuildingConfig).subscribe((res: any) => {
       this.isEditResetDataTeambuildingConfig = !this.isEditResetDataTeambuildingConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1565,7 +1659,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Time Period required!")
       return;
     }
-    this.configurationService.setConfigNotifyHRTheEmployeeMayHaveLeft(this.notifyHRTheEmployeeMayHaveLeftConfig).subscribe((res:any) => {
+    this.configurationService.setConfigNotifyHRTheEmployeeMayHaveLeft(this.notifyHRTheEmployeeMayHaveLeftConfig).subscribe((res: any) => {
       this.isEditNotifyHRTheEmployeeMayHaveLeftConfig = !this.isEditNotifyHRTheEmployeeMayHaveLeftConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1596,7 +1690,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       return;
     }
 
-    this.configurationService.setConfigMoneyPMUnlockTimeSheet(this.moneyPMUnlockTimeSheetConfig).subscribe((res:any) => {
+    this.configurationService.setConfigMoneyPMUnlockTimeSheet(this.moneyPMUnlockTimeSheetConfig).subscribe((res: any) => {
       this.isEditMoneyPMUnlockTimeSheetConfig = !this.isEditMoneyPMUnlockTimeSheetConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1636,7 +1730,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("At hour day required!")
       return;
     }
-      this.configurationService.setConfigSendMessageToPunishUser(this.sendMessageToPunishUserConfig).subscribe((res:any) => {
+    this.configurationService.setConfigSendMessageToPunishUser(this.sendMessageToPunishUserConfig).subscribe((res: any) => {
       this.isEditSendMessageToPunishUserConfig = !this.isEditSendMessageToPunishUserConfig;
       if (res) {
         this.notify.success(this.l('Update Successfully!'));
@@ -1689,12 +1783,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Dates required!")
       return;
     }
-    if(this.CreateNewRetroConfig.createNewRetroAtHour > this.GenerateRetroResultConfig.generateRetroResultAtHour 
-      || this.CreateNewRetroConfig.createNewRetroAtHour == this.GenerateRetroResultConfig.generateRetroResultAtHour){
+    if (this.CreateNewRetroConfig.createNewRetroAtHour > this.GenerateRetroResultConfig.generateRetroResultAtHour
+      || this.CreateNewRetroConfig.createNewRetroAtHour == this.GenerateRetroResultConfig.generateRetroResultAtHour) {
       abp.message.error("The retro creation time must be less than the retro result creation time")
       return;
     }
-    if(this.CreateNewRetroConfig.createNewRetroOnDate > this.GenerateRetroResultConfig.generateRetroResultOnDate){
+    if (this.CreateNewRetroConfig.createNewRetroOnDate > this.GenerateRetroResultConfig.generateRetroResultOnDate) {
       abp.message.error("The retro creation date must be less than the retro result creation date")
       return;
     }
@@ -1742,12 +1836,12 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Dates required!")
       return;
     }
-    if( this.GenerateRetroResultConfig.generateRetroResultAtHour < this.CreateNewRetroConfig.createNewRetroAtHour
-      ||this.GenerateRetroResultConfig.generateRetroResultAtHour ==this.CreateNewRetroConfig.createNewRetroAtHour){
+    if (this.GenerateRetroResultConfig.generateRetroResultAtHour < this.CreateNewRetroConfig.createNewRetroAtHour
+      || this.GenerateRetroResultConfig.generateRetroResultAtHour == this.CreateNewRetroConfig.createNewRetroAtHour) {
       abp.message.error("The time to create the retro result must be greater than the time to create the retro")
       return;
     }
-    if( this.GenerateRetroResultConfig.generateRetroResultOnDate < this.CreateNewRetroConfig.createNewRetroOnDate){
+    if (this.GenerateRetroResultConfig.generateRetroResultOnDate < this.CreateNewRetroConfig.createNewRetroOnDate) {
       abp.message.error("The retro result creation date must be greater than the retro result creation date")
       return;
     }
@@ -1758,11 +1852,11 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       }
     })
   }
-  ManualGetOpenTalk(){
+  ManualGetOpenTalk() {
     this.isMezonLoading = true;
     this.mezonSettingService.manualGetTimeJoinedOpenTalk(this.manualOpenTalk).subscribe(data => {
       this.isMezonLoading = false;
-      if(data.success){
+      if (data.success) {
         this.notify.success(this.l('Update Successfully!'));
       }
     })
@@ -1782,10 +1876,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
 
   selectedMonth: string = (() => {
     const date = new Date();
-    date.setMonth(date.getMonth() - 1); 
-    return date.toISOString().slice(0, 7); 
+    date.setMonth(date.getMonth() - 1);
+    return date.toISOString().slice(0, 7);
   })();
-  
+
   selectedPmReportMonth: string = new Date().toISOString().slice(0, 7);
 
   onManualTriggerPMReportPunishment() {
@@ -1799,7 +1893,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
               abp.notify.success('PM Report Punishment has been applied successfully');
             },
             (error) => {
-              abp.notify.error('Failed to apply PM Report Punishment: ' + 
+              abp.notify.error('Failed to apply PM Report Punishment: ' +
                 (error.error && error.error.error && error.error.error.message || error.message));
             }
           );
@@ -1820,7 +1914,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     }
 
     const [year, month] = this.selectedMonth.split('-').map(Number);
-    
+
     abp.message.confirm(
       `Are you sure you want to trigger punishment for ${month}/${year}?`,
       'Confirm Punishment Execution',
@@ -1831,8 +1925,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
               abp.notify.success('Punishments applied successfully.');
             },
             (error) => {
-              const errorMessage = (error.error && error.error.error && error.error.error.message) 
-                || error.message 
+              const errorMessage = (error.error && error.error.error && error.error.error.message)
+                || error.message
                 || 'An error occurred';
               abp.notify.error('Error: ' + errorMessage);
             }
@@ -1859,7 +1953,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Next Run Date is required!");
       return;
     }
-    
+
     this.lateInternReviewSettingService.change(this.lateInternReviewSetting).subscribe((res: any) => {
       this.isEditLateInternReviewSetting = false;
       if (res) {
@@ -1898,7 +1992,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("Day of week is required!");
       return;
     }
-    
+
     this.pmReportPunishSettingService.change(this.pmReportPunishSetting).subscribe((res: any) => {
       this.isEditPMReportPunishSetting = false;
       if (res) {
@@ -1906,10 +2000,187 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       }
     })
   }
-
   refreshPMReportPunishSetting() {
     this.getPMReportPunishSetting();
     this.isEditPMReportPunishSetting = false;
+  }
+
+  getBotReportSetting() {
+    if (this.permission.isGranted(this.VIEW_BOT_REPORT_SETTING)) {
+      this.projects = [];
+
+      this.botReportSettingService.getBotReportSetting().subscribe((data: any) => {
+        this.botReportSetting = data.result;
+        this.selectedProjects = this.botReportSetting.projectIds || [];
+
+        if (this.botReportSetting.branchCodes && this.botReportSetting.branchCodes.length > 0) {
+          this.selectedBranches = [...this.botReportSetting.branchCodes];
+        } else {
+          this.selectedBranches = [];
+        }
+        this.updateInitialState();
+      });
+
+      this.botReportSettingService.getActiveProjects().subscribe({
+        next: (response: any) => {
+          this.projects = response.result || [];
+        },
+        error: (error) => {
+          console.error('Error fetching projects:', error);
+        }
+      });
+    }
+  }
+
+  getAnomaliesReportSetting() {
+    if (this.permission.isGranted(this.VIEW_ANOMALIES_REPORT_SETTING)) {
+      this.anomaliesReportSettingService.getAnomaliesReportSetting().subscribe((data: any) => {
+        this.anomaliesReportSetting = data.result;
+        if (this.anomaliesReportSetting.branchCodes && this.anomaliesReportSetting.branchCodes.length > 0) {
+          this.selectedAnomaliesBranches = [...this.anomaliesReportSetting.branchCodes];
+        } else {
+          this.selectedAnomaliesBranches = [];
+        }
+        this.updateInitialAnomaliesState();
+      });
+    }
+  }
+
+  editBotReportSetting() {
+    this.isEditBotReportSetting = true;
+  }
+
+  editAnomaliesReportSetting() {
+    this.isEditAnomaliesReportSetting = true;
+  }
+
+  saveBotReportSetting() {
+    if (!this.permission.isGranted(this.EDIT_BOT_REPORT_SETTING)) {
+      abp.message.error("You do not have permission to edit this setting!");
+      return;
+    }
+    if (this.botReportSetting.hour < 0 || this.botReportSetting.hour > 23 || this.botReportSetting.minute < 0 || this.botReportSetting.minute > 59) {
+      abp.message.error("Time must be valid: hour (0-23), minute (0-59)!");
+      return;
+    }
+
+    if (!this.botReportSetting.everyday && !this.botReportSetting.dayofweek) {
+      abp.message.error("Day of week is required!");
+      return;
+    }
+
+    if (!this.selectedBranches || this.selectedBranches.length === 0) {
+      abp.message.error("You must select at least one branch!");
+      return;
+    }
+
+    this.botReportSetting.branchCodes = [...this.selectedBranches];
+    this.botReportSetting.projectIds = this.selectedProjects;
+    
+    this.botReportSettingService.setBotReportSetting(this.botReportSetting).subscribe((res: any) => {
+      this.isEditBotReportSetting = false;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+
+  }
+
+  saveAnomaliesReportSetting() {
+    if (!this.permission.isGranted(this.EDIT_ANOMALIES_REPORT_SETTING)) {
+      abp.message.error("You do not have permission to edit this setting!");
+      return;
+    }
+    if (this.anomaliesReportSetting.hour < 0 || this.anomaliesReportSetting.hour > 23 || this.anomaliesReportSetting.minute < 0 || this.anomaliesReportSetting.minute > 59) {
+      abp.message.error("Time must be valid: hour (0-23), minute (0-59)!");
+      return;
+    }
+    if (!this.anomaliesReportSetting.dayofweek) {
+      abp.message.error("Day of week is required!");
+      return;
+    }
+    if (!this.selectedAnomaliesBranches || this.selectedAnomaliesBranches.length === 0) {
+      abp.message.error("You must select at least one branch!");
+      return;
+    }
+
+    this.anomaliesReportSetting.branchCodes = [...this.selectedAnomaliesBranches];
+
+    this.anomaliesReportSettingService.setAnomaliesReportSetting(this.anomaliesReportSetting).subscribe((res: any) => {
+      this.isEditAnomaliesReportSetting = false;
+      if (res) {
+        this.notify.success(this.localization.localize('Update Successfully!', ''));
+      }
+    });
+  }
+
+  refreshBotReportSetting() {
+    this.getBotReportSetting();
+    this.isEditBotReportSetting = false;
+  }
+
+  refreshAnomaliesReportSetting() {
+    this.getAnomaliesReportSetting();
+    this.isEditAnomaliesReportSetting = false;
+  }
+
+  private updateInitialState() {
+    if (this.selectedBranches.length === this.branchCodes.length) {
+      this.isAllBranchesSelected = true;
+    } else if (this.selectedBranches.length === 0 || (this.selectedBranches.length === 1 && this.selectedBranches[0] === 'HN1')) {
+      this.selectedBranches = ['HN1'];
+      this.isAllBranchesSelected = false;
+    } else {
+      this.isAllBranchesSelected = false;
+    }
+  }
+
+  private updateInitialAnomaliesState() {
+    if (this.selectedAnomaliesBranches.length === this.branchCodes.length) {
+      this.isAllAnomaliesBranchesSelected = true;
+    } else if (this.selectedAnomaliesBranches.length === 0 || (this.selectedAnomaliesBranches.length === 1 && this.selectedAnomaliesBranches[0] === 'HN1')) {
+      this.selectedAnomaliesBranches = ['HN1'];
+      this.isAllAnomaliesBranchesSelected = false;
+    } else {
+      this.isAllAnomaliesBranchesSelected = false;
+    }
+  }
+
+  toggleAllProjects() {
+    this.selectedProjects = this.selectedProjects.filter(id => id !== -1);
+
+    if (!this.isAllProjectsSelected) {
+      this.selectedProjects = this.projects.map(project => project.id);
+      this.isAllProjectsSelected = true;
+    } else {
+      this.selectedProjects = [];
+      this.isAllProjectsSelected = false;
+    }
+  }
+
+  toggleAllBranches() {
+    this.selectedBranches = this.selectedBranches.filter(code => code !== '-1');
+
+    if (!this.isAllBranchesSelected) {
+      this.selectedBranches = [...this.branchCodes];
+      this.isAllBranchesSelected = true;
+    } else {
+      this.selectedBranches = ['HN1'];
+      this.isAllBranchesSelected = false;
+      abp.notify.info('At least one branch must be selected. Branch HN1 has been selected by default.');
+    }
+  }
+
+  toggleAllAnomaliesBranches() {
+    this.selectedAnomaliesBranches = this.selectedAnomaliesBranches.filter(code => code !== '-1');
+    if (!this.isAllAnomaliesBranchesSelected) {
+      this.selectedAnomaliesBranches = [...this.branchCodes];
+      this.isAllAnomaliesBranchesSelected = true;
+    } else {
+      this.selectedAnomaliesBranches = ['HN1'];
+      this.isAllAnomaliesBranchesSelected = false;
+      abp.notify.info('At least one branch must be selected. Branch HN1 has been selected by default.');
+    }
   }
 }
 
@@ -1972,6 +2243,7 @@ export class LogoutAllUserDTO {
 export class WFHSettingDTO {
   numOfRemoteDays: string;
   allowInternToWorkRemote: string;
+  allowProbationToWorkRemote: string;
   totalTimeTardinessAndEarlyLeave : string;
 }
 
@@ -2057,25 +2329,25 @@ export class EmailSaoDoDto {
   canSendEmailToSaoDo: string;
 }
 
-export class KomuDto{
+export class KomuDto {
   komuUri: string;
   komuSecretCode: string;
   komuChannelIdDevMode: string;
   komuUserNameDevMode: string;
 }
 
-export class NotificationSettingDto{
+export class NotificationSettingDto {
   sendEmailTimesheet: string;
   sendEmailRequest: string;
   sendKomuSubmitTimesheet: string;
   sendKomuRequest: string;
 }
 
-export class UnlockTimesheetConfigDto{
+export class UnlockTimesheetConfigDto {
   weeksCanUnlockBefor: string;
 }
 
-export class KomuPunishCheckInDto{
+export class KomuPunishCheckInDto {
   timeSendPunishUser: string;
   channelNotifyPunishUser: string;
   percentOfTrackerOnWorking: string;
@@ -2094,7 +2366,7 @@ export class GetCheckInCheckOutPunishmentSettingDto {
 
 }
 
-export class InputToUpdateSettingDto{
+export class InputToUpdateSettingDto {
   id: number;
   money: number;
 }
@@ -2118,7 +2390,7 @@ export class TimesCanLateAndEarlyInMonthSettingDto {
   timesCanLateAndEarlyInWeek: string;
 }
 
-export class TimeStartChangingToCheckoutSettingDto{
+export class TimeStartChangingToCheckoutSettingDto {
   enableTimeStartChangingToCheckout: string;
   timeStartCheckOut: string;
   timeStartCheckOutCaseOffAfternoon: string;

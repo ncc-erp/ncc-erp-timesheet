@@ -25,6 +25,7 @@ namespace Timesheet.APIs.MyAbsenceDays.WFHSetting
             {
                 numOfRemoteDays = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.WFHSetting),
                 allowInternToWorkRemote = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AllowInternToWorkRemote),
+                allowProbationToWorkRemote = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AllowProbationToWorkRemote),
                 totalTimeTardinessAndEarlyLeave = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.TotalTimeAbsenceTime)
             };
         }
@@ -34,6 +35,7 @@ namespace Timesheet.APIs.MyAbsenceDays.WFHSetting
         {
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.WFHSetting, input.numOfRemoteDays);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AllowInternToWorkRemote, input.allowInternToWorkRemote);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AllowProbationToWorkRemote, input.allowProbationToWorkRemote);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.TotalTimeAbsenceTime, input.totalTimeTardinessAndEarlyLeave);
             return input;
         }
