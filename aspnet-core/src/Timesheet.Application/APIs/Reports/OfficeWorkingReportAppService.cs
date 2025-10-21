@@ -129,6 +129,9 @@ namespace Timesheet.APIs.Reports
                     var dotIndex = line.IndexOf('.');
                     if (dotIndex >= 0)
                     {
+                        var indexEnd = dotIndex + 1;
+                        AddBold(mkList, currentPos, currentPos + indexEnd);
+
                         var startPos = currentPos + dotIndex + 2;
                         var endPos = line.Length;
                         if (startPos < currentPos + line.Length)
@@ -590,8 +593,7 @@ namespace Timesheet.APIs.Reports
                     .Select(x => new UserLite
                     {
                         Id = x.User.Id,
-                        Name = !string.IsNullOrEmpty(x.User.UserName) ? x.User.UserName :
-                               (!string.IsNullOrEmpty(x.User.Name) ? x.User.Name : "Unknown"),
+                        Name = x.User.FullName,
                         Email = x.User.EmailAddress,
                         OfficeName = x.Branch != null ? x.Branch.Name : string.Empty,
                         OfficeCode = x.Branch != null ? x.Branch.Code : string.Empty
@@ -701,12 +703,14 @@ namespace Timesheet.APIs.Reports
                 {
                     if (remoteFlags.Morning || remoteFlags.Afternoon)
                     {
-                        row.TotalAllLW += (trackerMinutes / 60.0);
-                        row.WfhLW += (trackerMinutes / 60.0);
+                        int workingMinutes = trackerMinutes > 0 ? trackerMinutes : (mMin + aMin);
+                        var trackerHours = workingMinutes / 60.0;
+                        row.TotalAllLW += trackerHours;
+                        row.WfhLW += trackerHours;
                     }
                     else
                     {
-                        int officeTime = mMin + aMin;
+                        int officeTime = (mMin + aMin) > 0 ? (mMin + aMin) : trackerMinutes;
                         var officeHours = officeTime / 60.0;
                         row.TotalAllLW += officeHours;
                         row.OfficeLW += officeHours;
@@ -716,15 +720,17 @@ namespace Timesheet.APIs.Reports
                 {
                     if (remoteFlags.Morning || remoteFlags.Afternoon)
                     {
-                        row.TotalAllLM += (trackerMinutes / 60.0);
-                        row.WfhLM += (trackerMinutes / 60.0);
+                        int workingMinutes = trackerMinutes > 0 ? trackerMinutes : (mMin + aMin);
+                        var trackerHours = workingMinutes / 60.0;
+                        row.TotalAllLM += trackerHours;
+                        row.WfhLM += trackerHours;
                     }
                     else
                     {
-                        int officeTime = mMin + aMin;
-                        var officeHoursLM = officeTime / 60.0;
-                        row.TotalAllLM += officeHoursLM;
-                        row.OfficeLM += officeHoursLM;
+                        int officeTime = (mMin + aMin) > 0 ? (mMin + aMin) : trackerMinutes;
+                        var officeHours = officeTime / 60.0;
+                        row.TotalAllLM += officeHours;
+                        row.OfficeLM += officeHours;
                     }
                 }
             }

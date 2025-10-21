@@ -1064,6 +1064,7 @@
               class="panel-header">
               <mat-panel-title>
                 <p class="title">{{"Office Working Report Setting"}}</p>
+                <mat-icon class="special-icon" matTooltip="List employees in specific offices sorted by Total Actual Working Time for Last Week and Last Month">help</mat-icon>
                 <div *ngIf="isShowOfficeWorkingReportSetting" class="edit-save">
                   <button *ngIf="!isEditOfficeWorkingReportSetting" large mat-raised-button color="primary"
                     (click)="editOfficeWorkingReportSetting();$event.stopPropagation()">
@@ -1178,7 +1179,8 @@
           <mat-expansion-panel *ngIf="permission.isGranted(VIEW_BOT_REPORT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowBotReportSetting">
             <mat-expansion-panel-header (click)="isShowBotReportSetting = !isShowBotReportSetting" class="panel-header">
               <mat-panel-title>
-                <p class="title">{{"Daily Project Report Setting"}}</p>
+                <p class="title">{{"Project Report Setting"}}</p>
+                <mat-icon class="special-icon" matTooltip="List all projects with members belonging to specific offices, sorted in descending order of total timelog">help</mat-icon>
                 <div *ngIf="isShowBotReportSetting" class="edit-save">
                   <button *ngIf="!isEditBotReportSetting" large mat-raised-button color="primary"
                     (click)="editBotReportSetting();$event.stopPropagation()">
@@ -1328,7 +1330,8 @@
           <mat-expansion-panel *ngIf="permission.isGranted(VIEW_ANOMALIES_REPORT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowAnomaliesReportSetting">
             <mat-expansion-panel-header (click)="isShowAnomaliesReportSetting = !isShowAnomaliesReportSetting" class="panel-header">
               <mat-panel-title>
-                <p class="title">{{"Daily Anomalies Report Setting"}}</p>
+                <p class="title">{{"Anomalies Report Setting"}}</p>
+                <mat-icon class="special-icon" matTooltip="Include anomalies for specific offices, including Unplanned Absences, Unapproved Short Working Hours and Missing Tracker Time for Approved WFH">help</mat-icon>
                 <div *ngIf="isShowAnomaliesReportSetting" class="edit-save">
                   <button *ngIf="!isEditAnomaliesReportSetting" large mat-raised-button color="primary" (click)="editAnomaliesReportSetting();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
