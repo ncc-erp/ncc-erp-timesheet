@@ -173,6 +173,14 @@
   height: 24px !important;
 }
 
+.btn-confirm-punishment {
+  min-width: 80px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+  line-height: 30px !important;
+  height: 30px !important;
+}
+
 .show-more-button .mat-icon {
   font-size: 18px;
   height: 18px;

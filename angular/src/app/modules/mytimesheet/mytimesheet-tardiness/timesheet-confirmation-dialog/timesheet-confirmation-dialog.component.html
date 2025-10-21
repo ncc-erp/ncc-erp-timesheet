@@ -1,6 +1,6 @@
 <div class="timesheet-confirmation-dialog">
   <div class="dialog-header">
-    <h2>Timesheet Confirmation – Week {{weekNumber}} ({{weekRange}})</h2>
+    <h2>Timesheet Confirmation – {{weekNumber > 0 ? 'Week ' + weekNumber : 'Month'}} ({{weekRange}})</h2>
     <div class="currency">Currency: MNM (group)</div>
   </div>
 
@@ -12,6 +12,9 @@
     <div class="summary-item">
       <div class="summary-label">Total Fine</div>
       <div class="summary-value">{{totalFine | number}}</div>
+      <div class="summary-note" *ngIf="calculateTotalPaidAmount() > 0">
+        (Paid: {{calculateTotalPaidAmount() | number}})
+      </div>
     </div>
     <div class="summary-item">
       <div class="summary-label">Status</div>
@@ -22,55 +25,60 @@
   </div>
 
   <div class="error-summary">
-    <h3>Error Summary</h3>
+    <h3>Punishment Summarry</h3>
     <table class="error-table">
       <thead>
         <tr>
           <th>DATE</th>
           <th>ERROR TYPE</th>
-          <th>DESCRIPTION</th>
-          <th>FINE (points)</th>
-          <th></th>
+          <th>FINE (đồng)</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let item of punishmentItems">
           <td>{{item.date | date:'MMM dd'}}</td>
           <td>
-            <!-- Attendance Punishments -->
-            <span *ngIf="item.attendancePunish > 0">
-              <span *ngIf="!item.checkIn && !item.checkOut">No CheckIn & Out</span>
-              <span *ngIf="item.checkIn && !item.checkOut">No Check-out</span>
-              <span *ngIf="!item.checkIn && item.checkOut">No Check-in</span>
-              <span *ngIf="item.checkIn && item.checkOut && item.attendancePunish > 0">Late</span>
-            </span>
-            
-            <!-- Daily Punishments -->
-            <span *ngIf="item.dailyPunish > 0">Daily</span>
-            
-            <!-- Mention Punishments -->
-            <span *ngIf="item.mentionPunish > 0">Mention</span>
-            
-            <!-- Tracker Punishments -->
-            <span *ngIf="item.trackerPunish > 0">Tracker</span>
-            
-            <!-- Ant Punishments -->
-            <span *ngIf="item.antPunish > 0">Ant</span>
-            
-            <!-- UnlockTS Gmail Punishments -->
-            <span *ngIf="item.unlockTSGmailPunish > 0">UnlockTS Gmail</span>
-            
-            <!-- UnlockTS IMS Punishments -->
-            <span *ngIf="item.unlockTSIMSPunish > 0">UnlockTS IMS</span>
-            
-            <!-- No punishment -->
-            <span *ngIf="item.totalDayPunishment === 0">No Punish</span>
+            <span *ngIf="item.userPunishmentType === 0">No Punish</span>
+            <span *ngIf="item.userPunishmentType === 1 || item.statusPunish === 1">Late</span>
+            <span *ngIf="item.userPunishmentType === 2 || item.statusPunish === 2">No Check In</span>
+            <span *ngIf="item.userPunishmentType === 3 || item.statusPunish === 3">No Check Out</span>
+            <span *ngIf="item.userPunishmentType === 4 || item.statusPunish === 4">Late & No CheckOut</span>
+            <span *ngIf="item.userPunishmentType === 5 || item.statusPunish === 5">No CheckIn & Out</span>
+            <span *ngIf="item.userPunishmentType === 6">Daily</span>
+            <span *ngIf="item.userPunishmentType === 7">Mention</span>
+            <span *ngIf="item.userPunishmentType === 8">Tracker 20k</span>
+            <span *ngIf="item.userPunishmentType === 9">Tracker 50k</span>
+            <span *ngIf="item.userPunishmentType === 10">Tracker 100k</span>
+            <span *ngIf="item.userPunishmentType === 11">Tracker 200k</span>
+            <span *ngIf="item.userPunishmentType === 12">Review Intern</span>
+            <span *ngIf="item.userPunishmentType === 13">PM Report 20k</span>
+            <span *ngIf="item.userPunishmentType === 14">PM Report 50k</span>
+            <span *ngIf="item.userPunishmentType === 15">Ant</span>
+            <span *ngIf="item.userPunishmentType === 16">UnlockTS Gmail</span>
+            <span *ngIf="item.userPunishmentType === 17">UnlockTS IMS</span>
+            <span *ngIf="!item.userPunishmentType && !item.statusPunish && item.moneyPunish > 0">CheckIn CheckOut</span>
           </td>
-          <td>{{item.noteReply || 'No description'}}</td>
-          <td>{{item.totalDayPunishment / 1000}}</td>
-          <td>
-            <mat-checkbox [checked]="true" disabled></mat-checkbox>
-          </td>
+          <td>{{item.moneyPunish | number}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="punishment-paid-summary" *ngIf="punishmentPaidItems && punishmentPaidItems.length > 0">
+    <h3>Punishment Paid</h3>
+    <table class="error-table">
+      <thead>
+        <tr>
+          <th>DATE</th>
+          <th>TX HASH</th>
+          <th>AMOUNT</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of punishmentPaidItems">
+          <td>{{item.dateAt | date:'MMM dd, yyyy'}}</td>
+          <td class="tx-hash">{{item.txHash}}</td>
+          <td>{{item.amount | number}}</td>
         </tr>
       </tbody>
     </table>

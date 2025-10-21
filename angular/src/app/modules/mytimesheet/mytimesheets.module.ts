@@ -19,6 +19,9 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatInputModule } from '@angular/material/input';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { TransactionHashDialogComponent } from './mytimesheet-tardiness/transaction-hash-dialog/transaction-hash-dialog.component';
 
 @NgModule({
     declarations: [
@@ -29,7 +32,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
       TimesheetWarningDialogComponent,
       MytimesheetNormalWorkingComponent,
       ComplainDialogComponent,
-      TimesheetConfirmationDialogComponent
+      TimesheetConfirmationDialogComponent,
+      TransactionHashDialogComponent
     ],
     imports: [
       CommonModule,
@@ -45,14 +49,17 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatDialogModule,
     MatIconModule,
     MatButtonModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatInputModule,
+    MatSnackBarModule
     ],
     entryComponents: [
       CreateEditTimesheetItemComponent,
       CreateEditTimesheetByWeekComponent,
       TimesheetWarningDialogComponent,
       ComplainDialogComponent,
-      TimesheetConfirmationDialogComponent
+      TimesheetConfirmationDialogComponent,
+      TransactionHashDialogComponent
     ]
   })
   export class MyTimeSheetsModule { }

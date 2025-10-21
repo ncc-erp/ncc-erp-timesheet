@@ -1,9 +1,11 @@
 .timesheet-confirmation-dialog {
   width: 800px;
   max-width: 100%;
+  max-height: 80vh; 
   padding: 20px;
   background-color: #fff;
   color: #333;
+  overflow-y: auto;
 }
 
 .dialog-header {
@@ -13,6 +15,10 @@
   margin-bottom: 20px;
   border-bottom: 1px solid #eee;
   padding-bottom: 10px;
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
 }
 
 .dialog-header h2 {
@@ -52,6 +58,12 @@
   font-weight: 500;
 }
 
+.summary-note {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 4px;
+}
+
 .paid {
   color: #4caf50;
 }
@@ -60,23 +72,46 @@
   color: #d32f2f;
 }
 
-.error-summary h3 {
+.error-summary h3, .punishment-paid-summary h3 {
   font-size: 16px;
   margin-bottom: 10px;
   font-weight: 500;
   color: #333;
 }
 
+.error-summary, .punishment-paid-summary {
+  max-height: 300px; 
+  overflow-y: auto; 
+  margin-bottom: 20px;
+}
+
+.punishment-paid-summary {
+  margin-top: 20px;
+}
+
+.tx-hash {
+  font-family: monospace;
+  font-size: 12px;
+  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
 .error-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 30px;
+  table-layout: fixed;
 }
 
 .error-table th, .error-table td {
   padding: 10px;
   text-align: left;
   border-bottom: 1px solid #eee;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .error-table th {
@@ -84,6 +119,22 @@
   font-weight: 500;
   color: #666;
   background-color: #f9f9f9;
+}
+
+.error-table th:nth-child(1),
+.error-table td:nth-child(1) {
+  width: 20%;
+}
+
+.error-table th:nth-child(2),
+.error-table td:nth-child(2) {
+  width: 60%; 
+}
+
+.error-table th:nth-child(3),
+.error-table td:nth-child(3) {
+  width: 20%; 
+  text-align: right;
 }
 
 .contribution-section {
@@ -97,6 +148,10 @@
   margin-top: 20px;
   border-top: 1px solid #eee;
   padding-top: 20px;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 10;
 }
 
 .donate-button {
