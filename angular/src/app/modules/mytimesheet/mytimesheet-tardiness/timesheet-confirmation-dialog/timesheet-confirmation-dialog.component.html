@@ -93,7 +93,11 @@
 
   <div class="timesheet-calendar-section">
     <h3>Monthly Timesheet Calendar</h3>
-    <div class="calendar-container">
+    <div *ngIf="isLoadingCalendarData" class="loading-container">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading calendar data...</div>
+    </div>
+    <div class="calendar-container" *ngIf="!isLoadingCalendarData">
       <div [ngSwitch]="view" class="calendar-scale">
         <mwl-calendar-month-view
           *ngSwitchCase="calendarView.Month"
@@ -125,7 +129,7 @@
       </div>
       <div class="legend-item">
         <div class="legend-color other"></div>
-        <span>Rejected</span>
+        <span>Rejected/Not Submitted</span>
       </div>
     </div>
   </div>

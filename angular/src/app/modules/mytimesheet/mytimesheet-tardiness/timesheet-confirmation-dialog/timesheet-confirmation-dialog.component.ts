@@ -41,6 +41,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   punishmentItems: any[] = [];
   punishmentPaidItems: UserPunishmentPaidDto[] = [];
   isLoadingPaidData: boolean = false;
+  isLoadingCalendarData: boolean = false;
   selectedFund: string = 'Build School Fund';
   contributeToFund: boolean = false;
 
@@ -246,6 +247,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   
   loadTimesheetData(): void {
     try {
+      this.isLoadingCalendarData = true;
       const currentDate = moment(this.viewDate);
       const startDate = currentDate.clone().startOf('month').format('YYYY-MM-DD');
       const endDate = currentDate.clone().endOf('month').format('YYYY-MM-DD');
@@ -258,16 +260,19 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
           console.warn('API returned no result data');
           this.timesheetData = [];
           this.refresh.next();
+          this.isLoadingCalendarData = false;
         }
       }, error => {
         console.error('Error loading timesheet data:', error);
         this.timesheetData = [];
         this.refresh.next();
+        this.isLoadingCalendarData = false;
       });
     } catch (error) {
       console.error('Exception in loadTimesheetData:', error);
       this.timesheetData = [];
       this.refresh.next();
+      this.isLoadingCalendarData = false;
     }
   }
   
@@ -277,6 +282,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       
       if (!this.timesheetData || this.timesheetData.length === 0) {
         this.refresh.next();
+        this.isLoadingCalendarData = false;
         return;
       }
 
@@ -308,10 +314,11 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
         });
       });
       
-      console.log('Generated calendar events:', this.events.length);
       this.refresh.next();
+      this.isLoadingCalendarData = false;
     } catch (error) {
       console.error('Error generating calendar events:', error);
+      this.isLoadingCalendarData = false;
     }
   }
   

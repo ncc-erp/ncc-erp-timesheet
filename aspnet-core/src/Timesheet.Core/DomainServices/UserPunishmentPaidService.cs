@@ -184,7 +184,7 @@ namespace Timesheet.DomainServices
                 
                 using (var httpClient = new HttpClient(clientHandler))
                 {
-                    var url = $"{_indexerUri}1337/tx/{transactionHash}/detail";
+                    var url = $"{_indexerUri}/1337/tx/{transactionHash}/detail";
                     _logger.LogInformation($"Calling MMN API: {url}");
                     
                     httpClient.DefaultRequestHeaders.Accept.Clear();
