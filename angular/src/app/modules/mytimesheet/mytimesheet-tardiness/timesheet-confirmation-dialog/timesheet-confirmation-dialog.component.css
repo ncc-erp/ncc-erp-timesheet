@@ -168,3 +168,134 @@
   background-color: #4caf50 !important;
   color: white !important;
 }
+
+.timesheet-calendar-section {
+  margin-bottom: 30px;
+}
+
+.timesheet-calendar-section h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  font-weight: 500;
+  color: #333;
+}
+
+.calendar-container {
+  margin-bottom: 15px;
+  border: px solid #eee;
+  border-radius: 4px;
+  overflow-x: hidden;
+}
+
+.calendar-container::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+.calendar-scale {
+  display: inline-block;        
+  transform: scale(0.97);
+  transform-origin: top left;
+}
+
+.calendar-scale > .cal-month-view {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 800px) {
+  .calendar-scale { transform: scale(0.85); }
+  .calendar-scale > .cal-month-view { width: 100%; max-width: 100%; }
+}
+
+.cal-cell-top {
+  min-height: 36px; 
+  position: relative;
+  padding: 2px 4px;
+}
+
+.cal-month-view .cal-day-number {
+  font-size: 12px;
+}
+
+.cal-month-view .cal-cell {
+  padding: 2px;
+}
+
+.timesheet-calendar-section .cal-month-view {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.cal-month-view .cal-header,
+.cal-month-view .cal-days {
+  table-layout: fixed;
+  width: 100%;
+}
+.cal-month-view .cal-day-cell {
+  width: 14.2857%;
+}
+
+.cal-month-view .cal-cell-top { height: 100%; }
+.cal-month-view .cal-events { display: none !important; }
+
+.timesheet-status-indicator {
+  display: block;
+  font-size: 11px;
+  margin-top: 2px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.calendar-legend {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  gap: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+.legend-color {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  margin-right: 5px;
+}
+
+.legend-color.pending {
+  background-color: #e3bc08;
+}
+
+.legend-color.approved {
+  background-color: #4caf50;
+}
+
+.legend-color.other {
+  background-color: #ff0000;
+}
+
+.cell-pending {
+  background-color: #e3bc08 !important;
+}
+.cell-approved {
+  background-color: #4caf50 !important;
+}
+.cell-rejected {
+  background-color: #ff0000 !important; 
+}
+
+.cal-month-view .cal-event {
+  height: 14px;
+  line-height: 14px;
+  font-size: 10px;
+}
+.cal-month-view .cal-event-title { display: none; }
+.cal-month-view .cal-badge { display: none !important; }
+.cal-month-view .cal-day-badge { display: none !important; }

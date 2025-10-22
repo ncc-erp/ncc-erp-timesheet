@@ -84,6 +84,45 @@
     </table>
   </div>
 
+  <div class="timesheet-calendar-section">
+    <h3>Monthly Timesheet Calendar</h3>
+    <div class="calendar-container">
+      <div [ngSwitch]="view" class="calendar-scale">
+        <mwl-calendar-month-view
+          *ngSwitchCase="calendarView.Month"
+          [viewDate]="viewDate"
+          [events]="events"
+          [refresh]="refresh"
+          [activeDayIsOpen]="activeDayIsOpen"
+          [cellTemplate]="customCellTemplate"
+          (dayClicked)="dayClicked($event)"
+        >
+        </mwl-calendar-month-view>
+      </div>
+    </div>
+    <ng-template #customCellTemplate let-day="day" let-locale="locale">
+      <div class="cal-cell-top" [ngClass]="getDayCellClass(day)">
+        <span class="cal-day-number">
+          {{ day.date | calendarDate:(view + 'ViewDayNumber') : locale }}
+        </span>
+      </div>
+    </ng-template>
+    <div class="calendar-legend">
+      <div class="legend-item">
+        <div class="legend-color pending"></div>
+        <span>Pending</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color approved"></div>
+        <span>Approved</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color other"></div>
+        <span>Rejected</span>
+      </div>
+    </div>
+  </div>
+
   <div class="contribution-section">
     <mat-checkbox [(ngModel)]="contributeToFund">
       I want to contribute my fine to: <strong>{{selectedFund}}</strong>

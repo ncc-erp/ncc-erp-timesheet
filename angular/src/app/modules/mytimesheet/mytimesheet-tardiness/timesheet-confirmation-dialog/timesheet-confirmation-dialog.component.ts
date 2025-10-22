@@ -1,16 +1,38 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, Injector } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog, MatSnackBar } from '@angular/material';
 import * as moment from 'moment';
 import { APP_CONSTANT } from '@app/constant/api.constants';
 import { UserPunishmentPaidService, UserPunishmentPaidDto } from '@app/service/api/user-punishment-paid.service';
 import { TransactionHashDialogComponent } from '../transaction-hash-dialog/transaction-hash-dialog.component';
+import { CalendarEvent, CalendarView } from 'angular-calendar';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
+import { MomentDateAdapter } from '@angular/material-moment-adapter';
+import { Subject } from 'rxjs';
+import { MyTimesheetService } from '@app/service/api/mytimesheet.service';
+import { AppComponentBase } from '@shared/app-component-base';
+
+export const MY_FORMATS = {
+  parse: {
+    dateInput: 'LL',
+  },
+  display: {
+    dateInput: 'YYYY-MM-DD',
+    monthYearLabel: 'MMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
 
 @Component({
   selector: 'app-timesheet-confirmation-dialog',
   templateUrl: './timesheet-confirmation-dialog.component.html',
-  styleUrls: ['./timesheet-confirmation-dialog.component.css']
+  styleUrls: ['./timesheet-confirmation-dialog.component.css'],
+  providers: [
+    { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE] },
+    { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS },
+  ],
 })
-export class TimesheetConfirmationDialogComponent implements OnInit {
+export class TimesheetConfirmationDialogComponent extends AppComponentBase implements OnInit {
   totalErrors: number = 0;
   totalFine: number = 0;
   isPaid: boolean = false;
@@ -21,17 +43,27 @@ export class TimesheetConfirmationDialogComponent implements OnInit {
   selectedFund: string = 'Build School Fund';
   contributeToFund: boolean = false;
 
+  view: CalendarView = CalendarView.Month;
+  calendarView = CalendarView;
+  viewDate: Date = new Date();
+  events: CalendarEvent[] = [];
+  activeDayIsOpen: boolean = false;
+  refresh: Subject<any> = new Subject();
+  timesheetData: any[] = [];
+
   constructor(
+    injector: Injector,
     public dialogRef: MatDialogRef<TimesheetConfirmationDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private userPunishmentPaidService: UserPunishmentPaidService,
+    private mytimesheetService: MyTimesheetService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) { }
+  ) { 
+    super(injector);
+  }
 
-  ngOnInit() {
-    console.log('Dialog data:', this.data);
-    
+  ngOnInit() {    
     const punishmentItemsRaw = this.data.timekeepingData.filter(item => {
       const hasPunishment = item.moneyPunish > 0;
       return hasPunishment;
@@ -77,6 +109,8 @@ export class TimesheetConfirmationDialogComponent implements OnInit {
       
       this.weekNumber = -1; 
       this.weekRange = `${monthStart.format('MMM DD')}-${monthEnd.format('DD, YYYY')}`;
+
+      this.viewDate = new Date(firstDate.year(), firstDate.month(), 1);
     } else {
       const currentDate = moment();
       const monthStart = currentDate.clone().startOf('month');
@@ -84,9 +118,12 @@ export class TimesheetConfirmationDialogComponent implements OnInit {
       
       this.weekNumber = -1; 
       this.weekRange = `${monthStart.format('MMM DD')}-${monthEnd.format('DD, YYYY')}`;
+
+      this.viewDate = new Date(currentDate.year(), currentDate.month(), 1);
     }
     
     this.loadPunishmentPaidData();
+    this.loadTimesheetData();
   }
 
   onClose(): void {
@@ -108,7 +145,7 @@ export class TimesheetConfirmationDialogComponent implements OnInit {
         
         if (this.punishmentItems.length > 0) {
           const firstDate = moment(this.punishmentItems[0].date);
-          month = firstDate.month() + 1; // moment months are 0-11, API expects 1-12
+          month = firstDate.month() + 1; 
           year = firstDate.year();
         } else {
           const currentDate = moment();
@@ -200,5 +237,105 @@ export class TimesheetConfirmationDialogComponent implements OnInit {
     }
     
     return this.punishmentPaidItems.reduce((total, item) => total + (item.amount || 0), 0);
+  }
+  
+  loadTimesheetData(): void {
+    try {
+      const currentDate = moment(this.viewDate);
+      const startDate = currentDate.clone().startOf('month').format('YYYY-MM-DD');
+      const endDate = currentDate.clone().endOf('month').format('YYYY-MM-DD');
+            
+      this.mytimesheetService.getAllTimeSheet(startDate, endDate).subscribe(result => {
+        if (result && result.result) {
+          this.timesheetData = result.result;
+          this.generateCalendarEvents();
+        } else {
+          console.warn('API returned no result data');
+          this.timesheetData = [];
+          this.refresh.next();
+        }
+      }, error => {
+        console.error('Error loading timesheet data:', error);
+        this.timesheetData = [];
+        this.refresh.next();
+      });
+    } catch (error) {
+      console.error('Exception in loadTimesheetData:', error);
+      this.timesheetData = [];
+      this.refresh.next();
+    }
+  }
+  
+  generateCalendarEvents(): void {
+    try {
+      this.events = [];
+      
+      if (!this.timesheetData || this.timesheetData.length === 0) {
+        this.refresh.next();
+        return;
+      }
+
+      const groupedByDate = {};
+      
+      this.timesheetData.forEach(timesheet => {
+        if (!timesheet || !timesheet.dateAt) return;
+        
+        const dateStr = moment(timesheet.dateAt).format('YYYY-MM-DD');
+        
+        if (!groupedByDate[dateStr]) {
+          groupedByDate[dateStr] = [];
+        }
+        
+        groupedByDate[dateStr].push(timesheet);
+      });
+
+      Object.keys(groupedByDate).forEach(dateStr => {
+        const timesheets = groupedByDate[dateStr];
+        const date = moment(dateStr).toDate();
+
+        this.events.push({
+          start: date,
+          end: date,
+          title: `${timesheets.length} timesheet(s)`,
+          meta: {
+            timesheets: timesheets
+          }
+        });
+      });
+      
+      console.log('Generated calendar events:', this.events.length);
+      this.refresh.next();
+    } catch (error) {
+      console.error('Error generating calendar events:', error);
+    }
+  }
+  
+  dayClicked(event: any): void {
+    const { date, events } = event;
+    if (events && events.length > 0 && events[0].meta && events[0].meta.timesheets) {
+      const timesheets = events[0].meta.timesheets;
+      console.log('Timesheets for this day:', timesheets);
+    }
+  }
+  
+  getStatusClass(status: number): string {
+    if (status === 1) { 
+      return 'day-off-state-pending';
+    } else if (status === 2) {
+      return 'day-off-state-approved';
+    } else { 
+      return 'day-off-state-reject';
+    }
+  }
+
+  getDayCellClass(day: any): string {
+    if (!day || !day.events || day.events.length === 0) return '';
+    const ev = day.events[0];
+    const timesheets = ev.meta && ev.meta.timesheets ? ev.meta.timesheets : [];
+    if (!timesheets.length) return '';
+    const status = timesheets[0].status;
+    if (status === 1) return 'cell-pending';
+    if (status === 2) return 'cell-approved';
+    return 'cell-rejected';
   }
 }

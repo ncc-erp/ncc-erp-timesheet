@@ -1,6 +1,5 @@
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
-import { DateAdapter } from '@angular/material/core';
-import { CalendarModule } from 'angular-calendar';
+import { CalendarModule, DateAdapter } from 'angular-calendar';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
