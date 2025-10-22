@@ -509,11 +509,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     // Filter out items with punishment
     const punishmentItems = this.listTimekeeping.filter(item => item.moneyPunish > 0);
     
-    if (punishmentItems.length === 0) {
-      this.notify.info('Không có khoản phạt nào trong tháng này');
-      return;
-    }
-
     const dialogRef = this.dialog.open(TimesheetConfirmationDialogComponent, {
       width: '800px',
       data: {
@@ -524,9 +519,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
 
     dialogRef.afterClosed().subscribe(result => {
       if (result && result.paid) {
-        this.notify.success('Đã xác nhận thanh toán tiền phạt');
-        // Here you would typically call an API to mark the timesheet as paid
-        // For now, we'll just refresh the data
+        this.notify.success('Paid Successfully');
         this.getData();
       }
     });

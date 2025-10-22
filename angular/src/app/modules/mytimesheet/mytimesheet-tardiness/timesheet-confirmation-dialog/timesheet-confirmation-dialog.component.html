@@ -64,9 +64,13 @@
     </table>
   </div>
   
-  <div class="punishment-paid-summary" *ngIf="punishmentPaidItems && punishmentPaidItems.length > 0">
+  <div class="punishment-paid-summary">
     <h3>Punishment Paid</h3>
-    <table class="error-table">
+    <div *ngIf="isLoadingPaidData" class="loading-container">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading payment data...</div>
+    </div>
+    <table class="error-table" *ngIf="!isLoadingPaidData">
       <thead>
         <tr>
           <th>DATE</th>
@@ -75,6 +79,9 @@
         </tr>
       </thead>
       <tbody>
+        <tr *ngIf="!punishmentPaidItems || punishmentPaidItems.length === 0">
+          <td colspan="3" class="no-data">No payment records found</td>
+        </tr>
         <tr *ngFor="let item of punishmentPaidItems">
           <td>{{item.dateAt | date:'MMM dd, yyyy'}}</td>
           <td class="tx-hash">{{item.txHash}}</td>

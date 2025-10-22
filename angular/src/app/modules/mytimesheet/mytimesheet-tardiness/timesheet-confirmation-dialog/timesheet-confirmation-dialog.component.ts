@@ -40,6 +40,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   weekRange: string;
   punishmentItems: any[] = [];
   punishmentPaidItems: UserPunishmentPaidDto[] = [];
+  isLoadingPaidData: boolean = false;
   selectedFund: string = 'Build School Fund';
   contributeToFund: boolean = false;
 
@@ -186,7 +187,8 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
 
   loadPunishmentPaidData(): void {
     try {
- 
+      this.isLoadingPaidData = true;
+      
       let year: number;
       let month: number;
       
@@ -210,6 +212,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
           this.totalFine = Math.max(0, totalPunishmentAmount - totalPaidAmount);
           
           this.isPaid = totalPaidAmount >= totalPunishmentAmount;
+          this.isLoadingPaidData = false;
         },
         (error) => {
           console.error(`Error loading punishment paid data for ${month}/${year}:`, error);
@@ -223,11 +226,13 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
             console.error('Error details:', error.error);
           }
           this.punishmentPaidItems = [];
+          this.isLoadingPaidData = false;
         }
       );
     } catch (e) {
       console.error('Exception in loadPunishmentPaidData:', e);
       this.punishmentPaidItems = [];
+      this.isLoadingPaidData = false;
     }
   }
   
