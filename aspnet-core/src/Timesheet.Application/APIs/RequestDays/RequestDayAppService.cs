@@ -196,7 +196,7 @@ namespace Timesheet.APIs.RequestDays
                            s.Request.Status == arrayAbsenceStatus[input.status.Value]))
                   .Where(s => !input.type.HasValue || input.type.Value < 0 || s.Request.Type == input.type.Value)
                   .WhereIf(input.dayType.HasValue && input.dayType.Value > 0, s => s.DateType == input.dayType.Value)
-                  .WhereIf(input.BranchId.HasValue,s => s.Request.User.BranchId == input.BranchId) 
+                  .WhereIf(input.BranchId.HasValue, s => s.Request.User.BranchId == input.BranchId)
                   .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
                   .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
 
@@ -550,6 +550,12 @@ namespace Timesheet.APIs.RequestDays
 
             var mapDateAtToRequestCount = new Dictionary<DateTime, int>();
 
+            var today = DateTime.Now.Date;
+            var mondayThisWeek = DateTimeUtils.FirstDayOfWeek(today);
+            var mondayNextWeek = mondayThisWeek.AddDays(7);
+            var fridayNextWeek = mondayNextWeek.AddDays(4);
+            var saturdayThisWeek = mondayThisWeek.AddDays(5);
+
             foreach (var abs in input.Absences)
             {
                 if (setDayOffSetting.Contains(abs.DateAt))
@@ -591,9 +597,9 @@ namespace Timesheet.APIs.RequestDays
 
                 //Check is Rejected
                 var rejectedAbsDetail = dbRequests.Where(s => s.Date == abs.DateAt.Date)
-                                                  .Where(s => s.Status == RequestStatus.Rejected)
-                                                  .Select(s => new { s.RequestId, s.Id })
-                                                  .FirstOrDefault();
+                                                    .Where(s => s.Status == RequestStatus.Rejected)
+                                                    .Select(s => new { s.RequestId, s.Id })
+                                                    .FirstOrDefault();
 
                 if (rejectedAbsDetail != null)
                 {
@@ -603,6 +609,31 @@ namespace Timesheet.APIs.RequestDays
 
                 if (input.Type == RequestType.Remote)
                 {
+                    if (abs.DateAt.Date >= mondayNextWeek && abs.DateAt.Date <= fridayNextWeek && today < saturdayThisWeek)
+                    {
+                        throw new UserFriendlyException($"You can only submit Remote requests for the next week (from {mondayNextWeek:dd/MM/yyyy} to {fridayNextWeek:dd/MM/yyyy}) starting from Saturday ({saturdayThisWeek:dd/MM/yyyy}).");
+                    }
+
+                    var startOfWeekContainRequest = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
+                    var previousMonday = startOfWeekContainRequest.AddDays(-7);
+                    var previousFriday = previousMonday.AddDays(4);
+                    int standardWorkingDays = 5;
+                    var absenceDaysLastWeek = WorkScope.GetAll<AbsenceDayRequest>()
+                        .Join(WorkScope.GetAll<AbsenceDayDetail>(),
+                            r => r.Id,
+                            d => d.RequestId,
+                            (r, d) => new { Request = r, Detail = d })
+                        .Where(x => x.Request.UserId == userId)
+                        .Where(x => x.Detail.DateAt.Date >= previousMonday && x.Detail.DateAt.Date <= previousFriday)
+                        .Where(x => x.Request.Status == RequestStatus.Pending || x.Request.Status == RequestStatus.Approved)
+                        .Where(x => (x.Request.Type == RequestType.Off && x.Detail.DateType != DayType.Custom) || x.Request.Type == RequestType.Remote)
+                        .Select(x => x.Detail.DateAt.Date)
+                        .Distinct()
+                        .Count();
+
+                    int workingDaysLastWeek = standardWorkingDays - absenceDaysLastWeek;
+                    bool rejectRemoteDueToLowWorkingDays = workingDaysLastWeek < 2;
+
                     var monday = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
                     var numberRemoteDayInWeek = 0;
                     if (mapDateAtToRequestCount.ContainsKey(monday))
@@ -615,7 +646,7 @@ namespace Timesheet.APIs.RequestDays
                         mapDateAtToRequestCount.Add(monday, numberRemoteDayInWeek);
                     }
 
-                    if (numberRemoteDayInWeek > MAX_ALLOW_REMOTE_DAY - 1)
+                    if (numberRemoteDayInWeek > MAX_ALLOW_REMOTE_DAY - 1 || rejectRemoteDueToLowWorkingDays)
                     {
                         absencedayRequest.Status = RequestStatus.Rejected;
                     }
@@ -1533,7 +1564,7 @@ namespace Timesheet.APIs.RequestDays
             var dateTimeFormat = "dd/MM/yyyy HH:mm:ss";
             foreach (var item in ListGetRequestInput)
             {
-                sheet.Cells[1, 1].Value = "Data Team Working Calendar with Day Of Type : " +  item.LeavedayType;
+                sheet.Cells[1, 1].Value = "Data Team Working Calendar with Day Of Type : " + item.LeavedayType;
                 sheet.Cells[rowIndex, 1].Value = rowIndex - 3;
                 sheet.Cells[rowIndex, 2].Value = item.FullName;
                 sheet.Cells[rowIndex, 3].Value = item.EmailAddress;
@@ -1556,7 +1587,8 @@ namespace Timesheet.APIs.RequestDays
         [AbpAuthorize(Ncc.Authorization.PermissionNames.AbsenceDayOfTeam_ExportTeamWorkingCalender)]
         public async Task<FileBase64Dto> ExportTeamWorkingCalender(InputRequestDto input)
         {
-            try {
+            try
+            {
                 var listTeamWorkCalender = GetAllRequestForUser(input).Result.ToList();
 
                 var templateFilePath = Path.Combine(TemplateFolder, "ExportTeamWorkingCalender.xlsx");
@@ -1577,12 +1609,12 @@ namespace Timesheet.APIs.RequestDays
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //throw new LoggerException("Error in the handling when using function Export Team Working Calender", ex);
-                Logger.Error( "Error in handling when using function ExportTeamWorkingCalender : ",ex);
+                Logger.Error("Error in handling when using function ExportTeamWorkingCalender : ", ex);
                 throw;
-            }            
+            }
         }
         private async Task<Expression<Func<AbsenceDayDetail, bool>>> GetWithBranchAndActiveMembersPredicate(List<long> projectIds)
         {
@@ -1675,7 +1707,9 @@ namespace Timesheet.APIs.RequestDays
                     .ToList();
 
                 return result;
-            } else {
+            }
+            else
+            {
                 var query = from s in WorkScope.GetAll<AbsenceDayDetail>()
                 .Where(s => s.DateAt >= input.startDate)
                 .Where(s => s.DateAt.Date <= input.endDate)
@@ -1688,7 +1722,7 @@ namespace Timesheet.APIs.RequestDays
                 .WhereIf(input.BranchId.HasValue, s => s.Request.User.BranchId == input.BranchId)
                 .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
                 .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
-                .GroupBy(s =>new { s.DateAt, s.Request.Type, AbsenceType = s.AbsenceTime ?? OnDayType.None })
+                .GroupBy(s => new { s.DateAt, s.Request.Type, AbsenceType = s.AbsenceTime ?? OnDayType.None })
                             select new CountRequestDto
                             {
                                 Date = s.Key.DateAt,
@@ -1729,33 +1763,33 @@ namespace Timesheet.APIs.RequestDays
                   .WhereIf(input.BranchId.HasValue, s => s.Request.User.BranchId == input.BranchId)
                   .Where(s => string.IsNullOrWhiteSpace(input.name) || s.Request.User.EmailAddress.Contains(input.name))
                   .Where(s => input.dayOffTypeId < 0 || s.Request.DayOffTypeId == input.dayOffTypeId)
-                               join u in qUser on s.Request.LastModifierUserId equals u.Id into updatedUser
-                               join cu in qUser on s.CreatorUserId equals cu.Id into cuu
-                               select new GetRequestDto
-                               {
-                                   Id = s.Request.Id,
-                                   UserId = s.Request.UserId,
-                                   AvatarPath = s.Request.User.AvatarPath,
-                                   Sex = s.Request.User.Sex,
-                                   FullName = s.Request.User.FullName,
-                                   Name = s.Request.User.Name,
-                                   Type = s.Request.User.Type,
-                                   DateAt = s.DateAt,
-                                   DateType = s.DateType,
-                                   DayOffName = s.Request.DayOffType.Name,
-                                   Hour = s.Hour,
-                                   Status = s.Request.Status,
-                                   ShortName = s.Request.User.Name,
-                                   LeavedayType = s.Request.Type,
-                                   BranchDisplayName = s.Request.User.Branch.DisplayName,
-                                   BranchColor = s.Request.User.Branch.Color,
-                                   AbsenceTime = s.AbsenceTime,
-                                   CreateTime = s.CreationTime,
-                                   CreateBy = cuu.Select(x => x.FullName).FirstOrDefault(),
-                                   LastModificationTime = s.Request.LastModificationTime,
-                                   LastModifierUserName = updatedUser.Select(x => x.FullName).FirstOrDefault(),
-                               }).ToListAsync();
-            if(input.type.Value == RequestType.Remote && input.remoteOfWeek.HasValue && input.remoteOfWeek.Value > 0)
+                                join u in qUser on s.Request.LastModifierUserId equals u.Id into updatedUser
+                                join cu in qUser on s.CreatorUserId equals cu.Id into cuu
+                                select new GetRequestDto
+                                {
+                                    Id = s.Request.Id,
+                                    UserId = s.Request.UserId,
+                                    AvatarPath = s.Request.User.AvatarPath,
+                                    Sex = s.Request.User.Sex,
+                                    FullName = s.Request.User.FullName,
+                                    Name = s.Request.User.Name,
+                                    Type = s.Request.User.Type,
+                                    DateAt = s.DateAt,
+                                    DateType = s.DateType,
+                                    DayOffName = s.Request.DayOffType.Name,
+                                    Hour = s.Hour,
+                                    Status = s.Request.Status,
+                                    ShortName = s.Request.User.Name,
+                                    LeavedayType = s.Request.Type,
+                                    BranchDisplayName = s.Request.User.Branch.DisplayName,
+                                    BranchColor = s.Request.User.Branch.Color,
+                                    AbsenceTime = s.AbsenceTime,
+                                    CreateTime = s.CreationTime,
+                                    CreateBy = cuu.Select(x => x.FullName).FirstOrDefault(),
+                                    LastModificationTime = s.Request.LastModificationTime,
+                                    LastModifierUserName = updatedUser.Select(x => x.FullName).FirstOrDefault(),
+                                }).ToListAsync();
+            if (input.type.Value == RequestType.Remote && input.remoteOfWeek.HasValue && input.remoteOfWeek.Value > 0)
             {
                 // Group elements by CreatorUserId
                 result = result.GroupBy(s => s.UserId)
@@ -1768,7 +1802,7 @@ namespace Timesheet.APIs.RequestDays
             {
                 result = result.Where(s => s.DateAt == input.date).ToList();
             }
-            
+
             var dictUserProjectInfos = await DictUserProjectInfos(result.Select(s => s.UserId));
 
             result.ForEach(s =>
@@ -1778,7 +1812,7 @@ namespace Timesheet.APIs.RequestDays
 
             return result;
         }
-    } 
+    }
 }
 
 
