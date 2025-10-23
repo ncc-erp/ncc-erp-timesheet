@@ -64,6 +64,7 @@ namespace Ncc.Configuration
         public const string AutoSubmitAtHour = "App.AutoSubmitAtHour";
         public const string WFHSetting = "App.WFHSetting";
         public const string AllowInternToWorkRemote = "App.AllowInternToWorkRemote";
+        public const string AllowProbationToWorkRemote = "App.AllowProbationToWorkRemote";
         public const string OpenTalkTaskId = "App.OpenTalkTaskId";
         public const string UnassignedTaskId = "App.UnassignedTaskId";
         public const string DateToLockTimesheetOfLastMonth = "App.DateToLockTimesheetOfLastMonth";
@@ -85,7 +86,7 @@ namespace Ncc.Configuration
         public const string SendEmailTimesheet = "App.SendEmailTimesheet";
         public const string SendEmailRequest = "App.SendEmailRequest";
         public const string SendKomuSubmitTimesheet = "App.SendKomuSubmitTimesheet";
-        public const string EnableNofityKomuCheckInOutPunishment  = "App.EnableNofityKomuCheckInOutPunishment ";
+        public const string EnableNofityKomuCheckInOutPunishment = "App.EnableNofityKomuCheckInOutPunishment ";
         public const string SendKomuRequest = "App.SendKomuRequest";
         public const string NRITNotifyEnableWorker = "App.NotifyEnableWorker";
         public const string NRITNotifyAtHourType = "App.NRITNotifyAtHourType";
@@ -135,12 +136,19 @@ namespace Ncc.Configuration
         public const string BotReportEnable = "Abp.BotReportEnable";
         public const string BotReportEveryday = "Abp.BotReportEveryday";
         public const string BotReportAtHour = "Abp.BotReportAtHour";
+        public const string BotReportAtMinute = "Abp.BotReportAtMinute";
         public const string BotReportAtDayOfWeek = "Abp.BotReportAtDayOfWeek";
         public const string BotReportWebhookUrl = "Abp.BotReportWebhookUrl";
         public const string BotReportBranchCodes = "Abp.BotReportBranchCodes";
         public const string BotReportMinHours = "Abp.BotReportMinHours";
         public const string BotReportTopN = "Abp.BotReportTopN";
         public const string BotReportProjectIds = "Abp.BotReportProjectIds";
+        public const string AnomaliesReportEnable = "Abp.AnomaliesReportEnable";
+        public const string AnomaliesReportAtHour = "Abp.AnomaliesReportAtHour";
+        public const string AnomaliesReportAtMinute = "Abp.AnomaliesReportAtMinute";
+        public const string AnomaliesReportAtDayOfWeek = "Abp.AnomaliesReportAtDayOfWeek";
+        public const string AnomaliesReportWebhookUrl = "Abp.AnomaliesReportWebhookUrl";
+        public const string AnomaliesReportBranchCodes = "Abp.AnomaliesReportBranchCodes";
 
         public const string ReviewDeadlineDay = "App.Review.DeadlineDay";
         public const string ReviewStartDayOfMonth = "App.Review.StartDayOfMonth";
@@ -183,5 +191,15 @@ namespace Ncc.Configuration
         public const string MoneyPMUnlockTimeSheet = "App.MoneyPMUnlockTimeSheet";
         public const string SendMessageToPunishUserEnableWorker = "App.SendMessageToPunishUserEnableWorker";
         public const string SendMessageToPunishUserAtHour = "App.SendMessageToPunishUserAtHour";
+        
+
+
+        public const string OfficeWorkingReportEnable = "App.OfficeWorkingReport.Enable";
+        public const string OfficeWorkingReportAtHour = "App.OfficeWorkingReport.AtHour";
+        public const string OfficeWorkingReportAtMinute = "App.OfficeWorkingReport.AtMinute";
+        public const string OfficeWorkingReportOfficeIds = "App.OfficeWorkingReport.OfficeIds";
+        public const string OfficeWorkingReportLimit = "App.OfficeWorkingReport.Limit";
+        public const string OfficeWorkingReportMezonUrl = "App.OfficeWorkingReport.MezonUrl";
+        public const string OfficeWorkingEveryday = "App.OfficeWorkingReport.Everyday";
     }
 }

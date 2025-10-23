@@ -93,7 +93,9 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
   userTypes = [
     { value: 0, label: 'Staff' },
     { value: 1, label: 'Internship' },
-    { value: 2, label: 'Collaborator' }
+    { value: 2, label: 'CTV' },
+    { value: 3, label: 'Probation' },
+    { value: 5, label: 'Vendor' }
   ];
 
   isExpandUserName = false;
@@ -194,6 +196,10 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
       this.listPosition = res.result;
       this.listPositionFilter = this.listPosition;
     });
+  }
+  getLabel(userType: number): string {
+    const found = this.userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
   }
   filterPosition(): void {
     if (this.positionSearch.value) {

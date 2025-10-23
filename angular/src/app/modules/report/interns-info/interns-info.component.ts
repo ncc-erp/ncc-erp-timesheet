@@ -84,7 +84,9 @@ export class InternsInfoComponent extends PagedListingComponentBase<any> impleme
   public userTypes = [
     { value: 0, label: 'Staff' },
     { value: 1, label: 'Intern' },
-    { value: 2, label: 'CTV' }
+    { value: 2, label: 'CTV' },
+    { value: 3, label: 'Probation' },
+    { value: 5, label: 'Vendor' }
   ];
 
   setDefault(){
@@ -198,6 +200,10 @@ export class InternsInfoComponent extends PagedListingComponentBase<any> impleme
       return member;
     }
     return "assets/images/undefine.png";
+  }
+  getLabel(userType: number): string {
+    const found = this.userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
   }
 
   public getStarColorByFloatRateStar(star) {

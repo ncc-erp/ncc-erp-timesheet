@@ -48,7 +48,9 @@ export class EditRoleComponent
   userTypes = [
     { value: 0, label: "Staff" },
     { value: 1, label: "Internship" },
-    { value: 2, label: "Collaborator" },
+    { value: 2, label: "CTV" },
+    { value: 3, label: "Probation" },
+    { value: 5, label: "Vendor" }
   ];
   userTypeForFilter = -1;
   userBranchForFilter = 0;
@@ -131,6 +133,11 @@ export class EditRoleComponent
       );
       this.displayActiveMembers = this.activeMembers.filter((x) => true);
     });
+  }
+
+  getLabel(userType: number): string {
+    const found = this.userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
   }
 
   selectTeam(user: UserDto, index) {

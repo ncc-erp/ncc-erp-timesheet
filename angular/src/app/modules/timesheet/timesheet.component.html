@@ -286,12 +286,14 @@
                                 style="border-radius: 50%; margin-right: 5px" />
                               <span class="object-name" title="{{ ut.userName }}">
                                 <span class="label-title">{{ ut.userName }} </span>
-                                <span *ngIf="ut.type == 0" class="label status-label bg-red">{{ userTypes[ut.type].label
+                                <span *ngIf="ut.type == 0" class="label status-label bg-red">{{getLabel(ut.type)
                                   }}</span>
                                 <span *ngIf="ut.type == 1" class="label status-label bg-green">{{
-                                  userTypes[ut.type].label }}</span>
+                                  getLabel(ut.type) }}</span>
                                 <span *ngIf="ut.type == 2" class="label status-label bg-blue">{{
-                                  userTypes[ut.type].label }}</span>
+                                  getLabel(ut.type) }}</span>
+                                <span *ngIf="ut.type == 3" class="label status-label bg-orange">{{getLabel(ut.type)}}</span>
+                                <span *ngIf="ut.type == 5" class="label status-label bg-purple">{{getLabel(ut.type)}}</span>
                                 <span *ngIf="ut.level != null">
                                   <span class="label status-label mr-left" [ngStyle]="userLevels[ut.level].style">{{
                                     userLevels[ut.level].name }}</span>
@@ -526,11 +528,15 @@
                         style="border-radius: 50%; margin-right: 5px" />
                       <span class="object-name" title="{{ ut.userName }}">
                         <span class="label-title">{{ ut.userName }} </span>
-                        <span *ngIf="ut.type == 0" class="label status-label bg-red">{{ userTypes[ut.type].label
+                        <span *ngIf="ut.type == 0" class="label status-label bg-red">{{getLabel(ut.type)
                           }}</span>
-                        <span *ngIf="ut.type == 1" class="label status-label bg-green">{{ userTypes[ut.type].label
+                        <span *ngIf="ut.type == 1" class="label status-label bg-green">{{getLabel(ut.type)
                           }}</span>
-                        <span *ngIf="ut.type == 2" class="label status-label bg-blue">{{ userTypes[ut.type].label
+                        <span *ngIf="ut.type == 2" class="label status-label bg-blue">{{getLabel(ut.type)
+                          }}</span>
+                        <span *ngIf="ut.type == 3" class="label status-label bg-orange">{{getLabel(ut.type) 
+                          }}</span>
+                        <span *ngIf="ut.type == 5" class="label status-label bg-purple">{{getLabel(ut.type) 
                           }}</span>
                         <span *ngIf="ut.level != null">
                           <span class="label status-label mr-left" [ngStyle]="userLevels[ut.level].style">{{

@@ -60,7 +60,9 @@
                         <mat-option value="100">All</mat-option>
                         <mat-option value="0">Staff</mat-option>
                         <mat-option value="1">Intern</mat-option>
-                        <mat-option value='2'>Colaborator</mat-option>
+                        <mat-option value="2">Colaborator</mat-option>
+                        <mat-option value="3">Probation</mat-option>
+                        <mat-option value="5">Vendor</mat-option>
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field class="col-sm-5ths field-padding" appearance="outline">
@@ -230,11 +232,15 @@
                                     <div class="align">
                                         <div>
                                             <span *ngIf="user.type == 0"
-                                            class="label status-label bg-red">{{userTypes[user.type].label}}</span>
+                                            class="label status-label bg-red">{{getLabel(user.type)}}</span>
                                             <span *ngIf="user.type == 1"
-                                            class="label status-label bg-green">{{userTypes[user.type].label}}</span>
+                                            class="label status-label bg-green">{{getLabel(user.type)}}</span>
                                             <span *ngIf="user.type == 2"
-                                            class="label status-label bg-blue">{{userTypes[user.type].label}}</span>
+                                            class="label status-label bg-blue">{{getLabel(user.type)}}</span>
+                                            <span *ngIf="user.type == 3"
+                                            class="label status-label bg-orange">{{getLabel(user.type)}}</span>
+                                            <span *ngIf="user.type == 5"
+                                            class="label status-label bg-purple">{{getLabel(user.type)}}</span>
                                         </div>
                                     </div>
                                 </td>

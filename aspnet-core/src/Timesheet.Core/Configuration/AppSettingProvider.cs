@@ -74,6 +74,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.KomuUserNameDevMode, "", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.WFHSetting, "3", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.AllowInternToWorkRemote, "false", scopes:SettingScopes.Application| SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AllowProbationToWorkRemote, "false", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.OpenTalkTaskId, "20078", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.UnassignedTaskId, "20077", scopes:SettingScopes.Application| SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendEmailTimesheet, "true", scopes:SettingScopes.Application| SettingScopes.Tenant),
@@ -141,7 +142,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.ResetDataTeamBuildingEnableWorker, "false", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ResetDataTeamBuildingAtHour, "1", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ResetDataTeamBuildingOnDateAndMonth, "1/1", scopes: SettingScopes.Application|SettingScopes.Tenant),
-                
+
                 new SettingDefinition(AppSettingNames.PMReportPunishEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.PMReportPunishAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.PMReportPunishAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
@@ -149,12 +150,19 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.BotReportEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportEveryday, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.BotReportAtMinute, "0", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportWebhookUrl, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportBranchCodes, "[\"HN1\"]", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportMinHours, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportTopN, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportProjectIds, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AnomaliesReportEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AnomaliesReportAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AnomaliesReportAtMinute, "0", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AnomaliesReportAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AnomaliesReportWebhookUrl, "", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.AnomaliesReportBranchCodes, "[\"HN1\"]", scopes: SettingScopes.Application|SettingScopes.Tenant),
 
                 new SettingDefinition(AppSettingNames.ReviewEnableWorker, "true", scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ReviewDeadlineDay, "5", scopes: SettingScopes.Application | SettingScopes.Tenant),
@@ -174,7 +182,7 @@ namespace Ncc.Configuration
 
                 new SettingDefinition(AppSettingNames.SecretRegisterCode, Configuration["DefaultSettings:SecretRegisterCode"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.EmailSaoDo, Configuration["DefaultSettings:EmailSaoDo"], 
+                new SettingDefinition(AppSettingNames.EmailSaoDo, Configuration["DefaultSettings:EmailSaoDo"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.EmailHR, Configuration["DefaultSettings:EmailHR"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
@@ -216,13 +224,23 @@ namespace Ncc.Configuration
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.ApproveRequestOffNotifyToChannels, Configuration["DefaultSettings:ApproveRequestOffNotifyToChannels"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
-                
+
                 new SettingDefinition(AppSettingNames.SendMessageRequestPendingTeamBuildingToHREmail, Configuration["DefaultSettings:SendMessageRequestPendingTeamBuildingToHREmail"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NotifyHRTheEmployeeMayHaveLeftToChannels, Configuration["DefaultSettings:NotifyHRTheEmployeeMayHaveLeftToChannels"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NotifyHRTheEmployeeMayHaveLeftToHREmail, Configuration["DefaultSettings:NotifyHRTheEmployeeMayHaveLeftToHREmail"],
                 scopes: SettingScopes.Application | SettingScopes.Tenant),
+
+
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportEnable, "True", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingEveryday, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportAtHour, "8", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportAtMinute, "0", scopes: SettingScopes.Application | SettingScopes.Tenant),
+
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportOfficeIds, "ALL", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportLimit, "20", scopes: SettingScopes.Application | SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.OfficeWorkingReportMezonUrl, "", scopes: SettingScopes.Application | SettingScopes.Tenant),
             };
         }
     }

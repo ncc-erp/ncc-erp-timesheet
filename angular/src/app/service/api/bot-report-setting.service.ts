@@ -15,6 +15,7 @@ export interface BotReportSettingDto {
   enable: boolean;
   everyday: boolean;
   hour: number;
+  minute: number;
   dayofweek: string;
   botUri: string;
   branchCodes?: string[];
@@ -36,11 +37,11 @@ export class BotReportSettingService extends BaseApiService {
     return 'Configuration';
   }
 
-  get(): Observable<any> {
+  getBotReportSetting(): Observable<any> {
     return this.http.get<any>(this.rootUrl + '/GetBotReportSetting');
   }
 
-  change(input: BotReportSettingDto): Observable<BotReportSettingDto> {
+  setBotReportSetting(input: BotReportSettingDto): Observable<BotReportSettingDto> {
     const payload = {
       ...input,
       projectIds: input.projectIds ? input.projectIds.map(id => Number(id)) : []
@@ -54,7 +55,7 @@ export class BotReportSettingService extends BaseApiService {
 
   getSelectedProjectIds(): Observable<number[]> {
     return new Observable<number[]>(observer => {
-      this.get().subscribe({
+      this.getBotReportSetting().subscribe({
         next: (response: any) => {
           const projectIds = response && response.result && response.result.projectIds 
             ? response.result.projectIds 
@@ -72,7 +73,7 @@ export class BotReportSettingService extends BaseApiService {
   }
 
   updateSelectedProjects(projectIds: number[]): Observable<any> {
-    return this.get().pipe(
+    return this.getBotReportSetting().pipe(
       switchMap(setting => {
         if (!setting || !setting.result) {
           throw new Error('Unable to retrieve current configuration');
@@ -82,7 +83,7 @@ export class BotReportSettingService extends BaseApiService {
           ...setting.result,
           projectIds: numericProjectIds
         };
-        return this.change(updatedSetting);
+        return this.setBotReportSetting(updatedSetting);
       }),
       catchError(error => {
         console.error('Error updating project list:', error);

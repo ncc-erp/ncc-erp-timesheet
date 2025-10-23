@@ -53,8 +53,8 @@ namespace Timesheet.DomainServices
                 .ToListAsync();
 
             var allUsers = await _workScope.GetAll<User>()
-                .Where(u => !u.IsDeleted)
-                .Select(u => new { u.Id, u.UserName, u.BranchId, u.IsActive })
+                .Where(u => !u.IsDeleted && u.IsActive && !u.IsStopWork)
+                .Select(u => new { u.Id, u.FullName, u.BranchId, u.IsActive })
                 .ToListAsync();
 
             var allProjects = await _workScope.GetAll<Project>()
@@ -146,7 +146,7 @@ namespace Timesheet.DomainServices
                         Name = allProjects.FirstOrDefault(proj => proj.Id == p.ProjectId)?.Name ?? "Unknown Project",
                         Members = allUsers
                             .Where(u => p.UserIds.Contains(u.Id))
-                            .Select(u => u.UserName)
+                            .Select(u => u.FullName)
                             .OrderBy(name => name)
                             .ToList(),
                         TotalTimelogLW = Math.Round(p.TotalMinutesLW / 60.0, 2),
@@ -249,10 +249,13 @@ namespace Timesheet.DomainServices
                     LastWeekHours = $"{x.TotalTimelogLW:0.0}h",
                     LastMonthHours = $"{x.TotalTimelogLM:0.0}h"
                 })
+                .Cast<dynamic>()
                 .ToList();
 
-            var sb = new System.Text.StringBuilder();
+            const int BATCH_SIZE = 5;
+            const int MESSAGE_DELAY_MS = 1000;
 
+            var headerSb = new StringBuilder();
             string lastWeekPeriod = $"{lastWeekStart:dd/MM/yyyy} - {lastWeekEnd:dd/MM/yyyy}";
             string lastMonthPeriod = $"{lastMonthStart:MM/yyyy}";
 
@@ -292,144 +295,163 @@ namespace Timesheet.DomainServices
                 branchInfo = "Unknown Branch";
             }
 
-            sb.AppendLine("Top Projects Summary");
-            sb.AppendLine($"Report Period:   Last Week  ({lastWeekStart:MM/dd/yyyy} - {lastWeekEnd:MM/dd/yyyy}) |  Last Month  ({lastMonthStart:MM/yyyy})");
-            sb.AppendLine($"Office: {branchInfo}");
-            sb.AppendLine("════════════════════════════════════");
+            headerSb.AppendLine("════════════ Top Projects Summary ════════════");
+            headerSb.AppendLine($"Report Period:   Last Week  ({lastWeekPeriod}) |  Last Month  ({lastMonthPeriod})");
+            headerSb.AppendLine($"Office: {branchInfo}");
+            headerSb.AppendLine("════════════════════════════════════");
 
-            foreach (var item in projectData)
-            {
-                sb.AppendLine($" Project:  {item.Project}");
-                sb.AppendLine($" Members:  {item.Members}");
-                sb.AppendLine($" Last Week:  {item.LastWeekHours}");
-                sb.AppendLine($" Last Month:  {item.LastMonthHours}");
-                sb.AppendLine("════════════════════════════════════");
-            }
-
-            if (projectData.Any())
-            {
-                sb.Length -= "════════════════════════════════════\r\n".Length;
-            }
-
-            var messageText = sb.ToString();
-
-            Console.WriteLine(messageText);
-
-            var mkList = new List<object>();
-
-            string titleToFind = "Top Projects Summary";
-            int titlePos = messageText.IndexOf(titleToFind);
-
-            if (titlePos >= 0)
-            {
-                mkList.Add(new
-                {
-                    type = "b",
-                    s = titlePos,
-                    e = titlePos + titleToFind.Length
-                });
-            }
-
-            string officeText = "Office:";
-            int officePos = messageText.IndexOf(officeText);
-            if (officePos >= 0)
-            {
-                mkList.Add(new
-                {
-                    type = "b",
-                    s = officePos,
-                    e = officePos + officeText.Length
-                });
-            }
-
-            string reportPeriodText = "Report Period:";
-            int reportPeriodPos = messageText.IndexOf(reportPeriodText);
-            if (reportPeriodPos >= 0)
-            {
-                mkList.Add(new
-                {
-                    type = "b",
-                    s = reportPeriodPos,
-                    e = reportPeriodPos + reportPeriodText.Length
-                });
-            }
-
-            string lastWeekText = "Last Week";
-            int lastWeekPeriodPos = messageText.IndexOf(lastWeekText, reportPeriodPos);
-            if (lastWeekPeriodPos >= 0)
-            {
-                mkList.Add(new
-                {
-                    type = "b",
-                    s = lastWeekPeriodPos,
-                    e = lastWeekPeriodPos + lastWeekText.Length
-                });
-            }
-
-            string lastMonthText = "Last Month";
-            int lastMonthPeriodPos = messageText.IndexOf(lastMonthText, reportPeriodPos);
-            if (lastMonthPeriodPos >= 0)
-            {
-                mkList.Add(new
-                {
-                    type = "b",
-                    s = lastMonthPeriodPos,
-                    e = lastMonthPeriodPos + lastMonthText.Length
-                });
-            }
-
-            int currentPos = 0;
-            while (true)
-            {
-                int projectPos = messageText.IndexOf("Project:", currentPos);
-                int membersPos = messageText.IndexOf("Members:", currentPos);
-                int lastWeekPos = messageText.IndexOf("Last Week:", currentPos);
-                int lastMonthPos = messageText.IndexOf("Last Month:", currentPos);
-
-                if (projectPos == -1) break;
-
-                mkList.Add(new
-                {
-                    type = "b",
-                    s = projectPos,
-                    e = projectPos + "Project:".Length
-                });
-
-                mkList.Add(new
-                {
-                    type = "b",
-                    s = membersPos,
-                    e = membersPos + "Members:".Length
-                });
-
-                mkList.Add(new
-                {
-                    type = "b",
-                    s = lastWeekPos,
-                    e = lastWeekPos + "Last Week:".Length
-                });
-
-                mkList.Add(new
-                {
-                    type = "b",
-                    s = lastMonthPos,
-                    e = lastMonthPos + "Last Month:".Length
-                });
-
-                currentPos = lastMonthPos + "Last Month:".Length;
-            }
+            var headerMessageText = headerSb.ToString();
+            var headerMkList = CreateMarkupList(headerMessageText);
 
             _mezonService.Post(webhookUrl, new
             {
                 type = "hook",
                 message = new
                 {
-                    t = messageText,
-                    mk = mkList
+                    t = headerMessageText,
+                    mk = headerMkList
                 }
             });
 
+            await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
+
+            if (projectData.Any())
+            {
+                var chunks = SplitIntoChunks(projectData, BATCH_SIZE);
+                int idx = 1;
+                for (int i = 0; i < chunks.Count; i++)
+                {
+                    var chunk = chunks[i];
+                    bool isLastChunk = i == chunks.Count - 1;
+
+                    var chunkSb = new StringBuilder();
+                    var chunkMkList = new List<object>();
+
+                    foreach (var item in chunk)
+                    {
+                        var itemSb = new StringBuilder();
+                        itemSb.AppendLine($"{idx}. Project:  {item.Project}");
+                        itemSb.AppendLine($" Members:  {item.Members}");
+                        itemSb.AppendLine($" Last Week:  {item.LastWeekHours}");
+                        itemSb.AppendLine($" Last Month:  {item.LastMonthHours}");
+                        itemSb.AppendLine("════════════════════════════════════");
+
+                        string itemText = itemSb.ToString();
+                        int itemStartPos = chunkSb.Length;
+                        chunkSb.Append(itemText);
+
+                        int projectPos = itemText.IndexOf($"{idx}. Project:", 0);
+                        int membersPos = itemText.IndexOf("Members:", projectPos);
+                        int lastWeekPos = itemText.IndexOf("Last Week:", membersPos);
+                        int lastMonthPos = itemText.IndexOf("Last Month:", lastWeekPos);
+
+                        chunkMkList.Add(new { type = "b", s = itemStartPos + projectPos, e = itemStartPos + projectPos + $"{idx}. Project:".Length });
+                        //chunkMkList.Add(new { type = "b", s = itemStartPos + projectPos, e = itemStartPos + projectPos + "Project:".Length });
+                        chunkMkList.Add(new { type = "b", s = itemStartPos + membersPos, e = itemStartPos + membersPos + "Members:".Length });
+                        chunkMkList.Add(new { type = "b", s = itemStartPos + lastWeekPos, e = itemStartPos + lastWeekPos + "Last Week:".Length });
+                        chunkMkList.Add(new { type = "b", s = itemStartPos + lastMonthPos, e = itemStartPos + lastMonthPos + "Last Month:".Length });
+
+                        idx++;
+                    }
+
+                    var chunkMessageText = chunkSb.ToString();
+                    if (!string.IsNullOrEmpty(chunkMessageText))
+                    {
+                        _mezonService.Post(webhookUrl, new
+                        {
+                            type = "hook",
+                            message = new
+                            {
+                                t = chunkMessageText,
+                                mk = chunkMkList
+                            }
+                        });
+                    }
+
+                    await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
+                }
+            }
+            else
+            {
+                var emptySb = new StringBuilder();
+                emptySb.AppendLine("No projects found in the projects summary");
+                emptySb.AppendLine("═══════════════════════════════════════");
+
+                var emptyMessageText = emptySb.ToString();
+                var emptyMkList = new List<object>();
+
+                int titlePos = emptyMessageText.IndexOf("═══ Projects Summary ═══");
+                if (titlePos >= 0)
+                {
+                    emptyMkList.Add(new { type = "b", s = titlePos, e = titlePos + "═══ Projects Summary ═══".Length });
+                }
+
+                _mezonService.Post(webhookUrl, new
+                {
+                    type = "hook",
+                    message = new
+                    {
+                        t = emptyMessageText,
+                        mk = emptyMkList
+                    }
+                });
+            }
+
             return true;
         }
+
+        private List<List<dynamic>> SplitIntoChunks(List<dynamic> projects, int batchSize)
+        {
+            var chunks = new List<List<dynamic>>();
+            for (int i = 0; i < projects.Count; i += batchSize)
+            {
+                var chunk = projects.Skip(i).Take(batchSize).ToList();
+                chunks.Add(chunk);
+            }
+            return chunks;
+        }
+
+        private List<object> CreateMarkupList(string messageText)
+        {
+            var mkList = new List<object>();
+
+            string titleToFind = "Top Projects Summary";
+            int titlePos = messageText.IndexOf(titleToFind);
+            if (titlePos >= 0)
+            {
+                mkList.Add(new { type = "b", s = titlePos, e = titlePos + titleToFind.Length });
+            }
+
+            string officeText = "Office:";
+            int officePos = messageText.IndexOf(officeText);
+            if (officePos >= 0)
+            {
+                mkList.Add(new { type = "b", s = officePos, e = officePos + officeText.Length });
+            }
+
+            string reportPeriodText = "Report Period:";
+            int reportPeriodPos = messageText.IndexOf(reportPeriodText);
+            if (reportPeriodPos >= 0)
+            {
+                mkList.Add(new { type = "b", s = reportPeriodPos, e = reportPeriodPos + reportPeriodText.Length });
+            }
+
+            string lastWeekText = "Last Week";
+            int lastWeekPeriodPos = messageText.IndexOf(lastWeekText, reportPeriodPos);
+            if (lastWeekPeriodPos >= 0)
+            {
+                mkList.Add(new { type = "b", s = lastWeekPeriodPos, e = lastWeekPeriodPos + lastWeekText.Length });
+            }
+
+            string lastMonthText = "Last Month";
+            int lastMonthPeriodPos = messageText.IndexOf(lastMonthText, reportPeriodPos);
+            if (lastMonthPeriodPos >= 0)
+            {
+                mkList.Add(new { type = "b", s = lastMonthPeriodPos, e = lastMonthPeriodPos + lastMonthText.Length });
+            }
+
+            return mkList;
+        }
+
     }
 }

@@ -29,18 +29,13 @@ namespace Timesheet.BackgroundWorker
         protected override void DoWork()
         {
             DateTime now = DateTimeUtils.GetNow();
-
-            if (now.Minute == 0)
+            try
             {
-                try
-                {
-                    Logger.Info($"BotReportWorker running at {now:yyyy-MM-dd HH:mm:ss}");
-                    RunBotReportJob(now);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("RunBotReportJob() error: " + ex.Message, ex);
-                }
+                RunBotReportJob(now);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("RunBotReportJob() error: " + ex.Message, ex);
             }
         }
 
@@ -49,23 +44,23 @@ namespace Timesheet.BackgroundWorker
             string enable = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportEnable);
             string everyday = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportEveryday);
             string hourStr = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtHour);
+            string minuteStr = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtMinute);
             string dayOfWeek = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtDayOfWeek);
 
             if (enable != "True")
             {
-                Logger.Info("RunBotReportJob() skipped: Disabled via settings.");
                 return;
             }
 
-            if (!int.TryParse(hourStr, out int configuredHour))
+            if (!int.TryParse(hourStr, out int configuredHour) || !int.TryParse(minuteStr, out int configuredMinute))
             {
                 Logger.Error("RunBotReportJob() error: Invalid hour setting.");
                 return;
             }
 
-            if (configuredHour != now.Hour)
+            if (configuredHour != now.Hour || configuredMinute != now.Minute)
             {
-                Logger.Info($"RunBotReportJob() skipped: Current hour = {now.Hour}, Configured = {configuredHour}");
+                // Logger.Info($"RunBotReportJob() skipped: Current hour = {now.Hour}, Configured = {configuredHour}");
                 return;
             }
 
@@ -73,11 +68,11 @@ namespace Timesheet.BackgroundWorker
 
             if (!isEveryday && !string.Equals(now.DayOfWeek.ToString(), dayOfWeek, StringComparison.OrdinalIgnoreCase))
             {
-                Logger.Info($"RunBotReportJob() skipped: Today is {now.DayOfWeek}, Configured = {dayOfWeek}");
+                // Logger.Info($"RunBotReportJob() skipped: Today is {now.DayOfWeek}, Configured = {dayOfWeek}");
                 return;
             }
 
-            Logger.Info($"RunBotReportJob() running... [Mode: {(isEveryday ? "Everyday" : dayOfWeek)}]");
+            // Logger.Info($"RunBotReportJob() running... [Mode: {(isEveryday ? "Everyday" : dayOfWeek)}]");
 
             ExecuteBotReport();
 

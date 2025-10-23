@@ -55,7 +55,7 @@ export enum CapabilityUserType {
   Staff = 0,
   Internship = 1,
   Collaborators = 2,
-  ProbationaryStaff = 3,
+  Probation = 3,
   Vendor = 5
 }
 export enum SortDirectionEnum {

@@ -801,7 +801,6 @@ namespace Ncc.Configuration
                 dayofweek = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.PMReportPunishAtDayOfWeek)
             };
         }
-
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_PMReportConfig_Update)]
         public async Task<PMReportPunishSettingDto> SetPMReportPunishSetting(PMReportPunishSettingDto input)
         {
@@ -811,7 +810,6 @@ namespace Ncc.Configuration
 
             return input;
         }
-
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_View)]
         public async Task<Timesheet.Configuration.Dto.BotReportSettingDto> GetBotReportSetting()
         {
@@ -820,6 +818,7 @@ namespace Ncc.Configuration
                 enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportEnable)),
                 everyday = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportEveryday)),
                 hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportAtHour)),
+                minute = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportAtMinute)),
                 dayofweek = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportAtDayOfWeek),
                 botUri = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportWebhookUrl),
                 minHours = double.TryParse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.BotReportMinHours), out var minH) ? (double?)minH : null,
@@ -835,23 +834,82 @@ namespace Ncc.Configuration
             return result;
         }
 
-
-
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_Update)]
         public async Task<Timesheet.Configuration.Dto.BotReportSettingDto> SetBotReportSetting(Timesheet.Configuration.Dto.BotReportSettingDto input)
         {
             var projectIdsJson = JsonConvert.SerializeObject(input.projectIds ?? new List<long>());
-            var branchCodesJson = JsonConvert.SerializeObject(input.branchCodes ?? new List<string>());
-            
+            var branchCodesJson = JsonConvert.SerializeObject(input.branchCodes ?? new List<string>());          
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportEnable, input.enable.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportEveryday, input.everyday.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportAtHour, input.hour.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportAtMinute, input.minute.ToString());
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportAtDayOfWeek, input.dayofweek);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportWebhookUrl, input.botUri);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportBranchCodes, branchCodesJson); 
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportMinHours, input.minHours?.ToString() ?? string.Empty);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportTopN, input.topN?.ToString() ?? string.Empty);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.BotReportProjectIds, projectIdsJson);
+
+            return input;
+        }
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_View)]
+        public async Task<OfficeWorkingReportSettingDto> GetOfficeWorkingReportSetting()
+        {
+            return new OfficeWorkingReportSettingDto
+            {
+                enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportEnable)),
+                everyday = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingEveryday)),
+                hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportAtHour)),
+                minute = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportAtMinute)),
+                officeIds = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportOfficeIds),
+                limit = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportLimit)),
+                mezonUrl = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.OfficeWorkingReportMezonUrl)
+            };
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_Update)]
+        public async Task<OfficeWorkingReportSettingDto> SetOfficeWorkingReportSetting(OfficeWorkingReportSettingDto input)
+        {
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportEnable, input.enable.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingEveryday, input.everyday.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportAtHour, input.hour.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportAtMinute, input.minute.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportOfficeIds, input.officeIds);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportLimit, input.limit.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeWorkingReportMezonUrl, input.mezonUrl);
+
+            return input;
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_AnomaliesReportConfig_View)]
+        public async Task<Timesheet.Configuration.Dto.AnomaliesReportSettingDto> GetAnomaliesReportSetting()
+        {
+            var result = new Timesheet.Configuration.Dto.AnomaliesReportSettingDto
+            {
+                enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AnomaliesReportEnable)),
+                hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AnomaliesReportAtHour)),
+                minute = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AnomaliesReportAtMinute)),
+                dayofweek = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AnomaliesReportAtDayOfWeek),
+                botUri = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AnomaliesReportWebhookUrl),
+                branchCodes = JsonConvert.DeserializeObject<List<string>>(
+                    await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.AnomaliesReportBranchCodes)
+                    ?? "[]")
+            };
+
+            return result;
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_AnomaliesReportConfig_Update)]
+        public async Task<Timesheet.Configuration.Dto.AnomaliesReportSettingDto> SetAnomaliesReportSetting(Timesheet.Configuration.Dto.AnomaliesReportSettingDto input)
+        {
+            var branchCodesJson = JsonConvert.SerializeObject(input.branchCodes ?? new List<string>());
+
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AnomaliesReportEnable, input.enable.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AnomaliesReportAtHour, input.hour.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AnomaliesReportAtMinute, input.minute.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AnomaliesReportAtDayOfWeek, input.dayofweek);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AnomaliesReportWebhookUrl, input.botUri);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AnomaliesReportBranchCodes, branchCodesJson);
 
             return input;
         }

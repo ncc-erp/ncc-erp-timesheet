@@ -118,7 +118,10 @@ export const APP_CONSTANT = {
   },
   TYPE: {
     Staff : 0,
+    Internship : 1,
     Collaborator : 2,
+    Probation : 3,
+    Vendor : 5
   },
   HISTORYLEVEL: {
     Intern_0 : 0,

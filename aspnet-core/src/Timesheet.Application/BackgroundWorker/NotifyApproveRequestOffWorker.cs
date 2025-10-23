@@ -120,7 +120,6 @@ namespace Timesheet.BackgroundWorker
 
             if (!needToNotify)
             {
-                Logger.Info("NotifyApproveRequestOff() stop: notifyAtHourConfig=" + notifyAtHourConfig + " date run=" + dateNow.ToString("dd/MM/yyyy HH:mm:ss") + " next run=" + dateNow.AddMinutes(_intervalMinutes).ToString("dd/MM/yyyy HH:mm:ss"));
                 return;
             }
 
@@ -147,13 +146,11 @@ namespace Timesheet.BackgroundWorker
                 }
                 else
                 {
-                    Logger.Info("SendMessageToUserDueDate() stop: notifyAtHourConfig=" + notifyAtHourConfig + " date run=" + dateNow.ToString("dd/MM/yyyy HH:mm:ss") + " next run=" + dateNow.AddMinutes(_intervalMinutes).ToString("dd/MM/yyyy HH:mm:ss"));
                     return;
                 }
             }
             else
             {
-                Logger.Info("SendMessageToUserDueDate() stop: notifyAtHourConfig=" + notifyAtHourConfig + " date run=" + dateNow.ToString("dd/MM/yyyy HH:mm:ss") + " next run=" + dateNow.AddMinutes(_intervalMinutes).ToString("dd/MM/yyyy HH:mm:ss"));
                 return;
             }
         }
