@@ -520,21 +520,21 @@ namespace Timesheet.APIs.RequestDays
             var requestDateAts = input.Absences.Select(s => s.DateAt.Date);
 
             var dbRequests = (from r in WorkScope.GetAll<AbsenceDayRequest>()
-                              join d in WorkScope.GetAll<AbsenceDayDetail>()
-                                  .Where(s => s.Request.UserId == userId)
-                                  .Where(s => requestDateAts.Contains(s.DateAt.Date))
-                              on r.Id equals d.RequestId
-                              select new RequestInfoDto
-                              {
-                                  Type = r.Type,
-                                  AbsenceTime = d.AbsenceTime,
-                                  Date = d.DateAt.Date,
-                                  DateType = d.DateType,
-                                  Hour = d.Hour,
-                                  Id = d.Id,
-                                  RequestId = r.Id,
-                                  Status = r.Status
-                              }).ToList();
+                                join d in WorkScope.GetAll<AbsenceDayDetail>()
+                                    .Where(s => s.Request.UserId == userId)
+                                    .Where(s => requestDateAts.Contains(s.DateAt.Date))
+                                on r.Id equals d.RequestId
+                                select new RequestInfoDto
+                                {
+                                    Type = r.Type,
+                                    AbsenceTime = d.AbsenceTime,
+                                    Date = d.DateAt.Date,
+                                    DateType = d.DateType,
+                                    Hour = d.Hour,
+                                    Id = d.Id,
+                                    RequestId = r.Id,
+                                    Status = r.Status
+                                }).ToList();
 
             validateRequests(userId, input, dbRequests);
 
@@ -549,6 +549,7 @@ namespace Timesheet.APIs.RequestDays
             int.TryParse(await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting), out MAX_ALLOW_REMOTE_DAY);
 
             var mapDateAtToRequestCount = new Dictionary<DateTime, int>();
+            var affectedWeeks = new HashSet<DateTime>();
 
             foreach (var abs in input.Absences)
             {
@@ -591,9 +592,9 @@ namespace Timesheet.APIs.RequestDays
 
                 //Check is Rejected
                 var rejectedAbsDetail = dbRequests.Where(s => s.Date == abs.DateAt.Date)
-                                                  .Where(s => s.Status == RequestStatus.Rejected)
-                                                  .Select(s => new { s.RequestId, s.Id })
-                                                  .FirstOrDefault();
+                                                    .Where(s => s.Status == RequestStatus.Rejected)
+                                                    .Select(s => new { s.RequestId, s.Id })
+                                                    .FirstOrDefault();
 
                 if (rejectedAbsDetail != null)
                 {
@@ -603,6 +604,26 @@ namespace Timesheet.APIs.RequestDays
 
                 if (input.Type == RequestType.Remote)
                 {
+                    var requestMonday = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
+                    var previousMonday = requestMonday.AddDays(-7);
+                    var previousFriday = previousMonday.AddDays(4);
+                    int standardWorkingDays = 5;
+                    var absenceDaysLastWeek = WorkScope.GetAll<AbsenceDayRequest>()
+                        .Join(WorkScope.GetAll<AbsenceDayDetail>(),
+                            r => r.Id,
+                            d => d.RequestId,
+                            (r, d) => new { Request = r, Detail = d })
+                        .Where(x => x.Request.UserId == userId)
+                        .Where(x => x.Detail.DateAt.Date >= previousMonday && x.Detail.DateAt.Date <= previousFriday)
+                        .Where(x => x.Request.Status == RequestStatus.Pending || x.Request.Status == RequestStatus.Approved)
+                        .Where(x => (x.Request.Type == RequestType.Off && x.Detail.DateType != DayType.Custom) || x.Request.Type == RequestType.Remote)
+                        .Select(x => x.Detail.DateAt.Date)
+                        .Distinct()
+                        .Count();
+
+                    int workingDaysLastWeek = standardWorkingDays - absenceDaysLastWeek;
+                    bool rejectRemoteDueToLowWorkingDays = input.Type == RequestType.Remote && workingDaysLastWeek < 2;
+
                     var monday = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
                     var numberRemoteDayInWeek = 0;
                     if (mapDateAtToRequestCount.ContainsKey(monday))
@@ -615,7 +636,7 @@ namespace Timesheet.APIs.RequestDays
                         mapDateAtToRequestCount.Add(monday, numberRemoteDayInWeek);
                     }
 
-                    if (numberRemoteDayInWeek > MAX_ALLOW_REMOTE_DAY - 1)
+                    if (numberRemoteDayInWeek > MAX_ALLOW_REMOTE_DAY - 1 || rejectRemoteDueToLowWorkingDays)
                     {
                         absencedayRequest.Status = RequestStatus.Rejected;
                     }
@@ -623,6 +644,8 @@ namespace Timesheet.APIs.RequestDays
                     {
                         mapDateAtToRequestCount[monday] = numberRemoteDayInWeek + 1;
                     }
+
+                    affectedWeeks.Add(previousMonday);
                 }
 
                 if (abs.DateType == DayType.Custom)
@@ -674,6 +697,45 @@ namespace Timesheet.APIs.RequestDays
 
                 abs.Status = absencedayRequest.Status;
                 abs.RequestId = requestId;
+            }
+
+            foreach (var weekStart in affectedWeeks)
+            {
+                var weekEnd = weekStart.AddDays(4);
+                var absenceDays = WorkScope.GetAll<AbsenceDayRequest>()
+                    .Join(WorkScope.GetAll<AbsenceDayDetail>(),
+                        r => r.Id,
+                        d => d.RequestId,
+                        (r, d) => new { Request = r, Detail = d })
+                    .Where(x => x.Request.UserId == userId)
+                    .Where(x => x.Detail.DateAt.Date >= weekStart && x.Detail.DateAt.Date <= weekEnd)
+                    .Where(x => x.Request.Status == RequestStatus.Pending || x.Request.Status == RequestStatus.Approved)
+                    .Where(x => (x.Request.Type == RequestType.Off && x.Detail.DateType != DayType.Custom) || x.Request.Type == RequestType.Remote)
+                    .Select(x => x.Detail.DateAt.Date)
+                    .Distinct()
+                    .Count();
+
+                int workingDays = 5 - absenceDays;
+                if (workingDays < 2)
+                {
+                    var requestsToUpdate = WorkScope.GetAll<AbsenceDayRequest>()
+                        .Join(WorkScope.GetAll<AbsenceDayDetail>(),
+                            r => r.Id,
+                            d => d.RequestId,
+                            (r, d) => new { Request = r, Detail = d })
+                        .Where(x => x.Request.UserId == userId)
+                        .Where(x => x.Request.Type == RequestType.Remote)
+                        .Where(x => x.Request.Status == RequestStatus.Pending)
+                        .Where(x => x.Detail.DateAt.Date >= weekStart.AddDays(7) && x.Detail.DateAt.Date <= weekStart.AddDays(11))
+                        .Select(x => x.Request)
+                        .ToList();
+
+                    foreach (var request in requestsToUpdate)
+                    {
+                        request.Status = RequestStatus.Rejected;
+                        await WorkScope.UpdateAsync(request);
+                    }
+                }
             }
 
             await notify(requester, input);
