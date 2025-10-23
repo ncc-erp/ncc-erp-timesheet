@@ -40,15 +40,17 @@
 }
 
 .list-button {
-    display: flex;
-    justify-content: flex-end;
-    gap: 4px;
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+  gap: 8px;
 }
 
 .list-button>button.mat-raised-button {
     min-width: 60px;
     padding: 0 5px;
     width: 49%;
+    min-height: 51px;
 }
 
 ::ng-deep .ngx-slider .ngx-slider-point {

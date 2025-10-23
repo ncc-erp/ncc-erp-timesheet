@@ -1,9 +1,59 @@
-.order{
-    text-align: center; min-width: 35px !important;
+/* Header menu */
+.branch-header-menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+/* Button wrapper */
+.branch-button-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+
+/* Button style */
+.btn-new-branch {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 20px;
+}
+
+/* Search wrapper */
+.branch-search-wrapper {
+  flex: 1;
+  max-width: 450px;
+}
+
+/* Remove mat-form-field padding/margin */
+::ng-deep .branch-search-wrapper .mat-form-field-wrapper {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.table thead th,
+.table tbody td {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.order {
+    min-width: 35px !important;
+}
+
+.col-action {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
 }
 
 .btn-action-desktop {
-    display: block;
+    display: inline-block;
 }
 
 .btn-action-mobile {
@@ -11,32 +61,55 @@
 }
 
 @media screen and (max-width: 730px) { 
+    /* Header menu responsive */
+    .branch-header-menu {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .branch-button-wrapper {
+        width: 100%;
+    }
+
+    .branch-search-wrapper {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .btn-action-desktop {
+        display: none;
+    }
+    
     .btn-action-mobile {
-        display: block;
+        display: inline-block;
         box-shadow: none;
         background: transparent;
         min-width: auto;
         padding: 0 10px;
     }
 
-    .btn-action-desktop {
-        display: none;
-    }
-
     .col-action {
-        display: flex;
-        justify-content: flex-end;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 5px !important;
         border-bottom: 0;
     }
 
-    tr:first-child {
-        .col-action {
-            border-top: 0;
-        }
+    tr:first-child .col-action {
+        border-top: 0;
     }
 
-    
     tr:last-child {
         border-bottom: 1px solid #eee;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table thead th {
+        white-space: nowrap;
     }
 }

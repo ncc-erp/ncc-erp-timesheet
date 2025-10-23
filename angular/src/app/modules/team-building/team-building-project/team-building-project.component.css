@@ -10,8 +10,17 @@
 .save-btn {
   position: absolute;
   right: 50px;
-  top: 7px;
+  top: 15px;
   margin: 0px;
+}
+
+.padding-0 {
+  padding: 10px !important;
+}
+
+.text-center {
+  text-align: center;
+  vertical-align: middle;
 }
 
 @media screen and (max-width: 600px) {

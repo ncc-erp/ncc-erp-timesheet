@@ -18,62 +18,67 @@
         </ul>
       </div>
       <div>
-        <div class="row clearfix pd-20">
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 mb-20">
-            <button name="createBtn" *ngIf="permission.isGranted(ADD)" mat-raised-button color="primary" class="pull-left"
-              (click)="create()">
+        <div class="project-member-header-menu">
+          <div class="project-member-button-wrapper">
+            <button name="createBtn" 
+                    *ngIf="permission.isGranted(ADD)" 
+                    mat-raised-button 
+                    color="primary" 
+                    class="btn-new-project-member"
+                    (click)="create()">
               <mat-icon>add</mat-icon>New
             </button>
           </div>
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-            <mat-form-field appearance="outline">
-              <mat-label>Date At</mat-label>
-              <input matInput name="dateAt" [placeholder]="'Date At' | localize" 
-                [matDatepicker]="pickerDateAt" (dateInput)="changeDate()" [(ngModel)]="dateAt"/>
-              <mat-datepicker-toggle matSuffix [for]="pickerDateAt"></mat-datepicker-toggle>
-              <mat-datepicker #pickerDateAt></mat-datepicker>
-            </mat-form-field>
-          </div> 
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-            <mat-form-field appearance="outline">
-              <mat-label >Project</mat-label>
-              <mat-select name="projectId" [(value)]="projectId" (selectionChange)="refresh()">
-                <mat-option>
-                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="projectSearch" 
-                  noEntriesFoundLabel= "No matching found"></ngx-mat-select-search>
-                </mat-option>
-                <mat-option *ngFor="let project of projects" [value]='project.id'>
-                  {{project.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div> 
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-            <mat-form-field appearance="outline">
-              <mat-label>Search by name project</mat-label>
-              <input name="searchText" matInput [(ngModel)]="searchText" placeholder="{{l('Search by name project')}}"
-                (keyup.enter)="searchOrFilter()" type="text" maxlength="128">
-              <i class="icon-32 material-icons" matPrefix>search</i>
-            </mat-form-field>
+          <div class="project-member-filters">
+            <div class="project-member-date-wrapper">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Date At</mat-label>
+                <input matInput name="dateAt" [placeholder]="'Date At' | localize" 
+                  [matDatepicker]="pickerDateAt" (dateInput)="changeDate()" [(ngModel)]="dateAt"/>
+                <mat-datepicker-toggle matSuffix [for]="pickerDateAt"></mat-datepicker-toggle>
+                <mat-datepicker #pickerDateAt></mat-datepicker>
+              </mat-form-field>
+            </div> 
+            <div class="project-member-project-wrapper">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Project</mat-label>
+                <mat-select name="projectId" [(value)]="projectId" (selectionChange)="refresh()">
+                  <mat-option>
+                    <ngx-mat-select-search placeholderLabel="Search" [formControl]="projectSearch" 
+                    noEntriesFoundLabel="No matching found"></ngx-mat-select-search>
+                  </mat-option>
+                  <mat-option *ngFor="let project of projects" [value]='project.id'>
+                    {{project.name}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div> 
+            <div class="project-member-search-wrapper">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Search by name project</mat-label>
+                <input name="searchText" matInput [(ngModel)]="searchText" placeholder="{{l('Search by name project')}}"
+                  (keyup.enter)="searchOrFilter()" type="text" maxlength="128">
+                <i class="icon-32 material-icons" matPrefix>search</i>
+              </mat-form-field>
+            </div>
           </div>
-
         </div>
         <div class="body table-responsive">
         <table class="table table-hover table-striped">
           <thead class="bg-light">
             <tr>
               <th>Name project</th>
-              <th>Date At</th>
+              <th class="text-center">Date At</th>
               <th class="text-center">Coefficient </th>
               <th>Note </th>
-              <th *ngIf="permission.isGranted(DELETE) || permission.isGranted(EDIT)" style="text-align:right">Actions</th>
+              <th *ngIf="permission.isGranted(DELETE) || permission.isGranted(EDIT)" style="text-align:center">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr
               *ngFor="let overtimeSetting of overtimeSettings | paginate: { id: 'server', itemsPerPage: pageSize, currentPage: pageNumber, totalItems: totalItems } ">
               <td>{{ overtimeSetting.projectName }}</td>
-              <td>{{ formatDate(overtimeSetting.dateAt) }}</td>
+              <td class="text-center">{{ formatDate(overtimeSetting.dateAt) }}</td>
               <td class="text-center">{{ overtimeSetting.coefficient }}</td>
               <td>{{ overtimeSetting.note }}</td>
               <td class="full-view">

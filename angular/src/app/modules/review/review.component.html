@@ -34,7 +34,7 @@
         <table class="table table-bordered table-striped">
           <thead>
             <tr>
-              <th>{{ "#" | localize }}</th>
+              <th>{{ "STT" | localize }}</th>
               <th>{{ "Date" | localize }}</th>
               <th>{{ "Actions" | localize }}</th>
             </tr>
@@ -42,7 +42,7 @@
           <tbody>
             <tr *ngFor="let item of reviewList; let i = index">
               <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1">{{ i + 1 }}</td>
-              <td class="time col-lg-8 col-md-8 col-sm-8 col-xs-8">
+              <td class="time col-lg-4 col-md-4 col-sm-6 col-xs-6">
                 <div (click)="viewReviewDetail(item)">
                   <span *ngIf="item.isActive == true" style="padding-left: 66px">{{ item.month }} - {{ item.year
                     }}</span>

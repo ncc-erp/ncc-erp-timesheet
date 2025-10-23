@@ -19,7 +19,7 @@
       </div>
       <div class="body table-responsive">
         <div class="customer-header-menu">
-          <div>
+          <div class="btn-wrapper">
             <button *ngIf="permission.isGranted(ADD_CLIENT)" mat-raised-button name="createBtn" color="primary" class="pull-left btn-new-client"
               (click)="createCustomer()">
               <mat-icon>add</mat-icon>New Client
@@ -33,7 +33,6 @@
               <i class="icon-32 material-icons" matPrefix>search</i>
             </mat-form-field>
           </div>
-
         </div>
         <div class="customer-table-wrapper">
           <table class="table table-hover table-striped" [busy]="isTableLoading">

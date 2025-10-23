@@ -1,5 +1,5 @@
 .customer-wrapper .customer-table-column-action-label {
-    text-align: right;
+    text-align: center;
 }
 
 .custom-dialog-container {
@@ -7,10 +7,26 @@
     background-color: aqua;
 }
 
-.customer-wrapper .customer-header-menu{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.customer-wrapper .customer-header-menu {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.customer-wrapper .customer-header-menu .btn-wrapper {
+  display: flex;
+  align-items: stretch; 
+}
+
+.customer-wrapper .btn-new-client {
+  height: 100%; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  margin: 0; 
 }
 
 .customer-wrapper .customer-header-menu .customer-header-search-wrapper{
@@ -22,7 +38,7 @@
 .customer-wrapper .customer-table-column-action{
     display: flex;
     gap: 10px;
-    justify-content: end;
+    justify-content: center;
 }
 .customer-wrapper .customer-table-column-action_response{
     display: none;
@@ -30,10 +46,6 @@
 ::ng-deep .customer-wrapper .customer-header-menu .customer-header-search-wrapper .mat-form-field-appearance-outline .mat-form-field-wrapper{
     padding: 0px !important;
     margin: 0px !important;
-}
-
-.btn-new-client {
-    margin: 12px 0;
 }
 
 @media screen and (max-width: 600px) { 
@@ -63,6 +75,7 @@
 
     .customer-wrapper .customer-table-column-action_response{
         display: flex;
+        justify-content: center;
     }
 
     .customer-table-column-action .customer-table-action-label{
@@ -89,10 +102,11 @@
     .customer-table-column-action {
         display: flex;
         gap: 10px;
+        justify-content: center;
     }
 
     .customer-wrapper .customer-table-column-action-label {
-        text-align: left;
+        text-align: center;
     }
 
     .customer-table-wrapper {

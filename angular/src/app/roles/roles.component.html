@@ -21,8 +21,9 @@
         <!--query start-->
         <div class="clearfix">
           <form>
-            <mat-form-field>
-              <input matInput placeholder="search by name" [(ngModel)]="keyword" name="keyword">
+            <mat-form-field appearance="outline">
+              <mat-label>Search by name</mat-label>
+              <input matInput placeholder="Enter name..." [(ngModel)]="keyword" name="keyword">
             </mat-form-field>
 
             <button mat-raised-button color="primary" (click)="getDataPage(1)" name="searchText">{{ 'Search' | localize }}</button>
@@ -84,7 +85,7 @@
             (pageChange)="getDataPage($event)" id="server">
           </abp-pagination-controls>
         </div>
-        <button *ngIf="permission.isGranted(ADD_ROLE)" mat-mini-fab color="primary" class="pull-right"
+        <button *ngIf="permission.isGranted(ADD_ROLE)" mat-fab color="primary" class="pull-right" 
           (click)="createRole()" name="createBtn">
           <mat-icon>add</mat-icon>
         </button>

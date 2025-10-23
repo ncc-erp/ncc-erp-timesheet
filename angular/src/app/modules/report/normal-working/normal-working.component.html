@@ -61,7 +61,7 @@
             </div>
             <div style="padding-top: 20px;">
                 <div class="row" style="margin: 0; padding: 0px 5px;">
-                    <mat-form-field class="col-sm-2 col-lg-1" appearance="outline">
+                    <mat-form-field class="pr-0 col-lg-1" appearance="outline">
                         <mat-label>User Type</mat-label>
                         <mat-select name="userType" [(value)]='userType' (selectionChange)='searchOrFilter()'>
                             <mat-option [value]='-1'>All</mat-option>
@@ -70,7 +70,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field class="col-sm-2 col-lg-1" appearance="outline">
+                    <mat-form-field class="pr-0 col-sm-2 col-lg-1" appearance="outline">
                         <mat-label>Branch</mat-label>
                         <mat-select name="branchId" [(value)]="branchId" (selectionChange)="searchOrFilter()">
                             <mat-option>
@@ -84,7 +84,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field class="col-sm-4 col-lg-2" appearance="outline">
+                    <mat-form-field class="pr-0 col-sm-4 col-lg-2" appearance="outline">
                         <mat-label>Project</mat-label>
                         <mat-select name="projectId" [(value)]="projectId" (selectionChange)="searchOrFilter()">
                             <mat-option>
@@ -97,7 +97,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field class="col-sm-2 col-lg-1" appearance="outline">
+                    <mat-form-field class="pr-0 col-sm-2 col-lg-1" appearance="outline">
                         <mat-label>Check In</mat-label>
                         <mat-select name="checkIn" [(value)]='checkInFilter' (selectionChange)='searchOrFilter()'>
                             <mat-option *ngFor="let item of checkInFilterList" [value]='APP_CONSTANT.CheckInFilter[item]'>
@@ -105,7 +105,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field class="col-sm-2 col-lg-2" appearance="outline">
+                    <mat-form-field class="pr-0 col-sm-2 col-lg-2" appearance="outline">
                         <mat-label>Timesheet</mat-label>
                         <mat-select name="timesheet" [(value)]='tsStatusFilter' (selectionChange)='searchOrFilter()'>
                             <mat-option *ngFor="let item of tsStatusFilterList" [value]='APP_CONSTANT.TsStatusFilter[item]'>
@@ -113,7 +113,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field class="col-sm-4 col-lg-2" appearance="outline">
+                    <mat-form-field class="pr-0 col-sm-4 col-lg-2" appearance="outline">
                         <mat-label>User Status</mat-label>
                         <mat-select name="userStatus" [(value)]='userStatus' (selectionChange)='searchOrFilter()'>
                             <mat-option *ngFor="let item of userStatusList" [value]='APP_CONSTANT.UserStatusFilter[item]'>
@@ -121,7 +121,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field class="col-sm-6 col-lg-2" appearance="outline">
+                    <mat-form-field class="pr-0 col-sm-6 col-lg-2" appearance="outline">
                         <mat-icon style="color: #9E9E9E" matPrefix>search</mat-icon>
                         <mat-label>Search by name, surname, email, username</mat-label>
                         <input name="searchText" matInput [(ngModel)]="searchText" (keyup.enter)="searchOrFilter()">
