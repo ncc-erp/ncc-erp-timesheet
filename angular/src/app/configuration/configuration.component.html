@@ -1063,8 +1063,10 @@
             <mat-expansion-panel-header (click)="isShowOfficeWorkingReportSetting =!isShowOfficeWorkingReportSetting"
               class="panel-header">
               <mat-panel-title>
-                <p class="title">{{"Office Working Report Setting"}}</p>
-                <mat-icon class="special-icon" matTooltip="List employees in specific offices sorted by Total Actual Working Time for Last Week and Last Month">help</mat-icon>
+                <div class = "special-title">
+                  <p class="title">{{"Office Working Report Setting"}}</p>
+                  <mat-icon class="special-icon" matTooltip="List employees in specific offices sorted by Total Actual Working Time for Last Week and Last Month">help</mat-icon>
+                </div>
                 <div *ngIf="isShowOfficeWorkingReportSetting" class="edit-save">
                   <button *ngIf="!isEditOfficeWorkingReportSetting" large mat-raised-button color="primary"
                     (click)="editOfficeWorkingReportSetting();$event.stopPropagation()">
@@ -1139,16 +1141,36 @@
                           matTooltip="Select branches for filtering report data (e.g., HN1, HN2, SG1, etc.)">help</mat-icon>
                       </div>
                       <mat-select multiple [(ngModel)]="selectedOfficeWorkingBranches" name="officeBranchCodes"
-                        [disabled]="!isEditOfficeWorkingReportSetting">
+                        [disabled]="!isEditOfficeWorkingReportSetting" (openedChange)="onOfficeWorkingDropdownClosed($event)">
+                        
+                        <mat-form-field class="search-field" (click)="$event.stopPropagation()">
+                          <label>Search branch</label>
+                          <input matInput
+                                [(ngModel)]="officeWorkingBranchSearch"
+                                (ngModelChange)="filterOfficeWorkingBranches()"
+                                (keydown)="$event.stopPropagation()"
+                                autocomplete="off"
+                                name="officeWorkingBranchSearchInput" />
+                        </mat-form-field>
+
+                        <mat-divider></mat-divider>
+                        
                         <div class="select-all-option">
                           <mat-option [value]="-1" (click)="toggleAllOfficeWorkingBranches()">
                             <strong>{{ isAllOfficeWorkingBranchesSelected ? 'Deselect All' : 'Select All' }}</strong>
                           </mat-option>
                         </div>
+                        
                         <mat-divider></mat-divider>
-                        <mat-option *ngFor="let code of branchCodes" [value]="code">
+                        
+                        <mat-option *ngFor="let code of filteredOfficeWorkingBranchCodes" [value]="code">
                           {{code}}
                         </mat-option>
+
+                        <div class="data-notfound" *ngIf="filteredOfficeWorkingBranchCodes.length === 0" disabled>
+                          <em>No branches found</em>
+                        </div>
+                        
                       </mat-select>
                     </mat-form-field>
                   </div>
@@ -1179,8 +1201,10 @@
           <mat-expansion-panel *ngIf="permission.isGranted(VIEW_BOT_REPORT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowBotReportSetting">
             <mat-expansion-panel-header (click)="isShowBotReportSetting = !isShowBotReportSetting" class="panel-header">
               <mat-panel-title>
-                <p class="title">{{"Project Report Setting"}}</p>
-                <mat-icon class="special-icon" matTooltip="List all projects with members belonging to specific offices, sorted in descending order of total timelog">help</mat-icon>
+                <div class="special-title">
+                  <p class="title">{{"Project Report Setting"}}</p>
+                  <mat-icon class="special-icon" matTooltip="List all projects with members belonging to specific offices, sorted in descending order of total timelog">help</mat-icon>
+                </div>
                 <div *ngIf="isShowBotReportSetting" class="edit-save">
                   <button *ngIf="!isEditBotReportSetting" large mat-raised-button color="primary"
                     (click)="editBotReportSetting();$event.stopPropagation()">
@@ -1271,16 +1295,29 @@
                           matTooltip="Select branches for filtering report data (e.g., HN1, HN2, SG1, etc.)">help</mat-icon>
                       </div>
                       <mat-select multiple [(ngModel)]="selectedBranches" name="branchCodes"
-                        [disabled]="!isEditBotReportSetting">
+                        [disabled]="!isEditBotReportSetting" (openedChange)="onBranchesDropdownClosed($event)">
+                        <mat-form-field class="search-field" (click)="$event.stopPropagation()">
+                          <label>Search Branch</label>
+                          <input matInput 
+                                [(ngModel)]="branchSearch" 
+                                (ngModelChange)="filterBranches()"
+                                (keydown)="$event.stopPropagation()"
+                                autocomplete="off" 
+                                name="branchSearchInput" />
+                        </mat-form-field> 
                         <div class="select-all-option">
                           <mat-option [value]="-1" (click)="toggleAllBranches()">
                             <strong>{{ isAllBranchesSelected ? 'Deselect All' : 'Select All' }}</strong>
                           </mat-option>
                         </div>
                         <mat-divider></mat-divider>
-                        <mat-option *ngFor="let code of branchCodes" [value]="code">
+                        <mat-option *ngFor="let code of filteredBranchCodes" [value]="code">
                           {{code}}
                         </mat-option>
+
+                        <div class="data-notfound" *ngIf="filteredBranchCodes.length === 0" disabled>
+                          <em>No branches found</em>
+                        </div>
                       </mat-select>
                     </mat-form-field>
                   </div>
@@ -1307,17 +1344,33 @@
                           help
                         </mat-icon>
                       </div>
-                      <mat-select multiple [disabled]="!isEditBotReportSetting" [(ngModel)]="selectedProjects"
-                        name="selectedProjects">
+                      <mat-select multiple [disabled]="!isEditBotReportSetting" [(ngModel)]="selectedProjects" (ngModelChange)="filterProjects()" name="selectedProjects" (openedChange)="onProjectsDropdownClosed($event)">
+                        <mat-form-field class="search-field" (click)="$event.stopPropagation()">
+                          <label>Search Project</label>
+                          <input matInput 
+                                [(ngModel)]="projectSearch" 
+                                (ngModelChange)="filterProjects()"
+                                (keydown)="$event.stopPropagation()"
+                                autocomplete="off" 
+                                name="projectSearchInput" />
+                        </mat-form-field>
+                        
                         <div class="select-all-option">
                           <mat-option [value]="-1" (click)="toggleAllProjects()">
                             <strong>{{ isAllProjectsSelected ? 'Deselect All' : 'Select All' }}</strong>
                           </mat-option>
                         </div>
+                      
                         <mat-divider></mat-divider>
-                        <mat-option *ngFor="let project of projects" [value]="project.id">
+                        
+                        <mat-option *ngFor="let project of filteredProjects" [value]="project.id">
                           {{project.name}} ({{project.code}})
                         </mat-option>
+                        
+                        <div class="data-notfound" *ngIf="filteredProjects.length === 0" disabled>
+                          <em>No projects found</em>
+                        </div>
+                        
                       </mat-select>
                     </mat-form-field>
                   </div>
@@ -1330,8 +1383,10 @@
           <mat-expansion-panel *ngIf="permission.isGranted(VIEW_ANOMALIES_REPORT_SETTING)" style="margin-bottom: 10px;" [expanded]="isShowAnomaliesReportSetting">
             <mat-expansion-panel-header (click)="isShowAnomaliesReportSetting = !isShowAnomaliesReportSetting" class="panel-header">
               <mat-panel-title>
-                <p class="title">{{"Anomalies Report Setting"}}</p>
-                <mat-icon class="special-icon" matTooltip="Include anomalies for specific offices, including Unplanned Absences, Unapproved Short Working Hours and Missing Tracker Time for Approved WFH">help</mat-icon>
+                <div class="special-title">
+                  <p class="title">{{"Anomalies Report Setting"}}</p>
+                  <mat-icon class="special-icon" matTooltip="Include anomalies for specific offices, including Unplanned Absences, Unapproved Short Working Hours and Missing Tracker Time for Approved WFH">help</mat-icon>
+                </div>
                 <div *ngIf="isShowAnomaliesReportSetting" class="edit-save">
                   <button *ngIf="!isEditAnomaliesReportSetting" large mat-raised-button color="primary" (click)="editAnomaliesReportSetting();$event.stopPropagation()">
                     <mat-icon>edit</mat-icon>Edit
@@ -1410,16 +1465,33 @@
                         <mat-label>Select Branches</mat-label>
                         <mat-icon class="special-icon" matTooltip="Select branches for filtering anomalies report data (e.g., HN1, HN2, SG1, etc.)">help</mat-icon>
                       </div>
-                      <mat-select multiple [(ngModel)]="selectedAnomaliesBranches" name="anomaliesBranchCodes" [disabled]="!isEditAnomaliesReportSetting">
+                      <mat-select multiple [(ngModel)]="selectedAnomaliesBranches" name="anomaliesBranchCodes" [disabled]="!isEditAnomaliesReportSetting" (openedChange)="onAnomaliesBranchesDropdownClosed($event)">
+                        <mat-form-field class="search-field">
+                          <label>Search branch</label>
+                            <input matInput 
+                              [(ngModel)]="anomaliesBranchSearch"
+                              name="anomaliesBranchSearchInput"
+                              (ngModelChange)="filterAnomaliesBranches()"
+                              (click)="$event.stopPropagation()"
+                              (keydown)="$event.stopPropagation()"
+                              autocomplete="off" />
+                        </mat-form-field>
+
                         <div class="select-all-option">
                           <mat-option [value]="-1" (click)="toggleAllAnomaliesBranches()">
                             <strong>{{ isAllAnomaliesBranchesSelected ? 'Deselect All' : 'Select All' }}</strong>
                           </mat-option>
                         </div>
+                        
                         <mat-divider></mat-divider>
-                        <mat-option *ngFor="let code of branchCodes" [value]="code">
+                        
+                        <mat-option *ngFor="let code of filteredAnomaliesBranchCodes" [value]="code">
                           {{code}}
                         </mat-option>
+                        
+                        <div class="data-notfound" *ngIf="filteredAnomaliesBranchCodes.length === 0" disabled>
+                          <em>No branches found</em>
+                        </div>
                       </mat-select>
                     </mat-form-field>
                   </div>
