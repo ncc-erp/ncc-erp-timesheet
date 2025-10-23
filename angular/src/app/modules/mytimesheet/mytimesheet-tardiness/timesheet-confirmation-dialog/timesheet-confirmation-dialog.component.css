@@ -246,6 +246,9 @@
   min-height: 36px; 
   position: relative;
   padding: 2px 4px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .cal-month-view .cal-day-number {
@@ -273,6 +276,17 @@
 
 .cal-month-view .cal-cell-top { height: 100%; }
 .cal-month-view .cal-events { display: none !important; }
+
+.working-hours {
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: auto;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 3px;
+  padding: 1px 3px;
+  margin-bottom: 2px;
+}
 
 .timesheet-status-indicator {
   display: block;

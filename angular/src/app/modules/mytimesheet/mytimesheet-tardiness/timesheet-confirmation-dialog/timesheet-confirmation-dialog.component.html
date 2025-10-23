@@ -116,6 +116,9 @@
         <span class="cal-day-number">
           {{ day.date | calendarDate:(view + 'ViewDayNumber') : locale }}
         </span>
+        <div *ngIf="day.events && day.events.length > 0 && day.events[0].meta && day.events[0].meta.totalWorkingHours" class="working-hours">
+          {{ day.events[0].meta.totalWorkingHours }}h
+        </div>
       </div>
     </ng-template>
     <div class="calendar-legend">

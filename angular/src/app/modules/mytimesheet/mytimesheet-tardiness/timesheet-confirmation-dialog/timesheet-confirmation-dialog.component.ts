@@ -304,12 +304,20 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
         const timesheets = groupedByDate[dateStr];
         const date = moment(dateStr).toDate();
 
+        const totalWorkingTime = timesheets.reduce((total, ts) => {
+          return total + (ts.workingTime || 0);
+        }, 0);
+
+        const totalWorkingHours = (totalWorkingTime / 60).toFixed(1);
+
         this.events.push({
           start: date,
           end: date,
           title: `${timesheets.length} timesheet(s)`,
           meta: {
-            timesheets: timesheets
+            timesheets: timesheets,
+            totalWorkingTime: totalWorkingTime,
+            totalWorkingHours: totalWorkingHours
           }
         });
       });
