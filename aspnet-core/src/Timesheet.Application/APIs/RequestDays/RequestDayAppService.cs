@@ -551,10 +551,10 @@ namespace Timesheet.APIs.RequestDays
             var mapDateAtToRequestCount = new Dictionary<DateTime, int>();
 
             var today = DateTime.Now.Date;
-            var currentWeekStart = DateTimeUtils.FirstDayOfWeek(today);
-            var nextWeekStart = currentWeekStart.AddDays(7);
-            var nextWeekEnd = nextWeekStart.AddDays(4);
-            var saturdayThisWeek = currentWeekStart.AddDays(5);
+            var mondayThisWeek = DateTimeUtils.FirstDayOfWeek(today);
+            var mondayNextWeek = mondayThisWeek.AddDays(7);
+            var fridayNextWeek = mondayNextWeek.AddDays(4);
+            var saturdayThisWeek = mondayThisWeek.AddDays(5);
 
             foreach (var abs in input.Absences)
             {
@@ -609,13 +609,13 @@ namespace Timesheet.APIs.RequestDays
 
                 if (input.Type == RequestType.Remote)
                 {
-                    if (abs.DateAt.Date >= nextWeekStart && abs.DateAt.Date <= nextWeekEnd && today < saturdayThisWeek)
+                    if (abs.DateAt.Date >= mondayNextWeek && abs.DateAt.Date <= fridayNextWeek && today < saturdayThisWeek)
                     {
-                        throw new UserFriendlyException($"You can only submit Remote requests for the next week (from {nextWeekStart:dd/MM/yyyy} to {nextWeekEnd:dd/MM/yyyy}) starting from Saturday ({saturdayThisWeek:dd/MM/yyyy}).");
+                        throw new UserFriendlyException($"You can only submit Remote requests for the next week (from {mondayNextWeek:dd/MM/yyyy} to {fridayNextWeek:dd/MM/yyyy}) starting from Saturday ({saturdayThisWeek:dd/MM/yyyy}).");
                     }
 
-                    var requestMonday = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
-                    var previousMonday = requestMonday.AddDays(-7);
+                    var startOfWeekContainRequest = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
+                    var previousMonday = startOfWeekContainRequest.AddDays(-7);
                     var previousFriday = previousMonday.AddDays(4);
                     int standardWorkingDays = 5;
                     var absenceDaysLastWeek = WorkScope.GetAll<AbsenceDayRequest>()
