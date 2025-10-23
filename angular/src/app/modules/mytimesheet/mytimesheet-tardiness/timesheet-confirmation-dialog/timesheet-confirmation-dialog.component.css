@@ -221,11 +221,6 @@
   overflow-x: hidden;
 }
 
-.calendar-container::-webkit-scrollbar {
-  width: 0px;
-  height: 0px;
-}
-
 .calendar-scale {
   display: inline-block;        
   transform: scale(0.97);
@@ -274,7 +269,6 @@
   width: 14.2857%;
 }
 
-.cal-month-view .cal-cell-top { height: 100%; }
 .cal-month-view .cal-events { display: none !important; }
 
 .working-hours {
@@ -339,11 +333,5 @@
   background-color: #ff0000 !important; 
 }
 
-.cal-month-view .cal-event {
-  height: 14px;
-  line-height: 14px;
-  font-size: 10px;
-}
-.cal-month-view .cal-event-title { display: none; }
 .cal-month-view .cal-badge { display: none !important; }
 .cal-month-view .cal-day-badge { display: none !important; }

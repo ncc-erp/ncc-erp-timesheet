@@ -128,9 +128,6 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     this.loadTimesheetData();
   }
 
-  onClose(): void {
-    this.dialogRef.close();
-  }
 
   markAsPaid(): void {
     const dialogRef = this.dialog.open(TransactionHashDialogComponent, {
@@ -308,7 +305,8 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
           return total + (ts.workingTime || 0);
         }, 0);
 
-        const totalWorkingHours = (totalWorkingTime / 60).toFixed(1);
+        const rawHours = totalWorkingTime / 60;
+        const totalWorkingHours = Number.isInteger(rawHours) ? Math.floor(rawHours).toString() : rawHours.toFixed(1);
 
         this.events.push({
           start: date,
@@ -327,24 +325,6 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     } catch (error) {
       console.error('Error generating calendar events:', error);
       this.isLoadingCalendarData = false;
-    }
-  }
-  
-  dayClicked(event: any): void {
-    const { date, events } = event;
-    if (events && events.length > 0 && events[0].meta && events[0].meta.timesheets) {
-      const timesheets = events[0].meta.timesheets;
-      console.log('Timesheets for this day:', timesheets);
-    }
-  }
-  
-  getStatusClass(status: number): string {
-    if (status === 1) { 
-      return 'day-off-state-pending';
-    } else if (status === 2) {
-      return 'day-off-state-approved';
-    } else { 
-      return 'day-off-state-reject';
     }
   }
 
