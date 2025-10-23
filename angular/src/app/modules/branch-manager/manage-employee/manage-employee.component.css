@@ -124,6 +124,90 @@
         width: 800px;
     }
 }
+.search-filter-container {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.search-row > div {
+  margin-bottom: 0 !important;
+}
+
+.search-field {
+  width: 100%;
+  min-height: 41px;
+  margin-bottom: 0 !important;
+}
+
+::ng-deep .search-field .mat-form-field-wrapper {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+::ng-deep .search-field .mat-form-field-flex {
+  align-items: center;
+  height: 40px;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  height: 100%;
+  align-items: center;
+}
+
+.btn-action {
+  flex: 1;
+  height: 40px;
+  min-width: 70px;
+}
+
+.filter-row {
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-row > div {
+  margin-bottom: 0 !important;
+}
+
+.filter-row .mat-form-field {
+  margin-bottom: 0 !important;
+    width: 100%;
+}
+
+::ng-deep .filter-row .mat-form-field-wrapper {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+::ng-deep .app-date-filter {
+  display: block;
+  width: 100%;
+}
+
+@media (max-width: 991px) {
+  .search-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .search-row > div {
+    width: 100%;
+  }
+}
 
 
+.pr-0{
+  padding-right: 0px;
+}
 
+::ng-deep app-date-filter .col-lg-4{
+  padding-right: 0px !important;
+}

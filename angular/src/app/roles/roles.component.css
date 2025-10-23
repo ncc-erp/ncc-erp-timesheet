@@ -1,0 +1,29 @@
+mat-form-field {
+  padding: 10px;
+}
+.clearfix form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 8px;
+}
+
+.clearfix form mat-form-field {
+    flex: 0 1 300px;
+    margin: 0;
+}
+
+::ng-deep .clearfix form .mat-form-field-wrapper {
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+}
+
+.clearfix form button {
+    height: 48px; 
+    width: 100px;}
+    
+.pull-right{
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+}

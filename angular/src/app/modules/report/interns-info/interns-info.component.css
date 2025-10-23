@@ -98,6 +98,7 @@ table thead th {
   padding: 0px 15px;
   display: flex;
   justify-content: space-between;
+  width: 100%;
 }
 .report .item{
   width: calc(25% - 25px);
@@ -109,6 +110,8 @@ table thead th {
 
 .report .report-left{
   justify-content: left;
+  width: 100vw;
+  margin-bottom: 15px;
 }
 
 .report .report-right{
@@ -219,11 +222,10 @@ margin-top: 7px;
   margin-left: 14px;
 }
 .button-filter{
-  height: 55px;
   display: flex;
   align-items: center;
+  justify-content: center;
   float: right;
-  margin-top: 6px;
 }
 ::ng-deep #intern-info .row .mat-form-field-infix{
   padding: 1em 0!important;
@@ -255,4 +257,7 @@ margin-top: 7px;
   .report {
     padding: 0;
   }
+}
+::ng-deep .select-row {
+  padding: 0 !important; 
 }

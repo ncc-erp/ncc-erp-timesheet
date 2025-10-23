@@ -19,29 +19,37 @@
       </div>
 
       <div class="body">
-        <div class="row clearfix">
-          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-            <button name="createBtn" *ngIf="permission.isGranted(ADD)" mat-raised-button color="primary" class="pull-left"
-              (click)="create()">
+        <div class="position-header-menu">
+          <div class="position-header-button-wrapper">
+            <button name="createBtn" 
+                    *ngIf="permission.isGranted(ADD)" 
+                    mat-raised-button 
+                    color="primary" 
+                    class="pull-left btn-new-position"
+                    (click)="create()">
               <mat-icon>add</mat-icon>New Position
             </button>
           </div>
 
-          <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 pull-right">
-            <mat-form-field appearance="outline">
+          <div class="position-header-search-wrapper">
+            <mat-form-field appearance="outline" class="w-100">
               <mat-label>Search by name, short name, code</mat-label>
-              <input matInput [(ngModel)]="searchText" name="searchText" placeholder="Search by name, short name, code"
-                (keyup.enter)="searchOrFilter()" type="text" maxlength="128">
+              <input matInput 
+                    [(ngModel)]="searchText" 
+                    name="searchText" 
+                    placeholder="Search by name, short name, code"
+                    (keyup.enter)="searchOrFilter()" 
+                    type="text" 
+                    maxlength="128">
               <i class="icon-32 material-icons" matPrefix>search</i>
             </mat-form-field>
           </div>
-
         </div>
         <div class="table-responsive" style="border: 0;">
           <table class="table table-hover table-striped">
             <thead class="bg-light">
               <tr>
-                <th class="order" style="text-align: center;">#</th>
+                <th class="order" style="text-align: center;">STT</th>
                 <th>Name</th>
                 <th>Short Name</th>
                 <th>Code</th>

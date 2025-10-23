@@ -1,27 +1,111 @@
+/* Header menu */
+.project-member-header-menu {
+  display: flex;
+  justify-content: space-between;
+  gap: 320px;
+  align-items: stretch;
+  margin-bottom: 20px;
+  padding: 20px;
+  flex-wrap: wrap;
+}
+
+/* Button wrapper */
+.project-member-button-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+
+/* Button style */
+.btn-new-project-member {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 20px;
+}
+
+/* Filters wrapper */
+.project-member-filters {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+/* Date wrapper */
+.project-member-date-wrapper {
+  flex: 0 0 200px;
+  display: flex;
+}
+
+/* Project wrapper */
+.project-member-project-wrapper {
+  flex: 0 0 200px;
+  display: flex;
+}
+
+/* Search wrapper */
+.project-member-search-wrapper {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+}
+
+/* Remove mat-form-field padding/margin */
+::ng-deep .project-member-header-menu .mat-form-field-wrapper {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .action-wrapper {
     display: none
 }
 
-.pd-20 {
-    padding: 20px;
+.full-view {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
 }
 
 @media screen and (max-width: 768px) {
+    /* Header menu responsive */
+    .project-member-header-menu {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .project-member-button-wrapper {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .project-member-filters {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .project-member-date-wrapper,
+    .project-member-project-wrapper,
+    .project-member-search-wrapper {
+        flex: 1;
+        width: 100%;
+        max-width: 100%;
+    }
+
     .action-wrapper {
-        display: flex;
-        flex-flow: row-reverse;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
     }
 
     .full-view {
         display: none;
     }
-
-    .mb-20 {
-        margin-bottom: 20px;
-    }
 }
-
-
 
 .card .header .header-dropdown {
     top: 15px;
