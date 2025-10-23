@@ -1330,6 +1330,14 @@
                     </mat-form-field>
                   </div>
 
+                  <div class="col-md-6" style="max-width: 440px;">
+                    <mat-form-field>
+                      <span class="special-label">Minute *</span>
+                      <mat-icon class="special-icon" matTooltip="Minute to send Bot Report notification (0-59)">help</mat-icon>
+                      <input type="number" matInput name="botMinute" [(ngModel)]="botReportSetting.minute" required [disabled]="!isEditBotReportSetting" min="0" max="59" />
+                    </mat-form-field>
+                  </div>
+
                   <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
                       <div class="special-title">
