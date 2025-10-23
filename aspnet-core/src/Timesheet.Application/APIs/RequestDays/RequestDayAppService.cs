@@ -609,7 +609,7 @@ namespace Timesheet.APIs.RequestDays
 
                 if (input.Type == RequestType.Remote)
                 {
-                    if (abs.DateAt.Date >= mondayNextWeek && abs.DateAt.Date <= fridayNextWeek && today < saturdayThisWeek)
+                    if (abs.DateAt.Date >= mondayNextWeek && (abs.DateAt.Date > fridayNextWeek || today < saturdayThisWeek))
                     {
                         throw new UserFriendlyException($"You can only submit Remote requests for the next week (from {mondayNextWeek:dd/MM/yyyy} to {fridayNextWeek:dd/MM/yyyy}) starting from Saturday ({saturdayThisWeek:dd/MM/yyyy}).");
                     }
