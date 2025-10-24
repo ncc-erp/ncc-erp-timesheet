@@ -333,6 +333,10 @@
   display: flex;
 }
 
+.filter-date .item .d-flex.align-items-center.justify-content-between {
+  height: 30px;
+}
+
 @media screen and (max-width: 600px) {
     .view-mobile {
       display: block;
@@ -362,6 +366,9 @@
     .filter-date {
       flex-direction: column;
       gap: 12px;
+    }
+    .filter-date .item .d-flex.align-items-center.justify-content-between {
+      height: 30px;
     }
     .header-filter .header .filter-date .item {
       margin-left: 0;

@@ -1,36 +1,18 @@
 import { Component, OnInit, Inject, Injector } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialog, MatSnackBar } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialog, MatSnackBar } from '@angular/material';
 import * as moment from 'moment';
 import { APP_CONSTANT } from '@app/constant/api.constants';
 import { UserPunishmentPaidService, UserPunishmentPaidDto } from '@app/service/api/user-punishment-paid.service';
 import { TransactionHashDialogComponent } from '../transaction-hash-dialog/transaction-hash-dialog.component';
 import { CalendarEvent, CalendarView } from 'angular-calendar';
-import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
-import { MomentDateAdapter } from '@angular/material-moment-adapter';
 import { Subject } from 'rxjs';
 import { MyTimesheetService } from '@app/service/api/mytimesheet.service';
 import { AppComponentBase } from '@shared/app-component-base';
 
-export const MY_FORMATS = {
-  parse: {
-    dateInput: 'LL',
-  },
-  display: {
-    dateInput: 'YYYY-MM-DD',
-    monthYearLabel: 'MMM YYYY',
-    dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'MMMM YYYY',
-  },
-};
-
 @Component({
   selector: 'app-timesheet-confirmation-dialog',
   templateUrl: './timesheet-confirmation-dialog.component.html',
-  styleUrls: ['./timesheet-confirmation-dialog.component.css'],
-  providers: [
-    { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE] },
-    { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS },
-  ],
+  styleUrls: ['./timesheet-confirmation-dialog.component.css']
 })
 export class TimesheetConfirmationDialogComponent extends AppComponentBase implements OnInit {
   totalErrors: number = 0;
@@ -55,7 +37,6 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
 
   constructor(
     injector: Injector,
-    public dialogRef: MatDialogRef<TimesheetConfirmationDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private userPunishmentPaidService: UserPunishmentPaidService,
     private mytimesheetService: MyTimesheetService,
@@ -70,7 +51,6 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       const hasPunishment = item.moneyPunish > 0;
       return hasPunishment;
     });
-
     
     const groupedByDateAndType = {};
     
@@ -127,7 +107,6 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     this.loadPunishmentPaidData();
     this.loadTimesheetData();
   }
-
 
   markAsPaid(): void {
     const dialogRef = this.dialog.open(TransactionHashDialogComponent, {
@@ -301,21 +280,12 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
         const timesheets = groupedByDate[dateStr];
         const date = moment(dateStr).toDate();
 
-        const totalWorkingTime = timesheets.reduce((total, ts) => {
-          return total + (ts.workingTime || 0);
-        }, 0);
-
-        const rawHours = totalWorkingTime / 60;
-        const totalWorkingHours = Number.isInteger(rawHours) ? Math.floor(rawHours).toString() : rawHours.toFixed(1);
-
         this.events.push({
           start: date,
           end: date,
           title: `${timesheets.length} timesheet(s)`,
           meta: {
-            timesheets: timesheets,
-            totalWorkingTime: totalWorkingTime,
-            totalWorkingHours: totalWorkingHours
+            timesheets: timesheets
           }
         });
       });
@@ -328,14 +298,15 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     }
   }
 
-  getDayCellClass(day: any): string {
-    if (!day || !day.events || day.events.length === 0) return '';
-    const ev = day.events[0];
-    const timesheets = ev.meta && ev.meta.timesheets ? ev.meta.timesheets : [];
-    if (!timesheets.length) return '';
-    const status = timesheets[0].status;
-    if (status === 1) return 'cell-pending';
-    if (status === 2) return 'cell-approved';
-    return 'cell-rejected';
+  formatWorkingHours(minutes: number): string {
+    if (!minutes || minutes <= 0) { return '0'; }
+    const hours = minutes / 60;
+    return Number.isInteger(hours) ? Math.floor(hours).toString() : hours.toFixed(1);
+  }
+
+  getWorkingHoursClass(status: number): string {
+    if (status === 1) { return 'wh-pending'; }
+    if (status === 2) { return 'wh-approved'; }
+    return 'wh-rejected';
   }
 }

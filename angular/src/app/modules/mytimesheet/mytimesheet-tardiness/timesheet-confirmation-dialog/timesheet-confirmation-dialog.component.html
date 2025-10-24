@@ -1,7 +1,7 @@
 <div class="timesheet-confirmation-dialog">
   <div class="dialog-header">
     <h2>Timesheet Confirmation – {{weekNumber > 0 ? 'Week ' + weekNumber : 'Month'}} ({{weekRange}})</h2>
-    <div class="currency">Currency: MNM (group)</div>
+    <div class="currency">Currency: đồng</div>
   </div>
 
   <div class="summary-section">
@@ -31,7 +31,7 @@
         <tr>
           <th>DATE</th>
           <th>ERROR TYPE</th>
-          <th>FINE (đồng)</th>
+          <th>FINE</th>
         </tr>
       </thead>
       <tbody>
@@ -106,19 +106,23 @@
           [refresh]="refresh"
           [activeDayIsOpen]="activeDayIsOpen"
           [cellTemplate]="customCellTemplate"
-          (dayClicked)="dayClicked($event)"
         >
         </mwl-calendar-month-view>
       </div>
     </div>
     <ng-template #customCellTemplate let-day="day" let-locale="locale">
-      <div class="cal-cell-top" [ngClass]="getDayCellClass(day)">
+      <div class="cal-cell-top">
         <span class="cal-day-number">
           {{ day.date | calendarDate:(view + 'ViewDayNumber') : locale }}
         </span>
-        <div *ngIf="day.events && day.events.length > 0 && day.events[0].meta && day.events[0].meta.totalWorkingHours" class="working-hours">
-          {{ day.events[0].meta.totalWorkingHours }}h
-        </div>
+        <ng-container *ngIf="day.events && day.events.length > 0 && day.events[0].meta && day.events[0].meta.timesheets">
+          <div 
+            *ngFor="let ts of day.events[0].meta.timesheets"
+            class="working-hours"
+            [ngClass]="getWorkingHoursClass(ts.status)">
+            {{ formatWorkingHours(ts.workingTime) }}h
+          </div>
+        </ng-container>
       </div>
     </ng-template>
     <div class="calendar-legend">

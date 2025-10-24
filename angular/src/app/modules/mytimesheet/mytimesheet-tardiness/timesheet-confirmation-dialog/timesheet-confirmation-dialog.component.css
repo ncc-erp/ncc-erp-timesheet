@@ -282,13 +282,19 @@
   margin-bottom: 2px;
 }
 
-.timesheet-status-indicator {
-  display: block;
-  font-size: 11px;
-  margin-top: 2px;
-  padding: 2px 5px;
-  border-radius: 3px;
-  text-align: center;
+.working-hours.wh-pending {
+  background-color: #e3bc08;
+  color: #000;
+}
+
+.working-hours.wh-approved {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.working-hours.wh-rejected {
+  background-color: #ff0000;
+  color: #fff;
 }
 
 .calendar-legend {
@@ -321,16 +327,6 @@
 
 .legend-color.other {
   background-color: #ff0000;
-}
-
-.cell-pending {
-  background-color: #e3bc08 !important;
-}
-.cell-approved {
-  background-color: #4caf50 !important;
-}
-.cell-rejected {
-  background-color: #ff0000 !important; 
 }
 
 .cal-month-view .cal-badge { display: none !important; }
