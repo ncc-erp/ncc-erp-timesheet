@@ -18,7 +18,7 @@ namespace Timesheet.APIs.UserPunishmentPaids.Dto
 
         public DateTime GetEndDate()
         {
-            return new DateTime(Year, Month, 1).AddMonths(1).AddDays(-1);
+            return GetStartDate().AddMonths(1).AddDays(-1);
         }
     }
 }

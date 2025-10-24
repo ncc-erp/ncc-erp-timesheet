@@ -30,6 +30,7 @@ namespace Timesheet.DomainServices
         private readonly string _indexerUri;
         private readonly string _donationWallet;
         private const string _serviceName = "MMNService";
+        private static readonly decimal TOKEN_DECIMAL_FACTOR = (decimal)Math.Pow(10, 6);
 
         public static string GenerateAddress(string input)
         {
@@ -107,25 +108,11 @@ namespace Timesheet.DomainServices
 
             var transactionInfo = await GetMMNTransactionsInfo(transactionHash);
 
-            var existingTransaction = await _userPunishmentPaidRepository
-                .GetAll()
-                .FirstOrDefaultAsync(x => x.TxHash == transactionHash);
-
-            if (existingTransaction != null)
-            {
-                _logger.LogWarning($"Transaction with hash {transactionHash} already exists in the database");
-                throw new UserFriendlyException($"Transaction with hash {transactionHash} has already been processed. Please use a different transaction.");
-            }
-            
             if (!decimal.TryParse(transactionInfo.Value, out decimal decimalAmount))
             {
                 _logger.LogError($"Cannot parse transaction amount: {transactionInfo.Value}");
                 return false;
             }
-                
-            int amount = (int)(decimalAmount / 1_000_000_000 * 1000);
-            
-            _logger.LogInformation($"Parsed transaction amount: {transactionInfo.Value} => {amount} VND");
 
             var transactionDate = DateTimeOffset.FromUnixTimeSeconds(transactionInfo.TransactionTimestamp).DateTime;
             if (transactionDate.Year != year || transactionDate.Month != month)
@@ -148,6 +135,18 @@ namespace Timesheet.DomainServices
                 _logger.LogError($"Transaction from_address {transactionInfo.FromAddress} does not match expected address {expectedFromAddress} for user {currentUser.MezonUserId}");
                 throw new UserFriendlyException($"Transaction must be sent from your own wallet. Please use your personal wallet to make the payment.");
             }
+
+            var existingTransaction = await _userPunishmentPaidRepository
+                .GetAll()
+                .FirstOrDefaultAsync(x => x.TxHash == transactionHash);
+
+            if (existingTransaction != null)
+            {
+                _logger.LogWarning($"Transaction with hash {transactionHash} already exists in the database");
+                throw new UserFriendlyException($"Transaction with hash {transactionHash} has already been processed. Please use a different transaction.");
+            }
+
+            int amount = (int)(decimalAmount / TOKEN_DECIMAL_FACTOR);
 
             var userPunishmentPaid = new UserPunishmentPaid
             {
