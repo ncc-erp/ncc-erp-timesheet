@@ -9,7 +9,7 @@ namespace Timesheet.APIs.UserPunishmentPaids.Dto
         public string TransactionHash { get; set; }
         
         [Required]
-        [Range(2000, 2100)]
+        [Range(2000, 5500)]
         public int Year { get; set; }
         
         [Required]
