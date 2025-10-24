@@ -3,9 +3,6 @@
    color:red;
 }
 
-.td--project {
-   padding: 0!important;
-}
 
 #btnAction > button {
    margin-top:2px;
@@ -134,7 +131,8 @@
 }
 
 .td--project {
-   padding-bottom: 10px !important;
+   padding: 10px !important;
+   padding-left: 0px !important;
    display: flex;
    white-space: break-spaces !important;
 }
@@ -143,7 +141,17 @@
    margin-left: auto;
 }
 
-.pm, .member, .pType, .pTime {
+.pm {
+  display: inline-block;
+  margin: 2px;
+  max-width: 550px;   
+  white-space: nowrap; 
+  overflow: hidden;    
+  text-overflow: ellipsis; 
+  vertical-align: middle;
+}
+
+.member, .pType, .pTime {
    display: inline-block;
    margin: 2px;
 }

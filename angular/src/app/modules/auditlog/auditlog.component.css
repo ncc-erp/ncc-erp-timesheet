@@ -11,6 +11,10 @@
     word-wrap: break-word;
 }
 
+.pr-0{
+    padding-right: 0px !important;
+}
+
 .preReview-parameters{
     padding: 10px;
     width: 100%;

@@ -53,8 +53,8 @@ namespace Timesheet.DomainServices
                 .ToListAsync();
 
             var allUsers = await _workScope.GetAll<User>()
-                .Where(u => !u.IsDeleted)
-                .Select(u => new { u.Id, u.UserName, u.BranchId, u.IsActive })
+                .Where(u => !u.IsDeleted && u.IsActive && !u.IsStopWork)
+                .Select(u => new { u.Id, u.FullName, u.BranchId, u.IsActive })
                 .ToListAsync();
 
             var allProjects = await _workScope.GetAll<Project>()
@@ -146,7 +146,7 @@ namespace Timesheet.DomainServices
                         Name = allProjects.FirstOrDefault(proj => proj.Id == p.ProjectId)?.Name ?? "Unknown Project",
                         Members = allUsers
                             .Where(u => p.UserIds.Contains(u.Id))
-                            .Select(u => u.UserName)
+                            .Select(u => u.FullName)
                             .OrderBy(name => name)
                             .ToList(),
                         TotalTimelogLW = Math.Round(p.TotalMinutesLW / 60.0, 2),
@@ -318,7 +318,7 @@ namespace Timesheet.DomainServices
             if (projectData.Any())
             {
                 var chunks = SplitIntoChunks(projectData, BATCH_SIZE);
-
+                int idx = 1;
                 for (int i = 0; i < chunks.Count; i++)
                 {
                     var chunk = chunks[i];
@@ -330,7 +330,7 @@ namespace Timesheet.DomainServices
                     foreach (var item in chunk)
                     {
                         var itemSb = new StringBuilder();
-                        itemSb.AppendLine($" Project:  {item.Project}");
+                        itemSb.AppendLine($"{idx}. Project:  {item.Project}");
                         itemSb.AppendLine($" Members:  {item.Members}");
                         itemSb.AppendLine($" Last Week:  {item.LastWeekHours}");
                         itemSb.AppendLine($" Last Month:  {item.LastMonthHours}");
@@ -340,15 +340,18 @@ namespace Timesheet.DomainServices
                         int itemStartPos = chunkSb.Length;
                         chunkSb.Append(itemText);
 
-                        int projectPos = itemText.IndexOf("Project:", 0);
+                        int projectPos = itemText.IndexOf($"{idx}. Project:", 0);
                         int membersPos = itemText.IndexOf("Members:", projectPos);
                         int lastWeekPos = itemText.IndexOf("Last Week:", membersPos);
                         int lastMonthPos = itemText.IndexOf("Last Month:", lastWeekPos);
 
-                        chunkMkList.Add(new { type = "b", s = itemStartPos + projectPos, e = itemStartPos + projectPos + "Project:".Length });
+                        chunkMkList.Add(new { type = "b", s = itemStartPos + projectPos, e = itemStartPos + projectPos + $"{idx}. Project:".Length });
+                        //chunkMkList.Add(new { type = "b", s = itemStartPos + projectPos, e = itemStartPos + projectPos + "Project:".Length });
                         chunkMkList.Add(new { type = "b", s = itemStartPos + membersPos, e = itemStartPos + membersPos + "Members:".Length });
                         chunkMkList.Add(new { type = "b", s = itemStartPos + lastWeekPos, e = itemStartPos + lastWeekPos + "Last Week:".Length });
                         chunkMkList.Add(new { type = "b", s = itemStartPos + lastMonthPos, e = itemStartPos + lastMonthPos + "Last Month:".Length });
+
+                        idx++;
                     }
 
                     var chunkMessageText = chunkSb.ToString();
