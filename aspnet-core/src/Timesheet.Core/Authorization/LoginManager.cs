@@ -108,10 +108,11 @@ namespace Ncc.Authorization
                 //check user exist by email from query_id
                 var mezonUser = JsonConvert.DeserializeObject<MezonUser>(hashData.user);
                 var user = UserManager.Users.FirstOrDefault(x => !string.IsNullOrEmpty(x.MezonUserId) && x.MezonUserId == mezonUser.mezon_user_id) ??
+                    UserManager.Users.FirstOrDefault(x => x.EmailAddress == mezonUser.email) ??
                     UserManager.Users.FirstOrDefault(x => x.EmailAddress == mezonUser.mezon_id);
                 if (user == null)
                 {
-                    Logger.Info($"Login fail with email: {mezonUser.mezon_id}");
+                   Logger.Info($"Login fail with email: {mezonUser.email ?? mezonUser.mezon_id}");
                     return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null);
                 }
                 // appToken ==> MD5
@@ -126,7 +127,7 @@ namespace Ncc.Authorization
                 }
 
                 var loginResult = await HandleAuthWithEmail(
-                    emailAddress: mezonUser.mezon_id,
+                    emailAddress: mezonUser.email ?? mezonUser.mezon_id,
                     mezonUserId: mezonUser.mezon_user_id,
                     tenancyName: hashAuthDto.TenancyName
                     );
@@ -414,7 +415,7 @@ namespace Ncc.Authorization
                 }
 
                 var loginResult = await HandleAuthWithEmail(
-                    emailAddress: userInfo.Subject,
+                    emailAddress: userInfo.Email ?? userInfo.Subject,
                     mezonUserId: userInfo.MezonUserId,
                     tenancyName: tenancyName,
                     shouldLockout: shouldLockout
