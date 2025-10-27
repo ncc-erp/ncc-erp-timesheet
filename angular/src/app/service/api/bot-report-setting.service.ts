@@ -15,7 +15,6 @@ export interface BotReportSettingDto {
   enable: boolean;
   everyday: boolean;
   hour: number;
-  minute: number;
   dayofweek: string;
   botUri: string;
   branchCodes?: string[];

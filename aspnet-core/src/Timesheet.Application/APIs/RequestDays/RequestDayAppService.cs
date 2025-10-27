@@ -520,21 +520,21 @@ namespace Timesheet.APIs.RequestDays
             var requestDateAts = input.Absences.Select(s => s.DateAt.Date);
 
             var dbRequests = (from r in WorkScope.GetAll<AbsenceDayRequest>()
-                              join d in WorkScope.GetAll<AbsenceDayDetail>()
-                                  .Where(s => s.Request.UserId == userId)
-                                  .Where(s => requestDateAts.Contains(s.DateAt.Date))
-                              on r.Id equals d.RequestId
-                              select new RequestInfoDto
-                              {
-                                  Type = r.Type,
-                                  AbsenceTime = d.AbsenceTime,
-                                  Date = d.DateAt.Date,
-                                  DateType = d.DateType,
-                                  Hour = d.Hour,
-                                  Id = d.Id,
-                                  RequestId = r.Id,
-                                  Status = r.Status
-                              }).ToList();
+                                join d in WorkScope.GetAll<AbsenceDayDetail>()
+                                    .Where(s => s.Request.UserId == userId)
+                                    .Where(s => requestDateAts.Contains(s.DateAt.Date))
+                                on r.Id equals d.RequestId
+                                select new RequestInfoDto
+                                {
+                                    Type = r.Type,
+                                    AbsenceTime = d.AbsenceTime,
+                                    Date = d.DateAt.Date,
+                                    DateType = d.DateType,
+                                    Hour = d.Hour,
+                                    Id = d.Id,
+                                    RequestId = r.Id,
+                                    Status = r.Status
+                                }).ToList();
 
             validateRequests(userId, input, dbRequests);
 
@@ -611,7 +611,7 @@ namespace Timesheet.APIs.RequestDays
                 {
                     if (abs.DateAt.Date >= mondayNextWeek && (abs.DateAt.Date > fridayNextWeek || today < saturdayThisWeek))
                     {
-                        throw new UserFriendlyException($"You can only submit Remote requests for the next week (from {mondayNextWeek:dd/MM/yyyy} to {fridayNextWeek:dd/MM/yyyy}) starting from Saturday ({saturdayThisWeek:dd/MM/yyyy}).");
+                        throw new UserFriendlyException($"You can only submit Remote requests for the next week (from {mondayNextWeek:dd/MM/yyyy} to {fridayNextWeek:dd/MM/yyyy}) starting from Saturday ({saturdayThisWeek:dd/MM/yyyy})");
                     }
 
                     var startOfWeekContainRequest = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
@@ -646,9 +646,13 @@ namespace Timesheet.APIs.RequestDays
                         mapDateAtToRequestCount.Add(monday, numberRemoteDayInWeek);
                     }
 
-                    if (numberRemoteDayInWeek > MAX_ALLOW_REMOTE_DAY - 1 || rejectRemoteDueToLowWorkingDays)
+                    if (numberRemoteDayInWeek > MAX_ALLOW_REMOTE_DAY - 1)
                     {
                         absencedayRequest.Status = RequestStatus.Rejected;
+                    }
+                    else if (rejectRemoteDueToLowWorkingDays)
+                    {
+                        throw new UserFriendlyException($"Your remote request for {abs.DateAt:dd/MM/yyyy} is rejected because you had less than 2 working days in the previous week due to {absenceDaysLastWeek} days of approved or pending off/remote requests");
                     }
                     else
                     {
