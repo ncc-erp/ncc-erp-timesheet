@@ -1114,20 +1114,13 @@
                     </mat-checkbox>
                   </div>
 
-                  <div class="col-md-6" style="max-width: 440px;">
+                  <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
-                      <span class="special-label">Hour *</span> <mat-icon class="special-icon"
-                        matTooltip="Hour to send Office Working Report notification (0-23)">help</mat-icon>
-                      <input type="number" matInput name="officeHour" [(ngModel)]="officeWorkingReportSetting.hour"
-                        required [disabled]="!isEditOfficeWorkingReportSetting" min="0" max="23" />
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-6" style="max-width: 440px;">
-                    <mat-form-field>
-                      <span class="special-label">Minute *</span> <mat-icon class="special-icon"
-                        matTooltip="Minute to send Office Working Report notification (0-59)">help</mat-icon>
-                      <input type="number" matInput name="officeMinute" [(ngModel)]="officeWorkingReportSetting.minute"
-                        required [disabled]="!isEditOfficeWorkingReportSetting" min="0" max="59" />
+                      <span class="special-label">Hour *</span>
+                      <mat-icon class="special-icon" matTooltip="Hour to send Office Working Report notification (0-23)">help</mat-icon>
+                      <input type="number" matInput name="officeHour" [(ngModel)]="officeWorkingReportSetting.hour" required
+                        [disabled]="!isEditOfficeWorkingReportSetting" min="0" max="23"
+                      />
                     </mat-form-field>
                   </div>
 
@@ -1226,18 +1219,11 @@
                     </mat-checkbox>
                   </div>
 
-                  <div class="col-md-6" style="max-width: 440px;">
+                  <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
                       <span class="special-label">Hour *</span>
                       <mat-icon class="special-icon" matTooltip="Hour to send Bot Report notification (0-23)">help</mat-icon>
                       <input type="number" matInput name="botHour" [(ngModel)]="botReportSetting.hour" required [disabled]="!isEditBotReportSetting" min="0" max="23" />
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-6" style="max-width: 440px;">
-                    <mat-form-field>
-                      <span class="special-label">Minute *</span>
-                      <mat-icon class="special-icon" matTooltip="Minute to send Bot Report notification (0-59)">help</mat-icon>
-                      <input type="number" matInput name="botMinute" [(ngModel)]="botReportSetting.minute" required [disabled]="!isEditBotReportSetting" min="0" max="59" />
                     </mat-form-field>
                   </div>
 
@@ -1264,7 +1250,7 @@
                   </div>
 
                   <div class="col-md-12" style="max-width: 880px; margin-top: 15px;">
-                    <mat-form-field style="width: 100%;">
+                    <mat-form-field>
                       <div class="label-with-icon">
                         <mat-label>Select Branches</mat-label>
                         <mat-icon class="special-icon"
@@ -1299,8 +1285,8 @@
                     </mat-form-field>
                   </div>
 
-                  <div class="col-md-12" style="margin-top: 15px;">
-                    <mat-form-field style="width: 100%;">
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
                       <div class="label-with-icon">
                         <mat-label>Select Projects (leave empty for all)</mat-label>
                         <mat-icon class="special-icon" matTooltip="Select projects to include in the project report. If none selected, all active projects will be included.">
@@ -1367,18 +1353,11 @@
                     </mat-checkbox>
                   </div>
 
-                  <div class="col-md-6" style="max-width: 440px;">
+                  <div class="col-md-12" style="max-width: 880px;">
                     <mat-form-field>
                       <span class="special-label">Hour *</span>
                       <mat-icon class="special-icon" matTooltip="Hour to send Daily Anomalies Report (0-23)">help</mat-icon>
                       <input type="number" matInput name="anomaliesHour" [(ngModel)]="anomaliesReportSetting.hour" required [disabled]="!isEditAnomaliesReportSetting" min="0" max="23" />
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-6" style="max-width: 440px;">
-                    <mat-form-field>
-                      <span class="special-label">Minute *</span>
-                      <mat-icon class="special-icon" matTooltip="Minute to send Daily Anomalies Report (0-59)">help</mat-icon>
-                      <input type="number" matInput name="anomaliesMinute" [(ngModel)]="anomaliesReportSetting.minute" required [disabled]="!isEditAnomaliesReportSetting" min="0" max="59" />
                     </mat-form-field>
                   </div>
 

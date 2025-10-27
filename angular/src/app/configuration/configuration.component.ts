@@ -221,7 +221,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditOfficeWorkingReportSetting: boolean = false;
   botReportSetting = { everyday: false, botUri: '', projectIds: [], branchCodes: [] } as BotReportSettingDto;
   anomaliesReportSetting = { hour: 0, dayofweek: 'Monday', botUri: '', branchCodes: [] } as AnomaliesReportSettingDto;
-  officeWorkingReportSetting = { enable: false, everyday: false, hour: 8, minute: 0, officeIds: '', limit: 10, mezonUrl: '' } as OfficeWorkingReportSettingDto;
+  officeWorkingReportSetting = { enable: false, everyday: false, hour: 8, officeIds: '', limit: 10, mezonUrl: '' } as OfficeWorkingReportSettingDto;
   selectedOfficeWorkingBranches: string[] = [];
   projects: ProjectDto[] = [];
   selectedProjects: number[] = [];
@@ -390,7 +390,6 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
           enable: response.result.enable,
           everyday: response.result.everyday,
           hour: response.result.hour,
-          minute: response.result.minute,
           officeIds: response.result.officeIds || '',
           limit: response.result.limit,
           mezonUrl: response.result.mezonUrl || ''
@@ -406,8 +405,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("You do not have permission to edit this setting!");
       return;
     }
-    if (this.officeWorkingReportSetting.hour < 0 || this.officeWorkingReportSetting.hour > 23 || this.officeWorkingReportSetting.minute < 0 || this.officeWorkingReportSetting.minute > 59) {
-      abp.message.error("Hour must be between 0 and 23, minute must be between 0 and 59!");
+    if (this.officeWorkingReportSetting.hour < 0 || this.officeWorkingReportSetting.hour > 23) {
+      abp.message.error("Hour must be between 0 and 23!");
       return;
     }
 
@@ -2059,8 +2058,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("You do not have permission to edit this setting!");
       return;
     }
-    if (this.botReportSetting.hour < 0 || this.botReportSetting.hour > 23 || this.botReportSetting.minute < 0 || this.botReportSetting.minute > 59) {
-      abp.message.error("Time must be valid: hour (0-23), minute (0-59)!");
+    if (this.botReportSetting.hour < 0 || this.botReportSetting.hour > 23) {
+      abp.message.error("Time must be valid: hour (0-23)!");
       return;
     }
 
@@ -2091,8 +2090,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       abp.message.error("You do not have permission to edit this setting!");
       return;
     }
-    if (this.anomaliesReportSetting.hour < 0 || this.anomaliesReportSetting.hour > 23 || this.anomaliesReportSetting.minute < 0 || this.anomaliesReportSetting.minute > 59) {
-      abp.message.error("Time must be valid: hour (0-23), minute (0-59)!");
+    if (this.anomaliesReportSetting.hour < 0 || this.anomaliesReportSetting.hour > 23) {
+      abp.message.error("Time must be valid: hour (0-23)!");
       return;
     }
     if (!this.anomaliesReportSetting.dayofweek) {

@@ -126,9 +126,6 @@ namespace Timesheet.DomainServices
                 UserPunishmentType.Tracker_50k,
                 UserPunishmentType.Tracker_100k,
                 UserPunishmentType.Tracker_200k,
-                UserPunishmentType.ReviewIntern,
-                UserPunishmentType.PMReport_20k,
-                UserPunishmentType.PMReport_50k,
             };
 
             var olds = await WorkScope.GetAll<UserPunishment>()

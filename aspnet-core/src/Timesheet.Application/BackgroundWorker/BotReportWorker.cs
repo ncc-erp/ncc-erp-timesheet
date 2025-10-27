@@ -22,7 +22,7 @@ namespace Timesheet.BackgroundWorker
         {
             _botReportDailyService = botReportDailyService;
 
-            Timer.Period = 1000 * 60;
+            Timer.Period = 1000 * 60 * 60;
         }
 
         [UnitOfWork]
@@ -44,7 +44,6 @@ namespace Timesheet.BackgroundWorker
             string enable = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportEnable);
             string everyday = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportEveryday);
             string hourStr = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtHour);
-            string minuteStr = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtMinute);
             string dayOfWeek = SettingManager.GetSettingValueForApplication(AppSettingNames.BotReportAtDayOfWeek);
 
             if (enable != "True")
@@ -52,13 +51,13 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
 
-            if (!int.TryParse(hourStr, out int configuredHour) || !int.TryParse(minuteStr, out int configuredMinute))
+            if (!int.TryParse(hourStr, out int configuredHour))
             {
                 Logger.Error("RunBotReportJob() error: Invalid hour setting.");
                 return;
             }
 
-            if (configuredHour != now.Hour || configuredMinute != now.Minute)
+            if (configuredHour != now.Hour)
             {
                 // Logger.Info($"RunBotReportJob() skipped: Current hour = {now.Hour}, Configured = {configuredHour}");
                 return;
