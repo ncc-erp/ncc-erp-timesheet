@@ -104,6 +104,9 @@
   gap: 5px;
 } */
 
+.pr-0 {
+  padding-right: 0px;
+}
 @media screen and (max-width: 445px) {
   :host ::ng-deep .body date-selector h2 {
     padding: 0 10px !important;

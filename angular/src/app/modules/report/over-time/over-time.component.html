@@ -18,7 +18,7 @@
         </ul>
       </div>
       <div class="clearfix" style="padding: 20px 5px 0px 5px" [busy] ="isLoading">
-        <div class="col-sm-2" style="padding:5px 15px 10px 15px">
+        <div class="col-sm-2" style="padding:5px 0px 10px 15px">
           <mat-form-field appearance="outline">
             <mat-label>Year</mat-label>
             <mat-select name="year" [(value)]='year' (selectionChange)="refresh()">
@@ -28,7 +28,7 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <div class="col-sm-2" style="padding:5px 15px 10px 15px">
+        <div class="col-sm-2" style="padding:5px 0px 10px 15px">
           <mat-form-field appearance="outline">
             <mat-label>Month</mat-label>
             <mat-select name="month" [(value)]='month' (selectionChange)="refresh()">
@@ -39,7 +39,7 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <div class="col-sm-4" style="padding:5px 15px 10px 15px">
+        <div class="col-sm-4" style="padding:5px 0px 10px 15px">
           <mat-form-field appearance="outline">
             <mat-label >Project</mat-label>
             <mat-select name="projectId" [(value)]="projectId" (selectionChange)="refresh()">

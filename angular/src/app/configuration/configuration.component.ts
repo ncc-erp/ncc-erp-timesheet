@@ -295,6 +295,18 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   sendMessageToPunishUserConfig: SendMessageToPunishUserConfigDto = {};
 
   manualOpenTalk = new Date().toISOString().substring(0, 10);
+  
+  branchSearch: string = '';
+  filteredBranchCodes: string[] = [];
+
+  projectSearch: string = '';
+  filteredProjects: ProjectDto[] = [];
+
+  anomaliesBranchSearch: string = '';
+  filteredAnomaliesBranchCodes: string[] = [];
+
+  officeWorkingBranchSearch: string = '';
+  filteredOfficeWorkingBranchCodes: string[] = [];
 
   constructor(
     private logTimesheetService: LogTimesheetInFutureSettingService,
@@ -372,6 +384,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getSendMessageToPunishUserConfig();
     this.getNRITVMAEConfig();
     this.getLateInternReviewSetting();
+    
+    this.filteredBranchCodes = [...this.branchCodes];
+    this.filteredAnomaliesBranchCodes = [...this.branchCodes];
+    this.filteredOfficeWorkingBranchCodes = [...this.branchCodes];
   }
   protected list(): void {
     if (this.permission.isGranted(this.VIEW_EMAIL_SETTING)) {
@@ -380,6 +396,104 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       });
     }
   }
+
+  filterBranches() {
+    const search = this.branchSearch ? this.branchSearch.toLowerCase().trim() : '';
+    
+    if (!search) {
+      this.filteredBranchCodes = [...this.branchCodes];
+    } else {
+      const matchedCodes = this.branchCodes.filter(code => 
+        code.toLowerCase().includes(search)
+      );
+      
+      const selectedButNotMatched = this.selectedBranches.filter(
+        selected => matchedCodes.indexOf(selected) === -1 && this.branchCodes.indexOf(selected) !== -1
+      );
+      
+      this.filteredBranchCodes = Array.from(new Set([...matchedCodes, ...selectedButNotMatched]));
+    }
+  }
+
+  onBranchesDropdownClosed(isOpen: boolean) {
+  if (!isOpen) {
+    this.branchSearch = '';
+    this.filteredBranchCodes = [...this.branchCodes];
+  }
+}
+
+  filterProjects() {
+    const search = this.projectSearch.toLowerCase().trim() || '';
+    
+    if (!search) {
+      this.filteredProjects = [...this.projects];
+    } else {
+      const matchedProjects = this.projects.filter(p => 
+        p.name.toLowerCase().includes(search) || 
+        p.code.toLowerCase().includes(search)
+      );
+      
+      const selectedButNotMatched = this.projects.filter(p =>
+        this.selectedProjects.indexOf(p.id) !== -1 && 
+        !matchedProjects.some(mp => mp.id === p.id)
+      );
+      
+      this.filteredProjects = [...matchedProjects, ...selectedButNotMatched];
+    }
+  }
+
+  onProjectsDropdownClosed(isOpen: boolean) {
+    if (!isOpen) {
+      this.projectSearch = '';
+      this.filteredProjects = [...this.projects];
+    }
+  }
+
+  onAnomaliesBranchesDropdownClosed(isOpen: boolean) {
+    if (!isOpen) {
+      this.anomaliesBranchSearch = '';
+      this.filteredAnomaliesBranchCodes = [...this.branchCodes];
+    }
+  }
+  
+  filterAnomaliesBranches() {
+    const search = this.anomaliesBranchSearch ? this.anomaliesBranchSearch.toLowerCase().trim() : '';
+    
+    if (!search) {
+      this.filteredAnomaliesBranchCodes = [...this.branchCodes];
+    } else {
+      const matchedCodes = this.branchCodes.filter(code => 
+        code.toLowerCase().includes(search)
+      );
+      
+      const selectedButNotMatched = this.selectedAnomaliesBranches.filter(
+        selected => matchedCodes.indexOf(selected) === -1 && this.branchCodes.indexOf(selected) !== -1
+      );
+      
+      this.filteredAnomaliesBranchCodes = Array.from(new Set([...matchedCodes, ...selectedButNotMatched]));
+    }
+  }
+
+  filterOfficeWorkingBranches() {
+    const search = this.officeWorkingBranchSearch ? this.officeWorkingBranchSearch.toLowerCase().trim() : '';
+    
+    if (!search) {
+      this.filteredOfficeWorkingBranchCodes = [...this.branchCodes];
+    } else {
+      const matchedCodes = this.branchCodes.filter(code => code.toLowerCase().includes(search));
+        const selectedButNotMatched = this.selectedOfficeWorkingBranches.filter(selected => matchedCodes.indexOf(selected) === -1 && this.branchCodes.indexOf(selected) !== -1);
+        
+        this.filteredOfficeWorkingBranchCodes = Array.from(new Set([...matchedCodes, ...selectedButNotMatched]));
+    }
+  }
+
+  onOfficeWorkingDropdownClosed(isOpen: boolean) {
+    if (!isOpen) {
+      this.officeWorkingBranchSearch = '';
+      this.filteredOfficeWorkingBranchCodes = [...this.branchCodes];
+    }
+  }
+
   editOfficeWorkingReportSetting() {
     this.isEditOfficeWorkingReportSetting = true;
   }
@@ -2023,6 +2137,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
       this.botReportSettingService.getActiveProjects().subscribe({
         next: (response: any) => {
           this.projects = response.result || [];
+          this.filteredProjects = [...this.projects];
         },
         error: (error) => {
           console.error('Error fetching projects:', error);

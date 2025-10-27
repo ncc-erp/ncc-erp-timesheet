@@ -14,7 +14,7 @@
 }
 
 .edit-save{
-    margin-left: 10px;
+    margin-left: 20px;
     margin-top: 6px;
 }
 
@@ -31,6 +31,18 @@
 .edit-save button{
     margin-right: 10px;
     margin-top: 20px;
+}
+
+::ng-deep .edit-save button .mat-button-wrapper {
+  display: flex;
+  flex-direction: row !important;
+  align-items: center; 
+  justify-content: center; 
+  gap: 6px; 
+}
+
+.edit-save button p {
+  margin: 0; 
 }
 
 .pass{
@@ -98,6 +110,9 @@ ul {
     margin-bottom: 0px;
 }
 .special-label {
+    display: inline-block;
+    align-items: center;
+    justify-content: left;
     color: rgba(0, 0, 0, .54);
     font-size: 12px;
     line-height: 24px;
@@ -108,18 +123,33 @@ ul {
     touch-action: none;
     user-select: none;
     position: relative;
-    top: 5px;
-    margin-left: 5px;
+}
+
+.special-content {
+  display: inline-flex;
+  align-items: center; 
+  gap: 4px; 
 }
 ::ng-deep .mat-tooltip {
     font-size: 12px !important;
     white-space: pre-line !important;
 }
-
 .configuration-tab-content {
+    padding-top: 30px;
     width: 100%;
     height: calc(100vh - 150px);
     overflow: auto;
+}
+
+.search-field{
+    padding: 10px  !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+}
+
+.data-notfound{
+    padding: 10px !important;
+    font-size: 1.25rem;
 }
 
 @media screen and (max-width: 600px) {
@@ -153,3 +183,58 @@ ul {
         margin-left: 0px;
     }
 }  
+
+mat-tab{
+    background:  #e0e0e0 !important; 
+}
+
+.main-content{
+    border-radius: 4px;
+}
+
+::ng-deep .main-content mat-expansion-panel{
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    background: #fff !important; 
+}
+
+.special-title {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2px;
+    padding-bottom: 5px;
+}
+
+mat-radio-group {
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+mat-radio-button {
+  transform: scale(0.9);
+}
+
+mat-radio-button .mat-radio-label-content {
+  padding-left: 4px;}
+
+
+::ng-deep .col-md-12, .col-md-6 {
+  margin-bottom: 0 !important;
+}
+
+mat-checkbox .mb-16 {
+  display: block;
+  margin-bottom: 16px !important;
+}
+
+::ng-deep .card.main-content .mat-expansion-panel-header {
+  width: 100%;
+  height: 100%;
+  padding:  12px 16px ;
+  margin: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}

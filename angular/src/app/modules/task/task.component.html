@@ -24,7 +24,7 @@
       </div>
       <div class="body table-responsive task-body" [busy]="isTableLoading">
         <div class="task-header-menu">
-          <div>
+          <div class="task-header-menu-button-wrapper">
             <button
               *ngIf="permission.isGranted(ADD_TASK)"
               mat-raised-button
@@ -57,9 +57,9 @@
         <div class="task-table-wrapper">
           <div *ngFor="let task of mapTasks; index as i">
             <div>
-              <h5>
+              <h4>
                 {{ task.name }} ({{ task.items.length }})
-              </h5>
+              </h4>
               <p *ngIf="task.name == 'Common Task'" style="font-weight: normal">
                 These tasks are automatically added to all new projects
               </p>

@@ -19,13 +19,7 @@ class PagedRolesRequestDto extends PagedRequestDto {
 @Component({
     templateUrl: './roles.component.html',
     animations: [appModuleAnimation()],
-    styles: [
-        `
-          mat-form-field {
-            padding: 10px;
-          }
-        `
-    ]
+    styleUrls: ['./roles.component.css']
 })
 export class RolesComponent extends PagedListingComponentBase<RoleDto> {
     ADD_ROLE = PERMISSIONS_CONSTANT.AddRole;

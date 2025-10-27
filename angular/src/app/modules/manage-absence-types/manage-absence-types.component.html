@@ -36,7 +36,7 @@
           <table class="table table-hover table-striped" [busy]="isTableLoading">
             <thead>
               <tr style="margin-bottom:20px">
-                <th style="text-align: left;">STT</th>
+                <th style="text-align: center;">STT</th>
                 <th style="padding-left: 20px;">Name</th>
                 <th style="text-align: center;"> Số ngày phép KHÔNG bị trừ</th>
                 <th style="text-align : center">Loại</th>
@@ -45,7 +45,7 @@
             </thead>
             <tbody>
               <tr *ngFor="let absence of absenceTypes, index as i" style="margin-bottom:20px">
-                <td style="text-align: left;" >
+                <td style="text-align : center;" >
                   {{i}}
                 </td>
                 <td align="start" >
@@ -61,9 +61,9 @@
                 </td>
                 <td class="manage-absence-types-table-column-action">
                   <button *ngIf="permission.isGranted(DELETE_LEAVE_TYPE)" mat-raised-button [name]="'deleteId-'+absence.id" (click)="deleteTask(absence)"
-                  class="btn btn-danger  pull-right">Delete</button>
+                  class="btn btn-danger">Delete</button>
                 <button *ngIf="permission.isGranted(DELETE_LEAVE_TYPE)" mat-raised-button [name]="'editId-'+absence.id" (click)="editTask(absence)"
-                  class="btn btn-primary pull-right" style="margin-right: 12px;">Edit</button>
+                  class="btn btn-primary">Edit</button>
                 </td>
                 <td class="manage-absence-types-table-column-action manage-absence-types-table-column-action_response">
                   <button *ngIf="permission.isGranted(DELETE_LEAVE_TYPE)" mat-icon-button [name]="'editId-'+absence.id" (click)="editTask(absence)" color="primary">

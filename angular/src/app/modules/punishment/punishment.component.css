@@ -7,10 +7,35 @@
 .punishment-header-menu {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch; 
   margin-bottom: 20px;
   flex-wrap: wrap;
   gap: 15px;
+}
+
+/* Wrapper group buttons */
+.punishment-header-menu .btn-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+
+/* Group buttons container */
+.punishment-header-menu .gr-btn-action {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  height: 100%;
+}
+
+.punishment-header-menu .btn-action,
+.punishment-header-menu .btn-new-punishment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  white-space: nowrap;
+  margin: 0; 
 }
 
 /* Search wrapper */
@@ -18,6 +43,11 @@
   flex: 1;
   max-width: 400px;
   min-width: 250px;
+}
+
+::ng-deep .customer-header-search-wrapper .mat-form-field-wrapper {
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 /* Table styles */
@@ -51,14 +81,19 @@
 }
 
 /* Action buttons */
-.punishment-table-column-action,
-.punishment-table-column-action-label {
+.punishment-table-column-action {
   display: flex;
   justify-content: flex-end;
   padding: 8px 16px;
-  text-align: right;
-  width: 140px; /* Slightly wider to accommodate the button */
+  width: 140px;
 }
+
+.punishment-table-column-action-label {
+  text-align: center !important;
+  width: 140px;
+  vertical-align: middle;
+}
+
 
 /* Action menu button */
 .action-menu-button {
@@ -146,8 +181,17 @@
     align-items: stretch;
   }
   
+  .punishment-header-menu .btn-wrapper {
+    width: 100%;
+  }
+  
+  .punishment-header-menu .gr-btn-action {
+    flex-wrap: wrap;
+  }
+  
   .customer-header-search-wrapper {
     max-width: 100%;
+    width: 100%;
   }
   
   .punishment-table-wrapper {
@@ -173,10 +217,6 @@
 .custom-dialog-container {
     width: 40% !important;
     background-color: aqua;
-}
-
-.btn-new-punishment {
-    margin: 12px 0;
 }
 
 /* Responsive styles */

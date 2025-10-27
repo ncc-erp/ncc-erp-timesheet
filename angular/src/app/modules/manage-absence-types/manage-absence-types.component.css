@@ -1,30 +1,53 @@
-.manage-absence-type-wrapper  .manage-absence-type-button-create button{
-    margin:  0px;
+.manage-absence-type-wrapper .manage-absence-type-button-create button {
+    margin: 0px;
 }
-::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .dialog-manage-absence-types{
+
+::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .dialog-manage-absence-types {
     width: 40% !important;
 }
-.manage-absence-types-table-column-action_response{
-    display: none;
+
+/* Hiện và căn giữa text buttons (Delete/Edit) cho desktop */
+.manage-absence-types-table-column-action {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
 }
+
+.manage-absence-types-table-column-action_response {
+    display: none !important;
+}
+
+.manage-absence-type-wrapper .manage-absence-type-table thead tr th:last-child {
+    text-align: center !important;
+}
+
 @media screen and (max-width: 600px) { 
-    ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .dialog-manage-absence-types{
+    ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .dialog-manage-absence-types {
         width: 90% !important;
     }
-    .manage-absence-type-wrapper .manage-absence-type-table thead tr th{
+    
+    .manage-absence-type-wrapper .manage-absence-type-table thead tr th {
         white-space: nowrap;
     }
-    .manage-absence-type-wrapper .manage-absence-type-table tbody tr td{
+    
+    .manage-absence-type-wrapper .manage-absence-type-table tbody tr td {
         white-space: nowrap;
     }
-    .manage-absence-type-wrapper .manage-absence-type-table{
+    
+    .manage-absence-type-wrapper .manage-absence-type-table {
         width: 100%;
         overflow-x: auto;
     }
-    .manage-absence-types-table-column-action{
-        display: none;
+    
+    .manage-absence-types-table-column-action {
+        display: none !important;
     }
-    .manage-absence-types-table-column-action_response{
-        display: flex;
+    
+    .manage-absence-types-table-column-action_response {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 5px !important;
     }
 }

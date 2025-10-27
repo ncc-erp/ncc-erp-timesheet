@@ -18,50 +18,52 @@
         </ul>
       </div>
       <div class="body" style="height: 100%">
-        <div class="row">
-          <div class="col-lg-3">
-            <mat-form-field class="example-full-width" appearance="outline">
-              <mat-label>Search by Capability Name</mat-label>
-              <input type="search" name="capabilitySearch" [(ngModel)]="searchText" (keydown.enter)="refresh()" matInput
-                placeholder="">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
+        <div class="capability-setting-header-menu">
+          <div class="capability-setting-filters">
+            <div class="capability-setting-search-wrapper">
+              <mat-form-field class="w-100" appearance="outline">
+                <mat-label>Search by Capability Name</mat-label>
+                <input type="search" name="capabilitySearch" [(ngModel)]="searchText" (keydown.enter)="refresh()" matInput
+                  placeholder="">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+            </div>
+            <div class="capability-setting-type-wrapper">
+              <mat-form-field class="w-100" appearance="outline">
+                <mat-label> {{ "Type" | localize }}</mat-label>
+                <mat-select name="capabilityType" [disableOptionCentering]="true" [(value)]="capabilityType"
+                  (selectionChange)="refresh()">
+                  <mat-option *ngFor="let type of capabilityTypeDropdown" [value]="type.value">
+                    {{type.key}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="capability-setting-usertype-wrapper">
+              <mat-form-field class="w-100" appearance="outline">
+                <mat-label> {{ "User type" | localize }}</mat-label>
+                <mat-select name="userType" [disableOptionCentering]="true" [(value)]="userType"
+                  (selectionChange)="refresh()">
+                  <mat-option *ngFor="let type of userTypeDropDown" [value]="type.value">
+                    {{type.key}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="capability-setting-position-wrapper">
+              <mat-form-field class="w-100" appearance="outline">
+                <mat-label> {{ "Position" | localize }}</mat-label>
+                <mat-select name="position" [disableOptionCentering]="true" [(value)]="positionId"
+                  (selectionChange)="refresh()">
+                  <mat-option *ngFor="let type of positionDropDown" [value]="type.value">
+                    {{type.key}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
-          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
-            <mat-form-field class="w-100" appearance="outline">
-              <mat-label> {{ "Type" | localize }}</mat-label>
-              <mat-select name="capabilityType" [disableOptionCentering]="true" [(value)]="capabilityType"
-                (selectionChange)="refresh()">
-                <mat-option *ngFor="let type of capabilityTypeDropdown" [value]="type.value">
-                  {{type.key}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
-            <mat-form-field class="w-100" appearance="outline">
-              <mat-label> {{ "User type" | localize }}</mat-label>
-              <mat-select name="userType" [disableOptionCentering]="true" [(value)]="userType"
-                (selectionChange)="refresh()">
-                <mat-option *ngFor="let type of userTypeDropDown" [value]="type.value">
-                  {{type.key}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
-            <mat-form-field class="w-100" appearance="outline">
-              <mat-label> {{ "Position" | localize }}</mat-label>
-              <mat-select name="position" [disableOptionCentering]="true" [(value)]="positionId"
-                (selectionChange)="refresh()">
-                <mat-option *ngFor="let type of positionDropDown" [value]="type.value">
-                  {{type.key}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 button-container text-right p-t-10">
-            <button name="createBtn" mat-raised-button color="primary" *ngIf="permission.isGranted(ADD)" class="btn remote"
+          <div class="capability-setting-button-wrapper">
+            <button name="createBtn" mat-raised-button color="primary" *ngIf="permission.isGranted(ADD)" class="btn-new-capability-setting"
               [routerLink]="['/app/main/capability-settings/capability-setting']">
               <mat-icon style="color: white" matPrefix>add</mat-icon>
               <span>

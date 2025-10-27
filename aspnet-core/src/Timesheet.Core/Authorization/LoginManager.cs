@@ -114,8 +114,9 @@ namespace Ncc.Authorization
                     Logger.Info($"Login fail with email: {mezonUser.mezon_id}");
                     return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null);
                 }
-
-                byte[] secretKey = Hasher.HMAC_SHA256(Encoding.UTF8.GetBytes(appToken), Encoding.UTF8.GetBytes("WebAppData"));
+                // appToken ==> MD5
+                var appTokenMD5 = Hasher.MD5Hash(appToken);
+                byte[] secretKey = Hasher.HMAC_SHA256(Encoding.UTF8.GetBytes(appTokenMD5), Encoding.UTF8.GetBytes("WebAppData"));
                 var hashedData = Hasher.HEX(Hasher.HMAC_SHA256(secretKey, Encoding.UTF8.GetBytes(queryId)));
 
                 if (mezonHash.Equals(hashedData) == false)
