@@ -10,5 +10,6 @@ namespace Timesheet.Authorization.Users
         public string avatar_url { get; set; }
         public string mezon_id { get; set; }
         public string sub { get; set; }
+        public string email { get; set; }
     }
 }
