@@ -504,6 +504,11 @@ namespace Timesheet.DomainServices
                 result.LastWeekAnomalies.AddRange(lastWeekAnomalies);
             }
 
+            result.LastWeekAnomalies = result.LastWeekAnomalies
+                .OrderByDescending(a => a.Count)
+                .ThenBy(a => a.EmployeeName)
+                .ToList();
+
             return result;
         }
 
