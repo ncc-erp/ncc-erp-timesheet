@@ -10,6 +10,7 @@ namespace Timesheet.DomainServices.Dto
         public string Date { get; set; }
         public string ActualHours { get; set; }
         public string Notes { get; set; }
+        public string Branch { get; set; }
     }
 
     public class LastWeekAnomalyDTO
@@ -21,5 +22,6 @@ namespace Timesheet.DomainServices.Dto
         public List<string> DatesBelowThreshold { get; set; } = new List<string>();
         public int Count { get; set; }
         public string Notes { get; set; }
+        public string Branch { get; set; }
     }
 }

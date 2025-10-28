@@ -1,4 +1,4 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Authorization;
 using Abp.Configuration;
 using Abp.Domain.Repositories;
@@ -23,25 +23,25 @@ using static Ncc.Entities.Enum.StatusEnum;
 namespace Timesheet.APIs.BotReportDaily
 {
     [AbpAuthorize]
-    public class BotReportDailyAppService : ApplicationService
+    public class AnomaliesReportAppService : ApplicationService
     {
         private readonly IWorkScope _workScope;
         private readonly MezonService _mezonService;
         private readonly ISettingManager _settingManager;
-        private readonly IBotReportDailyService _botReportDailyService;
+        private readonly IAbsenceDayService _absenceDayService;
 
-        public BotReportDailyAppService(IWorkScope workScope, MezonService mezonService, ISettingManager settingManager, DomainServices.BotReportDailyService botReportDailyService)
+        public AnomaliesReportAppService(IWorkScope workScope, MezonService mezonService, ISettingManager settingManager, DomainServices.AbsenceDayService absenceDayService)
         {
             _workScope = workScope;
             _mezonService = mezonService;
             _settingManager = settingManager;
-            _botReportDailyService = botReportDailyService;
+            _absenceDayService = absenceDayService;
         }
 
         [HttpGet]
-        public async Task<bool> SendDailyProjectTimelogToMezon(GetDailyProjectTimelogReportInput input)
+        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(AnomaliesTimelogReportInputDto input)
         {
-            return await _botReportDailyService.SendDailyProjectTimelogToMezon(input);
+            return await _absenceDayService.GetAnomaliesTimelogReport(input);
         }
     }
 }

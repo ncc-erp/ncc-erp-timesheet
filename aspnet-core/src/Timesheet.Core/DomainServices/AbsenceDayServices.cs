@@ -1,4 +1,5 @@
 ﻿using Abp.Dependency;
+using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Ncc.Authorization.Users;
 using Ncc.IoC;
@@ -11,16 +12,17 @@ using System.Threading.Tasks;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.Mezon;
+using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
 
-namespace Timesheet.Core
+namespace Timesheet.DomainServices
 {
-    public class AbsenceDayServices : IAbsenceDayServices, ITransientDependency
+    public class AbsenceDayService : IAbsenceDayService, ITransientDependency
     {
         private readonly IWorkScope _workScope;
         private readonly MezonService _mezonService;
         private const int MESSAGE_DELAY_MS = 1000;
-        public AbsenceDayServices(IWorkScope workScope, MezonService mezonService)
+        public AbsenceDayService(IWorkScope workScope, MezonService mezonService)
         {
             _workScope = workScope;
             _mezonService = mezonService;
@@ -64,7 +66,7 @@ namespace Timesheet.Core
         }
 
         private void AddOrUpdateAnomaly(long userId, string employeeName, string date, double? totalWorkingTime, string notes, bool isYesterdayInFunction,
-            List<YesterdayAnomalyDTO> yesterday, List<LastWeekAnomalyDTO> lastWeek, string violationType = "DatesBelowThreshold")
+            List<YesterdayAnomalyDTO> yesterday, List<LastWeekAnomalyDTO> lastWeek, string violationType = "DatesBelowThreshold", string branchCode = null)
         {
             if (isYesterdayInFunction)
             {
@@ -74,13 +76,14 @@ namespace Timesheet.Core
                     EmployeeName = employeeName,
                     Date = date,
                     ActualHours = totalWorkingTime.HasValue ? $"{totalWorkingTime.Value.ToString("F2", CultureInfo.InvariantCulture)}h" : "0h",
-                    Notes = notes
+                    Notes = notes,
+                    Branch = branchCode
                 };
                 yesterday.Add(yesterdayDto);
             }
             else
             {
-                var lastWeekDto = lastWeek.FirstOrDefault(a => a.UserId == userId) ?? new LastWeekAnomalyDTO { UserId = userId, EmployeeName = employeeName };
+                var lastWeekDto = lastWeek.FirstOrDefault(a => a.UserId == userId) ?? new LastWeekAnomalyDTO { UserId = userId, EmployeeName = employeeName, Branch = branchCode };
                 if (violationType == "DatesMissed")
                     lastWeekDto.DatesMissed.Add(date);
                 else if (violationType == "DatesNoTrackerTime")
@@ -189,7 +192,7 @@ namespace Timesheet.Core
         }
 
         private async Task<(List<YesterdayAnomalyDTO> yesterdayAnomalies, List<LastWeekAnomalyDTO> lastWeekAnomalies)> ProcessAnomalies(
-            long branchId, DateTime startDate, DateTime endDate, bool isYesterday)
+            long branchId, DateTime startDate, DateTime endDate, bool isYesterday, string branchCode)
         {
             var activeUsers = await _workScope.GetAll<User>()
                 .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork && u.BranchId == branchId)
@@ -401,7 +404,7 @@ namespace Timesheet.Core
                         string notes = isZeroTimeViolation ? "No tracker time for approved WFH" : "No early leave/late arrival approval";
                         string violationType = isZeroTimeViolation ? "DatesNoTrackerTime" : "DatesBelowThreshold";
                         AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), totalWorkingTime,
-                            notes, isYesterday, yesterdayAnomalies, lastWeekAnomalies, violationType);
+                            notes, isYesterday, yesterdayAnomalies, lastWeekAnomalies, violationType, branchCode);
                     }
 
                     if (isWFHMorning && isAfternoonPresentMorningAbsent && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice)
@@ -411,7 +414,7 @@ namespace Timesheet.Core
                         if (isAfternoonWorkingTimeViolation)
                         {
                             AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), officeActualHours,
-                                "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold");
+                                "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold", branchCode);
                         }
                     }
 
@@ -422,7 +425,7 @@ namespace Timesheet.Core
                         if (isMorningWorkingTimeViolation)
                         {
                             AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), officeActualHours,
-                                "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold");
+                                "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold", branchCode);
                         }
                     }
                 }
@@ -435,7 +438,7 @@ namespace Timesheet.Core
                     if (!isValidAbsence)
                     {
                         AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), officeActualHours,
-                            "No leave/WFH record", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesMissed");
+                            "No leave/WFH record", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesMissed", branchCode);
                     }
                 }
             }
@@ -444,6 +447,72 @@ namespace Timesheet.Core
             yesterdayAnomalies = yesterdayAnomalies.OrderBy(a => a.EmployeeName).ToList();
             lastWeekAnomalies = lastWeekAnomalies.OrderBy(a => a.EmployeeName).ToList();
             return (yesterdayAnomalies, lastWeekAnomalies);
+        }
+
+        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(AnomaliesTimelogReportInputDto input)
+        {
+            var now = DateTimeUtils.GetNow().Date;
+            var yesterday = now.AddDays(-1);
+            var (lastWeekStart, lastWeekEnd) = GetLastWeekRange(now);
+
+            var allBranches = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                .Select(b => new { b.Id, b.Code })
+                .AsNoTracking()
+                .ToListAsync();
+
+            var branchDict = allBranches.ToDictionary(b => b.Code, b => b.Id);
+            var idToCodeDict = allBranches.ToDictionary(b => b.Id, b => b.Code);
+            List<long> branchIds;
+
+            if (input.BranchCodes == null || !input.BranchCodes.Any())
+            {
+                branchIds = allBranches.Select(b => b.Id).ToList();
+            }
+            else
+            {
+                branchIds = input.BranchCodes
+                    .Where(code => branchDict.ContainsKey(code))
+                    .Select(code => branchDict[code])
+                    .ToList();
+
+                if (!branchIds.Any())
+                {
+                    throw new UserFriendlyException("No valid branch codes provided.");
+                }
+            }
+
+            var result = new AnomaliesTimelogReportDto
+            {
+                Yesterday = yesterday.ToString("dd/MM/yyyy"),
+                LastWeekStart = lastWeekStart.ToString("dd/MM/yyyy"),
+                LastWeekEnd = lastWeekEnd.ToString("dd/MM/yyyy"),
+                YesterdayAnomalies = new List<YesterdayAnomalyDTO>(),
+                LastWeekAnomalies = new List<LastWeekAnomalyDTO>()
+            };
+
+            foreach (var branchId in branchIds)
+            {
+                var branchCode = idToCodeDict[branchId];
+                var (yesterdayAnomalies, _) = await ProcessAnomalies(branchId, yesterday, yesterday.AddDays(1).AddSeconds(-1), true, branchCode);
+                result.YesterdayAnomalies.AddRange(yesterdayAnomalies);
+            }
+
+            foreach (var branchId in branchIds)
+            {
+                var branchCode = idToCodeDict[branchId];
+                var (_, lastWeekAnomalies) = await ProcessAnomalies(branchId, lastWeekStart, lastWeekEnd, false, branchCode);
+                result.LastWeekAnomalies.AddRange(lastWeekAnomalies);
+            }
+
+            return result;
+        }
+
+        private static (DateTime start, DateTime end) GetLastWeekRange(DateTime reportDate)
+        {
+            var thisWeekStart = DateTimeUtils.FirstDayOfWeek(reportDate);
+            var lwStart = thisWeekStart.AddDays(-7).Date;
+            var lwEnd = thisWeekStart.AddDays(-1).Date.AddDays(1).AddTicks(-1);
+            return (lwStart, lwEnd);
         }
 
         private async Task<object> GetBranchDataAsync(string branchName, DateTime? startDate = null, DateTime? endDate = null, string mode = "Branch")
@@ -464,14 +533,14 @@ namespace Timesheet.Core
                     {
                         throw new ArgumentException("startDate and endDate are required for Yesterday mode.");
                     }
-                    var (yesterdayAnomalies, _) = await ProcessAnomalies(branch.Id, startDate.Value, endDate.Value, true);
+                    var (yesterdayAnomalies, _) = await ProcessAnomalies(branch.Id, startDate.Value, endDate.Value, true, branch.Code);
                     return yesterdayAnomalies;
                 case "LastWeek":
                     if (!startDate.HasValue || !endDate.HasValue)
                     {
                         throw new ArgumentException("startDate and endDate are required for LastWeek mode.");
                     }
-                    var (_, lastWeekAnomalies) = await ProcessAnomalies(branch.Id, startDate.Value, endDate.Value, false);
+                    var (_, lastWeekAnomalies) = await ProcessAnomalies(branch.Id, startDate.Value, endDate.Value, false, branch.Code);
                     return lastWeekAnomalies;
                 case "Branch":
                 default:

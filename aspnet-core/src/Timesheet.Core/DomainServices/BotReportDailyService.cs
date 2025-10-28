@@ -100,6 +100,9 @@ namespace Timesheet.DomainServices
                 return new DailyProjectTimelogReportDto
                 {
                     ReportDate = today.ToString("yyyy-MM-dd"),
+                    LastWeekStart = lastWeekStart.ToString("yyyy-MM-dd"),
+                    LastWeekEnd = lastWeekEnd.ToString("yyyy-MM-dd"),
+                    LastMonth = lastMonthStart.ToString("yyyy-MM"),
                     Projects = new List<ProjectTimelogDto>()
                 };
             }
@@ -140,6 +143,9 @@ namespace Timesheet.DomainServices
             var result = new DailyProjectTimelogReportDto
             {
                 ReportDate = today.ToString("yyyy-MM-dd"),
+                LastWeekStart = lastWeekStart.ToString("yyyy-MM-dd"),
+                LastWeekEnd = lastWeekEnd.ToString("yyyy-MM-dd"),
+                LastMonth = lastMonthStart.ToString("yyyy-MM"),
                 Projects = projectTimesheets
                     .Select(p => new ProjectTimelogDto
                     {
