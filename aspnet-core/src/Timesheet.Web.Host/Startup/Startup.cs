@@ -122,6 +122,7 @@ namespace Ncc.Web.Host.Startup
 
             RegisterFileService(services);
             RegisterFaceIdService(services);
+            LoadUpMMNFileConfig();
 
 
             // Configure Abp and Dependency Injection
@@ -213,6 +214,11 @@ namespace Ncc.Web.Host.Startup
             var strAllowImageFileType = _appConfiguration.GetValue<string>("UploadFile:AllowImageFileTypes");
             ConstantUploadFile.AllowImageFileTypes = strAllowImageFileType.Split(",");
             ConstantInternalUploadFile.RootUrl = _appConfiguration.GetValue<string>("App:ServerRootAddress");
+        }
+        private void LoadUpMMNFileConfig()
+        {
+            MMNConstant.Uri = _appConfiguration.GetValue<string>("MMNService:IndexerUri");
+            MMNConstant.DonationWallet = _appConfiguration.GetValue<string>("MMNService:DonationWallet");
         }
         private void LoadTeamBuildingFileConfig()
         {

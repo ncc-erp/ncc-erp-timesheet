@@ -9,6 +9,7 @@ import { AppComponentBase } from 'shared/app-component-base';
 import { Component, OnInit, Injector } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { ComplainDialogComponent } from './complain-dialog/complain-dialog.component';
+import { TimesheetConfirmationDialogComponent } from './timesheet-confirmation-dialog/timesheet-confirmation-dialog.component';
 import { UserServiceProxy } from '@shared/service-proxies/service-proxies';
 
 @Component({
@@ -502,5 +503,25 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         this.notify.error('Failed to load punishment details');
       }
     );
+  }
+
+  openConfirmationDialog() {
+    // Filter out items with punishment
+    const punishmentItems = this.listTimekeeping.filter(item => item.moneyPunish > 0);
+    
+    const dialogRef = this.dialog.open(TimesheetConfirmationDialogComponent, {
+      width: '800px',
+      data: {
+        timekeepingData: this.listTimekeeping,
+        totalMonthlyPunishment: this.totalMonthlyPunishment
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.paid) {
+        this.notify.success('Paid Successfully');
+        this.getData();
+      }
+    });
   }
 }
