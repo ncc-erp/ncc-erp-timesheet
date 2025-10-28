@@ -7,7 +7,6 @@ export interface OfficeWorkingReportSettingDto {
     enable: boolean;
     everyday: boolean;
     hour: number;
-    minute: number;
     officeIds: string;
     limit: number;
     mezonUrl: string;

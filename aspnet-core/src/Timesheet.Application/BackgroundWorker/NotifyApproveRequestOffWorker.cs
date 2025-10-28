@@ -16,7 +16,7 @@ namespace Timesheet.BackgroundWorker
     {
         private readonly IApproveRequestOffServices _approveRequestOffServices;
         private bool _isRunning = false;
-        private int _intervalMinutes = 5;//5 minutes
+        private int _intervalMinutes = 60;//60 minutes
         public NotifyApproveRequestOffWorker(AbpTimer timer, IApproveRequestOffServices approveRequestOffServices, RequestDayAppService requestDayAppService) : base(timer)
         {
             _approveRequestOffServices = approveRequestOffServices;

@@ -346,7 +346,6 @@ namespace Timesheet.DomainServices
                         int lastMonthPos = itemText.IndexOf("Last Month:", lastWeekPos);
 
                         chunkMkList.Add(new { type = "b", s = itemStartPos + projectPos, e = itemStartPos + projectPos + $"{idx}. Project:".Length });
-                        //chunkMkList.Add(new { type = "b", s = itemStartPos + projectPos, e = itemStartPos + projectPos + "Project:".Length });
                         chunkMkList.Add(new { type = "b", s = itemStartPos + membersPos, e = itemStartPos + membersPos + "Members:".Length });
                         chunkMkList.Add(new { type = "b", s = itemStartPos + lastWeekPos, e = itemStartPos + lastWeekPos + "Last Week:".Length });
                         chunkMkList.Add(new { type = "b", s = itemStartPos + lastMonthPos, e = itemStartPos + lastMonthPos + "Last Month:".Length });

@@ -32,7 +32,7 @@ namespace Timesheet.BackgroundWorker
             _reportAppService = reportAppService;
             _logger = logger;
             _workScope = workScope;
-            Timer.Period = 1000 * 60;
+            Timer.Period = 1000 * 60 * 60;
         }
 
         private List<long> ConvertBranchCodesToOfficeIds(string branchCodesStr)
@@ -79,15 +79,14 @@ namespace Timesheet.BackgroundWorker
 
                 string everydayStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingEveryday);
                 string hourStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportAtHour);
-                string minuteStr = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportAtMinute);
 
-                if (!int.TryParse(hourStr, out int configuredHour) || !int.TryParse(minuteStr, out int configuredMinute))
+                if (!int.TryParse(hourStr, out int configuredHour))
                 {
                     throw new Exception(" Vui lòng thiết lập giờ chạy (0-23) và phút (0-59).");
                 }
 
                 bool isEveryday = string.Equals(everydayStr, "True", StringComparison.OrdinalIgnoreCase);
-                if (now.Hour != configuredHour || now.Minute != configuredMinute)
+                if (now.Hour != configuredHour)
                 {
                     //Logger.Info($"RunBotReportJob() skipped: Current hour = {now.Hour}, Configured = {configuredHour}, Current minute = {now.Minute}, Configured minute = {configuredMinute}");
                     return;

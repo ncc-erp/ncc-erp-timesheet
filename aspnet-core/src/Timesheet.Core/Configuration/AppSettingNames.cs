@@ -136,7 +136,6 @@ namespace Ncc.Configuration
         public const string BotReportEnable = "Abp.BotReportEnable";
         public const string BotReportEveryday = "Abp.BotReportEveryday";
         public const string BotReportAtHour = "Abp.BotReportAtHour";
-        public const string BotReportAtMinute = "Abp.BotReportAtMinute";
         public const string BotReportAtDayOfWeek = "Abp.BotReportAtDayOfWeek";
         public const string BotReportWebhookUrl = "Abp.BotReportWebhookUrl";
         public const string BotReportBranchCodes = "Abp.BotReportBranchCodes";
@@ -145,7 +144,6 @@ namespace Ncc.Configuration
         public const string BotReportProjectIds = "Abp.BotReportProjectIds";
         public const string AnomaliesReportEnable = "Abp.AnomaliesReportEnable";
         public const string AnomaliesReportAtHour = "Abp.AnomaliesReportAtHour";
-        public const string AnomaliesReportAtMinute = "Abp.AnomaliesReportAtMinute";
         public const string AnomaliesReportAtDayOfWeek = "Abp.AnomaliesReportAtDayOfWeek";
         public const string AnomaliesReportWebhookUrl = "Abp.AnomaliesReportWebhookUrl";
         public const string AnomaliesReportBranchCodes = "Abp.AnomaliesReportBranchCodes";
@@ -196,7 +194,6 @@ namespace Ncc.Configuration
 
         public const string OfficeWorkingReportEnable = "App.OfficeWorkingReport.Enable";
         public const string OfficeWorkingReportAtHour = "App.OfficeWorkingReport.AtHour";
-        public const string OfficeWorkingReportAtMinute = "App.OfficeWorkingReport.AtMinute";
         public const string OfficeWorkingReportOfficeIds = "App.OfficeWorkingReport.OfficeIds";
         public const string OfficeWorkingReportLimit = "App.OfficeWorkingReport.Limit";
         public const string OfficeWorkingReportMezonUrl = "App.OfficeWorkingReport.MezonUrl";

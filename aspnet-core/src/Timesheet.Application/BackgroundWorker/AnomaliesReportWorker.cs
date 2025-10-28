@@ -23,7 +23,7 @@ namespace Timesheet.BackgroundWorker
         ) : base(timer)
         {
             _absenceDayServices = absenceDayServices;
-            Timer.Period = 1000 * 60;
+            Timer.Period = 1000 * 60 * 60;
         }
 
         [UnitOfWork]
@@ -44,7 +44,6 @@ namespace Timesheet.BackgroundWorker
         {
             string enable = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportEnable);
             string hourStr = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportAtHour);
-            string minuteStr = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportAtMinute);
             string dayOfWeek = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportAtDayOfWeek);
             var branchCodesString = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportBranchCodes);
             string botUri = SettingManager.GetSettingValueForApplication(AppSettingNames.AnomaliesReportWebhookUrl) ?? string.Empty;
@@ -54,13 +53,13 @@ namespace Timesheet.BackgroundWorker
                 return;
             }
 
-            if (!int.TryParse(hourStr, out int configuredHour) || !int.TryParse(minuteStr, out int configuredMinute))
+            if (!int.TryParse(hourStr, out int configuredHour))
             {
                 Logger.Error("RunBotReportJob() error: Invalid hour setting.");
                 return;
             }
 
-            if (configuredHour != now.Hour || configuredMinute != now.Minute)
+            if (configuredHour != now.Hour)
             {
                 //Logger.Info($"RunBotReportJob() skipped: Current hour = {now.Hour}, Configured = {configuredHour}, Current minute = {now.Minute}, Configured = {configuredMinute}");
                 return;
@@ -82,7 +81,6 @@ namespace Timesheet.BackgroundWorker
             {
                 enable = true,
                 hour = configuredHour,
-                minute = configuredMinute,
                 dayofweek = dayOfWeek,
                 botUri = botUri,
                 branchCodes = branchCodes
@@ -96,7 +94,6 @@ namespace Timesheet.BackgroundWorker
                 {
                     enable = true,
                     hour = configuredHour,
-                    minute = configuredMinute,
                     dayofweek = dayOfWeek,
                     botUri = botUri,
                     branchCodes = branchCodes
