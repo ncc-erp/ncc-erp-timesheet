@@ -39,7 +39,7 @@ namespace Timesheet.APIs.BotReportDaily
         }
 
         [HttpGet]
-        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(AnomaliesTimelogReportInputDto input)
+        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportInput input)
         {
             return await _absenceDayService.GetAnomaliesTimelogReport(input);
         }

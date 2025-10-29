@@ -49,7 +49,7 @@ namespace Timesheet.DomainServices
             var lastMonthStart = new DateTime(lastMonthEnd.Year, lastMonthEnd.Month, 1);
 
             var allBranches = await _workScope.GetAll<Timesheet.Entities.Branch>()
-                .Select(b => new { b.Id, b.Code, b.DisplayName })
+                .Select(b => new { b.Id, b.DisplayName })
                 .ToListAsync();
 
             var allUsers = await _workScope.GetAll<User>()
@@ -65,8 +65,8 @@ namespace Timesheet.DomainServices
             var branchNames = new List<string>();
             List<long> officeUsers;
 
-            bool isAllBranchesSelected = input.BranchCodes.Count == allBranches.Count &&
-                                         input.BranchCodes.All(code => allBranches.Select(b => b.Code).Contains(code));
+            var validInputBranchIds = input.BranchId.Where(id => allBranches.Any(b => b.Id == id)).ToList() ?? new List<long>();
+            bool isAllBranchesSelected = validInputBranchIds.Count == allBranches.Count;
 
             if (isAllBranchesSelected)
             {
@@ -79,7 +79,7 @@ namespace Timesheet.DomainServices
             else
             {
                 var branchDict = allBranches
-                    .Where(b => input.BranchCodes.Contains(b.Code))
+                    .Where(b => validInputBranchIds.Contains(b.Id))
                     .ToDictionary(b => b.Id, b => b.DisplayName);
 
                 if (!branchDict.Any())
@@ -206,7 +206,7 @@ namespace Timesheet.DomainServices
                 }
             }
 
-            var input = new GetDailyProjectTimelogReportInput
+            var input = new GetDailyProjectTimelogReportByBranchCodesInput
             {
                 BranchCodes = branchCodes ?? new List<string>(),
                 MinHours = double.TryParse(minHoursStr, out var minHours) ? (double?)minHours : null,
@@ -222,7 +222,7 @@ namespace Timesheet.DomainServices
             return await SendDailyProjectTimelogToMezon(input);
         }
 
-        public async Task<bool> SendDailyProjectTimelogToMezon(GetDailyProjectTimelogReportInput input)
+        public async Task<bool> SendDailyProjectTimelogToMezon(GetDailyProjectTimelogReportByBranchCodesInput input)
         {
             var today = DateTime.Now.Date;
 
@@ -236,7 +236,36 @@ namespace Timesheet.DomainServices
             var lastMonthEnd = new DateTime(today.Year, today.Month, 1).AddDays(-1);
             var lastMonthStart = new DateTime(lastMonthEnd.Year, lastMonthEnd.Month, 1);
 
-            var reportData = await GetDailyProjectTimelogReport(input);
+            List<long> branchIds = new List<long>();
+
+            if (input.BranchCodes != null && input.BranchCodes.Any())
+            {
+                var validCodes = input.BranchCodes.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
+                if (validCodes.Any())
+                {
+                    var branches = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                        .Where(b => validCodes.Contains(b.Code))
+                        .Select(b => new { b.Id, b.DisplayName })
+                        .ToListAsync();
+
+                    branchIds = branches.Select(b => b.Id).ToList();
+
+                    if (!branchIds.Any())
+                    {
+                        Logger.Warn($"No valid branch codes found: {string.Join(", ", validCodes)}. Report will include all branches.");
+                    }
+                }
+            }
+
+            var reportInput = new GetDailyProjectTimelogReportInput
+            {
+                BranchId = branchIds,
+                MinHours = input.MinHours,
+                TopN = input.TopN,
+                ProjectIds = input.ProjectIds ?? new List<long>()
+            };
+
+            var reportData = await GetDailyProjectTimelogReport(reportInput);
 
             var webhookUrl = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportWebhookUrl);
 

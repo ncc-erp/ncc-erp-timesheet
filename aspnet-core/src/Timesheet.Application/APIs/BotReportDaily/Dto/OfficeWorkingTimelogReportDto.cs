@@ -19,7 +19,7 @@ namespace Timesheet.APIs.BotReportDaily.Dto
     }
     public class GetOfficeWorkingTimelogReportInput
     {
-        public List<string> BranchCodes { get; set; } = new List<string>();
+        public List<long> BranchId { get; set; } = new List<long>();
         public int Limit { get; set; } = int.MaxValue;
     }
 }

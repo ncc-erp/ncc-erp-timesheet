@@ -23,14 +23,14 @@ using static Ncc.Entities.Enum.StatusEnum;
 namespace Timesheet.APIs.BotReportDaily
 {
     [AbpAuthorize]
-    public class ProjectReportDailyAppService : ApplicationService
+    public class ProjectReportAppService : ApplicationService
     {
         private readonly IWorkScope _workScope;
         private readonly MezonService _mezonService;
         private readonly ISettingManager _settingManager;
         private readonly IBotReportDailyService _botReportDailyService;
 
-        public ProjectReportDailyAppService(IWorkScope workScope, MezonService mezonService, ISettingManager settingManager, DomainServices.BotReportDailyService botReportDailyService)
+        public ProjectReportAppService(IWorkScope workScope, MezonService mezonService, ISettingManager settingManager, DomainServices.BotReportDailyService botReportDailyService)
         {
             _workScope = workScope;
             _mezonService = mezonService;

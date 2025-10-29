@@ -858,23 +858,21 @@ namespace Timesheet.APIs.Reports
             var lmStart = DateTimeUtils.FirstDayOfMonth(now.AddMonths(-1));
             var lmEnd = DateTimeUtils.LastDayOfMonth(now.AddMonths(-1));
 
-            var allBranches = await WorkScope.GetAll<Branch>()
-                .Select(b => new { b.Id, b.Code })
+            var allBranchIds = await WorkScope.GetAll<Branch>()
                 .AsNoTracking()
+                .Select(b => b.Id)
                 .ToListAsync();
 
-            var branchDict = allBranches.ToDictionary(b => b.Code, b => b.Id);
             List<long> officeIds;
 
-            if (input.BranchCodes == null || !input.BranchCodes.Any())
+            if (input.BranchId == null || !input.BranchId.Any())
             {
-                officeIds = allBranches.Select(b => b.Id).ToList();
+                officeIds = allBranchIds;
             }
             else
             {
-                officeIds = input.BranchCodes
-                    .Where(code => branchDict.ContainsKey(code))
-                    .Select(code => branchDict[code])
+                officeIds = input.BranchId
+                    .Where(id => allBranchIds.Contains(id))
                     .ToList();
 
                 if (!officeIds.Any())

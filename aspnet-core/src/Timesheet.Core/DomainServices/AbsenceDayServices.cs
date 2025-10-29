@@ -449,7 +449,7 @@ namespace Timesheet.DomainServices
             return (yesterdayAnomalies, lastWeekAnomalies);
         }
 
-        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(AnomaliesTimelogReportInputDto input)
+        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportInput input)
         {
             var now = DateTimeUtils.GetNow().Date;
             var yesterday = now.AddDays(-1);
@@ -460,22 +460,21 @@ namespace Timesheet.DomainServices
                 .AsNoTracking()
                 .ToListAsync();
 
-            var branchDict = allBranches.ToDictionary(b => b.Code, b => b.Id);
-            var idToCodeDict = allBranches.ToDictionary(b => b.Id, b => b.Code);
+            var branchDict = allBranches.ToDictionary(b => b.Id, b => b.Code);
+            var validBranchIds = new List<long>();
             List<long> branchIds;
 
-            if (input.BranchCodes == null || !input.BranchCodes.Any())
+            if (input.BranchIds == null || !input.BranchIds.Any())
             {
-                branchIds = allBranches.Select(b => b.Id).ToList();
+                validBranchIds = allBranches.Select(b => b.Id).ToList();
             }
             else
             {
-                branchIds = input.BranchCodes
-                    .Where(code => branchDict.ContainsKey(code))
-                    .Select(code => branchDict[code])
+                validBranchIds = input.BranchIds
+                    .Where(id => branchDict.ContainsKey(id))
                     .ToList();
 
-                if (!branchIds.Any())
+                if (!validBranchIds.Any())
                 {
                     throw new UserFriendlyException("No valid branch codes provided.");
                 }
@@ -490,16 +489,16 @@ namespace Timesheet.DomainServices
                 LastWeekAnomalies = new List<LastWeekAnomalyDTO>()
             };
 
-            foreach (var branchId in branchIds)
+            foreach (var branchId in validBranchIds)
             {
-                var branchCode = idToCodeDict[branchId];
+                var branchCode = branchDict[branchId];
                 var (yesterdayAnomalies, _) = await ProcessAnomalies(branchId, yesterday, yesterday.AddDays(1).AddSeconds(-1), true, branchCode);
                 result.YesterdayAnomalies.AddRange(yesterdayAnomalies);
             }
 
-            foreach (var branchId in branchIds)
+            foreach (var branchId in validBranchIds)
             {
-                var branchCode = idToCodeDict[branchId];
+                var branchCode = branchDict[branchId];
                 var (_, lastWeekAnomalies) = await ProcessAnomalies(branchId, lastWeekStart, lastWeekEnd, false, branchCode);
                 result.LastWeekAnomalies.AddRange(lastWeekAnomalies);
             }
@@ -514,7 +513,7 @@ namespace Timesheet.DomainServices
 
         private static (DateTime start, DateTime end) GetLastWeekRange(DateTime reportDate)
         {
-            var thisWeekStart = DateTimeUtils.FirstDayOfWeek(reportDate);
+            var thisWeekStart = DateTimeUtils.FirstDayOfWeek(reportDate);   
             var lwStart = thisWeekStart.AddDays(-7).Date;
             var lwEnd = thisWeekStart.AddDays(-1).Date.AddDays(1).AddTicks(-1);
             return (lwStart, lwEnd);
