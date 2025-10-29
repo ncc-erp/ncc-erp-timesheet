@@ -32,7 +32,16 @@
           </div>
           <div _ngcontent-c9="" class="item">
             <div class="d-flex align-items-center justify-content-between">
-              <span _ngcontent-c9="" style="color: #d32f2f; font-size: 14px; margin-right: 10px;"><b _ngcontent-c9="">Tổng tiền phạt tháng:</b> {{ totalMonthlyPunishment | number }} VNĐ</span>
+              <div class="punishment-summary">
+                <div class="punishment-row">
+                  <span class="punishment-label">Tổng tiền phạt tháng:</span>
+                  <span class="punishment-amount">{{ totalMonthlyPunishment | number }} VNĐ</span>
+                </div>
+                <div class="punishment-row" *ngIf="totalMonthlyPunishment - totalPaidPunishment > 0">
+                  <span class="punishment-label">Tổng tiền phạt còn lại:</span>
+                  <span class="punishment-amount remaining">{{ totalMonthlyPunishment - totalPaidPunishment | number }} VNĐ</span>
+                </div>
+              </div>
               <button mat-raised-button color="primary" class="btn-confirm-punishment" (click)="openConfirmationDialog()">Confirm</button>
             </div>
           </div>
