@@ -131,6 +131,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  transition: all 0.2s ease;
+}
+
+.tx-hash.clickable {
+  color: #3f51b5;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.tx-hash.clickable:hover {
+  color: #1a237e;
+  text-decoration: none;
 }
 
 .error-table {
@@ -195,6 +207,11 @@
 
 .donate-button[disabled] {
   background-color: rgba(103, 58, 183, 0.5) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.paid-button[disabled] {
+  background-color: rgba(81, 171, 88, 0.5) !important;
   color: rgba(255, 255, 255, 0.7) !important;
 }
 

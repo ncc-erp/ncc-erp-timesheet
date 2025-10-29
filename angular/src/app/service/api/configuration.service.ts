@@ -1,4 +1,4 @@
-import { HRMConfigDto, KomuDto, ProjectConfigDto, NRITConfigDto, UnlockTimesheetConfigDto, RetroNotifyConfigDto, TeamBuildingConfigDto, ApproveTimesheetNotifyConfigDto, ApproveRequestOffNotifyConfigDto, SendMessageRequestPendingTeamBuildingToHRConfigDto, NotifyHRTheEmployeeMayHaveLeftConfigDto,MoneyPMUnlockTimeSheetConfigDto, SendMessageToPunishUserConfigDto, GenerateRetroResultConfigDto, CreateNewRetroConfigDto, ResetDataTeamBuildingConfigDto, NotifyReviewInternViaMezonAndEmailConfigDto } from './../../configuration/configuration.component';
+import { HRMConfigDto, KomuDto, ProjectConfigDto, NRITConfigDto, UnlockTimesheetConfigDto, RetroNotifyConfigDto, TeamBuildingConfigDto, ApproveTimesheetNotifyConfigDto, ApproveRequestOffNotifyConfigDto, SendMessageRequestPendingTeamBuildingToHRConfigDto, NotifyHRTheEmployeeMayHaveLeftConfigDto,MoneyPMUnlockTimeSheetConfigDto, SendMessageToPunishUserConfigDto, GenerateRetroResultConfigDto, CreateNewRetroConfigDto, ResetDataTeamBuildingConfigDto, NotifyReviewInternViaMezonAndEmailConfigDto, MMNConfigDto } from './../../configuration/configuration.component';
 import { HttpClient } from '@angular/common/http';
 import { BaseApiService } from '@app/service/api/base-api.service';
 import { Injectable } from '@angular/core';
@@ -137,6 +137,9 @@ export class ConfigurationService extends BaseApiService {
   }
   getConfigGenerateRetroResult():Observable<any>{
     return this.http.get(this.rootUrl + "/GetConfigGenerateRetroResult");
+  }
+  getDonationUrl(): Observable<any> {
+    return this.http.get(this.rootUrl + "/GetDonationUrl");
   }
   setConfigGenerateRetroResult(config:GenerateRetroResultConfigDto):Observable<any>{
     return this.http.post(this.rootUrl + "/SetConfigGenerateRetroResult", config);
