@@ -7,6 +7,7 @@ import { TransactionHashDialogComponent } from '../transaction-hash-dialog/trans
 import { CalendarEvent, CalendarView } from 'angular-calendar';
 import { Subject } from 'rxjs';
 import { MyTimesheetService } from '@app/service/api/mytimesheet.service';
+import { ConfigurationService } from '@app/service/api/configuration.service';
 import { AppComponentBase } from '@shared/app-component-base';
 
 @Component({
@@ -20,6 +21,8 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   isPaid: boolean = false;
   weekNumber: number;
   weekRange: string;
+  indexerUrl: string = '';
+  donationUrl: string = '';
   punishmentItems: any[] = [];
   punishmentPaidItems: UserPunishmentPaidDto[] = [];
   isLoadingPaidData: boolean = false;
@@ -40,6 +43,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     @Inject(MAT_DIALOG_DATA) public data: any,
     private userPunishmentPaidService: UserPunishmentPaidService,
     private mytimesheetService: MyTimesheetService,
+    private configService: ConfigurationService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) { 
@@ -47,6 +51,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   }
 
   ngOnInit() {    
+    this.loadConfiguration();
     const punishmentItemsRaw = this.data.timekeepingData.filter(item => {
       const hasPunishment = item.moneyPunish > 0;
       return hasPunishment;
@@ -151,9 +156,28 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     });
   }
 
+  private loadConfiguration(): void {
+    this.configService.getDonationUrl().subscribe(
+      (data) => {
+        if (data && data.result) {
+          if (data.result.indexerUrl) {
+            const url = new URL(data.result.indexerUrl);
+            this.indexerUrl = `${url.protocol}//${url.hostname}/`;
+          }
+          if (data.result.donationUrl) {
+            this.donationUrl = data.result.donationUrl;
+          }
+        }
+      },
+      () => {
+        this.snackBar.open('Error loading configuration. Please try again later.', 'Close', { duration: 5000 });
+      }
+    );
+  }
+
   donate(): void {
-    if (this.contributeToFund) {
-      window.open('https://dev-mmn.nccsoft.vn/uiux/v3/donation-campaign/detail.html', '_blank');
+    if (this.contributeToFund && this.donationUrl) {
+      window.open(this.donationUrl, '_blank');
     }
   }
   
@@ -308,5 +332,14 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     if (status === 1) { return 'wh-pending'; }
     if (status === 2) { return 'wh-approved'; }
     return 'wh-rejected';
+  }
+  openTransaction(hash: string, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (hash && this.indexerUrl) {
+      const url = `${this.indexerUrl}transactions/${hash}`.replace(/([^:]\/)\/+/g, '$1');
+      window.open(url, '_blank');
+    }
   }
 }

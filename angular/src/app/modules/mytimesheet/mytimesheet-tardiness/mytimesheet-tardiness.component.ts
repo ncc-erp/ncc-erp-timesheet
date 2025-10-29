@@ -41,6 +41,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   dayList: any = []
   public countLate: number = 0;
   totalMonthlyPunishment: number = 0;
+  totalPaidPunishment: number = 0;
   public maskTime = [/[\d]/, /\d/, ':', /\d/, /\d/];
 
   constructor(
@@ -78,7 +79,8 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.timekeepingService.getMyDetails(this.year, this.month + 1).subscribe(res => {
       this.listTimekeeping = res.result;
       if (this.listTimekeeping && this.listTimekeeping.length > 0) {
-        this.totalMonthlyPunishment = this.listTimekeeping[0].totalMonthPunishmentTotal;
+        this.totalMonthlyPunishment = this.listTimekeeping[0].totalMonthPunishmentTotal || 0;
+        this.totalPaidPunishment = this.listTimekeeping[0].totalPaidPunishment || 0;
       }
       
       this.groupTimekeepingByDay();

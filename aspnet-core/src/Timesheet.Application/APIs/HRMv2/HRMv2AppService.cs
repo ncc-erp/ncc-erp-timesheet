@@ -1,4 +1,4 @@
-﻿using Abp.Authorization;
+using Abp.Authorization;
 using Abp.Collections.Extensions;
 using Abp.Configuration;
 using Abp.UI;
@@ -128,16 +128,40 @@ namespace Timesheet.APIs.HRMv2
 
         public List<PunishmentEmployeeDto> GetPunishmentTotal(int year, int month)
         {
-            return WorkScope.GetAll<UserPunishment>()
+            var punishments = WorkScope.GetAll<UserPunishment>()
                 .Where(s => s.DateAt.Year == year)
                 .Where(s => s.DateAt.Month == month)
                 .Where(s => s.TotalMoney > 0)
-                .GroupBy(s => s.User.EmailAddress)
-                .Select(g => new PunishmentEmployeeDto
+                .GroupBy(s => new { s.UserId, s.User.EmailAddress })
+                .Select(g => new
                 {
-                    Email = g.Key,
-                    Money = g.Sum(x => x.TotalMoney)
+                    UserId = g.Key.UserId,
+                    Email = g.Key.EmailAddress,
+                    TotalPunishment = g.Sum(x => x.TotalMoney)
                 }).ToList();
+
+            var paidAmounts = WorkScope.GetAll<UserPunishmentPaid>()
+                .Where(p => p.DateAt.Year == year)
+                .Where(p => p.DateAt.Month == month)
+                .GroupBy(p => p.UserId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    PaidAmount = g.Sum(x => x.Amount)
+                }).ToList();
+
+            var result = punishments.Select(p => {
+                var paid = paidAmounts.FirstOrDefault(pa => pa.UserId == p.UserId);
+                var paidAmount = paid != null ? paid.PaidAmount : 0;
+
+                return new PunishmentEmployeeDto
+                {
+                    Email = p.Email,
+                    Money = Math.Max(0, p.TotalPunishment - paidAmount) 
+                };
+            }).ToList();
+
+            return result;
         }
 
         [HttpPost]

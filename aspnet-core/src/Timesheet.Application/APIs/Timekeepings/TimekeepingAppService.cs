@@ -445,6 +445,12 @@ namespace Timesheet.APIs.Timekeepings
                 up.UserId == AbpSession.UserId)
               .ToListAsync();
 
+            var totalPaidPunishment = await WorkScope.GetAll<UserPunishmentPaid>()
+                .Where(up => up.UserId == AbpSession.UserId && 
+                           up.DateAt.Year == year && 
+                           up.DateAt.Month == month)
+                .SumAsync(up => (int?)up.Amount) ?? 0;
+
             var userIds = tkList.Select(t => t.LastModifierUserId)
               .Union(upList.Select(up => up.CreatorUserId))
               .Where(id => id.HasValue)
@@ -516,7 +522,8 @@ namespace Timesheet.APIs.Timekeepings
                             BranchId = tk.User.BranchId,
                             StatusPunish = tk.StatusPunish,
                             TotalDayPunishment = totalDayPunishment,
-                            TotalMonthPunishmentTotal = totalMonthPunishmentTotal
+                            TotalMonthPunishmentTotal = totalMonthPunishmentTotal,
+                            TotalPaidPunishment = totalPaidPunishment
                         });
                     }
                 }
@@ -557,7 +564,8 @@ namespace Timesheet.APIs.Timekeepings
                         StatusPunish = tk.StatusPunish,
 
                         TotalDayPunishment = totalDayPunishment,
-                        TotalMonthPunishmentTotal = totalMonthPunishmentTotal
+                        TotalMonthPunishmentTotal = totalMonthPunishmentTotal,
+                        TotalPaidPunishment = totalPaidPunishment
                     });
                 }
             }
@@ -610,7 +618,8 @@ namespace Timesheet.APIs.Timekeepings
 
                         StatusPunish = CheckInCheckOutPunishmentType.NoPunish,
                         TotalDayPunishment = totalDayPunishment,
-                        TotalMonthPunishmentTotal = totalMonthPunishmentTotal
+                        TotalMonthPunishmentTotal = totalMonthPunishmentTotal,
+                        TotalPaidPunishment = totalPaidPunishment
                     });
                 }
             }

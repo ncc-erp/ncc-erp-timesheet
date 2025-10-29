@@ -114,7 +114,7 @@ export class TimekeepingDto {
   
   totalDayPunishment?: number;
   totalMonthPunishmentTotal?: number;
-  
+  totalPaidPunishment?: number;
   
   totalAttendancePunish?: number;
   totalDailyPunish?: number;

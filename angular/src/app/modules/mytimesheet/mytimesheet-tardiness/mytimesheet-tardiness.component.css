@@ -36,6 +36,38 @@
   border-collapse: collapse !important;
 }
 
+.punishment-summary {
+  margin-right: 15px;
+  min-width: 250px;
+}
+
+.punishment-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.punishment-label {
+  color: #333;
+  font-weight: 600;  /* Increased from 500 to 600 for bolder text */
+  margin-right: 10px;
+  white-space: nowrap;
+  font-weight: bold;  /* Added to ensure text is bold */
+}
+
+.punishment-amount {
+  font-weight: bold;
+  color: #d32f2f;
+  text-align: right;
+  min-width: 80px;
+}
+
+.punishment-amount.remaining {
+  color: #2e7d32;
+}
+
 .table-responsive th{
   vertical-align: middle;
 }

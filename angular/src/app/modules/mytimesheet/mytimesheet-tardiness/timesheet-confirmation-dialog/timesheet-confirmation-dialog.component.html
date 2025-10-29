@@ -38,25 +38,34 @@
         <tr *ngFor="let item of punishmentItems">
           <td>{{item.date | date:'MMM dd'}}</td>
           <td>
-            <span *ngIf="item.userPunishmentType === 0">No Punish</span>
-            <span *ngIf="item.userPunishmentType === 1 || item.statusPunish === 1">Late</span>
-            <span *ngIf="item.userPunishmentType === 2 || item.statusPunish === 2">No Check In</span>
-            <span *ngIf="item.userPunishmentType === 3 || item.statusPunish === 3">No Check Out</span>
-            <span *ngIf="item.userPunishmentType === 4 || item.statusPunish === 4">Late & No CheckOut</span>
-            <span *ngIf="item.userPunishmentType === 5 || item.statusPunish === 5">No CheckIn & Out</span>
-            <span *ngIf="item.userPunishmentType === 6">Daily</span>
-            <span *ngIf="item.userPunishmentType === 7">Mention</span>
-            <span *ngIf="item.userPunishmentType === 8">Tracker 20k</span>
-            <span *ngIf="item.userPunishmentType === 9">Tracker 50k</span>
-            <span *ngIf="item.userPunishmentType === 10">Tracker 100k</span>
-            <span *ngIf="item.userPunishmentType === 11">Tracker 200k</span>
-            <span *ngIf="item.userPunishmentType === 12">Review Intern</span>
-            <span *ngIf="item.userPunishmentType === 13">PM Report 20k</span>
-            <span *ngIf="item.userPunishmentType === 14">PM Report 50k</span>
-            <span *ngIf="item.userPunishmentType === 15">Ant</span>
-            <span *ngIf="item.userPunishmentType === 16">UnlockTS Gmail</span>
-            <span *ngIf="item.userPunishmentType === 17">UnlockTS IMS</span>
-            <span *ngIf="!item.userPunishmentType && !item.statusPunish && item.moneyPunish > 0">CheckIn CheckOut</span>
+            <ng-container [ngSwitch]="item.userPunishmentType">
+              <span *ngSwitchCase="0">No Punish</span>
+              <span *ngSwitchCase="1">Late</span>
+              <span *ngSwitchCase="2">No Check In</span>
+              <span *ngSwitchCase="3">No Check Out</span>
+              <span *ngSwitchCase="4">Late & No CheckOut</span>
+              <span *ngSwitchCase="5">No CheckIn & Out</span>
+              <span *ngSwitchCase="6">Daily</span>
+              <span *ngSwitchCase="7">Mention</span>
+              <span *ngSwitchCase="8">Tracker 20k</span>
+              <span *ngSwitchCase="9">Tracker 50k</span>
+              <span *ngSwitchCase="10">Tracker 100k</span>
+              <span *ngSwitchCase="11">Tracker 200k</span>
+              <span *ngSwitchCase="12">Review Intern</span>
+              <span *ngSwitchCase="13">PM Report 20k</span>
+              <span *ngSwitchCase="14">PM Report 50k</span>
+              <span *ngSwitchCase="15">Ant</span>
+              <span *ngSwitchCase="16">UnlockTS Gmail</span>
+              <span *ngSwitchCase="17">UnlockTS IMS</span>
+              <span *ngSwitchDefault>
+                <span *ngIf="item.statusPunish === 1">Late</span>
+                <span *ngIf="item.statusPunish === 2">No Check In</span>
+                <span *ngIf="item.statusPunish === 3">No Check Out</span>
+                <span *ngIf="item.statusPunish === 4">Late & No CheckOut</span>
+                <span *ngIf="item.statusPunish === 5">No CheckIn & Out</span>
+                <span *ngIf="!item.statusPunish && item.moneyPunish > 0">CheckIn CheckOut</span>
+              </span>
+            </ng-container>
           </td>
           <td>{{item.moneyPunish | number}}</td>
         </tr>
@@ -84,7 +93,14 @@
         </tr>
         <tr *ngFor="let item of punishmentPaidItems">
           <td>{{item.dateAt | date:'MMM dd, yyyy'}}</td>
-          <td class="tx-hash">{{item.txHash}}</td>
+          <td>
+            <a href="#" 
+               class="tx-hash" 
+               (click)="$event.preventDefault(); openTransaction(item.txHash, $event);"
+               [class.clickable]="indexerUrl && item.txHash">
+              {{item.txHash}}
+            </a>
+          </td>
           <td>{{item.amount | number}}</td>
         </tr>
       </tbody>
@@ -151,7 +167,7 @@
     <button mat-raised-button color="primary" [disabled]="!contributeToFund" (click)="donate()" class="donate-button">
       Donate on dong.mezon.ai
     </button>
-    <button mat-raised-button color="accent" (click)="markAsPaid()" class="paid-button">
+    <button mat-raised-button color="accent" [disabled]="!contributeToFund" (click)="markAsPaid()" class="paid-button">
       Mark as Paid
     </button>
   </div>
