@@ -862,7 +862,7 @@ namespace Timesheet.APIs.Public
                 }).ToList();
         }
         [HttpGet]
-        public List<PMsOfUser> FilterGetPMsOfUser(string email, DateTime? startDate = null, DateTime? endDate = null)
+        public List<PMsOfUser> GetPMsOfUserbyFilter(string email, DateTime? startDate = null, DateTime? endDate = null)
         {
             using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete))
             {
@@ -906,7 +906,6 @@ namespace Timesheet.APIs.Public
                 return result;
             }
         }
-
         [AbpAllowAnonymous]
         [HttpGet]
         public List<TimesheetAndCheckInOutAllUserDto> GetTimesheetAndCheckInOutAllUser(DateTime startDate, DateTime endDate)
