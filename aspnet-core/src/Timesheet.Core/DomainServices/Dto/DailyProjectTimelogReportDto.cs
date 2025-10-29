@@ -8,6 +8,9 @@ namespace Timesheet.DomainServices.Dto
         public class DailyProjectTimelogReportDto
         {
             public string ReportDate { get; set; }
+            public string LastWeekStart { get; set; }
+            public string LastWeekEnd { get; set; }
+            public string LastMonth { get; set; }
             public List<ProjectTimelogDto> Projects { get; set; }
 
             public DailyProjectTimelogReportDto()

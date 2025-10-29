@@ -7,7 +7,7 @@ using Ncc.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Timesheet.Core;
+using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Uitls;
 
@@ -15,11 +15,11 @@ namespace Timesheet.BackgroundWorker
 {
     public class AnomaliesReportWorker : PeriodicBackgroundWorkerBase, ISingletonDependency
     {
-        private readonly IAbsenceDayServices _absenceDayServices;
+        private readonly IAbsenceDayService _absenceDayServices;
 
         public AnomaliesReportWorker(
             AbpTimer timer,
-            IAbsenceDayServices absenceDayServices
+            IAbsenceDayService absenceDayServices
         ) : base(timer)
         {
             _absenceDayServices = absenceDayServices;

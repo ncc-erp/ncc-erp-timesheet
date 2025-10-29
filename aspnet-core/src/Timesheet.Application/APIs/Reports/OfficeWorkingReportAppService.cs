@@ -15,6 +15,7 @@ using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Timesheet.APIs.BotReportDaily.Dto;
 using Timesheet.APIs.Reports.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.Mezon;
@@ -704,14 +705,14 @@ namespace Timesheet.APIs.Reports
                     if (remoteFlags.Morning || remoteFlags.Afternoon)
                     {
                         int workingMinutes = trackerMinutes > 0 ? trackerMinutes : (mMin + aMin);
-                        var trackerHours = workingMinutes / 60.0;
+                        var trackerHours = Math.Round(workingMinutes / 60.0, 1);
                         row.TotalAllLW += trackerHours;
                         row.WfhLW += trackerHours;
                     }
                     else
                     {
                         int officeTime = (mMin + aMin) > 0 ? (mMin + aMin) : trackerMinutes;
-                        var officeHours = officeTime / 60.0;
+                        var officeHours = Math.Round(officeTime / 60.0, 1);
                         row.TotalAllLW += officeHours;
                         row.OfficeLW += officeHours;
                     }
@@ -721,14 +722,14 @@ namespace Timesheet.APIs.Reports
                     if (remoteFlags.Morning || remoteFlags.Afternoon)
                     {
                         int workingMinutes = trackerMinutes > 0 ? trackerMinutes : (mMin + aMin);
-                        var trackerHours = workingMinutes / 60.0;
+                        var trackerHours = Math.Round(workingMinutes / 60.0, 1);
                         row.TotalAllLM += trackerHours;
                         row.WfhLM += trackerHours;
                     }
                     else
                     {
                         int officeTime = (mMin + aMin) > 0 ? (mMin + aMin) : trackerMinutes;
-                        var officeHours = officeTime / 60.0;
+                        var officeHours = Math.Round(officeTime / 60.0, 1);
                         row.TotalAllLM += officeHours;
                         row.OfficeLM += officeHours;
                     }
@@ -848,6 +849,55 @@ namespace Timesheet.APIs.Reports
             sb.AppendLine("Total branches: {offices.Count}");
             sb.AppendLine("Time: LW ({lwStart:dd/MM}–{lwEnd:dd/MM}) | LM ({lmStart:dd/MM}–{lmEnd:dd/MM})");
             return sb.ToString();
+        }
+
+        public async Task<OfficeWorkingTimelogReportDto> GetOfficeWorkingTimelogReport(GetOfficeWorkingTimelogReportInput input)
+        {
+            var now = DateTimeUtils.GetNow().Date;
+            var (lwStart, lwEnd) = GetLastWeekRange(now);
+            var lmStart = DateTimeUtils.FirstDayOfMonth(now.AddMonths(-1));
+            var lmEnd = DateTimeUtils.LastDayOfMonth(now.AddMonths(-1));
+
+            var allBranches = await WorkScope.GetAll<Branch>()
+                .Select(b => new { b.Id, b.Code })
+                .AsNoTracking()
+                .ToListAsync();
+
+            var branchDict = allBranches.ToDictionary(b => b.Code, b => b.Id);
+            List<long> officeIds;
+
+            if (input.BranchCodes == null || !input.BranchCodes.Any())
+            {
+                officeIds = allBranches.Select(b => b.Id).ToList();
+            }
+            else
+            {
+                officeIds = input.BranchCodes
+                    .Where(code => branchDict.ContainsKey(code))
+                    .Select(code => branchDict[code])
+                    .ToList();
+
+                if (!officeIds.Any())
+                {
+                    throw new Abp.UI.UserFriendlyException("No valid branch codes provided.");
+                }
+            }
+
+            var result = new OfficeWorkingTimelogReportDto
+            {
+                LastWeekStart = lwStart.ToString("yyyy-MM-dd"),
+                LastWeekEnd = lwEnd.ToString("yyyy-MM-dd"),
+                LastMonth = lmStart.ToString("yyyy-MM"),
+                OfficeWorkingData = new List<OfficeWorkingTopLWLMDto>()
+            };
+
+            foreach (var officeId in officeIds)
+            {
+                var officeData = await ListTopOfficeWorkingTimeLWLMInternal(officeId, input.Limit);
+                result.OfficeWorkingData.AddRange(officeData);
+            }
+
+            return result;
         }
     }
 }

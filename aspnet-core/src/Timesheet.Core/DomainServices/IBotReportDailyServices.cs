@@ -10,6 +10,7 @@ namespace Timesheet.DomainServices
 {
     public interface IBotReportDailyService : IDomainService
     {
+        Task<DailyProjectTimelogReportDto> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input);
         Task<bool> SendDailyProjectTimelogToMezon(GetDailyProjectTimelogReportInput input);
         Task<bool> SendDailyProjectTimelogToMezon();
     }
