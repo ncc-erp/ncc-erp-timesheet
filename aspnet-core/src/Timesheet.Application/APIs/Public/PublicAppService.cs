@@ -866,43 +866,53 @@ namespace Timesheet.APIs.Public
         {
             using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete))
             {
-                IQueryable<ProjectUser> ApplyFilter(IQueryable<ProjectUser> query)
-                {
-                    if (startDate.HasValue || endDate.HasValue)
+                var qPms = WorkScope.GetAll<ProjectUser>()
+                    .Where(p => p.Type == ProjectUserType.PM)
+                    .Select(p => new
                     {
-                        query = query.Where(x => (!startDate.HasValue || x.CreationTime.Date >= startDate.Value.Date) &&
-                          (!endDate.HasValue || x.CreationTime.Date <= endDate.Value.Date));
-                    }
-                    return query;
+                        ProjectId = p.ProjectId,
+                        UserType = p.User.Type,
+                        FullName = p.User.FullName,
+                        BranchName = p.User.Branch.Name,
+                        EmailAddress = p.User.EmailAddress,
+                        AvatarPath = p.User.AvatarPath
+                    });
+                IQueryable<ProjectUser> userProjectQuery = WorkScope.GetAll<ProjectUser>()
+                    .Where(s => s.Project.Status == ProjectStatus.Active)
+                    .Where(s => s.Type != ProjectUserType.DeActive)
+                    .Where(x => x.User.EmailAddress == email);
+
+                if (startDate.HasValue || endDate.HasValue)
+                {
+                    userProjectQuery = userProjectQuery.Where(x => (!startDate.HasValue || x.CreationTime.Date >= startDate.Value.Date)
+                        && (!endDate.HasValue || x.CreationTime.Date <= endDate.Value.Date));
                 }
-                var baseQuery = ApplyFilter(WorkScope.GetAll<ProjectUser>()
-                  .Where(s => s.Project.Status == ProjectStatus.Active));
-                var userProjects = baseQuery
-                  .Where(x => x.User.EmailAddress == email)
-                  .Select(x => x.ProjectId)
-                  .Distinct();
+
+                var userProjects = userProjectQuery
+                    .Select(x => new { x.ProjectId, x.Project.Name, x.Project.Code })
+                    .Distinct()
+                    .ToList();
+
                 if (!userProjects.Any())
                 {
                     return new List<PMsOfUser>();
                 }
-                var result = baseQuery
-                  .Where(p => p.Type == ProjectUserType.PM)
-                  .Where(p => userProjects.Contains(p.ProjectId))
-                  .GroupBy(p => p.Project)
-                  .Select(g => new PMsOfUser
-                  {
-                      ProjectName = g.Key.Name,
-                      ProjectCode = g.Key.Code,
-                      PMs = g.Select(pm => new UserInfo
-                      {
-                          UserType = pm.User.Type,
-                          FullName = pm.User.FullName,
-                          BranchName = pm.User.Branch.Name,
-                          EmailAddress = pm.User.EmailAddress,
-                          AvatarPath = pm.User.AvatarPath
-                      }).ToList()
-                  })
-                  .ToList();
+                var result = userProjects.Select(x => new PMsOfUser
+                {
+                    ProjectName = x.Name,
+                    ProjectCode = x.Code,
+                    PMs = qPms
+                        .Where(p => p.ProjectId == x.ProjectId)
+                        .Select(p => new UserInfo
+                        {
+                            UserType = p.UserType,
+                            FullName = p.FullName,
+                            BranchName = p.BranchName,
+                            EmailAddress = p.EmailAddress,
+                            AvatarPath = p.AvatarPath
+                        }).ToList()
+                }).ToList();
+
                 return result;
             }
         }
