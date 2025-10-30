@@ -20,8 +20,8 @@ namespace Timesheet.DomainServices.Dto
         }
     }
 
-    public class AnomaliesTimelogReportInputDto
+    public class GetAnomaliesTimelogReportInput
     {
-        public List<string> BranchCodes { get; set; } = new List<string>();
+        public List<long> BranchIds { get; set; } = new List<long>();
     }
 }

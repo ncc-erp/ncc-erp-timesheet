@@ -12,6 +12,6 @@ namespace Timesheet.DomainServices
         Task<List<YesterdayAnomalyDTO>> GetYesterdayAnomalies(string branchName, DateTime date);
         Task<List<LastWeekAnomalyDTO>> GetLastWeekAnomalies(string branchName, DateTime startDate, DateTime endDate);
         Task<bool> SendDailyAnomaliesToMezon(AnomaliesReportSettingDto input, bool isWeekly);
-        Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(AnomaliesTimelogReportInputDto input);
+        Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportInput input);
     }
 }
