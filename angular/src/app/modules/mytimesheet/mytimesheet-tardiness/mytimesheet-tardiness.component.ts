@@ -74,6 +74,11 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     });
   }
 
+  getRemainingPunishment(): number {
+    const remaining = this.totalMonthlyPunishment - this.totalPaidPunishment;
+    return remaining > 0 ? remaining : 0;
+  }
+
   getData() {
     this.isTableLoading = true;
     this.timekeepingService.getMyDetails(this.year, this.month + 1).subscribe(res => {
