@@ -1,4 +1,5 @@
 ﻿using Abp.Application.Services;
+using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Configuration;
 using Abp.Domain.Repositories;
@@ -16,9 +17,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Timesheet.APIs.BotReportDaily.Dto;
 using Timesheet.APIs.Reports;
+using Timesheet.APIs.Reports.Dto;
 using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
+using Timesheet.Paging;
 using Timesheet.Services.Mezon;
 using static Ncc.Entities.Enum.StatusEnum;
 
@@ -40,10 +43,10 @@ namespace Timesheet.APIs.BotReportDaily
             _officeWorkingReportAppService = officeWorkingReportAppService;
         }
 
-        [HttpGet]
-        public async Task<OfficeWorkingTimelogReportDto> GetDailyProjectTimelogReport(GetOfficeWorkingTimelogReportInput input)
+        [HttpPost]
+        public async Task<PagedOfficeWorkingTopLWLMDto> GetDailyProjectTimelogReport(GetOfficeWorkingTimelogReportRequestDto request)
         {
-            return await _officeWorkingReportAppService.GetOfficeWorkingTimelogReport(input);
+            return await _officeWorkingReportAppService.GetOfficeWorkingTimelogReport(request);
         }
     }
 }
