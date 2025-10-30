@@ -1,4 +1,5 @@
 using Abp.Application.Services;
+using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Configuration;
 using Abp.Domain.Repositories;
@@ -14,8 +15,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Timesheet.DomainServices.Dto;
 using Timesheet.DomainServices;
+using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.Mezon;
 using static Ncc.Entities.Enum.StatusEnum;
@@ -38,10 +39,10 @@ namespace Timesheet.APIs.BotReportDaily
             _botReportDailyService = botReportDailyService;
         }
 
-        [HttpGet]
-        public async Task<DailyProjectTimelogReportDto> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input)
+        [HttpPost]
+        public async Task<PagedProjectTimelogDto> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportRequestDto request)
         {
-            return await _botReportDailyService.GetDailyProjectTimelogReport(input);
+            return await _botReportDailyService.GetDailyProjectTimelogReport(request);
         }
     }
 }

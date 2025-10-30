@@ -17,6 +17,7 @@ using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.Mezon;
 using static Ncc.Entities.Enum.StatusEnum;
+using Abp.Application.Services.Dto;
 
 namespace Timesheet.DomainServices
 {
@@ -34,7 +35,7 @@ namespace Timesheet.DomainServices
             _mezonService = mezonService;
         }
 
-        public async Task<DailyProjectTimelogReportDto> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input)
+        private async Task<List<ProjectTimelogDto>> GetProjectTimelogForBot(GetDailyProjectTimelogReportInput input)
         {
             var today = DateTime.Now.Date;
 
@@ -95,18 +96,6 @@ namespace Timesheet.DomainServices
                 branchNames.AddRange(branchDict.Values);
             }
 
-            if (!officeUsers.Any())
-            {
-                return new DailyProjectTimelogReportDto
-                {
-                    ReportDate = today.ToString("yyyy-MM-dd"),
-                    LastWeekStart = lastWeekStart.ToString("yyyy-MM-dd"),
-                    LastWeekEnd = lastWeekEnd.ToString("yyyy-MM-dd"),
-                    LastMonth = lastMonthStart.ToString("yyyy-MM"),
-                    Projects = new List<ProjectTimelogDto>()
-                };
-            }
-
             var activeProjectIds = (input.ProjectIds != null && input.ProjectIds.Any())
                 ? allProjects.Where(p => input.ProjectIds.Contains(p.Id)).Select(p => p.Id).ToList()
                 : allProjects.Select(p => p.Id).ToList();
@@ -140,37 +129,69 @@ namespace Timesheet.DomainServices
                 })
                 .ToList();
 
-            var result = new DailyProjectTimelogReportDto
+            var result = projectTimesheets
+                .Select(p => new ProjectTimelogDto
+                {
+                    Name = allProjects.FirstOrDefault(proj => proj.Id == p.ProjectId)?.Name ?? "Unknown Project",
+                    Members = allUsers
+                        .Where(u => p.UserIds.Contains(u.Id))
+                        .Select(u => u.FullName)
+                        .OrderBy(name => name)
+                        .ToList(),
+                    TotalTimelogLW = Math.Round(p.TotalMinutesLW / 60.0, 2),
+                    TotalTimelogLM = Math.Round(p.TotalMinutesLM / 60.0, 2)
+                })
+                .Where(p => p.TotalTimelogLW >= (input.MinHours ?? 0))
+                .OrderByDescending(p => p.TotalTimelogLW)
+                .ThenByDescending(p => p.TotalTimelogLM)
+                .ThenBy(p => p.Name)
+                .ToList();
+
+            if (input.TopN.HasValue && input.TopN.Value > 0 && result.Count > input.TopN.Value)
+            {
+                result = result.Take(input.TopN.Value).ToList();
+            }
+
+            return result;
+        }
+
+        public async Task<PagedProjectTimelogDto> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportRequestDto request)
+        {
+            var input = request.Input;
+            var param = request.Param;
+
+            var today = DateTime.Now.Date;
+
+            var lastWeekEnd = today.AddDays(-(int)today.DayOfWeek);
+            if (lastWeekEnd == today)
+            {
+                lastWeekEnd = today.AddDays(-7);
+            }
+            var lastWeekStart = lastWeekEnd.AddDays(-6);
+
+            var lastMonthEnd = new DateTime(today.Year, today.Month, 1).AddDays(-1);
+            var lastMonthStart = new DateTime(lastMonthEnd.Year, lastMonthEnd.Month, 1);
+
+            var data = await GetProjectTimelogForBot(input);
+
+            var query = data.AsQueryable();
+
+            var totalCount = query.Count();
+
+            var items = query
+                .Skip(param.SkipCount)
+                .Take(param.MaxResultCount)
+                .ToList();
+
+            return new PagedProjectTimelogDto
             {
                 ReportDate = today.ToString("yyyy-MM-dd"),
                 LastWeekStart = lastWeekStart.ToString("yyyy-MM-dd"),
                 LastWeekEnd = lastWeekEnd.ToString("yyyy-MM-dd"),
                 LastMonth = lastMonthStart.ToString("yyyy-MM"),
-                Projects = projectTimesheets
-                    .Select(p => new ProjectTimelogDto
-                    {
-                        Name = allProjects.FirstOrDefault(proj => proj.Id == p.ProjectId)?.Name ?? "Unknown Project",
-                        Members = allUsers
-                            .Where(u => p.UserIds.Contains(u.Id))
-                            .Select(u => u.FullName)
-                            .OrderBy(name => name)
-                            .ToList(),
-                        TotalTimelogLW = Math.Round(p.TotalMinutesLW / 60.0, 2),
-                        TotalTimelogLM = Math.Round(p.TotalMinutesLM / 60.0, 2)
-                    })
-                    .Where(p => p.TotalTimelogLW >= (input.MinHours ?? 0))
-                    .OrderByDescending(p => p.TotalTimelogLW)
-                    .ThenByDescending(p => p.TotalTimelogLM)
-                    .ThenBy(p => p.Name)
-                    .ToList()
+                TotalCount = totalCount,
+                Items = items
             };
-
-            if (input.TopN.HasValue && input.TopN.Value > 0 && result.Projects.Count > input.TopN.Value)
-            {
-                result.Projects = result.Projects.Take(input.TopN.Value).ToList();
-            }
-
-            return result;
         }
 
         public async Task<bool> SendDailyProjectTimelogToMezon()
@@ -265,7 +286,7 @@ namespace Timesheet.DomainServices
                 ProjectIds = input.ProjectIds ?? new List<long>()
             };
 
-            var reportData = await GetDailyProjectTimelogReport(reportInput);
+            var reportData = await GetProjectTimelogForBot(reportInput);
 
             var webhookUrl = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportWebhookUrl);
 
@@ -274,7 +295,7 @@ namespace Timesheet.DomainServices
                 return false;
             }
 
-            var projectData = reportData.Projects
+            var projectData = reportData
                 .OrderByDescending(x => x.TotalTimelogLW)
                 .Take(input.TopN ?? 10)
                 .Select(x => new
