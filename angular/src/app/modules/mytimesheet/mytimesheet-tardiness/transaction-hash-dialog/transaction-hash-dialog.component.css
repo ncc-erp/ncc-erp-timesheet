@@ -1,0 +1,21 @@
+.transaction-hash-dialog {
+  min-width: 400px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.hint {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+  font-family: monospace;
+  word-break: break-all;
+}
+
+mat-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}

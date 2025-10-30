@@ -1,0 +1,174 @@
+<div class="timesheet-confirmation-dialog">
+  <div class="dialog-header">
+    <h2>Timesheet Confirmation – {{weekNumber > 0 ? 'Week ' + weekNumber : 'Month'}} ({{weekRange}})</h2>
+    <div class="currency">Currency: đồng</div>
+  </div>
+
+  <div class="summary-section">
+    <div class="summary-item">
+      <div class="summary-label">Total Errors</div>
+      <div class="summary-value">{{totalErrors}}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">Total Fine</div>
+      <div class="summary-value">{{totalFine | number}}</div>
+      <div class="summary-note" *ngIf="calculateTotalPaidAmount() > 0">
+        (Paid: {{calculateTotalPaidAmount() | number}})
+      </div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">Status</div>
+      <div class="summary-value" [ngClass]="{'paid': isPaid, 'not-paid': !isPaid}">
+        {{isPaid ? 'Paid' : 'Not Paid'}}
+      </div>
+    </div>
+  </div>
+
+  <div class="error-summary">
+    <h3>Punishment Summarry</h3>
+    <table class="error-table">
+      <thead>
+        <tr>
+          <th>DATE</th>
+          <th>ERROR TYPE</th>
+          <th>FINE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of punishmentItems">
+          <td>{{item.date | date:'MMM dd'}}</td>
+          <td>
+            <ng-container [ngSwitch]="item.userPunishmentType">
+              <span *ngSwitchCase="0">No Punish</span>
+              <span *ngSwitchCase="1">Late</span>
+              <span *ngSwitchCase="2">No Check In</span>
+              <span *ngSwitchCase="3">No Check Out</span>
+              <span *ngSwitchCase="4">Late & No CheckOut</span>
+              <span *ngSwitchCase="5">No CheckIn & Out</span>
+              <span *ngSwitchCase="6">Daily</span>
+              <span *ngSwitchCase="7">Mention</span>
+              <span *ngSwitchCase="8">Tracker 20k</span>
+              <span *ngSwitchCase="9">Tracker 50k</span>
+              <span *ngSwitchCase="10">Tracker 100k</span>
+              <span *ngSwitchCase="11">Tracker 200k</span>
+              <span *ngSwitchCase="12">Review Intern</span>
+              <span *ngSwitchCase="13">PM Report 20k</span>
+              <span *ngSwitchCase="14">PM Report 50k</span>
+              <span *ngSwitchCase="15">Ant</span>
+              <span *ngSwitchCase="16">UnlockTS Gmail</span>
+              <span *ngSwitchCase="17">UnlockTS IMS</span>
+              <span *ngSwitchDefault>
+                <span *ngIf="item.statusPunish === 1">Late</span>
+                <span *ngIf="item.statusPunish === 2">No Check In</span>
+                <span *ngIf="item.statusPunish === 3">No Check Out</span>
+                <span *ngIf="item.statusPunish === 4">Late & No CheckOut</span>
+                <span *ngIf="item.statusPunish === 5">No CheckIn & Out</span>
+                <span *ngIf="!item.statusPunish && item.moneyPunish > 0">CheckIn CheckOut</span>
+              </span>
+            </ng-container>
+          </td>
+          <td>{{item.moneyPunish | number}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="punishment-paid-summary">
+    <h3>Punishment Paid</h3>
+    <div *ngIf="isLoadingPaidData" class="loading-container">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading payment data...</div>
+    </div>
+    <table class="error-table" *ngIf="!isLoadingPaidData">
+      <thead>
+        <tr>
+          <th>DATE</th>
+          <th>TX HASH</th>
+          <th>AMOUNT</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!punishmentPaidItems || punishmentPaidItems.length === 0">
+          <td colspan="3" class="no-data">No payment records found</td>
+        </tr>
+        <tr *ngFor="let item of punishmentPaidItems">
+          <td>{{item.dateAt | date:'MMM dd, yyyy'}}</td>
+          <td>
+            <a href="#" 
+               class="tx-hash" 
+               (click)="$event.preventDefault(); openTransaction(item.txHash, $event);"
+               [class.clickable]="indexerUrl && item.txHash">
+              {{item.txHash}}
+            </a>
+          </td>
+          <td>{{item.amount | number}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="timesheet-calendar-section">
+    <h3>Monthly Timesheet Calendar</h3>
+    <div *ngIf="isLoadingCalendarData" class="loading-container">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading calendar data...</div>
+    </div>
+    <div class="calendar-container" *ngIf="!isLoadingCalendarData">
+      <div [ngSwitch]="view" class="calendar-scale">
+        <mwl-calendar-month-view
+          *ngSwitchCase="calendarView.Month"
+          [viewDate]="viewDate"
+          [events]="events"
+          [refresh]="refresh"
+          [activeDayIsOpen]="activeDayIsOpen"
+          [cellTemplate]="customCellTemplate"
+        >
+        </mwl-calendar-month-view>
+      </div>
+    </div>
+    <ng-template #customCellTemplate let-day="day" let-locale="locale">
+      <div class="cal-cell-top">
+        <span class="cal-day-number">
+          {{ day.date | calendarDate:(view + 'ViewDayNumber') : locale }}
+        </span>
+        <ng-container *ngIf="day.events && day.events.length > 0 && day.events[0].meta && day.events[0].meta.timesheets">
+          <div 
+            *ngFor="let ts of day.events[0].meta.timesheets"
+            class="working-hours"
+            [ngClass]="getWorkingHoursClass(ts.status)">
+            {{ formatWorkingHours(ts.workingTime) }}h
+          </div>
+        </ng-container>
+      </div>
+    </ng-template>
+    <div class="calendar-legend">
+      <div class="legend-item">
+        <div class="legend-color pending"></div>
+        <span>Pending</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color approved"></div>
+        <span>Approved</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color other"></div>
+        <span>Rejected/Not Submitted</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="contribution-section">
+    <mat-checkbox [(ngModel)]="contributeToFund">
+      I want to contribute my fine to: <strong>{{selectedFund}}</strong>
+    </mat-checkbox>
+  </div>
+
+  <div class="dialog-footer">
+    <button mat-raised-button color="primary" [disabled]="!contributeToFund" (click)="donate()" class="donate-button">
+      Donate on dong.mezon.ai
+    </button>
+    <button mat-raised-button color="accent" [disabled]="!contributeToFund" (click)="markAsPaid()" class="paid-button">
+      Mark as Paid
+    </button>
+  </div>
+</div>

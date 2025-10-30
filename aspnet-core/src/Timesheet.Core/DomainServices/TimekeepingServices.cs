@@ -464,102 +464,104 @@ namespace Timesheet.DomainServices
             return (rs, userPunishmentsToInsert);
         }
 
-        [UnitOfWork]
+        [UnitOfWork(TransactionScopeOption.RequiresNew)]
         public async Task<List<Timekeeping>> AddTimekeepingByDay(DateTime selectedDate)
         {
-            var start = DateTime.Now;
-            var now = DateTimeUtils.GetNow();
-            await EnsureNotOffDate(selectedDate);
-
-            var users = await GetWorkingUsers(selectedDate);
-
-            var oldTimekeepingNotes = await SoftDeleteOldTimekeeping(selectedDate);
-            await SoftDeleteOldPunishments(selectedDate);
-
-            var (mapAbsenceUsers, mapRemoteUsers) = await GetAbsenceAndRemoteUsers(selectedDate);
-            var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, mapWFHUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
-
             var allTimekeepings = new List<Timekeeping>();
             var allPunishments = new List<UserPunishment>();
 
-            int batchSize = 100;
-            for (int i = 0; i < users.Count; i += batchSize)
-            {
-                var batch = users.Skip(i).Take(batchSize).ToList();
-
-                try
-                {
-                    Logger.Info($"Processing batch {i / batchSize + 1} with {batch.Count} users...");
-
-                    var tasks = batch.Select(user =>
-                        GenerateTimekeepingRecords(
-                            selectedDate,
-                            user,
-                            mapCheckInUsers,
-                            mapDailyUsers,
-                            mapMentionUsers,
-                            mapWFHUsers,
-                            dicUserNameToTracker,
-                            punishmentSystems,
-                            oldTimekeepingNotes,
-                            mapAbsenceUsers,
-                            mapRemoteUsers
-                        )
-                    );
-
-                    var result = await System.Threading.Tasks.Task.WhenAll(tasks);
-
-                    allTimekeepings.AddRange(result.SelectMany(r => r.rs));
-                    allPunishments.AddRange(result.SelectMany(r => r.userPunishmentsToInsert));
-
-
-                    Logger.Info($"Finished batch {i / batchSize + 1}. " +
-                                $"Accumulated {allTimekeepings.Count} records so far.");
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error($"❌ Error in batch {i / batchSize + 1}, " +
-                                 $"users {batch.First().UserId} → {batch.Last().UserId}. " +
-                                 $"Error: {ex}");
-                }
-            }
-
-            //await SaveDailyAndMentionPunishments(selectedDate, users, mapDailyUsers, mapMentionUsers, punishmentSystems);
-            Logger.Info($"✅ Successfully processed timekeeping for date {selectedDate:yyyy-MM-dd}. " +
-                        $"Total {allTimekeepings.Count} records, {allPunishments.Count} punishments.");
-
-            // TODO: check again
-            var userEmail = users.Select(u => u.EmailAddress).ToHashSet();
-            var checkInUsersOnly = mapCheckInUsers.Values
-                .Where(u => !userEmail.Contains(u.Email))
-                .ToList();
-
-            foreach (var checkIn in checkInUsersOnly)
-            {
-                var t = new Timekeeping
-                {
-                    UserEmail = checkIn.Email,
-                    CheckIn = checkIn?.VerifyStartTimeStr,
-                    CheckOut = checkIn?.VerifyEndTimeStr,
-                    DateAt = selectedDate,
-                    NoteReply = "Email not match",
-                    TrackerTime = dicUserNameToTracker.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTracker[checkIn.Email.Split("@")[0]].active_time : "0",
-                };
-                ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
-
-                try
-                {
-                    allTimekeepings.Add(t);
-                }
-                catch (Exception e)
-                {
-                    Logger.Error($"INSERT DATA ISSUE email: {t.User?.EmailAddress} Error: {e.Message}");
-                }
-            }
-
+            var start = DateTime.Now;
+            var now = DateTimeUtils.GetNow();
             var uow = UnitOfWorkManager.Begin(TransactionScopeOption.RequiresNew);
             try
             {
+                await EnsureNotOffDate(selectedDate);
+
+                var users = await GetWorkingUsers(selectedDate);
+
+                var oldTimekeepingNotes = await SoftDeleteOldTimekeeping(selectedDate);
+                await SoftDeleteOldPunishments(selectedDate);
+
+                var (mapAbsenceUsers, mapRemoteUsers) = await GetAbsenceAndRemoteUsers(selectedDate);
+                var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, mapWFHUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
+
+
+                int batchSize = 100;
+                for (int i = 0; i < users.Count; i += batchSize)
+                {
+                    var batch = users.Skip(i).Take(batchSize).ToList();
+
+                    try
+                    {
+                        Logger.Info($"Processing batch {i / batchSize + 1} with {batch.Count} users...");
+
+                        var tasks = batch.Select(user =>
+                            GenerateTimekeepingRecords(
+                                selectedDate,
+                                user,
+                                mapCheckInUsers,
+                                mapDailyUsers,
+                                mapMentionUsers,
+                                mapWFHUsers,
+                                dicUserNameToTracker,
+                                punishmentSystems,
+                                oldTimekeepingNotes,
+                                mapAbsenceUsers,
+                                mapRemoteUsers
+                            )
+                        );
+
+                        var result = await System.Threading.Tasks.Task.WhenAll(tasks);
+
+                        allTimekeepings.AddRange(result.SelectMany(r => r.rs));
+                        allPunishments.AddRange(result.SelectMany(r => r.userPunishmentsToInsert));
+
+
+                        Logger.Info($"Finished batch {i / batchSize + 1}. " +
+                                    $"Accumulated {allTimekeepings.Count} records so far.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error($"❌ Error in batch {i / batchSize + 1}, " +
+                                     $"users {batch.First().UserId} → {batch.Last().UserId}. " +
+                                     $"Error: {ex}");
+                    }
+                }
+
+                //await SaveDailyAndMentionPunishments(selectedDate, users, mapDailyUsers, mapMentionUsers, punishmentSystems);
+                Logger.Info($"✅ Successfully processed timekeeping for date {selectedDate:yyyy-MM-dd}. " +
+                            $"Total {allTimekeepings.Count} records, {allPunishments.Count} punishments.");
+
+                // TODO: check again
+                var userEmail = users.Select(u => u.EmailAddress).ToHashSet();
+                var checkInUsersOnly = mapCheckInUsers.Values
+                    .Where(u => !userEmail.Contains(u.Email))
+                    .ToList();
+
+                foreach (var checkIn in checkInUsersOnly)
+                {
+                    var t = new Timekeeping
+                    {
+                        UserEmail = checkIn.Email,
+                        CheckIn = checkIn?.VerifyStartTimeStr,
+                        CheckOut = checkIn?.VerifyEndTimeStr,
+                        DateAt = selectedDate,
+                        NoteReply = "Email not match",
+                        TrackerTime = dicUserNameToTracker.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTracker[checkIn.Email.Split("@")[0]].active_time : "0",
+                    };
+                    ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
+
+                    try
+                    {
+                        allTimekeepings.Add(t);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error($"INSERT DATA ISSUE email: {t.User?.EmailAddress} Error: {e.Message}");
+                    }
+                }
+
+
                 await WorkScope.InsertRangeAsync(allTimekeepings);
                 await WorkScope.InsertRangeAsync(allPunishments);
 

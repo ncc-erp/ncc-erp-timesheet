@@ -1,6 +1,5 @@
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
-import { DateAdapter } from '@angular/material/core';
-import { CalendarModule } from 'angular-calendar';
+import { CalendarModule, DateAdapter } from 'angular-calendar';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -14,9 +13,15 @@ import { MytimesheetTardinessComponent } from './mytimesheet-tardiness/mytimeshe
 import { TimesheetWarningDialogComponent } from './timesheet-warning-dialog/timesheet-warning-dialog.component';
 import { MytimesheetNormalWorkingComponent } from './mytimesheet-normal-working/mytimesheet-normal-working.component';
 import { ComplainDialogComponent } from './mytimesheet-tardiness/complain-dialog/complain-dialog.component';
+import { TimesheetConfirmationDialogComponent } from './mytimesheet-tardiness/timesheet-confirmation-dialog/timesheet-confirmation-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatInputModule } from '@angular/material/input';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { TransactionHashDialogComponent } from './mytimesheet-tardiness/transaction-hash-dialog/transaction-hash-dialog.component';
+
 @NgModule({
     declarations: [
       CreateEditTimesheetByWeekComponent,
@@ -25,7 +30,9 @@ import { MatButtonModule } from '@angular/material/button';
       MytimesheetTardinessComponent,
       TimesheetWarningDialogComponent,
       MytimesheetNormalWorkingComponent,
-      ComplainDialogComponent
+      ComplainDialogComponent,
+      TimesheetConfirmationDialogComponent,
+      TransactionHashDialogComponent
     ],
     imports: [
       CommonModule,
@@ -40,13 +47,18 @@ import { MatButtonModule } from '@angular/material/button';
     }),
     MatDialogModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatCheckboxModule,
+    MatInputModule,
+    MatSnackBarModule
     ],
     entryComponents: [
       CreateEditTimesheetItemComponent,
       CreateEditTimesheetByWeekComponent,
       TimesheetWarningDialogComponent,
-      ComplainDialogComponent
+      ComplainDialogComponent,
+      TimesheetConfirmationDialogComponent,
+      TransactionHashDialogComponent
     ]
   })
   export class MyTimeSheetsModule { }

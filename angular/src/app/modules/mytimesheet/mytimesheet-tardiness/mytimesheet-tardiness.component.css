@@ -36,6 +36,38 @@
   border-collapse: collapse !important;
 }
 
+.punishment-summary {
+  margin-right: 15px;
+  min-width: 250px;
+}
+
+.punishment-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.punishment-label {
+  color: #333;
+  font-weight: 600;  /* Increased from 500 to 600 for bolder text */
+  margin-right: 10px;
+  white-space: nowrap;
+  font-weight: bold;  /* Added to ensure text is bold */
+}
+
+.punishment-amount {
+  font-weight: bold;
+  color: #d32f2f;
+  text-align: right;
+  min-width: 80px;
+}
+
+.punishment-amount.remaining {
+  color: #2e7d32;
+}
+
 .table-responsive th{
   vertical-align: middle;
 }
@@ -171,6 +203,14 @@
   margin: 0 !important;
   line-height: 20px !important;
   height: 24px !important;
+}
+
+.btn-confirm-punishment {
+  min-width: 50px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+  line-height: 20px !important;
+  height: 20px !important;
 }
 
 .show-more-button .mat-icon {
@@ -325,6 +365,10 @@
   display: flex;
 }
 
+.filter-date .item .d-flex.align-items-center.justify-content-between {
+  height: 30px;
+}
+
 @media screen and (max-width: 600px) {
     .view-mobile {
       display: block;
@@ -354,6 +398,9 @@
     .filter-date {
       flex-direction: column;
       gap: 12px;
+    }
+    .filter-date .item .d-flex.align-items-center.justify-content-between {
+      height: 30px;
     }
     .header-filter .header .filter-date .item {
       margin-left: 0;

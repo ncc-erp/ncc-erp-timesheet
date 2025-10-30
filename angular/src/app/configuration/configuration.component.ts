@@ -2410,6 +2410,10 @@ export class HRMConfigDto {
   secretCode: string;
 }
 
+export class MMNConfigDto {
+  donationUrl: string;
+}
+
 export class NRITConfigDto {
   notifyEnableWorker: string;
   notifyAtHourType: string;

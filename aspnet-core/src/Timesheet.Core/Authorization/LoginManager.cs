@@ -111,7 +111,7 @@ namespace Ncc.Authorization
                     UserManager.Users.FirstOrDefault(x => x.EmailAddress == mezonUser.mezon_id);
                 if (user == null)
                 {
-                    Logger.Info($"Login fail with email: {mezonUser.mezon_id}");
+                   Logger.Info($"Login fail with email: {mezonUser.mezon_id}");
                     return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null);
                 }
                 // appToken ==> MD5
