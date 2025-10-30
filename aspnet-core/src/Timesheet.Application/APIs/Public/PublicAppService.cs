@@ -866,62 +866,51 @@ namespace Timesheet.APIs.Public
         {
             using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete))
             {
-                IQueryable<ProjectUser> userProjectQuery = WorkScope.GetAll<ProjectUser>()
-                    .AsNoTracking()
-                    .Where(s => s.Project.Status == ProjectStatus.Active)
-                    .Where(s => s.Type != ProjectUserType.DeActive)
-                    .Where(x => x.User.EmailAddress == email);
+                var sDate = startDate?.Date;
+                var eDate = endDate?.Date;
 
-                if (startDate.HasValue || endDate.HasValue)
-                {
-                    var sDate = startDate?.Date;
-                    var eDate = endDate?.Date;
-                    userProjectQuery = userProjectQuery.Where(x =>
-                        (!sDate.HasValue || x.CreationTime.Date >= sDate.Value) &&
-                        (!eDate.HasValue || x.CreationTime.Date <= eDate.Value));
-                }
-                var userProjects = userProjectQuery
-                    .Select(x => new { x.ProjectId, x.Project.Name, x.Project.Code })
-                    .Distinct()
-                    .ToList();
-
-                if (!userProjects.Any())
-                    return new List<PMsOfUser>();
-                var projectIds = userProjects.Select(p => p.ProjectId).ToList();
-                var qPms = WorkScope.GetAll<ProjectUser>()
-                    .AsNoTracking()
-                    .Where(p => p.Type == ProjectUserType.PM && projectIds.Contains(p.ProjectId))
-                    .Select(p => new
+                var query =
+                    from up in WorkScope.GetAll<ProjectUser>().AsNoTracking()
+                    join pm in WorkScope.GetAll<ProjectUser>().AsNoTracking()
+                        on up.ProjectId equals pm.ProjectId
+                    join proj in WorkScope.GetAll<Project>().AsNoTracking()
+                        on up.ProjectId equals proj.Id
+                    where proj.Status == ProjectStatus.Active
+                          && up.Type != ProjectUserType.DeActive
+                          && up.User.EmailAddress == email
+                          && pm.Type == ProjectUserType.PM
+                          && (!sDate.HasValue || up.CreationTime >= sDate.Value)
+                          && (!eDate.HasValue || up.CreationTime < eDate.Value.AddDays(1))
+                    select new
                     {
-                        ProjectId = p.ProjectId,
-                        UserType = p.User.Type,
-                        FullName = p.User.FullName,
-                        BranchName = p.User.Branch.Name,
-                        EmailAddress = p.User.EmailAddress,
-                        AvatarPath = p.User.AvatarPath
+                        proj.Id,
+                        proj.Name,
+                        proj.Code,
+                        PMFullName = pm.User.FullName,
+                        PMEmail = pm.User.EmailAddress,
+                        PMBranch = pm.User.Branch.Name,
+                        PMAvatar = pm.User.AvatarPath,
+                        PMUserType = pm.User.Type
+                    };
+
+                var data = query.ToList();
+
+                var result = data
+                    .GroupBy(x => new { x.Id, x.Name, x.Code })
+                    .Select(g => new PMsOfUser
+                    {
+                        ProjectName = g.Key.Name,
+                        ProjectCode = g.Key.Code,
+                        PMs = g.Select(p => new UserInfo
+                        {
+                            UserType = p.PMUserType,
+                            FullName = p.PMFullName,
+                            BranchName = p.PMBranch,
+                            EmailAddress = p.PMEmail,
+                            AvatarPath = p.PMAvatar
+                        }).ToList()
                     })
                     .ToList();
-                var pmsByProject = qPms
-                    .GroupBy(p => p.ProjectId)
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.Select(p => new UserInfo
-                        {
-                            UserType = p.UserType,
-                            FullName = p.FullName,
-                            BranchName = p.BranchName,
-                            EmailAddress = p.EmailAddress,
-                            AvatarPath = p.AvatarPath
-                        }).ToList()
-                    );
-                var result = userProjects.Select(x => new PMsOfUser
-                {
-                    ProjectName = x.Name,
-                    ProjectCode = x.Code,
-                    PMs = pmsByProject.TryGetValue(x.ProjectId, out var pmList)
-                        ? pmList
-                        : new List<UserInfo>()
-                }).ToList();
 
                 return result;
             }
