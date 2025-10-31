@@ -866,46 +866,56 @@ namespace Timesheet.APIs.Public
         {
             using (CurrentUnitOfWork.DisableFilter(AbpDataFilters.SoftDelete))
             {
-                IQueryable<ProjectUser> ApplyFilter(IQueryable<ProjectUser> query)
-                {
-                    if (startDate.HasValue || endDate.HasValue)
+                var sDate = startDate?.Date;
+                var eDate = endDate?.Date;
+
+                var query =
+                    from up in WorkScope.GetAll<ProjectUser>().AsNoTracking()
+                    join pm in WorkScope.GetAll<ProjectUser>().AsNoTracking()
+                        on up.ProjectId equals pm.ProjectId
+                    join proj in WorkScope.GetAll<Project>().AsNoTracking()
+                        on up.ProjectId equals proj.Id
+                    where proj.Status == ProjectStatus.Active
+                          && up.Type != ProjectUserType.DeActive
+                          && up.User.EmailAddress == email
+                          && pm.Type == ProjectUserType.PM
+                          && (!sDate.HasValue || up.CreationTime >= sDate.Value)
+                          && (!eDate.HasValue || up.CreationTime < eDate.Value.AddDays(1))
+                    select new
                     {
-                        query = query.Where(x => (!startDate.HasValue || x.CreationTime.Date >= startDate.Value.Date) &&
-                          (!endDate.HasValue || x.CreationTime.Date <= endDate.Value.Date));
-                    }
-                    return query;
-                }
-                var baseQuery = ApplyFilter(WorkScope.GetAll<ProjectUser>()
-                  .Where(s => s.Project.Status == ProjectStatus.Active));
-                var userProjects = baseQuery
-                  .Where(x => x.User.EmailAddress == email)
-                  .Select(x => x.ProjectId)
-                  .Distinct();
-                if (!userProjects.Any())
-                {
-                    return new List<PMsOfUser>();
-                }
-                var result = baseQuery
-                  .Where(p => p.Type == ProjectUserType.PM)
-                  .Where(p => userProjects.Contains(p.ProjectId))
-                  .GroupBy(p => p.Project)
-                  .Select(g => new PMsOfUser
-                  {
-                      ProjectName = g.Key.Name,
-                      ProjectCode = g.Key.Code,
-                      PMs = g.Select(pm => new UserInfo
-                      {
-                          UserType = pm.User.Type,
-                          FullName = pm.User.FullName,
-                          BranchName = pm.User.Branch.Name,
-                          EmailAddress = pm.User.EmailAddress,
-                          AvatarPath = pm.User.AvatarPath
-                      }).ToList()
-                  })
-                  .ToList();
+                        proj.Id,
+                        proj.Name,
+                        proj.Code,
+                        PMFullName = pm.User.FullName,
+                        PMEmail = pm.User.EmailAddress,
+                        PMBranch = pm.User.Branch.Name,
+                        PMAvatar = pm.User.AvatarPath,
+                        PMUserType = pm.User.Type
+                    };
+
+                var data = query.ToList();
+
+                var result = data
+                    .GroupBy(x => new { x.Id, x.Name, x.Code })
+                    .Select(g => new PMsOfUser
+                    {
+                        ProjectName = g.Key.Name,
+                        ProjectCode = g.Key.Code,
+                        PMs = g.Select(p => new UserInfo
+                        {
+                            UserType = p.PMUserType,
+                            FullName = p.PMFullName,
+                            BranchName = p.PMBranch,
+                            EmailAddress = p.PMEmail,
+                            AvatarPath = p.PMAvatar
+                        }).ToList()
+                    })
+                    .ToList();
+
                 return result;
             }
         }
+
         [AbpAllowAnonymous]
         [HttpGet]
         public List<TimesheetAndCheckInOutAllUserDto> GetTimesheetAndCheckInOutAllUser(DateTime startDate, DateTime endDate)
