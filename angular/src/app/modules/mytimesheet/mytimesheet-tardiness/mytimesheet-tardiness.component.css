@@ -36,9 +36,28 @@
   border-collapse: collapse !important;
 }
 
-.punishment-summary {
-  margin-right: 15px;
-  min-width: 250px;
+.punished {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.punishment-container {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 40px;
+  margin-top: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-right: 20px;
+}
+
+.punishment-text {
+  flex: 1;
+  min-width: 0;
+  margin-right: 10px;
 }
 
 .punishment-row {
@@ -47,25 +66,91 @@
   margin-bottom: 4px;
   font-size: 14px;
   line-height: 1.4;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .punishment-label {
   color: #333;
-  font-weight: 600;  /* Increased from 500 to 600 for bolder text */
+  font-weight: 600;
   margin-right: 10px;
   white-space: nowrap;
-  font-weight: bold;  /* Added to ensure text is bold */
+  flex-shrink: 0;
 }
 
 .punishment-amount {
   font-weight: bold;
   color: #d32f2f;
   text-align: right;
-  min-width: 80px;
+  min-width: 100px;
+  flex-shrink: 0;
+  margin-left: 10px;
 }
 
 .punishment-amount.remaining {
   color: #2e7d32;
+}
+
+.btn-confirm-punishment {
+  min-width: 50px;
+  padding: 0 12px;
+  font-size: 13px;
+  line-height: 20px;
+  height: 20px;
+  margin-left: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: center;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  box-shadow: none !important; 
+  transition: none; 
+}
+
+.btn-confirm-punishment:hover {
+  background-color: #f5f5f5; 
+  text-decoration: none;
+  border-color: #ccc; 
+}
+
+
+.header {
+  position: relative;
+  padding-right: 60px; 
+}
+
+.header-dropdown {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 768px) {
+  .punishment-container {
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-right: 0;
+  }
+  
+  .confirm-button-container {
+    flex-shrink: 0;
+    margin-left: 24px;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  
+  .btn-confirm-punishment {
+    margin-top: 8px;
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .table-responsive th{
@@ -203,14 +288,6 @@
   margin: 0 !important;
   line-height: 20px !important;
   height: 24px !important;
-}
-
-.btn-confirm-punishment {
-  min-width: 50px !important;
-  padding: 0 12px !important;
-  font-size: 13px !important;
-  line-height: 20px !important;
-  height: 20px !important;
 }
 
 .show-more-button .mat-icon {

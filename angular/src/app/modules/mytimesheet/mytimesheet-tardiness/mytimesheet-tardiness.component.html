@@ -37,9 +37,9 @@
                   <span class="punishment-label">Tổng tiền phạt tháng:</span>
                   <span class="punishment-amount">{{ totalMonthlyPunishment | number }} VNĐ</span>
                 </div>
-                <div class="punishment-row" *ngIf="totalMonthlyPunishment - totalPaidPunishment > 0">
+                <div class="punishment-row">
                   <span class="punishment-label">Tổng tiền phạt còn lại:</span>
-                  <span class="punishment-amount remaining">{{ totalMonthlyPunishment - totalPaidPunishment | number }} VNĐ</span>
+                  <span class="punishment-amount remaining">{{ getRemainingPunishment() | number }} VNĐ</span>
                 </div>
               </div>
               <button mat-raised-button color="primary" class="btn-confirm-punishment" (click)="openConfirmationDialog()">Confirm</button>
@@ -305,15 +305,22 @@
             không đúng.
           </p>
         </div>
-        <div class="item">
-          <div class="d-flex align-items-center">
-            <p class="text-total-monthly-punishment" style="margin-top: 4px; margin-right: 10px;">
-              Tổng tiền phạt tháng: <b>{{ totalMonthlyPunishment | number }} VNĐ</b>
-            </p>
-            <button mat-raised-button color="primary" class="btn-confirm-punishment" (click)="openConfirmationDialog()">Confirm</button>
+        <div class="punishment-container">
+          <div class="punishment-text">
+            <div class="punishment-row">
+              <span class="punishment-label">Tổng tiền phạt tháng:</span>
+              <span class="punishment-amount">{{ totalMonthlyPunishment | number }} VNĐ</span>
+            </div>
+            <div class="punishment-row">
+              <span class="punishment-label">Tổng tiền phạt còn lại:</span>
+              <span class="punishment-amount remaining">{{ getRemainingPunishment() | number }} VNĐ</span>
+            </div>
+          </div>
+          <div class="confirm-button-container">
+            <button mat-raised-button color="primary" class="btn-confirm-punishment" (click)="openConfirmationDialog()">
+              Confirm
+            </button>
           </div>
         </div>
       </div>
-    </div>
   </div>
-</ng-template>
