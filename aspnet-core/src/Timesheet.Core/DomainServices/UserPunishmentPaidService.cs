@@ -78,7 +78,7 @@ namespace Timesheet.DomainServices
                 var entities = await _userPunishmentPaidRepository
                     .GetAll()
                     .Where(x => x.UserId == currentUserId)
-                    .Where(x => x.DateAt >= startDate && x.DateAt <= endDate)
+                    .Where(x => x.DateAt >= startDate && x.DateAt < endDate)
                     .OrderByDescending(x => x.DateAt)
                     .ToListAsync();
 
