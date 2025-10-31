@@ -359,38 +359,7 @@ namespace Timesheet.DomainServices
                         requiredHours -= (tardinessHour + leaveEarlyHour);
 
                     bool isMorningOfficeAfternoonWFH = false;
-                    var userRequestAfternoonWFH = userAbsenceRequests.FirstOrDefault(r => r.Status == RequestStatus.Approved);
-                    if (userRequestAfternoonWFH != null && absenceDetailDict.ContainsKey((userRequestAfternoonWFH.Id, tk.DateAt))
-                        && absenceDetailDict[(userRequestAfternoonWFH.Id, tk.DateAt)].Any(d => d.DateType == DayType.Afternoon)
-                        && timekeepings.Any(t => t.UserId == tk.UserId && TimeSpan.TryParse(t.CheckIn, out var checkInMorning) && TimeSpan.TryParse(t.CheckOut, out var checkOutMorning)
-                            && checkInMorning < morningEndAt && checkOutMorning < afternoonStartAt && !string.IsNullOrEmpty(t.TrackerTime) && double.TryParse(t.TrackerTime, out var tr) && tr > 0))
-                    {
-                        isMorningOfficeAfternoonWFH = true;
-                        double morningRequiredHours = (user.MorningWorking ?? 0) - tardinessHour - leaveEarlyHour;
-                        double afternoonRequiredTrackerHours = (user.AfternoonWorking ?? 0) * wfhThreshold - tardinessHour - leaveEarlyHour;
-                        if ((officeActualHours ?? 0) < morningRequiredHours || (trackerTimeHours.HasValue && trackerTimeHours.Value < afternoonRequiredTrackerHours))
-                        {
-                            AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), totalWorkingTime,
-                                "Violation: Morning office, Afternoon WFH time mismatch", isYesterday, yesterdayAnomalies, lastWeekAnomalies);
-                        }
-                    }
-
                     bool isMorningWFHAfternoonOffice = false;
-                    var userRequestMorningWFH = userAbsenceRequests.FirstOrDefault(r => r.Status == RequestStatus.Approved);
-                    if (userRequestMorningWFH != null && absenceDetailDict.ContainsKey((userRequestMorningWFH.Id, tk.DateAt))
-                        && absenceDetailDict[(userRequestMorningWFH.Id, tk.DateAt)].Any(d => d.DateType == DayType.Morning)
-                        && timekeepings.Any(t => t.UserId == tk.UserId && TimeSpan.TryParse(t.CheckIn, out var checkInAfternoon) && TimeSpan.TryParse(t.CheckOut, out var checkOutAfternoon)
-                            && checkOutAfternoon > afternoonEndAt && checkInAfternoon > morningEndAt && !string.IsNullOrEmpty(t.TrackerTime) && double.TryParse(t.TrackerTime, out var tr) && tr > 0))
-                    {
-                        isMorningWFHAfternoonOffice = true;
-                        double afternoonRequiredHours = (user.AfternoonWorking ?? 0) - tardinessHour - leaveEarlyHour;
-                        double morningRequiredTrackerHours = (user.MorningWorking ?? 0) * wfhThreshold - tardinessHour - leaveEarlyHour;
-                        if ((officeActualHours ?? 0) < afternoonRequiredHours || (trackerTimeHours.HasValue && trackerTimeHours.Value < morningRequiredTrackerHours))
-                        {
-                            AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), totalWorkingTime,
-                                "Violation: Morning WFH, Afternoon office time mismatch", isYesterday, yesterdayAnomalies, lastWeekAnomalies);
-                        }
-                    }
 
                     bool isTimeViolation = ((isWFHFullday || isWFHMorning || isWFHAfternoon) && trackerActualHours.HasValue && trackerActualHours.Value < requiredHours) ||
                       (!(isWFHFullday || isWFHMorning || isWFHAfternoon) && officeActualHours.HasValue && officeActualHours.Value < requiredHours) &&
@@ -451,64 +420,89 @@ namespace Timesheet.DomainServices
 
         public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportInput input)
         {
-            var now = DateTimeUtils.GetNow().Date;
-            var yesterday = now.AddDays(-1);
-            var (lastWeekStart, lastWeekEnd) = GetLastWeekRange(now);
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var methodName = nameof(GetAnomaliesTimelogReport);
+            Console.WriteLine($"[{methodName}] Started at: {DateTime.Now:HH:mm:ss.fff}");
 
-            var allBranches = await _workScope.GetAll<Timesheet.Entities.Branch>()
-                .Select(b => new { b.Id, b.Code })
-                .AsNoTracking()
-                .ToListAsync();
-
-            var branchDict = allBranches.ToDictionary(b => b.Id, b => b.Code);
-            var validBranchIds = new List<long>();
-            List<long> branchIds;
-
-            if (input.BranchIds == null || !input.BranchIds.Any())
+            try
             {
-                validBranchIds = allBranches.Select(b => b.Id).ToList();
-            }
-            else
-            {
-                validBranchIds = input.BranchIds
-                    .Where(id => branchDict.ContainsKey(id))
-                    .ToList();
+                var now = DateTimeUtils.GetNow().Date;
+                var yesterday = now.AddDays(-1);
+                var (lastWeekStart, lastWeekEnd) = GetLastWeekRange(now);
 
-                if (!validBranchIds.Any())
+                var branchStopwatch = System.Diagnostics.Stopwatch.StartNew();
+                var allBranches = await _workScope.GetAll<Timesheet.Entities.Branch>()
+                    .Select(b => new { b.Id, b.Code })
+                    .AsNoTracking()
+                    .ToListAsync();
+                branchStopwatch.Stop();
+                Console.WriteLine($"[{methodName}] Fetched {allBranches.Count} branches in {branchStopwatch.ElapsedMilliseconds}ms");
+
+                var branchDict = allBranches.ToDictionary(b => b.Id, b => b.Code);
+                var validBranchIds = new List<long>();
+                List<long> branchIds;
+
+                if (input.BranchIds == null || !input.BranchIds.Any())
                 {
-                    throw new UserFriendlyException("No valid branch codes provided.");
+                    validBranchIds = allBranches.Select(b => b.Id).ToList();
                 }
+                else
+                {
+                    validBranchIds = input.BranchIds
+                        .Where(id => branchDict.ContainsKey(id))
+                        .ToList();
+
+                    if (!validBranchIds.Any())
+                    {
+                        throw new UserFriendlyException("No valid branch codes provided.");
+                    }
+                }
+
+                var result = new AnomaliesTimelogReportDto
+                {
+                    Yesterday = yesterday.ToString("dd/MM/yyyy"),
+                    LastWeekStart = lastWeekStart.ToString("dd/MM/yyyy"),
+                    LastWeekEnd = lastWeekEnd.ToString("dd/MM/yyyy"),
+                    YesterdayAnomalies = new List<YesterdayAnomalyDTO>(),
+                    LastWeekAnomalies = new List<LastWeekAnomalyDTO>()
+                };
+                Console.WriteLine($"[{methodName}] Processing {validBranchIds.Count} branches for yesterday anomalies...");
+
+                var yesterdayLoopStopwatch = System.Diagnostics.Stopwatch.StartNew();
+                foreach (var branchId in validBranchIds)
+                {
+                    var branchCode = branchDict[branchId];
+                    var (yesterdayAnomalies, _) = await ProcessAnomalies(branchId, yesterday, yesterday.AddDays(1).AddSeconds(-1), true, branchCode);
+                    result.YesterdayAnomalies.AddRange(yesterdayAnomalies);
+                }
+                yesterdayLoopStopwatch.Stop();
+                Console.WriteLine($"[{methodName}] Yesterday anomalies processed in {yesterdayLoopStopwatch.ElapsedMilliseconds}ms, found {result.YesterdayAnomalies.Count} items");
+
+                var lastWeekLoopStopwatch = System.Diagnostics.Stopwatch.StartNew();
+                foreach (var branchId in validBranchIds)
+                {
+                    var branchCode = branchDict[branchId];
+                    var (_, lastWeekAnomalies) = await ProcessAnomalies(branchId, lastWeekStart, lastWeekEnd, false, branchCode);
+                    result.LastWeekAnomalies.AddRange(lastWeekAnomalies);
+                }
+                lastWeekLoopStopwatch.Stop();
+                Console.WriteLine($"[{methodName}] Last week anomalies processed in {lastWeekLoopStopwatch.ElapsedMilliseconds}ms, found {result.LastWeekAnomalies.Count} items");
+
+                result.LastWeekAnomalies = result.LastWeekAnomalies
+                    .OrderByDescending(a => a.Count)
+                    .ThenBy(a => a.EmployeeName)
+                    .ToList();
+                stopwatch.Stop();
+                Console.WriteLine($"[{methodName}] Completed in {stopwatch.ElapsedMilliseconds}ms");
+
+                return result;
             }
-
-            var result = new AnomaliesTimelogReportDto
+            catch (Exception ex)
             {
-                Yesterday = yesterday.ToString("dd/MM/yyyy"),
-                LastWeekStart = lastWeekStart.ToString("dd/MM/yyyy"),
-                LastWeekEnd = lastWeekEnd.ToString("dd/MM/yyyy"),
-                YesterdayAnomalies = new List<YesterdayAnomalyDTO>(),
-                LastWeekAnomalies = new List<LastWeekAnomalyDTO>()
-            };
-
-            foreach (var branchId in validBranchIds)
-            {
-                var branchCode = branchDict[branchId];
-                var (yesterdayAnomalies, _) = await ProcessAnomalies(branchId, yesterday, yesterday.AddDays(1).AddSeconds(-1), true, branchCode);
-                result.YesterdayAnomalies.AddRange(yesterdayAnomalies);
+                stopwatch.Stop();
+                Console.WriteLine($"[{methodName}] ERROR after {stopwatch.ElapsedMilliseconds}ms: {ex.Message}");
+                throw;
             }
-
-            foreach (var branchId in validBranchIds)
-            {
-                var branchCode = branchDict[branchId];
-                var (_, lastWeekAnomalies) = await ProcessAnomalies(branchId, lastWeekStart, lastWeekEnd, false, branchCode);
-                result.LastWeekAnomalies.AddRange(lastWeekAnomalies);
-            }
-
-            result.LastWeekAnomalies = result.LastWeekAnomalies
-                .OrderByDescending(a => a.Count)
-                .ThenBy(a => a.EmployeeName)
-                .ToList();
-
-            return result;
         }
 
         private static (DateTime start, DateTime end) GetLastWeekRange(DateTime reportDate)

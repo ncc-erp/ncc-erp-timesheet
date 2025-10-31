@@ -41,7 +41,7 @@ namespace Timesheet.APIs.BotReportDaily
         }
 
         [HttpGet]
-        public async Task<OfficeWorkingTimelogReportDto> GetDailyProjectTimelogReport(GetOfficeWorkingTimelogReportInput input)
+        public async Task<OfficeWorkingTimelogReportDto> GetOfficeWorkingTimelogReport(GetOfficeWorkingTimelogReportInput input)
         {
             return await _officeWorkingReportAppService.GetOfficeWorkingTimelogReport(input);
         }
