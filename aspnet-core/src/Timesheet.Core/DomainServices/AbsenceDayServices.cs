@@ -1,5 +1,4 @@
-﻿using Abp.Application.Services.Dto;
-using Abp.Dependency;
+﻿using Abp.Dependency;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Ncc.Authorization.Users;
@@ -450,11 +449,8 @@ namespace Timesheet.DomainServices
             return (yesterdayAnomalies, lastWeekAnomalies);
         }
 
-        public async Task<object> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportRequestDto request)
+        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportInput input)
         {
-            var param = request.Param;
-            var input = request.Input;
-
             var now = DateTimeUtils.GetNow().Date;
             var yesterday = now.AddDays(-1);
             var (lastWeekStart, lastWeekEnd) = GetLastWeekRange(now);
@@ -484,58 +480,35 @@ namespace Timesheet.DomainServices
                 }
             }
 
-            var yesterdayAnomalies = new List<YesterdayAnomalyDTO>();
-            var lastWeekAnomalies = new List<LastWeekAnomalyDTO>();
+            var result = new AnomaliesTimelogReportDto
+            {
+                Yesterday = yesterday.ToString("dd/MM/yyyy"),
+                LastWeekStart = lastWeekStart.ToString("dd/MM/yyyy"),
+                LastWeekEnd = lastWeekEnd.ToString("dd/MM/yyyy"),
+                YesterdayAnomalies = new List<YesterdayAnomalyDTO>(),
+                LastWeekAnomalies = new List<LastWeekAnomalyDTO>()
+            };
 
             foreach (var branchId in validBranchIds)
             {
                 var branchCode = branchDict[branchId];
-                var (yest, _) = await ProcessAnomalies(branchId, yesterday, yesterday.AddDays(1).AddSeconds(-1), true, branchCode);
-                yesterdayAnomalies.AddRange(yest);
+                var (yesterdayAnomalies, _) = await ProcessAnomalies(branchId, yesterday, yesterday.AddDays(1).AddSeconds(-1), true, branchCode);
+                result.YesterdayAnomalies.AddRange(yesterdayAnomalies);
             }
 
             foreach (var branchId in validBranchIds)
             {
                 var branchCode = branchDict[branchId];
-                var (_, lastWeek) = await ProcessAnomalies(branchId, lastWeekStart, lastWeekEnd, false, branchCode);
-                lastWeekAnomalies.AddRange(lastWeek);
+                var (_, lastWeekAnomalies) = await ProcessAnomalies(branchId, lastWeekStart, lastWeekEnd, false, branchCode);
+                result.LastWeekAnomalies.AddRange(lastWeekAnomalies);
             }
 
-            lastWeekAnomalies = lastWeekAnomalies
+            result.LastWeekAnomalies = result.LastWeekAnomalies
                 .OrderByDescending(a => a.Count)
                 .ThenBy(a => a.EmployeeName)
                 .ToList();
 
-            var yesterdayQuery = yesterdayAnomalies.AsQueryable();
-            var yesterdayTotal = yesterdayQuery.Count();
-            var yesterdayItems = yesterdayQuery
-                .Skip(param.SkipCount)
-                .Take(param.MaxResultCount)
-                .ToList();
-
-            var lastWeekQuery = lastWeekAnomalies.AsQueryable();
-            var lastWeekTotal = lastWeekQuery.Count();
-            var lastWeekItems = lastWeekQuery
-                .Skip(param.SkipCount)
-                .Take(param.MaxResultCount)
-                .ToList();
-
-            return new
-            {
-                Yesterday = new PagedYesterdayAnomalyDto
-                {
-                    Yesterday = yesterday.ToString("dd/MM/yyyy"),
-                    TotalCount = yesterdayTotal,
-                    Items = yesterdayItems
-                },
-                LastWeek = new PagedLastWeekAnomalyDto
-                {
-                    LastWeekStart = lastWeekStart.ToString("dd/MM/yyyy"),
-                    LastWeekEnd = lastWeekEnd.ToString("dd/MM/yyyy"),
-                    TotalCount = lastWeekTotal,
-                    Items = lastWeekItems
-                }
-            };
+            return result;
         }
 
         private static (DateTime start, DateTime end) GetLastWeekRange(DateTime reportDate)

@@ -1,4 +1,3 @@
-using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Configuration;
 using Abp.Domain.Uow;
@@ -19,8 +18,6 @@ using System.Threading.Tasks;
 using Timesheet.APIs.BotReportDaily.Dto;
 using Timesheet.APIs.Reports.Dto;
 using Timesheet.Entities;
-using Timesheet.Extension;
-using Timesheet.Paging;
 using Timesheet.Services.Mezon;
 using Timesheet.Timesheets.Projects.Dto;
 using Timesheet.Uitls;
@@ -854,11 +851,8 @@ namespace Timesheet.APIs.Reports
             return sb.ToString();
         }
 
-        public async Task<PagedOfficeWorkingTopLWLMDto> GetOfficeWorkingTimelogReport(GetOfficeWorkingTimelogReportRequestDto request)
+        public async Task<OfficeWorkingTimelogReportDto> GetOfficeWorkingTimelogReport(GetOfficeWorkingTimelogReportInput input)
         {
-            var param = request.Param;
-            var input = request.Input;
-
             var now = DateTimeUtils.GetNow().Date;
             var (lwStart, lwEnd) = GetLastWeekRange(now);
             var lmStart = DateTimeUtils.FirstDayOfMonth(now.AddMonths(-1));
@@ -887,30 +881,21 @@ namespace Timesheet.APIs.Reports
                 }
             }
 
-            var result = new List<OfficeWorkingTopLWLMDto>();
-
-            foreach (var officeId in officeIds)
-            {
-                var officeData = await ListTopOfficeWorkingTimeLWLMInternal(officeId, input.Limit);
-                result.AddRange(officeData);
-            }
-
-            var query = result.AsQueryable();
-
-            var sortedQuery = query
-                .OrderByDescending(x => x.TotalAllLW)
-                .ThenByDescending(x => x.TotalAllLM);
-
-            var pagedResult = sortedQuery.GetGridResultSync(query, param);
-
-            return new PagedOfficeWorkingTopLWLMDto
+            var result = new OfficeWorkingTimelogReportDto
             {
                 LastWeekStart = lwStart.ToString("yyyy-MM-dd"),
                 LastWeekEnd = lwEnd.ToString("yyyy-MM-dd"),
                 LastMonth = lmStart.ToString("yyyy-MM"),
-                TotalCount = pagedResult.TotalCount,
-                Items = pagedResult.Items
+                OfficeWorkingData = new List<OfficeWorkingTopLWLMDto>()
             };
+
+            foreach (var officeId in officeIds)
+            {
+                var officeData = await ListTopOfficeWorkingTimeLWLMInternal(officeId, input.Limit);
+                result.OfficeWorkingData.AddRange(officeData);
+            }
+
+            return result;
         }
     }
 }
