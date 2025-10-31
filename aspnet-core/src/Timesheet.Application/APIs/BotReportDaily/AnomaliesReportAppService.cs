@@ -38,10 +38,10 @@ namespace Timesheet.APIs.BotReportDaily
             _absenceDayService = absenceDayService;
         }
 
-        [HttpPost]
-        public async Task<object> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportRequestDto request)
+        [HttpGet]
+        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportInput input)
         {
-            return await _absenceDayService.GetAnomaliesTimelogReport(request);
+            return await _absenceDayService.GetAnomaliesTimelogReport(input);
         }
     }
 }
