@@ -1,3 +1,4 @@
+using Abp.Application.Services.Dto;
 using Abp.Domain.Services;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace Timesheet.DomainServices
 {
     public interface IBotReportDailyService : IDomainService
     {
-        Task<DailyProjectTimelogReportDto> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input);
+        Task<PagedProjectTimelogDto> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportRequestDto request);
         Task<bool> SendDailyProjectTimelogToMezon(GetDailyProjectTimelogReportByBranchCodesInput input);
         Task<bool> SendDailyProjectTimelogToMezon();
     }
