@@ -652,7 +652,8 @@ namespace Timesheet.APIs.RequestDays
                     }
                     else if (rejectRemoteDueToLowWorkingDays)
                     {
-                        throw new UserFriendlyException($"Your remote request for {abs.DateAt:dd/MM/yyyy} is rejected because you had less than 2 working days in the previous week due to {absenceDaysLastWeek} days of approved or pending off/remote requests");
+                        absencedayRequest.Status = RequestStatus.Rejected;
+                        //throw new UserFriendlyException($"Your remote request for {abs.DateAt:dd/MM/yyyy} is rejected because you had less than 2 working days in the previous week due to {absenceDaysLastWeek} days of approved or pending off/remote requests");
                     }
                     else
                     {
