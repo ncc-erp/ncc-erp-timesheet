@@ -881,21 +881,32 @@ namespace Timesheet.APIs.Reports
                 }
             }
 
-            var result = new OfficeWorkingTimelogReportDto
+            var allUsers = new List<OfficeWorkingTopLWLMDto>();
+
+            foreach (var officeId in officeIds)
+            {
+                var officeData = await ListTopOfficeWorkingTimeLWLMInternal(
+                    officeId: officeId,
+                    limit: int.MaxValue,
+                    reportDate: now
+                );
+                allUsers.AddRange(officeData);
+            }
+
+            var topUsers = allUsers
+                .OrderByDescending(u => u.TotalAllLW)
+                .ThenByDescending(u => u.TotalAllLM)
+                .ThenBy(u => u.UserName)
+                .Take(input.Limit)
+                .ToList();
+
+            return new OfficeWorkingTimelogReportDto
             {
                 LastWeekStart = lwStart.ToString("yyyy-MM-dd"),
                 LastWeekEnd = lwEnd.ToString("yyyy-MM-dd"),
                 LastMonth = lmStart.ToString("yyyy-MM"),
-                OfficeWorkingData = new List<OfficeWorkingTopLWLMDto>()
+                OfficeWorkingData = topUsers
             };
-
-            foreach (var officeId in officeIds)
-            {
-                var officeData = await ListTopOfficeWorkingTimeLWLMInternal(officeId, input.Limit);
-                result.OfficeWorkingData.AddRange(officeData);
-            }
-
-            return result;
         }
     }
 }
