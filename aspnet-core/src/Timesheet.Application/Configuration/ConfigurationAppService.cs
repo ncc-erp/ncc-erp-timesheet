@@ -372,6 +372,17 @@ namespace Ncc.Configuration
             };
         }
 
+        [HttpGet]
+        [AbpAuthorize]
+        public async Task<MMNConfigDto> GetDonationUrl()
+        {
+            return new MMNConfigDto
+            {
+                IndexerUrl = _configuration.GetValue<string>("MMNService:IndexerUri"),
+                DonationUrl = _configuration.GetValue<string>("MMNService:DonationUrl")
+            };
+        }
+
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_HRMConfig_Update)]
         public async Task<HRMConfigDto> SetHRMConfig(HRMConfigDto input)
         {

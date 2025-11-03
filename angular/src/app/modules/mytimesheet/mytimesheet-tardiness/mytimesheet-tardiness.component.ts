@@ -9,6 +9,7 @@ import { AppComponentBase } from 'shared/app-component-base';
 import { Component, OnInit, Injector } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { ComplainDialogComponent } from './complain-dialog/complain-dialog.component';
+import { TimesheetConfirmationDialogComponent } from './timesheet-confirmation-dialog/timesheet-confirmation-dialog.component';
 import { UserServiceProxy } from '@shared/service-proxies/service-proxies';
 
 @Component({
@@ -40,6 +41,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   dayList: any = []
   public countLate: number = 0;
   totalMonthlyPunishment: number = 0;
+  totalPaidPunishment: number = 0;
   public maskTime = [/[\d]/, /\d/, ':', /\d/, /\d/];
 
   constructor(
@@ -72,12 +74,18 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     });
   }
 
+  getRemainingPunishment(): number {
+    const remaining = this.totalMonthlyPunishment - this.totalPaidPunishment;
+    return remaining > 0 ? remaining : 0;
+  }
+
   getData() {
     this.isTableLoading = true;
     this.timekeepingService.getMyDetails(this.year, this.month + 1).subscribe(res => {
       this.listTimekeeping = res.result;
       if (this.listTimekeeping && this.listTimekeeping.length > 0) {
-        this.totalMonthlyPunishment = this.listTimekeeping[0].totalMonthPunishmentTotal;
+        this.totalMonthlyPunishment = this.listTimekeeping[0].totalMonthPunishmentTotal || 0;
+        this.totalPaidPunishment = this.listTimekeeping[0].totalPaidPunishment || 0;
       }
       
       this.groupTimekeepingByDay();
@@ -502,5 +510,25 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         this.notify.error('Failed to load punishment details');
       }
     );
+  }
+
+  openConfirmationDialog() {
+    // Filter out items with punishment
+    const punishmentItems = this.listTimekeeping.filter(item => item.moneyPunish > 0);
+    
+    const dialogRef = this.dialog.open(TimesheetConfirmationDialogComponent, {
+      width: '800px',
+      data: {
+        timekeepingData: this.listTimekeeping,
+        totalMonthlyPunishment: this.totalMonthlyPunishment
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.paid) {
+        this.notify.success('Paid Successfully');
+        this.getData();
+      }
+    });
   }
 }

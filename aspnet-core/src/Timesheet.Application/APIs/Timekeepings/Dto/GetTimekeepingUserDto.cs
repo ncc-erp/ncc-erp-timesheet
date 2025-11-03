@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Timesheet.APIs.UserPunishments.Dto;
@@ -43,5 +43,6 @@ namespace Timesheet.APIs.Timekeepings.Dto
         public int? MentionPunish { get; set; }
         public int TotalDayPunishment { get; set; }
         public decimal TotalMonthPunishmentTotal { get; set; }
+        public decimal TotalPaidPunishment { get; set; }
     }
 }

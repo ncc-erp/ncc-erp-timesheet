@@ -1,0 +1,27 @@
+<div class="transaction-hash-dialog">
+  <h2 mat-dialog-title>Enter Transaction Hash</h2>
+  
+  <div mat-dialog-content>
+    <p>Please enter the transaction hash from your payment:</p>
+    
+    <mat-form-field class="full-width">
+      <input matInput [formControl]="transactionHashControl" placeholder="Transaction Hash">
+      <mat-error *ngIf="transactionHashControl.hasError('required')">
+        Transaction hash is required
+      </mat-error>
+      <mat-error *ngIf="transactionHashControl.hasError('minlength')">
+        Transaction hash must be at least 10 characters
+      </mat-error>
+      <mat-error *ngIf="transactionHashControl.hasError('maxlength')">
+        Transaction hash cannot exceed 255 characters
+      </mat-error>
+    </mat-form-field>
+    
+    <p class="hint">Example: a7f3d21e59b840cf2b16e7da1f5c9a438efdc21a8b547b3a99e2dce5f47ab019</p>
+  </div>
+  
+  <div mat-dialog-actions>
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" [disabled]="!transactionHashControl.valid" (click)="onSubmit()">Submit</button>
+  </div>
+</div>

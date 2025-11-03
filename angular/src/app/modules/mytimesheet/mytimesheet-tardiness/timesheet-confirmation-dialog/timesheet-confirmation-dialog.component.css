@@ -1,0 +1,350 @@
+.timesheet-confirmation-dialog {
+  width: 800px;
+  max-width: 100%;
+  max-height: 80vh; 
+  padding: 20px;
+  background-color: #fff;
+  color: #333;
+  overflow-y: auto;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+}
+
+.currency {
+  font-size: 12px;
+  color: #666;
+}
+
+.summary-section {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.summary-item {
+  text-align: center;
+  flex: 1;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.summary-note {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 4px;
+}
+
+.paid {
+  color: #4caf50;
+}
+
+.not-paid {
+  color: #d32f2f;
+}
+
+.error-summary h3, .punishment-paid-summary h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  font-weight: 500;
+  color: #333;
+}
+
+.error-summary, .punishment-paid-summary {
+  max-height: 300px; 
+  overflow-y: auto; 
+  margin-bottom: 20px;
+}
+
+.punishment-paid-summary {
+  margin-top: 20px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #4caf50;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.no-data {
+  text-align: center;
+  padding: 15px;
+  color: #666;
+  font-style: italic;
+}
+
+.tx-hash {
+  font-family: monospace;
+  font-size: 12px;
+  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: all 0.2s ease;
+}
+
+.tx-hash.clickable {
+  color: #3f51b5;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.tx-hash.clickable:hover {
+  color: #1a237e;
+  text-decoration: none;
+}
+
+.error-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+  table-layout: fixed;
+}
+
+.error-table th, .error-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.error-table th {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  background-color: #f9f9f9;
+}
+
+.error-table th:nth-child(1),
+.error-table td:nth-child(1) {
+  width: 20%;
+}
+
+.error-table th:nth-child(2),
+.error-table td:nth-child(2) {
+  width: 60%; 
+}
+
+.error-table th:nth-child(3),
+.error-table td:nth-child(3) {
+  width: 20%; 
+  text-align: right;
+}
+
+.contribution-section {
+  margin-bottom: 30px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 10;
+}
+
+.donate-button {
+  background-color: #673ab7 !important;
+  color: white !important;
+}
+
+.donate-button[disabled] {
+  background-color: rgba(103, 58, 183, 0.5) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.paid-button[disabled] {
+  background-color: rgba(81, 171, 88, 0.5) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.paid-button {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.timesheet-calendar-section {
+  margin-bottom: 30px;
+}
+
+.timesheet-calendar-section h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  font-weight: 500;
+  color: #333;
+}
+
+.calendar-container {
+  margin-bottom: 15px;
+  border: px solid #eee;
+  border-radius: 4px;
+  overflow-x: hidden;
+}
+
+.calendar-scale {
+  display: inline-block;        
+  transform: scale(0.97);
+  transform-origin: top left;
+}
+
+.calendar-scale > .cal-month-view {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 800px) {
+  .calendar-scale { transform: scale(0.85); }
+  .calendar-scale > .cal-month-view { width: 100%; max-width: 100%; }
+}
+
+.cal-cell-top {
+  min-height: 36px; 
+  position: relative;
+  padding: 2px 4px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.cal-month-view .cal-day-number {
+  font-size: 12px;
+}
+
+.cal-month-view .cal-cell {
+  padding: 2px;
+}
+
+.timesheet-calendar-section .cal-month-view {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.cal-month-view .cal-header,
+.cal-month-view .cal-days {
+  table-layout: fixed;
+  width: 100%;
+}
+.cal-month-view .cal-day-cell {
+  width: 14.2857%;
+}
+
+.cal-month-view .cal-events { display: none !important; }
+
+.working-hours {
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: auto;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 3px;
+  padding: 1px 3px;
+  margin-bottom: 2px;
+}
+
+.working-hours.wh-pending {
+  background-color: #e3bc08;
+  color: #000;
+}
+
+.working-hours.wh-approved {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.working-hours.wh-rejected {
+  background-color: #ff0000;
+  color: #fff;
+}
+
+.calendar-legend {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  gap: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+.legend-color {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  margin-right: 5px;
+}
+
+.legend-color.pending {
+  background-color: #e3bc08;
+}
+
+.legend-color.approved {
+  background-color: #4caf50;
+}
+
+.legend-color.other {
+  background-color: #ff0000;
+}
+
+.cal-month-view .cal-badge { display: none !important; }
+.cal-month-view .cal-day-badge { display: none !important; }

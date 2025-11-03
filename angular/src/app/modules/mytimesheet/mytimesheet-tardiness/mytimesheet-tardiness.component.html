@@ -30,8 +30,20 @@
               Click vào button Complain và nhập nội dung khiếu nại nếu bạn thấy không đúng.
             </p>
           </div>
-          <div class="item">
-            <span style="color: #d32f2f; font-size: 14px;"><b>Tổng tiền phạt tháng:</b> {{ totalMonthlyPunishment | number }} VNĐ</span>
+          <div _ngcontent-c9="" class="item">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="punishment-summary">
+                <div class="punishment-row">
+                  <span class="punishment-label">Tổng tiền phạt tháng:</span>
+                  <span class="punishment-amount">{{ totalMonthlyPunishment | number }} VNĐ</span>
+                </div>
+                <div class="punishment-row">
+                  <span class="punishment-label">Tổng tiền phạt còn lại:</span>
+                  <span class="punishment-amount remaining">{{ getRemainingPunishment() | number }} VNĐ</span>
+                </div>
+              </div>
+              <button mat-raised-button color="primary" class="btn-confirm-punishment" (click)="openConfirmationDialog()">Confirm</button>
+            </div>
           </div>
         </div>
         <ul class="header-dropdown m-r--5">
@@ -293,12 +305,22 @@
             không đúng.
           </p>
         </div>
-        <div class="item">
-          <p class="text-total-monthly-punishment" style="margin-top: 4px;">
-            Tổng tiền phạt tháng: <b>{{ totalMonthlyPunishment | number }} VNĐ</b>
-          </p>
+        <div class="punishment-container">
+          <div class="punishment-text">
+            <div class="punishment-row">
+              <span class="punishment-label">Tổng tiền phạt tháng:</span>
+              <span class="punishment-amount">{{ totalMonthlyPunishment | number }} VNĐ</span>
+            </div>
+            <div class="punishment-row">
+              <span class="punishment-label">Tổng tiền phạt còn lại:</span>
+              <span class="punishment-amount remaining">{{ getRemainingPunishment() | number }} VNĐ</span>
+            </div>
+          </div>
+          <div class="confirm-button-container">
+            <button mat-raised-button color="primary" class="btn-confirm-punishment" (click)="openConfirmationDialog()">
+              Confirm
+            </button>
+          </div>
         </div>
       </div>
-    </div>
   </div>
-</ng-template>
