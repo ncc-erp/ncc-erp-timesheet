@@ -36,10 +36,8 @@ namespace Timesheet.APIs.UserPunishmentPaids
                 throw new ArgumentException("Invalid year or month");
             }
 
-            var startDate = input.GetStartDate();
-            var endDate = input.GetEndDate();
-
-            return await _userPunishmentPaidService.GetByCurrentUserAsync(startDate, endDate);
+            var targetMonth = new DateTime(input.Year, input.Month, 1);
+            return await _userPunishmentPaidService.GetByCurrentUserAsync(targetMonth);
         }
 
         [HttpPost]

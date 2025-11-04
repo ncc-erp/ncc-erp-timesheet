@@ -106,10 +106,20 @@
                   mat-flat-button color="primary" (click)="createTimesheetItem()">
                   <mat-icon>add</mat-icon>
                 </button>
-                <button name="submit" *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
-                  (click)="submitTimesheet()" mat-flat-button color="primary">
-                  Submit Week for Approval
-                </button>
+                <div>
+                  <button name="unlockStaff" *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
+                    (click)="unlockTimesheet('Staff')" mat-flat-button color="warn" style="margin-right: 10px;">
+                    <mat-icon>lock_open</mat-icon> Unlock Staff
+                  </button>
+                  <button name="unlockPM" *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET) && !isBasicUser"
+                    (click)="unlockTimesheet('PM')" mat-flat-button color="warn" style="margin-right: 10px;">
+                    <mat-icon>lock_open</mat-icon> Unlock PM
+                  </button>
+                  <button name="submit" *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
+                    (click)="submitTimesheet()" mat-flat-button color="primary">
+                    Submit Week for Approval
+                  </button>
+                </div>
               </div>
             </div>
           </mat-tab>

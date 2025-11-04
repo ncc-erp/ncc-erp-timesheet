@@ -62,7 +62,7 @@ namespace Timesheet.DomainServices
             _donationWallet = configuration.GetValue<string>($"{_serviceName}:DonationWallet");
         }
 
-        public async Task<List<UserPunishmentPaidDto>> GetByCurrentUserAsync(DateTime startDate, DateTime endDate)
+        public async Task<List<UserPunishmentPaidDto>> GetByCurrentUserAsync(DateTime targetMonth)
         {
             try
             {
@@ -72,28 +72,30 @@ namespace Timesheet.DomainServices
                 }
 
                 var currentUserId = _abpSession.UserId.Value;
+                var endOfMonth = targetMonth.AddMonths(1);
 
-                _logger.LogInformation($"Getting punishment paid data for user {currentUserId} from {startDate:yyyy-MM-dd} to {endDate:yyyy-MM-dd}");
+                _logger.LogInformation($"Getting punishment paid data for user {currentUserId} for target month {targetMonth:yyyy-MM}");
 
                 var entities = await _userPunishmentPaidRepository
                     .GetAll()
                     .Where(x => x.UserId == currentUserId)
-                    .Where(x => x.DateAt >= startDate && x.DateAt < endDate)
+                    .Where(x => x.TargetMonth >= targetMonth && x.TargetMonth < endOfMonth)
                     .OrderByDescending(x => x.DateAt)
                     .ToListAsync();
 
-                _logger.LogInformation($"Found {entities.Count} punishment paid records for user {currentUserId}");
+                _logger.LogInformation($"Found {entities.Count} punishment paid records for user {currentUserId} in {targetMonth:yyyy-MM}");
 
                 return entities.Select(x => new UserPunishmentPaidDto
                 {
                     DateAt = x.DateAt,
+                    TargetMonth = x.TargetMonth,
                     Amount = x.Amount,
                     TxHash = x.TxHash
                 }).ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error when getting user punishment paid data for current user from {startDate:yyyy-MM-dd} to {endDate:yyyy-MM-dd}");
+                _logger.LogError(ex, $"Error when getting user punishment paid data for current user for target month {targetMonth:yyyy-MM}");
                 return new List<UserPunishmentPaidDto>();
             }
         }
@@ -115,11 +117,9 @@ namespace Timesheet.DomainServices
             }
 
             var transactionDate = DateTimeOffset.FromUnixTimeSeconds(transactionInfo.TransactionTimestamp).DateTime;
-            if (transactionDate.Year != year || transactionDate.Month != month)
-            {
-                _logger.LogError($"Transaction date {transactionDate:yyyy-MM-dd} does not match selected month/year {year}-{month}");
-                throw new UserFriendlyException($"Transaction date {transactionDate:yyyy-MM-dd} is out of date.");
-            }
+            var targetMonthDate = new DateTime(year, month, 1);
+            
+            _logger.LogInformation($"Processing payment: Transaction date is {transactionDate:yyyy-MM-dd}, applying to month {targetMonthDate:yyyy-MM}");
 
             if (transactionInfo.ToAddress != _donationWallet)
             {
@@ -152,6 +152,7 @@ namespace Timesheet.DomainServices
             {
                 UserId = _abpSession.UserId.Value,
                 DateAt = DateTimeOffset.FromUnixTimeSeconds(transactionInfo.TransactionTimestamp).DateTime,
+                TargetMonth = targetMonthDate, 
                 Amount = amount,
                 TxHash = transactionInfo.Hash
             };
@@ -159,7 +160,6 @@ namespace Timesheet.DomainServices
             try
             {
                 await _userPunishmentPaidRepository.InsertAsync(userPunishmentPaid);
-                await CurrentUnitOfWork.SaveChangesAsync();
 
                 _logger.LogInformation($"Successfully marked transaction {transactionHash} as paid for user {_abpSession.UserId.Value}");
                 return true;

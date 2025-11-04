@@ -1,4 +1,5 @@
 import { SpecialProjectTaskSettingService } from './../../service/api/special-project-task-config.service';
+import { InfoService } from '@app/service/api/info.service';
 import { CreateEditTimesheetItemComponent } from './create-edit-timesheet-item/create-edit-timesheet-item.component';
 import { MatDialog, MatTabChangeEvent, MAT_DIALOG_DATA } from '@angular/material';
 import { GetTimeSheetDto, DayOfWeek, WeekByTask, MyTimeSheetDto, ProjectIncludingTaskDto } from '../../service/api/model/common-DTO';
@@ -15,6 +16,7 @@ import { MomentDateAdapter } from '@angular/material-moment-adapter';
 import { convertHourtoMinute, convertMinuteToHour, convertFloatHourToMinute } from '@shared/common-time';
 import { AbsenceDayService } from '@app/service/api/absence-day.service';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
+import { UserServiceProxy } from '@shared/service-proxies/service-proxies';
 
 export const MY_FORMATS = {
   parse: {
@@ -79,20 +81,31 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
     { status: 3, label: 'Rejected', class: 'bg-grey' },
     { status: 0, label: 'New', class: 'bg-light-green' },
   ];
+  isBasicUser: boolean = false; 
+
   constructor(
     @Optional() @Inject(MAT_DIALOG_DATA) private data: any,
     injector: Injector,
     private route: ActivatedRoute,
     private router: Router,
+    private userService: UserServiceProxy,
     private timesheetService: MyTimesheetService,
     private _dialog: MatDialog,
     private projectService: ProjectManagerService,
     private absenceDayService: AbsenceDayService,
-    private specialProjectTaskSerivice: SpecialProjectTaskSettingService
+    private specialProjectTaskSerivice: SpecialProjectTaskSettingService,
+    private _infoService: InfoService,
   ) {
     super(injector);
     this.viewDate = new Date();
     this.selectedDays = new Map<string, number>();
+    
+    this.userService.get(this.appSession.userId).subscribe(user => {
+      const hasOnlyBasicRole = user.roleNames && 
+                             user.roleNames.length === 1 && 
+                             user.roleNames[0].toUpperCase() === 'BASICUSER';
+      this.isBasicUser = hasOnlyBasicRole;
+    });
   }
 
   receiveRefresh($event) {
@@ -598,6 +611,32 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
     })
     this.isTableLoading = false;
     this.isCanNextBack = true;
+  }
+
+  unlockTimesheet(type: string) {
+    const emailAddress = this.appSession.user.emailAddress;
+    
+    if (type === 'Staff') {
+      this._infoService.unlockToLogTimesheet(emailAddress).subscribe(
+        () => {
+          this.notify.success('Unlock Staff successfully!');
+          this.getAllTimeSheet();
+        },
+        (error) => {
+          this.notify.error('Failed to unlock Staff: ' + (error && error.error && error.error.error ? error.error.error.message : 'Unknown error'));
+        }
+      );
+    } else if (type === 'PM') {
+      this._infoService.unlockToApproveTimesheet(emailAddress).subscribe(
+        () => {
+          this.notify.success('Unlock PM successfully!');
+          this.getAllTimeSheet();
+        },
+        (error) => {
+          this.notify.error('Failed to unlock PM: ' + (error && error.error && error.error.error ? error.error.error.message : 'Unknown error'));
+        }
+      );
+    }
   }
 
   delete(item: GetTimeSheetDto): void {
