@@ -33,13 +33,8 @@ namespace Timesheet.DomainServices
             return TimeSpan.TryParse(input, out var result) ? result : (TimeSpan?)null;
         }
 
-        private bool IsWFHForDayType(dynamic[] userAbsenceRequests, (long RequestId, DateTime DateAt) absenceDetailDictKey, DayType dayType, Dictionary<(long RequestId, DateTime DateAt), List<dynamic>> absenceDetailDict)
-        {
-            return userAbsenceRequests.Any(r => r.Type == RequestType.Remote && r.Status == RequestStatus.Approved
-                && absenceDetailDict.ContainsKey((r.Id, absenceDetailDictKey.DateAt))
-                && absenceDetailDict[(r.Id, absenceDetailDictKey.DateAt)].Any(d => d.DateType == dayType));
-        }
-
+        // Tính bù thời gian trễ giờ (nếu thời gian trễ nhỏ hơn 15 phút thì thời gian làm việc sẽ được bù thêm thời gian trễ đó, nếu không thì không tính thời gian trễ)
+        // Ví dụ: Nếu một user bắt đầu làm việc lúc 8h35 thì sẽ tính thời gian làm việc từ thời điểm 8h30
         private double CalculateLateMinutes(TimeSpan? checkInTime, TimeSpan? morningStartAt, TimeSpan? afternoonStartAt, double minutes)
         {
             double lateMinutes = 0.0;
@@ -75,7 +70,7 @@ namespace Timesheet.DomainServices
                     UserId = userId,
                     EmployeeName = employeeName,
                     Date = date,
-                    ActualHours = totalWorkingTime.HasValue ? $"{totalWorkingTime.Value.ToString("F2", CultureInfo.InvariantCulture)}h" : "0h",
+                    ActualHours = totalWorkingTime.HasValue ? $"{totalWorkingTime.Value:F2}h" : "0h",
                     Notes = notes,
                     Branch = branchCode
                 };
@@ -97,12 +92,13 @@ namespace Timesheet.DomainServices
             }
         }
 
-        private bool IsValidAbsenceForCase(dynamic[] userAbsenceRequests, (long RequestId, DateTime DateAt) absenceDetailDictKey,
-            bool isFullDayAbsence, bool isMorningAbsence, bool isAfternoonAbsence, bool isMorningPresentAfternoonAbsent, bool isAfternoonPresentMorningAbsent,
-            Dictionary<(long RequestId, DateTime DateAt), List<dynamic>> absenceDetailList)
+        // Hàm duyệt qua các trường hợp các request được approved
+        private bool IsValidAbsenceForCase(IEnumerable<AbsenceRequestDto> userAbsenceRequests, DateTime dateAt,
+            bool isFullDayAbsence, bool isMorningAbsence, bool isAfternoonAbsence,
+            Dictionary<(long, DateTime), List<AbsenceDetailDto>> absenceDetailDict)
         {
             var relevantRequests = userAbsenceRequests
-                .Where(r => absenceDetailList.ContainsKey((r.Id, absenceDetailDictKey.DateAt)))
+                .Where(r => absenceDetailDict.ContainsKey((r.Id, dateAt)))
                 .ToList();
 
             bool hasMorningRequest = false, hasAfternoonRequest = false;
@@ -112,34 +108,28 @@ namespace Timesheet.DomainServices
 
             foreach (var request in relevantRequests)
             {
-                if (!absenceDetailList.ContainsKey((request.Id, absenceDetailDictKey.DateAt)))
+                if (!absenceDetailDict.TryGetValue((request.Id, dateAt), out var details))
                     continue;
 
-                var details = absenceDetailList[(request.Id, absenceDetailDictKey.DateAt)];
                 foreach (var detail in details)
                 {
                     if (request.Status == RequestStatus.Approved)
                     {
-                        if (isFullDayAbsence && detail.DateType == DayType.Fullday)
+                        // Trường hợp vắng hoặc onsite cả ngày
+                        if (isFullDayAbsence && detail.DateType == DayType.Fullday) 
                             return true;
-                        if (isMorningAbsence && detail.DateType == DayType.Morning)
+                        // Trường hợp vắng hoặc onsite buổi sáng
+                        if (isMorningAbsence && detail.DateType == DayType.Morning) 
                             return true;
-                        if (isAfternoonAbsence && detail.DateType == DayType.Afternoon)
+                        // Trường hợp vắng hoặc onsite buổi chiều
+                        if (isAfternoonAbsence && detail.DateType == DayType.Afternoon) 
                             return true;
-                        if ((isMorningAbsence || isAfternoonPresentMorningAbsent) && detail.DateType == DayType.Morning)
-                            return true;
-                        if ((isAfternoonAbsence || isMorningPresentAfternoonAbsent) && detail.DateType == DayType.Afternoon)
-                            return true;
+                        // Trường hợp vắng một buổi và có request remote cả ngày (vì xét thêm trường hợp không có thời gian checkout)
                         if ((isMorningAbsence || isAfternoonAbsence) && detail.DateType == DayType.Fullday && request.Type == RequestType.Remote)
                             return true;
+                        // Trường hợp remote cả ngày
                         if (isFullDayAbsence && request.Type == RequestType.Remote)
                             return true;
-                        if (isFullDayAbsence && (detail.DateType == DayType.Morning || detail.DateType == DayType.Afternoon))
-                        {
-                            var otherDetail = details.FirstOrDefault(d => d.DateType != detail.DateType && (d.DateType == DayType.Morning || d.DateType == DayType.Afternoon));
-                            if (otherDetail != null)
-                                return true;
-                        }
 
                         if (detail.DateType == DayType.Morning)
                         {
@@ -165,6 +155,7 @@ namespace Timesheet.DomainServices
                 }
             }
 
+            // Trường hợp có request cho buổi sáng và chiều (ví dụ: off sáng và remote chiều, remote sáng và off chiều,...)
             if (hasMorningRequest && hasAfternoonRequest &&
                 ((hasMorningOffOnsite && hasAfternoonRemote) || (hasAfternoonOffOnsite && hasMorningRemote)) &&
                 hasMorningApproved && hasAfternoonApproved)
@@ -196,41 +187,56 @@ namespace Timesheet.DomainServices
         {
             var activeUsers = await _workScope.GetAll<User>()
                 .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork && u.BranchId == branchId)
-                .Select(u => new { u.Id, u.FullName, u.BranchId, BranchName = u.Branch.Name, u.MorningStartAt, u.MorningEndAt, u.AfternoonStartAt, u.AfternoonEndAt, u.MorningWorking, u.AfternoonWorking })
+                .Select(u => new { u.Id, u.FullName, u.MorningStartAt, u.MorningEndAt, u.AfternoonStartAt, u.AfternoonEndAt, u.MorningWorking, u.AfternoonWorking })
                 .ToListAsync();
+
+            var userDict = activeUsers.ToDictionary(u => u.Id);
 
             var userIds = activeUsers.Select(u => u.Id).ToList();
 
             var timekeepings = await _workScope.GetAll<Timekeeping>()
-                .Where(t => userIds.Contains((long)t.UserId)
+                .Where(t => userIds.Contains(t.UserId.Value)
                     && t.DateAt >= startDate && t.DateAt <= endDate
                     && t.DateAt.DayOfWeek != DayOfWeek.Saturday)
                 .Select(t => new { t.UserId, t.DateAt, t.CheckIn, t.CheckOut, t.TrackerTime })
                 .ToListAsync();
 
+            var timekeepingDict = timekeepings
+                .GroupBy(t => t.UserId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
             var absenceRequests = await _workScope.GetAll<AbsenceDayRequest>()
                 .Where(r => userIds.Contains(r.UserId) && r.IsDeleted == false)
-                .Select(r => new { r.Id, r.UserId, r.Status, r.Type, r.IsDeleted })
+                .Select(r => new AbsenceRequestDto
+                {
+                    Id = r.Id,
+                    UserId = r.UserId,
+                    Status = r.Status,
+                    Type = r.Type
+                })
                 .ToListAsync();
 
             var absenceRequestDict = absenceRequests
                 .GroupBy(r => r.UserId)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Cast<dynamic>().ToList()
-                );
+                .ToDictionary(g => g.Key, g => g.ToList());
 
             var absenceDetails = await _workScope.GetAll<AbsenceDayDetail>()
                 .Where(d => absenceRequests.Select(r => r.Id).Contains(d.RequestId) && d.DateAt >= startDate && d.DateAt <= endDate)
-                .Select(d => new { d.RequestId, d.DateAt, d.DateType, d.AbsenceTime, d.Hour })
+                .Select(d => new AbsenceDetailDto
+                {
+                    RequestId = d.RequestId,
+                    DateAt = d.DateAt.Date,
+                    DateType = d.DateType,
+                    AbsenceTime = d.AbsenceTime,
+                    Hour = d.Hour,
+                    RequestStatus = d.Request.Status,
+                    RequestType = d.Request.Type
+                })
                 .ToListAsync();
 
             var absenceDetailDict = absenceDetails
                 .GroupBy(d => (d.RequestId, d.DateAt))
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Cast<dynamic>().ToList()
-                );
+                .ToDictionary(g => g.Key, g => g.ToList());
 
             var yesterdayAnomalies = new List<YesterdayAnomalyDTO>();
             var lastWeekAnomalies = new List<LastWeekAnomalyDTO>();
@@ -240,8 +246,7 @@ namespace Timesheet.DomainServices
 
             foreach (var tk in timekeepings)
             {
-                var user = activeUsers.FirstOrDefault(u => u.Id == tk.UserId);
-                if (user == null) continue;
+                if (!userDict.TryGetValue((long)tk.UserId, out var user)) continue;
 
                 bool isValidAbsence = false;
                 double? officeActualHours = null;
@@ -255,23 +260,28 @@ namespace Timesheet.DomainServices
                 TimeSpan? checkInTime = ParseTimeSpan(tk.CheckIn);
                 TimeSpan? checkOutTime = tk.CheckOut != null ? ParseTimeSpan(tk.CheckOut) : null;
 
-                var userAbsenceRequests = tk.UserId.HasValue && absenceRequestDict.ContainsKey(tk.UserId.Value)
-                                ? absenceRequestDict[tk.UserId.Value].ToArray()
-                                : Array.Empty<dynamic>();
+                var absenceKey = ((long)tk.UserId, tk.DateAt);
+                // Kiểm tra có request được approved của một user vào một thời điểm cụ thể không
+                var hasAbsenceData = absenceDetailDict.TryGetValue(absenceKey, out var absenceData);
+                var userAbsenceRequests = absenceRequestDict.GetValueOrDefault(tk.UserId.Value, new List<AbsenceRequestDto>());
 
-                bool isWFHFullday = IsWFHForDayType(userAbsenceRequests, (0, tk.DateAt), DayType.Fullday, absenceDetailDict);
-                bool isWFHMorning = IsWFHForDayType(userAbsenceRequests, (0, tk.DateAt), DayType.Morning, absenceDetailDict);
-                bool isWFHAfternoon = IsWFHForDayType(userAbsenceRequests, (0, tk.DateAt), DayType.Afternoon, absenceDetailDict);
+                bool isWFH = hasAbsenceData && absenceData.Any(d => d.RequestType == RequestType.Remote && d.RequestStatus == RequestStatus.Approved);
 
+                bool isWFHFullday = isWFH && absenceData.Any(d => d.DateType == DayType.Fullday);
+                bool isWFHMorning = isWFH && absenceData.Any(d => d.DateType == DayType.Morning);
+                bool isWFHAfternoon = isWFH && absenceData.Any(d => d.DateType == DayType.Afternoon);
+
+                // Vắng cả ngày khi không có thời điểm checkin và thời điểm checkout
                 bool isFullDayAbsence = tk.CheckIn == null && tk.CheckOut == null;
+                // Vắng buổi sáng khi có thời điểm checkin lớn hơn giờ kết thúc làm việc buổi sáng
                 bool isMorningAbsence = checkInTime.HasValue && morningEndAt.HasValue && checkInTime > morningEndAt;
+                // Vắng buổi chiều khi xảy ra một trong hai trường hợp:
+                // - Thời điểm checkout nhỏ hơn giờ bắt đầu làm việc buổi chiều
+                // - Không có thời điểm checkout (ngoại trừ trường hợp một người WFH có thể không có thời điểm checkout)
                 bool isAfternoonAbsence = checkInTime.HasValue && !isWFHFullday && !isWFHAfternoon &&
                     (!checkOutTime.HasValue || (afternoonStartAt.HasValue && checkOutTime.HasValue && checkOutTime < afternoonStartAt));
-                bool isMorningPresentAfternoonAbsent = checkInTime.HasValue && morningStartAt.HasValue && morningEndAt.HasValue && afternoonStartAt.HasValue
-                    && checkInTime < morningEndAt && checkOutTime.HasValue && checkOutTime < afternoonStartAt;
-                bool isAfternoonPresentMorningAbsent = checkOutTime.HasValue && afternoonStartAt.HasValue && afternoonEndAt.HasValue && morningEndAt.HasValue
-                    && checkOutTime > afternoonEndAt && checkInTime.HasValue && checkInTime > morningEndAt;
 
+                // Lấy tracker time
                 if (!string.IsNullOrEmpty(tk.TrackerTime) && (isWFHFullday || isWFHMorning || isWFHAfternoon))
                 {
                     if (TimeSpan.TryParse(tk.TrackerTime, out var trackerTimeSpan))
@@ -282,12 +292,13 @@ namespace Timesheet.DomainServices
                     }
                 }
 
+                // Kiểm tra nếu có làm việc WFH nhưng không có tracker time, có thể lấy thời gian checkout - checkin
                 if ((isWFHFullday || isWFHMorning || isWFHAfternoon) && trackerTimeHours.GetValueOrDefault(0) == 0 && checkInTime.HasValue && checkOutTime.HasValue)
                 {
                     var workingTime = (checkOutTime.Value - checkInTime.Value).TotalHours;
                     double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt, gracePeriodMinutes);
                     workingTime += lateMinutes / 60.0;
-                    if (!(isMorningPresentAfternoonAbsent || isAfternoonPresentMorningAbsent))
+                    if (!(isMorningAbsence || isAfternoonAbsence))
                     {
                         workingTime -= breakTime;
                     }
@@ -296,12 +307,13 @@ namespace Timesheet.DomainServices
 
                 trackerActualHours = trackerTimeHours > 0 ? trackerTimeHours : 0;
 
+                // Lấy giờ làm việc trên công ty
                 if (checkInTime.HasValue && checkOutTime.HasValue)
                 {
                     var workingTime = (checkOutTime.Value - checkInTime.Value).TotalHours;
                     double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt, gracePeriodMinutes);
                     workingTime += lateMinutes / 60.0;
-                    if (!(isMorningPresentAfternoonAbsent || isAfternoonPresentMorningAbsent))
+                    if (!(isMorningAbsence|| isAfternoonAbsence))
                     {
                         workingTime -= breakTime;
                     }
@@ -317,31 +329,29 @@ namespace Timesheet.DomainServices
                     }
                 }
 
+                // Thêm giờ đi muộn, về sớm
                 double tardinessHour = 0, leaveEarlyHour = 0;
-                foreach (var request in userAbsenceRequests)
+                if (hasAbsenceData)
                 {
-                    if (absenceDetailDict.ContainsKey((request.Id, tk.DateAt)))
+                    foreach (var d in absenceData)
                     {
-                        var details = absenceDetailDict[(request.Id, tk.DateAt)];
-                        foreach (var detail in details)
-                        {
-                            if (detail.AbsenceTime == OnDayType.DiMuon && detail.Hour > 0)
-                                tardinessHour += detail.Hour;
-                            if (detail.AbsenceTime == OnDayType.VeSom && detail.Hour > 0)
-                                leaveEarlyHour += detail.Hour;
-                        }
+                        if (d.AbsenceTime == OnDayType.DiMuon && d.Hour > 0)
+                            tardinessHour += d.Hour;
+                        if (d.AbsenceTime == OnDayType.VeSom && d.Hour > 0)
+                            leaveEarlyHour += d.Hour;
                     }
                 }
 
+                // Kiểm tra giờ làm việc có đủ không (làm việc ở công ty hoặc WFH)
                 if ((checkInTime.HasValue && checkOutTime.HasValue && !isFullDayAbsence) ||
                     (checkInTime == null && checkOutTime == null && (isWFHFullday || isWFHMorning || isWFHAfternoon)) ||
                     (checkInTime.HasValue && checkOutTime == null && (isWFHFullday || isWFHMorning || isWFHAfternoon)))
                 {
                     double? totalWorkingTime = (officeActualHours ?? 0) + (trackerActualHours ?? 0);
                     double standardWorkHours = 8.0;
-                    if (isMorningPresentAfternoonAbsent && user.MorningWorking.HasValue)
+                    if (isAfternoonAbsence && user.MorningWorking.HasValue)
                         standardWorkHours = user.MorningWorking.Value;
-                    else if (isAfternoonPresentMorningAbsent && user.AfternoonWorking.HasValue)
+                    else if (isMorningAbsence && user.AfternoonWorking.HasValue)
                         standardWorkHours = user.AfternoonWorking.Value;
 
                     double requiredHours = 0.0;
@@ -358,12 +368,8 @@ namespace Timesheet.DomainServices
                     if (tardinessHour > 0 || leaveEarlyHour > 0)
                         requiredHours -= (tardinessHour + leaveEarlyHour);
 
-                    bool isMorningOfficeAfternoonWFH = false;
-                    bool isMorningWFHAfternoonOffice = false;
-
                     bool isTimeViolation = ((isWFHFullday || isWFHMorning || isWFHAfternoon) && trackerActualHours.HasValue && trackerActualHours.Value < requiredHours) ||
-                      (!(isWFHFullday || isWFHMorning || isWFHAfternoon) && officeActualHours.HasValue && officeActualHours.Value < requiredHours) &&
-                      !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice;
+                      (!(isWFHFullday || isWFHMorning || isWFHAfternoon) && officeActualHours.HasValue && officeActualHours.Value < requiredHours);
 
                     bool isZeroTimeViolation = ((isWFHFullday || isWFHMorning || isWFHAfternoon) && trackerActualHours == 0.0) ||
                                                (!(isWFHFullday || isWFHMorning || isWFHAfternoon) && officeActualHours == 0.0);
@@ -372,41 +378,41 @@ namespace Timesheet.DomainServices
                     {
                         string notes = isZeroTimeViolation ? "No tracker time for approved WFH" : "No early leave/late arrival approval";
                         string violationType = isZeroTimeViolation ? "DatesNoTrackerTime" : "DatesBelowThreshold";
-                        AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), totalWorkingTime,
+                        AddOrUpdateAnomaly(tk.UserId.Value, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), totalWorkingTime,
                             notes, isYesterday, yesterdayAnomalies, lastWeekAnomalies, violationType, branchCode);
                     }
 
-                    if (isWFHMorning && isAfternoonPresentMorningAbsent && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice)
+                    if (isWFHMorning && isMorningAbsence)
                     {
                         double afternoonRequiredHours = (user.AfternoonWorking ?? 0) - tardinessHour - leaveEarlyHour;
                         bool isAfternoonWorkingTimeViolation = (officeActualHours ?? 0) < afternoonRequiredHours;
                         if (isAfternoonWorkingTimeViolation)
                         {
-                            AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), officeActualHours,
+                            AddOrUpdateAnomaly(tk.UserId.Value, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), officeActualHours,
                                 "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold", branchCode);
                         }
                     }
 
-                    if (isWFHAfternoon && isMorningPresentAfternoonAbsent && !isMorningOfficeAfternoonWFH && !isMorningWFHAfternoonOffice)
+                    if (isWFHAfternoon && isAfternoonAbsence)
                     {
                         double morningRequiredHours = (user.MorningWorking ?? 0) - tardinessHour - leaveEarlyHour;
                         bool isMorningWorkingTimeViolation = (officeActualHours ?? 0) < morningRequiredHours;
                         if (isMorningWorkingTimeViolation)
                         {
-                            AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), officeActualHours,
+                            AddOrUpdateAnomaly(tk.UserId.Value, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), officeActualHours,
                                 "No early leave/late arrival approval", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesBelowThreshold", branchCode);
                         }
                     }
                 }
 
-                if (isFullDayAbsence || isMorningAbsence || isAfternoonAbsence || isMorningPresentAfternoonAbsent || isAfternoonPresentMorningAbsent)
+                if (isFullDayAbsence || isMorningAbsence || isAfternoonAbsence)
                 {
-                    isValidAbsence = IsValidAbsenceForCase(userAbsenceRequests, (0, tk.DateAt), isFullDayAbsence, isMorningAbsence, isAfternoonAbsence,
-                        isMorningPresentAfternoonAbsent, isAfternoonPresentMorningAbsent, absenceDetailDict);
+                    isValidAbsence = IsValidAbsenceForCase(userAbsenceRequests, tk.DateAt, isFullDayAbsence, isMorningAbsence, isAfternoonAbsence,
+                        absenceDetailDict);
 
                     if (!isValidAbsence)
                     {
-                        AddOrUpdateAnomaly((long)tk.UserId, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), officeActualHours,
+                        AddOrUpdateAnomaly(tk.UserId.Value, user.FullName, tk.DateAt.ToString("dd/MM/yyyy"), officeActualHours,
                             "No leave/WFH record", isYesterday, yesterdayAnomalies, lastWeekAnomalies, "DatesMissed", branchCode);
                     }
                 }
@@ -903,15 +909,6 @@ namespace Timesheet.DomainServices
             pos += Environment.NewLine.Length - 2;
             sb.AppendLine("No anomalies found in this category");
             sb.AppendLine("═══════════════════════════════════════");
-
-            SendMezonMessage(botUri, sb, mkList);
-        }
-
-        private async Task SendFooterMessage(string botUri, string branchName, bool isWeekly, string completionMessage)
-        {
-            var sb = new StringBuilder();
-            var mkList = new List<object>();
-            int pos = 0;
 
             SendMezonMessage(botUri, sb, mkList);
         }
