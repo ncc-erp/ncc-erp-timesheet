@@ -429,6 +429,14 @@ namespace Timesheet.APIs.Timekeepings
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimeSheet_ViewMyTardinessDetail)]
         public async Task<List<GetTimekeepingUserDto>> GetMyDetails(int year, int month)
         {
+
+            var targetMonth = new DateTime(year, month, 1);
+            var totalPaidPunishment = await WorkScope.GetAll<UserPunishmentPaid> ()
+              .Where(up => up.UserId == AbpSession.UserId &&
+                up.TargetMonth.Year == year &&
+                up.TargetMonth.Month == month)
+              .SumAsync(up => (int ? ) up.Amount) ?? 0;
+
             var tkList = await WorkScope.GetAll<Timekeeping>()
               .Include(t => t.User).ThenInclude(u => u.Branch)
               .Where(t =>
@@ -444,12 +452,6 @@ namespace Timesheet.APIs.Timekeepings
                 up.DateAt.Month == month &&
                 up.UserId == AbpSession.UserId)
               .ToListAsync();
-
-            var totalPaidPunishment = await WorkScope.GetAll<UserPunishmentPaid>()
-                .Where(up => up.UserId == AbpSession.UserId && 
-                           up.DateAt.Year == year && 
-                           up.DateAt.Month == month)
-                .SumAsync(up => (int?)up.Amount) ?? 0;
 
             var userIds = tkList.Select(t => t.LastModifierUserId)
               .Union(upList.Select(up => up.CreatorUserId))

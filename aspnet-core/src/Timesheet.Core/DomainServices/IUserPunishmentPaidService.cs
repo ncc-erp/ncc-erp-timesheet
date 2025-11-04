@@ -8,7 +8,8 @@ namespace Timesheet.DomainServices
 {
     public interface IUserPunishmentPaidService
     {
-        Task<List<UserPunishmentPaidDto>> GetByCurrentUserAsync(DateTime startDate, DateTime endDate);
+        Task<List<UserPunishmentPaidDto>> GetByCurrentUserAsync(DateTime targetMonth);
+
         Task<bool> MarkPaidTransactions(string transactionHash, int year, int month);
     }
 }

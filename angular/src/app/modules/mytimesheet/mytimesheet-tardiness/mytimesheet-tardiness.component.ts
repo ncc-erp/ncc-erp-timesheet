@@ -520,7 +520,8 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       width: '800px',
       data: {
         timekeepingData: this.listTimekeeping,
-        totalMonthlyPunishment: this.totalMonthlyPunishment
+        totalMonthlyPunishment: this.totalMonthlyPunishment,
+        selectedDate: new Date(this.year, this.month, 1)
       }
     });
 
