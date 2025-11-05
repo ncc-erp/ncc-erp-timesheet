@@ -58,7 +58,6 @@ export class DailyProjectReportComponent implements OnInit, OnChanges {
     if (!this.listBranchFilter) {
       this.listBranchFilter = this.listBranch || [];
     }
-    // Không call API ngay, chờ user chọn branch
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -68,7 +67,6 @@ export class DailyProjectReportComponent implements OnInit, OnChanges {
   }
 
   searchOrFilter(): void {
-    // Validation: Không call API nếu không có branch nào được chọn
     if (!this.branchIds || this.branchIds.length === 0) {
       console.warn("No branches selected. Please select at least one branch.");
       this.projects = [];
@@ -111,19 +109,6 @@ export class DailyProjectReportComponent implements OnInit, OnChanges {
           this.isLoading = false;
         },
       });
-  }
-
-  onBranchSelectionChange(selectedIds: number[]): void {
-    this.branchIds = selectedIds || [];
-    
-    // Chỉ call API khi có ít nhất 1 branch được chọn
-    if (this.branchIds.length > 0) {
-      this.searchOrFilter();
-    } else {
-      // Clear data khi không có branch nào được chọn
-      this.projects = [];
-      this.filteredProjects = [];
-    }
   }
 
   filterBranch(): void {
@@ -209,29 +194,38 @@ export class DailyProjectReportComponent implements OnInit, OnChanges {
     this.applyFilters();
   }
 
-  isAllBranchesSelected(): boolean {
-    if (!this.branchIds || !this.listBranch || this.listBranch.length === 0) {
-      return false;
-    }
-    return this.branchIds.length === this.listBranch.length;
+isAllSelected(): boolean {
+  return (
+    this.branchIds &&
+    this.listBranch &&
+    this.branchIds.length === this.listBranch.length
+  );
+}
+
+toggleSelectAll(event?: MouseEvent): void {
+  if (event) {
+    event.stopPropagation();
   }
 
-  toggleSelectAllBranches(event?: MouseEvent): void {
-    if (event) {
-      event.stopPropagation();
-    }
-
-    if (this.isAllBranchesSelected()) {
-      // Deselect all - clear data
-      this.branchIds = [];
-      this.projects = [];
-      this.filteredProjects = [];
-    } else {
-      // Select all
-      this.branchIds = this.listBranch.map((b) => b.id);
-      this.searchOrFilter();
-    }
+  if (this.isAllSelected()) {
+    this.branchIds = [];
+    this.projects = [];
+    this.filteredProjects = [];
+  } else {
+    this.branchIds = this.listBranch.map(b => b.id);
+    this.searchOrFilter();
   }
+}
+
+onBranchSelectionChange(selectedIds: number[]): void {
+  this.branchIds = selectedIds || [];
+  if (this.branchIds.length > 0) {
+    this.searchOrFilter();
+  } else {
+    this.projects = [];
+    this.filteredProjects = [];
+  }
+}
 
   clearAllFilters(): void {
     this.searchText = "";
@@ -242,13 +236,11 @@ export class DailyProjectReportComponent implements OnInit, OnChanges {
     this.sortColumn = '';
     this.sortDirection = '';
     
-    // Clear data
     this.projects = [];
     this.filteredProjects = [];
   }
 
   refresh(): void {
-    // Chỉ refresh nếu có branch được chọn
     if (this.branchIds && this.branchIds.length > 0) {
       this.searchOrFilter();
     }

@@ -27,13 +27,10 @@
           <div class="col-lg-12">
             <div class="row">
               <!-- Branch Filter -->
-<div class="pr-0 col-md-4 col-sm-6 col-xs-12 mb-0 row-item">
-  <mat-form-field
-    style="padding-bottom: 0"
-    class="w-100"
-    appearance="outline"
-  >
+              <div class="pr-0 col-md-4 col-sm-6 col-xs-12 mb-0 row-item">
+  <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
     <mat-label>{{ "Branch" | localize }}</mat-label>
+
     <mat-select
       name="branchIds"
       multiple
@@ -49,12 +46,11 @@
         style="width: 100%; padding: 4px"
       />
 
-      <!-- ✅ Select All Option - Chỉ dùng mat-option -->
-      <mat-option (click)="toggleSelectAllBranches($event)">
+      <mat-checkbox style="margin-left: 10px;" (click)="toggleSelectAll($event)">
         <strong>
-          {{ isAllBranchesSelected() ? ('Deselect All' | localize) : ('Select All' | localize) }}
+          {{ isAllSelected() ? ('Deselect All' | localize) : ('Select All' | localize) }}
         </strong>
-      </mat-option>
+      </mat-checkbox>
 
       <mat-divider></mat-divider>
 
@@ -63,10 +59,14 @@
         [value]="branch.id"
       >
         {{ branch.name }}
+        <ng-container *ngIf="branch.name === defaultBranchName">
+          (Default)
+        </ng-container>
       </mat-option>
     </mat-select>
   </mat-form-field>
 </div>
+
 
               <!-- Min Hours Filter -->
               <div class="pr-0 col-md-2 col-sm-6 col-xs-12 mb-0 row-item">
@@ -228,7 +228,6 @@
           </div>
         </div>
 
-        <!-- No Data Message - Sau khi filter -->
         <div
           *ngIf="!isLoading && branchIds.length > 0 && filteredProjects.length === 0 && projects.length > 0"
           class="text-center p-4"
@@ -239,7 +238,6 @@
           </button>
         </div>
 
-        <!-- No Data từ API -->
         <div
           *ngIf="!isLoading && branchIds.length > 0 && projects.length === 0"
           class="text-center p-4"

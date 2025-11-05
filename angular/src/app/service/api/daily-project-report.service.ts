@@ -5,6 +5,7 @@ import { Observable } from "rxjs";
 import { BaseApiService } from "./base-api.service";
 
 export interface DailyProjectTimelogReportResponse {
+  result: DailyProjectTimelogReportResponse;
   reportDate: string;
   lastWeekStart: string;
   lastWeekEnd: string;
@@ -64,7 +65,7 @@ export class DailyProjectTimelogReportService extends BaseApiService{
         { params }
       )
       .pipe(
-        map((response) => response)
+        map((response) => response.result as DailyProjectTimelogReportResponse)
       );
   }
 }
