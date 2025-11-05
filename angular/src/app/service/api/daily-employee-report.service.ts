@@ -54,11 +54,11 @@ export class DailyEmployeeReportService extends BaseApiService {
       params = params.set("Limit", limit.toString());
     }
 
-    console.log('API URL:', this.getUrl("GetDailyProjectTimelogReport"));
+    console.log('API URL:', this.getUrl("GetOfficeWorkingTimelogReport"));
     console.log('API Params:', params.toString());
 
     return this.http.get<any>(
-      this.getUrl("GetDailyProjectTimelogReport"),
+      this.getUrl("GetOfficeWorkingTimelogReport"),
       { params }
     ).pipe(
       map(response => response.result ? response.result as DailyProjectTimelogReportResponse : response as DailyProjectTimelogReportResponse)

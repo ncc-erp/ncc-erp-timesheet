@@ -1,0 +1,252 @@
+<div class="row">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content">
+      <div class="header">
+        <h2>{{ "Project Working Report" | localize }}</h2>
+        <ul class="header-dropdown m-r--5">
+          <li>
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="headerMenu"
+              class="header-dropdown-mat-icon-button"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #headerMenu="matMenu">
+              <button mat-menu-item name="refreshBtn" (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+                <span>{{ "Refresh" | localize }}</span>
+              </button>
+            </mat-menu>
+          </li>
+        </ul>
+      </div>
+
+      <div class="body">
+        <div class="group">
+          <div class="col-lg-12">
+            <div class="row">
+              <!-- Branch Filter -->
+<div class="pr-0 col-md-4 col-sm-6 col-xs-12 mb-0 row-item">
+  <mat-form-field
+    style="padding-bottom: 0"
+    class="w-100"
+    appearance="outline"
+  >
+    <mat-label>{{ "Branch" | localize }}</mat-label>
+    <mat-select
+      name="branchIds"
+      multiple
+      [(ngModel)]="branchIds"
+      (ngModelChange)="onBranchSelectionChange($event)"
+    >
+      <input
+        matInput
+        placeholder="Search branch..."
+        [(ngModel)]="branchSearchText"
+        (keyup)="filterBranch()"
+        (click)="$event.stopPropagation()"
+        style="width: 100%; padding: 4px"
+      />
+
+      <!-- ✅ Select All Option - Chỉ dùng mat-option -->
+      <mat-option (click)="toggleSelectAllBranches($event)">
+        <strong>
+          {{ isAllBranchesSelected() ? ('Deselect All' | localize) : ('Select All' | localize) }}
+        </strong>
+      </mat-option>
+
+      <mat-divider></mat-divider>
+
+      <mat-option
+        *ngFor="let branch of listBranchFilter"
+        [value]="branch.id"
+      >
+        {{ branch.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+              <!-- Min Hours Filter -->
+              <div class="pr-0 col-md-2 col-sm-6 col-xs-12 mb-0 row-item">
+                <mat-form-field
+                  style="padding-bottom: 0"
+                  class="w-100"
+                  appearance="outline"
+                >
+                  <mat-label>{{ "Min Hours" | localize }}</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    [(ngModel)]="minHours"
+                    (keyup.enter)="searchOrFilter()"
+                    min="0"
+                  />
+                </mat-form-field>
+              </div>
+
+              <!-- Top N Filter -->
+              <div class="pr-0 col-md-2 col-sm-6 col-xs-12 mb-0 row-item">
+                <mat-form-field
+                  style="padding-bottom: 0"
+                  class="w-100"
+                  appearance="outline"
+                >
+                  <mat-label>{{ "Top N" | localize }}</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    [(ngModel)]="topN"
+                    (keyup.enter)="searchOrFilter()"
+                    min="1"
+                  />
+                </mat-form-field>
+              </div>
+
+              <!-- Search Filter -->
+              <div class="pr-0 col-md-4 col-sm-12 col-xs-12 mb-0 row-item">
+                <mat-form-field
+                  style="padding-bottom: 0"
+                  class="w-100"
+                  appearance="outline"
+                >
+                  <mat-label>{{ "Search" | localize }}</mat-label>
+                  <input
+                    matInput
+                    [(ngModel)]="searchText"
+                    (ngModelChange)="onSearchChange()"
+                    placeholder="Search by project or member name..."
+                  />
+                  <mat-icon matSuffix>search</mat-icon>
+                  <button
+                    mat-icon-button
+                    matSuffix
+                    *ngIf="searchText"
+                    (click)="clearSearch()"
+                  >
+                    <mat-icon>clear</mat-icon>
+                  </button>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div *ngIf="isLoading" class="text-center p-4">
+          <mat-spinner diameter="50"></mat-spinner>
+        </div>
+
+        <!-- Empty State - Chưa chọn branch -->
+        <div
+          *ngIf="!isLoading && branchIds.length === 0"
+          class="text-center p-4"
+          style="padding: 60px 20px;"
+        >
+          <mat-icon style="font-size: 64px; height: 64px; width: 64px; color: #999; margin-bottom: 16px;">
+            filter_list
+          </mat-icon>
+          <p style="color: #666; font-size: 16px; margin: 0;">
+            {{ "Please select at least one branch to view the report" | localize }}
+          </p>
+        </div>
+
+        <!-- Data Table -->
+        <div
+          *ngIf="!isLoading && branchIds.length > 0 && filteredProjects.length > 0"
+          class="table-container"
+        >
+          <!-- Fixed Header -->
+          <div class="table-header-wrapper">
+            <table class="table table-bordered table-header-fixed">
+              <thead>
+                <tr>
+                  <th class="col-project-name sortable" (click)="onSort('name')">
+                    <div class="header-content">
+                      <span>{{ "Project Name" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('name') }}</mat-icon>
+                    </div>
+                  </th>
+                  <th class="col-members">{{ "Members" | localize }}</th>
+                  <th class="col-data sortable" (click)="onSort('memberCount')">
+                    <div class="header-content">
+                      <span>{{ "Member Count" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('memberCount') }}</mat-icon>
+                    </div>
+                  </th>
+                  <th class="col-data sortable" (click)="onSort('totalTimelogLW')">
+                    <div class="header-content">
+                      <span>{{ "Hours (LW)" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('totalTimelogLW') }}</mat-icon>
+                    </div>
+                  </th>
+                  <th class="col-data sortable" (click)="onSort('totalTimelogLM')">
+                    <div class="header-content">
+                      <span>{{ "Hours (LM)" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('totalTimelogLM') }}</mat-icon>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+
+          <!-- Virtual Scroll Body -->
+          <cdk-virtual-scroll-viewport
+            [itemSize]="itemSize"
+            class="virtual-scroll-viewport"
+            [style.height.px]="
+              Math.min(filteredProjects.length * itemSize, maxHeight)
+            "
+          >
+            <table class="table table-bordered">
+              <tbody>
+                <tr
+                  *cdkVirtualFor="let item of filteredProjects"
+                  class="virtual-scroll-row"
+                >
+                  <td class="col-project-name">{{ item.name }}</td>
+                  <td class="col-members" [title]="item.members.join(', ')">
+                    {{ getMembersDisplay(item.members) }}
+                  </td>
+                  <td class="col-data">{{ item.memberCount }}</td>
+                  <td class="col-data">{{ item.totalTimelogLW | number: '1.1-1' }}</td>
+                  <td class="col-data">{{ item.totalTimelogLM | number: '1.1-1' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </cdk-virtual-scroll-viewport>
+
+          <!-- Footer with total count -->
+          <div class="table-footer">
+            <span class="total-count">
+              {{ "Total" | localize }}:
+              <strong>{{ filteredProjects.length }}</strong>
+              {{ filteredProjects.length === 1 ? "project" : "projects" }}
+            </span>
+          </div>
+        </div>
+
+        <!-- No Data Message - Sau khi filter -->
+        <div
+          *ngIf="!isLoading && branchIds.length > 0 && filteredProjects.length === 0 && projects.length > 0"
+          class="text-center p-4"
+        >
+          <p>{{ "No matching records found" | localize }}</p>
+          <button mat-raised-button color="primary" (click)="clearSearch()">
+            {{ "Clear Search" | localize }}
+          </button>
+        </div>
+
+        <!-- No Data từ API -->
+        <div
+          *ngIf="!isLoading && branchIds.length > 0 && projects.length === 0"
+          class="text-center p-4"
+        >
+          <p>{{ "No data available for selected branches" | localize }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

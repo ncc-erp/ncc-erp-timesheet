@@ -13,6 +13,9 @@ import {
 } from "@app/service/api/daily-employee-report.service";
 import { BranchDto } from "@shared/service-proxies/service-proxies";
 
+type SortColumn = 'wfhLW' | 'officeLW' | 'totalAllLW' | 'wfhLM' | 'officeLM' | 'totalAllLM';
+type SortDirection = 'asc' | 'desc' | '';
+
 @Component({
   selector: "app-daily-employee-report",
   templateUrl: "./daily-employee-report.component.html",
@@ -32,6 +35,10 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
   filteredProjects: OfficeWorkingItem[] = [];
   itemSize: number = 48;
   maxHeight = 400;
+
+  // Sort state
+  sortColumn: SortColumn | '' = '';
+  sortDirection: SortDirection = '';
 
   reportData: DailyProjectTimelogReportResponse;
   isLoading: boolean = false;
@@ -104,16 +111,57 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
   }
 
   applyFilters(): void {
-    if (!this.searchText || this.searchText.trim() === "") {
-      this.filteredProjects = [...this.projects];
-    } else {
+    let result = [...this.projects];
+
+    // Apply search filter
+    if (this.searchText && this.searchText.trim() !== "") {
       const search = this.searchText.toLowerCase().trim();
-      this.filteredProjects = this.projects.filter(
+      result = result.filter(
         (item) =>
           item.userName.toLowerCase().includes(search) ||
           item.officeName.toLowerCase().includes(search)
       );
     }
+
+    // Apply sort
+    if (this.sortColumn && this.sortDirection) {
+      result = this.sortData(result, this.sortColumn, this.sortDirection);
+    }
+
+    this.filteredProjects = result;
+  }
+
+  sortData(data: OfficeWorkingItem[], column: SortColumn, direction: SortDirection): OfficeWorkingItem[] {
+    if (!direction) return data;
+
+    return [...data].sort((a, b) => {
+      const valueA = a[column] || 0;
+      const valueB = b[column] || 0;
+
+      return direction === 'asc' ? valueA - valueB : valueB - valueA;
+    });
+  }
+
+  onSort(column: SortColumn): void {
+    if (this.sortColumn === column) {
+      // Cycle through: asc -> desc -> no sort
+      if (this.sortDirection === 'asc') {
+        this.sortDirection = 'desc';
+      } else if (this.sortDirection === 'desc') {
+        this.sortDirection = '';
+        this.sortColumn = '';
+      }
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    this.applyFilters();
+  }
+
+  getSortIcon(column: SortColumn): string {
+    if (this.sortColumn !== column) return 'unfold_more';
+    return this.sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
   }
 
   onSearchChange(): void {
@@ -125,28 +173,36 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
     this.applyFilters();
   }
 
-  isAllSelected(): boolean {
-    return (
-      this.branchIds &&
-      this.listBranch &&
-      this.branchIds.length === this.listBranch.length
-    );
+  toggleSelectAll(event?: MouseEvent): void {
+  if (event) {
+    event.stopPropagation();
   }
 
-  toggleSelectAll(): void {
-    if (this.isAllSelected()) {
-      this.branchIds = [];
-    } else {
-      this.branchIds = this.listBranch.map((branch) => branch.id);
-    }
-    this.searchOrFilter();
+  if (this.isAllSelected()) {
+    this.branchIds = [];
+  } else {
+    this.branchIds = this.listBranch.map(b => b.id);
   }
+
+  this.searchOrFilter();
+}
+
+isAllSelected(): boolean {
+  return (
+    this.branchIds &&
+    this.listBranch &&
+    this.branchIds.length === this.listBranch.length &&
+    this.branchIds.indexOf('all' as any) === -1
+  );
+}
 
   clearAllFilters(): void {
     this.searchText = "";
     this.branchSearchText = "";
     this.branchIds = [];
     this.limit = undefined;
+    this.sortColumn = '';
+    this.sortDirection = '';
     this.searchOrFilter();
   }
 

@@ -48,7 +48,36 @@
   text-overflow: ellipsis;
 }
 
-/* Column widths - điều chỉnh để Branch nhỏ hơn */
+/* Sortable columns */
+.table-header-fixed th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.table-header-fixed th.sortable:hover {
+  background-color: #e9ecef;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.sort-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #6c757d;
+}
+
+.table-header-fixed th.sortable:hover .sort-icon {
+  color: #495057;
+}
+
+/* Column widths */
 .col-name {
   width: 25%;
 }
@@ -95,7 +124,6 @@
   vertical-align: middle;
   text-align: center;
   overflow: hidden;
-  overflow-x: auto;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -141,6 +169,7 @@
 /* Scrollbar styling */
 .virtual-scroll-viewport::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 .virtual-scroll-viewport::-webkit-scrollbar-track {
@@ -171,6 +200,14 @@ mat-option strong {
   color: #007bff;
 }
 
+.select-all-icon {
+  margin-right: 8px;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .col-name {
@@ -183,6 +220,17 @@ mat-option strong {
 
   .col-data {
     width: 9.17%; /* (100% - 30% - 15%) / 6 */
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sort-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
   }
 }
 

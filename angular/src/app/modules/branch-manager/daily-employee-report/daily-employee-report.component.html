@@ -40,20 +40,26 @@
                     [(ngModel)]="branchIds"
                     (ngModelChange)="searchOrFilter()"
                   >
-                    <input
-                      matInput
-                      placeholder="Search branch..."
-                      [(ngModel)]="branchSearchText"
-                      (keyup)="filterBranch()"
-                      (click)="$event.stopPropagation()"
-                      style="width: 100%; padding: 4px"
-                    />
+                      <input
+                        matInput
+                        placeholder="Search branch..."
+                        [(ngModel)]="branchSearchText"
+                        (keyup)="filterBranch()"
+                        (click)="$event.stopPropagation()"
+                        style="width: 100%; padding: 4px"
+                      />
 
                     <!-- Select All Option -->
-                    <mat-option [value]="'all'" (click)="toggleSelectAll()">
-                      <strong>{{ "Select All" }}</strong>
-                    </mat-option>
-
+                      <mat-option 
+                        [value]="'all'" 
+                        (click)="toggleSelectAll($event)"
+                        [disabled]="true"
+                        style="cursor: pointer;"
+                      >
+                        <strong>
+                          {{ isAllSelected() ? ('Deselect All' | localize) : ('Select All' | localize) }}
+                        </strong>
+                      </mat-option>
                     <mat-divider></mat-divider>
 
                     <mat-option
@@ -130,12 +136,42 @@
                 <tr>
                   <th class="col-name">{{ "Name" | localize }}</th>
                   <th class="col-branch">{{ "Branch" | localize }}</th>
-                  <th class="col-data">{{ "WFH (LW)" | localize }}</th>
-                  <th class="col-data">{{ "Office (LW)" | localize }}</th>
-                  <th class="col-data">{{ "All (LW)" | localize }}</th>
-                  <th class="col-data">{{ "WFH (LM)" | localize }}</th>
-                  <th class="col-data">{{ "Office (LM)" | localize }}</th>
-                  <th class="col-data">{{ "All (LM)" | localize }}</th>
+                  <th class="col-data sortable" (click)="onSort('wfhLW')">
+                    <div class="header-content">
+                      <span>{{ "WFH (LW)" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('wfhLW') }}</mat-icon>
+                    </div>
+                  </th>
+                  <th class="col-data sortable" (click)="onSort('officeLW')">
+                    <div class="header-content">
+                      <span>{{ "Office (LW)" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('officeLW') }}</mat-icon>
+                    </div>
+                  </th>
+                  <th class="col-data sortable" (click)="onSort('totalAllLW')">
+                    <div class="header-content">
+                      <span>{{ "All (LW)" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('totalAllLW') }}</mat-icon>
+                    </div>
+                  </th>
+                  <th class="col-data sortable" (click)="onSort('wfhLM')">
+                    <div class="header-content">
+                      <span>{{ "WFH (LM)" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('wfhLM') }}</mat-icon>
+                    </div>
+                  </th>
+                  <th class="col-data sortable" (click)="onSort('officeLM')">
+                    <div class="header-content">
+                      <span>{{ "Office (LM)" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('officeLM') }}</mat-icon>
+                    </div>
+                  </th>
+                  <th class="col-data sortable" (click)="onSort('totalAllLM')">
+                    <div class="header-content">
+                      <span>{{ "All (LM)" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('totalAllLM') }}</mat-icon>
+                    </div>
+                  </th>
                 </tr>
               </thead>
             </table>
