@@ -1,0 +1,232 @@
+// anomalies-report.component.scss
+.anomalies-report-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
+  h1 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 28px;
+  }
+  
+  h2 {
+    color: #555;
+    margin: 20px 0;
+    font-size: 20px;
+  }
+  
+  h3 {
+    color: #666;
+    margin: 15px 0;
+    font-size: 18px;
+  }
+}
+
+// Tabs
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+  
+  .tab-button {
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      color: #2196F3;
+      background: #f5f5f5;
+    }
+    
+    &.active {
+      color: #2196F3;
+      border-bottom-color: #2196F3;
+      background: #e3f2fd;
+    }
+  }
+}
+
+// Filter Section
+.filter-section {
+  margin-bottom: 30px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .branch-select {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-height: 100px;
+    
+    &:focus {
+      outline: none;
+      border-color: #2196F3;
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    }
+    
+    option {
+      padding: 5px;
+    }
+  }
+}
+
+// Tab Content
+.tab-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Table Section
+.table-section {
+  margin-bottom: 40px;
+  
+  .filter-note {
+    font-size: 13px;
+    color: #666;
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+}
+
+// Data Table
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  
+  thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    
+    th {
+      padding: 14px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      transition: background 0.2s ease;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      
+      &.sortable {
+        cursor: pointer;
+      }
+    }
+  }
+  
+  tbody {
+    tr {
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s ease;
+      
+      &:hover {
+        background: #f8f9fa;
+      }
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      td {
+        padding: 12px;
+        font-size: 14px;
+        color: #333;
+        
+        &.no-data {
+          text-align: center;
+          color: #999;
+          font-style: italic;
+          padding: 30px;
+        }
+      }
+    }
+  }
+}
+
+// Date List & Badges
+.date-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  
+  .date-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #e3f2fd;
+    color: #1976d2;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    
+    &.threshold {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+    
+    &.no-tracker {
+      background: #ffebee;
+      color: #c62828;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .anomalies-report-container {
+    padding: 10px;
+    
+    h1 {
+      font-size: 22px;
+    }
+  }
+  
+  .data-table {
+    font-size: 12px;
+    
+    thead th,
+    tbody td {
+      padding: 8px 6px;
+    }
+  }
+  
+  .filter-section .branch-select {
+    max-width: 100%;
+  }
+}
