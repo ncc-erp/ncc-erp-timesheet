@@ -25,6 +25,16 @@ namespace Timesheet.DomainServices.Dto
         public string Notes { get; set; }
         public string Branch { get; set; }
     }
+
+    public class TimekeepingDto
+    {
+        public long? UserId { get; set; }
+        public DateTime DateAt { get; set; }
+        public string CheckIn { get; set; }
+        public string CheckOut { get; set; }
+        public string TrackerTime { get; set; }
+    }
+
     public class AbsenceRequestDto
     {
         public long Id { get; set; }
@@ -41,5 +51,13 @@ namespace Timesheet.DomainServices.Dto
         public double Hour { get; set; }
         public RequestStatus RequestStatus { get; set; }
         public RequestType RequestType { get; set; }
+        public long UserId { get; set; }
+    }
+    public class AnomalyData
+    {
+        public List<UserDto> Users { get; set; } = new List<UserDto>();
+        public List<TimekeepingDto> Timekeepings { get; set; } = new List<TimekeepingDto>();
+        public List<AbsenceRequestDto> AbsenceRequests { get; set; } = new List<AbsenceRequestDto>();
+        public List<AbsenceDetailDto> AbsenceDetails { get; set; } = new List<AbsenceDetailDto>();
     }
 }
