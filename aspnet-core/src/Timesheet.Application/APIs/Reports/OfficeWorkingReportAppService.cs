@@ -578,48 +578,53 @@ namespace Timesheet.APIs.Reports
             return SendTopOfficeUsersNotificationInternal(officeId, limit, reportDate, mezonUrl, userId, startDate, endDate, showAll, allOffices);
         }
         private async Task<List<OfficeWorkingTopLWLMDto>> ListTopOfficeWorkingTimeLWLMInternal(
-    long officeId, int limit = int.MaxValue, DateTime? reportDate = null, long? userId = null)
+     long officeId, int limit = int.MaxValue, DateTime? reportDate = null, long? userId = null)
         {
-            var now = reportDate?.Date ?? DateTimeUtils.GetNow().Date;
-            var (lwStart, lwEnd) = GetLastWeekRange(now);
-            var lmStart = DateTimeUtils.FirstDayOfMonth(now.AddMonths(-1));
-            var lmEnd = DateTimeUtils.LastDayOfMonth(now.AddMonths(-1));
+            var baseTime = reportDate?.Date ?? DateTimeUtils.GetNow().Date;
+            var (lwStart, lwEnd) = GetLastWeekRange(baseTime);
+            var lmStart = DateTimeUtils.FirstDayOfMonth(baseTime.AddMonths(-1));
+            var lmEnd = DateTimeUtils.LastDayOfMonth(baseTime.AddMonths(-1));
             var minStart = lwStart < lmStart ? lwStart : lmStart;
             var maxEnd = lwEnd > lmEnd ? lwEnd : lmEnd;
-            var users = await (
-                from u in WorkScope.GetAll<Ncc.Authorization.Users.User>()
-                    .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork && u.BranchId == officeId)
-                join b in WorkScope.GetAll<Branch>() on u.BranchId equals b.Id
-                select new UserLite
-                {
-                    Id = u.Id,
-                    Name = u.FullName,
-                    Email = u.EmailAddress,
-                    OfficeName = b.Name,
-                    OfficeCode = b.Code
-                })
-                .AsNoTracking()
-                .ToListAsync();
+            var userQuery = WorkScope.GetAll<Ncc.Authorization.Users.User>()
+                .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork);
+
+            if (officeId > 0)
+            {
+                userQuery = userQuery.Where(u => u.BranchId == officeId);
+            }
+            if (userId.HasValue)
+            {
+                userQuery = userQuery.Where(u => u.Id == userId.Value);
+            }
+            var users = await (from u in userQuery
+                               join b in WorkScope.GetAll<Branch>() on u.BranchId equals b.Id into bj
+                               from b in bj.DefaultIfEmpty()
+                               select new UserLite
+                               {
+                                   Id = u.Id,
+                                   Name = u.FullName,
+                                   Email = u.EmailAddress ?? "",
+                                   OfficeName = b != null ? b.Name : "",
+                                   OfficeCode = b != null ? b.Code : ""
+                               })
+                             .AsNoTracking()
+                             .ToListAsync();
 
             if (!users.Any())
                 return new List<OfficeWorkingTopLWLMDto>();
-
-            var mapUserId = users.ToDictionary(x => x.Id);
-            var mapEmail = users
-                .Where(x => !string.IsNullOrEmpty(x.Email))
-                .GroupBy(x => x.Email.Trim().ToLower())
-                .ToDictionary(g => g.Key, g => g.First());
-            var userIds = users.Select(u => u.Id).ToList();
-            var userEmails = mapEmail.Keys.ToList();
-            var tkList = await WorkScope.GetAll<Timekeeping>()
+            var userIds = new HashSet<long>(users.Select(u => u.Id));
+            var userEmails = users
+                .Where(u => !string.IsNullOrEmpty(u.Email))
+                .ToDictionary(u => u.Email.Trim().ToLower(), u => u.Id);
+            var timekeepings = await WorkScope.GetAll<Timekeeping>()
                 .Where(t => t.DateAt >= minStart && t.DateAt <= maxEnd)
                 .Where(t => (t.UserId.HasValue && userIds.Contains(t.UserId.Value)) ||
-                            (!t.UserId.HasValue && !string.IsNullOrEmpty(t.UserEmail) &&
-                             userEmails.Contains(t.UserEmail.Trim().ToLower())))
+                           (!t.UserId.HasValue && !string.IsNullOrEmpty(t.UserEmail) &&
+                            userEmails.ContainsKey(t.UserEmail.Trim().ToLower())))
                 .Select(t => new
                 {
-                    t.UserId,
-                    UserEmail = t.UserEmail != null ? t.UserEmail.Trim().ToLower() : null,
+                    UserId = t.UserId ?? userEmails[t.UserEmail.Trim().ToLower()],
                     t.DateAt,
                     t.CheckIn,
                     t.CheckOut,
@@ -627,130 +632,104 @@ namespace Timesheet.APIs.Reports
                 })
                 .AsNoTracking()
                 .ToListAsync();
-            var remoteDetails = await (
-                from d in WorkScope.GetAll<AbsenceDayDetail>()
-                    .Where(d => d.DateAt >= minStart && d.DateAt <= maxEnd)
-                join r in WorkScope.GetAll<AbsenceDayRequest>()
-                    .Where(r => r.Status == RequestStatus.Approved &&
-                               r.Type == RequestType.Remote &&
-                               userIds.Contains(r.UserId))
-                    on d.RequestId equals r.Id
-                select new
-                {
-                    d.DateAt,
-                    d.DateType,
-                    UserId = r.UserId
-                })
-                .AsNoTracking()
-                .ToListAsync();
-            var remoteMap = new Dictionary<(long, DateTime), RemoteFlags>();
-            foreach (var r in remoteDetails)
+            var remoteDetails = await (from d in WorkScope.GetAll<AbsenceDayDetail>()
+                                      .Where(d => d.DateAt >= minStart && d.DateAt <= maxEnd)
+                                       join r in WorkScope.GetAll<AbsenceDayRequest>()
+                                           .Where(r => r.Status == RequestStatus.Approved &&
+                                                     r.Type == RequestType.Remote &&
+                                                     userIds.Contains(r.UserId))
+                                           on d.RequestId equals r.Id
+                                       select new
+                                       {
+                                           d.DateAt,
+                                           d.DateType,
+                                           r.UserId
+                                       })
+                                     .AsNoTracking()
+                                     .ToListAsync();
+            var remoteMap = remoteDetails
+                .GroupBy(x => (x.UserId, x.DateAt.Date))
+                .ToDictionary(
+                    g => g.Key,
+                    g => new RemoteFlags(
+                        g.Any(x => x.DateType == DayType.Morning || x.DateType == DayType.Fullday),
+                        g.Any(x => x.DateType == DayType.Afternoon || x.DateType == DayType.Fullday)
+                    )
+                );
+
+            var result = new Dictionary<long, OfficeWorkingTopLWLMDto>();
+            var userMap = users.ToDictionary(u => u.Id, u => u);
+            foreach (var tk in timekeepings)
             {
-                var key = (r.UserId, r.DateAt.Date);
-                var val = remoteMap.TryGetValue(key, out var existing) ? existing : new RemoteFlags(false, false);
+                if (!userMap.TryGetValue(tk.UserId, out var userInfo))
+                    continue;
 
-                if (r.DateType == DayType.Fullday)
-                    val = new RemoteFlags(true, true);
-                else if (r.DateType == DayType.Morning)
-                    val = new RemoteFlags(true, val.Afternoon);
-                else if (r.DateType == DayType.Afternoon)
-                    val = new RemoteFlags(val.Morning, true);
+                var workingMinutes = ComputeWorkingMinutes(tk.CheckIn, tk.CheckOut);
+                if (workingMinutes <= 0 && string.IsNullOrEmpty(tk.TrackerTime))
+                    continue;
 
-                remoteMap[key] = val;
-            }
-
-            var agg = new Dictionary<long, OfficeWorkingTopLWLMDto>();
-            foreach (var t in tkList)
-            {
-                long? uid = t.UserId;
-                UserLite uinfo = null;
-
-                if (uid.HasValue)
+                if (!result.TryGetValue(tk.UserId, out var userReport))
                 {
-                    mapUserId.TryGetValue(uid.Value, out uinfo);
-                }
-                else if (!string.IsNullOrWhiteSpace(t.UserEmail))
-                {
-                    if (mapEmail.TryGetValue(t.UserEmail, out var u))
+                    userReport = new OfficeWorkingTopLWLMDto
                     {
-                        uid = u.Id;
-                        uinfo = u;
-                    }
-                }
-                if (uinfo == null || !uid.HasValue)
-                    continue;
-                if (userId.HasValue && uid.Value != userId.Value)
-                    continue;
-
-                var trackerMinutes = 0;
-                if (!string.IsNullOrWhiteSpace(t.TrackerTime) && TimeSpan.TryParse(t.TrackerTime, out var ts))
-                    trackerMinutes = (int)ts.TotalMinutes;
-
-                var (mMin, aMin) = ComputeSplitWorkingMinutes(t.CheckIn, t.CheckOut);
-                if (mMin + aMin + trackerMinutes <= 0)
-                    continue;
-
-                if (!agg.ContainsKey(uid.Value))
-                {
-                    agg[uid.Value] = new OfficeWorkingTopLWLMDto
-                    {
-                        UserId = uid.Value,
-                        UserName = uinfo.Name,
-                        OfficeName = uinfo.OfficeName,
-                        OfficeCode = uinfo.OfficeCode
+                        UserId = userInfo.Id,
+                        UserName = userInfo.Name,
+                        OfficeName = userInfo.OfficeName,
+                        OfficeCode = userInfo.OfficeCode
                     };
+                    result[tk.UserId] = userReport;
                 }
 
-                var row = agg[uid.Value];
-                var rf = remoteMap.TryGetValue((uid.Value, t.DateAt.Date), out var flags)
-                    ? flags
-                    : new RemoteFlags(false, false);
+                var isInLW = tk.DateAt.Date >= lwStart && tk.DateAt.Date <= lwEnd;
+                var isInLM = tk.DateAt.Date >= lmStart && tk.DateAt.Date <= lmEnd;
+                var isRemote = remoteMap.TryGetValue((tk.UserId, tk.DateAt.Date), out var flags) &&
+                              (flags.Morning || flags.Afternoon);
 
-                bool inLW = t.DateAt.Date >= lwStart && t.DateAt.Date <= lwEnd;
-                bool inLM = t.DateAt.Date >= lmStart && t.DateAt.Date <= lmEnd;
-                bool isRemote = rf.Morning || rf.Afternoon;
+                var trackerMinutes = !string.IsNullOrWhiteSpace(tk.TrackerTime) &&
+                                   TimeSpan.TryParse(tk.TrackerTime, out var ts)
+                                   ? (int)ts.TotalMinutes
+                                   : 0;
 
-                if (inLW)
+                var workingMin = isRemote
+                    ? (trackerMinutes > 0 ? trackerMinutes : workingMinutes)
+                    : (workingMinutes > 0 ? workingMinutes : trackerMinutes);
+
+                var hours = Math.Round(workingMin / 60.0, 1);
+
+                if (isInLW)
                 {
-                    int workingMin = isRemote
-                        ? (trackerMinutes > 0 ? trackerMinutes : mMin + aMin)
-                        : (mMin + aMin > 0 ? mMin + aMin : trackerMinutes);
-                    var hours = Math.Round(workingMin / 60.0, 1);
-                    row.TotalAllLW += hours;
+                    userReport.TotalAllLW += hours;
                     if (isRemote)
-                        row.WfhLW += hours;
+                        userReport.WfhLW += hours;
                     else
-                        row.OfficeLW += hours;
+                        userReport.OfficeLW += hours;
                 }
 
-                if (inLM)
+                if (isInLM)
                 {
-                    int workingMin = isRemote
-                        ? (trackerMinutes > 0 ? trackerMinutes : mMin + aMin)
-                        : (mMin + aMin > 0 ? mMin + aMin : trackerMinutes);
-                    var hours = Math.Round(workingMin / 60.0, 1);
-                    row.TotalAllLM += hours;
+                    userReport.TotalAllLM += hours;
                     if (isRemote)
-                        row.WfhLM += hours;
+                        userReport.WfhLM += hours;
                     else
-                        row.OfficeLM += hours;
+                        userReport.OfficeLM += hours;
                 }
             }
-            foreach (var user in users)
+            foreach (var user in users.Where(u => !result.ContainsKey(u.Id)))
             {
-                if (!agg.ContainsKey(user.Id))
+                result[user.Id] = new OfficeWorkingTopLWLMDto
                 {
-                    agg[user.Id] = new OfficeWorkingTopLWLMDto
-                    {
-                        UserId = user.Id,
-                        UserName = user.Name,
-                        OfficeName = user.OfficeName,
-                        OfficeCode = user.OfficeCode
-                    };
-                }
+                    UserId = user.Id,
+                    UserName = user.Name,
+                    OfficeName = user.OfficeName,
+                    OfficeCode = user.OfficeCode
+                };
             }
-            var rs = agg.Values.OrderByDescending(x => x.TotalAllLW).ThenByDescending(x => x.TotalAllLM);
-            return limit == int.MaxValue ? rs.ToList() : rs.Take(limit).ToList();
+
+            return result.Values
+                .OrderByDescending(x => x.TotalAllLW)
+                .ThenByDescending(x => x.TotalAllLM)
+                .Take(limit)
+                .ToList();
         }
 
         [AbpAuthorize]
@@ -761,236 +740,82 @@ namespace Timesheet.APIs.Reports
             return ListTopOfficeWorkingTimeLWLMInternal(officeId, limit, reportDate, userId);
         }
         private async Task<string> GetAllOfficesReport(
-     int actualLimit, DateTime? reportDate, long? userId,
-     DateTime? startDate, DateTime? endDate)
+            int actualLimit,
+            DateTime? reportDate,
+            long? userId,
+            DateTime? startDate,
+            DateTime? endDate)
         {
-            var sb = new StringBuilder();
             var baseTime = reportDate?.Date ?? DateTimeUtils.GetNow().Date;
             var (lwStart, lwEnd) = GetLastWeekRange(baseTime);
-            var lmStart = DateTimeUtils.FirstDayOfMonth(baseTime.AddMonths(-1));
-            var lmEnd = DateTimeUtils.LastDayOfMonth(baseTime.AddMonths(-1));
-            var minStart = lwStart < lmStart ? lwStart : lmStart;
-            var maxEnd = lwEnd > lmEnd ? lwEnd : lmEnd;
-            var offices = await WorkScope.GetAll<Branch>()
+            var officesTask = WorkScope.GetAll<Branch>()
                 .Where(b => b.Id > 0)
                 .Select(b => new { b.Id, b.Name, b.Code })
                 .OrderBy(b => b.Code ?? b.Name)
                 .AsNoTracking()
                 .ToListAsync();
 
-            if (!offices.Any())
-                return "No branch found";
-
-            var officeIds = offices.Select(o => o.Id).ToList();
             var usersQuery = WorkScope.GetAll<Ncc.Authorization.Users.User>()
-                .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork
-                         && u.BranchId.HasValue && officeIds.Contains(u.BranchId.Value));
+                .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork && u.BranchId.HasValue);
+
             if (userId.HasValue)
             {
                 usersQuery = usersQuery.Where(u => u.Id == userId.Value);
             }
 
-            var allUsers = await (
-                from u in usersQuery
-                join b in WorkScope.GetAll<Branch>() on u.BranchId equals b.Id
-                select new
-                {
-                    UserId = u.Id,
-                    u.FullName,
-                    EmailAddress = u.EmailAddress ?? "",
-                    BranchId = b.Id,
-                    BranchName = b.Name,
-                    BranchCode = b.Code
-                })
-                .AsNoTracking()
-                .ToListAsync();
+            var usersTask = (from u in usersQuery
+                             join b in WorkScope.GetAll<Branch>() on u.BranchId equals b.Id
+                             select new
+                             {
+                                 u.Id,
+                                 u.FullName,
+                                 EmailAddress = u.EmailAddress ?? "",
+                                 BranchId = b.Id,
+                                 BranchName = b.Name,
+                                 BranchCode = b.Code
+                             })
+                           .AsNoTracking()
+                           .ToListAsync();
 
-            if (!allUsers.Any())
-            {
-                sb.AppendLine("Employee Report");
-                sb.AppendLine($"LW ({lwStart:dd/MM}–{lwEnd:dd/MM}) | LM ({lmStart:dd/MM}–{lmEnd:dd/MM})");
-                sb.AppendLine($"Total branches: {offices.Count}");
-                sb.AppendLine("No data found");
-                return sb.ToString();
-            }
+            await Task.WhenAll(officesTask, usersTask);
+            var offices = await officesTask;
+            var users = await usersTask;
 
-            var userIds = allUsers.Select(u => u.UserId).ToList();
-            var userEmails = allUsers
-                .Where(u => !string.IsNullOrEmpty(u.EmailAddress))
-                .Select(u => u.EmailAddress.Trim().ToLower())
-                .ToList();
-            var allTks = await WorkScope.GetAll<Timekeeping>()
-                .Where(t => t.DateAt >= minStart && t.DateAt <= maxEnd)
-                .Where(t => userIds.Contains(t.UserId.Value) ||
-                           (t.UserEmail != null && userEmails.Contains(t.UserEmail.Trim().ToLower())))
-                .Select(t => new
-                {
-                    t.UserId,
-                    UserEmail = t.UserEmail != null ? t.UserEmail.Trim().ToLower() : "",
-                    t.DateAt,
-                    t.CheckIn,
-                    t.CheckOut,
-                    t.TrackerTime
-                })
-                .AsNoTracking()
-                .ToListAsync();
-            var allRemotes = await (
-                from d in WorkScope.GetAll<AbsenceDayDetail>()
-                    .Where(d => d.DateAt >= minStart && d.DateAt <= maxEnd)
-                join r in WorkScope.GetAll<AbsenceDayRequest>()
-                    .Where(r => r.Status == RequestStatus.Approved
-                             && r.Type == RequestType.Remote
-                             && userIds.Contains(r.UserId))
-                    on d.RequestId equals r.Id
-                select new
-                {
-                    d.DateAt,
-                    d.DateType,
-                    r.UserId
-                })
-                .AsNoTracking()
-                .ToListAsync();
-            var usersByOffice = allUsers.ToLookup(u => u.BranchId);
-            var userByEmail = allUsers
-                .Where(u => !string.IsNullOrEmpty(u.EmailAddress))
-                .GroupBy(u => u.EmailAddress.Trim().ToLower())
-                .ToDictionary(g => g.Key, g => g.First());
-            var enrichedTks = allTks
-                .Select(t =>
-                {
-                    var uid = t.UserId;
-                    if (!uid.HasValue && !string.IsNullOrEmpty(t.UserEmail))
-                    {
-                        if (userByEmail.TryGetValue(t.UserEmail, out var u))
-                            uid = u.UserId;
-                    }
-                    return new { UserId = uid, Record = t };
-                })
-                .Where(x => x.UserId.HasValue)
-                .ToLookup(x => x.UserId.Value, x => x.Record);            var remoteMap = new Dictionary<(long, DateTime), RemoteFlags>();
-            foreach (var r in allRemotes)
-            {
-                var key = (r.UserId, r.DateAt.Date);
-                var val = remoteMap.TryGetValue(key, out var v) ? v : new RemoteFlags(false, false);
+            if (!offices.Any())
+                return "Không tìm thấy văn phòng nào";
+            var officeMap = offices.ToDictionary(o => o.Id);
+            var userMap = users.ToLookup(u => u.BranchId);
 
-                if (r.DateType == DayType.Fullday)
-                    val = new RemoteFlags(true, true);
-                else if (r.DateType == DayType.Morning)
-                    val = new RemoteFlags(true, val.Afternoon);
-                else if (r.DateType == DayType.Afternoon)
-                    val = new RemoteFlags(val.Morning, true);
-
-                remoteMap[key] = val;
-            }
-            sb.AppendLine("Employee Report");
-            sb.AppendLine($"LW ({lwStart:dd/MM}–{lwEnd:dd/MM}) | LM ({lmStart:dd/MM}–{lmEnd:dd/MM})");
-            sb.AppendLine($"Total branches: {offices.Count}");
+            var sb = new StringBuilder();
+            sb.AppendLine("📊 **BÁO CÁO TẤT CẢ VĂN PHÒNG**");
+            sb.AppendLine();
+            sb.AppendLine($"📅 **Thời gian:** {lwStart:dd/MM/yyyy} - {lwEnd:dd/MM/yyyy}");
             sb.AppendLine();
             foreach (var office in offices)
             {
-                try
+                var officeUsers = userMap[office.Id].ToList();
+                if (!officeUsers.Any())
+                    continue;
+
+                sb.AppendLine($"🏢 **{office.Name}** ({officeUsers.Count} người)");
+                var officeData = await ListTopOfficeWorkingTimeLWLMInternal(
+                    office.Id,
+                    actualLimit,
+                    reportDate,
+                    userId);
+                var topUsers = officeData
+                    .OrderByDescending(x => x.TotalAllLW)
+                    .ThenByDescending(x => x.TotalAllLM)
+                    .Take(actualLimit)
+                    .ToList();
+                foreach (var user in topUsers)
                 {
-                    var officeUsers = usersByOffice[office.Id].ToList();
-                    var combined = new List<OfficeWorkingTopLWLMDto>();
-
-                    foreach (var user in officeUsers)
-                    {
-                        var dto = new OfficeWorkingTopLWLMDto
-                        {
-                            UserId = user.UserId,
-                            UserName = user.FullName,
-                            OfficeName = user.BranchName,
-                            OfficeCode = user.BranchCode
-                        };
-
-                        foreach (var tk in enrichedTks[user.UserId])
-                        {
-                            var trackerMin = 0;
-                            if (!string.IsNullOrWhiteSpace(tk.TrackerTime) &&
-                                TimeSpan.TryParse(tk.TrackerTime, out var ts))
-                                trackerMin = (int)ts.TotalMinutes;
-
-                            var (mMin, aMin) = ComputeSplitWorkingMinutes(tk.CheckIn, tk.CheckOut);
-                            if (mMin + aMin + trackerMin <= 0)
-                                continue;
-
-                            var rf = remoteMap.TryGetValue((user.UserId, tk.DateAt.Date), out var f)
-                                ? f
-                                : new RemoteFlags(false, false);
-
-                            bool inLW = tk.DateAt.Date >= lwStart && tk.DateAt.Date <= lwEnd;
-                            bool inLM = tk.DateAt.Date >= lmStart && tk.DateAt.Date <= lmEnd;
-                            bool isRemote = rf.Morning || rf.Afternoon;
-
-                            if (inLW)
-                            {
-                                int workingMin = isRemote
-                                    ? (trackerMin > 0 ? trackerMin : mMin + aMin)
-                                    : (mMin + aMin > 0 ? mMin + aMin : trackerMin);
-                                var h = Math.Round(workingMin / 60.0, 1);
-                                dto.TotalAllLW += h;
-                                if (isRemote)
-                                    dto.WfhLW += h;
-                                else
-                                    dto.OfficeLW += h;
-                            }
-                            if (inLM)
-                            {
-                                int workingMin = isRemote
-                                    ? (trackerMin > 0 ? trackerMin : mMin + aMin)
-                                    : (mMin + aMin > 0 ? mMin + aMin : trackerMin);
-                                var h = Math.Round(workingMin / 60.0, 1);
-                                dto.TotalAllLM += h;
-                                if (isRemote)
-                                    dto.WfhLM += h;
-                                else
-                                    dto.OfficeLM += h;
-                            }
-                        }
-                        combined.Add(dto);
-                    }
-
-                    combined = combined
-                        .OrderByDescending(x => x.TotalAllLW)
-                        .ThenByDescending(x => x.TotalAllLM)
-                        .ToList();
-
-                    var officeName = office.Code ?? office.Name ?? $"Office#{office.Id}";
-                    sb.AppendLine($"**VP {officeName}** ({combined.Count} employees)");
-
-                    if (!combined.Any())
-                    {
-                        sb.AppendLine("No data");
-                    }
-                    else
-                    {
-                        int idx = 1;
-                        foreach (var item in combined.Take(actualLimit))
-                        {
-                            var username = item.UserName ?? "N/A";
-                            var atIdx = username.IndexOf('@');
-                            if (atIdx >= 0)
-                                username = username.Substring(0, atIdx);
-                            sb.AppendLine($"{idx}. {username}");
-                            sb.AppendLine($"   - LW: Total {item.TotalAllLW:F1}h (Office {item.OfficeLW:F1}h, WFH {item.WfhLW:F1}h)");
-                            sb.AppendLine($"   - LM: Total {item.TotalAllLM:F1}h (Office {item.OfficeLM:F1}h, WFH {item.WfhLM:F1}h)");
-                            sb.AppendLine("═══════════════════════════");
-                            idx++;
-                        }
-                        if (combined.Count > actualLimit)
-                            sb.AppendLine($"... and {combined.Count - actualLimit} other employees");
-                    }
-                    sb.AppendLine();
+                    sb.AppendLine($"👤 {user.UserName}: {user.TotalAllLW}h (VP: {user.OfficeLW}h, WFH: {user.WfhLW}h)");
                 }
-                catch (Exception ex)
-                {
-                    sb.AppendLine($"Branch {office.Code ?? office.Name} - Error: {ex.Message}");
-                    sb.AppendLine();
-                }
+
+                sb.AppendLine();
             }
 
-            sb.AppendLine($"Total branches: {offices.Count}");
-            sb.AppendLine($"Time: LW ({lwStart:dd/MM}–{lwEnd:dd/MM}) | LM ({lmStart:dd/MM}–{lmEnd:dd/MM})");
             return sb.ToString();
         }
         public async Task<OfficeWorkingTimelogReportDto> GetOfficeWorkingTimelogReport(GetOfficeWorkingTimelogReportInput input)
