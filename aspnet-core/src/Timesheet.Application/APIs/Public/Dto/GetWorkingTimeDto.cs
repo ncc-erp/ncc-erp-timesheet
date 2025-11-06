@@ -12,11 +12,5 @@ namespace Timesheet.APIs.Public.Dto
         public string MorningEndTime { get; set; }
         public string AfternoonStartTime { get; set; }
         public string AfternoonEndTime { get; set; }
-        public DateTime DateAt { get; set; }
-        public double Hour { get; set; }
-        public RequestStatus Status { get; set; }
-        public long RequestId { get; set; }
-        public DayType DayType { get; set; }
-        public OnDayType? AbsenceTime { get; set; }
     }
 }

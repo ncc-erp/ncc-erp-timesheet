@@ -938,12 +938,7 @@ namespace Timesheet.APIs.Public
                             MorningEndTime = user.MorningEndAt,
                             AfternoonStartTime = user.AfternoonStartAt,
                             AfternoonEndTime = user.AfternoonEndAt,
-                            DateAt = detail.DateAt,
-                            Hour = detail.Hour,
-                            Status = request.Status,
-                            RequestId = request.Id,
-                            DayType = detail.DateType,
-                            AbsenceTime = detail.AbsenceTime
+                           
                         };
 
             return await query.AsNoTracking().ToListAsync();
