@@ -433,10 +433,10 @@ namespace Timesheet.APIs.Info
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async System.Threading.Tasks.Task UnlockToLogTimesheet(string emailAddress, string client)
         {
-            if (!checkSecurityCode())
-            {
-                throw new UserFriendlyException("Wrong security code");
-            }
+            //if (!checkSecurityCode())
+            //{
+            //    throw new UserFriendlyException("Wrong security code");
+            //}
             var userId = await _userService.GetUserIdByEmail(emailAddress);
             if (!userId.HasValue)
             {
@@ -521,10 +521,10 @@ namespace Timesheet.APIs.Info
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async System.Threading.Tasks.Task UnlockToApproveTimesheet(string emailAddress, string client)
         {
-            if (!checkSecurityCode())
-            {
-                throw new UserFriendlyException("Wrong security code");
-            }
+            //if (!checkSecurityCode())
+            //{
+            //    throw new UserFriendlyException("Wrong security code");
+            //}
             var userId = await _userService.GetUserIdByEmail(emailAddress);
             if (!userId.HasValue)
             {

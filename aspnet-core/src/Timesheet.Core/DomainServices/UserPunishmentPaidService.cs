@@ -110,6 +110,12 @@ namespace Timesheet.DomainServices
 
             var transactionInfo = await GetMMNTransactionsInfo(transactionHash);
 
+            if (transactionInfo.Status != 2)
+            {
+                _logger.LogError($"Transaction status {transactionInfo.Status} is not successful for hash {transactionHash}");
+                throw new UserFriendlyException("Transaction has not been confirmed successfully.");
+            }
+
             if (!decimal.TryParse(transactionInfo.Value, out decimal decimalAmount))
             {
                 _logger.LogError($"Cannot parse transaction amount: {transactionInfo.Value}");
@@ -215,7 +221,8 @@ namespace Timesheet.DomainServices
                         Value = transactionResponse.Data.Transaction.Value,
                         TransactionTimestamp = transactionResponse.Data.Transaction.TransactionTimestamp,
                         FromAddress = transactionResponse.Data.Transaction.FromAddress,
-                        ToAddress = transactionResponse.Data.Transaction.ToAddress
+                        ToAddress = transactionResponse.Data.Transaction.ToAddress,
+                        Status = transactionResponse.Data.Transaction.Status
                     };
                 }
             }
