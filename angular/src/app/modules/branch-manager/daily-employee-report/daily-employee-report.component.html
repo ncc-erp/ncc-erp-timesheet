@@ -63,7 +63,7 @@
                     <mat-divider></mat-divider>
 
                     <mat-option
-                      *ngFor="let branch of listBranchFilter"
+                      *ngFor="let branch of filteredBranches"
                       [value]="branch.id"
                     >
                       {{ branch.name }}
@@ -193,12 +193,12 @@
                 >
                   <td class="col-name">{{ item.userName }}</td>
                   <td class="col-branch">{{ item.officeName }}</td>
-                  <td class="col-data">{{ item.wfhLW }}</td>
-                  <td class="col-data">{{ item.officeLW }}</td>
-                  <td class="col-data">{{ item.totalAllLW }}</td>
-                  <td class="col-data">{{ item.wfhLM }}</td>
-                  <td class="col-data">{{ item.officeLM }}</td>
-                  <td class="col-data">{{ item.totalAllLM }}</td>
+                  <td class="col-data">{{ round(item.wfhLW) }}</td>
+                  <td class="col-data">{{ round(item.officeLW) }}</td>
+                  <td class="col-data">{{ round(item.totalAllLW) }}</td>
+                  <td class="col-data">{{ round(item.wfhLM) }}</td>
+                  <td class="col-data">{{ round(item.officeLM) }}</td>
+                  <td class="col-data">{{ round(item.totalAllLM) }}</td>
                 </tr>
               </tbody>
             </table>

@@ -1,4 +1,3 @@
-// anomalies-report.component.scss
 .anomalies-report-container {
   padding: 20px;
   max-width: 1400px;
@@ -24,7 +23,6 @@
   }
 }
 
-// Tabs
 .tabs {
   display: flex;
   gap: 10px;
@@ -55,7 +53,6 @@
   }
 }
 
-// Filter Section
 .filter-section {
   margin-bottom: 30px;
   padding: 15px;
@@ -90,10 +87,18 @@
   }
 }
 
-// Tab Content
 .tab-content {
   animation: fadeIn 0.3s ease-in;
 }
+
+::ng-deep .branch-select-panel {
+  max-height: 400px !important;
+}
+
+::ng-deep .branch-select-panel .mat-select-panel {
+  padding-top: 0 !important;
+}
+
 
 @keyframes fadeIn {
   from {
@@ -106,7 +111,6 @@
   }
 }
 
-// Table Section
 .table-section {
   margin-bottom: 40px;
   
@@ -118,7 +122,91 @@
   }
 }
 
-// Data Table
+.table-virtual {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table-virtual thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  color: black;
+}
+
+.table-virtual th {
+  padding: 14px 12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.table-virtual th .header-content,
+.data-table thead th .header-content,
+.table-header-fixed th .header-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.table-virtual th .sort-icon {
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.table-virtual td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.table-virtual td.col-branch,
+.table-virtual td.col-date,
+.table-virtual td.col-notes,
+.table-virtual td.col-hours,
+.table-virtual td.col-dates,
+.table-virtual td.col-count {
+  text-align: center;
+}
+
+.table-virtual td.col-name {
+  text-align: left;
+}
+
+.virtual-scroll-viewport {
+  display: block !important;
+  overflow-y: auto !important;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Đảm bảo header không bị scroll mất */
+.virtual-scroll-viewport::-webkit-scrollbar {
+  width: 8px;
+}
+.virtual-scroll-viewport::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 4px;
+}
+
+.virtual-scroll-row:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.virtual-scroll-row:nth-child(even) {
+  background-color: #ffffff;
+}
+
+.virtual-scroll-row:hover {
+  background-color: #e9ecef;
+  transition: background-color 0.2s;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -180,7 +268,6 @@
   }
 }
 
-// Date List & Badges
 .date-list {
   display: flex;
   flex-wrap: wrap;
@@ -207,7 +294,6 @@
   }
 }
 
-// Responsive Design
 @media (max-width: 768px) {
   .anomalies-report-container {
     padding: 10px;

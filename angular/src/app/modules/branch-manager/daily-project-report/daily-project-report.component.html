@@ -55,7 +55,7 @@
       <mat-divider></mat-divider>
 
       <mat-option
-        *ngFor="let branch of listBranchFilter"
+        *ngFor="let branch of filteredBranches"
         [value]="branch.id"
       >
         {{ branch.name }}
@@ -211,8 +211,8 @@
                     {{ getMembersDisplay(item.members) }}
                   </td>
                   <td class="col-data">{{ item.memberCount }}</td>
-                  <td class="col-data">{{ item.totalTimelogLW | number: '1.1-1' }}</td>
-                  <td class="col-data">{{ item.totalTimelogLM | number: '1.1-1' }}</td>
+                  <td class="col-data">{{ round(item.totalTimelogLW) }}</td>
+                  <td class="col-data">{{ round(item.totalTimelogLM) }}</td>
                 </tr>
               </tbody>
             </table>

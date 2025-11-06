@@ -13,6 +13,7 @@
   overflow: hidden;
   border-bottom: 2px solid #ddd;
   background: #f5f5f5;
+  padding: 0 8px 0 0;
 }
 
 .table-header-fixed {
@@ -30,6 +31,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  text-align: center;
 }
 
 /* Sortable Headers */
@@ -46,8 +48,8 @@
 .header-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
 }
 
 .sort-icon {
@@ -76,6 +78,19 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.virtual-scroll-row:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.virtual-scroll-row:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.virtual-scroll-row:hover {
+  background-color: #e9ecef;
+  transition: background-color 0.2s;
 }
 
 /* Column Widths */

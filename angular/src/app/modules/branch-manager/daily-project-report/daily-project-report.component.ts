@@ -251,4 +251,14 @@ onBranchSelectionChange(selectedIds: number[]): void {
     if (members.length <= 3) return members.join(', ');
     return `${members.slice(0, 3).join(', ')} +${members.length - 3} more`;
   }
+
+  get filteredBranches() {
+    return this.listBranchFilter.filter(b => b.id && b.id !== 0);
+  }
+
+  round(value: number | string | null): string {
+    if (value == null) return '0.0';
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return isNaN(num) ? '0.0' : num.toFixed(1);
+  }
 }

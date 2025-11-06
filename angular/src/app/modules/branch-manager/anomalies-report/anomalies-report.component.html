@@ -33,7 +33,7 @@
                 <div class="col-lg-12">
                   <div class="row">
                     <!-- Branch Filter -->
-                    <div class="pr-0 col-md-12 col-sm-12 col-xs-12 mb-0 row-item">
+                    <div class="pr-0 col-md-6 col-sm-12 col-xs-12 mb-0 row-item">
                       <mat-form-field
                         style="padding-bottom: 0"
                         class="w-100"
@@ -45,14 +45,59 @@
                           multiple
                           [(ngModel)]="selectedBranchIds"
                           (ngModelChange)="onBranchSelectionChange()"
+                          (openedChange)="onSelectOpened($event)"
+                          panelClass="branch-select-panel"
                         >
+                        <input
+                          matInput
+                          placeholder="Search branch..."
+                          [(ngModel)]="branchSearchText"
+                          (keyup)="filterBranch()"
+                          (click)="$event.stopPropagation()"
+                          style="width: 100%; padding: 4px"
+                        />
+                        <mat-option
+                          [value]="'all'"
+                          (click)="toggleSelectAll($event)"
+                          [disabled]="true"
+                          style="cursor: pointer;"
+                        >
+                        <strong>
+                          {{ isAllSelected() ? ('Deselect All' | localize) : ('Select All' | localize) }}
+                        </strong>
+                        </mat-option>
+                        <mat-divider></mat-divider>
                           <mat-option
-                            *ngFor="let branch of listBranchFilter"
+                            *ngFor="let branch of filteredBranches"
                             [value]="branch.id"
                           >
                             {{ branch.name }}
                           </mat-option>
                         </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <div class="pr-0 col-md-6 col-sm-12 col-xs-12 mb-0 row-item">
+                      <mat-form-field
+                        style="padding-bottom: 0"
+                        class="w-100"
+                        appearance="outline"
+                      >
+                        <mat-label>{{ "Search" | localize }}</mat-label>
+                        <input
+                          matInput
+                          [(ngModel)]="searchText"
+                          (ngModelChange)="onSearchChange()"
+                          placeholder="Search by name or branch..."
+                        />
+                        <mat-icon matSuffix>search</mat-icon>
+                        <button
+                          mat-icon-button
+                          matSuffix
+                          *ngIf="searchText"
+                          (click)="clearSearch()"
+                        >
+                        <mat-icon>clear</mat-icon>
+                        </button>
                       </mat-form-field>
                     </div>
                   </div>
@@ -69,14 +114,17 @@
                 <h3 class="section-title">
                   <mat-icon>event_busy</mat-icon>
                   {{ "Unplanned Absences" | localize }}
-                  <span class="count-badge">({{ yesterdayUnplannedAbsences.length }})</span>
+                  <span class="count-badge">({{ filteredYesterdayAbsences.length }})</span>
                 </h3>
 
-                <div *ngIf="yesterdayUnplannedAbsences.length > 0" class="table-container">
-                  <!-- Fixed Header -->
-                  <div class="table-header-wrapper">
-                    <table class="table table-bordered table-header-fixed">
-                      <thead>
+                <div *ngIf="filteredYesterdayAbsences.length > 0" class="table-container">
+                  <cdk-virtual-scroll-viewport
+                    [itemSize]="itemSize"
+                    class="virtual-scroll-viewport"
+                    [style.height.px]="Math.min(filteredYesterdayAbsences.length * itemSize, maxHeight)"
+                  >
+                    <table class="table table-bordered table-virtual">
+                      <thead class="table-header-fixed">
                         <tr>
                           <th class="col-name sortable" (click)="sort('employeeName', 'yesterday', 'absence')">
                             <div class="header-content">
@@ -99,18 +147,8 @@
                           <th class="col-notes">{{ "Notes" | localize }}</th>
                         </tr>
                       </thead>
-                    </table>
-                  </div>
-
-                  <!-- Virtual Scroll Body -->
-                  <cdk-virtual-scroll-viewport
-                    [itemSize]="itemSize"
-                    class="virtual-scroll-viewport"
-                    [style.height.px]="Math.min(yesterdayUnplannedAbsences.length * itemSize, maxHeight)"
-                  >
-                    <table class="table table-bordered">
                       <tbody>
-                        <tr *cdkVirtualFor="let item of yesterdayUnplannedAbsences" class="virtual-scroll-row">
+                        <tr *cdkVirtualFor="let item of filteredYesterdayAbsences" class="virtual-scroll-row">
                           <td class="col-name">{{ item.employeeName }}</td>
                           <td class="col-branch">{{ item.branch }}</td>
                           <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
@@ -121,7 +159,7 @@
                   </cdk-virtual-scroll-viewport>
                 </div>
 
-                <div *ngIf="yesterdayUnplannedAbsences.length === 0" class="text-center p-4">
+                <div *ngIf="filteredYesterdayAbsences.length === 0" class="text-center p-4">
                   <p>{{ "No unplanned absences" | localize }}</p>
                 </div>
               </div>
@@ -131,14 +169,17 @@
                 <h3 class="section-title">
                   <mat-icon>access_time</mat-icon>
                   {{ "Unapproved Short Working Hours" | localize }}
-                  <span class="count-badge">({{ yesterdayShortWorkingHours.length }})</span>
+                  <span class="count-badge">({{ filteredYesterdayShortHours.length }})</span>
                 </h3>
 
-                <div *ngIf="yesterdayShortWorkingHours.length > 0" class="table-container">
-                  <!-- Fixed Header -->
-                  <div class="table-header-wrapper">
-                    <table class="table table-bordered table-header-fixed">
-                      <thead>
+                <div *ngIf="filteredYesterdayShortHours.length > 0" class="table-container">
+                  <cdk-virtual-scroll-viewport
+                    [itemSize]="itemSize"
+                    class="virtual-scroll-viewport"
+                    [style.height.px]="Math.min(filteredYesterdayShortHours.length * itemSize, maxHeight)"
+                  >
+                    <table class="table table-bordered table-virtual">
+                      <thead class="table-header-fixed">
                         <tr>
                           <th class="col-name sortable" (click)="sort('employeeName', 'yesterday', 'short')">
                             <div class="header-content">
@@ -167,18 +208,8 @@
                           <th class="col-notes">{{ "Notes" | localize }}</th>
                         </tr>
                       </thead>
-                    </table>
-                  </div>
-
-                  <!-- Virtual Scroll Body -->
-                  <cdk-virtual-scroll-viewport
-                    [itemSize]="itemSize"
-                    class="virtual-scroll-viewport"
-                    [style.height.px]="Math.min(yesterdayShortWorkingHours.length * itemSize, maxHeight)"
-                  >
-                    <table class="table table-bordered">
                       <tbody>
-                        <tr *cdkVirtualFor="let item of yesterdayShortWorkingHours" class="virtual-scroll-row">
+                        <tr *cdkVirtualFor="let item of filteredYesterdayShortHours" class="virtual-scroll-row">
                           <td class="col-name">{{ item.employeeName }}</td>
                           <td class="col-branch">{{ item.branch }}</td>
                           <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
@@ -190,7 +221,7 @@
                   </cdk-virtual-scroll-viewport>
                 </div>
 
-                <div *ngIf="yesterdayShortWorkingHours.length === 0" class="text-center p-4">
+                <div *ngIf="filteredYesterdayShortHours.length === 0" class="text-center p-4">
                   <p>{{ "No short working hours" | localize }}</p>
                 </div>
               </div>
@@ -204,7 +235,7 @@
                 <div class="col-lg-12">
                   <div class="row">
                     <!-- Branch Filter -->
-                    <div class="pr-0 col-md-12 col-sm-12 col-xs-12 mb-0 row-item">
+                    <div class="pr-0 col-md-6 col-sm-12 col-xs-12 mb-0 row-item">
                       <mat-form-field
                         style="padding-bottom: 0"
                         class="w-100"
@@ -217,13 +248,56 @@
                           [(ngModel)]="selectedBranchIds"
                           (ngModelChange)="onBranchSelectionChange()"
                         >
-                          <mat-option
-                            *ngFor="let branch of listBranchFilter"
-                            [value]="branch.id"
-                          >
-                            {{ branch.name }}
-                          </mat-option>
+                        <input
+                          matInput
+                          placeholder="Search branch..."
+                          [(ngModel)]="branchSearchText"
+                          (keyup)="filterBranch()"
+                          (click)="$event.stopPropagation()"
+                          style="width: 100%; padding: 4px"
+                        />
+                        <mat-option
+                          [value]="'all'"
+                          (click)="toggleSelectAll($event)"
+                          [disabled]="true"
+                          style="cursor: pointer;"
+                        >
+                        <strong>
+                          {{ isAllSelected() ? ('Deselect All' | localize) : ('Select All' | localize) }}
+                        </strong>
+                        </mat-option>
+                        <mat-divider></mat-divider>
+                        <mat-option
+                          *ngFor="let branch of filteredBranches"
+                          [value]="branch.id"
+                        >
+                          {{ branch.name }}
+                        </mat-option>
                         </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <div class="pr-0 col-md-6 col-sm-12 col-xs-12 mb-0 row-item">
+                      <mat-form-field
+                        style="padding-bottom: 0"
+                        class="w-100"
+                        appearance="outline"
+                      >
+                        <mat-label>{{ "Search" | localize }}</mat-label>
+                        <input
+                          matInput
+                          [(ngModel)]="searchText"
+                          (ngModelChange)="onSearchChange()"
+                          placeholder="Search by name or branch..."
+                        />
+                        <mat-icon matSuffix>search</mat-icon>
+                        <button
+                          mat-icon-button
+                          matSuffix
+                          *ngIf="searchText"
+                          (click)="clearSearch()"
+                        >
+                        <mat-icon>clear</mat-icon>
+                        </button>
                       </mat-form-field>
                     </div>
                   </div>
@@ -240,13 +314,17 @@
                 <h3 class="section-title">
                   <mat-icon>event_busy</mat-icon>
                   {{ "Unplanned Absences" | localize }}
-                  <span class="count-badge">({{ lastWeekUnplannedAbsences.length }})</span>
+                  <span class="count-badge">({{ filteredLastWeekAbsences.length }})</span>
                 </h3>
 
-                <div *ngIf="lastWeekUnplannedAbsences.length > 0" class="table-container">
-                  <div class="table-header-wrapper">
-                    <table class="table table-bordered table-header-fixed">
-                      <thead>
+                <div *ngIf="filteredLastWeekAbsences.length > 0" class="table-container">
+                  <cdk-virtual-scroll-viewport
+                    [itemSize]="itemSize"
+                    class="virtual-scroll-viewport"
+                    [style.height.px]="Math.min(filteredLastWeekAbsences.length * itemSize, maxHeight)"
+                  >
+                    <table class="table table-bordered table-virtual">
+                      <thead class="table-header-fixed">
                         <tr>
                           <th class="col-name sortable" (click)="sort('employeeName', 'lastWeek', 'absence')">
                             <div class="header-content">
@@ -270,33 +348,24 @@
                           <th class="col-notes">{{ "Notes" | localize }}</th>
                         </tr>
                       </thead>
-                    </table>
-                  </div>
-
-                  <cdk-virtual-scroll-viewport
-                    [itemSize]="itemSize"
-                    class="virtual-scroll-viewport"
-                    [style.height.px]="Math.min(lastWeekUnplannedAbsences.length * itemSize, maxHeight)"
-                  >
-                    <table class="table table-bordered">
                       <tbody>
-                        <tr *cdkVirtualFor="let item of lastWeekUnplannedAbsences" class="virtual-scroll-row">
+                        <tr *cdkVirtualFor="let item of filteredLastWeekAbsences" class="virtual-scroll-row">
                           <td class="col-name">{{ item.employeeName }}</td>
                           <td class="col-branch">{{ item.branch }}</td>
                           <td class="col-dates">
-                            <span *ngFor="let date of item.datesMissed" class="date-badge">
-                              {{ date | date:'dd/MM' }}
+                            <span *ngFor="let date of item.datesMissed; let last = last" class="date-badge">
+                              {{ date | date:'dd/MM/yyyy' }}<ng-container *ngIf="!last">, </ng-container>
                             </span>
                           </td>
                           <td class="col-count">{{ item.count }}</td>
-                          <td class="col-notes">{{ item.notes }}</td>
+                          <td class="col-notes">{{ "No leave/WFH record" | localize }}</td>
                         </tr>
                       </tbody>
                     </table>
                   </cdk-virtual-scroll-viewport>
                 </div>
 
-                <div *ngIf="lastWeekUnplannedAbsences.length === 0" class="text-center p-4">
+                <div *ngIf="filteredLastWeekAbsences.length === 0" class="text-center p-4">
                   <p>{{ "No unplanned absences" | localize }}</p>
                 </div>
               </div>
@@ -306,17 +375,21 @@
                 <h3 class="section-title">
                   <mat-icon>access_time</mat-icon>
                   {{ "Unapproved Short Working Hours" | localize }}
-                  <span class="count-badge">({{ lastWeekShortWorkingHours.length }})</span>
+                  <span class="count-badge">({{ filteredLastWeekShortHours.length }})</span>
                 </h3>
                 <p class="filter-note">
                   <mat-icon>info</mat-icon>
                   {{ "Filter: No early leave/late arrival approval || No tracker time for approved WFH" | localize }}
                 </p>
 
-                <div *ngIf="lastWeekShortWorkingHours.length > 0" class="table-container">
-                  <div class="table-header-wrapper">
-                    <table class="table table-bordered table-header-fixed">
-                      <thead>
+                <div *ngIf="filteredLastWeekShortHours.length > 0" class="table-container">
+                  <cdk-virtual-scroll-viewport
+                    [itemSize]="itemSize"
+                    class="virtual-scroll-viewport"
+                    [style.height.px]="Math.min(filteredLastWeekShortHours.length * itemSize, maxHeight)"
+                  >
+                    <table class="table table-bordered table-virtual">
+                      <thead class="table-header-fixed">
                         <tr>
                           <th class="col-name sortable" (click)="sort('employeeName', 'lastWeek', 'short')">
                             <div class="header-content">
@@ -340,36 +413,27 @@
                           <th class="col-notes">{{ "Notes" | localize }}</th>
                         </tr>
                       </thead>
-                    </table>
-                  </div>
-
-                  <cdk-virtual-scroll-viewport
-                    [itemSize]="itemSize"
-                    class="virtual-scroll-viewport"
-                    [style.height.px]="Math.min(lastWeekShortWorkingHours.length * itemSize, maxHeight)"
-                  >
-                    <table class="table table-bordered">
                       <tbody>
-                        <tr *cdkVirtualFor="let item of lastWeekShortWorkingHours" class="virtual-scroll-row">
+                        <tr *cdkVirtualFor="let item of filteredLastWeekShortHours" class="virtual-scroll-row">
                           <td class="col-name">{{ item.employeeName }}</td>
                           <td class="col-branch">{{ item.branch }}</td>
                           <td class="col-dates">
-                            <span *ngFor="let date of item.datesBelowThreshold" class="date-badge threshold">
-                              {{ date | date:'dd/MM' }}
+                            <span *ngFor="let date of item.datesBelowThreshold; let last = last" class="date-badge threshold">
+                              {{ date | date:'dd/MM/yyyy' }}<ng-container *ngIf="!last">, </ng-container>
                             </span>
-                            <span *ngFor="let date of item.datesNoTrackerTime" class="date-badge no-tracker">
-                              {{ date | date:'dd/MM' }}
+                            <span *ngFor="let date of item.datesNoTrackerTime; let last = last" class="date-badge no-tracker">
+                              {{ date | date:'dd/MM/yyyy' }}<ng-container *ngIf="!last">, </ng-container>
                             </span>
                           </td>
                           <td class="col-count">{{ item.count }}</td>
-                          <td class="col-notes">{{ item.notes }}</td>
+                          <td class="col-notes">{{ "No early leave/late arrival approval" | localize }}</td>
                         </tr>
                       </tbody>
                     </table>
                   </cdk-virtual-scroll-viewport>
                 </div>
 
-                <div *ngIf="lastWeekShortWorkingHours.length === 0" class="text-center p-4">
+                <div *ngIf="filteredLastWeekShortHours.length === 0" class="text-center p-4">
                   <p>{{ "No short working hours" | localize }}</p>
                 </div>
               </div>

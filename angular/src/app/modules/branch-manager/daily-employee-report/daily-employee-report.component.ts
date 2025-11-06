@@ -209,4 +209,14 @@ isAllSelected(): boolean {
   refresh(): void {
     this.searchOrFilter();
   }
+
+  get filteredBranches() {
+    return this.listBranchFilter.filter(b => b.id && b.id !== 0);
+  }
+
+  round(value: number | string | null): string {
+    if (value == null) return '0.0';
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return isNaN(num) ? '0.0' : num.toFixed(1);
+  }
 }
