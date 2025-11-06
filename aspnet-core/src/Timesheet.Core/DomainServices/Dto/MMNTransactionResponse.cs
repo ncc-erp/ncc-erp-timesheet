@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.Services.MMN.Dto
 {
@@ -40,6 +41,9 @@ namespace Timesheet.Services.MMN.Dto
         [JsonProperty("transaction_timestamp")]
         public long TransactionTimestamp { get; set; }
 
+        [JsonProperty("status")]
+        public MmnTransactionStatus Status { get; set; }
+
         [JsonProperty("text_data")]
         public string TextData { get; set; }
 
@@ -54,5 +58,6 @@ namespace Timesheet.Services.MMN.Dto
         public long TransactionTimestamp { get; set; }
         public string FromAddress { get; set; }
         public string ToAddress { get; set; }
+        public MmnTransactionStatus Status { get; set; }
     }
 }

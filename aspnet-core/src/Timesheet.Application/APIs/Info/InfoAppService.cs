@@ -21,6 +21,7 @@ using Timesheet.DomainServices;
 using Branch = Timesheet.Entities.Branch;
 using Ncc.IoC;
 using Microsoft.AspNetCore.Routing.Constraints;
+using Abp.Authorization;
 
 namespace Timesheet.APIs.Info
 {
@@ -431,17 +432,23 @@ namespace Timesheet.APIs.Info
         }
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
+        [AbpAuthorize]
         public async System.Threading.Tasks.Task UnlockToLogTimesheet(string emailAddress, string client)
         {
-            if (!checkSecurityCode())
-            {
-                throw new UserFriendlyException("Wrong security code");
-            }
+            //if (!checkSecurityCode())
+            //{
+            //    throw new UserFriendlyException("Wrong security code");
+            //}
             var userId = await _userService.GetUserIdByEmail(emailAddress);
             if (!userId.HasValue)
             {
                 Logger.Error("Not found user with email " + emailAddress);
                 throw new UserFriendlyException("Not found user with email " + emailAddress);
+            }
+            if (userId.Value != AbpSession.UserId.Value)
+            {
+                Logger.Error($"User {AbpSession.UserId.Value} attempted to unlock timesheet for email {emailAddress}");
+                throw new UserFriendlyException("You can only unlock the timesheet for your own account.");
             }
             if(IsAlreadyUnlockToLog(userId.Value))
             {
@@ -519,17 +526,23 @@ namespace Timesheet.APIs.Info
 
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
+        [AbpAuthorize]
         public async System.Threading.Tasks.Task UnlockToApproveTimesheet(string emailAddress, string client)
         {
-            if (!checkSecurityCode())
-            {
-                throw new UserFriendlyException("Wrong security code");
-            }
+            //if (!checkSecurityCode())
+            //{
+            //    throw new UserFriendlyException("Wrong security code");
+            //}
             var userId = await _userService.GetUserIdByEmail(emailAddress);
             if (!userId.HasValue)
             {
                 Logger.Error("Not found user with email " + emailAddress);
                 throw new UserFriendlyException("Not found user with email " + emailAddress);
+            }
+            if (userId.Value != AbpSession.UserId.Value)
+            {
+                Logger.Error($"User {AbpSession.UserId.Value} attempted to unlock approval timesheet for email {emailAddress}");
+                throw new UserFriendlyException("You can only unlock approval permissions for your own account.");
             }
             if(IsAlreadyUnlockToApprove(userId.Value))
             {
