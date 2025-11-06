@@ -358,5 +358,13 @@ namespace Ncc.Entities.Enum
         {
             MEZON = 1,
         }
+
+        public enum MmnTransactionStatus
+        {
+            Pending = 0,
+            Confirmed = 1,
+            Finalized = 2,
+            Failed = 3
+        }
     }
 }

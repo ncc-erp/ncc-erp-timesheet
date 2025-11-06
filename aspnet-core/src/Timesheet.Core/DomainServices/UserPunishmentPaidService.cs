@@ -18,6 +18,7 @@ using SimpleBase;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.MMN.Dto;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.DomainServices
 {
@@ -110,7 +111,7 @@ namespace Timesheet.DomainServices
 
             var transactionInfo = await GetMMNTransactionsInfo(transactionHash);
 
-            if (transactionInfo.Status != 2)
+            if (transactionInfo.Status != MmnTransactionStatus.Finalized)
             {
                 _logger.LogError($"Transaction status {transactionInfo.Status} is not successful for hash {transactionHash}");
                 throw new UserFriendlyException("Transaction has not been confirmed successfully.");
