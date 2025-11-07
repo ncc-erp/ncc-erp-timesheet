@@ -430,6 +430,8 @@ namespace Timesheet.APIs.Info
                 return mapResult;
             }
         }
+
+        // Unlock endpoint for IMS tool
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async System.Threading.Tasks.Task UnlockToLogTimesheet(string emailAddress, string client)
@@ -469,6 +471,7 @@ namespace Timesheet.APIs.Info
             });
         }
 
+        // Unlock endpoint consumed directly by the timesheet web app (self-service unlock)
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
         [AbpAuthorize]
@@ -563,6 +566,7 @@ namespace Timesheet.APIs.Info
             }
         }
 
+        // Unlock approve/reject timesheet endpoint for IMS 
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async System.Threading.Tasks.Task UnlockToApproveTimesheet(string emailAddress, string client)
@@ -593,6 +597,7 @@ namespace Timesheet.APIs.Info
             }
         }
 
+        // Unlock approve/reject endpoint consumed directly by the timesheet web app (self-service unlock)
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
         [AbpAuthorize]
