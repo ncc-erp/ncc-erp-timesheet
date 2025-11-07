@@ -83,6 +83,9 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.isTableLoading = true;
     this.timekeepingService.getMyDetails(this.year, this.month + 1).subscribe(res => {
       this.listTimekeeping = res.result;
+      this.totalMonthlyPunishment = 0;
+      this.totalPaidPunishment = 0;
+
       if (this.listTimekeeping && this.listTimekeeping.length > 0) {
         this.totalMonthlyPunishment = this.listTimekeeping[0].totalMonthPunishmentTotal || 0;
         this.totalPaidPunishment = this.listTimekeeping[0].totalPaidPunishment || 0;
@@ -521,14 +524,11 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       data: {
         timekeepingData: this.listTimekeeping,
         totalMonthlyPunishment: this.totalMonthlyPunishment,
-        selectedDate: new Date(this.year, this.month, 1)
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && result.paid) {
-        this.notify.success('Paid Successfully');
-        this.getData();
+        selectedDate: new Date(this.year, this.month, 1),
+        onPaidSuccess: () => {
+          this.notify.success('Paid Successfully');
+          this.getData();
+        }
       }
     });
   }
