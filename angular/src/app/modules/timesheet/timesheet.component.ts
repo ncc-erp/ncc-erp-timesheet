@@ -171,7 +171,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     const emailAddress = this.appSession.user.emailAddress;
     
     if (type === 'PM') {
-      this._infoService.unlockToApproveTimesheet(emailAddress).subscribe(
+      this._infoService.unlockToApproveTimesheet1(emailAddress).subscribe(
         () => {
           this._notify.success('Unlock PM successfully!');
           this.getTimesheets();

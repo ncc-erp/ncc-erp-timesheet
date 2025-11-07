@@ -24,4 +24,14 @@ export class InfoService extends BaseApiService {
     const params = new HttpParams().set('emailAddress', emailAddress);
     return this.http.post(this.rootUrl + '/UnlockToApproveTimesheet', null, { params });
   }
+
+    unlockToLogTimesheet1(emailAddress: string): Observable<any> {
+    const params = new HttpParams().set('emailAddress', emailAddress);
+    return this.http.post(this.rootUrl + '/UnlockToLogTimesheet1', null, { params });
+  }
+
+  unlockToApproveTimesheet1(emailAddress: string): Observable<any> {
+    const params = new HttpParams().set('emailAddress', emailAddress);
+    return this.http.post(this.rootUrl + '/UnlockToApproveTimesheet1', null, { params });
+  }
 }

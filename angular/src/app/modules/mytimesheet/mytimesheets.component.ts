@@ -613,30 +613,18 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
     this.isCanNextBack = true;
   }
 
-  unlockTimesheet(type: string) {
+  unlockTimesheet() {
     const emailAddress = this.appSession.user.emailAddress;
-    
-    if (type === 'Staff') {
-      this._infoService.unlockToLogTimesheet(emailAddress).subscribe(
-        () => {
-          this.notify.success('Unlock Staff successfully!');
-          this.getAllTimeSheet();
-        },
-        (error) => {
-          this.notify.error('Failed to unlock Staff: ' + (error && error.error && error.error.error ? error.error.error.message : 'Unknown error'));
-        }
-      );
-    } else if (type === 'PM') {
-      this._infoService.unlockToApproveTimesheet(emailAddress).subscribe(
-        () => {
-          this.notify.success('Unlock PM successfully!');
-          this.getAllTimeSheet();
-        },
-        (error) => {
-          this.notify.error('Failed to unlock PM: ' + (error && error.error && error.error.error ? error.error.error.message : 'Unknown error'));
-        }
-      );
-    }
+
+    this._infoService.unlockToLogTimesheet1(emailAddress).subscribe(
+      () => {
+        this.notify.success('Unlock Staff successfully!');
+        this.getAllTimeSheet();
+      },
+      (error) => {
+        this.notify.error('Failed to unlock Staff: ' + (error && error.error && error.error.error ? error.error.error.message : 'Unknown error'));
+      }
+    );
   }
 
   delete(item: GetTimeSheetDto): void {
