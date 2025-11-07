@@ -150,6 +150,9 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
             this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
             
             this.loadPunishmentPaidData();
+            if (this.data && typeof this.data.onPaidSuccess === 'function') {
+              this.data.onPaidSuccess();
+            }
           } else {
             this.snackBar.open(result.message || 'Failed to process transaction', 'Close', { duration: 5000 });
           }
@@ -195,14 +198,6 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   loadPunishmentPaidData(): void {
     this.isLoadingPaidData = true;
     
-    if (this.punishmentItems.length === 0) {
-      this.totalFine = 0;
-      this.isPaid = false;
-      this.punishmentPaidItems = [];
-      this.isLoadingPaidData = false;
-      return;
-    }
-    
     let year: number;
     let month: number;
     
@@ -211,10 +206,15 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       month = selectedDate.month() + 1;
       year = selectedDate.year();
     } 
-    else {
+    else if (this.punishmentItems.length > 0) {
       const firstDate = moment(this.punishmentItems[0].date);
       month = firstDate.month() + 1;
       year = firstDate.year();
+    }
+    else {
+      const fallbackDate = moment();
+      month = fallbackDate.month() + 1;
+      year = fallbackDate.year();
     }
 
     try {
