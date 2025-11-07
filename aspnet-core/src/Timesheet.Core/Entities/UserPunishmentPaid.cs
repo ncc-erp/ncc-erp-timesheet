@@ -13,6 +13,8 @@ namespace Timesheet.Entities
         public User User { get; set; }
         
         public DateTime DateAt { get; set; }
+
+        public DateTime TargetMonth { get; set; }
         
         public int Amount { get; set; }
         

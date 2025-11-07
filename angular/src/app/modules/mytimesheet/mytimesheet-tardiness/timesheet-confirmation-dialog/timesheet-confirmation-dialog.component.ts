@@ -99,14 +99,14 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
 
       this.viewDate = new Date(firstDate.year(), firstDate.month(), 1);
     } else {
-      const currentDate = moment();
-      const monthStart = currentDate.clone().startOf('month');
-      const monthEnd = currentDate.clone().endOf('month');
+      const selectedDate = this.data.selectedDate ? moment(this.data.selectedDate) : moment();
+      const monthStart = selectedDate.clone().startOf('month');
+      const monthEnd = selectedDate.clone().endOf('month');
       
       this.weekNumber = -1; 
       this.weekRange = `${monthStart.format('MMM DD')}-${monthEnd.format('DD, YYYY')}`;
 
-      this.viewDate = new Date(currentDate.year(), currentDate.month(), 1);
+      this.viewDate = new Date(selectedDate.year(), selectedDate.month(), 1);
     }
     
     this.loadPunishmentPaidData();
@@ -120,39 +120,48 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     });
 
     dialogRef.afterClosed().subscribe(transactionHash => {
-      if (transactionHash) {
-        this.snackBar.open('Processing transaction...', '', { duration: 2000 });
-        
-        let year: number;
-        let month: number;
-        
-        if (this.punishmentItems.length > 0) {
-          const firstDate = moment(this.punishmentItems[0].date);
-          month = firstDate.month() + 1; 
-          year = firstDate.year();
-        } else {
-          const currentDate = moment();
-          month = currentDate.month() + 1; 
-          year = currentDate.year();
-        }
-        
-        this.userPunishmentPaidService.markPaidTransaction(transactionHash, year, month).subscribe(
-          result => {
-            if (result && result.success) {
-              this.isPaid = true;
-              this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
-              
-              this.loadPunishmentPaidData();
-            } else {
-              this.snackBar.open(result.message || 'Failed to process transaction', 'Close', { duration: 5000 });
-            }
-          },
-          error => {
-            console.error('Error marking transaction as paid:', error);
-            this.snackBar.open('Error processing transaction. Please try again.', 'Close', { duration: 5000 });
-          }
-        );
+      if (!transactionHash) return;
+      
+      this.snackBar.open('Processing transaction...', '', { duration: 2000 });
+      
+      let year: number;
+      let month: number;
+      
+      if (this.data.selectedDate) {
+        const selectedDate = moment(this.data.selectedDate);
+        month = selectedDate.month() + 1;
+        year = selectedDate.year();
+      } 
+      else if (this.punishmentItems.length > 0) {
+        const firstDate = moment(this.punishmentItems[0].date);
+        month = firstDate.month() + 1;
+        year = firstDate.year();
+      } 
+      else {
+        const currentDate = moment();
+        month = currentDate.month() + 1;
+        year = currentDate.year();
       }
+      
+      this.userPunishmentPaidService.markPaidTransaction(transactionHash, year, month).subscribe(
+        result => {
+          if (result && result.success) {
+            this.isPaid = true;
+            this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
+            
+            this.loadPunishmentPaidData();
+            if (this.data && typeof this.data.onPaidSuccess === 'function') {
+              this.data.onPaidSuccess();
+            }
+          } else {
+            this.snackBar.open(result.message || 'Failed to process transaction', 'Close', { duration: 5000 });
+          }
+        },
+        error => {
+          console.error('Error marking transaction as paid:', error);
+          this.snackBar.open('Error processing transaction. Please try again.', 'Close', { duration: 5000 });
+        }
+      );
     });
   }
 
@@ -187,45 +196,41 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   }
 
   loadPunishmentPaidData(): void {
+    this.isLoadingPaidData = true;
+    
+    let year: number;
+    let month: number;
+    
+    if (this.data.selectedDate) {
+      const selectedDate = moment(this.data.selectedDate);
+      month = selectedDate.month() + 1;
+      year = selectedDate.year();
+    } 
+    else if (this.punishmentItems.length > 0) {
+      const firstDate = moment(this.punishmentItems[0].date);
+      month = firstDate.month() + 1;
+      year = firstDate.year();
+    }
+    else {
+      const fallbackDate = moment();
+      month = fallbackDate.month() + 1;
+      year = fallbackDate.year();
+    }
+
     try {
-      this.isLoadingPaidData = true;
-      
-      let year: number;
-      let month: number;
-      
-      if (this.punishmentItems.length > 0) {
-        const firstDate = moment(this.punishmentItems[0].date);
-        month = firstDate.month() + 1; 
-        year = firstDate.year();
-      } else {
-        const currentDate = moment();
-        month = currentDate.month() + 1; 
-        year = currentDate.year();
-      }
-      
       this.userPunishmentPaidService.getForCurrentUser(year, month).subscribe(
         (result) => {
           this.punishmentPaidItems = result || [];
           
           const totalPunishmentAmount = this.data.totalMonthlyPunishment || 0;
-          const totalPaidAmount = this.calculateTotalPaidAmount();
+          const totalPaidAmount = this.punishmentPaidItems.reduce((sum, item) => sum + (item.amount || 0), 0);
           
           this.totalFine = Math.max(0, totalPunishmentAmount - totalPaidAmount);
-          
           this.isPaid = totalPaidAmount >= totalPunishmentAmount;
           this.isLoadingPaidData = false;
         },
         (error) => {
           console.error(`Error loading punishment paid data for ${month}/${year}:`, error);
-          if (error.status) {
-            console.error('HTTP Status:', error.status);
-          }
-          if (error.message) {
-            console.error('Error message:', error.message);
-          }
-          if (error.error) {
-            console.error('Error details:', error.error);
-          }
           this.punishmentPaidItems = [];
           this.isLoadingPaidData = false;
         }

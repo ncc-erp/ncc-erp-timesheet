@@ -22,6 +22,24 @@ mat-button-toggle-group{
     font-weight: 900;
 }
 
+button[name="unlockStaff"] {
+    background-color: #4CAF50;
+    color: white;
+}
+
+button[name="unlockStaff"]:hover {
+    background-color: #45a049; 
+}
+
+button[name="unlockPM"] {
+    background-color: #2196F3;
+    color: white;
+}
+
+button[name="unlockPM"]:hover {
+    background-color: #0b7dda; 
+}
+
 .main-content {
     min-width: 800px;
   }

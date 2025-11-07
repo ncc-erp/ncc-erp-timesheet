@@ -141,8 +141,7 @@ namespace Timesheet.APIs.HRMv2
                 }).ToList();
 
             var paidAmounts = WorkScope.GetAll<UserPunishmentPaid>()
-                .Where(p => p.DateAt.Year == year)
-                .Where(p => p.DateAt.Month == month)
+                .Where(p => p.TargetMonth.Year == year && p.TargetMonth.Month == month)
                 .GroupBy(p => p.UserId)
                 .Select(g => new
                 {

@@ -26,6 +26,9 @@ using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Uitls;
 using Timesheet.Users.Dto;
+using Ncc.Entities.Enum;
+using Timesheet.APIs.Public.Dto;
+using Timesheet.Entities;
 using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.Public
@@ -915,6 +918,30 @@ namespace Timesheet.APIs.Public
                 return result;
             }
         }
+        [HttpGet]
+        public async Task<List<GetWorkingTimeDto>> GetWFHWorkingTimeHours(DateTime date, string email = null)
+        {
+            var query = from detail in WorkScope.GetAll<AbsenceDayDetail>()
+                        join request in WorkScope.GetAll<AbsenceDayRequest>()
+                            on detail.RequestId equals request.Id
+                        join user in WorkScope.GetAll<User>()
+                            on request.UserId equals user.Id
+                        where request.Type == RequestType.Remote
+                           && (request.Status == RequestStatus.Approved || request.Status == RequestStatus.Pending)
+                           && detail.DateAt.Date == date.Date
+                           && (email == null || user.EmailAddress == email)
+                        select new GetWorkingTimeDto
+                        {
+                            UserEmail = user.EmailAddress,
+                            MorningStartTime = user.MorningStartAt,
+                            MorningEndTime = user.MorningEndAt,
+                            AfternoonStartTime = user.AfternoonStartAt,
+                            AfternoonEndTime = user.AfternoonEndAt,
+                           
+                        };
+
+            return await query.AsNoTracking().ToListAsync();
+        }
 
         [AbpAllowAnonymous]
         [HttpGet]
@@ -1139,5 +1166,6 @@ namespace Timesheet.APIs.Public
             }
             return resultList;
         }
+        
     }
 }

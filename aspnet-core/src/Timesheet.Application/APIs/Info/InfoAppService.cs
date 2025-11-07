@@ -21,6 +21,7 @@ using Timesheet.DomainServices;
 using Branch = Timesheet.Entities.Branch;
 using Ncc.IoC;
 using Microsoft.AspNetCore.Routing.Constraints;
+using Abp.Authorization;
 
 namespace Timesheet.APIs.Info
 {
@@ -429,6 +430,8 @@ namespace Timesheet.APIs.Info
                 return mapResult;
             }
         }
+
+        // Unlock endpoint for IMS tool
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async System.Threading.Tasks.Task UnlockToLogTimesheet(string emailAddress, string client)
@@ -442,6 +445,52 @@ namespace Timesheet.APIs.Info
             {
                 Logger.Error("Not found user with email " + emailAddress);
                 throw new UserFriendlyException("Not found user with email " + emailAddress);
+            }
+            if(IsAlreadyUnlockToLog(userId.Value))
+            {
+                Logger.Info(emailAddress + " Already Unlock");
+                return;
+            }
+
+            //Thay đổi sử dụng business mới
+            //Trước đây user có thể unlock nhiều tuần và user sẽ mất số tiền unlock tương ứng với số tuần
+            //Ví dụ: User unlock 3 tuần sẽ mất số tiền là: 3 * 20k
+            //Business mới:
+            //Mỗi lần user unlock sẽ mất 20k và chỉ được unlock tuần gần nhất. Nếu muốn unlock các tuần đổ về trước cần có sự xác nhận của IT và HR.
+
+            //var listUnlockWeekEmployee = await getMyTimesheetLockedAsync(userId.Value);
+
+            if (!ClientRequest.MEZON.ToString().Equals(client))
+            {
+                await UnlockTimeSheetIms(userId.Value);
+            }
+            await WorkScope.InsertAsync<UnlockTimesheet>(new UnlockTimesheet
+            {
+                UserId = userId.Value,
+                Type = LockUnlockTimesheetType.MyTimesheet
+            });
+        }
+
+        // Unlock endpoint consumed directly by the timesheet web app (self-service unlock)
+        [HttpPost]
+        [System.Security.SuppressUnmanagedCodeSecurity]
+        [AbpAuthorize]
+        public async System.Threading.Tasks.Task UnlockToLogTimesheet1(string emailAddress, string client)
+        {
+            //if (!checkSecurityCode())
+            //{
+            //    throw new UserFriendlyException("Wrong security code");
+            //}
+            var userId = await _userService.GetUserIdByEmail(emailAddress);
+            if (!userId.HasValue)
+            {
+                Logger.Error("Not found user with email " + emailAddress);
+                throw new UserFriendlyException("Not found user with email " + emailAddress);
+            }
+            if (userId.Value != AbpSession.UserId.Value)
+            {
+                Logger.Error($"User {AbpSession.UserId.Value} attempted to unlock timesheet for email {emailAddress}");
+                throw new UserFriendlyException("You can only unlock the timesheet for your own account.");
             }
             if(IsAlreadyUnlockToLog(userId.Value))
             {
@@ -517,6 +566,7 @@ namespace Timesheet.APIs.Info
             }
         }
 
+        // Unlock approve/reject timesheet endpoint for IMS 
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async System.Threading.Tasks.Task UnlockToApproveTimesheet(string emailAddress, string client)
@@ -530,6 +580,43 @@ namespace Timesheet.APIs.Info
             {
                 Logger.Error("Not found user with email " + emailAddress);
                 throw new UserFriendlyException("Not found user with email " + emailAddress);
+            }
+            if(IsAlreadyUnlockToApprove(userId.Value))
+            {
+                return;
+            }
+            var timesLockedPM = await getTimesheetLockedOfPMAsync(userId.Value);
+
+            if (timesLockedPM == 0)
+            {
+                throw new UserFriendlyException("You have no pending timesheet in previous week. If you want to unlock please contact admin.");
+            }
+            else
+            {
+                await UnlockToApproveTimesheet(userId.Value, 1, client);
+            }
+        }
+
+        // Unlock approve/reject endpoint consumed directly by the timesheet web app (self-service unlock)
+        [HttpPost]
+        [System.Security.SuppressUnmanagedCodeSecurity]
+        [AbpAuthorize]
+        public async System.Threading.Tasks.Task UnlockToApproveTimesheet1(string emailAddress, string client)
+        {
+            //if (!checkSecurityCode())
+            //{
+            //    throw new UserFriendlyException("Wrong security code");
+            //}
+            var userId = await _userService.GetUserIdByEmail(emailAddress);
+            if (!userId.HasValue)
+            {
+                Logger.Error("Not found user with email " + emailAddress);
+                throw new UserFriendlyException("Not found user with email " + emailAddress);
+            }
+            if (userId.Value != AbpSession.UserId.Value)
+            {
+                Logger.Error($"User {AbpSession.UserId.Value} attempted to unlock approval timesheet for email {emailAddress}");
+                throw new UserFriendlyException("You can only unlock approval permissions for your own account.");
             }
             if(IsAlreadyUnlockToApprove(userId.Value))
             {

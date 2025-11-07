@@ -642,6 +642,12 @@ namespace Timesheet.Timesheets.MyTimesheets
                 throw new UserFriendlyException("Timesheet was locked! You can submit timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
             }
 
+            var hasPaidEnough = await HasPaidEnoughPunishment(AbpSession.UserId.Value);
+            if (!hasPaidEnough)
+            {
+                throw new UserFriendlyException("You need to pay the full punishment for the current month before you can submit your timesheet.\r\n!");
+            }
+
             foreach (var item in mytimesheets)
             {
                 item.Status = TimesheetStatus.Pending;
@@ -714,6 +720,29 @@ namespace Timesheet.Timesheets.MyTimesheets
 
                 }
             }
+        }
+
+        private async Task<bool> HasPaidEnoughPunishment(long userId)
+        {
+            var currentDate = DateTimeUtils.GetNow();
+            var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+
+            var startDate = firstDayOfMonth;
+            var endDate = currentDate;
+
+            var totalPunishmentAmount = await WorkScope.GetAll<UserPunishment>()
+                .Where(p => p.UserId == userId)
+                .Where(p => p.DateAt >= startDate && p.DateAt <= endDate)
+                .Where(p => !p.IsDeleted)
+                .SumAsync(p => p.TotalMoney);
+
+            var totalPaidAmount = await WorkScope.GetAll<UserPunishmentPaid>()
+                .Where(p => p.UserId == userId)
+                .Where(p => p.TargetMonth.Year == currentDate.Year && p.TargetMonth.Month == currentDate.Month)
+                .Where(p => !p.IsDeleted)
+                .SumAsync(p => p.Amount);
+
+            return totalPaidAmount >= totalPunishmentAmount;
         }
 
         public async Task<NotifyUserInfoDto> getNotifyUserInfoDto(long userId)

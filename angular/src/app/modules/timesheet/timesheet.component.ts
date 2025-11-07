@@ -14,8 +14,9 @@ import { TimesheetWarningComponent } from './timesheet-warning/timesheet-warning
 import * as moment from 'moment';
 import { FormControl } from '@angular/forms';
 import { ProjectManagerService } from '@app/service/api/project-manager.service';
-import { BranchDto } from '@shared/service-proxies/service-proxies';
+import { BranchDto, UserServiceProxy } from '@shared/service-proxies/service-proxies';
 import { BranchService } from '@app/service/api/branch.service';
+import { InfoService } from '@app/service/api/info.service';
 
 export const MY_FORMATS = {
   parse: {
@@ -39,6 +40,7 @@ export const MY_FORMATS = {
 export class TimesheetComponent extends AppComponentBase implements OnInit {
   APPROVAL_TIMESHEET = PERMISSIONS_CONSTANT.ApprovalTimesheets;
   EXPORT_EXCEL_TIMESHEET = PERMISSIONS_CONSTANT.ExportExcelTimesheets;
+  isBasicUser: boolean = false;
 
   viewBy: number = this.APP_CONSTANT.TimesheetViewBy.Project;
   filterStatus: number = this.APP_CONSTANT.TimesheetStatus.Pending;
@@ -145,14 +147,43 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     private _dialog: MatDialog,
     private projectManageService: ProjectManagerService,
     private branchService: BranchService,
+    private _infoService: InfoService,
+    private _userService: UserServiceProxy,
+    private _notify: NotifyService,
+
   ) {
-    super(injector)
+    super(injector);
+    this._userService.get(this.appSession.userId).subscribe(user => {
+      const hasOnlyBasicRole = user.roleNames && 
+                             user.roleNames.length === 1 && 
+                             user.roleNames[0].toUpperCase() === 'BASICUSER';
+      this.isBasicUser = hasOnlyBasicRole;
+    });
     this.projectSearch.valueChanges.subscribe(() => {
       this.filterProject();
     });
     this.branchSearch.valueChanges.subscribe(() => {
       this.filterBranch();
     })
+  }
+
+  unlockTimesheet(type: string) {
+    const emailAddress = this.appSession.user.emailAddress;
+    
+    if (type === 'PM') {
+      this._infoService.unlockToApproveTimesheet1(emailAddress).subscribe(
+        () => {
+          this._notify.success('Unlock PM successfully!');
+          this.getTimesheets();
+        },
+        (error) => {
+          const errorMessage = error && error.error && error.error.error && error.error.error.message 
+            ? error.error.error.message 
+            : 'Unknown error';
+          this._notify.error('Failed to unlock PM: ' + errorMessage);
+        }
+      );
+    }
   }
 
   ngOnInit() {
