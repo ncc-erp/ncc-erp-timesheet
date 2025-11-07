@@ -642,11 +642,11 @@ namespace Timesheet.Timesheets.MyTimesheets
                 throw new UserFriendlyException("Timesheet was locked! You can submit timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
             }
 
-            var hasPaidEnough = await HasPaidEnoughPunishment(AbpSession.UserId.Value);
-            if (!hasPaidEnough)
-            {
-                throw new UserFriendlyException("You need to pay the full punishment for the current month before you can submit your timesheet.\r\n!");
-            }
+            //var hasPaidEnough = await HasPaidEnoughPunishment(AbpSession.UserId.Value);
+            //if (!hasPaidEnough)
+            //{
+            //    throw new UserFriendlyException("You need to pay the full punishment for the current month before you can submit your timesheet.\r\n!");
+            //}
 
             foreach (var item in mytimesheets)
             {
