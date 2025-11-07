@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Ncc.Entities.Enum;
-using static Ncc.Entities.Enum.StatusEnum;
 namespace Timesheet.APIs.Public.Dto
 {
     public class GetWorkingTimeDto

@@ -919,7 +919,6 @@ namespace Timesheet.APIs.Public
             }
         }
         [HttpGet]
-        [AbpAuthorize]
         public async Task<List<GetWorkingTimeDto>> GetWFHWorkingTimeHours(DateTime date, string email = null)
         {
             var query = from detail in WorkScope.GetAll<AbsenceDayDetail>()
