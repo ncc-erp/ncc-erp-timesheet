@@ -2,9 +2,12 @@
 using Abp.BackgroundJobs;
 using Abp.Collections.Extensions;
 using Abp.UI;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ncc;
+using Ncc.Authorization;
+using Ncc.Authorization.Roles;
 using Ncc.Authorization.Users;
 using Ncc.Configuration;
 using Ncc.Entities;
@@ -36,12 +39,14 @@ namespace Timesheet.APIs.ManageWorkingTimes
         private readonly IBackgroundJobManager _backgroundJobManager;
         private readonly KomuService _komuService;
         private readonly MezonService _mezonService;
+        private readonly UserManager _userManager;
 
-        public ManageWorkingTimeAppService(IBackgroundJobManager backgroundJobManager, IWorkScope workScope, KomuService komuService, MezonService mezonService) : base(workScope)
+        public ManageWorkingTimeAppService(IBackgroundJobManager backgroundJobManager, IWorkScope workScope, KomuService komuService, MezonService mezonService, UserManager userManager) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _komuService = komuService;
             _mezonService = mezonService;
+            _userManager = userManager;
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewDetail, Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll)]
@@ -99,83 +104,95 @@ namespace Timesheet.APIs.ManageWorkingTimes
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ManageWorkingTime_Approval)]
-        [HttpPost]
-        public async System.Threading.Tasks.Task ApproveWorkingTime(long id)
+[HttpPost]
+public async System.Threading.Tasks.Task ApproveWorkingTime(long id)
+{
+    var currentUserId = AbpSession.UserId.Value;
+    var currentUser = await _userManager.GetUserByIdAsync(currentUserId);
+    var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
+    var isBranchDirector = currentUserRoles.Contains(StaticRoleNames.Host.BranchDirector);
+
+    var itemExt = await WorkScope.GetAll<HistoryWorkingTime>()
+        .Where(s => s.Id == id)
+        .Select(s => new { 
+            Entity = s, 
+            s.User.FullName,
+            s.UserId
+        })
+        .FirstOrDefaultAsync();
+
+    if (itemExt == null)
+    {
+        throw new UserFriendlyException("Request not found");
+    }
+
+    // Ngăn chặn tự phê duyệt (trừ BranchDirector)
+    if (itemExt.UserId == currentUserId && !isBranchDirector)
+    {
+        throw new UserFriendlyException("Bạn không thể tự phê duyệt yêu cầu của chính mình. Chỉ có Giám đốc văn phòng mới có thể tự phê duyệt.");
+    }
+    if (itemExt.IsRequesterBranchDirector && !isBranchDirector)
+    {
+        throw new UserFriendlyException("Bạn không có quyền phê duyệt yêu cầu của Giám đốc văn phòng.");
+    }
+    var projectIds = await WorkScope.GetAll<ProjectUser>()
+        .Where(s => s.Type == ProjectUserType.PM && s.UserId == currentUserId)
+        .Select(s => s.ProjectId).ToListAsync();
+
+    var isValid = await WorkScope.GetAll<ProjectUser>()
+        .AnyAsync(s => s.UserId == itemExt.UserId && projectIds.Contains(s.ProjectId));
+
+    if (!isValid)
+    {
+        throw new UserFriendlyException($"You are not PM of user {itemExt.FullName}");
+    }
+
+    var item = itemExt.Entity;
+
+    item.Status = RequestStatus.Approved;
+    await WorkScope.UpdateAsync<HistoryWorkingTime>(item);
+
+    // Phần còn lại giữ nguyên
+    if (item.ApplyDate.Date <= DateTimeUtils.GetNow().Date)
+    {
+        await ChangeWorkingTime(item);
+    }
+    else
+    {
+        var today = DateTimeUtils.GetNow().Date;
+
+        var deleteBgrdjs = await WorkScope.GetAll<BackgroundJobInfo>()
+            .Where(s => s.JobType.StartsWith("Timesheet.BackgroundJob.WorkingTimeBackgroundJob") && s.JobArgs.Contains($"\"UserId\":{item.UserId}"))
+            .Select(s => s).ToListAsync();
+        var hwtIds = new LinkedList<long>();
+        foreach (var bgrd in deleteBgrdjs)
         {
-
-            var itemExt = await WorkScope.GetAll<HistoryWorkingTime>()
-                .Where(s => s.Id == id)
-                .Select(s => new { Entity = s, s.User.FullName })
-                .FirstOrDefaultAsync();
-
-            var item = itemExt.Entity;
-
-            var projectIds = await WorkScope.GetAll<ProjectUser>()
-                .Where(s => s.Type == ProjectUserType.PM && s.UserId == AbpSession.UserId)
-                .Select(s => s.ProjectId).ToListAsync();
-
-            var isValid = await WorkScope.GetAll<ProjectUser>()
-                .AnyAsync(s => s.UserId == item.UserId && projectIds.Contains(s.ProjectId));
-
-            if (!isValid)
+            await _backgroundJobManager.DeleteAsync(bgrd.Id.ToString());
+            try
             {
-                throw new UserFriendlyException($"You are not PM of user {itemExt.FullName}");
+                HistoryWorkingTime h = JsonConvert.DeserializeObject<HistoryWorkingTime>(bgrd.JobArgs);
+                hwtIds.AddLast(h.Id);
             }
-
-            item.Status = RequestStatus.Approved;
-            await WorkScope.UpdateAsync<HistoryWorkingTime>(item);
-
-            if (item.ApplyDate.Date <= DateTimeUtils.GetNow().Date)
-            {
-                await ChangeWorkingTime(item);
-            }
-            else
-            {
-                // delete background job
-                //var getDeleted = await
-                //    (from b in WorkScope.GetAll<BackgroundJobInfo>()
-                //     from hd in WorkScope.GetAll<HistoryWorkingTime>().Where(x => x.UserId == item.UserId && x.ApplyDate == item.ApplyDate && x.Id != id)
-                //     where b.JobArgs.Contains($"\"Id\":{hd.Id}") && b.JobType.Contains("Timesheet.BackgroundJob.WorkingTimeBackgroundJob")
-                //     select new { Id = b.Id }).ToListAsync();
-                var today = DateTimeUtils.GetNow().Date;
-
-                var deleteBgrdjs = await WorkScope.GetAll<BackgroundJobInfo>()
-                    .Where(s => s.JobType.StartsWith("Timesheet.BackgroundJob.WorkingTimeBackgroundJob") && s.JobArgs.Contains($"\"UserId\":{item.UserId}"))
-                    .Select(s => s).ToListAsync();
-                var hwtIds = new LinkedList<long>();
-                foreach (var bgrd in deleteBgrdjs)
-                {
-                    await _backgroundJobManager.DeleteAsync(bgrd.Id.ToString());
-                    try
-                    {
-                        HistoryWorkingTime h = JsonConvert.DeserializeObject<HistoryWorkingTime>(bgrd.JobArgs);
-                        hwtIds.AddLast(h.Id);
-                    }
-                    catch (Exception e)
-                    {
-
-                    }
-
-                }
-
-                var approvedHWTs = await WorkScope.GetAll<HistoryWorkingTime>()
-                    .Where(s => (s.UserId == item.UserId && s.Id != id && s.Status == RequestStatus.Approved && s.ApplyDate.Date > today) || hwtIds.Contains(s.Id))
-                    .ToListAsync();
-                foreach (var hwt in approvedHWTs)
-                {
-                    hwt.Status = RequestStatus.Rejected;
-                    await WorkScope.UpdateAsync(hwt);
-                }
-
-                // add background job
-                await _backgroundJobManager.EnqueueAsync<WorkingTimeBackgroundJob, WorkingTimeBackgroundJobArgs>(new WorkingTimeBackgroundJobArgs
-                {
-                    Target = item
-                }, BackgroundJobPriority.High, TimeSpan.FromHours((item.ApplyDate.Date.AddHours(20) - DateTimeUtils.GetNow()).TotalHours));
-            }
-
-            await notifyKomuWhenApproveChangeMyWorkingTime(item, true);
+            catch (Exception e) { }
         }
+
+        var approvedHWTs = await WorkScope.GetAll<HistoryWorkingTime>()
+            .Where(s => (s.UserId == item.UserId && s.Id != id && s.Status == RequestStatus.Approved && s.ApplyDate.Date > today) || hwtIds.Contains(s.Id))
+            .ToListAsync();
+        foreach (var hwt in approvedHWTs)
+        {
+            hwt.Status = RequestStatus.Rejected;
+            await WorkScope.UpdateAsync(hwt);
+        }
+
+        await _backgroundJobManager.EnqueueAsync<WorkingTimeBackgroundJob, WorkingTimeBackgroundJobArgs>(new WorkingTimeBackgroundJobArgs
+        {
+            Target = item
+        }, BackgroundJobPriority.High, TimeSpan.FromHours((item.ApplyDate.Date.AddHours(20) - DateTimeUtils.GetNow()).TotalHours));
+    }
+
+    await notifyKomuWhenApproveChangeMyWorkingTime(item, true);
+}
 
         private async System.Threading.Tasks.Task ChangeWorkingTime(HistoryWorkingTime workingTime)
         {
@@ -214,47 +231,70 @@ namespace Timesheet.APIs.ManageWorkingTimes
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ManageWorkingTime_Approval)]
-        [HttpPost]
-        public async System.Threading.Tasks.Task RejectWorkingTime(long id)
-        {
-            var itemExt = await WorkScope.GetAll<HistoryWorkingTime>()
-                .Where(s => s.Id == id)
-                .Select(s => new { Entity = s, s.User.FullName })
-                .FirstOrDefaultAsync();
+[HttpPost]
+public async System.Threading.Tasks.Task RejectWorkingTime(long id)
+{
+    var currentUserId = AbpSession.UserId.Value;
+    var currentUser = await _userManager.GetUserByIdAsync(currentUserId);
+    var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
+    var isBranchDirector = currentUserRoles.Contains(StaticRoleNames.Host.BranchDirector);
 
-            var item = itemExt.Entity;
+    var itemExt = await WorkScope.GetAll<HistoryWorkingTime>()
+        .Where(s => s.Id == id)
+        .Select(s => new { 
+            Entity = s, 
+            s.User.FullName,
+            s.UserId
+        })
+        .FirstOrDefaultAsync();
 
-            if (item.Status == RequestStatus.Approved && item.ApplyDate.Date <= DateTime.Now.Date)
-            {
-                throw new UserFriendlyException("This working time is approved");
-            }
+    if (itemExt == null)
+    {
+        throw new UserFriendlyException("Request not found");
+    }
 
-            var projectIds = await WorkScope.GetAll<ProjectUser>()
-                .Where(s => s.Type == ProjectUserType.PM && s.UserId == AbpSession.UserId)
-                .Select(s => s.ProjectId).ToListAsync();
+    // Ngăn chặn tự từ chối (trừ BranchDirector)
+    if (itemExt.UserId == currentUserId && !isBranchDirector)
+    {
+        throw new UserFriendlyException("Bạn không thể từ chối yêu cầu của chính mình. Chỉ có Giám đốc văn phòng mới có thể tự từ chối.");
+    }
+    if (itemExt.IsRequesterBranchDirector && !isBranchDirector)
+    {
+        throw new UserFriendlyException("Bạn không có quyền từ chối yêu cầu của Giám đốc văn phòng.");
+    }
+    var projectIds = await WorkScope.GetAll<ProjectUser>()
+        .Where(s => s.Type == ProjectUserType.PM && s.UserId == currentUserId)
+        .Select(s => s.ProjectId).ToListAsync();
 
-            var isValid = await WorkScope.GetAll<ProjectUser>()
-                .AnyAsync(s => s.UserId == item.UserId && projectIds.Contains(s.ProjectId));
+    var isValid = await WorkScope.GetAll<ProjectUser>()
+        .AnyAsync(s => s.UserId == itemExt.UserId && projectIds.Contains(s.ProjectId));
 
-            if (!isValid)
-            {
-                throw new UserFriendlyException($"You are not PM of user {itemExt.FullName}");
-            }
+    if (!isValid)
+    {
+        throw new UserFriendlyException($"You are not PM of user {itemExt.FullName}");
+    }
 
-            item.Status = RequestStatus.Rejected;
-            await WorkScope.UpdateAsync<HistoryWorkingTime>(item);
-            // delete background job
-            var getDeleted = await (from b in WorkScope.GetAll<BackgroundJobInfo>()
-                                    where b.JobArgs.Contains($"\"Id\":{id}") && b.JobType.Contains("Timesheet.BackgroundJob.WorkingTimeBackgroundJob")
-                                    select new { Id = b.Id }).FirstOrDefaultAsync();
-            if (getDeleted != null)
-            {
-                await _backgroundJobManager.DeleteAsync($"{getDeleted.Id}");
-            }
+    var item = itemExt.Entity;
 
-            await notifyKomuWhenApproveChangeMyWorkingTime(item, false);
-        }
+    if (item.Status == RequestStatus.Approved && item.ApplyDate.Date <= DateTime.Now.Date)
+    {
+        throw new UserFriendlyException("This working time is approved");
+    }
 
+    item.Status = RequestStatus.Rejected;
+    await WorkScope.UpdateAsync<HistoryWorkingTime>(item);
+    
+    // delete background job
+    var getDeleted = await (from b in WorkScope.GetAll<BackgroundJobInfo>()
+                           where b.JobArgs.Contains($"\"Id\":{id}") && b.JobType.Contains("Timesheet.BackgroundJob.WorkingTimeBackgroundJob")
+                           select new { Id = b.Id }).FirstOrDefaultAsync();
+    if (getDeleted != null)
+    {
+        await _backgroundJobManager.DeleteAsync($"{getDeleted.Id}");
+    }
+
+    await notifyKomuWhenApproveChangeMyWorkingTime(item, false);
+}
         private async System.Threading.Tasks.Task notifyKomuWhenApproveChangeMyWorkingTime(HistoryWorkingTime request, bool isApprove)
         {
             var enableNotify = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendKomuRequest);
