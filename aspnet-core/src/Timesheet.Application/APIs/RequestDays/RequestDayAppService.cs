@@ -37,7 +37,10 @@ using Timesheet.Services.Mezon;
 using Timesheet.Services.W2;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
-
+using Microsoft.AspNetCore.Identity;
+using Ncc.Authorization;
+using Ncc.Authorization.Roles;
+using Microsoft.EntityFrameworkCore;
 namespace Timesheet.APIs.RequestDays
 {
     [AbpAuthorize]
@@ -50,9 +53,11 @@ namespace Timesheet.APIs.RequestDays
         private readonly IW2Service _w2Service;
         private readonly string TemplateFolder = Path.Combine("wwwroot", "template");
         private readonly MezonService _mezonService;
+        private readonly UserManager _userManager;
+
         public RequestDayAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
             ITimekeepingServices timeKeepingService, IWorkScope workScope, IApproveRequestOffServices approveRequestOffServices,
-            IW2Service w2Service, MezonService mezonService) : base(workScope)
+            IW2Service w2Service, MezonService mezonService, UserManager userManager) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _timeKeepingService = timeKeepingService;
@@ -60,6 +65,7 @@ namespace Timesheet.APIs.RequestDays
             _approveRequestOffServices = approveRequestOffServices;
             _w2Service = w2Service;
             _mezonService = mezonService;
+            _userManager = userManager;
         }
 
         [HttpPost]
@@ -1250,13 +1256,47 @@ namespace Timesheet.APIs.RequestDays
         public async System.Threading.Tasks.Task ApproveRequest(long[] requestIds)
         {
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
+            var currentUserId = AbpSession.UserId.Value;
+            var currentUser = await WorkScope.GetAsync<User>(currentUserId);
+            var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
+            var isCurrentUserBranchDirector = currentUserRoles.Contains(StaticRoleNames.Host.BranchDirector);
             foreach (var requestId in requestIds)
             {
                 var request = await WorkScope
                 .GetAll<AbsenceDayRequest>()
-                .Include(ar => ar.User) // Eager loading User
+                .Include(ar => ar.User) 
+                .Include(ar => ar.User.Branch)
                 .FirstOrDefaultAsync(ar => ar.Id == requestId);
+                if (request == null) continue;
+                if (isCurrentUserBranchDirector && currentUser.BranchId != request.User.BranchId)
+                {
+                    throw new UserFriendlyException("Bạn chỉ có thể phê duyệt yêu cầu của người cùng chi nhánh.");
+                }
 
+                if (!isCurrentUserBranchDirector)
+                {
+                    if (!(isViewBranch || (await CheckSessionUserIsPMOfUser(request.UserId))))
+                    {
+                        throw new UserFriendlyException("You are not authorized to approve this request");
+                    }
+                }
+
+                if (request.UserId == currentUserId)
+                {
+                    if (!isCurrentUserBranchDirector)
+                    {
+                        throw new UserFriendlyException("Bạn không thể tự phê duyệt yêu cầu của chính mình. Chỉ có Giám đốc văn phòng mới có thể tự phê duyệt.");
+                    }
+
+                   
+                }
+                var requesterRoles = await _userManager.GetRolesAsync(request.User);
+                var isRequesterBranchDirector = requesterRoles.Contains(StaticRoleNames.Host.BranchDirector);
+                var isCurrentUserPM = currentUserRoles.Any(r => r == StaticRoleNames.Host.ProjectAdmin);
+                if (isRequesterBranchDirector && isCurrentUserPM)
+                {
+                    throw new UserFriendlyException("Bạn không có quyền phê duyệt yêu cầu của Giám đốc văn phòng.");
+                }
                 if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
                     var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
@@ -1297,10 +1337,46 @@ namespace Timesheet.APIs.RequestDays
         public async System.Threading.Tasks.Task RejectRequest(long[] requestIds)
         {
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
+            var currentUserId = AbpSession.UserId.Value;
+            var currentUser = await WorkScope.GetAsync<User>(currentUserId);
+            var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
+            var isCurrentUserBranchDirector = currentUserRoles.Contains(StaticRoleNames.Host.BranchDirector);
             foreach (var requestId in requestIds)
             {
-                var request = await WorkScope.GetAsync<AbsenceDayRequest>(requestId);
+                var request = await WorkScope.GetAll<AbsenceDayRequest>()
+                        .Include(ar => ar.User) 
+                        .Include(ar => ar.User.Branch)
+                        .FirstOrDefaultAsync(ar => ar.Id == requestId);
 
+                if (request == null) continue;
+                if (isCurrentUserBranchDirector && currentUser.BranchId != request.User.BranchId)
+                {
+                    throw new UserFriendlyException("Bạn chỉ có thể từ chối yêu cầu của người cùng chi nhánh.");
+                }
+                if (!isCurrentUserBranchDirector)
+                {
+                    if (!(isViewBranch || (await CheckSessionUserIsPMOfUser(request.UserId))))
+                    {
+                        throw new UserFriendlyException("You are not authorized to reject this request");
+                    }
+                }
+                if (request.UserId == currentUserId)
+                {
+           
+                if (!isCurrentUserBranchDirector)
+                {
+                    throw new UserFriendlyException("Bạn không thể tự từ chối yêu cầu của chính mình. Chỉ có Giám đốc văn phòng mới có thể tự từ chối.");
+                }
+               
+                }
+                var requesterRoles = await _userManager.GetRolesAsync(request.User);
+                var isRequesterBranchDirector = requesterRoles.Contains(StaticRoleNames.Host.BranchDirector);
+                var isCurrentUserPM = currentUserRoles.Any(r => r == StaticRoleNames.Host.ProjectAdmin);
+
+                if (isRequesterBranchDirector && isCurrentUserPM)
+                {
+                    throw new UserFriendlyException("Bạn không có quyền từ chối yêu cầu của Giám đốc văn phòng.");
+                }
                 if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
                     request.Status = RequestStatus.Rejected;

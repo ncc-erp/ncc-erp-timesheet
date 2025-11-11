@@ -27,7 +27,10 @@ using Timesheet.Services.Komu;
 using Timesheet.Services.Mezon;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
-
+using Microsoft.AspNetCore.Identity;
+using Ncc.Authorization.Users;
+using Ncc.Authorization;
+using Ncc.Authorization.Roles;
 namespace Timesheet.APIs.ManageWorkingTimes
 {
     [AbpAuthorize(Ncc.Authorization.PermissionNames.ManageWorkingTime, Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll)]
@@ -36,12 +39,14 @@ namespace Timesheet.APIs.ManageWorkingTimes
         private readonly IBackgroundJobManager _backgroundJobManager;
         private readonly KomuService _komuService;
         private readonly MezonService _mezonService;
+        private readonly UserManager _userManager;
 
-        public ManageWorkingTimeAppService(IBackgroundJobManager backgroundJobManager, IWorkScope workScope, KomuService komuService, MezonService mezonService) : base(workScope)
+        public ManageWorkingTimeAppService(IBackgroundJobManager backgroundJobManager, IWorkScope workScope, KomuService komuService, MezonService mezonService, UserManager userManager) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _komuService = komuService;
             _mezonService = mezonService;
+            _userManager = userManager;
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewDetail, Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll)]
@@ -102,16 +107,29 @@ namespace Timesheet.APIs.ManageWorkingTimes
         [HttpPost]
         public async System.Threading.Tasks.Task ApproveWorkingTime(long id)
         {
-
+            var currentUserId = AbpSession.UserId.Value;
             var itemExt = await WorkScope.GetAll<HistoryWorkingTime>()
                 .Where(s => s.Id == id)
-                .Select(s => new { Entity = s, s.User.FullName })
+                .Select(s => new { Entity = s, s.User.FullName, s.UserId, User = s.User })
                 .FirstOrDefaultAsync();
 
             var item = itemExt.Entity;
-
+            if (item.UserId == currentUserId)
+            {
+                var currentUser = await WorkScope.GetAsync<User>(currentUserId);
+                var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
+                var isBranchDirector = currentUserRoles.Contains(StaticRoleNames.Host.BranchDirector);
+                if (!isBranchDirector)
+                {
+                    throw new UserFriendlyException("Bạn không thể tự phê duyệt yêu cầu của chính mình. Chỉ có Giám đốc văn phòng mới có thể tự phê duyệt.");
+                }
+                if (currentUser.BranchId != item.User.BranchId)
+                {
+                    throw new UserFriendlyException("Bạn chỉ có thể phê duyệt yêu cầu của người cùng chi nhánh.");
+                }
+            }
             var projectIds = await WorkScope.GetAll<ProjectUser>()
-                .Where(s => s.Type == ProjectUserType.PM && s.UserId == AbpSession.UserId)
+                .Where(s => s.Type == ProjectUserType.PM && s.UserId == currentUserId)
                 .Select(s => s.ProjectId).ToListAsync();
 
             var isValid = await WorkScope.GetAll<ProjectUser>()
@@ -217,13 +235,27 @@ namespace Timesheet.APIs.ManageWorkingTimes
         [HttpPost]
         public async System.Threading.Tasks.Task RejectWorkingTime(long id)
         {
+            var currentUserId = AbpSession.UserId.Value;
             var itemExt = await WorkScope.GetAll<HistoryWorkingTime>()
                 .Where(s => s.Id == id)
-                .Select(s => new { Entity = s, s.User.FullName })
+                .Select(s => new { Entity = s, s.User.FullName,s.UserId, User = s.User })
                 .FirstOrDefaultAsync();
 
             var item = itemExt.Entity;
-
+            if (item.UserId == currentUserId)
+            {
+                var currentUser = await WorkScope.GetAsync<User>(currentUserId);
+                var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
+                var isBranchDirector = currentUserRoles.Contains(StaticRoleNames.Host.BranchDirector);
+                if (!isBranchDirector)
+                {
+                    throw new UserFriendlyException("Bạn không thể tự từ chối yêu cầu của chính mình. Chỉ có Giám đốc văn phòng mới có thể tự từ chối.");
+                }
+                if (currentUser.BranchId != item.User.BranchId)
+                {
+                    throw new UserFriendlyException("Bạn chỉ có thể từ chối yêu cầu của người cùng chi nhánh.");
+                }
+            }
             if (item.Status == RequestStatus.Approved && item.ApplyDate.Date <= DateTime.Now.Date)
             {
                 throw new UserFriendlyException("This working time is approved");
