@@ -1250,39 +1250,29 @@ namespace Timesheet.APIs.RequestDays
                           select p).AnyAsync();
 
         }
-        // ========== HELPER METHOD - Tránh duplicate ==========
         private async System.Threading.Tasks.Task ValidateApproveRejectPermission(AbsenceDayRequest request, long currentUserId, User currentUser, bool isCurrentUserBranchDirector)
         {
             var requesterRoles = await _userManager.GetRolesAsync(request.User);
             var isRequesterBranchDirector = requesterRoles.Contains(StaticRoleNames.Host.BranchDirector);
-
-            // ========== XỬ LÝ CHO GDVP ==========
             if (isCurrentUserBranchDirector)
             {
-                // ✅ Case 1: GDVP tự approve/reject cho chính mình - CHO PHÉP
                 if (request.UserId == currentUserId)
                 {
-                    return; // Cho phép
+                    return; 
                 }
-
-                // Case 2: GDVP approve/reject cho người khác
-                // ✅ Case 2.1: Cùng chi nhánh - CHO PHÉP (trừ GDVP khác)
                 if (currentUser.BranchId == request.User.BranchId)
                 {
                     if (isRequesterBranchDirector)
                     {
-                        throw new UserFriendlyException("Bạn không có quyền phê duyệt/từ chối yêu cầu của Giám đốc văn phòng khác.");
+                        throw new UserFriendlyException("You do not have the authority to approve/deny requests from other office directors.");
                     }
-                    return; // Cho phép approve/reject member/PM cùng chi nhánh
+                    return; 
                 }
-
-                // ✅ Case 2.2: Khác chi nhánh - CHỈ approve/reject được PM nếu GDVP là PM của project chung
                 if (isRequesterBranchDirector)
                 {
-                    throw new UserFriendlyException("Bạn không có quyền phê duyệt/từ chối yêu cầu của Giám đốc văn phòng khác chi nhánh.");
+                    throw new UserFriendlyException("You do not have the authority to approve/deny requests from the office director of another branch.");
                 }
 
-                // Lấy danh sách project mà requester là PM
                 var requesterAsPMProjects = await WorkScope.GetAll<ProjectUser>()
                     .Where(pu => pu.UserId == request.UserId && pu.Type == ProjectUserType.PM)
                     .Select(pu => pu.ProjectId)
@@ -1290,10 +1280,8 @@ namespace Timesheet.APIs.RequestDays
 
                 if (!requesterAsPMProjects.Any())
                 {
-                    throw new UserFriendlyException("Bạn không thể phê duyệt/từ chối yêu cầu của người này vì họ không phải PM của bất kỳ dự án nào.");
+                    throw new UserFriendlyException("You cannot approve/deny this person's request because they are not the PM of any project.");
                 }
-
-                // ✅ QUAN TRỌNG: Kiểm tra GDVP phải là PM trong project chung
                 var isCurrentUserPMInCommonProject = await WorkScope.GetAll<ProjectUser>()
                     .AnyAsync(pu => pu.UserId == currentUserId &&
                                    pu.Type == ProjectUserType.PM &&
@@ -1301,26 +1289,20 @@ namespace Timesheet.APIs.RequestDays
 
                 if (!isCurrentUserPMInCommonProject)
                 {
-                    throw new UserFriendlyException("Bạn không có quyền phê duyệt/từ chối yêu cầu này. Bạn phải là PM trong cùng dự án với người gửi yêu cầu.");
+                    throw new UserFriendlyException("You do not have the authority to approve/deny this request. You must be the PM on the same project as the requestor.");
                 }
 
-                return; // Cho phép
+                return; 
             }
-
-            // ========== XỬ LÝ CHO PM/MEMBER THƯỜNG ==========
-            // Không được tự approve/reject
             if (request.UserId == currentUserId)
             {
-                throw new UserFriendlyException("Bạn không thể tự phê duyệt/từ chối yêu cầu của chính mình. Chỉ có Giám đốc văn phòng mới có thể tự phê duyệt/từ chối.");
+                throw new UserFriendlyException("You cannot approve/deny your own request. Only the office director can approve/deny it.");
             }
 
-            // PM không được approve/reject GDVP
             if (isRequesterBranchDirector)
             {
-                throw new UserFriendlyException("Bạn không có quyền phê duyệt/từ chối yêu cầu của Giám đốc văn phòng.");
+                throw new UserFriendlyException("You do not have the authority to approve/deny the request of the office director.");
             }
-
-            // Kiểm tra quyền thông thường
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
             if (!(isViewBranch || (await CheckSessionUserIsPMOfUser(request.UserId))))
             {
@@ -1345,11 +1327,8 @@ namespace Timesheet.APIs.RequestDays
                     .FirstOrDefaultAsync(ar => ar.Id == requestId);
 
                 if (request == null) continue;
-
-                // ✅ Validate permission (sử dụng helper method)
                 await ValidateApproveRejectPermission(request, currentUserId, currentUser, isCurrentUserBranchDirector);
 
-                // ========== XỬ LÝ W2 CHO REMOTE REQUEST ==========
                 var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
                     .Where(s => s.RequestId == requestId)
                     .Where(s => s.Request.Type == RequestType.Remote)
@@ -1370,8 +1349,6 @@ namespace Timesheet.APIs.RequestDays
                         throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
                     }
                 }
-
-                // ========== APPROVE REQUEST ==========
                 request.Status = RequestStatus.Approved;
                 await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
 
@@ -1397,13 +1374,9 @@ namespace Timesheet.APIs.RequestDays
 
                 if (request == null) continue;
 
-                // ✅ Validate permission (sử dụng helper method)
                 await ValidateApproveRejectPermission(request, currentUserId, currentUser, isCurrentUserBranchDirector);
-
-                // ========== REJECT REQUEST ==========
                 request.Status = RequestStatus.Rejected;
                 await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
-
                 var approverId = AbpSession.UserId.Value;
                 await notifyKomuWhenApproveOrRejectRequest(request, false, approverId);
             }
