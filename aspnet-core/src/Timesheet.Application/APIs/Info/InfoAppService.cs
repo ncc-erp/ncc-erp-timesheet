@@ -61,46 +61,46 @@ namespace Timesheet.APIs.Info
             var isAlreadyUnlockToApprove = IsAlreadyUnlockToApprove(userId);
             var isPM = IsPM(userId);
             var firstDateCanLogIfUnlock = await getStartDateToCheckUnlockTS();
-            float fMoneyPMUnlockTimeSheet = getMoneyPMUnlockTimeSheet();
+            float fMoneyPMUnlockTimeSheet = getMoneyPMUnlockTimeSheet();          
             if (isAlreadyUnlockToLog && isAlreadyUnlockToApprove)
-            {
+                {
+                    return new UserLockedTimesheetDto
+                    {
+                        IsUnlockLog = isAlreadyUnlockToLog,
+                        IsUnlockApprove = isAlreadyUnlockToApprove,
+                        IsPM = isPM,
+                        FirstDateCanLogIfUnlock = firstDateCanLogIfUnlock.ToString("dd/MM/yyyy"),
+                    };
+                }
+                List<EmployeeLockedWeekDto> listLockedDate = null;
+                int timesLockedEm = 0, amount = 0, lockedPM = 0;
+                float amountPM = 0;
+                if (!isAlreadyUnlockToLog)
+                {
+                    listLockedDate = await getMyTimesheetLockedAsync(userId);
+                    timesLockedEm = listLockedDate == null ? 0 : listLockedDate.Count();
+                    amount = timesLockedEm >= 4 ? 100000 : timesLockedEm * 20000;
+                }
+                if (!isAlreadyUnlockToApprove)
+                {
+
+
+                    lockedPM = await getTimesheetLockedOfPMAsync(userId);
+                    amountPM = fMoneyPMUnlockTimeSheet * lockedPM;
+                }
+
                 return new UserLockedTimesheetDto
                 {
+                    LockedEmployee = listLockedDate,
+                    LockedPM = lockedPM,
+                    Amount = amount,
+                    AmountPM = amountPM,
                     IsUnlockLog = isAlreadyUnlockToLog,
                     IsUnlockApprove = isAlreadyUnlockToApprove,
                     IsPM = isPM,
                     FirstDateCanLogIfUnlock = firstDateCanLogIfUnlock.ToString("dd/MM/yyyy"),
                 };
-            }
-            List<EmployeeLockedWeekDto> listLockedDate = null;
-            int timesLockedEm = 0, amount = 0, lockedPM = 0;
-            float amountPM = 0;
-            if (!isAlreadyUnlockToLog)
-            {
-                listLockedDate = await getMyTimesheetLockedAsync(userId);
-                timesLockedEm = listLockedDate == null ? 0 : listLockedDate.Count();
-                amount = timesLockedEm >= 4 ? 100000 : timesLockedEm * 20000;
-            }
-            if (!isAlreadyUnlockToApprove)
-            {
-
-
-                lockedPM = await getTimesheetLockedOfPMAsync(userId);
-                amountPM = fMoneyPMUnlockTimeSheet * lockedPM;
-            }
-
-            return new UserLockedTimesheetDto
-            {
-                LockedEmployee = listLockedDate,
-                LockedPM = lockedPM,
-                Amount = amount,
-                AmountPM = amountPM,
-                IsUnlockLog = isAlreadyUnlockToLog,
-                IsUnlockApprove = isAlreadyUnlockToApprove,
-                IsPM = isPM,
-                FirstDateCanLogIfUnlock = firstDateCanLogIfUnlock.ToString("dd/MM/yyyy"),
-            };
-        }
+                }
 
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
@@ -155,7 +155,7 @@ namespace Timesheet.APIs.Info
             {
                 UserId = input.UserId,
                 Type = LockUnlockTimesheetType.MyTimesheet
-            });
+            }); 
         }
 
         [HttpGet]
@@ -169,16 +169,16 @@ namespace Timesheet.APIs.Info
             var listUnlock = await WorkScope.GetAll<UserUnlockIms>()
                 .Where(s => s.User.IsActive)
                 .Select(s => new
-                {
-                    s.UserId,
-                    s.User.Surname,
-                    s.User.Name,
-                    s.Amount
-                }).GroupBy(s => new { s.UserId, s.Surname, s.Name }).Select(s => new UserUnlockTSDto
-                {
-                    FullName = s.Key.Surname + " " + s.Key.Name,
-                    Amount = s.Sum(t => t.Amount)
-                }).OrderByDescending(s => s.Amount).Take(10).ToListAsync();
+            {
+                s.UserId,
+                s.User.Surname,
+                s.User.Name,
+                s.Amount
+            }).GroupBy(s => new { s.UserId, s.Surname, s.Name }).Select(s => new UserUnlockTSDto
+            {
+                FullName = s.Key.Surname + " " + s.Key.Name,
+                Amount = s.Sum(t => t.Amount)
+            }).OrderByDescending(s => s.Amount).Take(10).ToListAsync();
             int index = 1;
             foreach (var l in listUnlock)
             {
@@ -219,7 +219,7 @@ namespace Timesheet.APIs.Info
 
             return await getMyTimesheetLockedAsync(userId.Value);
         }
-
+       
 
         public async Task<DateTime> getStartDateToCheckUnlockTS()
         {
@@ -231,9 +231,9 @@ namespace Timesheet.APIs.Info
             int.TryParse(DateToLockTimesheetOfLastMonthCfg, out DateToLockTimesheetOfLastMonth);
 
             //var startDateToCheck = now.Day < DateToLockTimesheetOfLastMonth ? now.AddDays(1 - now.Day).AddMonths(-1).Date : now.AddDays(1 - now.Day).Date;
-            var startDateToCheck = now.Day < DateToLockTimesheetOfLastMonth
-                                    ? DateTimeUtils.FirstDayOfWeek(now).AddDays(-7 * weeksCanUnlockBefor)
-                                    : DateTimeUtils.Max(DateTimeUtils.FirstDayOfMonth(now),
+            var startDateToCheck = now.Day < DateToLockTimesheetOfLastMonth 
+                                    ? DateTimeUtils.FirstDayOfWeek(now).AddDays(-7 * weeksCanUnlockBefor) 
+                                    : DateTimeUtils.Max(DateTimeUtils.FirstDayOfMonth(now), 
                                                         DateTimeUtils.FirstDayOfWeek(now).AddDays(-7 * weeksCanUnlockBefor));
 
             return startDateToCheck;
@@ -342,7 +342,7 @@ namespace Timesheet.APIs.Info
             return listUnlockWeek;
 
         }
-
+        
         private async Task<int> getTimesheetLockedOfPMAsync1(string emailAddress)
         {
             var userId = await _userService.GetUserIdByEmail(emailAddress);
