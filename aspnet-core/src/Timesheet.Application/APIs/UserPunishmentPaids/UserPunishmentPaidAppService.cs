@@ -1,4 +1,4 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Authorization;
 using Abp.UI;
 using Microsoft.AspNetCore.Mvc;
@@ -60,20 +60,14 @@ namespace Timesheet.APIs.UserPunishmentPaids
 
         [HttpPost]
         [AbpAuthorize]
-        public async Task<PreviewAndApplyPunishmentPointsResultDto> PreviewAndApplyPunishmentPoints(PreviewAndApplyPunishmentPointsDto input)
+        public async Task<object> PreviewAndApplyPunishmentPoints(PreviewAndApplyPunishmentPointsDto input)
         {
             var result = await _userPunishmentPaidService.PreviewAndApplyPunishmentPointsAsync(input.Year, input.Month);
 
-            return new PreviewAndApplyPunishmentPointsResultDto
+            return new
             {
-                Success = result.Success,
-                Message = result.Message,
-                TotalHashAmount = result.TotalHashAmount,
-                TotalPunishmentMoney = result.TotalPunishmentMoney,
-                RemainPoints = result.RemainPoints,
-                EffectivePunishmentAmount = result.EffectivePunishmentAmount,
-                PunishmentsMarkedAsPaid = result.PunishmentsMarkedAsPaid,
-                HasSufficientFunds = result.HasSufficientFunds
+                success = result.Success,
+                message = result.Message
             };
         }
 

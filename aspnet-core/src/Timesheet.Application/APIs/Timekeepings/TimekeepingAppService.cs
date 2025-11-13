@@ -907,7 +907,7 @@ namespace Timesheet.APIs.Timekeepings
                         throw new UserFriendlyException("No matching punishment configuration found.");
                 }
 
-                await HandleRefundForPaidPunishment(userPunishment, oldPunishmentMoney, newPunishmentType, punishmentSystem);
+                await HandleRefundForPaidPunishment(userPunishment, newPunishmentType, punishmentSystem);
 
                 var result = await HandlePunishmentTypeChange(
                     userPunishment,
@@ -1236,10 +1236,10 @@ namespace Timesheet.APIs.Timekeepings
 
         private async Task HandleRefundForPaidPunishment(
             UserPunishment userPunishment, 
-            int oldPunishmentMoney, 
             UserPunishmentType newPunishmentType, 
             PunishmentSystem punishmentSystem)
         {
+            var oldPunishmentMoney = userPunishment.TotalMoney; 
             int amountReduced = 0;
 
             if (newPunishmentType == UserPunishmentType.NoPunish)
@@ -1293,9 +1293,13 @@ namespace Timesheet.APIs.Timekeepings
                 {
                     balance.RemainPoints += punishmentAmountReduced;
                 }
+                else
+                {
+                    balance.TotalPunishmentMoney = Math.Max(0, balance.TotalPunishmentMoney - punishmentAmountReduced);
+                }
                 
                 await WorkScope.UpdateAsync(balance);
-                Logger.Info($"Updated UserPunishmentBalance for user {userId}: {(isPaid ? $"added {punishmentAmountReduced} to RemainPoints" : "no RemainPoints added (unpaid)")}. TotalPunishmentMoney unchanged = {balance.TotalPunishmentMoney}, new RemainPoints = {balance.RemainPoints}");
+                Logger.Info($"Updated UserPunishmentBalance for user {userId}: {(isPaid ? $"added {punishmentAmountReduced} to RemainPoints" : $"reduced TotalPunishmentMoney by {punishmentAmountReduced}")}. TotalPunishmentMoney = {balance.TotalPunishmentMoney}, RemainPoints = {balance.RemainPoints}");
             }
         }
     }
