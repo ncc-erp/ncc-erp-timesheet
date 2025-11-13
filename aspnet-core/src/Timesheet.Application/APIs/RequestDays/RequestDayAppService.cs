@@ -1260,6 +1260,11 @@ namespace Timesheet.APIs.RequestDays
 
             if (isCurrentUserBranchDirector)
             {
+                if (request.UserId == currentUser.Id)
+                {
+                    return;
+                }
+
                 if (currentUser.BranchId != request.User.BranchId && isRequesterBranchDirector)
                 {
                     throw new UserFriendlyException("You do not have the authority to approve/reject requests from the Branch Director of another branch.");
@@ -1269,14 +1274,12 @@ namespace Timesheet.APIs.RequestDays
                 {
                     throw new UserFriendlyException("You do not have the authority to approve/reject requests from other Branch Director.");
                 }
-                if (request.UserId == currentUser.Id)
-                {
-                    return;
-                }
+
                 if (currentUser.BranchId == request.User.BranchId)
                 {
                     return;
                 }
+
                 var requesterAsPMProjects = await WorkScope.GetAll<ProjectUser>()
                     .Where(pu => pu.UserId == request.UserId && pu.Type == ProjectUserType.PM)
                     .Select(pu => pu.ProjectId)
@@ -1298,6 +1301,7 @@ namespace Timesheet.APIs.RequestDays
                 }
                 return;
             }
+
             if (request.UserId == currentUser.Id)
             {
                 throw new UserFriendlyException("You cannot approve/reject your own request. Only the Branch Director can approve/reject it.");
