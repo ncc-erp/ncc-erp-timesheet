@@ -1250,29 +1250,33 @@ namespace Timesheet.APIs.RequestDays
                           select p).AnyAsync();
 
         }
-        private async System.Threading.Tasks.Task ValidateApproveRejectPermission(AbsenceDayRequest request, long currentUserId, User currentUser, bool isCurrentUserBranchDirector)
+        private async System.Threading.Tasks.Task ValidateApproveRejectPermission(AbsenceDayRequest request)
         {
+            var currentUser = await WorkScope.GetAsync<User>(AbpSession.UserId.Value);
+            var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
+            var isCurrentUserBranchDirector = currentUserRoles.Contains(StaticRoleNames.Host.BranchDirector);
             var requesterRoles = await _userManager.GetRolesAsync(request.User);
             var isRequesterBranchDirector = requesterRoles.Contains(StaticRoleNames.Host.BranchDirector);
+
             if (isCurrentUserBranchDirector)
             {
-                if (request.UserId == currentUserId)
+                if (currentUser.BranchId != request.User.BranchId && isRequesterBranchDirector)
                 {
-                    return; 
+                    throw new UserFriendlyException("You do not have the authority to approve/reject requests from the Branch Director of another branch.");
+                }
+
+                if (currentUser.BranchId == request.User.BranchId && isRequesterBranchDirector)
+                {
+                    throw new UserFriendlyException("You do not have the authority to approve/reject requests from other Branch Director.");
+                }
+                if (request.UserId == currentUser.Id)
+                {
+                    return;
                 }
                 if (currentUser.BranchId == request.User.BranchId)
                 {
-                    if (isRequesterBranchDirector)
-                    {
-                        throw new UserFriendlyException("You do not have the authority to approve/deny requests from other office directors.");
-                    }
-                    return; 
+                    return;
                 }
-                if (isRequesterBranchDirector)
-                {
-                    throw new UserFriendlyException("You do not have the authority to approve/deny requests from the office director of another branch.");
-                }
-
                 var requesterAsPMProjects = await WorkScope.GetAll<ProjectUser>()
                     .Where(pu => pu.UserId == request.UserId && pu.Type == ProjectUserType.PM)
                     .Select(pu => pu.ProjectId)
@@ -1280,54 +1284,54 @@ namespace Timesheet.APIs.RequestDays
 
                 if (!requesterAsPMProjects.Any())
                 {
-                    throw new UserFriendlyException("You cannot approve/deny this person's request because they are not the PM of any project.");
+                    throw new UserFriendlyException("You cannot approve/reject this person's request because they are not the PM of any project.");
                 }
+
                 var isCurrentUserPMInCommonProject = await WorkScope.GetAll<ProjectUser>()
-                    .AnyAsync(pu => pu.UserId == currentUserId &&
+                    .AnyAsync(pu => pu.UserId == currentUser.Id &&
                                    pu.Type == ProjectUserType.PM &&
                                    requesterAsPMProjects.Contains(pu.ProjectId));
 
                 if (!isCurrentUserPMInCommonProject)
                 {
-                    throw new UserFriendlyException("You do not have the authority to approve/deny this request. You must be the PM on the same project as the requestor.");
+                    throw new UserFriendlyException("You do not have the authority to approve/reject this request. You must be the PM on the same project as the requestor.");
                 }
-
-                return; 
+                return;
             }
-            if (request.UserId == currentUserId)
+            if (request.UserId == currentUser.Id)
             {
-                throw new UserFriendlyException("You cannot approve/deny your own request. Only the office director can approve/deny it.");
+                throw new UserFriendlyException("You cannot approve/reject your own request. Only the Branch Director can approve/reject it.");
             }
 
             if (isRequesterBranchDirector)
             {
-                throw new UserFriendlyException("You do not have the authority to approve/deny the request of the office director.");
+                throw new UserFriendlyException("You do not have the authority to approve/reject the request of the Branch Director.");
             }
+
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
-            if (!(isViewBranch || (await CheckSessionUserIsPMOfUser(request.UserId))))
+            if (!isViewBranch && !(await CheckSessionUserIsPMOfUser(request.UserId)))
             {
                 throw new UserFriendlyException("You are not authorized to approve/reject this request");
             }
+        }
+        private async Task<AbsenceDayRequest> GetAbsenceDayRequestWithIncludes(long requestId)
+        {
+            return await WorkScope.GetAll<AbsenceDayRequest>()
+                .Include(ar => ar.User)
+                .Include(ar => ar.User.Branch)
+                .FirstOrDefaultAsync(ar => ar.Id == requestId);
         }
 
         [HttpPost]
         public async System.Threading.Tasks.Task ApproveRequest(long[] requestIds)
         {
-            var currentUserId = AbpSession.UserId.Value;
-            var currentUser = await WorkScope.GetAsync<User>(currentUserId);
-            var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
-            var isCurrentUserBranchDirector = currentUserRoles.Contains(StaticRoleNames.Host.BranchDirector);
-
             foreach (var requestId in requestIds)
             {
-                var request = await WorkScope
-                    .GetAll<AbsenceDayRequest>()
-                    .Include(ar => ar.User)
-                    .Include(ar => ar.User.Branch)
-                    .FirstOrDefaultAsync(ar => ar.Id == requestId);
+                var request = await GetAbsenceDayRequestWithIncludes(requestId);
 
                 if (request == null) continue;
-                await ValidateApproveRejectPermission(request, currentUserId, currentUser, isCurrentUserBranchDirector);
+
+                await ValidateApproveRejectPermission(request);
 
                 var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
                     .Where(s => s.RequestId == requestId)
@@ -1352,33 +1356,23 @@ namespace Timesheet.APIs.RequestDays
                 request.Status = RequestStatus.Approved;
                 await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
 
-                var approverId = AbpSession.UserId.Value;
-                await notifyKomuWhenApproveOrRejectRequest(request, true, approverId);
+                await notifyKomuWhenApproveOrRejectRequest(request, true, AbpSession.UserId.Value);
             }
         }
 
         [HttpPost]
         public async System.Threading.Tasks.Task RejectRequest(long[] requestIds)
         {
-            var currentUserId = AbpSession.UserId.Value;
-            var currentUser = await WorkScope.GetAsync<User>(currentUserId);
-            var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
-            var isCurrentUserBranchDirector = currentUserRoles.Contains(StaticRoleNames.Host.BranchDirector);
-
             foreach (var requestId in requestIds)
             {
-                var request = await WorkScope.GetAll<AbsenceDayRequest>()
-                    .Include(ar => ar.User)
-                    .Include(ar => ar.User.Branch)
-                    .FirstOrDefaultAsync(ar => ar.Id == requestId);
+               var request = await GetAbsenceDayRequestWithIncludes(requestId);
 
                 if (request == null) continue;
 
-                await ValidateApproveRejectPermission(request, currentUserId, currentUser, isCurrentUserBranchDirector);
+                await ValidateApproveRejectPermission(request);
                 request.Status = RequestStatus.Rejected;
                 await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
-                var approverId = AbpSession.UserId.Value;
-                await notifyKomuWhenApproveOrRejectRequest(request, false, approverId);
+                await notifyKomuWhenApproveOrRejectRequest(request, false, AbpSession.UserId.Value);
             }
         }
 
@@ -1414,7 +1408,6 @@ namespace Timesheet.APIs.RequestDays
                     DateType = s.DateType,
                     Hour = s.Hour
                 }).FirstOrDefaultAsync();
-
             var alreadySentToPMIds = new HashSet<long>();
             foreach (var project in receivers)
             {
@@ -1445,7 +1438,6 @@ namespace Timesheet.APIs.RequestDays
 
             }
         }
-
         private string GetRequestName(AbsenceDayRequest request, AbsenceDayDetailDto absenceDayDetail, string offTypeName)
         {
             if (request.Type == RequestType.Off && absenceDayDetail.DateType == DayType.Custom)
