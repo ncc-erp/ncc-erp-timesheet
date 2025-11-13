@@ -10,6 +10,13 @@
       <div class="summary-value">{{totalErrors}}</div>
     </div>
     <div class="summary-item">
+      <div class="summary-label">Points</div>
+      <div class="summary-value">{{userBalance?.remainPoints | number}}</div>
+      <div class="summary-note" *ngIf="totalUsedRemainPoints > 0">
+        (Used: {{totalUsedRemainPoints | number}})
+      </div>
+    </div>
+    <div class="summary-item">
       <div class="summary-label">Total Fine</div>
       <div class="summary-value">{{totalFine | number}}</div>
       <div class="summary-note" *ngIf="calculateTotalPaidAmount() > 0">

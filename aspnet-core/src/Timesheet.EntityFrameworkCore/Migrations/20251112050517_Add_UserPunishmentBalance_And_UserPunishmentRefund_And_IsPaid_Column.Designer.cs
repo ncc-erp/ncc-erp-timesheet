@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ncc.EntityFrameworkCore;
 
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    partial class TimesheetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251112050517_Add_UserPunishmentBalance_And_UserPunishmentRefund_And_IsPaid_Column")]
+    partial class Add_UserPunishmentBalance_And_UserPunishmentRefund_And_IsPaid_Column
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -171,16 +171,23 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     const emailAddress = this.appSession.user.emailAddress;
     
     if (type === 'PM') {
-      this._infoService.unlockToApproveTimesheet1(emailAddress).subscribe(
-        () => {
-          this._notify.success('Unlock PM successfully!');
-          this.getTimesheets();
-        },
-        (error) => {
-          const errorMessage = error && error.error && error.error.error && error.error.error.message 
-            ? error.error.error.message 
-            : 'Unknown error';
-          this._notify.error('Failed to unlock PM: ' + errorMessage);
+      abp.message.confirm(
+        'Are you sure you want to unlock PM timesheet for last week?',
+        (result: boolean) => {
+          if (result) {
+            this._infoService.unlockToApproveTimesheet1(emailAddress).subscribe(
+              () => {
+                this._notify.success('Unlock PM successfully!');
+                this.getTimesheets();
+              },
+              (error) => {
+                const errorMessage = error && error.error && error.error.error && error.error.error.message 
+                  ? error.error.error.message 
+                  : 'Unknown error';
+                this._notify.error('Failed to unlock PM: ' + errorMessage);
+              }
+            );
+          }
         }
       );
     }

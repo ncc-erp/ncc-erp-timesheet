@@ -528,10 +528,6 @@ namespace Timesheet.DomainServices
                     }
                 }
 
-                //await SaveDailyAndMentionPunishments(selectedDate, users, mapDailyUsers, mapMentionUsers, punishmentSystems);
-                Logger.Info($"✅ Successfully processed timekeeping for date {selectedDate:yyyy-MM-dd}. " +
-                            $"Total {allTimekeepings.Count} records, {allPunishments.Count} punishments.");
-
                 // TODO: check again
                 var userEmail = users.Select(u => u.EmailAddress).ToHashSet();
                 var checkInUsersOnly = mapCheckInUsers.Values
@@ -561,9 +557,63 @@ namespace Timesheet.DomainServices
                     }
                 }
 
+                foreach (var punishment in allPunishments)
+                {
+                    punishment.IsPaid = false;
+                }
 
                 await WorkScope.InsertRangeAsync(allTimekeepings);
                 await WorkScope.InsertRangeAsync(allPunishments);
+
+                await CurrentUnitOfWork.SaveChangesAsync();
+
+                var affectedUserIds = allPunishments
+                    .Where(p => p.UserId > 0)
+                    .Select(p => p.UserId)
+                    .Distinct()
+                    .ToList();
+
+                if (affectedUserIds.Any())
+                {
+                    var totalByUsers = await WorkScope.GetAll<UserPunishment>()
+                        .Where(p => !p.IsDeleted && (p.IsPaid == false || p.IsPaid == null) && affectedUserIds.Contains(p.UserId))
+                        .GroupBy(p => p.UserId)
+                        .Select(g => new
+                        {
+                            UserId = g.Key,
+                            Total = g.Sum(p => (long)p.TotalMoney)
+                        })
+                        .ToDictionaryAsync(x => x.UserId, x => x.Total);
+
+                    var balanceRepo = WorkScope.GetRepo<UserPunishmentBalance>();
+                    var existingBalances = await balanceRepo.GetAll()
+                        .Where(b => affectedUserIds.Contains(b.UserId))
+                        .ToListAsync();
+
+                    var existingBalanceMap = existingBalances.ToDictionary(b => b.UserId);
+
+                    foreach (var userId in affectedUserIds)
+                    {
+                        totalByUsers.TryGetValue(userId, out var totalUnpaidPunishment);
+
+                        if (!existingBalanceMap.TryGetValue(userId, out var balance))
+                        {
+                            balance = new UserPunishmentBalance
+                            {
+                                UserId = userId,
+                                TotalPunishmentMoney = (int)totalUnpaidPunishment,
+                                RemainPoints = 0
+                            };
+
+                            await balanceRepo.InsertAsync(balance);
+                        }
+                        else
+                        {
+                            balance.TotalPunishmentMoney = (int)totalUnpaidPunishment;
+                            await balanceRepo.UpdateAsync(balance);
+                        }
+                    }
+                }
 
                 await uow.CompleteAsync();
             }
@@ -574,7 +624,8 @@ namespace Timesheet.DomainServices
 
             var elapsed = DateTime.Now - start;
             Console.WriteLine($"Thời gian chạy: {elapsed.TotalMilliseconds} ms");
-
+            Logger.Info($"✅ Successfully processed timekeeping for date {selectedDate:yyyy-MM-dd}. " +
+            $"Total {allTimekeepings.Count} records, {allPunishments.Count} punishments.");
             return allTimekeepings;
         }
 

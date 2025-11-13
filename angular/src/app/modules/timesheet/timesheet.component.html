@@ -167,34 +167,47 @@
             </div>
           </div>
 
-          <div class="action-timesheet-overview">
-            <div class="action-timesheet">
-              <div class="col-sm-2 status-timesheet">
-                <div class="form-group form-float">
-                  <div>
-                    <button name="approveBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
-                      style="width: 100%" class="btn btn-success waves-effect" (click)="btnApprove()">
-                      Approve
-                    </button>
-                  </div>
+      <div class="action-timesheet-overview" style="display: flex; flex-wrap: nowrap; gap: 8px; align-items: flex-start;">
+            <div class="action-buttons" style="display: flex; flex-wrap: nowrap; gap: 8px; width: 100%;">
+              <div class="status-timesheet" style="flex: 1 1 auto; min-width: 0;">
+                <div class="form-group form-float" style="margin-bottom: 0;">
+                  <button name="approveBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" 
+                    class="btn btn-success waves-effect" 
+                    style="width: 100%; white-space: nowrap; padding: 8px 8px; height: 35px;" 
+                    (click)="btnApprove()">
+                    Approve
+                  </button>
                 </div>
               </div>
-              <div class="col-sm-2 status-timesheet">
-                <div class="form-group form-float">
-                  <div>
-                    <button name="rejectBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" class="text-center m-t-10" type="submit"
-                      style="width: 100%" class="btn bg-grey waves-effect" (click)="btnReject()">
-                      Reject
-                    </button>
-                  </div>
+              <div class="status-timesheet" style="flex: 1 1 auto; min-width: 0;">
+                <div class="form-group form-float" style="margin-bottom: 0;">
+                  <button name="rejectBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" 
+                    class="btn bg-grey waves-effect" 
+                    style="width: 100%; white-space: nowrap; padding: 8px 8px; height: 35px;" 
+                    (click)="btnReject()">
+                    Reject
+                  </button>
                 </div>
               </div>
-              <div class="col-sm-2 status-timesheet">
-                <div class="form-group form-float">
-                  <button name="exportMenuBtn" *ngIf="permission.isGranted(EXPORT_EXCEL_TIMESHEET)" class="text-center m-t-10" type="submit"
-                    style="width: 100%" class="btn bg-red waves-effect" [matMenuTriggerFor]="actionsMenu"
+              <div class="status-timesheet" style="flex: 1 1 auto; min-width: 0;">
+                <div class="form-group form-float" style="margin-bottom: 0;">
+                  <button name="exportMenuBtn" *ngIf="permission.isGranted(EXPORT_EXCEL_TIMESHEET)" 
+                    class="btn bg-red waves-effect" 
+                    style="width: 100%; white-space: nowrap; padding: 8px 8px; height: 35px;"
+                    [matMenuTriggerFor]="actionsMenu"
                     [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
                     Export
+                  </button>
+                </div>
+              </div>
+              <div class="status-timesheet" style="flex: 1 1 auto; min-width: 0; width: 50px;">
+                <div class="form-group form-float" style="margin-bottom: 0;">
+                  <button name="unlockPM" *ngIf="!isBasicUser"
+                    class="btn bg-blue waves-effect" 
+                    style="width: 100%; white-space: nowrap; padding: 8px 8px; height: 35px;"
+                    (click)="unlockTimesheet('PM')" 
+                    [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
+                    <i class="material-icons" style="font-size: 16px; vertical-align: text-bottom; margin-right: 2px; position: relative; top: 1px;">lock_open</i> Unlock PM
                   </button>
                 </div>
                 <mat-menu #actionsMenu="matMenu">

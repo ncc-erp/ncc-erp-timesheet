@@ -61,46 +61,46 @@ namespace Timesheet.APIs.Info
             var isAlreadyUnlockToApprove = IsAlreadyUnlockToApprove(userId);
             var isPM = IsPM(userId);
             var firstDateCanLogIfUnlock = await getStartDateToCheckUnlockTS();
-            float fMoneyPMUnlockTimeSheet = getMoneyPMUnlockTimeSheet();          
+            float fMoneyPMUnlockTimeSheet = getMoneyPMUnlockTimeSheet();
             if (isAlreadyUnlockToLog && isAlreadyUnlockToApprove)
-                {
-                    return new UserLockedTimesheetDto
-                    {
-                        IsUnlockLog = isAlreadyUnlockToLog,
-                        IsUnlockApprove = isAlreadyUnlockToApprove,
-                        IsPM = isPM,
-                        FirstDateCanLogIfUnlock = firstDateCanLogIfUnlock.ToString("dd/MM/yyyy"),
-                    };
-                }
-                List<EmployeeLockedWeekDto> listLockedDate = null;
-                int timesLockedEm = 0, amount = 0, lockedPM = 0;
-                float amountPM = 0;
-                if (!isAlreadyUnlockToLog)
-                {
-                    listLockedDate = await getMyTimesheetLockedAsync(userId);
-                    timesLockedEm = listLockedDate == null ? 0 : listLockedDate.Count();
-                    amount = timesLockedEm >= 4 ? 100000 : timesLockedEm * 20000;
-                }
-                if (!isAlreadyUnlockToApprove)
-                {
-
-
-                    lockedPM = await getTimesheetLockedOfPMAsync(userId);
-                    amountPM = fMoneyPMUnlockTimeSheet * lockedPM;
-                }
-
+            {
                 return new UserLockedTimesheetDto
                 {
-                    LockedEmployee = listLockedDate,
-                    LockedPM = lockedPM,
-                    Amount = amount,
-                    AmountPM = amountPM,
                     IsUnlockLog = isAlreadyUnlockToLog,
                     IsUnlockApprove = isAlreadyUnlockToApprove,
                     IsPM = isPM,
                     FirstDateCanLogIfUnlock = firstDateCanLogIfUnlock.ToString("dd/MM/yyyy"),
                 };
-                }
+            }
+            List<EmployeeLockedWeekDto> listLockedDate = null;
+            int timesLockedEm = 0, amount = 0, lockedPM = 0;
+            float amountPM = 0;
+            if (!isAlreadyUnlockToLog)
+            {
+                listLockedDate = await getMyTimesheetLockedAsync(userId);
+                timesLockedEm = listLockedDate == null ? 0 : listLockedDate.Count();
+                amount = timesLockedEm >= 4 ? 100000 : timesLockedEm * 20000;
+            }
+            if (!isAlreadyUnlockToApprove)
+            {
+
+
+                lockedPM = await getTimesheetLockedOfPMAsync(userId);
+                amountPM = fMoneyPMUnlockTimeSheet * lockedPM;
+            }
+
+            return new UserLockedTimesheetDto
+            {
+                LockedEmployee = listLockedDate,
+                LockedPM = lockedPM,
+                Amount = amount,
+                AmountPM = amountPM,
+                IsUnlockLog = isAlreadyUnlockToLog,
+                IsUnlockApprove = isAlreadyUnlockToApprove,
+                IsPM = isPM,
+                FirstDateCanLogIfUnlock = firstDateCanLogIfUnlock.ToString("dd/MM/yyyy"),
+            };
+        }
 
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
@@ -155,7 +155,7 @@ namespace Timesheet.APIs.Info
             {
                 UserId = input.UserId,
                 Type = LockUnlockTimesheetType.MyTimesheet
-            }); 
+            });
         }
 
         [HttpGet]
@@ -169,16 +169,16 @@ namespace Timesheet.APIs.Info
             var listUnlock = await WorkScope.GetAll<UserUnlockIms>()
                 .Where(s => s.User.IsActive)
                 .Select(s => new
-            {
-                s.UserId,
-                s.User.Surname,
-                s.User.Name,
-                s.Amount
-            }).GroupBy(s => new { s.UserId, s.Surname, s.Name }).Select(s => new UserUnlockTSDto
-            {
-                FullName = s.Key.Surname + " " + s.Key.Name,
-                Amount = s.Sum(t => t.Amount)
-            }).OrderByDescending(s => s.Amount).Take(10).ToListAsync();
+                {
+                    s.UserId,
+                    s.User.Surname,
+                    s.User.Name,
+                    s.Amount
+                }).GroupBy(s => new { s.UserId, s.Surname, s.Name }).Select(s => new UserUnlockTSDto
+                {
+                    FullName = s.Key.Surname + " " + s.Key.Name,
+                    Amount = s.Sum(t => t.Amount)
+                }).OrderByDescending(s => s.Amount).Take(10).ToListAsync();
             int index = 1;
             foreach (var l in listUnlock)
             {
@@ -219,7 +219,7 @@ namespace Timesheet.APIs.Info
 
             return await getMyTimesheetLockedAsync(userId.Value);
         }
-       
+
 
         public async Task<DateTime> getStartDateToCheckUnlockTS()
         {
@@ -231,9 +231,9 @@ namespace Timesheet.APIs.Info
             int.TryParse(DateToLockTimesheetOfLastMonthCfg, out DateToLockTimesheetOfLastMonth);
 
             //var startDateToCheck = now.Day < DateToLockTimesheetOfLastMonth ? now.AddDays(1 - now.Day).AddMonths(-1).Date : now.AddDays(1 - now.Day).Date;
-            var startDateToCheck = now.Day < DateToLockTimesheetOfLastMonth 
-                                    ? DateTimeUtils.FirstDayOfWeek(now).AddDays(-7 * weeksCanUnlockBefor) 
-                                    : DateTimeUtils.Max(DateTimeUtils.FirstDayOfMonth(now), 
+            var startDateToCheck = now.Day < DateToLockTimesheetOfLastMonth
+                                    ? DateTimeUtils.FirstDayOfWeek(now).AddDays(-7 * weeksCanUnlockBefor)
+                                    : DateTimeUtils.Max(DateTimeUtils.FirstDayOfMonth(now),
                                                         DateTimeUtils.FirstDayOfWeek(now).AddDays(-7 * weeksCanUnlockBefor));
 
             return startDateToCheck;
@@ -342,7 +342,7 @@ namespace Timesheet.APIs.Info
             return listUnlockWeek;
 
         }
-        
+
         private async Task<int> getTimesheetLockedOfPMAsync1(string emailAddress)
         {
             var userId = await _userService.GetUserIdByEmail(emailAddress);
@@ -477,10 +477,6 @@ namespace Timesheet.APIs.Info
         [AbpAuthorize]
         public async System.Threading.Tasks.Task UnlockToLogTimesheet1(string emailAddress, string client)
         {
-            //if (!checkSecurityCode())
-            //{
-            //    throw new UserFriendlyException("Wrong security code");
-            //}
             var userId = await _userService.GetUserIdByEmail(emailAddress);
             if (!userId.HasValue)
             {
@@ -508,7 +504,7 @@ namespace Timesheet.APIs.Info
 
             if (!ClientRequest.MEZON.ToString().Equals(client))
             {
-                await UnlockTimeSheetIms(userId.Value);
+                await UnlockTimeSheetIms1(userId.Value);
             }
             await WorkScope.InsertAsync<UnlockTimesheet>(new UnlockTimesheet
             {
@@ -546,11 +542,11 @@ namespace Timesheet.APIs.Info
                     Type = LockUnlockTimesheetType.MyTimesheet,
                     Amount = amount
                 });
-                
+
                 var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
                     .Where(p => p.Type == UserPunishmentType.UnlockTSIMS)
                     .FirstOrDefaultAsync();
-                    
+
                 if (punishmentSystem != null)
                 {
                     await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
@@ -559,6 +555,54 @@ namespace Timesheet.APIs.Info
                         UserId = userId,
                         PunishmentSystemId = punishmentSystem.Id,
                         Type = UserPunishmentType.UnlockTSIMS,
+                        Count = 1,
+                        TotalMoney = amount
+                    });
+                }
+            }
+        }
+        public async System.Threading.Tasks.Task UnlockTimeSheetIms1(long userId)
+        {
+            var timesLockedEmployee = 1;
+
+            if (timesLockedEmployee > 0)
+            {
+                var amount = (timesLockedEmployee >= 4 ? 100000 : timesLockedEmployee * 20000);
+                var fund = await WorkScope.GetAll<Fund>().Where(s => s.Status == FundStatus.Proceeds).FirstOrDefaultAsync();
+                if (fund == null)
+                {
+                    await WorkScope.InsertAsync<Fund>(new Fund
+                    {
+                        Amount = amount,
+                        Status = FundStatus.Proceeds
+                    });
+                }
+                else
+                {
+                    fund.Amount += amount;
+                    await WorkScope.UpdateAsync(fund);
+                }
+                await WorkScope.InsertAsync<UserUnlockIms>(new UserUnlockIms
+                {
+                    UserId = userId,
+                    Times = timesLockedEmployee,
+                    IsPayment = false,
+                    Type = LockUnlockTimesheetType.MyTimesheet,
+                    Amount = amount
+                });
+
+                var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
+                    .Where(p => p.Type == UserPunishmentType.UnlockStaff)
+                    .FirstOrDefaultAsync();
+
+                if (punishmentSystem != null)
+                {
+                    await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
+                    {
+                        DateAt = DateTime.Now,
+                        UserId = userId,
+                        PunishmentSystemId = punishmentSystem.Id,
+                        Type = UserPunishmentType.UnlockStaff,
                         Count = 1,
                         TotalMoney = amount
                     });
@@ -603,10 +647,6 @@ namespace Timesheet.APIs.Info
         [AbpAuthorize]
         public async System.Threading.Tasks.Task UnlockToApproveTimesheet1(string emailAddress, string client)
         {
-            //if (!checkSecurityCode())
-            //{
-            //    throw new UserFriendlyException("Wrong security code");
-            //}
             var userId = await _userService.GetUserIdByEmail(emailAddress);
             if (!userId.HasValue)
             {
@@ -630,7 +670,7 @@ namespace Timesheet.APIs.Info
             }
             else
             {
-                await UnlockToApproveTimesheet(userId.Value, 1, client);
+                await UnlockToApproveTimesheet1(userId.Value, 1, client);
             }
         }
 
@@ -662,11 +702,11 @@ namespace Timesheet.APIs.Info
                     Type = LockUnlockTimesheetType.ApproveRejectTimesheet,
                     Amount = amount
                 });
-                
+
                 var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
                     .Where(p => p.Type == UserPunishmentType.UnlockTSIMS)
                     .FirstOrDefaultAsync();
-                    
+
                 if (punishmentSystem != null)
                 {
                     await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
@@ -680,14 +720,69 @@ namespace Timesheet.APIs.Info
                     });
                 }
             }
-            
+
             //Add unlock pm
             await WorkScope.InsertAsync<UnlockTimesheet>(new UnlockTimesheet
             {
                 UserId = userId,
                 Type = LockUnlockTimesheetType.ApproveRejectTimesheet
-            }); 
-      
+            });
+
+        }
+
+        private async System.Threading.Tasks.Task UnlockToApproveTimesheet1(long userId, int timesLockedPM, string client)
+        {
+            if (!ClientRequest.MEZON.ToString().Equals(client))
+            {
+                float fMoneyPMUnlockTimeSheet = getMoneyPMUnlockTimeSheet();
+                var amount = timesLockedPM * fMoneyPMUnlockTimeSheet;
+                var fund = await WorkScope.GetAll<Fund>().Where(s => s.Status == FundStatus.Proceeds).FirstOrDefaultAsync();
+                if (fund == null)
+                {
+                    await WorkScope.InsertAsync<Fund>(new Fund
+                    {
+                        Amount = amount,
+                        Status = FundStatus.Proceeds
+                    });
+                }
+                else
+                {
+                    fund.Amount += amount;
+                    await WorkScope.UpdateAsync(fund);
+                }
+                await WorkScope.InsertAsync<UserUnlockIms>(new UserUnlockIms
+                {
+                    UserId = userId,
+                    Times = timesLockedPM,
+                    IsPayment = false,
+                    Type = LockUnlockTimesheetType.ApproveRejectTimesheet,
+                    Amount = amount
+                });
+
+                var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
+                    .Where(p => p.Type == UserPunishmentType.UnlockPM)
+                    .FirstOrDefaultAsync();
+
+                if (punishmentSystem != null)
+                {
+                    await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
+                    {
+                        DateAt = DateTime.Now,
+                        UserId = userId,
+                        PunishmentSystemId = punishmentSystem.Id,
+                        Type = UserPunishmentType.UnlockPM,
+                        Count = 1,
+                        TotalMoney = Convert.ToInt32(amount)
+                    });
+                }
+            }
+
+            await WorkScope.InsertAsync<UnlockTimesheet>(new UnlockTimesheet
+            {
+                UserId = userId,
+                Type = LockUnlockTimesheetType.ApproveRejectTimesheet
+            });
+
         }
 
         private bool IsAlreadyUnlockToLog(long userId)
@@ -707,7 +802,7 @@ namespace Timesheet.APIs.Info
                  .Where(s => s.Type == ProjectUserType.PM)
                  .Where(s => s.Project.Status == ProjectStatus.Active)
                  .Any();
-        }    
+        }
 
         private bool checkSecurityCode()
         {

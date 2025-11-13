@@ -642,11 +642,11 @@ namespace Timesheet.Timesheets.MyTimesheets
                 throw new UserFriendlyException("Timesheet was locked! You can submit timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
             }
 
-            //var hasPaidEnough = await HasPaidEnoughPunishment(AbpSession.UserId.Value);
-            //if (!hasPaidEnough)
-            //{
-            //    throw new UserFriendlyException("You need to pay the full punishment for the current month before you can submit your timesheet.\r\n!");
-            //}
+            var hasPaidEnough = await HasPaidEnoughPunishment(AbpSession.UserId.Value);
+            if (!hasPaidEnough)
+            {
+                throw new UserFriendlyException("You need to pay the full punishment for the current month before you can submit your timesheet.\r\n!");
+            }
 
             foreach (var item in mytimesheets)
             {
@@ -730,19 +730,17 @@ namespace Timesheet.Timesheets.MyTimesheets
             var startDate = firstDayOfMonth;
             var endDate = currentDate;
 
-            var totalPunishmentAmount = await WorkScope.GetAll<UserPunishment>()
-                .Where(p => p.UserId == userId)
-                .Where(p => p.DateAt >= startDate && p.DateAt <= endDate)
-                .Where(p => !p.IsDeleted)
-                .SumAsync(p => p.TotalMoney);
+            var balance = await WorkScope.GetAll<UserPunishmentBalance>()
+                .FirstOrDefaultAsync(b => b.UserId == userId);
 
-            var totalPaidAmount = await WorkScope.GetAll<UserPunishmentPaid>()
-                .Where(p => p.UserId == userId)
-                .Where(p => p.TargetMonth.Year == currentDate.Year && p.TargetMonth.Month == currentDate.Month)
-                .Where(p => !p.IsDeleted)
-                .SumAsync(p => p.Amount);
+            var totalPunishmentAmount = balance?.TotalPunishmentMoney ?? 0;
 
-            return totalPaidAmount >= totalPunishmentAmount;
+            if (totalPunishmentAmount > 0)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public async Task<NotifyUserInfoDto> getNotifyUserInfoDto(long userId)

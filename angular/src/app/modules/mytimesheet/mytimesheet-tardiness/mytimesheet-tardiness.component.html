@@ -42,7 +42,15 @@
                   <span class="punishment-amount remaining">{{ getRemainingPunishment() | number }} VNĐ</span>
                 </div>
               </div>
-              <button mat-raised-button color="primary" class="btn-confirm-punishment" (click)="openConfirmationDialog()">Confirm</button>
+              <button 
+                mat-raised-button 
+                color="primary" 
+                class="btn-confirm-punishment" 
+                [disabled]="isConfirmLoading"
+                (click)="openConfirmationDialog()">
+                <span *ngIf="!isConfirmLoading">Confirm</span>
+                <mat-spinner *ngIf="isConfirmLoading" diameter="16"></mat-spinner>
+              </button>
             </div>
           </div>
         </div>
@@ -85,7 +93,7 @@
                   {{ "Edited by" | localize }}
                 </th>
 
-                <th style="min-width: 490px;" [attr.colspan]="isBasicUser ? 8 : 10">
+                <th style="min-width: 490px;" [attr.colspan]="isBasicUser ? 9 : 11">
                   {{ "Punishments" | localize }}
                 </th>
                 <th style="min-width: 150px; max-width: 300px; width: 200px;" rowspan="2">
@@ -127,8 +135,14 @@
                 <th class="punish-col" rowspan="2">
                   {{ "UnlockTS Gmail" | localize }}
                 </th>
-                <th class="punish-col" rowspan="2">
+                <!-- <th class="punish-col" rowspan="2">
                   {{ "UnlockTS IMS" | localize }}
+                </th> -->
+                <th class="punish-col" rowspan="2">
+                  {{ "UnlockTS Staff" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2">
+                  {{ "UnlockTS PM" | localize }}
                 </th>
                 <th class="punish-col" rowspan="2">
                   {{ "Total" | localize }}
@@ -203,8 +217,14 @@
                 </td>
 
                 <td class="punish-col" style="text-align: center;">
-                  <span [class]="getCssClassByPunish(item.unlockTSIMSPunish)" *ngIf="item.unlockTSIMSPunish > 0">
-                    {{ formatPunishmentAmount(item.unlockTSIMSPunish) }}
+                  <span [class]="getCssClassByPunish(item.unlockTSStaffPunish)" *ngIf="item.unlockTSStaffPunish > 0">
+                    {{ formatPunishmentAmount(item.unlockTSStaffPunish) }}
+                  </span>
+                </td>
+
+                <td class="punish-col" style="text-align: center;">
+                  <span [class]="getCssClassByPunish(item.unlockTSPMPunish)" *ngIf="item.unlockTSPMPunish > 0">
+                    {{ formatPunishmentAmount(item.unlockTSPMPunish) }}
                   </span>
                 </td>
 

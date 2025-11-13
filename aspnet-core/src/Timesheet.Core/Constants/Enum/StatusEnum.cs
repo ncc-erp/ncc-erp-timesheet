@@ -281,7 +281,9 @@ namespace Ncc.Entities.Enum
             PMReport_50k = 14,
             Ant = 15,
             UnlockTSGmail = 16,
-            UnlockTSIMS = 17
+            UnlockTSIMS = 17,
+            UnlockPM = 18,
+            UnlockStaff = 19
         }
         public enum PunishmentGroupType
         {
@@ -294,7 +296,9 @@ namespace Ncc.Entities.Enum
             ReviewIntern = 12, 
             Ant = 15,  
             UnlockTSGmail = 16, 
-            UnlockTSIMS = 17   
+            UnlockTSIMS = 17,
+            UnlockTS_PM = 18,
+            UnlockTS_Staff = 19   
         }
         public enum CheckInCheckOutPunishmentType
         {
