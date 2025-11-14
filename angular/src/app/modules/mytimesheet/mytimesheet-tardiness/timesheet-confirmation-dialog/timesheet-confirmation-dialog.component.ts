@@ -19,7 +19,8 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   @Output() remainPointsUsed = new EventEmitter<void>();
   totalErrors: number = 0;
   totalFine: number = 0;
-  isPaid: boolean = false;
+  totalRemainPointsUsedInMonth: number = 0;
+  owedAmount: number = 0;
   weekNumber: number;
   weekRange: string;
   indexerUrl: string = '';
@@ -120,13 +121,14 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
 
     if (this.data.summaryData) {
       this.userBalance = this.data.summaryData.userBalance;
-      this.totalFine = this.data.summaryData.userBalance && this.data.summaryData.userBalance.totalPunishmentMoney ? this.data.summaryData.userBalance.totalPunishmentMoney : 0;
-      this.totalPaidPunishmentInMonth = this.data.summaryData.totalPaidPunishmentInMonth || 0;
+      this.totalFine = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
+      this.totalPaidPunishmentInMonth = this.data.summaryData.totalPaidPunishmentInMonth;
+      this.totalRemainPointsUsedInMonth = this.data.summaryData.totalRemainPointsUsedInMonth || 0;
+      this.updateOwedAmount();
     } else {
       this.loadAllPunishmentData();
     }
   }
-
 
   markAsPaid(): void {
     const dialogRef = this.dialog.open(TransactionHashDialogComponent, {
@@ -144,7 +146,6 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       this.userPunishmentPaidService.markPaidTransaction(transactionHash, year, month).subscribe(
       result => {
         if (result && result.success) {
-            this.isPaid = true;
             this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
           
           this.loadPunishmentPaidData();
@@ -204,10 +205,6 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
         (result) => {
           this.punishmentPaidItems = result || [];
           
-          const totalPunishmentAmount = this.data.totalMonthlyPunishment || 0;
-          const totalPaidAmount = this.punishmentPaidItems.reduce((sum, item) => sum + (item.amount || 0), 0);
-          
-          this.isPaid = totalPaidAmount >= totalPunishmentAmount;
           this.isLoadingPaidData = false;
         },
         (error) => {
@@ -249,8 +246,10 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       (result) => {
         if (result && result.success) {
           this.userBalance = result.userBalance;
-          this.totalFine = result.userBalance.totalPunishmentMoney || 0;
-          this.totalPaidPunishmentInMonth = result.totalPaidPunishmentInMonth || 0;
+          this.totalFine = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
+          this.totalPaidPunishmentInMonth = result.totalPaidPunishmentInMonth;
+          this.totalRemainPointsUsedInMonth = result.totalRemainPointsUsedInMonth || 0;
+          this.updateOwedAmount();
           this.totalUsedRemainPoints = result.totalRemainPointsUsedInMonth || 0;
         }
       },
@@ -260,6 +259,12 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
         this.totalPaidPunishmentInMonth = 0;
       }
     );
+  }
+
+  private updateOwedAmount(): void {
+    const totalPunishment = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
+    const remainPoints = this.userBalance ? this.userBalance.remainPoints : 0;
+    this.owedAmount = Math.max(0, totalPunishment - remainPoints);
   }
   
   loadTimesheetData(): void {

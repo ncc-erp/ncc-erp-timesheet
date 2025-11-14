@@ -5,28 +5,28 @@
   </div>
 
   <div class="summary-section">
-    <div class="summary-item">
+    <div class="summary-item" matTooltip="Total number of punishment errors you have in this month.">
       <div class="summary-label">Total Errors</div>
       <div class="summary-value">{{totalErrors}}</div>
     </div>
-    <div class="summary-item">
-      <div class="summary-label">Points</div>
-      <div class="summary-value">{{userBalance?.remainPoints | number}}</div>
-      <div class="summary-note" *ngIf="totalUsedRemainPoints > 0">
-        (Used: {{totalUsedRemainPoints | number}})
-      </div>
-    </div>
-    <div class="summary-item">
+    <div class="summary-item" matTooltip="Total punishment amount for this month, before applying any points.">
       <div class="summary-label">Total Fine</div>
       <div class="summary-value">{{totalFine | number}}</div>
       <div class="summary-note" *ngIf="calculateTotalPaidAmount() > 0">
         (Paid: {{calculateTotalPaidAmount() | number}})
       </div>
     </div>
-    <div class="summary-item">
-      <div class="summary-label">Status</div>
-      <div class="summary-value" [ngClass]="{'paid': isPaid, 'not-paid': !isPaid}">
-        {{isPaid ? 'Paid' : 'Not Paid'}}
+    <div class="summary-item" matTooltip="Points you have received when HR removed or reduced punishments. These points are used to reduce your total fine.">
+      <div class="summary-label">Refund Points</div>
+      <div class="summary-value" style="color: green;">{{userBalance?.remainPoints | number}}</div>
+      <div class="summary-note" *ngIf="totalUsedRemainPoints > 0">
+        (Used: {{totalUsedRemainPoints | number}})
+      </div>
+    </div>
+    <div class="summary-item" matTooltip="Remaining punishment you still need to pay after subtracting your points. Formula: Remaining Amount = Total Fine - Points.">
+      <div class="summary-label">Remaining Amount</div>
+      <div class="summary-value" style="color: red;">
+        {{ owedAmount | number:'1.0-0' }}
       </div>
     </div>
   </div>
