@@ -361,14 +361,6 @@ namespace Timesheet.DomainServices
                 var startOfMonth = targetMonth;
                 var endOfMonth = targetMonth.AddMonths(1);
 
-                var totalUnpaidPunishmentInMonth = await WorkScope.GetAll<UserPunishment>()
-                    .Where(p => p.UserId == userId 
-                        && !p.IsDeleted 
-                        && (p.IsPaid == false || p.IsPaid == null)
-                        && p.DateAt >= startOfMonth 
-                        && p.DateAt < endOfMonth)
-                    .SumAsync(p => (long)p.TotalMoney);
-
                 var balance = await WorkScope.GetAll<UserPunishmentBalance>()
                     .Where(b => b.UserId == userId)
                     .FirstOrDefaultAsync();

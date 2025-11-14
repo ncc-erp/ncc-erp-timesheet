@@ -335,11 +335,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     return punishmentDate.getDate() === dayOfMonth && up.userPunishmentType > 0;
   });
 
-  console.log('=== OPENING DIALOG ===');
-  console.log('Item date:', item.date);
-  console.log('Day of month:', dayOfMonth);
-  console.log('Filtered user punishments:', filteredUserPunishments);
-
   filteredUserPunishments.forEach(up => {
     if (up.userPunishmentType > 0) {
       const punishmentType = this.APP_CONSTANT.PUNISHMENT_TYPES.find(p => p.value === up.userPunishmentType);
@@ -348,9 +343,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       }
     }
   });
-
-  console.log('User punishment types:', userPunishmentTypes);
-  console.log('Structured user notes:', item.structuredUserNotes);
 
   if (userPunishmentTypes.length === 0) {
     this.notify.info('Không có loại phạt nào cho ngày này');

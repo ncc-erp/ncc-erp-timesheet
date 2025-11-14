@@ -575,15 +575,15 @@ namespace Timesheet.DomainServices
 
                 if (affectedUserIds.Any())
                 {
-                    var totalByUsers = await WorkScope.GetAll<UserPunishment>()
-                        .Where(p => !p.IsDeleted && (p.IsPaid == false || p.IsPaid == null) && affectedUserIds.Contains(p.UserId))
+                    var newPunishmentByUsers = allPunishments
+                        .Where(p => p.UserId > 0)
                         .GroupBy(p => p.UserId)
                         .Select(g => new
                         {
                             UserId = g.Key,
                             Total = g.Sum(p => (long)p.TotalMoney)
                         })
-                        .ToDictionaryAsync(x => x.UserId, x => x.Total);
+                        .ToDictionary(x => x.UserId, x => x.Total);
 
                     var balanceRepo = WorkScope.GetRepo<UserPunishmentBalance>();
                     var existingBalances = await balanceRepo.GetAll()
@@ -597,21 +597,21 @@ namespace Timesheet.DomainServices
 
                     foreach (var userId in affectedUserIds)
                     {
-                        totalByUsers.TryGetValue(userId, out var totalUnpaidPunishment);
+                        newPunishmentByUsers.TryGetValue(userId, out var newPunishmentAmount);
 
                         if (!existingBalanceMap.TryGetValue(userId, out var balance))
                         {
                             balance = new UserPunishmentBalance
                             {
                                 UserId = userId,
-                                TotalPunishmentMoney = (int)totalUnpaidPunishment,
+                                TotalPunishmentMoney = (int)newPunishmentAmount,
                                 RemainPoints = 0
                             };
                             balancesToInsert.Add(balance);
                         }
                         else
                         {
-                            balance.TotalPunishmentMoney = (int)totalUnpaidPunishment;
+                            balance.TotalPunishmentMoney += (int)newPunishmentAmount;
                             balancesToUpdate.Add(balance);
                         }
                     }
