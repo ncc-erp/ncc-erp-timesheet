@@ -1264,32 +1264,26 @@ namespace Timesheet.APIs.RequestDays
                 {
                     return;
                 }
-
                 if (currentUser.BranchId != request.User.BranchId && isRequesterBranchDirector)
                 {
                     throw new UserFriendlyException("You do not have the authority to approve/reject requests from the Branch Director of another branch.");
                 }
-
                 if (currentUser.BranchId == request.User.BranchId && isRequesterBranchDirector)
                 {
                     throw new UserFriendlyException("You do not have the authority to approve/reject requests from other Branch Director.");
                 }
-
                 if (currentUser.BranchId == request.User.BranchId)
                 {
                     return;
                 }
-
                 var requesterAsPMProjects = await WorkScope.GetAll<ProjectUser>()
                     .Where(pu => pu.UserId == request.UserId && pu.Type == ProjectUserType.PM)
                     .Select(pu => pu.ProjectId)
                     .ToListAsync();
-
                 if (!requesterAsPMProjects.Any())
                 {
                     throw new UserFriendlyException("You cannot approve/reject this person's request because they are not the PM of any project.");
                 }
-
                 var isCurrentUserPMInCommonProject = await WorkScope.GetAll<ProjectUser>()
                     .AnyAsync(pu => pu.UserId == currentUser.Id &&
                                    pu.Type == ProjectUserType.PM &&
@@ -1310,6 +1304,13 @@ namespace Timesheet.APIs.RequestDays
             if (isRequesterBranchDirector)
             {
                 throw new UserFriendlyException("You do not have the authority to approve/reject the request of the Branch Director.");
+            }
+            var isRequesterPM = await WorkScope.GetAll<ProjectUser>()
+                .AnyAsync(pu => pu.UserId == request.UserId && pu.Type == ProjectUserType.PM);
+
+            if (isRequesterPM)
+            {
+                throw new UserFriendlyException("You do not have the authority to approve/reject the request of a PM. Only Branch Director can approve/reject it.");
             }
 
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
