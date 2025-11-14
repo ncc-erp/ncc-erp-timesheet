@@ -372,9 +372,9 @@ namespace Timesheet.DomainServices
 
             return await WorkScope.GetAll<UserPunishmentRefund>()
                 .Where(r => r.UserId == userId 
-                    && r.UserPunishmentId == null 
                     && r.CreationTime >= startOfMonth 
-                    && r.CreationTime < endOfMonth)
+                    && r.CreationTime < endOfMonth
+                    && r.Type == PointType.IsUse)
                 .SumAsync(r => r.Points);
         }
 
