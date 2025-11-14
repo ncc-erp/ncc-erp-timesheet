@@ -283,34 +283,6 @@ namespace Timesheet.DomainServices
             _logger.LogInformation($"Marked {unpaidPunishments.Count} punishments as paid for user {userId} in {targetMonth:yyyy-MM}");
         }
 
-        //private async Task RecalculateUserPunishmentBalance(long userId, int hashAmount)
-        //{
-        //    var balance = await WorkScope.GetAll<UserPunishmentBalance>()
-        //        .FirstOrDefaultAsync(b => b.UserId == userId);
-
-        //    if (balance == null)
-        //    {
-        //        balance = new UserPunishmentBalance
-        //        {
-        //            UserId = userId,
-        //            TotalPunishmentMoney = 0,
-        //            RemainPoints = 0
-        //        };
-        //        await WorkScope.InsertAsync(balance);
-        //        _logger.LogInformation($"Created new balance for user {userId} with TotalPunishmentMoney = 0");
-        //    }
-        //    else
-        //    {
-        //        var currentTotal = balance.TotalPunishmentMoney;
-        //        var newTotal = Math.Max(0, currentTotal - hashAmount);
-                
-        //        balance.TotalPunishmentMoney = newTotal;
-        //        await WorkScope.UpdateAsync(balance);
-                
-        //        _logger.LogInformation($"Updated TotalPunishmentMoney for user {userId}: {currentTotal} - {hashAmount} = {newTotal}");
-        //    }
-        //}
-
         private async Task RecalculateUserPunishmentBalanceWithRemainPoints(long userId, int hashAmount)
         {
             var balance = await WorkScope.GetAll<UserPunishmentBalance>()
