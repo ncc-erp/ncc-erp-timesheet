@@ -1264,7 +1264,8 @@ namespace Timesheet.APIs.Timekeepings
                 {
                     UserId = userPunishment.UserId,
                     UserPunishmentId = userPunishment.Id,
-                    Points = amountReduced
+                    Points = amountReduced,
+                    Type = PointType.IsClaim
                 };
                 await WorkScope.InsertAsync(refund);
                 Logger.Info($"Created refund {amountReduced} points for user {userPunishment.UserId}, punishment {userPunishment.Id}");

@@ -173,11 +173,13 @@ namespace Timesheet.DomainServices
                 .FirstOrDefaultAsync(b => b.UserId == _abpSession.UserId.Value);
             
             var totalPunishmentMoney = userBalance?.TotalPunishmentMoney ?? 0;
+            var remainPoints = userBalance?.RemainPoints ?? 0;
+            var requiredAmount = Math.Max(0, totalPunishmentMoney - remainPoints);
             
-            if (amount < totalPunishmentMoney)
+            if (amount < requiredAmount)
             {
-                _logger.LogError($"Transaction amount {amount} is less than total punishment money {totalPunishmentMoney} for user {_abpSession.UserId.Value}");
-                throw new UserFriendlyException($"Transaction amount ({amount:N0} VNĐ) is insufficient to cover total punishment balance ({totalPunishmentMoney:N0} VNĐ).");
+                _logger.LogError($"Transaction amount {amount} is less than required amount {requiredAmount} (TotalPunishmentMoney: {totalPunishmentMoney} - RemainPoints: {remainPoints}) for user {_abpSession.UserId.Value}");
+                throw new UserFriendlyException($"Transaction amount ({amount:N0} VNĐ) is insufficient to cover required payment ({requiredAmount:N0} VNĐ). Your current balance: {totalPunishmentMoney:N0} VNĐ penalty - {remainPoints:N0} reward points.");
             }
 
             var userPunishmentPaid = new UserPunishmentPaid
@@ -195,7 +197,7 @@ namespace Timesheet.DomainServices
 
                 await MarkPunishmentsAsPaid(_abpSession.UserId.Value, targetMonthDate);
 
-                await RecalculateUserPunishmentBalance(_abpSession.UserId.Value, amount);
+                await RecalculateUserPunishmentBalanceWithRemainPoints(_abpSession.UserId.Value, amount);
 
                 return true;
             }
@@ -281,7 +283,35 @@ namespace Timesheet.DomainServices
             _logger.LogInformation($"Marked {unpaidPunishments.Count} punishments as paid for user {userId} in {targetMonth:yyyy-MM}");
         }
 
-        private async Task RecalculateUserPunishmentBalance(long userId, int hashAmount)
+        //private async Task RecalculateUserPunishmentBalance(long userId, int hashAmount)
+        //{
+        //    var balance = await WorkScope.GetAll<UserPunishmentBalance>()
+        //        .FirstOrDefaultAsync(b => b.UserId == userId);
+
+        //    if (balance == null)
+        //    {
+        //        balance = new UserPunishmentBalance
+        //        {
+        //            UserId = userId,
+        //            TotalPunishmentMoney = 0,
+        //            RemainPoints = 0
+        //        };
+        //        await WorkScope.InsertAsync(balance);
+        //        _logger.LogInformation($"Created new balance for user {userId} with TotalPunishmentMoney = 0");
+        //    }
+        //    else
+        //    {
+        //        var currentTotal = balance.TotalPunishmentMoney;
+        //        var newTotal = Math.Max(0, currentTotal - hashAmount);
+                
+        //        balance.TotalPunishmentMoney = newTotal;
+        //        await WorkScope.UpdateAsync(balance);
+                
+        //        _logger.LogInformation($"Updated TotalPunishmentMoney for user {userId}: {currentTotal} - {hashAmount} = {newTotal}");
+        //    }
+        //}
+
+        private async Task RecalculateUserPunishmentBalanceWithRemainPoints(long userId, int hashAmount)
         {
             var balance = await WorkScope.GetAll<UserPunishmentBalance>()
                 .FirstOrDefaultAsync(b => b.UserId == userId);
@@ -296,17 +326,40 @@ namespace Timesheet.DomainServices
                 };
                 await WorkScope.InsertAsync(balance);
                 _logger.LogInformation($"Created new balance for user {userId} with TotalPunishmentMoney = 0");
+                return;
             }
-            else
+
+            var currentTotalPunishmentMoney = balance.TotalPunishmentMoney;
+            var currentRemainPoints = balance.RemainPoints;
+
+            if (currentRemainPoints > 0 && currentTotalPunishmentMoney > 0)
             {
-                var currentTotal = balance.TotalPunishmentMoney;
-                var newTotal = Math.Max(0, currentTotal - hashAmount);
+                var remainPointsUsed = Math.Min(currentRemainPoints, currentTotalPunishmentMoney);
+                balance.RemainPoints -= remainPointsUsed;
+                balance.TotalPunishmentMoney -= remainPointsUsed;
                 
-                balance.TotalPunishmentMoney = newTotal;
-                await WorkScope.UpdateAsync(balance);
-                
-                _logger.LogInformation($"Updated TotalPunishmentMoney for user {userId}: {currentTotal} - {hashAmount} = {newTotal}");
+                _logger.LogInformation($"Applied {remainPointsUsed} RemainPoints for user {userId}. RemainPoints: {currentRemainPoints} -> {balance.RemainPoints}, TotalPunishmentMoney: {currentTotalPunishmentMoney} -> {balance.TotalPunishmentMoney}");
+
+                var refundRecord = new UserPunishmentRefund
+                {
+                    UserId = userId,
+                    UserPunishmentId = null,
+                    Points = remainPointsUsed,
+                    Type = PointType.IsUse
+                };
+                await WorkScope.InsertAsync(refundRecord);
             }
+
+            if (balance.TotalPunishmentMoney > 0)
+            {
+                var beforeHashAmount = balance.TotalPunishmentMoney;
+                balance.TotalPunishmentMoney = Math.Max(0, balance.TotalPunishmentMoney - hashAmount);
+                
+                _logger.LogInformation($"Applied hash amount {hashAmount} for user {userId}. TotalPunishmentMoney: {beforeHashAmount} -> {balance.TotalPunishmentMoney}");
+            }
+            
+            await WorkScope.UpdateAsync(balance);
+            _logger.LogInformation($"Final balance for user {userId}: TotalPunishmentMoney = {balance.TotalPunishmentMoney}, RemainPoints = {balance.RemainPoints}");
         }
 
         public async Task<int> GetTotalRemainPointsUsedInMonth(long userId, int year, int month)
@@ -368,96 +421,61 @@ namespace Timesheet.DomainServices
                 var currentTotalPunishmentMoney = balance?.TotalPunishmentMoney ?? 0;
                 var currentRemainPoints = balance?.RemainPoints ?? 0;
 
-                int newTotalPunishmentMoney = Math.Max(0, currentTotalPunishmentMoney - currentRemainPoints);
-                int newRemainPoints = Math.Max(0, currentRemainPoints - currentTotalPunishmentMoney);
+                bool canPayAll = currentRemainPoints >= currentTotalPunishmentMoney;
+                bool usedRemainPoints = false;
 
-                bool usedRemainPoints = currentRemainPoints > 0 && currentTotalPunishmentMoney > 0;
-
-                if (balance == null)
+                if (canPayAll && currentTotalPunishmentMoney > 0)
                 {
-                    balance = new UserPunishmentBalance
+                    int newTotalPunishmentMoney = 0; 
+                    int newRemainPoints = currentRemainPoints - currentTotalPunishmentMoney;
+
+                    if (balance == null)
                     {
-                        UserId = userId,
-                        TotalPunishmentMoney = newTotalPunishmentMoney,
-                        RemainPoints = newRemainPoints
-                    };
-                    await WorkScope.InsertAsync(balance);
-                }
-                else
-                {
-                    balance.TotalPunishmentMoney = newTotalPunishmentMoney;
-                    balance.RemainPoints = newRemainPoints;
-                    await WorkScope.UpdateAsync(balance);
-                }
+                        balance = new UserPunishmentBalance
+                        {
+                            UserId = userId,
+                            TotalPunishmentMoney = newTotalPunishmentMoney,
+                            RemainPoints = newRemainPoints
+                        };
+                        await WorkScope.InsertAsync(balance);
+                    }
+                    else
+                    {
+                        balance.TotalPunishmentMoney = newTotalPunishmentMoney;
+                        balance.RemainPoints = newRemainPoints;
+                        await WorkScope.UpdateAsync(balance);
+                    }
 
-                _logger.LogInformation($"Updated UserPunishmentBalance: {currentTotalPunishmentMoney} - {currentRemainPoints} = {newTotalPunishmentMoney}, RemainPoints: {currentRemainPoints} - {currentTotalPunishmentMoney} = {newRemainPoints}");
+                    _logger.LogInformation($"Updated UserPunishmentBalance: {currentTotalPunishmentMoney} - {currentRemainPoints} = {newTotalPunishmentMoney}, RemainPoints: {currentRemainPoints} - {currentTotalPunishmentMoney} = {newRemainPoints}");
 
-                var remainPointsUsed = currentRemainPoints - newRemainPoints;
-                int punishmentsMarked = 0;
-
-                if (remainPointsUsed > 0)
-                {
                     var refundRecord = new UserPunishmentRefund
                     {
                         UserId = userId,
                         UserPunishmentId = null, 
-                        Points = remainPointsUsed
+                        Points = currentTotalPunishmentMoney,
+                        Type = PointType.IsUse
                     };
                     await WorkScope.InsertAsync(refundRecord);
-                    _logger.LogInformation($"Recorded {remainPointsUsed} RemainPoints usage for user {userId}");
+                    _logger.LogInformation($"Recorded {currentTotalPunishmentMoney} RemainPoints usage for user {userId}");
 
-                    if (newTotalPunishmentMoney == 0)
+                    var unpaidPunishmentsAll = await WorkScope.GetAll<UserPunishment>()
+                        .Where(p => p.UserId == userId 
+                            && !p.IsDeleted 
+                            && (p.IsPaid == false || p.IsPaid == null)
+                            && p.DateAt >= startOfMonth 
+                            && p.DateAt < endOfMonth)
+                        .ToListAsync();
+
+                    foreach (var punishment in unpaidPunishmentsAll)
                     {
-                        var unpaidPunishmentsAll = await WorkScope.GetAll<UserPunishment>()
-                            .Where(p => p.UserId == userId 
-                                && !p.IsDeleted 
-                                && (p.IsPaid == false || p.IsPaid == null)
-                                && p.DateAt >= startOfMonth 
-                                && p.DateAt < endOfMonth)
-                            .ToListAsync();
-
-                        foreach (var punishment in unpaidPunishmentsAll)
-                        {
-                            punishment.IsPaid = true;
-                            await WorkScope.UpdateAsync(punishment);
-                            punishmentsMarked++;
-                        }
-
-                        _logger.LogInformation($"Marked ALL {punishmentsMarked} punishments as paid for user {userId} in {year}/{month} because TotalPunishmentMoney reached 0 after applying RemainPoints");
+                        punishment.IsPaid = true;
+                        await WorkScope.UpdateAsync(punishment);
                     }
-                    else
-                    {
-                        var unpaidPunishments = await WorkScope.GetAll<UserPunishment>()
-                            .Where(p => p.UserId == userId 
-                                && !p.IsDeleted 
-                                && (p.IsPaid == false || p.IsPaid == null)
-                                && p.DateAt >= startOfMonth 
-                                && p.DateAt < endOfMonth)
-                            .OrderBy(p => p.DateAt) 
-                            .ToListAsync();
-
-                        int remainingPoints = remainPointsUsed;
-                        foreach (var punishment in unpaidPunishments)
-                        {
-                            if (remainingPoints >= punishment.TotalMoney)
-                            {
-                                punishment.IsPaid = true;
-                                await WorkScope.UpdateAsync(punishment);
-                                remainingPoints -= punishment.TotalMoney;
-                                punishmentsMarked++;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-
-                        _logger.LogInformation($"Marked {punishmentsMarked} punishments as paid for user {userId} in {year}/{month} using {remainPointsUsed} RemainPoints");
-                    }
+                    usedRemainPoints = true;
                 }
                 else
                 {
-                    _logger.LogInformation($"No RemainPoints used, no punishments marked as paid for user {userId} in {year}/{month}");
+                    _logger.LogInformation($"RemainPoints ({currentRemainPoints}) not enough to cover TotalPunishmentMoney ({currentTotalPunishmentMoney}). No changes made for user {userId} in {year}/{month}");
                 }
 
                 var updatedBalance = await WorkScope.GetAll<UserPunishmentBalance>()
@@ -476,7 +494,7 @@ namespace Timesheet.DomainServices
 
                 result.Success = true;
                 result.Message = usedRemainPoints
-                    ? $"Successfully applied {currentRemainPoints - newRemainPoints:N0} reward points. Remaining penalty: {newTotalPunishmentMoney:N0} VND"
+                    ? $"Successfully applied {currentTotalPunishmentMoney:N0} reward points. All penalties paid."
                     : "No reward points were used";
 
                 return result;

@@ -567,16 +567,9 @@ namespace Timesheet.DomainServices
 
                 await CurrentUnitOfWork.SaveChangesAsync();
 
-                var affectedUserIds = allPunishments
-                    .Where(p => p.UserId > 0)
-                    .Select(p => p.UserId)
-                    .Distinct()
-                    .ToList();
-
-                if (affectedUserIds.Any())
+                if (allPunishments.Count() > 0)
                 {
                     var newPunishmentByUsers = allPunishments
-                        .Where(p => p.UserId > 0)
                         .GroupBy(p => p.UserId)
                         .Select(g => new
                         {
@@ -587,7 +580,7 @@ namespace Timesheet.DomainServices
 
                     var balanceRepo = WorkScope.GetRepo<UserPunishmentBalance>();
                     var existingBalances = await balanceRepo.GetAll()
-                        .Where(b => affectedUserIds.Contains(b.UserId))
+                        .Where(b => newPunishmentByUsers.ContainsKey(b.UserId))
                         .ToListAsync();
 
                     var existingBalanceMap = existingBalances.ToDictionary(b => b.UserId);
@@ -595,9 +588,10 @@ namespace Timesheet.DomainServices
                     var balancesToInsert = new List<UserPunishmentBalance>();
                     var balancesToUpdate = new List<UserPunishmentBalance>();
 
-                    foreach (var userId in affectedUserIds)
+                    foreach (var kvp in newPunishmentByUsers)
                     {
-                        newPunishmentByUsers.TryGetValue(userId, out var newPunishmentAmount);
+                        var userId = kvp.Key;
+                        var newPunishmentAmount = kvp.Value;
 
                         if (!existingBalanceMap.TryGetValue(userId, out var balance))
                         {

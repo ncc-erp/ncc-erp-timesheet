@@ -358,6 +358,11 @@ namespace Ncc.Entities.Enum
             NUMBER = 1,
             LEVEL = 2,
         }
+        public enum PointType
+        {
+            IsClaim = 0,
+            IsUse = 1
+        }
         public enum ClientRequest
         {
             MEZON = 1,
