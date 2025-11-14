@@ -513,6 +513,35 @@ namespace Timesheet.APIs.Info
             });
         }
 
+        private async System.Threading.Tasks.Task UpdateUserPunishmentBalanceAsync(long userId, int punishmentAmount)
+        {
+            if (punishmentAmount <= 0)
+            {
+                return;
+            }
+
+            var balance = await WorkScope.GetAll<UserPunishmentBalance>()
+                .Where(b => b.UserId == userId)
+                .FirstOrDefaultAsync();
+
+            if (balance == null)
+            {
+                balance = new UserPunishmentBalance
+                {
+                    UserId = userId,
+                    TotalPunishmentMoney = punishmentAmount,
+                    RemainPoints = 0
+                };
+
+                await WorkScope.InsertAsync(balance);
+            }
+            else
+            {
+                balance.TotalPunishmentMoney += punishmentAmount;
+                await WorkScope.UpdateAsync(balance);
+            }
+        }
+
         public async System.Threading.Tasks.Task UnlockTimeSheetIms(long userId)
         {
             var timesLockedEmployee = 1;
@@ -558,6 +587,8 @@ namespace Timesheet.APIs.Info
                         Count = 1,
                         TotalMoney = amount
                     });
+
+                    await UpdateUserPunishmentBalanceAsync(userId, amount);
                 }
             }
         }
@@ -606,6 +637,8 @@ namespace Timesheet.APIs.Info
                         Count = 1,
                         TotalMoney = amount
                     });
+
+                    await UpdateUserPunishmentBalanceAsync(userId, amount);
                 }
             }
         }
@@ -709,6 +742,8 @@ namespace Timesheet.APIs.Info
 
                 if (punishmentSystem != null)
                 {
+                    var amountInt = Convert.ToInt32(amount);
+
                     await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
                     {
                         DateAt = DateTime.Now,
@@ -716,8 +751,10 @@ namespace Timesheet.APIs.Info
                         PunishmentSystemId = punishmentSystem.Id,
                         Type = UserPunishmentType.UnlockTSIMS,
                         Count = 1,
-                        TotalMoney = Convert.ToInt32(amount)
+                        TotalMoney = amountInt
                     });
+
+                    await UpdateUserPunishmentBalanceAsync(userId, amountInt);
                 }
             }
 
@@ -765,6 +802,8 @@ namespace Timesheet.APIs.Info
 
                 if (punishmentSystem != null)
                 {
+                    var amountInt = Convert.ToInt32(amount);
+
                     await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
                     {
                         DateAt = DateTime.Now,
@@ -772,8 +811,10 @@ namespace Timesheet.APIs.Info
                         PunishmentSystemId = punishmentSystem.Id,
                         Type = UserPunishmentType.UnlockPM,
                         Count = 1,
-                        TotalMoney = Convert.ToInt32(amount)
+                        TotalMoney = amountInt
                     });
+
+                    await UpdateUserPunishmentBalanceAsync(userId, amountInt);
                 }
             }
 
