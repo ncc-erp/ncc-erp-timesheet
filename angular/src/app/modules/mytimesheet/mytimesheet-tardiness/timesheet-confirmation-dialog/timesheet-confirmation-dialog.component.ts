@@ -115,41 +115,18 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     
     this.loadPunishmentPaidData();
     this.loadTimesheetData();
-    this.loadUserBalance();
-    this.loadTotalPaidPunishment();
 
     this.totalUsedRemainPoints = this.data.totalUsedRemainPoints || 0;
 
-    this.applyRemainPoints();
+    if (this.data.summaryData) {
+      this.userBalance = this.data.summaryData.userBalance;
+      this.totalFine = this.data.summaryData.userBalance && this.data.summaryData.userBalance.totalPunishmentMoney ? this.data.summaryData.userBalance.totalPunishmentMoney : 0;
+      this.totalPaidPunishmentInMonth = this.data.summaryData.totalPaidPunishmentInMonth || 0;
+    } else {
+      this.loadAllPunishmentData();
+    }
   }
 
-  applyRemainPoints(): void {
-    const { year, month } = this.getTargetYearMonth();
-    
-    this.userPunishmentPaidService.previewAndApplyPunishmentPoints(year, month).subscribe(
-      result => {
-        if (result && result.success) {
-          if (result.message && result.message.trim()) {
-            this.snackBar.open(result.message, 'Close', { duration: 5000 });
-          }
-
-          this.loadPunishmentPaidData();
-          this.loadUserBalance();
-          this.loadTotalPaidPunishment();
-
-          if (result.message && result.message.includes('RemainPoints')) {
-            this.remainPointsUsed.emit();
-          }
-        } else {
-          this.snackBar.open(result.message || 'Failed to apply RemainPoints', 'Close', { duration: 5000 });
-        }
-      },
-      error => {
-        console.error('Error applying RemainPoints:', error);
-        this.snackBar.open('Error applying RemainPoints. Please try again.', 'Close', { duration: 5000 });
-      }
-    );
-  }
 
   markAsPaid(): void {
     const dialogRef = this.dialog.open(TransactionHashDialogComponent, {
@@ -171,8 +148,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
             this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
           
           this.loadPunishmentPaidData();
-          this.loadUserBalance();
-          this.loadTotalPaidPunishment();
+          this.loadAllPunishmentData();
           if (this.data && typeof this.data.onPaidSuccess === 'function') {
             this.data.onPaidSuccess();
           }
@@ -251,19 +227,6 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     return this.totalPaidPunishmentInMonth;
   }
 
-  loadUserBalance(): void {
-    this.userPunishmentPaidService.getCurrentUserBalance().subscribe(
-      (result) => {
-        this.userBalance = result;
-        this.totalFine = result.totalPunishmentMoney || 0;
-      },
-      (error) => {
-        console.error('Error loading user balance:', error);
-        this.userBalance = null;
-      }
-    );
-  }
-
   private getTargetYearMonth(): { year: number, month: number } {
     if (this.data.selectedDate) {
       const selectedDate = moment(this.data.selectedDate);
@@ -279,15 +242,21 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     }
   }
 
-  loadTotalPaidPunishment(): void {
+  loadAllPunishmentData(): void {
     const { year, month } = this.getTargetYearMonth();
     
-    this.userPunishmentPaidService.getTotalPaidPunishmentInMonth(year, month).subscribe(
+    this.userPunishmentPaidService.previewApplyAndGetSummary(year, month).subscribe(
       (result) => {
-        this.totalPaidPunishmentInMonth = result || 0;
+        if (result && result.success) {
+          this.userBalance = result.userBalance;
+          this.totalFine = result.userBalance.totalPunishmentMoney || 0;
+          this.totalPaidPunishmentInMonth = result.totalPaidPunishmentInMonth || 0;
+          this.totalUsedRemainPoints = result.totalRemainPointsUsedInMonth || 0;
+        }
       },
       (error) => {
-        console.error('Error loading total paid punishment:', error);
+        console.error('Error loading punishment summary:', error);
+        this.userBalance = null;
         this.totalPaidPunishmentInMonth = 0;
       }
     );

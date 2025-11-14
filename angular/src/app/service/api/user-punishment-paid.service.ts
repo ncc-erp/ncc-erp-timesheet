@@ -32,6 +32,14 @@ export interface PreviewAndApplyPunishmentPointsDto {
   hasSufficientFunds: boolean;
 }
 
+export interface UserPunishmentSummaryDto {
+  success: boolean;
+  message: string;
+  userBalance: GetUserPunishmentBalanceDto;
+  totalRemainPointsUsedInMonth: number;
+  totalPaidPunishmentInMonth: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -68,59 +76,20 @@ export class UserPunishmentPaidService extends BaseApiService {
     );
   }
 
-  getCurrentUserBalance(): Observable<GetUserPunishmentBalanceDto> {
-    const url = `${this.rootUrl}/GetCurrentUserBalance`;
-    return this.http.get<any>(url).pipe(
-      map(response => {
-        if (response && response.result) {
-          return response.result;
-        }
-        return { totalPunishmentMoney: 0, remainPoints: 0, effectiveAmount: 0 };
-      })
-    );
-  }
-
-  getTotalRemainPointsUsedInMonth(year: number, month: number): Observable<number> {
-    const url = `${this.rootUrl}/GetTotalRemainPointsUsedInMonth?year=${year}&month=${month}`;
-    return this.http.get<any>(url).pipe(
-      map(response => {
-        if (response && response.result) {
-          return response.result;
-        }
-        return 0;
-      })
-    );
-  }
-
-  getTotalPaidPunishmentInMonth(year: number, month: number): Observable<number> {
-    const url = `${this.rootUrl}/GetTotalPaidPunishmentInMonth?year=${year}&month=${month}`;
-    return this.http.get<any>(url).pipe(
-      map(response => {
-        if (response && response.result !== undefined) {
-          return response.result;
-        }
-        return 0;
-      })
-    );
-  }
-
-  previewAndApplyPunishmentPoints(year: number, month: number): Observable<PreviewAndApplyPunishmentPointsDto> {
-    const url = `${this.rootUrl}/PreviewAndApplyPunishmentPoints`;
+  previewApplyAndGetSummary(year: number, month: number): Observable<UserPunishmentSummaryDto> {
+    const url = `${this.rootUrl}/PreviewApplyAndGetSummary`;
     const body = { year: year, month: month };
     return this.http.post<any>(url, body).pipe(
       map(response => {
         if (response && response.result) {
           return response.result;
         }
-        return { 
-          success: false, 
-          message: 'Unknown error occurred', 
-          totalHashAmount: 0,
-          totalPunishmentMoney: 0,
-          remainPoints: 0,
-          effectivePunishmentAmount: 0,
-          punishmentsMarkedAsPaid: 0,
-          hasSufficientFunds: false
+        return {
+          success: false,
+          message: 'No data received',
+          userBalance: { totalPunishmentMoney: 0, remainPoints: 0, effectiveAmount: 0 },
+          totalRemainPointsUsedInMonth: 0,
+          totalPaidPunishmentInMonth: 0
         };
       })
     );

@@ -1,4 +1,4 @@
-﻿using Abp.Application.Services;
+using Abp.Application.Services;
 using Abp.Authorization;
 using Abp.UI;
 using Microsoft.AspNetCore.Mvc;
@@ -60,58 +60,9 @@ namespace Timesheet.APIs.UserPunishmentPaids
 
         [HttpPost]
         [AbpAuthorize]
-        public async Task<object> PreviewAndApplyPunishmentPoints(PreviewAndApplyPunishmentPointsDto input)
+        public async Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummary(PreviewAndApplyPunishmentPointsDto input)
         {
-            var result = await _userPunishmentPaidService.PreviewAndApplyPunishmentPointsAsync(input.Year, input.Month);
-
-            return new
-            {
-                success = result.Success,
-                message = result.Message
-            };
-        }
-
-        [HttpGet]
-        [AbpAuthorize]
-        public async Task<int> GetTotalRemainPointsUsedInMonth(int year, int month)
-        {
-            if (!AbpSession.UserId.HasValue)
-            {
-                return 0;
-            }
-            
-            var userId = AbpSession.UserId.Value;
-            return await _userPunishmentPaidService.GetTotalRemainPointsUsedInMonth(userId, year, month);
-        }
-
-        [HttpGet]
-        [AbpAuthorize]
-        public async Task<GetUserPunishmentBalanceDto> GetCurrentUserBalance()
-        {
-            var (totalPunishmentMoney, remainPoints, hasBalance) = await _userPunishmentPaidService.GetUserPunishmentBalanceAsync();
-
-            var effectiveAmount = Math.Max(0, totalPunishmentMoney - remainPoints);
-
-            return new GetUserPunishmentBalanceDto
-            {
-                TotalPunishmentMoney = totalPunishmentMoney,
-                RemainPoints = remainPoints,
-                EffectiveAmount = effectiveAmount,
-                HasBalance = hasBalance
-            };
-        }
-
-        [HttpGet]
-        [AbpAuthorize]
-        public async Task<int> GetTotalPaidPunishmentInMonth(int year, int month)
-        {
-            if (!AbpSession.UserId.HasValue)
-            {
-                return 0;
-            }
-            
-            var userId = AbpSession.UserId.Value;
-            return await _userPunishmentPaidService.GetTotalPaidPunishmentInMonth(userId, year, month);
+            return await _userPunishmentPaidService.PreviewApplyAndGetSummaryAsync(input.Year, input.Month);
         }
     }
 }
