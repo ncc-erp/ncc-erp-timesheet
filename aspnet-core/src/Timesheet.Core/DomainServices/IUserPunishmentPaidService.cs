@@ -12,10 +12,6 @@ namespace Timesheet.DomainServices
 
         Task<bool> MarkPaidTransactions(string transactionHash, int year, int month);
 
-        Task<int> GetTotalRemainPointsUsedInMonth(long userId, int year, int month);
-
-        Task<int> GetTotalPaidPunishmentInMonth(long userId, int year, int month);
-
         Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummaryAsync(int year, int month);
     }
 }
