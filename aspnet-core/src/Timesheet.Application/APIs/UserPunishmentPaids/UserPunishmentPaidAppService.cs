@@ -57,5 +57,12 @@ namespace Timesheet.APIs.UserPunishmentPaids
                 Message = "Transaction marked as paid successfully"
             };
         }
+
+        [HttpPost]
+        [AbpAuthorize]
+        public async Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummary(PreviewAndApplyPunishmentPointsDto input)
+        {
+            return await _userPunishmentPaidService.PreviewApplyAndGetSummaryAsync(input.Year, input.Month);
+        }
     }
 }

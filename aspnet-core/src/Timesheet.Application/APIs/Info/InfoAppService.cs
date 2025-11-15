@@ -477,10 +477,6 @@ namespace Timesheet.APIs.Info
         [AbpAuthorize]
         public async System.Threading.Tasks.Task UnlockToLogTimesheet1(string emailAddress, string client)
         {
-            //if (!checkSecurityCode())
-            //{
-            //    throw new UserFriendlyException("Wrong security code");
-            //}
             var userId = await _userService.GetUserIdByEmail(emailAddress);
             if (!userId.HasValue)
             {
@@ -508,13 +504,42 @@ namespace Timesheet.APIs.Info
 
             if (!ClientRequest.MEZON.ToString().Equals(client))
             {
-                await UnlockTimeSheetIms(userId.Value);
+                await UnlockTimeSheetIms1(userId.Value);
             }
             await WorkScope.InsertAsync<UnlockTimesheet>(new UnlockTimesheet
             {
                 UserId = userId.Value,
                 Type = LockUnlockTimesheetType.MyTimesheet
             });
+        }
+
+        private async System.Threading.Tasks.Task UpdateUserPunishmentBalanceAsync(long userId, int punishmentAmount)
+        {
+            if (punishmentAmount <= 0)
+            {
+                return;
+            }
+
+            var balance = await WorkScope.GetAll<UserPunishmentBalance>()
+                .Where(b => b.UserId == userId)
+                .FirstOrDefaultAsync();
+
+            if (balance == null)
+            {
+                balance = new UserPunishmentBalance
+                {
+                    UserId = userId,
+                    TotalPunishmentMoney = punishmentAmount,
+                    RemainPoints = 0
+                };
+
+                await WorkScope.InsertAsync(balance);
+            }
+            else
+            {
+                balance.TotalPunishmentMoney += punishmentAmount;
+                await WorkScope.UpdateAsync(balance);
+            }
         }
 
         public async System.Threading.Tasks.Task UnlockTimeSheetIms(long userId)
@@ -546,11 +571,11 @@ namespace Timesheet.APIs.Info
                     Type = LockUnlockTimesheetType.MyTimesheet,
                     Amount = amount
                 });
-                
+
                 var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
                     .Where(p => p.Type == UserPunishmentType.UnlockTSIMS)
                     .FirstOrDefaultAsync();
-                    
+
                 if (punishmentSystem != null)
                 {
                     await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
@@ -562,6 +587,58 @@ namespace Timesheet.APIs.Info
                         Count = 1,
                         TotalMoney = amount
                     });
+
+                    await UpdateUserPunishmentBalanceAsync(userId, amount);
+                }
+            }
+        }
+        public async System.Threading.Tasks.Task UnlockTimeSheetIms1(long userId)
+        {
+            var timesLockedEmployee = 1;
+
+            if (timesLockedEmployee > 0)
+            {
+                var amount = (timesLockedEmployee >= 4 ? 100000 : timesLockedEmployee * 20000);
+                var fund = await WorkScope.GetAll<Fund>().Where(s => s.Status == FundStatus.Proceeds).FirstOrDefaultAsync();
+                if (fund == null)
+                {
+                    await WorkScope.InsertAsync<Fund>(new Fund
+                    {
+                        Amount = amount,
+                        Status = FundStatus.Proceeds
+                    });
+                }
+                else
+                {
+                    fund.Amount += amount;
+                    await WorkScope.UpdateAsync(fund);
+                }
+                await WorkScope.InsertAsync<UserUnlockIms>(new UserUnlockIms
+                {
+                    UserId = userId,
+                    Times = timesLockedEmployee,
+                    IsPayment = false,
+                    Type = LockUnlockTimesheetType.MyTimesheet,
+                    Amount = amount
+                });
+
+                var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
+                    .Where(p => p.Type == UserPunishmentType.UnlockStaff)
+                    .FirstOrDefaultAsync();
+
+                if (punishmentSystem != null)
+                {
+                    await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
+                    {
+                        DateAt = DateTime.Now,
+                        UserId = userId,
+                        PunishmentSystemId = punishmentSystem.Id,
+                        Type = UserPunishmentType.UnlockStaff,
+                        Count = 1,
+                        TotalMoney = amount
+                    });
+
+                    await UpdateUserPunishmentBalanceAsync(userId, amount);
                 }
             }
         }
@@ -603,10 +680,6 @@ namespace Timesheet.APIs.Info
         [AbpAuthorize]
         public async System.Threading.Tasks.Task UnlockToApproveTimesheet1(string emailAddress, string client)
         {
-            //if (!checkSecurityCode())
-            //{
-            //    throw new UserFriendlyException("Wrong security code");
-            //}
             var userId = await _userService.GetUserIdByEmail(emailAddress);
             if (!userId.HasValue)
             {
@@ -630,7 +703,7 @@ namespace Timesheet.APIs.Info
             }
             else
             {
-                await UnlockToApproveTimesheet(userId.Value, 1, client);
+                await UnlockToApproveTimesheet1(userId.Value, 1, client);
             }
         }
 
@@ -662,13 +735,15 @@ namespace Timesheet.APIs.Info
                     Type = LockUnlockTimesheetType.ApproveRejectTimesheet,
                     Amount = amount
                 });
-                
+
                 var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
                     .Where(p => p.Type == UserPunishmentType.UnlockTSIMS)
                     .FirstOrDefaultAsync();
-                    
+
                 if (punishmentSystem != null)
                 {
+                    var amountInt = Convert.ToInt32(amount);
+
                     await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
                     {
                         DateAt = DateTime.Now,
@@ -676,18 +751,79 @@ namespace Timesheet.APIs.Info
                         PunishmentSystemId = punishmentSystem.Id,
                         Type = UserPunishmentType.UnlockTSIMS,
                         Count = 1,
-                        TotalMoney = Convert.ToInt32(amount)
+                        TotalMoney = amountInt
                     });
+
+                    await UpdateUserPunishmentBalanceAsync(userId, amountInt);
                 }
             }
-            
+
             //Add unlock pm
             await WorkScope.InsertAsync<UnlockTimesheet>(new UnlockTimesheet
             {
                 UserId = userId,
                 Type = LockUnlockTimesheetType.ApproveRejectTimesheet
-            }); 
-      
+            });
+
+        }
+
+        private async System.Threading.Tasks.Task UnlockToApproveTimesheet1(long userId, int timesLockedPM, string client)
+        {
+            if (!ClientRequest.MEZON.ToString().Equals(client))
+            {
+                float fMoneyPMUnlockTimeSheet = getMoneyPMUnlockTimeSheet();
+                var amount = timesLockedPM * fMoneyPMUnlockTimeSheet;
+                var fund = await WorkScope.GetAll<Fund>().Where(s => s.Status == FundStatus.Proceeds).FirstOrDefaultAsync();
+                if (fund == null)
+                {
+                    await WorkScope.InsertAsync<Fund>(new Fund
+                    {
+                        Amount = amount,
+                        Status = FundStatus.Proceeds
+                    });
+                }
+                else
+                {
+                    fund.Amount += amount;
+                    await WorkScope.UpdateAsync(fund);
+                }
+                await WorkScope.InsertAsync<UserUnlockIms>(new UserUnlockIms
+                {
+                    UserId = userId,
+                    Times = timesLockedPM,
+                    IsPayment = false,
+                    Type = LockUnlockTimesheetType.ApproveRejectTimesheet,
+                    Amount = amount
+                });
+
+                var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
+                    .Where(p => p.Type == UserPunishmentType.UnlockPM)
+                    .FirstOrDefaultAsync();
+
+                if (punishmentSystem != null)
+                {
+                    var amountInt = Convert.ToInt32(amount);
+
+                    await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
+                    {
+                        DateAt = DateTime.Now,
+                        UserId = userId,
+                        PunishmentSystemId = punishmentSystem.Id,
+                        Type = UserPunishmentType.UnlockPM,
+                        Count = 1,
+                        TotalMoney = amountInt
+                    });
+
+                    await UpdateUserPunishmentBalanceAsync(userId, amountInt);
+                }
+            }
+
+            await WorkScope.InsertAsync<UnlockTimesheet>(new UnlockTimesheet
+            {
+                UserId = userId,
+                Type = LockUnlockTimesheetType.ApproveRejectTimesheet
+            });
+
         }
 
         private bool IsAlreadyUnlockToLog(long userId)
@@ -707,7 +843,7 @@ namespace Timesheet.APIs.Info
                  .Where(s => s.Type == ProjectUserType.PM)
                  .Where(s => s.Project.Status == ProjectStatus.Active)
                  .Any();
-        }    
+        }
 
         private bool checkSecurityCode()
         {

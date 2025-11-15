@@ -51,9 +51,29 @@ namespace Ncc.EntityFrameworkCore
         public DbSet<PunishmentSystem> PunishmentSystems { get; set; }
         public DbSet<UserPunishment> UserPunishments { get; set; }
         public DbSet<UserPunishmentPaid> UserPunishmentPaids { get; set; }
+        public DbSet<UserPunishmentBalance> UserPunishmentBalances { get; set; }
+        public DbSet<UserPunishmentRefund> UserPunishmentRefunds { get; set; }
         public TimesheetDbContext(DbContextOptions<TimesheetDbContext> options)
             : base(options)
         {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configure UserPunishmentRefund to avoid cascade delete conflicts
+            modelBuilder.Entity<UserPunishmentRefund>()
+                .HasOne(r => r.UserPunishment)
+                .WithMany()
+                .HasForeignKey(r => r.UserPunishmentId)
+                .OnDelete(DeleteBehavior.Restrict); // No cascade delete
+
+            modelBuilder.Entity<UserPunishmentRefund>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict); // No cascade delete
         }
     }
 }

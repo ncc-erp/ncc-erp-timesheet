@@ -313,7 +313,8 @@ namespace Timesheet.DomainServices
                             PunishmentSystemId = dailyPunishment.Id,
                             Type = dailyPunishment.Type,
                             Count = mapDailyUsers[user.UserName],
-                            TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money
+                            TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money,
+                            IsPaid = false
                         });
                     }
 
@@ -329,6 +330,7 @@ namespace Timesheet.DomainServices
                             Type = mentionPunishment.Type,
                             Count = mapMentionUsers[user.UserName],
                             TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
+                            IsPaid = false
                         });
                     }
 
@@ -354,6 +356,7 @@ namespace Timesheet.DomainServices
                                 Type = mentionPunishment.Type,
                                 Count = mapWFHUsers[user.UserName],
                                 TotalMoney = mapWFHUsers[user.UserName] * mentionPunishment.Money,
+                                IsPaid = false
                             });
                         }
                     }
@@ -444,7 +447,8 @@ namespace Timesheet.DomainServices
                             Count = 1,
                             TotalMoney = punishmentSystem.Money,
                             UserNote = t.UserNote,
-                            NoteReply = t.NoteReply
+                            NoteReply = t.NoteReply,
+                            IsPaid = false
                         });
                     }
                 }
@@ -540,10 +544,6 @@ namespace Timesheet.DomainServices
                     }
                 }
 
-                //await SaveDailyAndMentionPunishments(selectedDate, users, mapDailyUsers, mapMentionUsers, punishmentSystems);
-                Logger.Info($"✅ Successfully processed timekeeping for date {selectedDate:yyyy-MM-dd}. " +
-                            $"Total {allTimekeepings.Count} records, {allPunishments.Count} punishments.");
-
                 // TODO: check again
                 var userEmail = users.Select(u => u.EmailAddress).ToHashSet();
                 var checkInUsersOnly = mapCheckInUsers.Values
@@ -577,6 +577,65 @@ namespace Timesheet.DomainServices
                 await WorkScope.InsertRangeAsync(allTimekeepings);
                 await WorkScope.InsertRangeAsync(allPunishments);
 
+                await CurrentUnitOfWork.SaveChangesAsync();
+
+                if (allPunishments.Count() > 0)
+                {
+                    var newPunishmentByUsers = allPunishments
+                        .GroupBy(p => p.UserId)
+                        .Select(g => new
+                        {
+                            UserId = g.Key,
+                            Total = g.Sum(p => (long)p.TotalMoney)
+                        })
+                        .ToDictionary(x => x.UserId, x => x.Total);
+
+                    var balanceRepo = WorkScope.GetRepo<UserPunishmentBalance>();
+                    var existingBalances = await balanceRepo.GetAll()
+                        .Where(b => newPunishmentByUsers.ContainsKey(b.UserId))
+                        .ToListAsync();
+
+                    var existingBalanceMap = existingBalances.ToDictionary(b => b.UserId);
+
+                    var balancesToInsert = new List<UserPunishmentBalance>();
+                    var balancesToUpdate = new List<UserPunishmentBalance>();
+
+                    foreach (var kvp in newPunishmentByUsers)
+                    {
+                        var userId = kvp.Key;
+                        var newPunishmentAmount = kvp.Value;
+
+                        if (!existingBalanceMap.TryGetValue(userId, out var balance))
+                        {
+                            balance = new UserPunishmentBalance
+                            {
+                                UserId = userId,
+                                TotalPunishmentMoney = (int)newPunishmentAmount,
+                                RemainPoints = 0
+                            };
+                            balancesToInsert.Add(balance);
+                        }
+                        else
+                        {
+                            balance.TotalPunishmentMoney += (int)newPunishmentAmount;
+                            balancesToUpdate.Add(balance);
+                        }
+                    }
+
+                    if (balancesToInsert.Any())
+                    {
+                        await WorkScope.InsertRangeAsync(balancesToInsert);
+                    }
+
+                    if (balancesToUpdate.Any())
+                    {
+                        foreach (var balance in balancesToUpdate)
+                        {
+                            await WorkScope.UpdateAsync(balance);
+                        }
+                    }
+                }
+
                 await uow.CompleteAsync();
             }
             finally
@@ -586,7 +645,8 @@ namespace Timesheet.DomainServices
 
             var elapsed = DateTime.Now - start;
             Console.WriteLine($"Thời gian chạy: {elapsed.TotalMilliseconds} ms");
-
+            Logger.Info($"✅ Successfully processed timekeeping for date {selectedDate:yyyy-MM-dd}. " +
+            $"Total {allTimekeepings.Count} records, {allPunishments.Count} punishments.");
             return allTimekeepings;
         }
 
@@ -607,7 +667,8 @@ namespace Timesheet.DomainServices
                         PunishmentSystemId = dailyPunishment.Id,
                         Type = dailyPunishment.Type,
                         Count = mapDailyUsers[user.UserName],
-                        TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money
+                        TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money,
+                        IsPaid = false
                     });
                 }
 
@@ -621,7 +682,8 @@ namespace Timesheet.DomainServices
                         PunishmentSystemId = mentionPunishment.Id,
                         Type = mentionPunishment.Type,
                         Count = mapMentionUsers[user.UserName],
-                        TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money
+                        TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
+                        IsPaid = false
                     });
                 }
 
@@ -646,6 +708,7 @@ namespace Timesheet.DomainServices
                             Type = mentionPunishment.Type,
                             Count = mapWFHUsers[user.UserName],
                             TotalMoney = mapWFHUsers[user.UserName] * mentionPunishment.Money,
+                            IsPaid = false
                         });
                     }
                 }
@@ -700,7 +763,8 @@ namespace Timesheet.DomainServices
                     Count = 1,
                     TotalMoney = punishmentSystem.Money,
                     UserNote = userNote,
-                    NoteReply = noteReply
+                    NoteReply = noteReply,
+                    IsPaid = false
                 };
             }
             return null;
