@@ -334,38 +334,6 @@ namespace Timesheet.DomainServices
             _logger.LogInformation($"Final balance for user {userId}: TotalPunishmentMoney = {balance.TotalPunishmentMoney}, RemainPoints = {balance.RemainPoints}");
         }
 
-        public async Task<int> GetTotalRemainPointsUsedInMonth(long userId, int year, int month)
-        {
-            var targetMonth = new DateTime(year, month, 1);
-            var startOfMonth = targetMonth;
-            var endOfMonth = targetMonth.AddMonths(1);
-            
-            _logger.LogInformation($"GetTotalRemainPointsUsedInMonth - Year: {year}, Month: {month}, StartOfMonth: {startOfMonth:yyyy-MM-dd HH:mm:ss}, EndOfMonth: {endOfMonth:yyyy-MM-dd HH:mm:ss}");
-
-            return await WorkScope.GetAll<UserPunishmentRefund>()
-                .Where(r => r.UserId == userId 
-                    && r.CreationTime >= startOfMonth 
-                    && r.CreationTime < endOfMonth
-                    && r.Type == PointType.IsUse)
-                .SumAsync(r => r.Points);
-        }
-
-        public async Task<int> GetTotalPaidPunishmentInMonth(long userId, int year, int month)
-        {
-            var targetMonth = new DateTime(year, month, 1);
-            var endOfMonth = targetMonth.AddMonths(1);
-
-            var totalPaid = await WorkScope.GetAll<UserPunishment>()
-                .Where(p => p.UserId == userId 
-                    && !p.IsDeleted 
-                    && p.IsPaid == true
-                    && p.DateAt >= targetMonth 
-                    && p.DateAt < endOfMonth)
-                .SumAsync(p => p.TotalMoney);
-
-            return totalPaid;
-        }
-
         public async Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummaryAsync(int year, int month)
         {
             var result = new UserPunishmentSummaryDto();
@@ -390,24 +358,31 @@ namespace Timesheet.DomainServices
                 var currentMonthStart = new DateTime(now.Year, now.Month, 1);
                 var isCurrentMonth = targetMonth == currentMonthStart;
 
-                var totalUnpaidPunishments = await WorkScope.GetAll<UserPunishment>()
+                var monthlyPunishments = await WorkScope.GetAll<UserPunishment>()
                     .Where(p => p.UserId == userId)
                     .Where(p => !p.IsDeleted)
+                    .Where(p => p.DateAt >= startOfMonth && p.DateAt < endOfMonth)
+                    .ToListAsync();
+
+                var unpaidPunishments = monthlyPunishments
                     .Where(p => p.IsPaid == false || p.IsPaid == null)
-                    .Where(p => p.DateAt >= startOfMonth)
-                    .SumAsync(p => (int?)p.TotalMoney) ?? 0;
+                    .ToList();
 
-                var totalClaimPoints = await WorkScope.GetAll<UserPunishmentRefund>()
+                var totalUnpaidPunishments = unpaidPunishments
+                    .Sum(p => p.TotalMoney);
+
+                var refunds = await WorkScope.GetAll<UserPunishmentRefund>()
                     .Where(r => r.UserId == userId)
                     .Where(r => !r.IsDeleted)
+                    .ToListAsync(); 
+
+                var totalClaimPoints = refunds
                     .Where(r => r.Type == PointType.IsClaim)
-                    .SumAsync(r => (int?)r.Points) ?? 0;
+                    .Sum(r => r.Points);
 
-                var totalUsePoints = await WorkScope.GetAll<UserPunishmentRefund>()
-                    .Where(r => r.UserId == userId)
-                    .Where(r => !r.IsDeleted)
+                var totalUsePoints = refunds
                     .Where(r => r.Type == PointType.IsUse)
-                    .SumAsync(r => (int?)r.Points) ?? 0;
+                    .Sum(r => r.Points);
 
                 var calculatedRemainPoints = totalClaimPoints - totalUsePoints;
                 if (calculatedRemainPoints < 0)
@@ -494,20 +469,16 @@ namespace Timesheet.DomainServices
                     await WorkScope.InsertAsync(refundRecord);
                     _logger.LogInformation($"Recorded {currentTotalPunishmentMoney} RemainPoints usage for user {userId}");
 
-                    var unpaidPunishmentsAll = await WorkScope.GetAll<UserPunishment>()
-                        .Where(p => p.UserId == userId 
-                            && !p.IsDeleted 
-                            && (p.IsPaid == false || p.IsPaid == null)
-                            && p.DateAt >= startOfMonth 
-                            && p.DateAt < endOfMonth)
-                        .ToListAsync();
-
-                    foreach (var punishment in unpaidPunishmentsAll)
+                    foreach (var punishment in unpaidPunishments)
                     {
                         punishment.IsPaid = true;
                         await WorkScope.UpdateAsync(punishment);
                     }
                     usedRemainPoints = true;
+
+                    currentTotalPunishmentMoney = balance.TotalPunishmentMoney;
+                    currentRemainPoints = balance.RemainPoints;
+
                 }
                 else
                 {
@@ -520,9 +491,18 @@ namespace Timesheet.DomainServices
                     RemainPoints = currentRemainPoints
                 };
 
-                result.TotalRemainPointsUsedInMonth = await GetTotalRemainPointsUsedInMonth(userId, year, month);
+                var totalRemainPointsUsedInMonth = refunds
+                    .Where(r => r.Type == PointType.IsUse)
+                    .Where(r => r.CreationTime >= startOfMonth && r.CreationTime < endOfMonth)
+                    .Sum(r => r.Points);
 
-                result.TotalPaidPunishmentInMonth = await GetTotalPaidPunishmentInMonth(userId, year, month);
+                var totalPaidPunishmentInMonth = monthlyPunishments
+                    .Where(p => p.IsPaid == true)
+                    .Sum(p => p.TotalMoney);
+
+                result.TotalRemainPointsUsedInMonth = totalRemainPointsUsedInMonth;
+
+                result.TotalPaidPunishmentInMonth = totalPaidPunishmentInMonth;
 
                 result.Success = true;
                 result.Message = usedRemainPoints
