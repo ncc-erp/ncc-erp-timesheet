@@ -37,7 +37,7 @@
                   <span class="punishment-label">Tổng tiền phạt tháng:</span>
                   <span class="punishment-amount">{{ totalMonthlyPunishment | number }} VNĐ</span>
                 </div>
-                <div class="punishment-row">
+                <div class="punishment-row" *ngIf="isCurrentMonth">
                   <span class="punishment-label">Tổng tiền phạt còn lại:</span>
                   <span class="punishment-amount remaining">{{ getRemainingPunishment() | number }} VNĐ</span>
                 </div>
@@ -331,7 +331,7 @@
               <span class="punishment-label">Tổng tiền phạt tháng:</span>
               <span class="punishment-amount">{{ totalMonthlyPunishment | number }} VNĐ</span>
             </div>
-            <div class="punishment-row">
+            <div class="punishment-row" *ngIf="isCurrentMonth">
               <span class="punishment-label">Tổng tiền phạt còn lại:</span>
               <span class="punishment-amount remaining">{{ getRemainingPunishment() | number }} VNĐ</span>
             </div>

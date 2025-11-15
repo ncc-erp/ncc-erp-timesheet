@@ -598,6 +598,15 @@ namespace Timesheet.APIs.Info
 
             if (timesLockedEmployee > 0)
             {
+                var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
+                    .Where(p => p.Type == UserPunishmentType.UnlockStaff)
+                    .FirstOrDefaultAsync();
+
+                if (punishmentSystem == null)
+                {
+                    throw new UserFriendlyException("Punishment configuration for UnlockStaff is missing. Please contact administrator.");
+                }
+
                 var amount = (timesLockedEmployee >= 4 ? 100000 : timesLockedEmployee * 20000);
                 var fund = await WorkScope.GetAll<Fund>().Where(s => s.Status == FundStatus.Proceeds).FirstOrDefaultAsync();
                 if (fund == null)
@@ -622,24 +631,17 @@ namespace Timesheet.APIs.Info
                     Amount = amount
                 });
 
-                var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
-                    .Where(p => p.Type == UserPunishmentType.UnlockStaff)
-                    .FirstOrDefaultAsync();
-
-                if (punishmentSystem != null)
+                await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
                 {
-                    await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
-                    {
-                        DateAt = DateTime.Now,
-                        UserId = userId,
-                        PunishmentSystemId = punishmentSystem.Id,
-                        Type = UserPunishmentType.UnlockStaff,
-                        Count = 1,
-                        TotalMoney = amount
-                    });
+                    DateAt = DateTime.Now,
+                    UserId = userId,
+                    PunishmentSystemId = punishmentSystem.Id,
+                    Type = UserPunishmentType.UnlockStaff,
+                    Count = 1,
+                    TotalMoney = amount
+                });
 
-                    await UpdateUserPunishmentBalanceAsync(userId, amount);
-                }
+                await UpdateUserPunishmentBalanceAsync(userId, amount);
             }
         }
 
@@ -771,6 +773,15 @@ namespace Timesheet.APIs.Info
         {
             if (!ClientRequest.MEZON.ToString().Equals(client))
             {
+                var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
+                .Where(p => p.Type == UserPunishmentType.UnlockPM)
+                .FirstOrDefaultAsync();
+
+                if (punishmentSystem == null)
+                {
+                    throw new UserFriendlyException("Punishment configuration for UnlockPM is missing. Please contact administrator.");
+                }
+                
                 float fMoneyPMUnlockTimeSheet = getMoneyPMUnlockTimeSheet();
                 var amount = timesLockedPM * fMoneyPMUnlockTimeSheet;
                 var fund = await WorkScope.GetAll<Fund>().Where(s => s.Status == FundStatus.Proceeds).FirstOrDefaultAsync();
@@ -796,26 +807,19 @@ namespace Timesheet.APIs.Info
                     Amount = amount
                 });
 
-                var punishmentSystem = await WorkScope.GetAll<PunishmentSystem>()
-                    .Where(p => p.Type == UserPunishmentType.UnlockPM)
-                    .FirstOrDefaultAsync();
+                var amountInt = Convert.ToInt32(amount);
 
-                if (punishmentSystem != null)
+                await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
                 {
-                    var amountInt = Convert.ToInt32(amount);
+                    DateAt = DateTime.Now,
+                    UserId = userId,
+                    PunishmentSystemId = punishmentSystem.Id,
+                    Type = UserPunishmentType.UnlockPM,
+                    Count = 1,
+                    TotalMoney = amountInt
+                });
 
-                    await WorkScope.InsertAsync<UserPunishment>(new UserPunishment
-                    {
-                        DateAt = DateTime.Now,
-                        UserId = userId,
-                        PunishmentSystemId = punishmentSystem.Id,
-                        Type = UserPunishmentType.UnlockPM,
-                        Count = 1,
-                        TotalMoney = amountInt
-                    });
-
-                    await UpdateUserPunishmentBalanceAsync(userId, amountInt);
-                }
+                await UpdateUserPunishmentBalanceAsync(userId, amountInt);
             }
 
             await WorkScope.InsertAsync<UnlockTimesheet>(new UnlockTimesheet

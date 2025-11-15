@@ -44,6 +44,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   public countLate: number = 0;
   totalMonthlyPunishment: number = 0;
   userBalance: GetUserPunishmentBalanceDto | null = null;
+  isCurrentMonth: boolean = true;
   public maskTime = [/[\d]/, /\d/, ':', /\d/, /\d/];
 
   constructor(
@@ -73,13 +74,17 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
                              user.roleNames.length === 1 && 
                              user.roleNames[0].toUpperCase() === 'BASICUSER';
       this.isBasicUser = hasOnlyBasicRole;
+      const now = new Date();
+      this.isCurrentMonth = (this.year === now.getFullYear() && (this.month + 1) === (now.getMonth() + 1));
       this.getData();
       this.loadUserBalance();
     });
   }
 
   getRemainingPunishment(): number {
-    return this.userBalance && this.userBalance.totalPunishmentMoney ? this.userBalance.totalPunishmentMoney : 0;
+    const totalPunishment = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
+    const remainPoints = this.userBalance ? this.userBalance.remainPoints : 0;
+    return Math.max(0, totalPunishment - remainPoints);
   }
 
   loadUserBalance(): void {
@@ -323,6 +328,8 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.getData();
     this.loadUserBalance();
     this.countLate = this.countPunish(this.listTimekeeping)
+    const now = new Date();
+    this.isCurrentMonth = (this.year === now.getFullYear() && (this.month + 1) === (now.getMonth() + 1));
   }
 
   openComplainDialog(item: TimekeepingDto) {
