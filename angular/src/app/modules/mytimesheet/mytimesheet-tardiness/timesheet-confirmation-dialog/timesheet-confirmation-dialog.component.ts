@@ -34,6 +34,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   selectedFund: string = 'Build School Fund';
   contributeToFund: boolean = false;
   totalUsedRemainPoints: number = 0;
+  isCurrentMonth: boolean = true;
 
   view: CalendarView = CalendarView.Month;
   calendarView = CalendarView;
@@ -118,6 +119,10 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     this.loadTimesheetData();
 
     this.totalUsedRemainPoints = this.data.totalUsedRemainPoints || 0;
+
+    const target = this.getTargetYearMonth();
+    const now = moment();
+    this.isCurrentMonth = (target.year === now.year() && target.month === (now.month() + 1));
 
     if (this.data.summaryData) {
       this.userBalance = this.data.summaryData.userBalance;
