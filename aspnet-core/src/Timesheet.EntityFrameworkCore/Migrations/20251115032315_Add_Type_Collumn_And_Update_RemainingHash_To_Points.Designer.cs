@@ -10,7 +10,7 @@ using Ncc.EntityFrameworkCore;
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    [Migration("20251114121016_Add_Type_Collumn_And_Update_RemainingHash_To_Points")]
+    [Migration("20251115032315_Add_Type_Collumn_And_Update_RemainingHash_To_Points")]
     partial class Add_Type_Collumn_And_Update_RemainingHash_To_Points
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
