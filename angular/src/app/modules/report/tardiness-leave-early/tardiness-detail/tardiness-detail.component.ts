@@ -186,7 +186,9 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
       12: [12],
       15: [15], 
       16: [16], 
-      17: [17]  
+      17: [17],
+      18: [18],
+      19: [19]
     };
 
     if (this.selectedGroupType === -1) {

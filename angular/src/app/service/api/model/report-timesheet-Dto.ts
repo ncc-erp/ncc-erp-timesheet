@@ -103,6 +103,8 @@ export class TimekeepingDto {
   unlockTSPunish?: number;       
   unlockTSGmailPunish?: number;
   unlockTSIMSPunish?: number;
+  unlockTSStaffPunish?: number;
+  unlockTSPMPunish?: number;
   
     
   structuredUserNotes?: Array<{
@@ -124,6 +126,8 @@ export class TimekeepingDto {
   totalPmReportPunish?: number;
   totalAntPunish?: number;
   totalUnlockTSPunish?: number;
+  totalUnlockTSStaffPunish?: number;
+  totalUnlockTSPMPunish?: number;
   
  
   structuredNoteReplies?: PunishmentNoteReply[];

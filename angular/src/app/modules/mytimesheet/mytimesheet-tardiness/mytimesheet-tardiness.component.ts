@@ -11,6 +11,7 @@ import { MatDialog } from '@angular/material';
 import { ComplainDialogComponent } from './complain-dialog/complain-dialog.component';
 import { TimesheetConfirmationDialogComponent } from './timesheet-confirmation-dialog/timesheet-confirmation-dialog.component';
 import { UserServiceProxy } from '@shared/service-proxies/service-proxies';
+import { UserPunishmentPaidService, GetUserPunishmentBalanceDto } from '@app/service/api/user-punishment-paid.service';
 
 @Component({
   selector: 'app-mytimesheet-tardiness',
@@ -37,17 +38,20 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   userId: number;
   userName: string;
   isTableLoading: boolean = false;
+  isConfirmLoading: boolean = false;
   selectedDay: number = -1;
   dayList: any = []
   public countLate: number = 0;
   totalMonthlyPunishment: number = 0;
-  totalPaidPunishment: number = 0;
+  userBalance: GetUserPunishmentBalanceDto | null = null;
+  isCurrentMonth: boolean = true;
   public maskTime = [/[\d]/, /\d/, ':', /\d/, /\d/];
 
   constructor(
     private timekeepingService: TimekeepingService,
     private dialog: MatDialog,
     private userService: UserServiceProxy,
+    private userPunishmentPaidService: UserPunishmentPaidService,
     injector: Injector,
   ) {
     super(injector);
@@ -70,25 +74,43 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
                              user.roleNames.length === 1 && 
                              user.roleNames[0].toUpperCase() === 'BASICUSER';
       this.isBasicUser = hasOnlyBasicRole;
+      const now = new Date();
+      this.isCurrentMonth = (this.year === now.getFullYear() && (this.month + 1) === (now.getMonth() + 1));
       this.getData();
+      this.loadUserBalance();
     });
   }
 
   getRemainingPunishment(): number {
-    const remaining = this.totalMonthlyPunishment - this.totalPaidPunishment;
-    return remaining > 0 ? remaining : 0;
+    const totalPunishment = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
+    const remainPoints = this.userBalance ? this.userBalance.remainPoints : 0;
+    return Math.max(0, totalPunishment - remainPoints);
   }
+
+  loadUserBalance(): void {
+    this.userPunishmentPaidService.previewApplyAndGetSummary(this.year, this.month + 1).subscribe(
+      (result) => {
+        if (result && result.success) {
+          this.userBalance = result.userBalance;
+        }
+      },
+      (error) => {
+        console.error('Error loading user balance:', error);
+        this.userBalance = null;
+      }
+    );
+  }
+
 
   getData() {
     this.isTableLoading = true;
+    this.loadUserBalance(); 
     this.timekeepingService.getMyDetails(this.year, this.month + 1).subscribe(res => {
       this.listTimekeeping = res.result;
       this.totalMonthlyPunishment = 0;
-      this.totalPaidPunishment = 0;
 
       if (this.listTimekeeping && this.listTimekeeping.length > 0) {
         this.totalMonthlyPunishment = this.listTimekeeping[0].totalMonthPunishmentTotal || 0;
-        this.totalPaidPunishment = this.listTimekeeping[0].totalPaidPunishment || 0;
       }
       
       this.groupTimekeepingByDay();
@@ -123,6 +145,8 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
           antPunish: 0,            
           unlockTSGmailPunish: 0,      
           unlockTSIMSPunish: 0,      
+          unlockTSStaffPunish: 0,
+          unlockTSPMPunish: 0,
           totalDayPunishment: 0,
           structuredNoteReplies: [],
           structuredUserNotes: [],  
@@ -203,6 +227,10 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         record.unlockTSGmailPunish = (record.unlockTSGmailPunish || 0) + moneyAmount;
       } else if (punishType === 17) {
         record.unlockTSIMSPunish = (record.unlockTSIMSPunish || 0) + moneyAmount;
+      } else if (punishType === 18) {
+        record.unlockTSPMPunish = (record.unlockTSPMPunish || 0) + moneyAmount;
+      } else if (punishType === 19) {
+        record.unlockTSStaffPunish = (record.unlockTSStaffPunish || 0) + moneyAmount;
       }
 
       record.totalDayPunishment = (
@@ -214,7 +242,9 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         (record.pmReportPunish || 0) + 
         (record.antPunish || 0) + 
         (record.unlockTSGmailPunish || 0) + 
-        (record.unlockTSIMSPunish || 0)
+        (record.unlockTSIMSPunish || 0) +
+        (record.unlockTSStaffPunish || 0) +
+        (record.unlockTSPMPunish || 0)
       );
     });
 
@@ -296,7 +326,10 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.viewDate = new Date(this.year, this.month, this.selectedDay);
     this.getDayByMonthAndYear(this.month, this.year)
     this.getData();
+    this.loadUserBalance();
     this.countLate = this.countPunish(this.listTimekeeping)
+    const now = new Date();
+    this.isCurrentMonth = (this.year === now.getFullYear() && (this.month + 1) === (now.getMonth() + 1));
   }
 
   openComplainDialog(item: TimekeepingDto) {
@@ -309,11 +342,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     return punishmentDate.getDate() === dayOfMonth && up.userPunishmentType > 0;
   });
 
-  console.log('=== OPENING DIALOG ===');
-  console.log('Item date:', item.date);
-  console.log('Day of month:', dayOfMonth);
-  console.log('Filtered user punishments:', filteredUserPunishments);
-
   filteredUserPunishments.forEach(up => {
     if (up.userPunishmentType > 0) {
       const punishmentType = this.APP_CONSTANT.PUNISHMENT_TYPES.find(p => p.value === up.userPunishmentType);
@@ -322,9 +350,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       }
     }
   });
-
-  console.log('User punishment types:', userPunishmentTypes);
-  console.log('Structured user notes:', item.structuredUserNotes);
 
   if (userPunishmentTypes.length === 0) {
     this.notify.info('Không có loại phạt nào cho ngày này');
@@ -383,6 +408,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
           .then(() => {
             this.notify.success('Complain updated successfully.');
             this.getData();
+            this.loadUserBalance();
           })
           .catch((error: any) => {
             console.error('❌ Error in operations:', error);
@@ -516,20 +542,84 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   }
 
   openConfirmationDialog() {
-    // Filter out items with punishment
-    const punishmentItems = this.listTimekeeping.filter(item => item.moneyPunish > 0);
-    
-    const dialogRef = this.dialog.open(TimesheetConfirmationDialogComponent, {
-      width: '800px',
-      data: {
-        timekeepingData: this.listTimekeeping,
-        totalMonthlyPunishment: this.totalMonthlyPunishment,
-        selectedDate: new Date(this.year, this.month, 1),
-        onPaidSuccess: () => {
-          this.notify.success('Paid Successfully');
-          this.getData();
-        }
-      }
-    });
+    if (this.isConfirmLoading) {
+      return;
+    }
+
+    this.isConfirmLoading = true;
+
+    this.userPunishmentPaidService
+      .previewApplyAndGetSummary(this.year, this.month + 1)
+      .toPromise()
+      .then((summaryResult) => {
+        const totalUsedRemainPoints = summaryResult && summaryResult.totalRemainPointsUsedInMonth ? summaryResult.totalRemainPointsUsedInMonth : 0;
+        this.userBalance = summaryResult && summaryResult.userBalance ? summaryResult.userBalance : this.userBalance;
+        const dialogRef = this.dialog.open(TimesheetConfirmationDialogComponent, {
+          width: '800px',
+          data: {
+            timekeepingData: this.listTimekeeping,
+            totalMonthlyPunishment: this.totalMonthlyPunishment,
+            selectedDate: new Date(this.year, this.month, 1),
+            totalUsedRemainPoints: totalUsedRemainPoints,
+            summaryData: summaryResult, 
+            onPaidSuccess: () => {
+              this.notify.success('Paid Successfully');
+              this.getData();
+              this.loadUserBalance();
+            }
+          }
+        });
+
+        dialogRef.componentInstance.remainPointsUsed.subscribe(() => {
+          this.userPunishmentPaidService
+            .previewApplyAndGetSummary(this.year, this.month + 1)
+            .subscribe((summaryResult) => {
+              const updatedTotalUsed = summaryResult && summaryResult.totalRemainPointsUsedInMonth ? summaryResult.totalRemainPointsUsedInMonth : 0;
+              dialogRef.componentInstance.totalUsedRemainPoints = updatedTotalUsed;
+            }, (error) => {
+              console.error('Error reloading total used RemainPoints:', error);
+            });
+
+          this.loadUserBalance();
+        });
+
+        dialogRef.afterClosed().subscribe(() => {
+          this.isConfirmLoading = false;
+        });
+      })
+      .catch((error) => {
+        console.error('Error getting total used RemainPoints:', error);
+        const dialogRef = this.dialog.open(TimesheetConfirmationDialogComponent, {
+          width: '800px',
+          data: {
+            timekeepingData: this.listTimekeeping,
+            totalMonthlyPunishment: this.totalMonthlyPunishment,
+            selectedDate: new Date(this.year, this.month, 1),
+            totalUsedRemainPoints: 0,
+            summaryData: null, 
+            onPaidSuccess: () => {
+              this.notify.success('Paid Successfully');
+              this.getData();
+              this.loadUserBalance();
+            }
+          }
+        });
+
+        dialogRef.componentInstance.remainPointsUsed.subscribe(() => {
+          this.userPunishmentPaidService
+            .previewApplyAndGetSummary(this.year, this.month + 1)
+            .subscribe((summaryResult) => {
+              const updatedTotalUsed = summaryResult && summaryResult.totalRemainPointsUsedInMonth ? summaryResult.totalRemainPointsUsedInMonth : 0;
+              dialogRef.componentInstance.totalUsedRemainPoints = updatedTotalUsed;
+            }, (error) => {
+              console.error('Error reloading total used RemainPoints:', error);
+            });
+          this.loadUserBalance();
+        });
+
+        dialogRef.afterClosed().subscribe(() => {
+          this.isConfirmLoading = false;
+        });
+      });
   }
 }

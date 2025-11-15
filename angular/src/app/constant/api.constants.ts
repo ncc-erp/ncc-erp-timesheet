@@ -262,7 +262,9 @@ export const APP_CONSTANT = {
     { "name": "Report after 17:00 or forgot to report", "value": 14 },
     { "name": "Ant", "value": 15 },
     { "name": "Unlock Timesheet Gmail", "value": 16 },
-    { "name": "Unlock Timesheet IMS", "value": 17 }
+    { "name": "Unlock Timesheet IMS", "value": 17 },
+    { "name": "Unlock Timesheet PM", "value": 18 },
+    { "name": "Unlock Timesheet Staff", "value": 19 }
     
   ],  
   PunishRulesShortName: [
@@ -283,7 +285,9 @@ export const APP_CONSTANT = {
     { "name": "Report after 17:00", "value": 14 },
     { "name": "Ant", "value": 15 },
     { "name": "UnlockTS Gmail", "value": 16 },
-    { "name": "UnlockTS IMS", "value": 17 }
+    { "name": "UnlockTS IMS", "value": 17 },
+    { "name": "UnlockTS PM", "value": 18 },
+    { "name": "UnlockTS Staff", "value": 19 }
   ],
   
   PunishmentGroups: {
@@ -296,7 +300,9 @@ export const APP_CONSTANT = {
     LATE_INTERN_REVIEW: [12],             
     ANT: [15],
     UNLOCK_TS_GMAIL: [16],
-    UNLOCK_TS_IMS: [17]              
+    UNLOCK_TS_IMS: [17],
+    UNLOCK_TS_PM: [18],
+    UNLOCK_TS_STAFF: [19]
   },
   
   PUNISHMENT_TYPES: [
@@ -317,7 +323,9 @@ export const APP_CONSTANT = {
     { value: 14, name: 'PM Report 50k' },
     { value: 15, name: 'Ant' },
     { value: 16, name: 'UnlockTS Gmail' },
-    { value: 17, name: 'UnlockTS IMS' }
+    { value: 17, name: 'UnlockTS IMS' },
+    { value: 18, name: 'UnlockTS Staff' },
+    { value: 19, name: 'UnlockTS PM' }
   ],
   
   PunishmentTypeMap: {
@@ -338,7 +346,9 @@ export const APP_CONSTANT = {
     14: ['NO_PUNISH', 'PM_REPORT'],
     15: ['NO_PUNISH', 'ANT'], 
     16: ['NO_PUNISH', 'UNLOCK_TS_GMAIL'],
-    17: ['NO_PUNISH', 'UNLOCK_TS_IMS']    
+    17: ['NO_PUNISH', 'UNLOCK_TS_IMS'],
+    18: ['NO_PUNISH', 'UNLOCK_TS_PM'],
+    19: ['NO_PUNISH', 'UNLOCK_TS_STAFF']    
 
   },
   GroupTypes: [
@@ -352,7 +362,9 @@ export const APP_CONSTANT = {
     { id: 12, name: 'Late Intern Review' },
     { id: 15, name: 'Ant' },
     { id: 16, name: 'Unlock Timesheet Gmail' },
-    { id: 17, name: 'Unlock Timesheet IMS' }
+    { id: 17, name: 'Unlock Timesheet IMS' },
+    { id: 18, name: 'Unlock Timesheet PM' },
+    { id: 19, name: 'Unlock Timesheet Staff' }
   ],
   ProjectMemberType: {
     Expose: 0,

@@ -1,4 +1,4 @@
-﻿using Abp.Domain.Entities.Auditing;
+using Abp.Domain.Entities.Auditing;
 using Ncc.Authorization.Users;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -23,5 +23,6 @@ namespace Timesheet.Entities
         public string UserNote { get; set; }
         [MaxLength(1000)]
         public string NoteReply { get; set; }
+        public bool IsPaid { get; set; }
     }
 }

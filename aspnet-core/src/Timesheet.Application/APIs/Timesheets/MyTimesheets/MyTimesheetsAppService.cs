@@ -730,19 +730,17 @@ namespace Timesheet.Timesheets.MyTimesheets
             var startDate = firstDayOfMonth;
             var endDate = currentDate;
 
-            var totalPunishmentAmount = await WorkScope.GetAll<UserPunishment>()
-                .Where(p => p.UserId == userId)
-                .Where(p => p.DateAt >= startDate && p.DateAt <= endDate)
-                .Where(p => !p.IsDeleted)
-                .SumAsync(p => p.TotalMoney);
+            var balance = await WorkScope.GetAll<UserPunishmentBalance>()
+                .FirstOrDefaultAsync(b => b.UserId == userId);
 
-            var totalPaidAmount = await WorkScope.GetAll<UserPunishmentPaid>()
-                .Where(p => p.UserId == userId)
-                .Where(p => p.TargetMonth.Year == currentDate.Year && p.TargetMonth.Month == currentDate.Month)
-                .Where(p => !p.IsDeleted)
-                .SumAsync(p => p.Amount);
+            var totalPunishmentAmount = balance?.TotalPunishmentMoney ?? 0;
 
-            return totalPaidAmount >= totalPunishmentAmount;
+            if (totalPunishmentAmount > 0)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public async Task<NotifyUserInfoDto> getNotifyUserInfoDto(long userId)

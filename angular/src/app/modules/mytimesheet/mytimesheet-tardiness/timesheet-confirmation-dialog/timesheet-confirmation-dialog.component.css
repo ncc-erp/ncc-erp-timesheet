@@ -348,3 +348,9 @@
 
 .cal-month-view .cal-badge { display: none !important; }
 .cal-month-view .cal-day-badge { display: none !important; }
+
+.used-points {
+  color: #ff6b35;
+  font-size: 12px;
+  font-weight: normal;
+}
