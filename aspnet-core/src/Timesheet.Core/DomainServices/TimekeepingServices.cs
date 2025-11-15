@@ -21,6 +21,7 @@ using Timesheet.Entities;
 using Timesheet.Extension;
 using Timesheet.Services.FaceIdService;
 using Timesheet.Services.Komu;
+using Timesheet.Services.Komu.Dto;
 using Timesheet.Services.Project;
 using Timesheet.Services.Project.Dto;
 using Timesheet.Services.Tracker;
@@ -33,14 +34,12 @@ namespace Timesheet.DomainServices
     public class TimekeepingServices : BaseDomainService, ITimekeepingServices, ITransientDependency
     {
         private readonly KomuService _komuService;
-        private readonly TrackerService _trackerService;
         private readonly FaceIdService _faceIdService;
         private readonly ProjectService _projectService;
         private readonly ISettingManager _settingManager;
 
         public TimekeepingServices(
             KomuService komuService,
-            TrackerService trackerService,
             IWorkScope workScope,
             FaceIdService faceIdService,
             ProjectService projectService,
@@ -48,7 +47,6 @@ namespace Timesheet.DomainServices
             : base(workScope)
         {
             _komuService = komuService;
-            _trackerService = trackerService;
             _faceIdService = faceIdService;
             _projectService = projectService;
             _settingManager = settingManager;
@@ -184,17 +182,16 @@ namespace Timesheet.DomainServices
             Dictionary<string, int> mapDailyUsers,
             Dictionary<string, int> mapMentionUsers,
             Dictionary<string, int> mapWFHUsers,
-            Dictionary<string, (float ActiveMinute, string active_time)> dicUserNameToTracker,
+            Dictionary<string, (float SpentMinute, string spent_time)> dicUserNameToTracker,
             Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems)> LoadExternalData(DateTime selectedDate, List<TimesheetUserDto> users)
         {
             var checkInUsers = _faceIdService.GetEmployeeCheckInOutMini(selectedDate)
                 ?? throw new UserFriendlyException("Missing checkIn data");
 
-            var dailyAndMention = _komuService.GetDailyReport(selectedDate)
+            var dailyAndMentionAndTracker = _komuService.GetDailyReport(selectedDate)
                 ?? throw new UserFriendlyException("Missing komu data");
 
             var userNames = users.Select(x => x.UserName).Distinct().ToList();
-            var trackerTimes = _trackerService.GetTimeTrackerToDay(selectedDate, userNames);
 
             var punishmentTypes = Enum.GetValues(typeof(UserPunishmentType))
                 .Cast<UserPunishmentType>()
@@ -205,10 +202,25 @@ namespace Timesheet.DomainServices
                 .ToDictionaryAsync(x => x.Type, x => x);
 
             var mapCheckInUsers = checkInUsers.ToDictionary(s => s.Email);
-            var mapDailyUsers = dailyAndMention.daily.ToDictionary(s => s.email, s => s.count);
-            var mapMentionUsers = dailyAndMention.mention.ToDictionary(s => s.name, s => s.count);
-            var mapWFHUsers = dailyAndMention.wfh.ToDictionary(s => s.name, s => s.total);
-            var dicUserNameToTracker = trackerTimes.ToDictionary(s => s.email, s => (s.ActiveMinute, s.active_time));
+            var mapDailyUsers = dailyAndMentionAndTracker.daily.ToDictionary(s => s.email, s => s.count);
+            var mapMentionUsers = dailyAndMentionAndTracker.mention.ToDictionary(s => s.name, s => s.count);
+            var mapWFHUsers = dailyAndMentionAndTracker.wfh.ToDictionary(s => s.name, s => s.total);
+
+            var processedTracker = dailyAndMentionAndTracker.tracker
+                .GroupBy(t => t.email)
+                .Select(g =>
+                {
+                    var best = g
+                        .OrderByDescending(t => t.SpentMinute).First();
+                    return new TrackerDto
+                    {
+                        email = g.Key,
+                        spent_time = best.spent_time
+                    };
+                })
+                .ToList();
+            var dicUserNameToTracker = processedTracker.ToDictionary(s => s.email, s => (s.SpentMinute, s.spent_time));
+
             var PunishmentSystems = punishmentSystems;
             return
             (
@@ -228,7 +240,7 @@ namespace Timesheet.DomainServices
             Dictionary<string, int> mapDailyUsers,
             Dictionary<string, int> mapMentionUsers,
             Dictionary<string, int> mapWFHUsers,
-            Dictionary<string, (float ActiveMinute, string active_time)> dicUserNameToTracker,
+            Dictionary<string, (float SpentMinute, string spent_time)> dicUserNameToTracker,
             Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems,
             Dictionary<long, List<(string NoteReply, string UserNote)>> oldTimekeepingNotes,
             Dictionary<long, List<MapAbsenceUserDto>> mapAbsenceUsers,
@@ -263,7 +275,7 @@ namespace Timesheet.DomainServices
             var registerCheckInOut = CaculateCheckInOutTimeNew(combinedMapAbsenceUsers, user);
             bool isRemoteWork = mapRemoteUsers.ContainsKey(user.UserId);
 
-            float trackerTime = dicUserNameToTracker.ContainsKey(user.UserName) ? dicUserNameToTracker[user.UserName].ActiveMinute : 0;
+            float trackerTime = dicUserNameToTracker.ContainsKey(user.UserName) ? dicUserNameToTracker[user.UserName].SpentMinute : 0;
 
             t.RegisterCheckIn = registerCheckInOut.CheckIn;
             t.RegisterCheckOut = registerCheckInOut.CheckOut;
@@ -415,7 +427,7 @@ namespace Timesheet.DomainServices
                 t.MoneyPunish = 0;
             }
 
-            t.TrackerTime = dicUserNameToTracker.ContainsKey(user.UserName) ? dicUserNameToTracker[user.UserName].active_time : "0";
+            t.TrackerTime = dicUserNameToTracker.ContainsKey(user.UserName) ? dicUserNameToTracker[user.UserName].spent_time : "0:00:00";
             try
             {
                 rs.Add(t);
@@ -547,7 +559,7 @@ namespace Timesheet.DomainServices
                         CheckOut = checkIn?.VerifyEndTimeStr,
                         DateAt = selectedDate,
                         NoteReply = "Email not match",
-                        TrackerTime = dicUserNameToTracker.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTracker[checkIn.Email.Split("@")[0]].active_time : "0",
+                        TrackerTime = dicUserNameToTracker.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTracker[checkIn.Email.Split("@")[0]].spent_time : "0",
                     };
                     ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
 
@@ -1246,9 +1258,9 @@ namespace Timesheet.DomainServices
             }
             var listUserName = listUserCheckInOutInfo.Select(x => x.UserName).ToList();
 
-            var userTrackerTimes = _trackerService.GetTimeTrackerToDay(date, listUserName);
+            var userTrackerTimes = _komuService.GetDailyReport(date).tracker;
 
-            var dicUserNameToTrackerTime = userTrackerTimes.ToDictionary(s => s.email, s => new { s.ActiveMinute, s.active_time });
+            var dicUserNameToTrackerTime = userTrackerTimes.ToDictionary(s => s.email, s => new { s.SpentMinute, s.spent_time });
 
             var dicUserNameToRegisterWorkingMinute = GetDicUserNameToWorkingMinute(date, listUserName);
 
@@ -1258,19 +1270,19 @@ namespace Timesheet.DomainServices
             {
                 var registerMinute = dicUserNameToRegisterWorkingMinute.ContainsKey(item.UserName) ? dicUserNameToRegisterWorkingMinute[item.UserName] : 8 * 60;
                 var trackerInfo = dicUserNameToTrackerTime[item.UserName];
-                var trackerMinute = trackerInfo?.ActiveMinute ?? 0;
+                var trackerMinute = trackerInfo?.SpentMinute ?? 0;
                 var minMinute = percentageConfig * registerMinute;
 
                 if (item.IsNoCheckInAndNoCheckOut)
                 {
                     var message = $"{CommonUtils.GetDiscordTagUser(item.EmailAddress)} " +
                         $"- no check in and no check out - not enough tracker time (" +
-                        $"tracker time: {trackerInfo.active_time} < " +
+                        $"tracker time: {trackerInfo.spent_time} < " +
                         $"{percentageConfig * 100}% * {DateTimeUtils.ConvertMinuteToHour(registerMinute)}h)";
 
                     if (trackerMinute < minMinute)
                     {
-                        if (trackerInfo.ActiveMinute <= 0)
+                        if (trackerInfo.SpentMinute <= 0)
                         {
                             message = $"{CommonUtils.GetDiscordTagUser(item.EmailAddress)} " +
                             $"- no check in and no check out - no tracker time";
@@ -1286,7 +1298,7 @@ namespace Timesheet.DomainServices
                     {
                         message = $"{CommonUtils.GetDiscordTagUser(item.EmailAddress)} " +
                         $"- no check in and no check out - enough tracker time (" +
-                        $"tracker time: {trackerInfo.active_time} >= " +
+                        $"tracker time: {trackerInfo.spent_time} >= " +
                         $"{percentageConfig * 100}% * {DateTimeUtils.ConvertMinuteToHour(registerMinute)}h)";
 
                         result.List50k.Add(message);
@@ -1296,7 +1308,7 @@ namespace Timesheet.DomainServices
                 {
                     if (trackerMinute < minMinute)
                     {
-                        if (trackerInfo.ActiveMinute <= 0)
+                        if (trackerInfo.SpentMinute <= 0)
                         {
                             var message = $"{CommonUtils.GetDiscordTagUser(item.EmailAddress)} " +
                                 $"- no check out - no tracker time";
@@ -1307,7 +1319,7 @@ namespace Timesheet.DomainServices
                         {
                             var message = $"{CommonUtils.GetDiscordTagUser(item.EmailAddress)} " +
                                 $"- no check out - not enough tracker time (" +
-                                $"tracker time: {trackerInfo.active_time} < " +
+                                $"tracker time: {trackerInfo.spent_time} < " +
                                 $"{percentageConfig * 100}% * {DateTimeUtils.ConvertMinuteToHour(registerMinute)}h)";
                             result.List50k.Add(message);
                         }
