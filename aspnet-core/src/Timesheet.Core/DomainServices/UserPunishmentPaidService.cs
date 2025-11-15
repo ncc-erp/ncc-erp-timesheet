@@ -386,11 +386,15 @@ namespace Timesheet.DomainServices
                 var startOfMonth = targetMonth;
                 var endOfMonth = targetMonth.AddMonths(1);
 
+                var now = DateTime.Now;
+                var currentMonthStart = new DateTime(now.Year, now.Month, 1);
+                var isCurrentMonth = targetMonth == currentMonthStart;
+
                 var totalUnpaidPunishments = await WorkScope.GetAll<UserPunishment>()
                     .Where(p => p.UserId == userId)
                     .Where(p => !p.IsDeleted)
                     .Where(p => p.IsPaid == false || p.IsPaid == null)
-                    .Where(p => p.DateAt >= new DateTime(2025, 11, 1))
+                    .Where(p => p.DateAt >= startOfMonth)
                     .SumAsync(p => (int?)p.TotalMoney) ?? 0;
 
                 var totalClaimPoints = await WorkScope.GetAll<UserPunishmentRefund>()
@@ -415,45 +419,48 @@ namespace Timesheet.DomainServices
                     .Where(b => b.UserId == userId)
                     .FirstOrDefaultAsync();
 
-                if (balance == null)
+                if (isCurrentMonth)
                 {
-                    balance = new UserPunishmentBalance
+                    if (balance == null)
                     {
-                        UserId = userId,
-                        TotalPunishmentMoney = totalUnpaidPunishments,
-                        RemainPoints = calculatedRemainPoints
-                    };
-                    await WorkScope.InsertAsync(balance);
+                        balance = new UserPunishmentBalance
+                        {
+                            UserId = userId,
+                            TotalPunishmentMoney = totalUnpaidPunishments,
+                            RemainPoints = calculatedRemainPoints
+                        };
+                        await WorkScope.InsertAsync(balance);
+                    }
+                    else
+                    {
+                        var needUpdate = false;
+
+                        if (balance.TotalPunishmentMoney != totalUnpaidPunishments)
+                        {
+                            balance.TotalPunishmentMoney = totalUnpaidPunishments;
+                            needUpdate = true;
+                        }
+
+                        if (balance.RemainPoints != calculatedRemainPoints)
+                        {
+                            balance.RemainPoints = calculatedRemainPoints;
+                            needUpdate = true;
+                        }
+
+                        if (needUpdate)
+                        {
+                            await WorkScope.UpdateAsync(balance);
+                        }
+                    }
                 }
-                else
-                {
-                    var needUpdate = false;
 
-                    if (balance.TotalPunishmentMoney != totalUnpaidPunishments)
-                    {
-                        balance.TotalPunishmentMoney = totalUnpaidPunishments;
-                        needUpdate = true;
-                    }
+                var currentTotalPunishmentMoney = balance?.TotalPunishmentMoney ?? totalUnpaidPunishments;
+                var currentRemainPoints = balance?.RemainPoints ?? calculatedRemainPoints;
 
-                    if (balance.RemainPoints != calculatedRemainPoints)
-                    {
-                        balance.RemainPoints = calculatedRemainPoints;
-                        needUpdate = true;
-                    }
-
-                    if (needUpdate)
-                    {
-                        await WorkScope.UpdateAsync(balance);
-                    }
-                }
-
-                var currentTotalPunishmentMoney = balance.TotalPunishmentMoney;
-                var currentRemainPoints = balance.RemainPoints;
-
-                bool canPayAll = currentRemainPoints >= currentTotalPunishmentMoney;
+                bool canPayAll = isCurrentMonth && currentRemainPoints >= currentTotalPunishmentMoney;
                 bool usedRemainPoints = false;
 
-                if (canPayAll && currentTotalPunishmentMoney > 0)
+                if (isCurrentMonth && canPayAll && currentTotalPunishmentMoney > 0)
                 {
                     int newTotalPunishmentMoney = 0; 
                     int newRemainPoints = currentRemainPoints - currentTotalPunishmentMoney;
@@ -507,14 +514,10 @@ namespace Timesheet.DomainServices
                     _logger.LogInformation($"RemainPoints ({currentRemainPoints}) not enough to cover TotalPunishmentMoney ({currentTotalPunishmentMoney}). No changes made for user {userId} in {year}/{month}");
                 }
 
-                var updatedBalance = await WorkScope.GetAll<UserPunishmentBalance>()
-                    .Where(b => b.UserId == userId)
-                    .FirstOrDefaultAsync();
-
                 result.UserBalance = new GetUserPunishmentBalanceDto
                 {
-                    TotalPunishmentMoney = updatedBalance?.TotalPunishmentMoney ?? 0,
-                    RemainPoints = updatedBalance?.RemainPoints ?? 0
+                    TotalPunishmentMoney = currentTotalPunishmentMoney,
+                    RemainPoints = currentRemainPoints
                 };
 
                 result.TotalRemainPointsUsedInMonth = await GetTotalRemainPointsUsedInMonth(userId, year, month);
