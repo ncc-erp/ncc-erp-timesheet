@@ -1249,13 +1249,25 @@ namespace Timesheet.APIs.RequestDays
         [HttpPost]
         public async System.Threading.Tasks.Task ApproveRequest(long[] requestIds)
         {
+            var currentUser = await WorkScope.GetAsync<User>(AbpSession.UserId.Value);
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
+
+            var isPM = await WorkScope.GetAll<ProjectUser>()
+                    .Where(s => s.UserId == currentUser.Id && s.Type == ProjectUserType.PM)
+                    .Where(s => s.Project.Status == ProjectStatus.Active)
+                    .FirstOrDefaultAsync();
+
             foreach (var requestId in requestIds)
-            {
+            {   
                 var request = await WorkScope
                 .GetAll<AbsenceDayRequest>()
                 .Include(ar => ar.User) // Eager loading User
                 .FirstOrDefaultAsync(ar => ar.Id == requestId);
+
+                if (isPM != null && request.UserId == currentUser.Id && !isViewBranch)
+                {
+                    throw new UserFriendlyException("You cannot approve your own request!");
+                }
 
                 if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
