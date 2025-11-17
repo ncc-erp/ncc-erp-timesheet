@@ -24,5 +24,8 @@ namespace Timesheet.Entities
         [MaxLength(1000)]
         public string NoteReply { get; set; }
         public bool IsPaid { get; set; }
+        public long? UserPunishmentPaidId { get; set; }
+        [ForeignKey(nameof(UserPunishmentPaidId))]
+        public UserPunishmentPaid UserPunishmentPaid { get; set; }
     }
 }
