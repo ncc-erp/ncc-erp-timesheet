@@ -1265,16 +1265,6 @@ namespace Timesheet.APIs.RequestDays
                     return;
                 }
 
-                if (currentUser.BranchId != request.User.BranchId && isRequesterBranchDirector)
-                {
-                    throw new UserFriendlyException("You do not have the authority to approve/reject requests from the Branch Director of another branch.");
-                }
-
-                if (currentUser.BranchId == request.User.BranchId && isRequesterBranchDirector)
-                {
-                    throw new UserFriendlyException("You do not have the authority to approve/reject requests from other Branch Director.");
-                }
-
                 if (currentUser.BranchId == request.User.BranchId)
                 {
                     return;
