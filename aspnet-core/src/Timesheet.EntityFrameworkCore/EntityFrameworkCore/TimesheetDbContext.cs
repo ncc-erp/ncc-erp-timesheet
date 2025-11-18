@@ -74,6 +74,10 @@ namespace Ncc.EntityFrameworkCore
                 .WithMany()
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Restrict); // No cascade delete
+
+            modelBuilder.Entity<UserPunishmentBalance>()
+                .HasIndex(b => b.UserId)
+                .IsUnique();
         }
     }
 }

@@ -77,7 +77,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       const now = new Date();
       this.isCurrentMonth = (this.year === now.getFullYear() && (this.month + 1) === (now.getMonth() + 1));
       this.getData();
-      this.loadUserBalance();
     });
   }
 
