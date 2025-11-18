@@ -1,11 +1,14 @@
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.Runtime.Session;
+using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Ncc.Authorization.Users;
 using Ncc.IoC;
 using Newtonsoft.Json;
+using SimpleBase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +16,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Abp.UI;
-using SimpleBase;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.MMN.Dto;
@@ -103,6 +104,14 @@ namespace Timesheet.DomainServices
 
         public async Task<bool> MarkPaidTransactions(string transactionHash, int year, int month)
         {
+            using (var uow = UnitOfWorkManager.Begin(new UnitOfWorkOptions
+            {
+                IsTransactional = true
+            }))
+
+            {
+            try
+            {
             if (!_abpSession.UserId.HasValue)
             {
                 _logger.LogError($"Cannot mark paid transaction {transactionHash}: User not logged in");
@@ -145,10 +154,10 @@ namespace Timesheet.DomainServices
 
             var endOfMonth = targetMonthDate.AddMonths(1);
             var hasUnpaidPunishments = await WorkScope.GetAll<UserPunishment>()
-                .AnyAsync(p => p.UserId == _abpSession.UserId.Value 
-                    && !p.IsDeleted 
+                .AnyAsync(p => p.UserId == _abpSession.UserId.Value
+                    && !p.IsDeleted
                     && (p.IsPaid == false || p.IsPaid == null)
-                    && p.DateAt >= targetMonthDate 
+                    && p.DateAt >= targetMonthDate
                     && p.DateAt < endOfMonth);
 
             if (!hasUnpaidPunishments)
@@ -186,18 +195,18 @@ namespace Timesheet.DomainServices
             {
                 UserId = _abpSession.UserId.Value,
                 DateAt = DateTimeOffset.FromUnixTimeSeconds(transactionInfo.TransactionTimestamp).DateTime,
-                TargetMonth = targetMonthDate, 
+                TargetMonth = targetMonthDate,
                 Amount = amount,
                 TxHash = transactionInfo.Hash
             };
 
-            try
-            {
                 await _userPunishmentPaidRepository.InsertAsync(userPunishmentPaid);
 
                 await MarkPunishmentsAsPaid(_abpSession.UserId.Value, targetMonthDate);
 
                 await RecalculateUserPunishmentBalanceWithRemainPoints(_abpSession.UserId.Value, amount);
+
+                await uow.CompleteAsync();
 
                 return true;
             }
@@ -210,6 +219,7 @@ namespace Timesheet.DomainServices
                 return false;
             }
         }
+    }
 
         private async Task<MMNTransactionInfo> GetMMNTransactionsInfo(string transactionHash)
         {
@@ -217,15 +227,15 @@ namespace Timesheet.DomainServices
             {
                 HttpClientHandler clientHandler = new HttpClientHandler();
                 clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
-                
+
                 using (var httpClient = new HttpClient(clientHandler))
                 {
                     var url = $"{_indexerUri}/1337/tx/{transactionHash}/detail";
                     _logger.LogInformation($"Calling MMN API: {url}");
-                    
+
                     httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    
+
                     var response = await httpClient.GetAsync(url);
 
                     if (!response.IsSuccessStatusCode)
@@ -236,7 +246,7 @@ namespace Timesheet.DomainServices
 
                     var jsonString = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation($"MMN API Response: {jsonString}");
-                    
+
                     var transactionResponse = JsonConvert.DeserializeObject<MMNTransactionResponse>(jsonString);
 
                     if (transactionResponse?.Data?.Transaction == null)
@@ -267,7 +277,7 @@ namespace Timesheet.DomainServices
         private async Task MarkPunishmentsAsPaid(long userId, DateTime targetMonth)
         {
             var endOfMonth = targetMonth.AddMonths(1);
-            
+
             var unpaidPunishments = await WorkScope.GetAll<UserPunishment>()
                 .Where(p => p.UserId == userId)
                 .Where(p => p.DateAt >= targetMonth && p.DateAt < endOfMonth)
@@ -309,7 +319,7 @@ namespace Timesheet.DomainServices
                 var remainPointsUsed = Math.Min(currentRemainPoints, currentTotalPunishmentMoney);
                 balance.RemainPoints -= remainPointsUsed;
                 balance.TotalPunishmentMoney -= remainPointsUsed;
-                
+
                 _logger.LogInformation($"Applied {remainPointsUsed} RemainPoints for user {userId}. RemainPoints: {currentRemainPoints} -> {balance.RemainPoints}, TotalPunishmentMoney: {currentTotalPunishmentMoney} -> {balance.TotalPunishmentMoney}");
 
                 var refundRecord = new UserPunishmentRefund
@@ -326,10 +336,10 @@ namespace Timesheet.DomainServices
             {
                 var beforeHashAmount = balance.TotalPunishmentMoney;
                 balance.TotalPunishmentMoney = Math.Max(0, balance.TotalPunishmentMoney - hashAmount);
-                
+
                 _logger.LogInformation($"Applied hash amount {hashAmount} for user {userId}. TotalPunishmentMoney: {beforeHashAmount} -> {balance.TotalPunishmentMoney}");
             }
-            
+
             await WorkScope.UpdateAsync(balance);
             _logger.LogInformation($"Final balance for user {userId}: TotalPunishmentMoney = {balance.TotalPunishmentMoney}, RemainPoints = {balance.RemainPoints}");
         }
@@ -337,7 +347,12 @@ namespace Timesheet.DomainServices
         public async Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummaryAsync(int year, int month)
         {
             var result = new UserPunishmentSummaryDto();
+            using (var uow = UnitOfWorkManager.Begin(new UnitOfWorkOptions
+            {
+                IsTransactional = true
+            }))
 
+            {
             try
             {
                 if (!_abpSession.UserId.HasValue)
@@ -374,7 +389,7 @@ namespace Timesheet.DomainServices
                 var refunds = await WorkScope.GetAll<UserPunishmentRefund>()
                     .Where(r => r.UserId == userId)
                     .Where(r => !r.IsDeleted)
-                    .ToListAsync(); 
+                    .ToListAsync();
 
                 var totalClaimPoints = refunds
                     .Where(r => r.Type == PointType.IsClaim)
@@ -437,7 +452,7 @@ namespace Timesheet.DomainServices
 
                 if (isCurrentMonth && canPayAll && currentTotalPunishmentMoney > 0)
                 {
-                    int newTotalPunishmentMoney = 0; 
+                    int newTotalPunishmentMoney = 0;
                     int newRemainPoints = currentRemainPoints - currentTotalPunishmentMoney;
 
                     if (balance == null)
@@ -462,7 +477,7 @@ namespace Timesheet.DomainServices
                     var refundRecord = new UserPunishmentRefund
                     {
                         UserId = userId,
-                        UserPunishmentId = null, 
+                        UserPunishmentId = null,
                         Points = currentTotalPunishmentMoney,
                         Type = PointType.IsUse
                     };
@@ -508,7 +523,7 @@ namespace Timesheet.DomainServices
                 result.Message = usedRemainPoints
                     ? $"Successfully applied {currentTotalPunishmentMoney:N0} reward points. All penalties paid."
                     : "No reward points were used";
-
+                await uow.CompleteAsync();   
                 return result;
             }
             catch (Exception ex)
@@ -517,6 +532,8 @@ namespace Timesheet.DomainServices
                 result.Success = false;
                 result.Message = "An error occurred while processing punishment points";
                 return result;
+                }
             }
         }
     }
+}
