@@ -11,18 +11,17 @@
 /* Table Container */
 .table-container {
   position: relative;
-  border: 1px solid #dee2e6;
+  border: 2px solid #dee2e6;
   border-radius: 4px;
   overflow: hidden;
-  margin-top: 10px;
 }
 
 /* Fixed Header Wrapper */
 .table-header-wrapper {
   background: #fff;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
   overflow: hidden;
-  padding: 0 8px 0 0;
+  padding-right: 9px;
 }
 
 .table-header-fixed {
@@ -56,7 +55,7 @@
   transition: background-color 0.2s;
 }
 
-.table-header-fixed th.sortable:hover {
+.table-header-fixed th:hover {
   background-color: #e9ecef;
 }
 
@@ -64,13 +63,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .sort-icon {
   font-size: 18px;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   color: #6c757d;
 }
 
@@ -78,9 +77,21 @@
   color: #495057;
 }
 
+.special-icon {
+  display: inline-block;
+  touch-action: none;
+  user-select: none;
+  position: relative;
+}
+
 /* Column widths */
+.col-index {
+  width: 5%;
+}
+
 .col-name {
   width: 25%;
+  font-weight: 600;
 }
 
 .col-branch {
@@ -88,7 +99,12 @@
 }
 
 .col-data {
-  width: 10.83%; /* (100% - 25% - 10%) / 6 columns */
+  width: 10%; /* (100% - 25% - 10%) / 6 columns */
+}
+
+::ng-deep .custom-search-icon {
+  position: relative;
+  top: -5px;
 }
 
 /* Virtual Scroll Viewport */
@@ -211,16 +227,20 @@ mat-option strong {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .col-index {
+    width: 5%;
+  }
+
   .col-name {
-    width: 30%;
+    width: 25%;
   }
 
   .col-branch {
-    width: 15%;
+    width: 10%;
   }
 
   .col-data {
-    width: 9.17%; /* (100% - 30% - 15%) / 6 */
+    width: 10%; /* (100% - 30% - 15%) / 6 */
   }
 
   .header-content {
@@ -243,4 +263,33 @@ mat-option strong {
 .text-center.p-4 p {
   color: #6c757d;
   margin-bottom: 1rem;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  min-height: 100px;
+}
+
+/* Filter Note */
+.filter-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 4px;
+  color: #1976d2;
+  font-size: 14px;
+  width: 250px;
+}
+
+.filter-note mat-icon {
+  font-size: 16px;
+  height: 16px;
+  width: 16px;
+  color: #1976d2;
 }

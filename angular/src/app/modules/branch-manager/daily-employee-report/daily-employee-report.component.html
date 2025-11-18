@@ -24,103 +24,95 @@
 
       <div class="body">
         <div class="group">
-          <div class="col-lg-12">
-            <div class="row">
-              <!-- Branch Filter -->
-              <div class="pr-0 col-md-4 col-sm-6 col-xs-12 mb-0 row-item">
-                <mat-form-field
-                  style="padding-bottom: 0"
-                  class="w-100"
-                  appearance="outline"
+          <div class="row">
+            <!-- Search Filter -->
+            <div class="pr-0 col-md-3 col-sm-12 col-xs-12 mb-0 row-item">
+              <mat-form-field style="padding-bottom: 0;" class="w-100" appearance="outline">
+                <mat-label>{{ "Search" | localize }}</mat-label>
+                <div style="display: flex; align-items: center; justify-content: flex-start;">
+                  <input style="flex-grow: 1;" matInput [(ngModel)]="searchText"
+                    (ngModelChange)="onSearchChange()" placeholder="Search by name or branch..." />
+                  <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="searchText" (click)="clearSearch()">clear</mat-icon>
+                  <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix>search</mat-icon>
+                </div>
+              </mat-form-field>
+            </div>
+
+            <!-- Limit Filter -->
+            <div class="pr-0 col-md-2 col-sm-6 col-xs-12 mb-0 row-item">
+              <mat-form-field
+                style="padding-bottom: 0"
+                class="w-100"
+                appearance="outline"
+              >
+                <mat-label>{{ "Limit" | localize }}</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="limit"
+                  (keyup.enter)="onLimitEnter()"
+                  min="1"
+                />
+                <mat-icon
+                  class="special-icon"
+                  matSuffix
+                  matTooltip="Number of top employees to include in office working report"
                 >
-                  <mat-label>{{ "Branch" | localize }}</mat-label>
-                  <mat-select
-                    name="branchIds"
-                    multiple
-                    [(ngModel)]="branchIds"
-                    (ngModelChange)="searchOrFilter()"
-                  >
-                      <input
-                        matInput
-                        placeholder="Search branch..."
-                        [(ngModel)]="branchSearchText"
-                        (keyup)="filterBranch()"
-                        (click)="$event.stopPropagation()"
-                        style="width: 100%; padding: 4px"
-                      />
+                  info
+                </mat-icon>
+              </mat-form-field>
+            </div>
 
-                    <!-- Select All Option -->
-                      <mat-option 
-                        [value]="'all'" 
-                        (click)="toggleSelectAll($event)"
-                        [disabled]="true"
-                        style="cursor: pointer;"
-                      >
-                        <strong>
-                          {{ isAllSelected() ? ('Deselect All' | localize) : ('Select All' | localize) }}
-                        </strong>
-                      </mat-option>
-                    <mat-divider></mat-divider>
+            <!-- Branch Filter -->
+            <div class="pr-0 col-md-2 col-sm-6 col-xs-12 mb-0 row-item">
+              <mat-form-field
+                style="padding-bottom: 0"
+                class="w-100"
+                appearance="outline"
+              >
+                <mat-label>{{ "Branch" | localize }}</mat-label>
+                <mat-select
+                  name="branchIds"
+                  multiple
+                  [(ngModel)]="branchIds"
+                  (ngModelChange)="searchOrFilter()"
+                >
+                    <input
+                      matInput
+                      placeholder="Search branch..."
+                      [(ngModel)]="branchSearchText"
+                      (keyup)="filterBranch()"
+                      (click)="$event.stopPropagation()"
+                      style="width: 100%; padding: 4px"
+                    />
 
-                    <mat-option
-                      *ngFor="let branch of filteredBranches"
-                      [value]="branch.id"
+                  <!-- Select All Option -->
+                    <mat-option 
+                      [value]="'all'" 
+                      (click)="toggleSelectAll($event)"
+                      [disabled]="true"
+                      style="cursor: pointer;"
                     >
-                      {{ branch.name }}
+                      <strong>
+                        {{ getSelectAllText() | localize }}
+                      </strong>
                     </mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
+                  <mat-divider></mat-divider>
 
-              <!-- Limit Filter -->
-              <div class="pr-0 col-md-3 col-sm-6 col-xs-12 mb-0 row-item">
-                <mat-form-field
-                  style="padding-bottom: 0"
-                  class="w-100"
-                  appearance="outline"
-                >
-                  <mat-label>{{ "Limit" | localize }}</mat-label>
-                  <input
-                    matInput
-                    type="number"
-                    [(ngModel)]="limit"
-                    (keyup.enter)="searchOrFilter()"
-                    min="1"
-                  />
-                </mat-form-field>
-              </div>
-
-              <!-- Search Filter -->
-              <div class="pr-0 col-md-5 col-sm-12 col-xs-12 mb-0 row-item">
-                <mat-form-field
-                  style="padding-bottom: 0"
-                  class="w-100"
-                  appearance="outline"
-                >
-                  <mat-label>{{ "Search" | localize }}</mat-label>
-                  <input
-                    matInput
-                    [(ngModel)]="searchText"
-                    (ngModelChange)="onSearchChange()"
-                    placeholder="Search by name or branch..."
-                  />
-                  <mat-icon matSuffix>search</mat-icon>
-                  <button
-                    mat-icon-button
-                    matSuffix
-                    *ngIf="searchText"
-                    (click)="clearSearch()"
+                  <mat-option
+                    *ngFor="let branch of filteredBranches"
+                    [value]="branch.id"
                   >
-                    <mat-icon>clear</mat-icon>
-                  </button>
-                </mat-form-field>
-              </div>
+                    {{ branch.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
           </div>
         </div>
 
         <!-- Loading Indicator -->
-        <div *ngIf="isLoading" class="text-center p-4">
+        <div *ngIf="isLoading" class="text-center p-4 loading-container">
           <mat-spinner diameter="50"></mat-spinner>
         </div>
 
@@ -134,39 +126,50 @@
             <table class="table table-bordered table-header-fixed">
               <thead>
                 <tr>
-                  <th class="col-name">{{ "Name" | localize }}</th>
-                  <th class="col-branch">{{ "Branch" | localize }}</th>
-                  <th class="col-data sortable" (click)="onSort('wfhLW')">
+                  <th class="col-index" style="user-select: none;">No.</th>
+                  <th class="col-name sortable" (click)="onSort('fullName')" matTooltip="Employee full name">
+                    <div class="header-content">
+                      <span>{{ "Name" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('fullName') }}</mat-icon>
+                    </div>
+                  </th>
+                  <th class="col-branch sortable" (click)="onSort('branchName')" matTooltip="The branch where the employee is working">
+                    <div class="header-content">
+                      <span>{{ "Branch" | localize }}</span>
+                      <mat-icon class="sort-icon">{{ getSortIcon('branchName') }}</mat-icon>
+                    </div>
+                  </th>
+                  <th class="col-data sortable" (click)="onSort('wfhLW')" matTooltip="Total hours worked in last week from home">
                     <div class="header-content">
                       <span>{{ "WFH (LW)" | localize }}</span>
                       <mat-icon class="sort-icon">{{ getSortIcon('wfhLW') }}</mat-icon>
                     </div>
                   </th>
-                  <th class="col-data sortable" (click)="onSort('officeLW')">
+                  <th class="col-data sortable" (click)="onSort('officeLW')" matTooltip="Total hours worked in last week at office">
                     <div class="header-content">
                       <span>{{ "Office (LW)" | localize }}</span>
                       <mat-icon class="sort-icon">{{ getSortIcon('officeLW') }}</mat-icon>
                     </div>
                   </th>
-                  <th class="col-data sortable" (click)="onSort('totalAllLW')">
+                  <th class="col-data sortable" (click)="onSort('totalAllLW')" matTooltip="Total hours worked in last week (any location)">
                     <div class="header-content">
                       <span>{{ "All (LW)" | localize }}</span>
                       <mat-icon class="sort-icon">{{ getSortIcon('totalAllLW') }}</mat-icon>
                     </div>
                   </th>
-                  <th class="col-data sortable" (click)="onSort('wfhLM')">
+                  <th class="col-data sortable" (click)="onSort('wfhLM')" matTooltip="Total hours worked in last month from home">
                     <div class="header-content">
                       <span>{{ "WFH (LM)" | localize }}</span>
                       <mat-icon class="sort-icon">{{ getSortIcon('wfhLM') }}</mat-icon>
                     </div>
                   </th>
-                  <th class="col-data sortable" (click)="onSort('officeLM')">
+                  <th class="col-data sortable" (click)="onSort('officeLM')" matTooltip="Total hours worked in last month at office">
                     <div class="header-content">
                       <span>{{ "Office (LM)" | localize }}</span>
                       <mat-icon class="sort-icon">{{ getSortIcon('officeLM') }}</mat-icon>
                     </div>
                   </th>
-                  <th class="col-data sortable" (click)="onSort('totalAllLM')">
+                  <th class="col-data sortable" (click)="onSort('totalAllLM')" matTooltip="Total hours worked in last month (any location)">
                     <div class="header-content">
                       <span>{{ "All (LM)" | localize }}</span>
                       <mat-icon class="sort-icon">{{ getSortIcon('totalAllLM') }}</mat-icon>
@@ -188,11 +191,18 @@
             <table class="table table-bordered">
               <tbody>
                 <tr
-                  *cdkVirtualFor="let item of filteredProjects"
+                  *cdkVirtualFor="let item of filteredProjects; let i = index"
                   class="virtual-scroll-row"
                 >
-                  <td class="col-name">{{ item.userName }}</td>
-                  <td class="col-branch">{{ item.officeName }}</td>
+                  <td class="col-index">{{ i + 1 }}</td>
+                  <td class="col-name">{{ item.fullName }}</td>
+                  <td class="col-branch">
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+                      <span class="label" [style.backgroundColor]="item.branchColor">
+                        {{item.branchName}}
+                      </span>
+                    </div>
+                  </td>
                   <td class="col-data">{{ round(item.wfhLW) }}</td>
                   <td class="col-data">{{ round(item.officeLW) }}</td>
                   <td class="col-data">{{ round(item.totalAllLW) }}</td>
@@ -209,7 +219,7 @@
             <span class="total-count">
               {{ "Total" | localize }}:
               <strong>{{ filteredProjects.length }}</strong>
-              {{ filteredProjects.length === 1 ? "item" : "items" }}
+              {{ filteredProjects.length === 1 ? "record" : "records" }}
             </span>
           </div>
         </div>

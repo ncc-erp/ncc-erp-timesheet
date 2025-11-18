@@ -1,26 +1,17 @@
-.anomalies-report-container {
-  padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  
-  h1 {
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 28px;
-  }
-  
-  h2 {
-    color: #555;
-    margin: 20px 0;
-    font-size: 20px;
-  }
-  
-  h3 {
-    color: #666;
-    margin: 15px 0;
-    font-size: 18px;
-  }
+h1 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+
+h2 {
+  color: #555;
+  font-size: 20px;
+}
+
+h3 {
+  color: #666;
+  font-size: 24px;
 }
 
 .tabs {
@@ -99,6 +90,26 @@
   padding-top: 0 !important;
 }
 
+::ng-deep .custom-search-icon {
+  position: relative;
+  top: -5px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding-bottom: 5px;
+  margin-top: -20px;
+}
+
+.special-icon {
+  display: inline-block;
+  touch-action: none;
+  user-select: none;
+  position: relative;
+}
 
 @keyframes fadeIn {
   from {
@@ -115,10 +126,11 @@
   margin-bottom: 40px;
   
   .filter-note {
-    font-size: 13px;
-    color: #666;
-    font-style: italic;
-    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    padding-bottom: 5px;
   }
 }
 
@@ -129,10 +141,30 @@
 }
 
 .table-virtual thead {
-  position: sticky;
-  top: 0;
-  z-index: 10;
   color: black;
+  background-color: #f9f9f9;
+}
+
+.table-header {
+  margin-bottom: 0;
+}
+
+.table-container {
+  position: relative;
+  border: 2px solid #dee2e6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.table-header-wrapper {
+  background: #fff;
+  border-bottom: 2px solid #dee2e6;
+  overflow: hidden;
+  padding-right: 8px;
+}
+
+.table-body {
+  border-top: none;
 }
 
 .table-virtual th {
@@ -148,14 +180,20 @@
 .table-header-fixed th .header-content {
   display: flex;
   align-items: center;
-  gap: 6px;
   justify-content: center;
+  gap: 2px;
   cursor: pointer;
 }
 
+.table-virtual th:hover {
+  background-color: #e9ecef;
+}
+
 .table-virtual th .sort-icon {
-  font-size: 16px;
-  opacity: 0.8;
+  font-size: 18px;
+  width: 16px;
+  height: 16px;
+  color: #6c757d;
 }
 
 .table-virtual td {
@@ -164,47 +202,98 @@
   font-size: 14px;
 }
 
+.table-virtual td.col-index,
 .table-virtual td.col-branch,
 .table-virtual td.col-date,
 .table-virtual td.col-notes,
 .table-virtual td.col-hours,
-.table-virtual td.col-dates,
 .table-virtual td.col-count {
   text-align: center;
 }
 
 .table-virtual td.col-name {
   text-align: left;
+  font-weight: 600;
+}
+
+.col-index {
+  width: 5%;
+}
+
+.col-name {
+  width: 20%;
+}
+
+.col-branch {
+  width: 10%;
+}
+
+.col-date {
+  width: 15%;
+}
+
+.col-dates {
+  width: 35%;
+}
+
+.col-hours {
+  width: 15%;
+}
+
+.col-count {
+  width: 8%;
+  font-weight: 600;
 }
 
 .virtual-scroll-viewport {
   display: block !important;
-  overflow-y: auto !important;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow-y: overlay !important;
+  overflow-x: hidden;
 }
 
-/* Đảm bảo header không bị scroll mất */
 .virtual-scroll-viewport::-webkit-scrollbar {
   width: 8px;
 }
-.virtual-scroll-viewport::-webkit-scrollbar-thumb {
-  background: #c0c0c0;
-  border-radius: 4px;
+.virtual-scroll-viewport::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
+.virtual-scroll-viewport::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+.virtual-scroll-viewport::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
 .virtual-scroll-row:nth-child(odd) {
-  background-color: #f9f9f9;
+  background-color: #ffffff;
 }
 
 .virtual-scroll-row:nth-child(even) {
-  background-color: #ffffff;
+  background-color: #f9f9f9;
 }
 
 .virtual-scroll-row:hover {
   background-color: #e9ecef;
   transition: background-color 0.2s;
+}
+
+.table-footer {
+  background-color: #f8f9fa;
+  padding: 12px 15px;
+  border-top: 2px solid #dee2e6;
+  text-align: right;
+}
+
+.total-count {
+  font-size: 14px;
+  color: #495057;
+}
+
+.total-count strong {
+  color: #007bff;
+  font-size: 16px;
 }
 
 .data-table {
@@ -315,4 +404,12 @@
   .filter-section .branch-select {
     max-width: 100%;
   }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  min-height: 100px;
 }

@@ -13,7 +13,7 @@ import {
 } from "@app/service/api/daily-employee-report.service";
 import { BranchDto } from "@shared/service-proxies/service-proxies";
 
-type SortColumn = 'wfhLW' | 'officeLW' | 'totalAllLW' | 'wfhLM' | 'officeLM' | 'totalAllLM';
+type SortColumn = 'fullName' | 'branchName' | 'wfhLW' | 'officeLW' | 'totalAllLW' | 'wfhLM' | 'officeLM' | 'totalAllLM';
 type SortDirection = 'asc' | 'desc' | '';
 
 @Component({
@@ -113,17 +113,16 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
   applyFilters(): void {
     let result = [...this.projects];
 
-    // Apply search filter
     if (this.searchText && this.searchText.trim() !== "") {
       const search = this.searchText.toLowerCase().trim();
       result = result.filter(
         (item) =>
           item.userName.toLowerCase().includes(search) ||
-          item.officeName.toLowerCase().includes(search)
+          item.branchName.toLowerCase().includes(search) ||
+          item.fullName.toLowerCase().includes(search)
       );
     }
 
-    // Apply sort
     if (this.sortColumn && this.sortDirection) {
       result = this.sortData(result, this.sortColumn, this.sortDirection);
     }
@@ -135,16 +134,25 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
     if (!direction) return data;
 
     return [...data].sort((a, b) => {
-      const valueA = a[column] || 0;
-      const valueB = b[column] || 0;
+      let valueA: any = a[column] || '';
+      let valueB: any = b[column] || '';
 
-      return direction === 'asc' ? valueA - valueB : valueB - valueA;
+      if (column === 'fullName' || column === 'branchName') {
+        valueA = valueA.toLowerCase();
+        valueB = valueB.toLowerCase();
+        return direction === 'asc'
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
+
+      const numA = Number(valueA) || 0;
+      const numB = Number(valueB) || 0;
+      return direction === 'asc' ? numA - numB : numB - numA;
     });
   }
 
   onSort(column: SortColumn): void {
     if (this.sortColumn === column) {
-      // Cycle through: asc -> desc -> no sort
       if (this.sortDirection === 'asc') {
         this.sortDirection = 'desc';
       } else if (this.sortDirection === 'desc') {
@@ -173,28 +181,49 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
     this.applyFilters();
   }
 
+  onLimitEnter(): void {
+    const hasValue = this.limit !== null && this.limit !== undefined && !isNaN(Number(this.limit));
+
+    if (hasValue) {
+      this.searchOrFilter();
+    } else {
+      this.limit = undefined;
+      this.searchOrFilter();
+    }
+  }
+
   toggleSelectAll(event?: MouseEvent): void {
-  if (event) {
-    event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+    }
+
+    if (this.isAllSelected() || (this.branchIds && this.branchIds.length > 0)) {
+      this.branchIds = [];
+    } else {
+      this.branchIds = this.listBranch.map(b => b.id);
+    }
+
+    this.searchOrFilter();
   }
 
-  if (this.isAllSelected()) {
-    this.branchIds = [];
-  } else {
-    this.branchIds = this.listBranch.map(b => b.id);
+  isAllSelected(): boolean {
+    return (
+      this.branchIds &&
+      this.listBranch &&
+      this.branchIds.length === this.listBranch.length &&
+      this.branchIds.indexOf('all' as any) === -1
+    );
   }
 
-  this.searchOrFilter();
-}
-
-isAllSelected(): boolean {
-  return (
-    this.branchIds &&
-    this.listBranch &&
-    this.branchIds.length === this.listBranch.length &&
-    this.branchIds.indexOf('all' as any) === -1
-  );
-}
+  getSelectAllText(): string {
+    if (this.isAllSelected()) {
+      return 'Deselect All';
+    } else if (this.branchIds && this.branchIds.length > 0) {
+      return 'Deselect';
+    } else {
+      return 'Select All';
+    }
+  }
 
   clearAllFilters(): void {
     this.searchText = "";

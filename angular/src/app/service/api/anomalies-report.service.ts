@@ -12,20 +12,28 @@ export interface AnomaliesTimelogReportResponse {
   yesterdayAnomalies: {
     userId: number;
     employeeName: string;
+    userName: string;
     date: string;
     actualHours: string;
     notes: string;
-    branch: string;
+    branch: {
+      branchName: string;
+      branchColor: string;
+    };
   }[];
   lastWeekAnomalies: {
     userId: number;
     employeeName: string;
+    userName: string;
     datesMissed: string[];
     datesNoTrackerTime: string[];
     datesBelowThreshold: string[];
     count: number;
     notes: string;
-    branch: string;
+    branch: {
+      branchName: string;
+      branchColor: string;
+    };
   }[];
 }
 

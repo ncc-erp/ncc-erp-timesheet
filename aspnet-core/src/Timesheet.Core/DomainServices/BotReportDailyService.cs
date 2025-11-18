@@ -84,7 +84,8 @@ namespace Timesheet.DomainServices
 
                 if (!branchDict.Any())
                 {
-                    throw new UserFriendlyException("Invalid branch codes provided. None of the specified branch codes exist in the system.");
+                    branchDict = allBranches.ToDictionary(b => b.Id, b => b.DisplayName);
+                    branchNames.Add("All Branches");
                 }
 
                 officeUsers = allUsers

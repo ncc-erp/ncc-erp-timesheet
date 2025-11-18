@@ -47,17 +47,27 @@ namespace Timesheet.APIs.Reports
                 get;
                 set;
             }
+            public string UserName
+            {
+                get;
+                set;
+            }
             public string Email
             {
                 get;
                 set;
             }
-            public string OfficeName
+            public string BranchName
             {
                 get;
                 set;
             }
-            public string OfficeCode
+            public string BranchCode
+            {
+                get;
+                set;
+            }
+            public string BranchColor
             {
                 get;
                 set;
@@ -272,8 +282,9 @@ namespace Timesheet.APIs.Reports
                         Name = !string.IsNullOrEmpty(x.User.UserName) ? x.User.UserName :
                                (!string.IsNullOrEmpty(x.User.Name) ? x.User.Name : "Unknown"),
                         Email = x.User.EmailAddress,
-                        OfficeName = x.Branch != null ? x.Branch.Name : string.Empty,
-                        OfficeCode = x.Branch != null ? x.Branch.Code : string.Empty
+                        BranchName = x.Branch != null ? x.Branch.Name : string.Empty,
+                        BranchCode = x.Branch != null ? x.Branch.Code : string.Empty,
+                        BranchColor = x.Branch != null ? x.Branch.Color : string.Empty
                     })
                     .AsNoTracking()
                     .ToListAsync();
@@ -291,7 +302,7 @@ namespace Timesheet.APIs.Reports
             }).AsNoTracking().ToListAsync();
 
             var aggMap = new Dictionary<long,
-              (string name, string officeName, string officeCode, int minutes)>();
+              (string name, string branchName, string branchCode, string branchColor, int minutes)>();
 
             foreach (var t in tkList)
             {
@@ -328,7 +339,7 @@ namespace Timesheet.APIs.Reports
                 if (!aggMap.TryGetValue(userIdResolved.Value, out
                     var current))
                 {
-                    current = (userInfo.Name, userInfo.OfficeName, userInfo.OfficeCode, 0);
+                    current = (userInfo.Name, userInfo.BranchName, userInfo.BranchCode, userInfo.BranchColor, 0);
                 }
                 current.minutes += minutes;
                 aggMap[userIdResolved.Value] = current;
@@ -338,8 +349,9 @@ namespace Timesheet.APIs.Reports
             {
                 UserId = kv.Key,
                 UserName = kv.Value.name,
-                OfficeName = kv.Value.officeName,
-                OfficeCode = kv.Value.officeCode,
+                BranchName = kv.Value.branchName,
+                BranchCode = kv.Value.branchCode,
+                BranchColor = kv.Value.branchColor,
                 TotalAllLW = kv.Value.minutes / 60.0,
                 OfficeLW = kv.Value.minutes / 60.0
             }).OrderByDescending(x => x.TotalAllLW);
@@ -556,7 +568,7 @@ namespace Timesheet.APIs.Reports
                     int idx = 1;
                     foreach (var i in items)
                     {
-                        var officeShown = string.IsNullOrWhiteSpace(i.OfficeCode) ? i.OfficeName : i.OfficeCode;
+                        var officeShown = string.IsNullOrWhiteSpace(i.BranchCode) ? i.BranchName : i.BranchCode;
                         sb.AppendLine("{idx}) {i.UserName} | {officeShown} | {i.TotalAllLW}h");
                         idx++;
                     }
@@ -604,9 +616,11 @@ namespace Timesheet.APIs.Reports
                                {
                                    Id = u.Id,
                                    Name = u.FullName,
+                                   UserName = u.UserName,
                                    Email = u.EmailAddress ?? "",
-                                   OfficeName = b != null ? b.Name : "",
-                                   OfficeCode = b != null ? b.Code : ""
+                                   BranchName = b != null ? b.Name : "",
+                                   BranchCode = b != null ? b.Code : "",
+                                   BranchColor = b != null ? b.Color : ""
                                })
                              .AsNoTracking()
                              .ToListAsync();
@@ -673,9 +687,11 @@ namespace Timesheet.APIs.Reports
                     userReport = new OfficeWorkingTopLWLMDto
                     {
                         UserId = userInfo.Id,
-                        UserName = userInfo.Name,
-                        OfficeName = userInfo.OfficeName,
-                        OfficeCode = userInfo.OfficeCode
+                        FullName = userInfo.Name,
+                        UserName = userInfo.UserName,
+                        BranchName = userInfo.BranchName,
+                        BranchCode = userInfo.BranchCode,
+                        BranchColor = userInfo.BranchColor
                     };
                     result[tk.UserId] = userReport;
                 }
@@ -720,8 +736,9 @@ namespace Timesheet.APIs.Reports
                 {
                     UserId = user.Id,
                     UserName = user.Name,
-                    OfficeName = user.OfficeName,
-                    OfficeCode = user.OfficeCode
+                    BranchName = user.BranchName,
+                    BranchCode = user.BranchCode,
+                    BranchColor = user.BranchColor
                 };
             }
 

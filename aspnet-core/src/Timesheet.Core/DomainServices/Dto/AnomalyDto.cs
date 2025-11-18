@@ -8,22 +8,24 @@ namespace Timesheet.DomainServices.Dto
     {
         public long UserId { get; set; }
         public string EmployeeName { get; set; }
+        public string UserName { get; set; }
         public string Date { get; set; }
         public string ActualHours { get; set; }
         public string Notes { get; set; }
-        public string Branch { get; set; }
+        public BranchToDisplayDto Branch { get; set; }
     }
 
     public class LastWeekAnomalyDTO
     {
         public long UserId { get; set; }
         public string EmployeeName { get; set; }
+        public string UserName { get; set; }
         public List<string> DatesMissed { get; set; } = new List<string>();
         public List<string> DatesNoTrackerTime { get; set; } = new List<string>();
         public List<string> DatesBelowThreshold { get; set; } = new List<string>();
         public int Count { get; set; }
         public string Notes { get; set; }
-        public string Branch { get; set; }
+        public BranchToDisplayDto Branch { get; set; }
     }
 
     public class TimekeepingDto
@@ -59,5 +61,10 @@ namespace Timesheet.DomainServices.Dto
         public List<TimekeepingDto> Timekeepings { get; set; } = new List<TimekeepingDto>();
         public List<AbsenceRequestDto> AbsenceRequests { get; set; } = new List<AbsenceRequestDto>();
         public List<AbsenceDetailDto> AbsenceDetails { get; set; } = new List<AbsenceDetailDto>();
+    }
+    public class BranchToDisplayDto
+    {
+        public string BranchName { get; set; }
+        public string BranchColor { get; set; }
     }
 }

@@ -6,9 +6,11 @@ import { map } from 'rxjs/operators';
 
 export interface OfficeWorkingItem {
   userId: number;
+  fullName: string;
   userName: string;
-  officeName: string;
-  officeCode: string;
+  branchName: string;
+  branchCode: string;
+  branchColor: string;
   totalAllLW: number;
   officeLW: number;
   wfhLW: number;

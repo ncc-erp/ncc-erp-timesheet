@@ -7,9 +7,11 @@ namespace Timesheet.APIs.Reports.Dto
     public class OfficeWorkingTopLWLMDto
     {
         public long UserId { get; set; }
+        public string FullName { get; set; }
         public string UserName { get; set; }
-        public string OfficeName { get; set; }
-        public string OfficeCode { get; set; }
+        public string BranchName { get; set; }
+        public string BranchCode { get; set; }
+        public string BranchColor { get; set; }
         public double TotalAllLW { get; set; } 
         public double OfficeLW { get; set; } 
         public double WfhLW { get; set; }

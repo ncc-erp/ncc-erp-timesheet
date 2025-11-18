@@ -1,4 +1,3 @@
-<!-- anomalies-report.component.html -->
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="card main-content">
@@ -6,11 +5,7 @@
         <h2>{{ "Anomalies Timelog Report" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button
-              mat-icon-button
-              [matMenuTriggerFor]="headerMenu"
-              class="header-dropdown-mat-icon-button"
-            >
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
@@ -29,75 +24,42 @@
           <mat-tab label="{{ 'Yesterday' | localize }}">
             <!-- Yesterday Content -->
             <div class="tab-content-wrapper">
-              <div class="group">
-                <div class="col-lg-12">
+              <div class="body" style="padding-left: 0;">
+                <div class="group">
                   <div class="row">
+                    <div class="pr-0 col-md-3 col-sm-12 col-xs-12 mb-0 row-item">
+                      <mat-form-field style="padding-bottom: 0;" class="w-100" appearance="outline">
+                        <mat-label>{{ "Search" | localize }}</mat-label>
+                        <div style="display: flex; flex-direction: row; align-items: center; justify-items: center;">
+                          <input style="flex-grow: 1;" matInput [(ngModel)]="searchText"
+                            (ngModelChange)="onSearchChange()" placeholder="Search by name or branch..." />
+                          <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="searchText" (click)="clearSearch()">clear</mat-icon>
+                          <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix>search</mat-icon>
+                        </div>
+                      </mat-form-field>
+                    </div>
+
                     <!-- Branch Filter -->
-                    <div class="pr-0 col-md-6 col-sm-12 col-xs-12 mb-0 row-item">
-                      <mat-form-field
-                        style="padding-bottom: 0"
-                        class="w-100"
-                        appearance="outline"
-                      >
+                    <div class="pr-0 col-md-2 col-sm-12 col-xs-12 mb-0 row-item">
+                      <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
                         <mat-label>{{ "Branch" | localize }}</mat-label>
-                        <mat-select
-                          name="branchIds"
-                          multiple
-                          [(ngModel)]="selectedBranchIds"
-                          (ngModelChange)="onBranchSelectionChange()"
-                          (openedChange)="onSelectOpened($event)"
-                          panelClass="branch-select-panel"
-                        >
-                        <input
-                          matInput
-                          placeholder="Search branch..."
-                          [(ngModel)]="branchSearchText"
-                          (keyup)="filterBranch()"
-                          (click)="$event.stopPropagation()"
-                          style="width: 100%; padding: 4px"
-                        />
-                        <mat-option
-                          [value]="'all'"
-                          (click)="toggleSelectAll($event)"
-                          [disabled]="true"
-                          style="cursor: pointer;"
-                        >
-                        <strong>
-                          {{ isAllSelected() ? ('Deselect All' | localize) : ('Select All' | localize) }}
-                        </strong>
-                        </mat-option>
-                        <mat-divider></mat-divider>
-                          <mat-option
-                            *ngFor="let branch of filteredBranches"
-                            [value]="branch.id"
-                          >
+                        <mat-select name="branchIds" multiple [(ngModel)]="selectedBranchIdsYesterday"
+                          (ngModelChange)="onBranchSelectionChange()" (openedChange)="onSelectOpened($event)"
+                          panelClass="branch-select-panel">
+                          <input matInput placeholder="Search branch..." [(ngModel)]="branchSearchText"
+                            (keyup)="filterBranch()" (click)="$event.stopPropagation()"
+                            style="width: 100%; padding: 4px" />
+                          <mat-option [value]="'all'" (click)="toggleSelectAll($event)" [disabled]="true"
+                            style="cursor: pointer;">
+                            <strong>
+                              {{ getSelectAllText() | localize }}
+                            </strong>
+                          </mat-option>
+                          <mat-divider></mat-divider>
+                          <mat-option *ngFor="let branch of filteredBranches" [value]="branch.id">
                             {{ branch.name }}
                           </mat-option>
                         </mat-select>
-                      </mat-form-field>
-                    </div>
-                    <div class="pr-0 col-md-6 col-sm-12 col-xs-12 mb-0 row-item">
-                      <mat-form-field
-                        style="padding-bottom: 0"
-                        class="w-100"
-                        appearance="outline"
-                      >
-                        <mat-label>{{ "Search" | localize }}</mat-label>
-                        <input
-                          matInput
-                          [(ngModel)]="searchText"
-                          (ngModelChange)="onSearchChange()"
-                          placeholder="Search by name or branch..."
-                        />
-                        <mat-icon matSuffix>search</mat-icon>
-                        <button
-                          mat-icon-button
-                          matSuffix
-                          *ngIf="searchText"
-                          (click)="clearSearch()"
-                        >
-                        <mat-icon>clear</mat-icon>
-                        </button>
                       </mat-form-field>
                     </div>
                   </div>
@@ -105,8 +67,8 @@
               </div>
 
               <!-- Loading Indicator -->
-              <div *ngIf="isLoading" class="text-center p-4">
-                <mat-spinner diameter="50"></mat-spinner>
+              <div *ngIf="isLoading" class="loading-container">
+                <mat-spinner class="custom-loading-spinner" diameter="50"></mat-spinner>
               </div>
 
               <!-- Unplanned Absences Table -->
@@ -114,49 +76,65 @@
                 <h3 class="section-title">
                   <mat-icon>event_busy</mat-icon>
                   {{ "Unplanned Absences" | localize }}
-                  <span class="count-badge">({{ filteredYesterdayAbsences.length }})</span>
                 </h3>
 
                 <div *ngIf="filteredYesterdayAbsences.length > 0" class="table-container">
-                  <cdk-virtual-scroll-viewport
-                    [itemSize]="itemSize"
-                    class="virtual-scroll-viewport"
-                    [style.height.px]="Math.min(filteredYesterdayAbsences.length * itemSize, maxHeight)"
-                  >
-                    <table class="table table-bordered table-virtual">
+                  <div class="table-header-wrapper">
+                    <table class="table table-bordered table-virtual table-header">
                       <thead class="table-header-fixed">
                         <tr>
+                          <th class="col-index" style="user-select: none;">No.</th>
                           <th class="col-name sortable" (click)="sort('employeeName', 'yesterday', 'absence')">
                             <div class="header-content">
                               <span>{{ "Employee Name" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('employeeName') }}</mat-icon>
+                              <mat-icon class="sort-icon">{{ getSortIcon('employeeName', 'yesterday', 'absence') }}</mat-icon>
                             </div>
                           </th>
-                          <th class="col-branch sortable" (click)="sort('branch', 'yesterday', 'absence')">
+                          <th class="col-branch sortable" (click)="sort('branch', 'yesterday', 'absence')" matTooltip="The branch where the employee is working">
                             <div class="header-content">
                               <span>{{ "Branch" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('branch') }}</mat-icon>
+                              <mat-icon class="sort-icon">{{ getSortIcon('branch', 'yesterday', 'absence') }}</mat-icon>
                             </div>
                           </th>
-                          <th class="col-date sortable" (click)="sort('date', 'yesterday', 'absence')">
-                            <div class="header-content">
-                              <span>{{ "Date" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('date') }}</mat-icon>
-                            </div>
-                          </th>
-                          <th class="col-notes">{{ "Notes" | localize }}</th>
+                          <th class="col-date" matTooltip="The date when the employee has unplanned absence">Date</th>
+                          <th class="col-notes" style="user-select: none;">{{ "Notes" | localize }}</th>
                         </tr>
                       </thead>
+                    </table>
+                  </div>
+                  <cdk-virtual-scroll-viewport #yesterdayAbsenceViewport [itemSize]="itemSize"
+                    class="virtual-scroll-viewport"
+                    [style.height.px]="Math.min(filteredYesterdayAbsences.length * itemSize, maxHeight)">
+                    <table class="table table-bordered table-virtual table-body">
                       <tbody>
-                        <tr *cdkVirtualFor="let item of filteredYesterdayAbsences" class="virtual-scroll-row">
+                        <tr *cdkVirtualFor="let item of filteredYesterdayAbsences; let i = index" class="virtual-scroll-row">
+                          <td class="col-index">{{ i + 1 }}</td>
                           <td class="col-name">{{ item.employeeName }}</td>
-                          <td class="col-branch">{{ item.branch }}</td>
-                          <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
+                          <td class="col-branch">
+                            <span class="label" [style.backgroundColor]="item.branch.branchColor">
+                              {{item.branch.branchName}}
+                            </span>
+                          </td>
+                          <td class="col-date">
+                            <div class="row d-flex" style="flex-wrap: wrap; gap: 4px; margin-left: -10px;">
+                              <span class="label bg-blue" style="padding: 4px 4px; margin: 0 auto; margin-top: 4px;">
+                                {{ item.date | date:'dd/MM/yyyy' }}
+                              </span>
+                            </div>
+                          </td>
                           <td class="col-notes">{{ item.notes }}</td>
                         </tr>
                       </tbody>
                     </table>
                   </cdk-virtual-scroll-viewport>
+
+                  <div class="table-footer">
+                    <span class="total-count">
+                      {{ "Total" | localize }}:
+                      <strong>{{ filteredYesterdayAbsences.length }}</strong>
+                      {{ filteredYesterdayAbsences.length === 1 ? "record" : "records" }}
+                    </span>
+                  </div>
                 </div>
 
                 <div *ngIf="filteredYesterdayAbsences.length === 0" class="text-center p-4">
@@ -166,59 +144,75 @@
 
               <!-- Unapproved Short Working Hours Table -->
               <div *ngIf="!isLoading" class="table-section">
-                <h3 class="section-title">
+                <h3 class="section-title" style="margin-top: 20px;">
                   <mat-icon>access_time</mat-icon>
                   {{ "Unapproved Short Working Hours" | localize }}
-                  <span class="count-badge">({{ filteredYesterdayShortHours.length }})</span>
                 </h3>
 
                 <div *ngIf="filteredYesterdayShortHours.length > 0" class="table-container">
-                  <cdk-virtual-scroll-viewport
-                    [itemSize]="itemSize"
-                    class="virtual-scroll-viewport"
-                    [style.height.px]="Math.min(filteredYesterdayShortHours.length * itemSize, maxHeight)"
-                  >
-                    <table class="table table-bordered table-virtual">
+                  <div class="table-header-wrapper">
+                    <table class="table table-bordered table-virtual table-header">
                       <thead class="table-header-fixed">
                         <tr>
+                          <th class="col-index" style="user-select: none;">No.</th>
                           <th class="col-name sortable" (click)="sort('employeeName', 'yesterday', 'short')">
                             <div class="header-content">
                               <span>{{ "Employee Name" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('employeeName') }}</mat-icon>
+                              <mat-icon class="sort-icon">{{ getSortIcon('employeeName', 'yesterday', 'short') }}</mat-icon>
                             </div>
                           </th>
-                          <th class="col-branch sortable" (click)="sort('branch', 'yesterday', 'short')">
+                          <th class="col-branch sortable" (click)="sort('branch', 'yesterday', 'short')" matTooltip="The branch where the employee is working">
                             <div class="header-content">
                               <span>{{ "Branch" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('branch') }}</mat-icon>
+                              <mat-icon class="sort-icon">{{ getSortIcon('branch', 'yesterday', 'short') }}</mat-icon>
                             </div>
                           </th>
-                          <th class="col-date sortable" (click)="sort('date', 'yesterday', 'short')">
-                            <div class="header-content">
-                              <span>{{ "Date" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('date') }}</mat-icon>
-                            </div>
-                          </th>
-                          <th class="col-hours sortable" (click)="sort('actualHours', 'yesterday', 'short')">
+                          <th class="col-date" matTooltip="The date when the employee has unapproved short working hours">Date</th>
+                          <th class="col-hours sortable" (click)="sort('actualHours', 'yesterday', 'short')" matTooltip="The actual working time logged by the employee on that date">
                             <div class="header-content">
                               <span>{{ "Actual Hours" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('actualHours') }}</mat-icon>
+                              <mat-icon class="sort-icon">{{ getSortIcon('actualHours', 'yesterday', 'short') }}</mat-icon>
                             </div>
                           </th>
-                          <th class="col-notes">{{ "Notes" | localize }}</th>
+                          <th class="col-notes" style="user-select: none;">{{ "Notes" | localize }}</th>
                         </tr>
                       </thead>
+                    </table>
+                  </div>
+                  <cdk-virtual-scroll-viewport #yesterdayShortViewport [itemSize]="itemSize"
+                    class="virtual-scroll-viewport"
+                    [style.height.px]="Math.min(filteredYesterdayShortHours.length * itemSize, maxHeight)">
+                    <table class="table table-bordered table-virtual table-body">
                       <tbody>
-                        <tr *cdkVirtualFor="let item of filteredYesterdayShortHours" class="virtual-scroll-row">
+                        <tr *cdkVirtualFor="let item of filteredYesterdayShortHours; let i = index" class="virtual-scroll-row">
+                          <td class="col-index">{{ i + 1 }}</td>
                           <td class="col-name">{{ item.employeeName }}</td>
-                          <td class="col-branch">{{ item.branch }}</td>
-                          <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
-                          <td class="col-hours">{{ item.actualHours }}</td>
+                          <td class="col-branch">
+                            <span class="label" [style.backgroundColor]="item.branch.branchColor">
+                              {{item.branch.branchName}}
+                            </span>
+                          </td>
+                          <td class="col-date">
+                            <div class="row d-flex" style="flex-wrap: wrap; gap: 4px; margin-left: -10px;">
+                              <span class="label bg-blue" style="padding: 4px 4px; margin: 0 auto; margin-top: 4px;">
+                                {{ item.date | date:'dd/MM/yyyy' }}
+                              </span>
+                            </div>
+                          </td>
+                          <td class="col-hours">{{ item.actualHours.replace('h', '') }}</td>
                           <td class="col-notes">{{ item.notes }}</td>
                         </tr>
                       </tbody>
                     </table>
                   </cdk-virtual-scroll-viewport>
+
+                  <div class="table-footer">
+                    <span class="total-count">
+                      {{ "Total" | localize }}:
+                      <strong>{{ filteredYesterdayShortHours.length }}</strong>
+                      {{ filteredYesterdayShortHours.length === 1 ? "record" : "records" }}
+                    </span>
+                  </div>
                 </div>
 
                 <div *ngIf="filteredYesterdayShortHours.length === 0" class="text-center p-4">
@@ -231,73 +225,41 @@
           <mat-tab label="{{ 'Last Week' | localize }}">
             <!-- Last Week Content -->
             <div class="tab-content-wrapper">
-              <div class="group">
-                <div class="col-lg-12">
+              <div class="body" style="padding-left: 0;">
+                <div class="group">
                   <div class="row">
                     <!-- Branch Filter -->
-                    <div class="pr-0 col-md-6 col-sm-12 col-xs-12 mb-0 row-item">
-                      <mat-form-field
-                        style="padding-bottom: 0"
-                        class="w-100"
-                        appearance="outline"
-                      >
+                    <div class="pr-0 col-md-3 col-sm-12 col-xs-12 mb-0 row-item">
+                      <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
                         <mat-label>{{ "Branch" | localize }}</mat-label>
-                        <mat-select
-                          name="branchIds"
-                          multiple
-                          [(ngModel)]="selectedBranchIds"
-                          (ngModelChange)="onBranchSelectionChange()"
-                        >
-                        <input
-                          matInput
-                          placeholder="Search branch..."
-                          [(ngModel)]="branchSearchText"
-                          (keyup)="filterBranch()"
-                          (click)="$event.stopPropagation()"
-                          style="width: 100%; padding: 4px"
-                        />
-                        <mat-option
-                          [value]="'all'"
-                          (click)="toggleSelectAll($event)"
-                          [disabled]="true"
-                          style="cursor: pointer;"
-                        >
-                        <strong>
-                          {{ isAllSelected() ? ('Deselect All' | localize) : ('Select All' | localize) }}
-                        </strong>
-                        </mat-option>
-                        <mat-divider></mat-divider>
-                        <mat-option
-                          *ngFor="let branch of filteredBranches"
-                          [value]="branch.id"
-                        >
-                          {{ branch.name }}
-                        </mat-option>
+                        <mat-select name="branchIds" multiple [(ngModel)]="selectedBranchIdsLastWeek"
+                          (ngModelChange)="onBranchSelectionChange()">
+                          <input matInput placeholder="Search branch..." [(ngModel)]="branchSearchText"
+                            (keyup)="filterBranch()" (click)="$event.stopPropagation()"
+                            style="width: 100%; padding: 4px" />
+                          <mat-option [value]="'all'" (click)="toggleSelectAll($event)" [disabled]="true"
+                            style="cursor: pointer;">
+                            <strong>
+                              {{ getSelectAllText() | localize }}
+                            </strong>
+                          </mat-option>
+                          <mat-divider></mat-divider>
+                          <mat-option *ngFor="let branch of filteredBranches" [value]="branch.id">
+                            {{ branch.name }}
+                          </mat-option>
                         </mat-select>
                       </mat-form-field>
                     </div>
-                    <div class="pr-0 col-md-6 col-sm-12 col-xs-12 mb-0 row-item">
-                      <mat-form-field
-                        style="padding-bottom: 0"
-                        class="w-100"
-                        appearance="outline"
-                      >
+                    <div class="pr-0 col-md-2 col-sm-12 col-xs-12 mb-0 row-item">
+                      <mat-form-field style="padding-bottom: 0;" class="w-100" appearance="outline">
                         <mat-label>{{ "Search" | localize }}</mat-label>
-                        <input
-                          matInput
-                          [(ngModel)]="searchText"
-                          (ngModelChange)="onSearchChange()"
-                          placeholder="Search by name or branch..."
-                        />
-                        <mat-icon matSuffix>search</mat-icon>
-                        <button
-                          mat-icon-button
-                          matSuffix
-                          *ngIf="searchText"
-                          (click)="clearSearch()"
-                        >
-                        <mat-icon>clear</mat-icon>
-                        </button>
+                        <div style="display: flex; flex-direction: row; align-items: center; justify-items: center;">
+                          <input style="flex-grow: 1;" matInput [(ngModel)]="searchText"
+                            (ngModelChange)="onSearchChange()" placeholder="Search by name or branch..."
+                            style="width: 100%;" />
+                          <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="searchText" (click)="clearSearch()">clear</mat-icon>
+                          <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix>search</mat-icon>
+                        </div>
                       </mat-form-field>
                     </div>
                   </div>
@@ -305,7 +267,7 @@
               </div>
 
               <!-- Loading Indicator -->
-              <div *ngIf="isLoading" class="text-center p-4">
+              <div *ngIf="isLoading" class="loading-container">
                 <mat-spinner diameter="50"></mat-spinner>
               </div>
 
@@ -314,48 +276,57 @@
                 <h3 class="section-title">
                   <mat-icon>event_busy</mat-icon>
                   {{ "Unplanned Absences" | localize }}
-                  <span class="count-badge">({{ filteredLastWeekAbsences.length }})</span>
                 </h3>
 
                 <div *ngIf="filteredLastWeekAbsences.length > 0" class="table-container">
-                  <cdk-virtual-scroll-viewport
-                    [itemSize]="itemSize"
-                    class="virtual-scroll-viewport"
-                    [style.height.px]="Math.min(filteredLastWeekAbsences.length * itemSize, maxHeight)"
-                  >
-                    <table class="table table-bordered table-virtual">
+                  <div class="table-header-wrapper">
+                    <table class="table table-bordered table-virtual table-header">
                       <thead class="table-header-fixed">
                         <tr>
+                          <th class="col-index" style="user-select: none;">No.</th>
                           <th class="col-name sortable" (click)="sort('employeeName', 'lastWeek', 'absence')">
                             <div class="header-content">
                               <span>{{ "Employee Name" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('employeeName') }}</mat-icon>
+                              <mat-icon class="sort-icon">{{ getSortIcon('employeeName', 'lastWeek', 'absence') }}</mat-icon>
                             </div>
                           </th>
-                          <th class="col-branch sortable" (click)="sort('branch', 'lastWeek', 'absence')">
+                          <th class="col-branch sortable" (click)="sort('branch', 'lastWeek', 'absence')" matTooltip="The branch where the employee is working">
                             <div class="header-content">
                               <span>{{ "Branch" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('branch') }}</mat-icon>
+                              <mat-icon class="sort-icon">{{ getSortIcon('branch', 'lastWeek', 'absence') }}</mat-icon>
                             </div>
                           </th>
-                          <th class="col-dates">{{ "Dates Missed" | localize }}</th>
-                          <th class="col-count sortable" (click)="sort('count', 'lastWeek', 'absence')">
+                          <th class="col-dates" matTooltip="The dates when the employee has unplanned absence in last week">{{ "Dates Missed" | localize }}</th>
+                          <th class="col-count sortable" (click)="sort('count', 'lastWeek', 'absence')" matTooltip="The total number of unplanned absence days for the employee in last week">
                             <div class="header-content">
                               <span>{{ "Count" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('count') }}</mat-icon>
+                              <mat-icon class="sort-icon">{{ getSortIcon('count', 'lastWeek', 'absence') }}</mat-icon>
                             </div>
                           </th>
-                          <th class="col-notes">{{ "Notes" | localize }}</th>
+                          <th class="col-notes" style="user-select: none;">{{ "Notes" | localize }}</th>
                         </tr>
                       </thead>
+                    </table>
+                  </div>
+                  <cdk-virtual-scroll-viewport #lastWeekAbsenceViewport [itemSize]="itemSize"
+                    class="virtual-scroll-viewport"
+                    [style.height.px]="Math.min(filteredLastWeekAbsences.length * itemSize, maxHeight)">
+                    <table class="table table-bordered table-virtual table-body">
                       <tbody>
-                        <tr *cdkVirtualFor="let item of filteredLastWeekAbsences" class="virtual-scroll-row">
+                        <tr *cdkVirtualFor="let item of filteredLastWeekAbsences; let i = index" class="virtual-scroll-row">
+                          <td class="col-index">{{ i + 1 }}</td>
                           <td class="col-name">{{ item.employeeName }}</td>
-                          <td class="col-branch">{{ item.branch }}</td>
-                          <td class="col-dates">
-                            <span *ngFor="let date of item.datesMissed; let last = last" class="date-badge">
-                              {{ date | date:'dd/MM/yyyy' }}<ng-container *ngIf="!last">, </ng-container>
+                          <td class="col-branch">
+                            <span class="label" [style.backgroundColor]="item.branch.branchColor">
+                              {{item.branch.branchName}}
                             </span>
+                          </td>
+                          <td class="col-dates">
+                            <div class="row d-flex" style="flex-wrap: wrap; gap: 4px; margin-left: -10px;">
+                              <span class="label bg-blue" style="padding: 4px 4px; margin-top: 4px;" *ngFor="let date of item.datesMissed; let last = last">
+                                {{ date | date:'dd/MM/yyyy' }}
+                              </span>
+                            </div>
                           </td>
                           <td class="col-count">{{ item.count }}</td>
                           <td class="col-notes">{{ "No leave/WFH record" | localize }}</td>
@@ -363,6 +334,14 @@
                       </tbody>
                     </table>
                   </cdk-virtual-scroll-viewport>
+
+                  <div class="table-footer">
+                    <span class="total-count">
+                      {{ "Total" | localize }}:
+                      <strong>{{ filteredLastWeekAbsences.length }}</strong>
+                      {{ filteredLastWeekAbsences.length === 1 ? "record" : "records" }}
+                    </span>
+                  </div>
                 </div>
 
                 <div *ngIf="filteredLastWeekAbsences.length === 0" class="text-center p-4">
@@ -372,10 +351,9 @@
 
               <!-- Unapproved Short Working Hours Table -->
               <div *ngIf="!isLoading" class="table-section">
-                <h3 class="section-title">
+                <h3 class="section-title" style="margin-top: 20px;">
                   <mat-icon>access_time</mat-icon>
                   {{ "Unapproved Short Working Hours" | localize }}
-                  <span class="count-badge">({{ filteredLastWeekShortHours.length }})</span>
                 </h3>
                 <p class="filter-note">
                   <mat-icon>info</mat-icon>
@@ -383,47 +361,57 @@
                 </p>
 
                 <div *ngIf="filteredLastWeekShortHours.length > 0" class="table-container">
-                  <cdk-virtual-scroll-viewport
-                    [itemSize]="itemSize"
-                    class="virtual-scroll-viewport"
-                    [style.height.px]="Math.min(filteredLastWeekShortHours.length * itemSize, maxHeight)"
-                  >
-                    <table class="table table-bordered table-virtual">
+                  <div class="table-header-wrapper">
+                    <table class="table table-bordered table-virtual table-header">
                       <thead class="table-header-fixed">
                         <tr>
+                          <th class="col-index" style="user-select: none;">No.</th>
                           <th class="col-name sortable" (click)="sort('employeeName', 'lastWeek', 'short')">
                             <div class="header-content">
                               <span>{{ "Employee Name" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('employeeName') }}</mat-icon>
+                              <mat-icon class="sort-icon">{{ getSortIcon('employeeName', 'lastWeek', 'short') }}</mat-icon>
                             </div>
                           </th>
-                          <th class="col-branch sortable" (click)="sort('branch', 'lastWeek', 'short')">
+                          <th class="col-branch sortable" (click)="sort('branch', 'lastWeek', 'short')" matTooltip="The branch where the employee is working">
                             <div class="header-content">
                               <span>{{ "Branch" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('branch') }}</mat-icon>
+                              <mat-icon class="sort-icon">{{ getSortIcon('branch', 'lastWeek', 'short') }}</mat-icon>
                             </div>
                           </th>
-                          <th class="col-dates">{{ "Days Below Threshold" | localize }}</th>
-                          <th class="col-count sortable" (click)="sort('count', 'lastWeek', 'short')">
+                          <th class="col-dates" matTooltip="The dates when the employee has unapproved short working hours in last week">{{ "Dates Below Threshold" | localize }}</th>
+                          <th class="col-count sortable" (click)="sort('count', 'lastWeek', 'short')" matTooltip="The total number of days with unapproved short working hours for the employee in last week">
                             <div class="header-content">
                               <span>{{ "Count" | localize }}</span>
-                              <mat-icon class="sort-icon">{{ getSortIcon('count') }}</mat-icon>
+                              <mat-icon class="sort-icon">{{ getSortIcon('count', 'lastWeek', 'short') }}</mat-icon>
                             </div>
                           </th>
-                          <th class="col-notes">{{ "Notes" | localize }}</th>
+                          <th class="col-notes" style="user-select: none;">{{ "Notes" | localize }}</th>
                         </tr>
                       </thead>
+                    </table>
+                  </div>
+                  <cdk-virtual-scroll-viewport #lastWeekShortViewport [itemSize]="itemSize"
+                    class="virtual-scroll-viewport"
+                    [style.height.px]="Math.min(filteredLastWeekShortHours.length * itemSize, maxHeight)">
+                    <table class="table table-bordered table-virtual table-body">
                       <tbody>
-                        <tr *cdkVirtualFor="let item of filteredLastWeekShortHours" class="virtual-scroll-row">
+                        <tr *cdkVirtualFor="let item of filteredLastWeekShortHours; let i = index" class="virtual-scroll-row">
+                          <td class="col-index">{{ i + 1 }}</td>
                           <td class="col-name">{{ item.employeeName }}</td>
-                          <td class="col-branch">{{ item.branch }}</td>
+                          <td class="col-branch">
+                            <span class="label" [style.backgroundColor]="item.branch.branchColor">
+                              {{item.branch.branchName}}
+                            </span>
+                          </td>
                           <td class="col-dates">
-                            <span *ngFor="let date of item.datesBelowThreshold; let last = last" class="date-badge threshold">
-                              {{ date | date:'dd/MM/yyyy' }}<ng-container *ngIf="!last">, </ng-container>
-                            </span>
-                            <span *ngFor="let date of item.datesNoTrackerTime; let last = last" class="date-badge no-tracker">
-                              {{ date | date:'dd/MM/yyyy' }}<ng-container *ngIf="!last">, </ng-container>
-                            </span>
+                            <div class="row d-flex" style="flex-wrap: wrap; gap: 4px; margin-left: -10px;">
+                              <span class="label bg-blue" style="padding: 4px 4px; margin-top: 4px;" *ngFor="let date of item.datesBelowThreshold; let last = last">
+                                {{ date | date:'dd/MM/yyyy' }}
+                              </span>
+                              <span class="label bg-blue" style="padding: 4px 4px; margin-top: 4px;" *ngFor="let date of item.datesNoTrackerTime; let last = last">
+                                {{ date | date:'dd/MM/yyyy' }}
+                              </span>
+                            </div>
                           </td>
                           <td class="col-count">{{ item.count }}</td>
                           <td class="col-notes">{{ "No early leave/late arrival approval" | localize }}</td>
@@ -431,6 +419,14 @@
                       </tbody>
                     </table>
                   </cdk-virtual-scroll-viewport>
+
+                  <div class="table-footer">
+                    <span class="total-count">
+                      {{ "Total" | localize }}:
+                      <strong>{{ filteredLastWeekShortHours.length }}</strong>
+                      {{ filteredLastWeekShortHours.length === 1 ? "record" : "records" }}
+                    </span>
+                  </div>
                 </div>
 
                 <div *ngIf="filteredLastWeekShortHours.length === 0" class="text-center p-4">

@@ -4,6 +4,8 @@ import {
   OnInit,
   OnChanges,
   SimpleChanges,
+  ElementRef,
+  AfterViewInit
 } from "@angular/core";
 import {
   DailyProjectTimelogReportService,
@@ -11,12 +13,15 @@ import {
 } from "@app/service/api/daily-project-report.service";
 import { BranchDto } from "@shared/service-proxies/service-proxies";
 
+declare var ResizeObserver: any;
+
 interface ProjectReportItem {
   name: string;
   members: string[];
   totalTimelogLW: number;
   totalTimelogLM: number;
   memberCount: number;
+  expanded?: boolean;
 }
 
 type SortColumn = 'name' | 'memberCount' | 'totalTimelogLW' | 'totalTimelogLM';
@@ -27,7 +32,7 @@ type SortDirection = 'asc' | 'desc' | '';
   templateUrl: "./daily-project-report.component.html",
   styleUrls: ["./daily-project-report.component.css"],
 })
-export class DailyProjectReportComponent implements OnInit, OnChanges {
+export class DailyProjectReportComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() listBranch: BranchDto[];
   @Input() listBranchFilter: BranchDto[];
 
@@ -51,13 +56,15 @@ export class DailyProjectReportComponent implements OnInit, OnChanges {
   Math = Math;
 
   constructor(
-    private dailyProjectReportService: DailyProjectTimelogReportService
+    private dailyProjectReportService: DailyProjectTimelogReportService,
+    private elementRef: ElementRef
   ) {}
 
   ngOnInit(): void {
     if (!this.listBranchFilter) {
       this.listBranchFilter = this.listBranch || [];
     }
+    this.searchOrFilter();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -66,25 +73,32 @@ export class DailyProjectReportComponent implements OnInit, OnChanges {
     }
   }
 
-  searchOrFilter(): void {
-    if (!this.branchIds || this.branchIds.length === 0) {
-      console.warn("No branches selected. Please select at least one branch.");
-      this.projects = [];
-      this.filteredProjects = [];
-      this.isLoading = false;
-      return;
-    }
+  ngAfterViewInit() {
+    const viewport = this.elementRef.nativeElement.querySelector('cdk-virtual-scroll-viewport');
+    const header = this.elementRef.nativeElement.querySelector('.table-header-wrapper');
+    if (!viewport || !header) return;
 
+    const sync = () => {
+      const hasScroll = viewport.scrollHeight > viewport.clientHeight;
+      header.classList.toggle('has-scroll', hasScroll);
+    };
+
+    new ResizeObserver(sync).observe(viewport);
+    setTimeout(sync, 100);
+  }
+
+  searchOrFilter(): void {
     this.isLoading = true;
+    const branchIds = this.getBranchCodes();
 
     console.log("=== Search/Filter ===");
-    console.log("Branch IDs selected:", this.branchIds);
+    console.log("Branch IDs selected:", branchIds);
     console.log("Min Hours:", this.minHours);
     console.log("Top N:", this.topN);
 
     this.dailyProjectReportService
       .getDailyProjectTimelogReport(
-        this.branchIds,
+        branchIds,
         this.minHours,
         this.topN
       )
@@ -94,6 +108,7 @@ export class DailyProjectReportComponent implements OnInit, OnChanges {
           this.projects = (response.projects || []).map((p) => ({
             ...p,
             memberCount: p.members ? p.members.length : 0,
+            expanded: false,
           }));
           this.applyFilters();
 
@@ -109,6 +124,17 @@ export class DailyProjectReportComponent implements OnInit, OnChanges {
           this.isLoading = false;
         },
       });
+  }
+
+  getBranchCodes(): number[] {
+    if (
+      !this.branchIds ||
+      this.branchIds.length === 0 ||
+      this.branchIds.indexOf("all" as any) !== -1
+    ) {
+      return this.listBranch ? this.listBranch.map((branch) => branch.id) : [];
+    }
+    return this.branchIds;
   }
 
   filterBranch(): void {
@@ -194,38 +220,69 @@ export class DailyProjectReportComponent implements OnInit, OnChanges {
     this.applyFilters();
   }
 
-isAllSelected(): boolean {
-  return (
-    this.branchIds &&
-    this.listBranch &&
-    this.branchIds.length === this.listBranch.length
-  );
-}
+  onMinHoursEnter(): void {
+    const hasValue = this.minHours !== null && this.minHours !== undefined && !isNaN(Number(this.minHours));
 
-toggleSelectAll(event?: MouseEvent): void {
-  if (event) {
-    event.stopPropagation();
+    if (hasValue) {
+      this.searchOrFilter();
+    } else {
+      this.minHours = undefined;
+      this.searchOrFilter();
+    }
   }
 
-  if (this.isAllSelected()) {
-    this.branchIds = [];
-    this.projects = [];
-    this.filteredProjects = [];
-  } else {
-    this.branchIds = this.listBranch.map(b => b.id);
-    this.searchOrFilter();
-  }
-}
+  onLimitEnter(): void {
+    const hasValue = this.topN !== null && this.topN !== undefined && !isNaN(Number(this.topN));
 
-onBranchSelectionChange(selectedIds: number[]): void {
-  this.branchIds = selectedIds || [];
-  if (this.branchIds.length > 0) {
-    this.searchOrFilter();
-  } else {
-    this.projects = [];
-    this.filteredProjects = [];
+    if (hasValue) {
+      this.searchOrFilter();
+    } else {
+      this.topN = undefined;
+      this.searchOrFilter();
+    }
   }
-}
+
+  isAllSelected(): boolean {
+    return (
+      this.branchIds &&
+      this.listBranch &&
+      this.branchIds.length === this.listBranch.length
+    );
+  }
+
+  getSelectAllText(): string {
+    if (this.isAllSelected()) {
+      return 'Deselect All';
+    } else if (this.branchIds && this.branchIds.length > 0) {
+      return 'Deselect';
+    } else {
+      return 'Select All';
+    }
+  }
+  toggleSelectAll(event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    if (this.isAllSelected() || (this.branchIds && this.branchIds.length > 0)) {
+      this.branchIds = [];
+      this.projects = [];
+      this.filteredProjects = [];
+    } else {
+      this.branchIds = this.listBranch.map(b => b.id);
+      this.searchOrFilter();
+    }
+  }
+
+  onBranchSelectionChange(selectedIds: number[]): void {
+    this.branchIds = selectedIds || [];
+    if (this.branchIds.length > 0) {
+      this.searchOrFilter();
+    } else {
+      this.projects = [];
+      this.filteredProjects = [];
+    }
+  }
 
   clearAllFilters(): void {
     this.searchText = "";
@@ -246,10 +303,8 @@ onBranchSelectionChange(selectedIds: number[]): void {
     }
   }
 
-  getMembersDisplay(members: string[]): string {
-    if (!members || members.length === 0) return 'N/A';
-    if (members.length <= 3) return members.join(', ');
-    return `${members.slice(0, 3).join(', ')} +${members.length - 3} more`;
+  toggleExpanded(item: ProjectReportItem): void {
+    item.expanded = !item.expanded;
   }
 
   get filteredBranches() {
