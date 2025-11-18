@@ -80,6 +80,8 @@ namespace TimesheetApplication.UserPunishment
                 var createdEntity = await _workScope.InsertAsync(userPunishment);
                 await CurrentUnitOfWork.SaveChangesAsync();
 
+                await UpdateUserPunishmentBalanceAsync(input.UserId, (int)userPunishment.TotalMoney);
+
                 return MapToDto(createdEntity);
             }
             catch (UserFriendlyException)
@@ -783,6 +785,39 @@ namespace TimesheetApplication.UserPunishment
             {
                 _logger.LogError(ex, "Error in GetCompanyPunishmentComparisonAsync");
                 throw new UserFriendlyException("An error occurred while getting punishment comparison data.");
+            }
+        }
+        private async Task UpdateUserPunishmentBalanceAsync(long userId, int punishmentAmount)
+        {
+            try
+            {
+                var balance = await _workScope.GetAll<UserPunishmentBalance>()
+                    .FirstOrDefaultAsync(b => b.UserId == userId);
+
+                if (balance == null)
+                {
+                    balance = new UserPunishmentBalance
+                    {
+                        UserId = userId,
+                        TotalPunishmentMoney = punishmentAmount,
+                        RemainPoints = 0
+                    };
+                    await _workScope.InsertAsync(balance);
+                    _logger.LogInformation($"Created new UserPunishmentBalance for user {userId} with TotalPunishmentMoney = {punishmentAmount}");
+                }
+                else
+                {
+                    balance.TotalPunishmentMoney += punishmentAmount;
+                    await _workScope.UpdateAsync(balance);
+                    _logger.LogInformation($"Updated UserPunishmentBalance for user {userId}: added {punishmentAmount}, new total = {balance.TotalPunishmentMoney}");
+                }
+
+                await CurrentUnitOfWork.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating UserPunishmentBalance for user {userId}");
+                throw new UserFriendlyException("An error occurred while updating punishment balance.");
             }
         }
     }

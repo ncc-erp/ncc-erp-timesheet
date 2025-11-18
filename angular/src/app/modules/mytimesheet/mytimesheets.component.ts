@@ -3,7 +3,7 @@ import { InfoService } from '@app/service/api/info.service';
 import { CreateEditTimesheetItemComponent } from './create-edit-timesheet-item/create-edit-timesheet-item.component';
 import { MatDialog, MatTabChangeEvent, MAT_DIALOG_DATA } from '@angular/material';
 import { GetTimeSheetDto, DayOfWeek, WeekByTask, MyTimeSheetDto, ProjectIncludingTaskDto } from '../../service/api/model/common-DTO';
-import { Component, OnInit, Injector, Optional, Inject } from '@angular/core';
+import { Component, OnInit, Injector, Optional, Inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppComponentBase } from '@shared/app-component-base';
 import * as _ from 'lodash';
@@ -17,6 +17,7 @@ import { convertHourtoMinute, convertMinuteToHour, convertFloatHourToMinute } fr
 import { AbsenceDayService } from '@app/service/api/absence-day.service';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { UserServiceProxy } from '@shared/service-proxies/service-proxies';
+import { MytimesheetTardinessComponent } from './mytimesheet-tardiness/mytimesheet-tardiness.component';
 
 export const MY_FORMATS = {
   parse: {
@@ -75,6 +76,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
   autoSubmitAt: string;
   specialProjectTask = {} as SpecialProjectTaskSettingDTO;
   isRefresh: boolean = false;
+  @ViewChild(MytimesheetTardinessComponent) tardinessComponent: MytimesheetTardinessComponent;
   statusList = [
     { status: 1, label: 'Pending', class: 'bg-teal' },
     { status: 2, label: 'Approved', class: 'bg-green' },
@@ -616,13 +618,23 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
   unlockTimesheet() {
     const emailAddress = this.appSession.user.emailAddress;
 
-    this._infoService.unlockToLogTimesheet1(emailAddress).subscribe(
-      () => {
-        this.notify.success('Unlock Staff successfully!');
-        this.getAllTimeSheet();
-      },
-      (error) => {
-        this.notify.error('Failed to unlock Staff: ' + (error && error.error && error.error.error ? error.error.error.message : 'Unknown error'));
+    abp.message.confirm(
+      'Are you sure you want to unlock timesheet for last week?',
+      (result: boolean) => {
+        if (result) {
+          this._infoService.unlockToLogTimesheet1(emailAddress).subscribe(
+            () => {
+              this.notify.success('Unlock Staff successfully!');
+              this.getAllTimeSheet();
+              if (this.tardinessComponent) {
+                this.tardinessComponent.getData();
+              }
+            },
+            (error) => {
+              this.notify.error('Failed to unlock Staff: ' + (error && error.error && error.error.error ? error.error.error.message : 'Unknown error'));
+            }
+          );
+        }
       }
     );
   }

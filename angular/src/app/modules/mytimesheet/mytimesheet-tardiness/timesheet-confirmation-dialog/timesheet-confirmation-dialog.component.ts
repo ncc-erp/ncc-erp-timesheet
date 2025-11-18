@@ -1,8 +1,8 @@
-import { Component, OnInit, Inject, Injector } from '@angular/core';
+import { Component, OnInit, Inject, Injector, Output, EventEmitter } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatSnackBar } from '@angular/material';
 import * as moment from 'moment';
 import { APP_CONSTANT } from '@app/constant/api.constants';
-import { UserPunishmentPaidService, UserPunishmentPaidDto } from '@app/service/api/user-punishment-paid.service';
+import { UserPunishmentPaidService, UserPunishmentPaidDto, GetUserPunishmentBalanceDto } from '@app/service/api/user-punishment-paid.service';
 import { TransactionHashDialogComponent } from '../transaction-hash-dialog/transaction-hash-dialog.component';
 import { CalendarEvent, CalendarView } from 'angular-calendar';
 import { Subject } from 'rxjs';
@@ -16,19 +16,25 @@ import { AppComponentBase } from '@shared/app-component-base';
   styleUrls: ['./timesheet-confirmation-dialog.component.css']
 })
 export class TimesheetConfirmationDialogComponent extends AppComponentBase implements OnInit {
+  @Output() remainPointsUsed = new EventEmitter<void>();
   totalErrors: number = 0;
   totalFine: number = 0;
-  isPaid: boolean = false;
+  totalRemainPointsUsedInMonth: number = 0;
+  owedAmount: number = 0;
   weekNumber: number;
   weekRange: string;
   indexerUrl: string = '';
   donationUrl: string = '';
   punishmentItems: any[] = [];
   punishmentPaidItems: UserPunishmentPaidDto[] = [];
+  userBalance: GetUserPunishmentBalanceDto | null = null;
   isLoadingPaidData: boolean = false;
+  totalPaidPunishmentInMonth: number = 0;
   isLoadingCalendarData: boolean = false;
   selectedFund: string = 'Build School Fund';
   contributeToFund: boolean = false;
+  totalUsedRemainPoints: number = 0;
+  isCurrentMonth: boolean = true;
 
   view: CalendarView = CalendarView.Month;
   calendarView = CalendarView;
@@ -111,6 +117,22 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     
     this.loadPunishmentPaidData();
     this.loadTimesheetData();
+
+    this.totalUsedRemainPoints = this.data.totalUsedRemainPoints || 0;
+
+    const target = this.getTargetYearMonth();
+    const now = moment();
+    this.isCurrentMonth = (target.year === now.year() && target.month === (now.month() + 1));
+
+    if (this.data.summaryData) {
+      this.userBalance = this.data.summaryData.userBalance;
+      this.totalFine = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
+      this.totalPaidPunishmentInMonth = this.data.summaryData.totalPaidPunishmentInMonth;
+      this.totalRemainPointsUsedInMonth = this.data.summaryData.totalRemainPointsUsedInMonth || 0;
+      this.updateOwedAmount();
+    } else {
+      this.loadAllPunishmentData();
+    }
   }
 
   markAsPaid(): void {
@@ -124,44 +146,27 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       
       this.snackBar.open('Processing transaction...', '', { duration: 2000 });
       
-      let year: number;
-      let month: number;
-      
-      if (this.data.selectedDate) {
-        const selectedDate = moment(this.data.selectedDate);
-        month = selectedDate.month() + 1;
-        year = selectedDate.year();
-      } 
-      else if (this.punishmentItems.length > 0) {
-        const firstDate = moment(this.punishmentItems[0].date);
-        month = firstDate.month() + 1;
-        year = firstDate.year();
-      } 
-      else {
-        const currentDate = moment();
-        month = currentDate.month() + 1;
-        year = currentDate.year();
-      }
-      
+      const { year, month } = this.getTargetYearMonth();
+    
       this.userPunishmentPaidService.markPaidTransaction(transactionHash, year, month).subscribe(
-        result => {
-          if (result && result.success) {
-            this.isPaid = true;
+      result => {
+        if (result && result.success) {
             this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
-            
-            this.loadPunishmentPaidData();
-            if (this.data && typeof this.data.onPaidSuccess === 'function') {
-              this.data.onPaidSuccess();
-            }
-          } else {
-            this.snackBar.open(result.message || 'Failed to process transaction', 'Close', { duration: 5000 });
+          
+          this.loadPunishmentPaidData();
+          this.loadAllPunishmentData();
+          if (this.data && typeof this.data.onPaidSuccess === 'function') {
+            this.data.onPaidSuccess();
           }
-        },
-        error => {
+        } else {
+            this.snackBar.open(result.message || 'Failed to process transaction', 'Close', { duration: 5000 });
+        }
+      },
+      error => {
           console.error('Error marking transaction as paid:', error);
           this.snackBar.open('Error processing transaction. Please try again.', 'Close', { duration: 5000 });
-        }
-      );
+      }
+    );
     });
   }
 
@@ -198,35 +203,13 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   loadPunishmentPaidData(): void {
     this.isLoadingPaidData = true;
     
-    let year: number;
-    let month: number;
-    
-    if (this.data.selectedDate) {
-      const selectedDate = moment(this.data.selectedDate);
-      month = selectedDate.month() + 1;
-      year = selectedDate.year();
-    } 
-    else if (this.punishmentItems.length > 0) {
-      const firstDate = moment(this.punishmentItems[0].date);
-      month = firstDate.month() + 1;
-      year = firstDate.year();
-    }
-    else {
-      const fallbackDate = moment();
-      month = fallbackDate.month() + 1;
-      year = fallbackDate.year();
-    }
+    const { year, month } = this.getTargetYearMonth();
 
     try {
       this.userPunishmentPaidService.getForCurrentUser(year, month).subscribe(
         (result) => {
           this.punishmentPaidItems = result || [];
           
-          const totalPunishmentAmount = this.data.totalMonthlyPunishment || 0;
-          const totalPaidAmount = this.punishmentPaidItems.reduce((sum, item) => sum + (item.amount || 0), 0);
-          
-          this.totalFine = Math.max(0, totalPunishmentAmount - totalPaidAmount);
-          this.isPaid = totalPaidAmount >= totalPunishmentAmount;
           this.isLoadingPaidData = false;
         },
         (error) => {
@@ -243,11 +226,50 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   }
   
   calculateTotalPaidAmount(): number {
-    if (!this.punishmentPaidItems || this.punishmentPaidItems.length === 0) {
-      return 0;
+    return this.totalPaidPunishmentInMonth;
+  }
+
+  private getTargetYearMonth(): { year: number, month: number } {
+    if (this.data.selectedDate) {
+      const selectedDate = moment(this.data.selectedDate);
+      return { year: selectedDate.year(), month: selectedDate.month() + 1 };
+    } 
+    else if (this.punishmentItems.length > 0) {
+      const firstDate = moment(this.punishmentItems[0].date);
+      return { year: firstDate.year(), month: firstDate.month() + 1 };
     }
+    else {
+      const fallbackDate = moment();
+      return { year: fallbackDate.year(), month: fallbackDate.month() + 1 };
+    }
+  }
+
+  loadAllPunishmentData(): void {
+    const { year, month } = this.getTargetYearMonth();
     
-    return this.punishmentPaidItems.reduce((total, item) => total + (item.amount || 0), 0);
+    this.userPunishmentPaidService.previewApplyAndGetSummary(year, month).subscribe(
+      (result) => {
+        if (result && result.success) {
+          this.userBalance = result.userBalance;
+          this.totalFine = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
+          this.totalPaidPunishmentInMonth = result.totalPaidPunishmentInMonth;
+          this.totalRemainPointsUsedInMonth = result.totalRemainPointsUsedInMonth || 0;
+          this.updateOwedAmount();
+          this.totalUsedRemainPoints = result.totalRemainPointsUsedInMonth || 0;
+        }
+      },
+      (error) => {
+        console.error('Error loading punishment summary:', error);
+        this.userBalance = null;
+        this.totalPaidPunishmentInMonth = 0;
+      }
+    );
+  }
+
+  private updateOwedAmount(): void {
+    const totalPunishment = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
+    const remainPoints = this.userBalance ? this.userBalance.remainPoints : 0;
+    this.owedAmount = Math.max(0, totalPunishment - remainPoints);
   }
   
   loadTimesheetData(): void {

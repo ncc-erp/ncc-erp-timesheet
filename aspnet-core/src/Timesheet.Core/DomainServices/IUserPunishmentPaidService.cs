@@ -11,5 +11,7 @@ namespace Timesheet.DomainServices
         Task<List<UserPunishmentPaidDto>> GetByCurrentUserAsync(DateTime targetMonth);
 
         Task<bool> MarkPaidTransactions(string transactionHash, int year, int month);
+
+        Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummaryAsync(int year, int month);
     }
 }

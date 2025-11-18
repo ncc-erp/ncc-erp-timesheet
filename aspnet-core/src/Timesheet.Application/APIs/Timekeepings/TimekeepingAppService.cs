@@ -159,6 +159,14 @@ namespace Timesheet.APIs.Timekeepings
               {
                 PunishmentGroupType.UnlockTSIMS,
                 UserPunishmentType.UnlockTSIMS
+              },
+              {
+                PunishmentGroupType.UnlockTS_PM,
+                UserPunishmentType.UnlockPM
+              },
+              {
+                PunishmentGroupType.UnlockTS_Staff,
+                UserPunishmentType.UnlockStaff
               }
             };
 
@@ -872,6 +880,7 @@ namespace Timesheet.APIs.Timekeepings
                     throw new UserFriendlyException("No matching record found to update.");
 
                 var oldPunishmentType = userPunishment.Type;
+                var oldPunishmentMoney = userPunishment.TotalMoney; 
                 var newPunishmentType = input.StatusPunish;
 
                 var timekeeping = await this.WorkScope.GetAll<Timekeeping>()
@@ -897,6 +906,8 @@ namespace Timesheet.APIs.Timekeepings
                         .FirstOrDefaultAsync() ??
                         throw new UserFriendlyException("No matching punishment configuration found.");
                 }
+
+                await HandleRefundForPaidPunishment(userPunishment, newPunishmentType, punishmentSystem);
 
                 var result = await HandlePunishmentTypeChange(
                     userPunishment,
@@ -1220,6 +1231,76 @@ namespace Timesheet.APIs.Timekeepings
             {
                 timekeeping.UserNote = null;
                 await WorkScope.GetRepo<Timekeeping>().UpdateAsync(timekeeping);
+            }
+        }
+
+        private async Task HandleRefundForPaidPunishment(
+            UserPunishment userPunishment, 
+            UserPunishmentType newPunishmentType, 
+            PunishmentSystem punishmentSystem)
+        {
+            var oldPunishmentMoney = userPunishment.TotalMoney; 
+            int amountReduced = 0;
+
+            if (newPunishmentType == UserPunishmentType.NoPunish)
+            {
+                amountReduced = oldPunishmentMoney;
+            }
+            else if (punishmentSystem != null)
+            {
+                var newPunishmentMoney = punishmentSystem.Money * (userPunishment.Count > 0 ? userPunishment.Count : 1);
+                amountReduced = Math.Max(0, oldPunishmentMoney - newPunishmentMoney);
+            }
+
+            if (amountReduced > 0)
+            {
+                await UpdateUserPunishmentBalance(userPunishment.UserId, amountReduced, userPunishment.IsPaid);
+                Logger.Info($"Updated UserPunishmentBalance for user {userPunishment.UserId}: reduced {amountReduced}, isPaid: {userPunishment.IsPaid}");
+            }
+
+            if (userPunishment.IsPaid && amountReduced > 0)
+            {
+                var refund = new UserPunishmentRefund
+                {
+                    UserId = userPunishment.UserId,
+                    UserPunishmentId = userPunishment.Id,
+                    Points = amountReduced,
+                    Type = PointType.IsClaim
+                };
+                await WorkScope.InsertAsync(refund);
+                Logger.Info($"Created refund {amountReduced} points for user {userPunishment.UserId}, punishment {userPunishment.Id}");
+            }
+        }
+
+        private async Task UpdateUserPunishmentBalance(long userId, int punishmentAmountReduced = 0, bool isPaid = false)
+        {
+            var balance = await WorkScope.GetAll<UserPunishmentBalance>()
+                .FirstOrDefaultAsync(b => b.UserId == userId);
+
+            if (balance == null)
+            {
+                balance = new UserPunishmentBalance
+                {
+                    UserId = userId,
+                    TotalPunishmentMoney = 0,
+                    RemainPoints = isPaid ? punishmentAmountReduced : 0 
+                };
+                await WorkScope.InsertAsync(balance);
+                Logger.Info($"Created new UserPunishmentBalance for user {userId} with RemainPoints = {(isPaid ? punishmentAmountReduced : 0)} (isPaid: {isPaid})");
+            }
+            else
+            {
+                if (isPaid)
+                {
+                    balance.RemainPoints += punishmentAmountReduced;
+                }
+                else
+                {
+                    balance.TotalPunishmentMoney = Math.Max(0, balance.TotalPunishmentMoney - punishmentAmountReduced);
+                }
+                
+                await WorkScope.UpdateAsync(balance);
+                Logger.Info($"Updated UserPunishmentBalance for user {userId}: {(isPaid ? $"added {punishmentAmountReduced} to RemainPoints" : $"reduced TotalPunishmentMoney by {punishmentAmountReduced}")}. TotalPunishmentMoney = {balance.TotalPunishmentMoney}, RemainPoints = {balance.RemainPoints}");
             }
         }
     }

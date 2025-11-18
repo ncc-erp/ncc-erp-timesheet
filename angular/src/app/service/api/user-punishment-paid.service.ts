@@ -15,6 +15,31 @@ export interface MarkPaidTransactionResultDto {
   message: string;
 }
 
+export interface GetUserPunishmentBalanceDto {
+  totalPunishmentMoney: number;
+  remainPoints: number;
+  effectiveAmount: number;
+}
+
+export interface PreviewAndApplyPunishmentPointsDto {
+  success: boolean;
+  message: string;
+  totalHashAmount: number;
+  totalPunishmentMoney: number;
+  remainPoints: number;
+  effectivePunishmentAmount: number;
+  punishmentsMarkedAsPaid: number;
+  hasSufficientFunds: boolean;
+}
+
+export interface UserPunishmentSummaryDto {
+  success: boolean;
+  message: string;
+  userBalance: GetUserPunishmentBalanceDto;
+  totalRemainPointsUsedInMonth: number;
+  totalPaidPunishmentInMonth: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -47,6 +72,25 @@ export class UserPunishmentPaidService extends BaseApiService {
           return response.result;
         }
         return { success: false, message: 'Unknown error occurred' };
+      })
+    );
+  }
+
+  previewApplyAndGetSummary(year: number, month: number): Observable<UserPunishmentSummaryDto> {
+    const url = `${this.rootUrl}/PreviewApplyAndGetSummary`;
+    const body = { year: year, month: month };
+    return this.http.post<any>(url, body).pipe(
+      map(response => {
+        if (response && response.result) {
+          return response.result;
+        }
+        return {
+          success: false,
+          message: 'No data received',
+          userBalance: { totalPunishmentMoney: 0, remainPoints: 0, effectiveAmount: 0 },
+          totalRemainPointsUsedInMonth: 0,
+          totalPaidPunishmentInMonth: 0
+        };
       })
     );
   }
