@@ -206,6 +206,7 @@ namespace Timesheet.DomainServices
                     await RecalculateUserPunishmentBalanceWithRemainPoints(_abpSession.UserId.Value, amount);
 
                     await uow.CompleteAsync();
+
                     return true;
                 }
                 catch (Exception ex)
@@ -345,12 +346,12 @@ namespace Timesheet.DomainServices
         public async Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummaryAsync(int year, int month)
         {
             var result = new UserPunishmentSummaryDto();
-
             using (var uow = UnitOfWorkManager.Begin(new UnitOfWorkOptions
             {
                 IsTransactional = true
             }))
             {
+
                 try
                 {
                     if (!_abpSession.UserId.HasValue)
@@ -491,6 +492,7 @@ namespace Timesheet.DomainServices
 
                         currentTotalPunishmentMoney = balance.TotalPunishmentMoney;
                         currentRemainPoints = balance.RemainPoints;
+
                     }
                     else
                     {
@@ -513,12 +515,13 @@ namespace Timesheet.DomainServices
                         .Sum(p => p.TotalMoney);
 
                     result.TotalRemainPointsUsedInMonth = totalRemainPointsUsedInMonth;
+
                     result.TotalPaidPunishmentInMonth = totalPaidPunishmentInMonth;
+
                     result.Success = true;
                     result.Message = usedRemainPoints
                         ? $"Successfully applied {currentTotalPunishmentMoney:N0} reward points. All penalties paid."
                         : "No reward points were used";
-
                     await uow.CompleteAsync();
                     return result;
                 }
