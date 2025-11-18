@@ -104,118 +104,113 @@ namespace Timesheet.DomainServices
 
         public async Task<bool> MarkPaidTransactions(string transactionHash, int year, int month)
         {
-            using (var uow = UnitOfWorkManager.Begin(new UnitOfWorkOptions
+            if (!_abpSession.UserId.HasValue)
             {
-                IsTransactional = true
-            }))
+                _logger.LogError($"Cannot mark paid transaction {transactionHash}: User not logged in");
+                throw new UserFriendlyException("You must be logged in to mark a transaction as paid.");
+            }
+
+            var transactionInfo = await GetMMNTransactionsInfo(transactionHash);
+
+            if (transactionInfo.Status != MmnTransactionStatus.Finalized)
             {
-                try
-                {
-                    if (!_abpSession.UserId.HasValue)
-                    {
-                        _logger.LogError($"Cannot mark paid transaction {transactionHash}: User not logged in");
-                        throw new UserFriendlyException("You must be logged in to mark a transaction as paid.");
-                    }
+                _logger.LogError($"Transaction status {transactionInfo.Status} is not successful for hash {transactionHash}");
+                throw new UserFriendlyException("Transaction has not been confirmed successfully.");
+            }
 
-                    var transactionInfo = await GetMMNTransactionsInfo(transactionHash);
+            if (!decimal.TryParse(transactionInfo.Value, out decimal decimalAmount))
+            {
+                _logger.LogError($"Cannot parse transaction amount: {transactionInfo.Value}");
+                return false;
+            }
 
-                    if (transactionInfo.Status != MmnTransactionStatus.Finalized)
-                    {
-                        _logger.LogError($"Transaction status {transactionInfo.Status} is not successful for hash {transactionHash}");
-                        throw new UserFriendlyException("Transaction has not been confirmed successfully.");
-                    }
+            var transactionDate = DateTimeOffset.FromUnixTimeSeconds(transactionInfo.TransactionTimestamp).DateTime;
+            var targetMonthDate = new DateTime(year, month, 1);
+            
+            _logger.LogInformation($"Processing payment: Transaction date is {transactionDate:yyyy-MM-dd}, applying to month {targetMonthDate:yyyy-MM}");
 
-                    if (!decimal.TryParse(transactionInfo.Value, out decimal decimalAmount))
-                    {
-                        _logger.LogError($"Cannot parse transaction amount: {transactionInfo.Value}");
-                        return false;
-                    }
+            if (transactionInfo.ToAddress != _donationWallet)
+            {
+                _logger.LogError($"Transaction to_address {transactionInfo.ToAddress} does not match donation wallet {_donationWallet}");
+                throw new UserFriendlyException($"Transaction must be sent to the official donation wallet. Please check your transaction details.");
+            }
 
-                    var transactionDate = DateTimeOffset.FromUnixTimeSeconds(transactionInfo.TransactionTimestamp).DateTime;
-                    var targetMonthDate = new DateTime(year, month, 1);
+            var currentUser = await _userRepository.GetAsync(_abpSession.UserId.Value);
+            
+            var expectedFromAddress = GenerateAddress(currentUser.MezonUserId);
+            if (transactionInfo.FromAddress != expectedFromAddress)
+            {
+                _logger.LogError($"Transaction from_address {transactionInfo.FromAddress} does not match expected address {expectedFromAddress} for user {currentUser.MezonUserId}");
+                throw new UserFriendlyException($"Transaction must be sent from your own wallet. Please use your personal wallet to make the payment.");
+            }
 
-                    _logger.LogInformation($"Processing payment: Transaction date is {transactionDate:yyyy-MM-dd}, applying to month {targetMonthDate:yyyy-MM}");
+            var endOfMonth = targetMonthDate.AddMonths(1);
+            var hasUnpaidPunishments = await WorkScope.GetAll<UserPunishment>()
+                .AnyAsync(p => p.UserId == _abpSession.UserId.Value 
+                    && !p.IsDeleted 
+                    && (p.IsPaid == false || p.IsPaid == null)
+                    && p.DateAt >= targetMonthDate 
+                    && p.DateAt < endOfMonth);
 
-                    if (transactionInfo.ToAddress != _donationWallet)
-                    {
-                        _logger.LogError($"Transaction to_address {transactionInfo.ToAddress} does not match donation wallet {_donationWallet}");
-                        throw new UserFriendlyException($"Transaction must be sent to the official donation wallet. Please check your transaction details.");
-                    }
+            if (!hasUnpaidPunishments)
+            {
+                _logger.LogWarning($"User {_abpSession.UserId.Value} attempted to make payment for {targetMonthDate:yyyy-MM} but has no unpaid punishments in that month");
+                throw new UserFriendlyException($"You cannot make a payment for {targetMonthDate:yyyy-MM} because you have no unpaid punishments in that month.");
+            }
 
-                    var currentUser = await _userRepository.GetAsync(_abpSession.UserId.Value);
+            var existingTransaction = await _userPunishmentPaidRepository
+                .GetAll()
+                .FirstOrDefaultAsync(x => x.TxHash == transactionHash);
 
-                    var expectedFromAddress = GenerateAddress(currentUser.MezonUserId);
-                    if (transactionInfo.FromAddress != expectedFromAddress)
-                    {
-                        _logger.LogError($"Transaction from_address {transactionInfo.FromAddress} does not match expected address {expectedFromAddress} for user {currentUser.MezonUserId}");
-                        throw new UserFriendlyException($"Transaction must be sent from your own wallet. Please use your personal wallet to make the payment.");
-                    }
+            if (existingTransaction != null)
+            {
+                _logger.LogWarning($"Transaction with hash {transactionHash} already exists in the database");
+                throw new UserFriendlyException($"Transaction with hash {transactionHash} has already been processed. Please use a different transaction.");
+            }
 
-                    var endOfMonth = targetMonthDate.AddMonths(1);
-                    var hasUnpaidPunishments = await WorkScope.GetAll<UserPunishment>()
-                        .AnyAsync(p => p.UserId == _abpSession.UserId.Value
-                            && !p.IsDeleted
-                            && (p.IsPaid == false || p.IsPaid == null)
-                            && p.DateAt >= targetMonthDate
-                            && p.DateAt < endOfMonth);
+            int amount = (int)(decimalAmount / TOKEN_DECIMAL_FACTOR);
 
-                    if (!hasUnpaidPunishments)
-                    {
-                        _logger.LogWarning($"User {_abpSession.UserId.Value} attempted to make payment for {targetMonthDate:yyyy-MM} but has no unpaid punishments in that month");
-                        throw new UserFriendlyException($"You cannot make a payment for {targetMonthDate:yyyy-MM} because you have no unpaid punishments in that month.");
-                    }
+            var userBalance = await WorkScope.GetAll<UserPunishmentBalance>()
+                .FirstOrDefaultAsync(b => b.UserId == _abpSession.UserId.Value);
+            
+            var totalPunishmentMoney = userBalance?.TotalPunishmentMoney ?? 0;
+            var remainPoints = userBalance?.RemainPoints ?? 0;
+            var requiredAmount = Math.Max(0, totalPunishmentMoney - remainPoints);
+            
+            if (amount < requiredAmount)
+            {
+                _logger.LogError($"Transaction amount {amount} is less than required amount {requiredAmount} (TotalPunishmentMoney: {totalPunishmentMoney} - RemainPoints: {remainPoints}) for user {_abpSession.UserId.Value}");
+                throw new UserFriendlyException($"Transaction amount ({amount:N0} VNĐ) is insufficient to cover required payment ({requiredAmount:N0} VNĐ). Your current balance: {totalPunishmentMoney:N0} VNĐ penalty - {remainPoints:N0} reward points.");
+            }
 
-                    var existingTransaction = await _userPunishmentPaidRepository
-                        .GetAll()
-                        .FirstOrDefaultAsync(x => x.TxHash == transactionHash);
+            var userPunishmentPaid = new UserPunishmentPaid
+            {
+                UserId = _abpSession.UserId.Value,
+                DateAt = DateTimeOffset.FromUnixTimeSeconds(transactionInfo.TransactionTimestamp).DateTime,
+                TargetMonth = targetMonthDate, 
+                Amount = amount,
+                TxHash = transactionInfo.Hash
+            };
 
-                    if (existingTransaction != null)
-                    {
-                        _logger.LogWarning($"Transaction with hash {transactionHash} already exists in the database");
-                        throw new UserFriendlyException($"Transaction with hash {transactionHash} has already been processed. Please use a different transaction.");
-                    }
+            try
+            {
+                await _userPunishmentPaidRepository.InsertAsync(userPunishmentPaid);
 
-                    int amount = (int)(decimalAmount / TOKEN_DECIMAL_FACTOR);
+                await MarkPunishmentsAsPaid(_abpSession.UserId.Value, targetMonthDate);
 
-                    var userBalance = await WorkScope.GetAll<UserPunishmentBalance>()
-                        .FirstOrDefaultAsync(b => b.UserId == _abpSession.UserId.Value);
+                await RecalculateUserPunishmentBalanceWithRemainPoints(_abpSession.UserId.Value, amount);
 
-                    var totalPunishmentMoney = userBalance?.TotalPunishmentMoney ?? 0;
-                    var remainPoints = userBalance?.RemainPoints ?? 0;
-                    var requiredAmount = Math.Max(0, totalPunishmentMoney - remainPoints);
+                await uow.CompleteAsync();
 
-                    if (amount < requiredAmount)
-                    {
-                        _logger.LogError($"Transaction amount {amount} is less than required amount {requiredAmount} (TotalPunishmentMoney: {totalPunishmentMoney} - RemainPoints: {remainPoints}) for user {_abpSession.UserId.Value}");
-                        throw new UserFriendlyException($"Transaction amount ({amount:N0} VNĐ) is insufficient to cover required payment ({requiredAmount:N0} VNĐ). Your current balance: {totalPunishmentMoney:N0} VNĐ penalty - {remainPoints:N0} reward points.");
-                    }
-
-                    var userPunishmentPaid = new UserPunishmentPaid
-                    {
-                        UserId = _abpSession.UserId.Value,
-                        DateAt = DateTimeOffset.FromUnixTimeSeconds(transactionInfo.TransactionTimestamp).DateTime,
-                        TargetMonth = targetMonthDate,
-                        Amount = amount,
-                        TxHash = transactionInfo.Hash
-                    };
-
-                    await _userPunishmentPaidRepository.InsertAsync(userPunishmentPaid);
-
-                    await MarkPunishmentsAsPaid(_abpSession.UserId.Value, targetMonthDate);
-
-                    await RecalculateUserPunishmentBalanceWithRemainPoints(_abpSession.UserId.Value, amount);
-
-                    await uow.CompleteAsync();
-
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    if (ex is UserFriendlyException)
-                        throw;
-
-                    _logger.LogError(ex, $"Error marking transaction {transactionHash} as paid");
-                    return false;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserFriendlyException)
+                    throw;
+                    
+                _logger.LogError(ex, $"Error marking transaction {transactionHash} as paid");
+                return false;
                 }
             }
         }
