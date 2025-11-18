@@ -134,7 +134,7 @@ namespace Timesheet.DomainServices
 
             var transactionDate = DateTimeOffset.FromUnixTimeSeconds(transactionInfo.TransactionTimestamp).DateTime;
             var targetMonthDate = new DateTime(year, month, 1);
-
+            
             _logger.LogInformation($"Processing payment: Transaction date is {transactionDate:yyyy-MM-dd}, applying to month {targetMonthDate:yyyy-MM}");
 
             if (transactionInfo.ToAddress != _donationWallet)
@@ -144,7 +144,7 @@ namespace Timesheet.DomainServices
             }
 
             var currentUser = await _userRepository.GetAsync(_abpSession.UserId.Value);
-
+            
             var expectedFromAddress = GenerateAddress(currentUser.MezonUserId);
             if (transactionInfo.FromAddress != expectedFromAddress)
             {
@@ -154,10 +154,10 @@ namespace Timesheet.DomainServices
 
             var endOfMonth = targetMonthDate.AddMonths(1);
             var hasUnpaidPunishments = await WorkScope.GetAll<UserPunishment>()
-                .AnyAsync(p => p.UserId == _abpSession.UserId.Value
-                    && !p.IsDeleted
+                .AnyAsync(p => p.UserId == _abpSession.UserId.Value 
+                    && !p.IsDeleted 
                     && (p.IsPaid == false || p.IsPaid == null)
-                    && p.DateAt >= targetMonthDate
+                    && p.DateAt >= targetMonthDate 
                     && p.DateAt < endOfMonth);
 
             if (!hasUnpaidPunishments)
@@ -180,11 +180,11 @@ namespace Timesheet.DomainServices
 
             var userBalance = await WorkScope.GetAll<UserPunishmentBalance>()
                 .FirstOrDefaultAsync(b => b.UserId == _abpSession.UserId.Value);
-
+            
             var totalPunishmentMoney = userBalance?.TotalPunishmentMoney ?? 0;
             var remainPoints = userBalance?.RemainPoints ?? 0;
             var requiredAmount = Math.Max(0, totalPunishmentMoney - remainPoints);
-
+            
             if (amount < requiredAmount)
             {
                 _logger.LogError($"Transaction amount {amount} is less than required amount {requiredAmount} (TotalPunishmentMoney: {totalPunishmentMoney} - RemainPoints: {remainPoints}) for user {_abpSession.UserId.Value}");
@@ -195,7 +195,7 @@ namespace Timesheet.DomainServices
             {
                 UserId = _abpSession.UserId.Value,
                 DateAt = DateTimeOffset.FromUnixTimeSeconds(transactionInfo.TransactionTimestamp).DateTime,
-                TargetMonth = targetMonthDate,
+                TargetMonth = targetMonthDate, 
                 Amount = amount,
                 TxHash = transactionInfo.Hash
             };
@@ -214,7 +214,7 @@ namespace Timesheet.DomainServices
             {
                 if (ex is UserFriendlyException)
                     throw;
-
+                    
                 _logger.LogError(ex, $"Error marking transaction {transactionHash} as paid");
                 return false;
             }
@@ -227,15 +227,15 @@ namespace Timesheet.DomainServices
             {
                 HttpClientHandler clientHandler = new HttpClientHandler();
                 clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
-
+                
                 using (var httpClient = new HttpClient(clientHandler))
                 {
                     var url = $"{_indexerUri}/1337/tx/{transactionHash}/detail";
                     _logger.LogInformation($"Calling MMN API: {url}");
-
+                    
                     httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
+                    
                     var response = await httpClient.GetAsync(url);
 
                     if (!response.IsSuccessStatusCode)
@@ -246,7 +246,7 @@ namespace Timesheet.DomainServices
 
                     var jsonString = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation($"MMN API Response: {jsonString}");
-
+                    
                     var transactionResponse = JsonConvert.DeserializeObject<MMNTransactionResponse>(jsonString);
 
                     if (transactionResponse?.Data?.Transaction == null)
@@ -277,7 +277,7 @@ namespace Timesheet.DomainServices
         private async Task MarkPunishmentsAsPaid(long userId, DateTime targetMonth)
         {
             var endOfMonth = targetMonth.AddMonths(1);
-
+            
             var unpaidPunishments = await WorkScope.GetAll<UserPunishment>()
                 .Where(p => p.UserId == userId)
                 .Where(p => p.DateAt >= targetMonth && p.DateAt < endOfMonth)
@@ -319,7 +319,7 @@ namespace Timesheet.DomainServices
                 var remainPointsUsed = Math.Min(currentRemainPoints, currentTotalPunishmentMoney);
                 balance.RemainPoints -= remainPointsUsed;
                 balance.TotalPunishmentMoney -= remainPointsUsed;
-
+                
                 _logger.LogInformation($"Applied {remainPointsUsed} RemainPoints for user {userId}. RemainPoints: {currentRemainPoints} -> {balance.RemainPoints}, TotalPunishmentMoney: {currentTotalPunishmentMoney} -> {balance.TotalPunishmentMoney}");
 
                 var refundRecord = new UserPunishmentRefund
@@ -336,10 +336,10 @@ namespace Timesheet.DomainServices
             {
                 var beforeHashAmount = balance.TotalPunishmentMoney;
                 balance.TotalPunishmentMoney = Math.Max(0, balance.TotalPunishmentMoney - hashAmount);
-
+                
                 _logger.LogInformation($"Applied hash amount {hashAmount} for user {userId}. TotalPunishmentMoney: {beforeHashAmount} -> {balance.TotalPunishmentMoney}");
             }
-
+            
             await WorkScope.UpdateAsync(balance);
             _logger.LogInformation($"Final balance for user {userId}: TotalPunishmentMoney = {balance.TotalPunishmentMoney}, RemainPoints = {balance.RemainPoints}");
         }
@@ -389,7 +389,7 @@ namespace Timesheet.DomainServices
                 var refunds = await WorkScope.GetAll<UserPunishmentRefund>()
                     .Where(r => r.UserId == userId)
                     .Where(r => !r.IsDeleted)
-                    .ToListAsync();
+                    .ToListAsync(); 
 
                 var totalClaimPoints = refunds
                     .Where(r => r.Type == PointType.IsClaim)
@@ -452,7 +452,7 @@ namespace Timesheet.DomainServices
 
                 if (isCurrentMonth && canPayAll && currentTotalPunishmentMoney > 0)
                 {
-                    int newTotalPunishmentMoney = 0;
+                    int newTotalPunishmentMoney = 0; 
                     int newRemainPoints = currentRemainPoints - currentTotalPunishmentMoney;
 
                     if (balance == null)
@@ -477,7 +477,7 @@ namespace Timesheet.DomainServices
                     var refundRecord = new UserPunishmentRefund
                     {
                         UserId = userId,
-                        UserPunishmentId = null,
+                        UserPunishmentId = null, 
                         Points = currentTotalPunishmentMoney,
                         Type = PointType.IsUse
                     };
