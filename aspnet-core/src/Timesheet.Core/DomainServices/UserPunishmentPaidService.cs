@@ -1,11 +1,14 @@
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.Runtime.Session;
+using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Ncc.Authorization.Users;
 using Ncc.IoC;
 using Newtonsoft.Json;
+using SimpleBase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +16,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Abp.UI;
-using SimpleBase;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.MMN.Dto;
@@ -103,6 +104,14 @@ namespace Timesheet.DomainServices
 
         public async Task<bool> MarkPaidTransactions(string transactionHash, int year, int month)
         {
+            using (var uow = UnitOfWorkManager.Begin(new UnitOfWorkOptions
+            {
+                IsTransactional = true
+            }))
+
+            {
+            try
+            {
             if (!_abpSession.UserId.HasValue)
             {
                 _logger.LogError($"Cannot mark paid transaction {transactionHash}: User not logged in");
@@ -191,13 +200,13 @@ namespace Timesheet.DomainServices
                 TxHash = transactionInfo.Hash
             };
 
-            try
-            {
                 await _userPunishmentPaidRepository.InsertAsync(userPunishmentPaid);
 
                 await MarkPunishmentsAsPaid(_abpSession.UserId.Value, targetMonthDate);
 
                 await RecalculateUserPunishmentBalanceWithRemainPoints(_abpSession.UserId.Value, amount);
+
+                await uow.CompleteAsync();
 
                 return true;
             }
@@ -205,11 +214,12 @@ namespace Timesheet.DomainServices
             {
                 if (ex is UserFriendlyException)
                     throw;
-                    
-                _logger.LogError(ex, $"Error marking transaction {transactionHash} as paid");
+
+                _logger.LogError($"Error in MarkPaidTransactions for transaction {transactionHash}: {ex.Message}", ex);
                 return false;
             }
         }
+    }
 
         private async Task<MMNTransactionInfo> GetMMNTransactionsInfo(string transactionHash)
         {
@@ -337,7 +347,12 @@ namespace Timesheet.DomainServices
         public async Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummaryAsync(int year, int month)
         {
             var result = new UserPunishmentSummaryDto();
+            using (var uow = UnitOfWorkManager.Begin(new UnitOfWorkOptions
+            {
+                IsTransactional = true
+            }))
 
+            {
             try
             {
                 if (!_abpSession.UserId.HasValue)
@@ -508,7 +523,7 @@ namespace Timesheet.DomainServices
                 result.Message = usedRemainPoints
                     ? $"Successfully applied {currentTotalPunishmentMoney:N0} reward points. All penalties paid."
                     : "No reward points were used";
-
+                await uow.CompleteAsync();   
                 return result;
             }
             catch (Exception ex)
@@ -517,6 +532,7 @@ namespace Timesheet.DomainServices
                 result.Success = false;
                 result.Message = "An error occurred while processing punishment points";
                 return result;
+                }
             }
         }
     }
