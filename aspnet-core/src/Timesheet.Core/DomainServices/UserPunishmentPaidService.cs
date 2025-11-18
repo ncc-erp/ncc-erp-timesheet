@@ -214,8 +214,8 @@ namespace Timesheet.DomainServices
             {
                 if (ex is UserFriendlyException)
                     throw;
-                    
-                _logger.LogError(ex, $"Error marking transaction {transactionHash} as paid");
+
+                _logger.LogError($"Error in MarkPaidTransactions for transaction {transactionHash}: {ex.Message}", ex);
                 return false;
             }
         }
