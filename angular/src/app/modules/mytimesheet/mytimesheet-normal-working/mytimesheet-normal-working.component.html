@@ -81,7 +81,7 @@
                     <tbody>
                         <ng-container>
                             <tr>
-                                <td class="sticky-left"><b>{{normalWorkingHourByUserLogin.totalWorkingHour}}</b></td>
+                                <td class="sticky-left"><b>{{round(normalWorkingHourByUserLogin.totalWorkingHour)}}</b></td>
                                 <td class="sticky-left"><b>{{normalWorkingHourByUserLogin.totalOpenTalk}}</b></td>
                                 <td [id]='"width" + i' *ngFor="let detail of normalWorkingHourByUserLogin.listWorkingHour" class="text-center"
                                     [ngClass]="getCssClass(detail)" [matTooltip]="detail.infoTooltip"
