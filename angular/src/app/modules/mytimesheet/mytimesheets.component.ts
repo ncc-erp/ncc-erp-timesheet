@@ -620,10 +620,14 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
         this.isCanNextBack = true;
 
         let msg = '';
+        let code = 0;
 
         if (error && error.error) {
-          if (error.error.error && error.error.error.message) {
-            msg = error.error.error.message;
+          if (error.error.error) {
+             code = error.error.error.code;
+             if (error.error.error.message) {
+                msg = error.error.error.message;
+             }
           } else if (error.error.message) {
             msg = error.error.message;
           }
@@ -635,7 +639,10 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
 
         console.error('SubmitToPending error message:', msg, error);
 
-        if (msg && msg.indexOf('Timesheet was locked!') >= 0) {
+        const TimesheetLockedErrorCode = 1;
+        const PunishmentNotPaidErrorCode = 2;
+
+        if (code === TimesheetLockedErrorCode || (msg && msg.indexOf('Timesheet was locked!') >= 0)) {
           const dialogRef = this._dialog.open(UnlockConfirmDialogComponent, {
             width: '400px'
           });
@@ -649,7 +656,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
           return;
         }
 
-        if (msg && msg.indexOf('You need to pay the full punishment for the current month') >= 0) {
+        if (code === PunishmentNotPaidErrorCode || (msg && msg.indexOf('You need to pay the full punishment for the current month') >= 0)) {
           abp.message.confirm(
             'Do you want to open punishment summary now?',
             'You need to pay the full punishment for the current month.',
