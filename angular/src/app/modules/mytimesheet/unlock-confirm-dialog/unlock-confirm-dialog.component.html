@@ -1,0 +1,31 @@
+<div mat-dialog-content class="unlock-dialog-content">
+  <div class="unlock-dialog-icon swal-icon--warning">
+    <span class="swal-icon--warning__body">
+      <span class="swal-icon--warning__dot"></span>
+    </span>
+  </div>
+
+  <h2 class="unlock-dialog-title">You need to unlock to submit this week</h2>
+  <p class="unlock-dialog-message">
+    Do you want to unlock your timesheet for this week?
+  </p>
+
+  <div class="unlock-dialog-actions-main">
+  </div>
+</div>
+
+<div mat-dialog-actions class="unlock-dialog-footer">
+  <div class="unlock-dialog-footer-buttons">
+    <button mat-button mat-dialog-close class="unlock-dialog-cancel-btn">
+      Cancel
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      class="unlock-dialog-unlock-btn"
+      [mat-dialog-close]="'unlock'">
+      <mat-icon>lock_open</mat-icon>
+      Unlock Staff
+    </button>
+  </div>
+</div>
