@@ -22,13 +22,9 @@ mat-button-toggle-group{
     font-weight: 900;
 }
 
-button[name="unlockStaff"] {
-    background-color: #4CAF50;
-    color: white;
-}
-
-button[name="unlockStaff"]:hover {
-    background-color: #45a049; 
+.submit-approve-btn {
+  background-color: #4caf50;
+  color: #ffffff;
 }
 
 button[name="unlockPM"] {
