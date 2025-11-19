@@ -41,6 +41,9 @@ namespace Timesheet.Timesheets.MyTimesheets
         private readonly ICommonServices _commonService;
         private readonly KomuService _komuService;
         private readonly MezonService _mezonService;
+        private const int TimesheetLockedErrorCode = 1;
+        private const int PunishmentNotPaidErrorCode = 2;
+
         public MyTimesheetsAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
             ICommonServices commonService, IWorkScope workScope, MezonService mezonService) : base(workScope)
         {
@@ -639,13 +642,13 @@ namespace Timesheet.Timesheets.MyTimesheets
             var firstDateCanUnlock = GetFirstDateToLockTS(AbpSession.UserId.Value, isUnLocked).Result;
             if (input.EndDate.Date < firstDateCanUnlock)
             {
-                throw new UserFriendlyException("Timesheet was locked! You can submit timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
+                throw new UserFriendlyException(TimesheetLockedErrorCode, "Timesheet was locked! You can submit timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
             }
 
             var hasPaidEnough = await HasPaidEnoughPunishment(AbpSession.UserId.Value);
             if (!hasPaidEnough)
             {
-                throw new UserFriendlyException("You need to pay the full punishment for the current month before you can submit your timesheet.\r\n!");
+                throw new UserFriendlyException(PunishmentNotPaidErrorCode, "You need to pay the full punishment for the current month before you can submit your timesheet.\r\n!");
             }
 
             foreach (var item in mytimesheets)
