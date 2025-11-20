@@ -622,8 +622,12 @@ namespace Timesheet.Timesheets.MyTimesheets
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimesheet_Submit)]
-        public async Task<string> SubmitToPending(StartEndDateDto input)
+        public async Task<SubmitTimesheetResultDto> SubmitToPending(StartEndDateDto input)
         {
+            var result = new SubmitTimesheetResultDto
+            {
+                Success = false
+            };
             var isUnLocked = IsUserUnlockedToLogTS(AbpSession.UserId.Value);
 
             var mytimesheets = await WorkScope.GetAll<MyTimesheet>()
@@ -636,19 +640,25 @@ namespace Timesheet.Timesheets.MyTimesheets
             DateTime lockDate = _commonService.getlockDateUser();
             if (!isUnLocked && mytimesheets.Any(s => s.DateAt.Date < lockDate))
             {
-                throw new UserFriendlyException("Go to ims.nccsoft.vn > Unlock timesheet");
+                result.ErrorCode = "TimesheetLocked";
+                result.ErrorMessage = "Go to ims.nccsoft.vn > Unlock timesheet";
+                return result;
             }
 
-            var firstDateCanUnlock = GetFirstDateToLockTS(AbpSession.UserId.Value, isUnLocked).Result;
+            var firstDateCanUnlock = await GetFirstDateToLockTS(AbpSession.UserId.Value, isUnLocked);
             if (input.EndDate.Date < firstDateCanUnlock)
             {
-                throw new UserFriendlyException(TimesheetLockedErrorCode, "Timesheet was locked! You can submit timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
+                result.ErrorCode = "TimesheetLocked";
+                result.ErrorMessage = $"Timesheet was locked! You can submit timesheet begin: {firstDateCanUnlock:yyyy-MM-dd}";
+                return result;
             }
 
             var hasPaidEnough = await HasPaidEnoughPunishment(AbpSession.UserId.Value);
             if (!hasPaidEnough)
             {
-                throw new UserFriendlyException(PunishmentNotPaidErrorCode, "You need to pay the full punishment for the current month before you can submit your timesheet.\r\n!");
+                result.ErrorCode = "PunishmentUnpaid";
+                result.ErrorMessage = "You need to pay the full punishment for the current month before you can submit your timesheet.";
+                return result;
             }
 
             foreach (var item in mytimesheets)
@@ -663,7 +673,9 @@ namespace Timesheet.Timesheets.MyTimesheets
 
             await notifySubmitTimesheet(mytimesheets);
 
-            var result = "Submit success " + mytimesheets.Count + " timesheets";
+            result.Success = true;
+            result.ErrorCode = null;
+            result.ErrorMessage = null;
             return result;
         }
 

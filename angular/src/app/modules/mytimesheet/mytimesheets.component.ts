@@ -610,70 +610,62 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
     this.isCanNextBack = false;
     this.timesheetService.SubmitToPending(startDate, endDate).subscribe(
       res => {
-        this.notify.info(this.l(res.result));
-        this.getAllTimeSheet();
         this.isTableLoading = false;
         this.isCanNextBack = true;
+
+        const data = res && res.result ? res.result : res;
+
+        if (data && data.success === false && data.errorCode) {
+          console.error('SubmitToPending business error:', data);
+
+          if (data.errorCode === 'TimesheetLocked') {
+            const dialogRef = this._dialog.open(UnlockConfirmDialogComponent, {
+              width: '400px'
+            });
+
+            dialogRef.afterClosed().subscribe(action => {
+              if (action === 'unlock') {
+                this.unlockTimesheet();
+              }
+            });
+
+            return;
+          }
+
+          if (data.errorCode === 'PunishmentUnpaid') {
+            abp.message.confirm(
+              'Do you want to open punishment summary now?',
+              'You need to pay the full punishment for the current month.',
+              (result: boolean) => {
+                if (
+                  result &&
+                  this.tardinessComponent &&
+                  (this.tardinessComponent as any).openConfirmationDialog
+                ) {
+                  (this.tardinessComponent as any).openConfirmationDialog();
+                }
+              }
+            );
+            return;
+          }
+
+          this.notify.error('Submit failed: ' + (data.errorMessage || 'Unknown error'));
+          return;
+        }
+
+        this.notify.info(this.l('Submit Successfully'));
+        this.getAllTimeSheet();
       },
       (error) => {
         this.isTableLoading = false;
         this.isCanNextBack = true;
 
-        let msg = '';
-        let code = 0;
-
-        if (error && error.error) {
-          if (error.error.error) {
-             code = error.error.error.code;
-             if (error.error.error.message) {
-                msg = error.error.error.message;
-             }
-          } else if (error.error.message) {
-            msg = error.error.message;
-          }
-        }
-
-        if (!msg && error && error.message) {
-          msg = error.message;
-        }
-
-        console.error('SubmitToPending error message:', msg, error);
-
-        const TimesheetLockedErrorCode = 1;
-        const PunishmentNotPaidErrorCode = 2;
-
-        if (code === TimesheetLockedErrorCode || (msg && msg.indexOf('Timesheet was locked!') >= 0)) {
-          const dialogRef = this._dialog.open(UnlockConfirmDialogComponent, {
-            width: '400px'
-          });
-
-          dialogRef.afterClosed().subscribe(action => {
-            if (action === 'unlock') {
-              this.unlockTimesheet();
-            }
-          });
-
-          return;
-        }
-
-        if (code === PunishmentNotPaidErrorCode || (msg && msg.indexOf('You need to pay the full punishment for the current month') >= 0)) {
-          abp.message.confirm(
-            'Do you want to open punishment summary now?',
-            'You need to pay the full punishment for the current month.',
-            (result: boolean) => {
-              if (
-                result &&
-                this.tardinessComponent &&
-                (this.tardinessComponent as any).openConfirmationDialog
-              ) {
-                (this.tardinessComponent as any).openConfirmationDialog();
-              }
-            }
-          );
-          return;
-        }
-
-        this.notify.error('Submit failed: ' + (msg || 'Unknown error'));
+        const msg =
+          (error && error.error && error.error.message) ||
+          (error && error.message) ||
+          'Unknown error';
+        console.error('SubmitToPending system error:', error);
+        this.notify.error('Submit failed: ' + msg);
       }
     );
   }
