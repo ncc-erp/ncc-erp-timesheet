@@ -377,7 +377,7 @@ export const APP_CONSTANT = {
     Mezon : 1
   },
   TimesheetErrorCode: {
-    TIMESHEET_LOCKED: 'TIMESHEET_LOCKED',
-    PUNISHMENT_UNPAID: 'PUNISHMENT_UNPAID'
+    TIMESHEET_LOCKED: 1,
+    PUNISHMENT_UNPAID: 2
   }
 };
