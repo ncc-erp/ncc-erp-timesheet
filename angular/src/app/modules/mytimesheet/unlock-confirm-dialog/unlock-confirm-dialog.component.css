@@ -64,12 +64,6 @@
   margin-top: 16px;
 }
 
-.unlock-dialog-unlock-btn {
-  min-width: 140px;
-  background-color: #4CAF50 !important; 
-  color: #fff !important;
-}
-
 .unlock-dialog-footer {
   display: flex;
   justify-content: center;
