@@ -41,8 +41,6 @@ namespace Timesheet.Timesheets.MyTimesheets
         private readonly ICommonServices _commonService;
         private readonly KomuService _komuService;
         private readonly MezonService _mezonService;
-        private const int TimesheetLockedErrorCode = 1;
-        private const int PunishmentNotPaidErrorCode = 2;
 
         public MyTimesheetsAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
             ICommonServices commonService, IWorkScope workScope, MezonService mezonService) : base(workScope)
