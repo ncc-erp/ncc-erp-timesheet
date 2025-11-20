@@ -375,5 +375,9 @@ export const APP_CONSTANT = {
   NotifyChannel: {
     KOMU : 0,
     Mezon : 1
+  },
+  TimesheetErrorCode: {
+    TIMESHEET_LOCKED: 'TIMESHEET_LOCKED',
+    PUNISHMENT_UNPAID: 'PUNISHMENT_UNPAID'
   }
 };

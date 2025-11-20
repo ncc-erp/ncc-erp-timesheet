@@ -618,7 +618,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
         if (data && data.success === false && data.errorCode) {
           console.error('SubmitToPending business error:', data);
 
-          if (data.errorCode === 'TimesheetLocked') {
+          if (data.errorCode === this.APP_CONSTANT.TimesheetErrorCode.TIMESHEET_LOCKED) {
             const dialogRef = this._dialog.open(UnlockConfirmDialogComponent, {
               width: '400px'
             });
@@ -632,7 +632,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
             return;
           }
 
-          if (data.errorCode === 'PunishmentUnpaid') {
+          if (data.errorCode === this.APP_CONSTANT.TimesheetErrorCode.PUNISHMENT_UNPAID) {
             abp.message.confirm(
               'Do you want to open punishment summary now?',
               'You need to pay the full punishment for the current month.',

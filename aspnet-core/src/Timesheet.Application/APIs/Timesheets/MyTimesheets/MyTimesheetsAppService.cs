@@ -638,7 +638,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             DateTime lockDate = _commonService.getlockDateUser();
             if (!isUnLocked && mytimesheets.Any(s => s.DateAt.Date < lockDate))
             {
-                result.ErrorCode = "TimesheetLocked";
+                result.ErrorCode = TimesheetErrorCode.TIMESHEET_LOCKED.ToString();
                 result.ErrorMessage = "Go to ims.nccsoft.vn > Unlock timesheet";
                 return result;
             }
@@ -646,7 +646,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             var firstDateCanUnlock = await GetFirstDateToLockTS(AbpSession.UserId.Value, isUnLocked);
             if (input.EndDate.Date < firstDateCanUnlock)
             {
-                result.ErrorCode = "TimesheetLocked";
+                result.ErrorCode = TimesheetErrorCode.TIMESHEET_LOCKED.ToString();
                 result.ErrorMessage = $"Timesheet was locked! You can submit timesheet begin: {firstDateCanUnlock:yyyy-MM-dd}";
                 return result;
             }
@@ -654,7 +654,7 @@ namespace Timesheet.Timesheets.MyTimesheets
             var hasPaidEnough = await HasPaidEnoughPunishment(AbpSession.UserId.Value);
             if (!hasPaidEnough)
             {
-                result.ErrorCode = "PunishmentUnpaid";
+                result.ErrorCode = TimesheetErrorCode.PUNISHMENT_UNPAID.ToString();
                 result.ErrorMessage = "You need to pay the full punishment for the current month before you can submit your timesheet.";
                 return result;
             }
