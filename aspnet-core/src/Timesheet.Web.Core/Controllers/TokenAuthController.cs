@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Timesheet.Controllers.Dto;
 using Timesheet.Services.Mezon;
 using Timesheet.Services.Mezon.Dto;
+using Ncc.Authorization.Dto;
 
 namespace Ncc.Controllers
 {
@@ -122,7 +123,8 @@ namespace Ncc.Controllers
         public async Task<AuthenticateResultModel> MezonAuthenticate([FromBody] OAuth2TokenDto model)
         {
             Logger.Info("MezonAuthenticate");
-            var loginResult = await GetLoginResultMezonAsync(model.Token, GetTenancyNameOrNull());
+            var mezonResult = await GetLoginResultMezonAsync(model.Token, GetTenancyNameOrNull());
+            var loginResult = mezonResult.LoginResult;
             var accessToken = CreateAccessToken(CreateJwtClaims(loginResult.Identity));
             return new AuthenticateResultModel
             {
@@ -130,18 +132,20 @@ namespace Ncc.Controllers
                 EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
                 ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
                 UserId = loginResult.User.Id,
-                Token = model.Token
+                Token = mezonResult.MezonAccessToken,
+                MezonUserId = loginResult.User.MezonUserId
             };
         }
 
-        private async Task<AbpLoginResult<Tenant, User>> GetLoginResultMezonAsync(string token, string tenancyName)
+        private async Task<MezonLoginResult> GetLoginResultMezonAsync(string token, string tenancyName)
         {
             Logger.Info("GetLoginResultMezonAsync");
-            var loginResult = await _logInManager.LoginOAuth2Async(token, tenancyName, false);
+            var mezonResult = await _logInManager.LoginInternalOAuth2Async(token, tenancyName, false);
+            var loginResult = mezonResult.LoginResult;
             switch (loginResult.Result)
             {
                 case AbpLoginResultType.Success:
-                    return loginResult;
+                    return mezonResult;
                 default:
                     throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(loginResult.Result, null, tenancyName);
             }
