@@ -18,6 +18,7 @@ import { AbsenceDayService } from '@app/service/api/absence-day.service';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { UserServiceProxy } from '@shared/service-proxies/service-proxies';
 import { MytimesheetTardinessComponent } from './mytimesheet-tardiness/mytimesheet-tardiness.component';
+import { UnlockConfirmDialogComponent } from './unlock-confirm-dialog/unlock-confirm-dialog.component';
 
 export const MY_FORMATS = {
   parse: {
@@ -83,7 +84,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
     { status: 3, label: 'Rejected', class: 'bg-grey' },
     { status: 0, label: 'New', class: 'bg-light-green' },
   ];
-  isBasicUser: boolean = false; 
+  isBasicUser: boolean = false;
 
   constructor(
     @Optional() @Inject(MAT_DIALOG_DATA) private data: any,
@@ -101,11 +102,11 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
     super(injector);
     this.viewDate = new Date();
     this.selectedDays = new Map<string, number>();
-    
+
     this.userService.get(this.appSession.userId).subscribe(user => {
-      const hasOnlyBasicRole = user.roleNames && 
-                             user.roleNames.length === 1 && 
-                             user.roleNames[0].toUpperCase() === 'BASICUSER';
+      const hasOnlyBasicRole = user.roleNames &&
+        user.roleNames.length === 1 &&
+        user.roleNames[0].toUpperCase() === 'BASICUSER';
       this.isBasicUser = hasOnlyBasicRole;
     });
   }
@@ -133,7 +134,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
     this.specialProjectTaskSerivice.get().subscribe((res: any) => {
       this.specialProjectTask = res.result;
     })
-}
+  }
 
   getAllTimeSheet() {
     this.isTableLoading = true;
@@ -307,7 +308,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
     }
     );
   }
-  setIsRefresh(){
+  setIsRefresh() {
     this.isRefresh = true;
   }
 
@@ -607,12 +608,66 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
     let endDate = this.mapDayOfWeek[this.mapDayOfWeek.length - 1].dateAt;
     this.isTableLoading = true;
     this.isCanNextBack = false;
-    this.timesheetService.SubmitToPending(startDate, endDate).subscribe(res => {
-      this.notify.info(this.l(res.result));
-      this.getAllTimeSheet();
-    })
-    this.isTableLoading = false;
-    this.isCanNextBack = true;
+    this.timesheetService.SubmitToPending(startDate, endDate).subscribe(
+      res => {
+        this.isTableLoading = false;
+        this.isCanNextBack = true;
+
+        const data = res && res.result ? res.result : res;
+
+        if (data && data.success === false && data.errorCode) {
+          console.error('SubmitToPending business error:', data);
+
+          if (data.errorCode === this.APP_CONSTANT.TimesheetErrorCode.TIMESHEET_LOCKED) {
+            const dialogRef = this._dialog.open(UnlockConfirmDialogComponent, {
+              width: '400px'
+            });
+
+            dialogRef.afterClosed().subscribe(action => {
+              if (action === 'unlock') {
+                this.unlockTimesheet();
+              }
+            });
+
+            return;
+          }
+
+          if (data.errorCode === this.APP_CONSTANT.TimesheetErrorCode.PUNISHMENT_UNPAID) {
+            abp.message.confirm(
+              'Do you want to open punishment summary now?',
+              'You need to pay the full punishment for the current month.',
+              (result: boolean) => {
+                if (
+                  result &&
+                  this.tardinessComponent &&
+                  (this.tardinessComponent as any).openConfirmationDialog
+                ) {
+                  (this.tardinessComponent as any).openConfirmationDialog();
+                }
+              }
+            );
+            return;
+          }
+
+          this.notify.error('Submit failed: ' + (data.errorMessage || 'Unknown error'));
+          return;
+        }
+
+        this.notify.info(this.l('Submit Successfully'));
+        this.getAllTimeSheet();
+      },
+      (error) => {
+        this.isTableLoading = false;
+        this.isCanNextBack = true;
+
+        const msg =
+          (error && error.error && error.error.message) ||
+          (error && error.message) ||
+          'Unknown error';
+        console.error('SubmitToPending system error:', error);
+        this.notify.error('Submit failed: ' + msg);
+      }
+    );
   }
 
   unlockTimesheet() {
@@ -666,7 +721,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
   public mask2 = {
     guide: false,
     showMask: false,
-    mask: [/\d/,/\d/, '.', /\d/]
+    mask: [/\d/, /\d/, '.', /\d/]
   };
 }
 export class SpecialProjectTaskSettingDTO {

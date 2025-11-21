@@ -375,5 +375,11 @@ namespace Ncc.Entities.Enum
             Finalized = 2,
             Failed = 3
         }
+
+        public enum TimesheetErrorCode
+        {
+            TIMESHEET_LOCKED = 1,
+            PUNISHMENT_UNPAID = 2
+        }
     }
 }

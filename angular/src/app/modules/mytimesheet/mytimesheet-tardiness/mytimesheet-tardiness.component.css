@@ -80,7 +80,7 @@
 
 .punishment-amount {
   font-weight: bold;
-  color: #d32f2f;
+  color: #2e7d32;
   text-align: right;
   min-width: 100px;
   flex-shrink: 0;
@@ -88,7 +88,7 @@
 }
 
 .punishment-amount.remaining {
-  color: #2e7d32;
+  color: #d32f2f;
 }
 
 .btn-confirm-punishment {
