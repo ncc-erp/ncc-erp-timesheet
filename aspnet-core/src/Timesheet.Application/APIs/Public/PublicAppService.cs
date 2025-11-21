@@ -1103,6 +1103,7 @@ namespace Timesheet.APIs.Public
 
             var qprojectPms = (from s in (_ws.GetAll<ProjectUser>()
                 .Where(s => s.Type == ProjectUserType.PM)
+                .Where(s => s.User.IsActive)
                 .Select(s => new { s.ProjectId, ProjectName = s.Project.Name, PMId = s.UserId }))
                                group s by new { s.ProjectId, s.ProjectName } into g
                                select new { g.Key.ProjectId, g.Key.ProjectName, PmId = g.FirstOrDefault().PMId }
