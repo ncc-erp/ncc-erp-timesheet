@@ -178,6 +178,7 @@ namespace Timesheet.BackgroundWorker
                         }
                     }
                 }
+                Logger.Info("RunOfficeBotReportJob() finished.");
             }
             catch (Exception ex)
             {

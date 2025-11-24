@@ -7,9 +7,11 @@ namespace Timesheet.APIs.Reports.Dto
     public class OfficeWorkingTopLWLMDto
     {
         public long UserId { get; set; }
+        public string FullName { get; set; }
         public string UserName { get; set; }
-        public string OfficeName { get; set; }
-        public string OfficeCode { get; set; }
+        public string BranchName { get; set; }
+        public string BranchCode { get; set; }
+        public string BranchColor { get; set; }
         public double TotalAllLW { get; set; } 
         public double OfficeLW { get; set; } 
         public double WfhLW { get; set; }
@@ -23,5 +25,25 @@ namespace Timesheet.APIs.Reports.Dto
         public double OfficeLMHours => OfficeLM;
         public double WfhLMHours => WfhLM;
         
+    }
+    public class UserLite
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public string BranchName { get; set; }
+        public string BranchCode { get; set; }
+        public string BranchColor { get; set; }
+    }
+    public struct RemoteFlags
+    {
+        public bool Morning { get; set; }
+        public bool Afternoon { get; set; }
+        public RemoteFlags(bool morning, bool afternoon)
+        {
+            Morning = morning;
+            Afternoon = afternoon;
+        }
     }
 }
