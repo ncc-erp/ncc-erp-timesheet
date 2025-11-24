@@ -954,6 +954,13 @@
           <br />
           <mat-checkbox
             class="mt-2 ml-2 text-danger"
+            name="notifyApproveRejectTimesheet"
+            [(ngModel)]="project.isNoticeKMApproveRejectTimesheet"
+            >Approve/Reject Timesheet</mat-checkbox
+          >
+          <br />
+          <mat-checkbox
+            class="mt-2 ml-2 text-danger"
             name="notifyApproveRejectChangeWorkingTime"
             [(ngModel)]="project.isNoticeKMApproveChangeWorkingTime"
             >Approve/Reject Change Working Time</mat-checkbox
