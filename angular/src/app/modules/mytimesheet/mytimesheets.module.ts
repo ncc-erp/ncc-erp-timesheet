@@ -38,9 +38,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
       TimesheetConfirmationDialogComponent,
       TransactionHashDialogComponent,
       TranferDialogComponent,
-      TransactionSuccessDialogComponent
-      UnlockConfirmDialogComponent,
-      TransactionHashDialogComponent
+      TransactionSuccessDialogComponent,
+      UnlockConfirmDialogComponent
     ],
     imports: [
       CommonModule,
@@ -69,9 +68,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
       TimesheetConfirmationDialogComponent,
       TransactionHashDialogComponent,
       TranferDialogComponent,
-      TransactionSuccessDialogComponent
-      UnlockConfirmDialogComponent,
-      TransactionHashDialogComponent
+      TransactionSuccessDialogComponent,
+      UnlockConfirmDialogComponent
     ]
   })
   export class MyTimeSheetsModule { }
