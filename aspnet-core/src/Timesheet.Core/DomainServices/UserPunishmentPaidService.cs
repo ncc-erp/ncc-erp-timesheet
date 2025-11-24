@@ -534,18 +534,12 @@ namespace Timesheet.DomainServices
                         return result;
                     }
 
-                    var monthlyPunishments = await WorkScope.GetAll<UserPunishment>()
+                    var unpaidPunishments = await WorkScope.GetAll<UserPunishment>()
                         .Where(p => p.UserId == userId)
                         .Where(p => !p.IsDeleted)
                         .Where(p => p.DateAt >= startOfMonth && p.DateAt < endOfMonth)
-                        .ToListAsync();
-
-                    var unpaidPunishments = monthlyPunishments
                         .Where(p => p.IsPaid == false || p.IsPaid == null)
-                        .ToList();
-
-                    var totalUnpaidPunishments = unpaidPunishments
-                        .Sum(p => p.TotalMoney);
+                        .ToListAsync();
 
                     var balance = await WorkScope.GetAll<UserPunishmentBalance>()
                         .Where(b => b.UserId == userId)
