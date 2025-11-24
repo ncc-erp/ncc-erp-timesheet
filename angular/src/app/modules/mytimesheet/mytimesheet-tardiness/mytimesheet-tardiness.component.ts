@@ -83,7 +83,12 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   getRemainingPunishment(): number {
     const totalPunishment = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
     const remainPoints = this.userBalance ? this.userBalance.remainPoints : 0;
-    return Math.max(0, totalPunishment - remainPoints);
+    
+    if (totalPunishment > remainPoints) {
+      return totalPunishment - remainPoints;
+    } else {
+      return totalPunishment;
+    }
   }
 
   loadUserBalance(): void {
@@ -554,6 +559,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         const totalUsedRemainPoints = summaryResult && summaryResult.totalRemainPointsUsedInMonth ? summaryResult.totalRemainPointsUsedInMonth : 0;
         this.userBalance = summaryResult && summaryResult.userBalance ? summaryResult.userBalance : this.userBalance;
         const dialogRef = this.dialog.open(TimesheetConfirmationDialogComponent, {
+
           width: '800px',
           data: {
             timekeepingData: this.listTimekeeping,
@@ -563,8 +569,40 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
             summaryData: summaryResult, 
             onPaidSuccess: () => {
               this.notify.success('Paid Successfully');
-              this.getData();
-              this.loadUserBalance();
+
+              this.userPunishmentPaidService
+                .previewApplyAndGetSummary(this.year, this.month + 1)
+                .subscribe((latestSummary) => {
+                  if (!latestSummary || !latestSummary.success) {
+                    return;
+                  }
+
+                  this.userBalance = latestSummary.userBalance;
+
+                  this.getData();
+
+                  dialogRef.componentInstance.totalUsedRemainPoints =
+                    latestSummary.totalRemainPointsUsedInMonth || 0;
+
+                  dialogRef.componentInstance.userBalance = latestSummary.userBalance
+                    ? latestSummary.userBalance
+                    : dialogRef.componentInstance.userBalance;
+
+                  dialogRef.componentInstance.totalFine = dialogRef.componentInstance.userBalance
+                    ? dialogRef.componentInstance.userBalance.totalPunishmentMoney
+                    : 0;
+
+                  dialogRef.componentInstance.totalPaidPunishmentInMonth =
+                    latestSummary.totalPaidPunishmentInMonth;
+
+                  dialogRef.componentInstance.totalRemainPointsUsedInMonth =
+                    latestSummary.totalRemainPointsUsedInMonth || 0;
+
+                  (dialogRef.componentInstance as any).updateOwedAmount &&
+                    (dialogRef.componentInstance as any).updateOwedAmount();
+                  (dialogRef.componentInstance as any).updateUsePointsTooltip &&
+                    (dialogRef.componentInstance as any).updateUsePointsTooltip();
+                });
             }
           }
         });
@@ -573,13 +611,32 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
           this.userPunishmentPaidService
             .previewApplyAndGetSummary(this.year, this.month + 1)
             .subscribe((summaryResult) => {
-              const updatedTotalUsed = summaryResult && summaryResult.totalRemainPointsUsedInMonth ? summaryResult.totalRemainPointsUsedInMonth : 0;
+
+              const updatedTotalUsed = summaryResult && summaryResult.totalRemainPointsUsedInMonth
+                ? summaryResult.totalRemainPointsUsedInMonth
+                : 0;
               dialogRef.componentInstance.totalUsedRemainPoints = updatedTotalUsed;
+
+              dialogRef.componentInstance.userBalance = summaryResult && summaryResult.userBalance
+                ? summaryResult.userBalance
+                : dialogRef.componentInstance.userBalance;
+              dialogRef.componentInstance.totalFine = dialogRef.componentInstance.userBalance
+                ? dialogRef.componentInstance.userBalance.totalPunishmentMoney
+                : 0;
+              dialogRef.componentInstance.totalPaidPunishmentInMonth = summaryResult.totalPaidPunishmentInMonth;
+              dialogRef.componentInstance.totalRemainPointsUsedInMonth = summaryResult.totalRemainPointsUsedInMonth || 0;
+
+              (dialogRef.componentInstance as any).updateOwedAmount &&
+                (dialogRef.componentInstance as any).updateOwedAmount();
+              (dialogRef.componentInstance as any).updateUsePointsTooltip &&
+                (dialogRef.componentInstance as any).updateUsePointsTooltip();
+
+              if (summaryResult && summaryResult.userBalance) {
+                this.userBalance = summaryResult.userBalance;
+              }
             }, (error) => {
               console.error('Error reloading total used RemainPoints:', error);
             });
-
-          this.loadUserBalance();
         });
 
         dialogRef.afterClosed().subscribe(() => {
@@ -598,7 +655,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
             summaryData: null, 
             onPaidSuccess: () => {
               this.notify.success('Paid Successfully');
-              this.getData();
               this.loadUserBalance();
             }
           }
@@ -613,7 +669,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
             }, (error) => {
               console.error('Error reloading total used RemainPoints:', error);
             });
-          this.loadUserBalance();
         });
 
         dialogRef.afterClosed().subscribe(() => {

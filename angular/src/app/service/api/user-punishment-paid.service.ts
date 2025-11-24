@@ -94,4 +94,20 @@ export class UserPunishmentPaidService extends BaseApiService {
       })
     );
   }
+
+  applyRemainPoints(year: number, month: number): Observable<UserPunishmentSummaryDto> {
+    const url = `${this.rootUrl}/ApplyRemainPoints`;
+    const body = { year: year, month: month };
+    return this.http.post<any>(url, body).pipe(
+      map(response => {
+        if (response && response.result) {
+          return response.result;
+        }
+        return {
+          success: false,
+          message: 'No data received'
+        } as any;
+      })
+    );
+  }
 }

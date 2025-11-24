@@ -33,6 +33,21 @@
       </div>
     </ng-container>
   </div>
+  <div *ngIf="isCurrentMonth">
+    <button
+      mat-stroked-button
+      color="primary"
+      class="use-points-button"
+      (click)="applyRemainPoints()"
+      [disabled]="
+      !userBalance ||
+      userBalance.totalPunishmentMoney <= 0 ||
+      userBalance.remainPoints < userBalance.totalPunishmentMoney
+    "
+       [matTooltip]="usePointsTooltip">
+      Use Points
+    </button>
+  </div>
 
   <div class="error-summary">
     <h3>Punishment Summarry</h3>

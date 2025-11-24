@@ -43,6 +43,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   activeDayIsOpen: boolean = false;
   refresh: Subject<any> = new Subject();
   timesheetData: any[] = [];
+  usePointsTooltip: string = '';
 
   constructor(
     injector: Injector,
@@ -130,6 +131,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       this.totalPaidPunishmentInMonth = this.data.summaryData.totalPaidPunishmentInMonth;
       this.totalRemainPointsUsedInMonth = this.data.summaryData.totalRemainPointsUsedInMonth || 0;
       this.updateOwedAmount();
+      this.updateUsePointsTooltip();
     } else {
       this.loadAllPunishmentData();
     }
@@ -152,9 +154,8 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       result => {
         if (result && result.success) {
             this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
-          
+
           this.loadPunishmentPaidData();
-          this.loadAllPunishmentData();
           if (this.data && typeof this.data.onPaidSuccess === 'function') {
             this.data.onPaidSuccess();
           }
@@ -187,6 +188,21 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
         this.snackBar.open('Error loading configuration. Please try again later.', 'Close', { duration: 5000 });
       }
     );
+  }
+
+  private updateUsePointsTooltip(): void {
+    if (!this.userBalance) {
+      this.usePointsTooltip = '';
+      return;
+    }
+
+    if (this.userBalance.totalPunishmentMoney <= 0) {
+      this.usePointsTooltip = 'No punishment amount to pay.';
+    } else if (this.userBalance.remainPoints < this.userBalance.totalPunishmentMoney) {
+      this.usePointsTooltip = 'Your current points are not enough to cover all punishment.';
+    } else {
+      this.usePointsTooltip = '';
+    }
   }
 
   donate(): void {
@@ -256,6 +272,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
           this.totalRemainPointsUsedInMonth = result.totalRemainPointsUsedInMonth || 0;
           this.updateOwedAmount();
           this.totalUsedRemainPoints = result.totalRemainPointsUsedInMonth || 0;
+          this.updateUsePointsTooltip();
         }
       },
       (error) => {
@@ -266,10 +283,37 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     );
   }
 
+  applyRemainPoints(): void {
+    const target = this.getTargetYearMonth();
+
+    this.userPunishmentPaidService.applyRemainPoints(target.year, target.month).subscribe(
+      (result) => {
+        if (result && result.success) {
+          this.snackBar.open('Applied remain points successfully.', 'Close', { duration: 3000 });
+
+          if (this.remainPointsUsed) {
+            this.remainPointsUsed.emit();
+          }
+        } else {
+          this.snackBar.open(result && result.message ? result.message : 'Failed to apply remain points.', 'Close', { duration: 5000 });
+        }
+      },
+      (error) => {
+        console.error('Error applying remain points:', error);
+        this.snackBar.open('Error applying remain points. Please try again.', 'Close', { duration: 5000 });
+      }
+    );
+  }
+
   private updateOwedAmount(): void {
     const totalPunishment = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
     const remainPoints = this.userBalance ? this.userBalance.remainPoints : 0;
-    this.owedAmount = Math.max(0, totalPunishment - remainPoints);
+    
+    if (totalPunishment > remainPoints) {
+      this.owedAmount = totalPunishment - remainPoints;
+    } else {
+      this.owedAmount = totalPunishment;
+    }
   }
   
   loadTimesheetData(): void {

@@ -13,5 +13,7 @@ namespace Timesheet.DomainServices
         Task<bool> MarkPaidTransactions(string transactionHash, int year, int month);
 
         Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummaryAsync(int year, int month);
+
+        Task<UserPunishmentSummaryDto> ApplyRemainPointsAsync(int year, int month);
     }
 }
