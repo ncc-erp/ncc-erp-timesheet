@@ -1,11 +1,14 @@
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.Runtime.Session;
+using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Ncc.Authorization.Users;
 using Ncc.IoC;
 using Newtonsoft.Json;
+using SimpleBase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +16,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Abp.UI;
-using SimpleBase;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.MMN.Dto;
@@ -103,6 +104,14 @@ namespace Timesheet.DomainServices
 
         public async Task<bool> MarkPaidTransactions(string transactionHash, int year, int month)
         {
+            using (var uow = UnitOfWorkManager.Begin(new UnitOfWorkOptions
+            {
+                IsTransactional = true
+            }))
+
+            {
+            try
+            {
             if (!_abpSession.UserId.HasValue)
             {
                 _logger.LogError($"Cannot mark paid transaction {transactionHash}: User not logged in");
@@ -171,33 +180,35 @@ namespace Timesheet.DomainServices
 
             var userBalance = await WorkScope.GetAll<UserPunishmentBalance>()
                 .FirstOrDefaultAsync(b => b.UserId == _abpSession.UserId.Value);
-            
+
             var totalPunishmentMoney = userBalance?.TotalPunishmentMoney ?? 0;
             var remainPoints = userBalance?.RemainPoints ?? 0;
             var requiredAmount = Math.Max(0, totalPunishmentMoney - remainPoints);
-            
+
             if (amount < requiredAmount)
             {
                 _logger.LogError($"Transaction amount {amount} is less than required amount {requiredAmount} (TotalPunishmentMoney: {totalPunishmentMoney} - RemainPoints: {remainPoints}) for user {_abpSession.UserId.Value}");
                 throw new UserFriendlyException($"Transaction amount ({amount:N0} VNĐ) is insufficient to cover required payment ({requiredAmount:N0} VNĐ). Your current balance: {totalPunishmentMoney:N0} VNĐ penalty - {remainPoints:N0} reward points.");
             }
 
+            var extraAmount = amount - requiredAmount;
+
             var userPunishmentPaid = new UserPunishmentPaid
             {
                 UserId = _abpSession.UserId.Value,
                 DateAt = DateTimeOffset.FromUnixTimeSeconds(transactionInfo.TransactionTimestamp).DateTime,
-                TargetMonth = targetMonthDate, 
+                TargetMonth = targetMonthDate,
                 Amount = amount,
                 TxHash = transactionInfo.Hash
             };
 
-            try
-            {
                 await _userPunishmentPaidRepository.InsertAsync(userPunishmentPaid);
 
-                await MarkPunishmentsAsPaid(_abpSession.UserId.Value, targetMonthDate);
+                await MarkPunishmentsAsPaid(_abpSession.UserId.Value, targetMonthDate, userPunishmentPaid.Id);
 
-                await RecalculateUserPunishmentBalanceWithRemainPoints(_abpSession.UserId.Value, amount);
+                await RecalculateUserPunishmentBalanceWithRemainPoints(_abpSession.UserId.Value, amount, extraAmount);
+
+                await uow.CompleteAsync();
 
                 return true;
             }
@@ -205,11 +216,12 @@ namespace Timesheet.DomainServices
             {
                 if (ex is UserFriendlyException)
                     throw;
-                    
-                _logger.LogError(ex, $"Error marking transaction {transactionHash} as paid");
+
+                _logger.LogError($"Error in MarkPaidTransactions for transaction {transactionHash}: {ex.Message}", ex);
                 return false;
             }
         }
+    }
 
         private async Task<MMNTransactionInfo> GetMMNTransactionsInfo(string transactionHash)
         {
@@ -264,7 +276,7 @@ namespace Timesheet.DomainServices
             }
         }
 
-        private async Task MarkPunishmentsAsPaid(long userId, DateTime targetMonth)
+        private async Task MarkPunishmentsAsPaid(long userId, DateTime targetMonth, long userPunishmentPaidId)
         {
             var endOfMonth = targetMonth.AddMonths(1);
             
@@ -277,13 +289,14 @@ namespace Timesheet.DomainServices
             foreach (var punishment in unpaidPunishments)
             {
                 punishment.IsPaid = true;
+                punishment.UserPunishmentPaidId = userPunishmentPaidId;
                 await WorkScope.UpdateAsync(punishment);
             }
 
             _logger.LogInformation($"Marked {unpaidPunishments.Count} punishments as paid for user {userId} in {targetMonth:yyyy-MM}");
         }
 
-        private async Task RecalculateUserPunishmentBalanceWithRemainPoints(long userId, int hashAmount)
+        private async Task RecalculateUserPunishmentBalanceWithRemainPoints(long userId, int hashAmount, int extraAmount)
         {
             var balance = await WorkScope.GetAll<UserPunishmentBalance>()
                 .FirstOrDefaultAsync(b => b.UserId == userId);
@@ -329,7 +342,24 @@ namespace Timesheet.DomainServices
                 
                 _logger.LogInformation($"Applied hash amount {hashAmount} for user {userId}. TotalPunishmentMoney: {beforeHashAmount} -> {balance.TotalPunishmentMoney}");
             }
-            
+
+            if (extraAmount > 0)
+            {
+                var beforeRemainPoints = balance.RemainPoints;
+                balance.RemainPoints += extraAmount;
+
+                _logger.LogInformation($"Extra payment amount {extraAmount} will be converted to RemainPoints for user {userId}. RemainPoints: {beforeRemainPoints} -> {balance.RemainPoints}");
+
+                var extraRefundRecord = new UserPunishmentRefund
+                {
+                    UserId = userId,
+                    UserPunishmentId = null,
+                    Points = extraAmount,
+                    Type = PointType.IsClaim
+                };
+                await WorkScope.InsertAsync(extraRefundRecord);
+            }
+
             await WorkScope.UpdateAsync(balance);
             _logger.LogInformation($"Final balance for user {userId}: TotalPunishmentMoney = {balance.TotalPunishmentMoney}, RemainPoints = {balance.RemainPoints}");
         }
@@ -337,7 +367,12 @@ namespace Timesheet.DomainServices
         public async Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummaryAsync(int year, int month)
         {
             var result = new UserPunishmentSummaryDto();
+            using (var uow = UnitOfWorkManager.Begin(new UnitOfWorkOptions
+            {
+                IsTransactional = true
+            }))
 
+            {
             try
             {
                 if (!_abpSession.UserId.HasValue)
@@ -469,6 +504,8 @@ namespace Timesheet.DomainServices
                     await WorkScope.InsertAsync(refundRecord);
                     _logger.LogInformation($"Recorded {currentTotalPunishmentMoney} RemainPoints usage for user {userId}");
 
+                    refunds.Add(refundRecord);
+
                     foreach (var punishment in unpaidPunishments)
                     {
                         punishment.IsPaid = true;
@@ -508,7 +545,7 @@ namespace Timesheet.DomainServices
                 result.Message = usedRemainPoints
                     ? $"Successfully applied {currentTotalPunishmentMoney:N0} reward points. All penalties paid."
                     : "No reward points were used";
-
+                await uow.CompleteAsync();   
                 return result;
             }
             catch (Exception ex)
@@ -517,6 +554,7 @@ namespace Timesheet.DomainServices
                 result.Success = false;
                 result.Message = "An error occurred while processing punishment points";
                 return result;
+                }
             }
         }
     }

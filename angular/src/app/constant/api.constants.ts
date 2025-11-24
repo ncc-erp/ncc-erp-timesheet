@@ -324,8 +324,8 @@ export const APP_CONSTANT = {
     { value: 15, name: 'Ant' },
     { value: 16, name: 'UnlockTS Gmail' },
     { value: 17, name: 'UnlockTS IMS' },
-    { value: 18, name: 'UnlockTS Staff' },
-    { value: 19, name: 'UnlockTS PM' }
+    { value: 18, name: 'UnlockTS PM' },
+    { value: 19, name: 'UnlockTS Staff' }
   ],
   
   PunishmentTypeMap: {
@@ -375,5 +375,9 @@ export const APP_CONSTANT = {
   NotifyChannel: {
     KOMU : 0,
     Mezon : 1
+  },
+  TimesheetErrorCode: {
+    TIMESHEET_LOCKED: 1,
+    PUNISHMENT_UNPAID: 2
   }
 };

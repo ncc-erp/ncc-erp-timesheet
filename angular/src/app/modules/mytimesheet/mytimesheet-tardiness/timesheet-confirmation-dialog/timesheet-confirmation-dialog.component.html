@@ -18,7 +18,7 @@
           (Paid: {{calculateTotalPaidAmount() | number}})
         </div>
       </div>
-      <div class="summary-item" matTooltip="Points you have received when HR removed or reduced punishments. These points are used to reduce your total fine.">
+      <div class="summary-item" matTooltip="You receive these points when HR removes/reduces fines, or when you overpay. They are used to reduce your total fine.">
         <div class="summary-label">Refund Points</div>
         <div class="summary-value" style="color: green;">{{userBalance?.remainPoints | number}}</div>
         <div class="summary-note" *ngIf="totalUsedRemainPoints > 0">

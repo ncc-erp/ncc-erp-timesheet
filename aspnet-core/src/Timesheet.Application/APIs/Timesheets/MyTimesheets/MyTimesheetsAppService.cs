@@ -41,6 +41,7 @@ namespace Timesheet.Timesheets.MyTimesheets
         private readonly ICommonServices _commonService;
         private readonly KomuService _komuService;
         private readonly MezonService _mezonService;
+
         public MyTimesheetsAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
             ICommonServices commonService, IWorkScope workScope, MezonService mezonService) : base(workScope)
         {
@@ -590,7 +591,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                 ProjectTargetUserId = item.ProjectTargetUserId,
                 IsTemp = item.IsTemp,
                 UserId = item.UserId,
-                EmailAddress = item.User?.EmailAddress ?? string.Empty 
+                EmailAddress = item.User?.EmailAddress ?? string.Empty
             };
         }
 
@@ -619,8 +620,12 @@ namespace Timesheet.Timesheets.MyTimesheets
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.MyTimesheet_Submit)]
-        public async Task<string> SubmitToPending(StartEndDateDto input)
+        public async Task<SubmitTimesheetResultDto> SubmitToPending(StartEndDateDto input)
         {
+            var result = new SubmitTimesheetResultDto
+            {
+                Success = false
+            };
             var isUnLocked = IsUserUnlockedToLogTS(AbpSession.UserId.Value);
 
             var mytimesheets = await WorkScope.GetAll<MyTimesheet>()
@@ -633,19 +638,25 @@ namespace Timesheet.Timesheets.MyTimesheets
             DateTime lockDate = _commonService.getlockDateUser();
             if (!isUnLocked && mytimesheets.Any(s => s.DateAt.Date < lockDate))
             {
-                throw new UserFriendlyException("Go to ims.nccsoft.vn > Unlock timesheet");
+                result.ErrorCode = (int)TimesheetErrorCode.TIMESHEET_LOCKED;
+                result.ErrorMessage = "Go to ims.nccsoft.vn > Unlock timesheet";
+                return result;
             }
 
-            var firstDateCanUnlock = GetFirstDateToLockTS(AbpSession.UserId.Value, isUnLocked).Result;
+            var firstDateCanUnlock = await GetFirstDateToLockTS(AbpSession.UserId.Value, isUnLocked);
             if (input.EndDate.Date < firstDateCanUnlock)
             {
-                throw new UserFriendlyException("Timesheet was locked! You can submit timesheet begin :" + firstDateCanUnlock.ToString("yyyy-MM-dd"));
+                result.ErrorCode = (int)TimesheetErrorCode.TIMESHEET_LOCKED;
+                result.ErrorMessage = $"Timesheet was locked! You can submit timesheet begin: {firstDateCanUnlock:yyyy-MM-dd}";
+                return result;
             }
 
             var hasPaidEnough = await HasPaidEnoughPunishment(AbpSession.UserId.Value);
             if (!hasPaidEnough)
             {
-                throw new UserFriendlyException("You need to pay the full punishment for the current month before you can submit your timesheet.\r\n!");
+                result.ErrorCode = (int)TimesheetErrorCode.PUNISHMENT_UNPAID;
+                result.ErrorMessage = "You need to pay the full punishment for the current month before you can submit your timesheet.";
+                return result;
             }
 
             foreach (var item in mytimesheets)
@@ -660,7 +671,9 @@ namespace Timesheet.Timesheets.MyTimesheets
 
             await notifySubmitTimesheet(mytimesheets);
 
-            var result = "Submit success " + mytimesheets.Count + " timesheets";
+            result.Success = true;
+            result.ErrorCode = null;
+            result.ErrorMessage = null;
             return result;
         }
 
@@ -1080,10 +1093,11 @@ namespace Timesheet.Timesheets.MyTimesheets
                 .Where(s => s.TypeOfWork == TypeOfWork.NormalWorkingHours)
                 .FirstOrDefault();
 
-            if (myTS == null || myTS == default) {
+            if (myTS == null || myTS == default)
+            {
 
                 int workingTime = (int)(input.Hour * 60);
-                
+
                 // Maximum allowed working hours per day to prevent unrealistic time logging
                 const int maxHoursPerDay = 24;
 
@@ -1092,13 +1106,13 @@ namespace Timesheet.Timesheets.MyTimesheets
                    .Sum(s => s.WorkingTime);
 
                 double sumWorkingTime = sumWorkingTimeOlds + workingTime;
-                
+
                 // Check if adding this timesheet would exceed the maximum allowed working time for the day
                 if (sumWorkingTime > maxHoursPerDay * 60)
                 {
                     return $"Failed! Total working time on {dateAt.ToString("yyyy-MM-dd")} can't exceed {maxHoursPerDay} hours";
                 }
-                
+
                 myTS = new MyTimesheet
                 {
                     DateAt = dateAt,
@@ -1207,7 +1221,7 @@ namespace Timesheet.Timesheets.MyTimesheets
                 {
                     return $"Failed! Total working time on {today.ToString("yyyy-MM-dd")} can't exceed {maxHoursPerDay} hours";
                 }
-                
+
                 var timesheet = new MyTimesheet
                 {
                     DateAt = today,

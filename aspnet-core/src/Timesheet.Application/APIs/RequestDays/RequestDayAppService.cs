@@ -520,21 +520,21 @@ namespace Timesheet.APIs.RequestDays
             var requestDateAts = input.Absences.Select(s => s.DateAt.Date);
 
             var dbRequests = (from r in WorkScope.GetAll<AbsenceDayRequest>()
-                                join d in WorkScope.GetAll<AbsenceDayDetail>()
-                                    .Where(s => s.Request.UserId == userId)
-                                    .Where(s => requestDateAts.Contains(s.DateAt.Date))
-                                on r.Id equals d.RequestId
-                                select new RequestInfoDto
-                                {
-                                    Type = r.Type,
-                                    AbsenceTime = d.AbsenceTime,
-                                    Date = d.DateAt.Date,
-                                    DateType = d.DateType,
-                                    Hour = d.Hour,
-                                    Id = d.Id,
-                                    RequestId = r.Id,
-                                    Status = r.Status
-                                }).ToList();
+                              join d in WorkScope.GetAll<AbsenceDayDetail>()
+                                  .Where(s => s.Request.UserId == userId)
+                                  .Where(s => requestDateAts.Contains(s.DateAt.Date))
+                              on r.Id equals d.RequestId
+                              select new RequestInfoDto
+                              {
+                                  Type = r.Type,
+                                  AbsenceTime = d.AbsenceTime,
+                                  Date = d.DateAt.Date,
+                                  DateType = d.DateType,
+                                  Hour = d.Hour,
+                                  Id = d.Id,
+                                  RequestId = r.Id,
+                                  Status = r.Status
+                              }).ToList();
 
             validateRequests(userId, input, dbRequests);
 
@@ -1258,7 +1258,7 @@ namespace Timesheet.APIs.RequestDays
                     .FirstOrDefaultAsync();
 
             foreach (var requestId in requestIds)
-            {   
+            {
                 var request = await WorkScope
                 .GetAll<AbsenceDayRequest>()
                 .Include(ar => ar.User) // Eager loading User
@@ -1450,6 +1450,8 @@ namespace Timesheet.APIs.RequestDays
 
         private async System.Threading.Tasks.Task checkPMOfUser(long PMId, long userId)
         {
+            var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
+
             var userInProjectIds = await WorkScope.GetAll<ProjectUser>()
                 .Where(s => s.UserId == userId)
                 .Select(s => s.ProjectId).Distinct()
@@ -1460,7 +1462,7 @@ namespace Timesheet.APIs.RequestDays
                 .Select(s => s.ProjectId)
                 .Distinct()
                 .ToListAsync();
-            if (!pmInProjectIds.Intersect(userInProjectIds).Any())
+            if (!pmInProjectIds.Intersect(userInProjectIds).Any() && !isViewBranch)
             {
                 throw new UserFriendlyException(string.Format("You aren't PM of this user"));
             }
@@ -1831,5 +1833,4 @@ namespace Timesheet.APIs.RequestDays
         }
     }
 }
-
 

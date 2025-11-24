@@ -173,4 +173,10 @@ export class MytimesheetNormalWorkingComponent extends AppComponentBase implemen
     }
     return `Về Sớm ${absenceDetaiInDay.hour}h`;
   }
+
+  round(value: number | string | null): string {
+    if (value == null) return '0.0';
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return isNaN(num) ? '0.0' : num.toFixed(1);
+  }
 }

@@ -14,6 +14,7 @@ import { TimesheetWarningDialogComponent } from './timesheet-warning-dialog/time
 import { MytimesheetNormalWorkingComponent } from './mytimesheet-normal-working/mytimesheet-normal-working.component';
 import { ComplainDialogComponent } from './mytimesheet-tardiness/complain-dialog/complain-dialog.component';
 import { TimesheetConfirmationDialogComponent } from './mytimesheet-tardiness/timesheet-confirmation-dialog/timesheet-confirmation-dialog.component';
+import { UnlockConfirmDialogComponent } from './unlock-confirm-dialog/unlock-confirm-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -38,6 +39,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
       TransactionHashDialogComponent,
       TranferDialogComponent,
       TransactionSuccessDialogComponent
+      UnlockConfirmDialogComponent,
+      TransactionHashDialogComponent
     ],
     imports: [
       CommonModule,
@@ -67,6 +70,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
       TransactionHashDialogComponent,
       TranferDialogComponent,
       TransactionSuccessDialogComponent
+      UnlockConfirmDialogComponent,
+      TransactionHashDialogComponent
     ]
   })
   export class MyTimeSheetsModule { }
