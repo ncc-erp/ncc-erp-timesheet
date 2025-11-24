@@ -14,6 +14,8 @@ export class AppConsts {
     static mezonAppId: string;
     static mezonAuthServerUrl: string;
     static redirectUri: string;
+    static mmnApiBaseUrl: string;
+    static zkApiEndpoint: string;
 
 
     static localeMappings: any = [];

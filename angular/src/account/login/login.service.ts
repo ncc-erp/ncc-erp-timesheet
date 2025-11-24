@@ -10,17 +10,20 @@ import { catchError, finalize, map, startWith } from 'rxjs/operators';
 import { PermissionCheckerService } from 'abp-ng2-module/dist/src/auth/permission-checker.service';
 import { AppPreBootstrap } from 'AppPreBootstrap';
 import { GoogleLoginService } from '@app/service/api/goole-login.service';
-import { Observable, of, throwError } from '@node_modules/rxjs';
+import { Observable, of } from '@node_modules/rxjs';
 import { HttpErrorResponse } from '@node_modules/@angular/common/http';
 import { MezonLoginService } from '@app/service/api/mezon-api.service';
 import { AuthenticateModel, AuthenticateResultModel, IHashMezonAuthModel, TokenAuthServiceProxy } from '@shared/service-proxies/service-proxies';
 import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
+import { EZkClientType, IEphemeralKeyPair, IZkProof } from '@node_modules/mmn-client-js/dist';
+import { mmnClient, zkClient } from '@shared/mmn-clients';
 
 
 @Injectable()
 export class LoginService {
     static readonly twoFactorRememberClientTokenName = 'TwoFactorRememberClientToken';
-
+    private mmn = mmnClient;
+    private zk = zkClient;
     authenticateModel: AuthenticateModel;
     authenticateResult: AuthenticateResultModel;
 
@@ -56,8 +59,8 @@ export class LoginService {
 
     authenticateMezon(token: string, scope: string): Observable<any> {
         return this._mezonService.mezonAuthenticate(token).pipe(
-            map(data => {
-                var result = this.processAuthenticateResult(data.result);
+            map(async data => {
+                var result = await this.processAuthenticateResult(data.result);
                 return { ...data, loading: false }
             }),
             startWith({ loading: true, success: false }),
@@ -77,15 +80,27 @@ export class LoginService {
             });
     }
 
-    private processAuthenticateResult(authenticateResult: AuthenticateResultModel) {
+    private async processAuthenticateResult(authenticateResult: AuthenticateResultModel) {
         this.authenticateResult = authenticateResult;
-
+        const senderAddress = this.mmn.getAddressFromUserId(authenticateResult.mezonUserId);
+        const keyPair = this.mmn.generateEphemeralKeyPair();
+        const zkProof = await this.zk.getZkProofs({
+            userId: authenticateResult.mezonUserId,
+            ephemeralPublicKey: keyPair.publicKey,
+            jwt: authenticateResult.authToken,
+            address: senderAddress,
+            clientType: EZkClientType.OAUTH,
+          });
         if (authenticateResult.accessToken) {
-            // Successfully logged in
             this.login(
                 authenticateResult.accessToken,
                 authenticateResult.encryptedAccessToken,
                 authenticateResult.expireInSeconds,
+                authenticateResult.authToken,
+                authenticateResult.mezonUserId,
+                senderAddress,
+                keyPair,
+                zkProof,
                 this.rememberMe);
 
         } else {
@@ -100,7 +115,7 @@ export class LoginService {
         }
     }
 
-    private login(accessToken: string, encryptedAccessToken: string, expireInSeconds: number, rememberMe?: boolean): void {
+    private login(accessToken: string, encryptedAccessToken: string, expireInSeconds: number, authToken:string, mezonUserId:string, senderAddress:string, keyPair:IEphemeralKeyPair , zkProof:IZkProof  , rememberMe?: boolean): void {
 
         const tokenExpireDate = rememberMe ? (new Date(new Date().getTime() + 1000 * expireInSeconds)) : undefined;
 
@@ -128,7 +143,12 @@ export class LoginService {
         AppPreBootstrap.getUserConfiguration(() => {
             location.href = `${AppConsts.appBaseUrl}${this.selectBestRoute()}`;
         });
-
+      
+        localStorage.setItem('mezonUserId', mezonUserId );
+        localStorage.setItem('authToken',authToken );
+        localStorage.setItem('senderAddress', senderAddress);        
+        localStorage.setItem('keyPair', JSON.stringify(keyPair));
+        localStorage.setItem('zkProof', JSON.stringify(zkProof));
         location.href = initialUrl;
     }
 

@@ -3079,6 +3079,8 @@ export class AuthenticateResultModel implements IAuthenticateResultModel {
     encryptedAccessToken: string | undefined;
     expireInSeconds: number | undefined;
     userId: number | undefined;
+    authToken: string | undefined;
+    mezonUserId: string | undefined;
 
     constructor(data?: IAuthenticateResultModel) {
         if (data) {
@@ -3126,7 +3128,9 @@ export interface IAuthenticateResultModel {
     accessToken: string | undefined;
     encryptedAccessToken: string | undefined;
     expireInSeconds: number | undefined;
-    userId: number | undefined;
+    userId: number | undefined; 
+    authToken: string | undefined;
+    mezonUserId: string | undefined;
 }
 
 export class ExternalLoginProviderInfoModel implements IExternalLoginProviderInfoModel {
