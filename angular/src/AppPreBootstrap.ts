@@ -34,12 +34,10 @@ export class AppPreBootstrap {
             if (typeof result.sentryDsn != "undefined" && result.sentryDsn !== "") {
                 AppConsts.sentryDsn = result.sentryDsn;
             }
-            if (typeof result.mmnApiBaseUrl != "undefined" && result.mmnApiBaseUrl !== "") {
-                AppConsts.mmnApiBaseUrl = result.mmnApiBaseUrl;
+            if (typeof result.mmnBaseUrl != "undefined" && result.mmnBaseUrl !== "") {
+                AppConsts.mmnBaseUrl = result.mmnBaseUrl;
             }
-            if (typeof result.zkApiEndpoint != "undefined" && result.zkApiEndpoint !== "") {
-                AppConsts.zkApiEndpoint = result.zkApiEndpoint;
-            }
+           
             callback();
         });
     }

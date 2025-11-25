@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-// MatSnackBar không còn cần thiết nữa
+import { AppConsts } from '@shared/AppConsts';
 
 export interface TransactionSuccessDialogData {
   transactionHash?: string;
@@ -13,7 +13,8 @@ export interface TransactionSuccessDialogData {
   styleUrls: ['./transaction-success-dialog.component.css']
 })
 export class TransactionSuccessDialogComponent {
-  baseUrl = 'https://dev-mmn.nccsoft.vn/transactions/';
+  baseUrl = AppConsts.buildMmnUrl('transactions/')
+    
 
   constructor(
     public dialogRef: MatDialogRef<TransactionSuccessDialogComponent>,

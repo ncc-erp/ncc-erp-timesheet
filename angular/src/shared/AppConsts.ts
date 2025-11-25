@@ -14,8 +14,8 @@ export class AppConsts {
     static mezonAppId: string;
     static mezonAuthServerUrl: string;
     static redirectUri: string;
-    static mmnApiBaseUrl: string;
-    static zkApiEndpoint: string;
+    static mmnBaseUrl: string;
+  
 
 
     static localeMappings: any = [];
@@ -31,6 +31,18 @@ export class AppConsts {
     static readonly authorization = {
         encrptedAuthTokenName: 'enc_auth_token'
     };
+
+    static buildMmnUrl(path: string = ''): string {
+        const base = (AppConsts.mmnBaseUrl || '').replace(/\/+$/, '');
+        if (!base) {
+            return path;
+        }
+        if (!path) {
+            return base;
+        }
+        const normalizedPath = path.replace(/^\/+/, '');
+        return `${base}/${normalizedPath}`;
+    }
 }
 export const DATE_TIME_OPTIONS = ["Day", "Week", "Month", "Quarter", "Half-Year", "Year", "Custom"];
 export const DATE_FILTER_TYPE = ["Onboard", "Be Staff", "Quit Job"];

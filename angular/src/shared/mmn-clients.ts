@@ -6,13 +6,13 @@ let _zkClient: ZkClient | null = null;
 
 function createMmnClient(): MmnClient {
   return new MmnClient({
-    baseUrl: AppConsts.mmnApiBaseUrl ,
+    baseUrl:  AppConsts.buildMmnUrl('mmn-api/'),
   });
 }
 
 function createZkClient(): ZkClient {
   return new ZkClient({
-    endpoint: AppConsts.zkApiEndpoint ,
+    endpoint: AppConsts.buildMmnUrl('zk-api'),
   });
 }
 

@@ -15,7 +15,8 @@ import { HttpErrorResponse } from '@node_modules/@angular/common/http';
 import { MezonLoginService } from '@app/service/api/mezon-api.service';
 import { AuthenticateModel, AuthenticateResultModel, IHashMezonAuthModel, TokenAuthServiceProxy } from '@shared/service-proxies/service-proxies';
 import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
-import { EZkClientType, IEphemeralKeyPair, IZkProof } from '@node_modules/mmn-client-js/dist';
+import { STORAGE_KEYS } from '@app/constant/storage-keys.constant';
+import { IEphemeralKeyPair, IZkProof } from '@node_modules/mmn-client-js/dist';
 import { mmnClient, zkClient } from '@shared/mmn-clients';
 
 
@@ -143,11 +144,11 @@ export class LoginService {
             location.href = `${AppConsts.appBaseUrl}${this.selectBestRoute()}`;
         });
       
-        localStorage.setItem('mezonUserId', mezonUserId );
-        localStorage.setItem('authToken',authToken );
-        localStorage.setItem('senderAddress', senderAddress);        
-        localStorage.setItem('keyPair', JSON.stringify(keyPair));
-        localStorage.setItem('zkProof', JSON.stringify(zkProof));
+        localStorage.setItem(STORAGE_KEYS.MEZON_USER_ID, mezonUserId);
+        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authToken);
+        localStorage.setItem(STORAGE_KEYS.SENDER_ADDRESS, senderAddress);
+        localStorage.setItem(STORAGE_KEYS.KEY_PAIR, JSON.stringify(keyPair));
+        localStorage.setItem(STORAGE_KEYS.ZK_PROOF, JSON.stringify(zkProof));
         location.href = initialUrl;
     }
 

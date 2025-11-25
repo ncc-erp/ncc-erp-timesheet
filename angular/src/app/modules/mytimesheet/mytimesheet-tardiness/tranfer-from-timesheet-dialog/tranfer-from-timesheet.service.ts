@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { from, Observable } from "rxjs"; // 1. Import `from` và `Observable`
 import { mmnClient } from "@shared/mmn-clients";
+import { STORAGE_KEYS } from "@app/constant/storage-keys.constant";
 
 @Injectable({ providedIn: "root" })
 export class MmnService {
@@ -9,12 +10,12 @@ export class MmnService {
     return from(this.executeTransfer(amountToTransfer));
   }
   async executeTransfer(amountToTransfer: number) {
-    const senderUserId = localStorage.getItem("mezonUserId");
+    const senderUserId = localStorage.getItem(STORAGE_KEYS.MEZON_USER_ID);
     const senderAddress = this.mmn.getAddressFromUserId(senderUserId);
     const recipientAddress = "HsvGsttQ8swfZehVDMDYqRWEMA8CW6AfyLjk3jBwQagY";
-    const keyPairRaw = localStorage.getItem('keyPair');
+    const keyPairRaw = localStorage.getItem(STORAGE_KEYS.KEY_PAIR);
     const keyPair = keyPairRaw ? JSON.parse(keyPairRaw) : undefined;
-    const zkProofRaw = localStorage.getItem('zkProof');
+    const zkProofRaw = localStorage.getItem(STORAGE_KEYS.ZK_PROOF);
     const zkProof = zkProofRaw ? JSON.parse(zkProofRaw) : undefined;
     try {
       const nonceRes = await this.mmn.getCurrentNonce(senderUserId);
