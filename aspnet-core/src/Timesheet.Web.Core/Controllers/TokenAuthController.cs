@@ -76,8 +76,7 @@ namespace Ncc.Controllers
                 AccessToken = accessToken,
                 EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
                 ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
-                UserId = loginResult.User.Id,
-                MezonUserId = loginResult.User.MezonUserId
+                UserId = loginResult.User.Id
             };
         }
 
@@ -94,8 +93,7 @@ namespace Ncc.Controllers
                 AccessToken = accessToken,
                 EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
                 ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
-                UserId = loginResult.User.Id,
-                MezonUserId = loginResult.User.MezonUserId
+                UserId = loginResult.User.Id
             };
         }
 
