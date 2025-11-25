@@ -83,14 +83,20 @@ export class LoginService {
 
     private async processAuthenticateResult(authenticateResult: AuthenticateResultModel) {
         this.authenticateResult = authenticateResult;
-        const senderAddress = this.mmn.getAddressFromUserId(authenticateResult.mezonUserId);
-        const keyPair = this.mmn.generateEphemeralKeyPair();
-        const zkProof = await this.zk.getZkProofs({
-            userId: authenticateResult.mezonUserId,
-            ephemeralPublicKey: keyPair.publicKey,
-            jwt: authenticateResult.authToken,
-            address: senderAddress,
-          });
+        let senderAddress: string | undefined;
+        let keyPair: IEphemeralKeyPair | undefined;
+        let zkProof: IZkProof | undefined;
+
+        if (authenticateResult.mezonUserId) {
+            senderAddress = this.mmn.getAddressFromUserId(authenticateResult.mezonUserId);
+            keyPair = this.mmn.generateEphemeralKeyPair();
+            zkProof = await this.zk.getZkProofs({
+                userId: authenticateResult.mezonUserId,
+                ephemeralPublicKey: keyPair.publicKey,
+                jwt: authenticateResult.authToken,
+                address: senderAddress,
+            });
+        }
         if (authenticateResult.accessToken) {
             this.login(
                 authenticateResult.accessToken,
@@ -115,7 +121,17 @@ export class LoginService {
         }
     }
 
-    private login(accessToken: string, encryptedAccessToken: string, expireInSeconds: number, authToken:string, mezonUserId:string, senderAddress:string, keyPair:IEphemeralKeyPair , zkProof:IZkProof  , rememberMe?: boolean): void {
+    private login(
+        accessToken: string,
+        encryptedAccessToken: string,
+        expireInSeconds: number,
+        authToken: string,
+        mezonUserId?: string,
+        senderAddress?: string,
+        keyPair?: IEphemeralKeyPair,
+        zkProof?: IZkProof,
+        rememberMe?: boolean
+    ): void {
 
         const tokenExpireDate = rememberMe ? (new Date(new Date().getTime() + 1000 * expireInSeconds)) : undefined;
 
@@ -144,11 +160,21 @@ export class LoginService {
             location.href = `${AppConsts.appBaseUrl}${this.selectBestRoute()}`;
         });
       
-        localStorage.setItem(STORAGE_KEYS.MEZON_USER_ID, mezonUserId);
-        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authToken);
-        localStorage.setItem(STORAGE_KEYS.SENDER_ADDRESS, senderAddress);
-        localStorage.setItem(STORAGE_KEYS.KEY_PAIR, JSON.stringify(keyPair));
-        localStorage.setItem(STORAGE_KEYS.ZK_PROOF, JSON.stringify(zkProof));
+        if (mezonUserId) {
+            localStorage.setItem(STORAGE_KEYS.MEZON_USER_ID, mezonUserId);
+        }
+        if (authToken) {
+            localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authToken);
+        }
+        if (senderAddress) {
+            localStorage.setItem(STORAGE_KEYS.SENDER_ADDRESS, senderAddress);
+        }
+        if (keyPair) {
+            localStorage.setItem(STORAGE_KEYS.KEY_PAIR, JSON.stringify(keyPair));
+        }
+        if (zkProof) {
+            localStorage.setItem(STORAGE_KEYS.ZK_PROOF, JSON.stringify(zkProof));
+        }
         location.href = initialUrl;
     }
 
