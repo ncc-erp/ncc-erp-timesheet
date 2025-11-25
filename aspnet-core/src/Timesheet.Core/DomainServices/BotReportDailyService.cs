@@ -34,7 +34,7 @@ namespace Timesheet.DomainServices
             _mezonService = mezonService;
         }
 
-        public async Task<DailyProjectTimelogReportDto> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input)
+        public async Task<List<ProjectTimelogDto>> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input)
         {
             var today = DateTime.Now.Date;
 
@@ -98,14 +98,7 @@ namespace Timesheet.DomainServices
 
             if (!officeUsers.Any())
             {
-                return new DailyProjectTimelogReportDto
-                {
-                    ReportDate = today.ToString("yyyy-MM-dd"),
-                    LastWeekStart = lastWeekStart.ToString("yyyy-MM-dd"),
-                    LastWeekEnd = lastWeekEnd.ToString("yyyy-MM-dd"),
-                    LastMonth = lastMonthStart.ToString("yyyy-MM"),
-                    Projects = new List<ProjectTimelogDto>()
-                };
+                return new List<ProjectTimelogDto>();
             }
 
             var activeProjectIds = (input.ProjectIds != null && input.ProjectIds.Any())
@@ -141,13 +134,7 @@ namespace Timesheet.DomainServices
                 })
                 .ToList();
 
-            var result = new DailyProjectTimelogReportDto
-            {
-                ReportDate = today.ToString("yyyy-MM-dd"),
-                LastWeekStart = lastWeekStart.ToString("yyyy-MM-dd"),
-                LastWeekEnd = lastWeekEnd.ToString("yyyy-MM-dd"),
-                LastMonth = lastMonthStart.ToString("yyyy-MM"),
-                Projects = projectTimesheets
+            var result = projectTimesheets
                     .Select(p => new ProjectTimelogDto
                     {
                         Name = allProjects.FirstOrDefault(proj => proj.Id == p.ProjectId)?.Name ?? "Unknown Project",
@@ -163,12 +150,11 @@ namespace Timesheet.DomainServices
                     .OrderByDescending(p => p.TotalTimelogLW)
                     .ThenByDescending(p => p.TotalTimelogLM)
                     .ThenBy(p => p.Name)
-                    .ToList()
-            };
+                    .ToList();
 
-            if (input.TopN.HasValue && input.TopN.Value > 0 && result.Projects.Count > input.TopN.Value)
+            if (input.TopN.HasValue && input.TopN.Value > 0 && result.Count > input.TopN.Value)
             {
-                result.Projects = result.Projects.Take(input.TopN.Value).ToList();
+                result = result.Take(input.TopN.Value).ToList();
             }
 
             return result;
@@ -275,7 +261,7 @@ namespace Timesheet.DomainServices
                 return false;
             }
 
-            var projectData = reportData.Projects
+            var projectData = reportData
                 .OrderByDescending(x => x.TotalTimelogLW)
                 .Take(input.TopN ?? 10)
                 .Select(x => new

@@ -3,20 +3,6 @@ using System.Collections.Generic;
 
 namespace Timesheet.DomainServices.Dto
 {
-    public class DailyProjectTimelogReportDto
-    {
-        public string ReportDate { get; set; }
-        public string LastWeekStart { get; set; }
-        public string LastWeekEnd { get; set; }
-        public string LastMonth { get; set; }
-        public List<ProjectTimelogDto> Projects { get; set; }
-
-        public DailyProjectTimelogReportDto()
-        {
-            Projects = new List<ProjectTimelogDto>();
-        }
-    }
-
     public class ProjectTimelogDto
     {
         public string Name { get; set; }
