@@ -27,6 +27,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   weekRange: string;
   indexerUrl: string = '';
   donationUrl: string = '';
+  donationWallet: string = '';
   punishmentItems: any[] = [];
   punishmentPaidItems: UserPunishmentPaidDto[] = [];
   userBalance: GetUserPunishmentBalanceDto | null = null;
@@ -178,7 +179,8 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       width: '500px',
       disableClose: true,
       data: {
-        minAmount: minAmount
+        minAmount: minAmount,
+        donationWallet: this.donationWallet,
       }
     });
 
@@ -239,6 +241,9 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
           }
           if (data.result.donationUrl) {
             this.donationUrl = data.result.donationUrl;
+          }
+          if (data.result.donationWallet) {
+          this.donationWallet = data.result.donationWallet;
           }
         }
       },

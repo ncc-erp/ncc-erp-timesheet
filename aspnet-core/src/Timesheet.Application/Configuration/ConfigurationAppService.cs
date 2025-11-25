@@ -379,7 +379,8 @@ namespace Ncc.Configuration
             return new MMNConfigDto
             {
                 IndexerUrl = _configuration.GetValue<string>("MMNService:IndexerUri"),
-                DonationUrl = _configuration.GetValue<string>("MMNService:DonationUrl")
+                DonationUrl = _configuration.GetValue<string>("MMNService:DonationUrl"),
+                DonationWallet = _configuration.GetValue<string>("MMNService:DonationWallet")
             };
         }
 

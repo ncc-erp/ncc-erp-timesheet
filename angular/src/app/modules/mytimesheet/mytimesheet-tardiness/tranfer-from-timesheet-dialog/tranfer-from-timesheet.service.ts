@@ -6,13 +6,12 @@ import { STORAGE_KEYS } from "@app/constant/storage-keys.constant";
 @Injectable({ providedIn: "root" })
 export class MmnService {
   private mmn = mmnClient;
-  transfer(amountToTransfer: number): Observable<any> {
-    return from(this.executeTransfer(amountToTransfer));
+  transfer(amountToTransfer: number, recipientAddress: string): Observable<any> {
+    return from(this.executeTransfer(amountToTransfer, recipientAddress));
   }
-  async executeTransfer(amountToTransfer: number) {
+  async executeTransfer(amountToTransfer: number, recipientAddress: string) {
     const senderUserId = localStorage.getItem(STORAGE_KEYS.MEZON_USER_ID);
     const senderAddress = this.mmn.getAddressFromUserId(senderUserId);
-    const recipientAddress = "HsvGsttQ8swfZehVDMDYqRWEMA8CW6AfyLjk3jBwQagY";
     const keyPairRaw = localStorage.getItem(STORAGE_KEYS.KEY_PAIR);
     const keyPair = keyPairRaw ? JSON.parse(keyPairRaw) : undefined;
     const zkProofRaw = localStorage.getItem(STORAGE_KEYS.ZK_PROOF);

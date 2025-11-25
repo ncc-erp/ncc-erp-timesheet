@@ -16,10 +16,7 @@ export class TranferDialogComponent implements OnInit {
   userBalanceScaled: number = 0;    
   userBalanceDisplay: string = '0'; 
 
-  recipientAddressControl = new FormControl(
-    "HsvGsttQ8swfZehVDMDYqRWEMA8CW6AfyLjk3jBwQagY",
-    [Validators.required]
-  );
+  recipientAddressControl: FormControl;
 
   amountControl: FormControl;
   isSubmitting = false;
@@ -33,6 +30,13 @@ export class TranferDialogComponent implements OnInit {
     const rawMinAmount = (data && data.minAmount) ? data.minAmount : 0;
     this.minAmount = rawMinAmount / this.SCALE; 
     
+    const recipientAddress = data && data.donationWallet
+      ? data.donationWallet
+      : "";
+    this.recipientAddressControl = new FormControl(recipientAddress, [
+      Validators.required,
+    ]);
+
     this.amountControl = new FormControl("", [
       Validators.required,
       // CẬP NHẬT: Regex cho phép số và dấu phẩy
@@ -151,8 +155,9 @@ export class TranferDialogComponent implements OnInit {
     this.errorMessage = null; 
 
     const transferAmountRaw = amountInput; 
+    const recipientAddress = this.recipientAddressControl.value;
 
-    this.mmnService.transfer(transferAmountRaw).subscribe({
+    this.mmnService.transfer(transferAmountRaw, recipientAddress).subscribe({
       next: (transferResult) => {
         this.isSubmitting = false;
         this.dialogRef.close(transferResult);
