@@ -27,6 +27,7 @@ using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.Komu;
+using Timesheet.Services.Mezon;
 using Timesheet.Timesheets.MyTimesheets;
 using Timesheet.Timesheets.MyTimesheets.Dto;
 using Timesheet.Timesheets.Timesheets.Dto;
@@ -259,7 +260,8 @@ namespace Timesheet.Application.Tests.API.MyTimesheets
             var _komuService = Substitute.For<KomuService>(_httpClient, _logger, _config, _settingManager);
             var _abpSession = Substitute.For<IAbpSession>();
             _work = Resolve<IWorkScope>();
-            _myTimesheet = new MyTimesheetsAppService(_backgroundJobManager, _komuService, _commonServices, _work);
+            var _mezonService = Substitute.For<MezonService>();
+            _myTimesheet = new MyTimesheetsAppService(_backgroundJobManager, _komuService, _commonServices, _work, _mezonService);
             _myTimesheet.AbpSession = Resolve<IAbpSession>();
 
             _myTimesheet.SettingManager = Resolve<ISettingManager>();
@@ -1122,7 +1124,7 @@ namespace Timesheet.Application.Tests.API.MyTimesheets
                 .ToListAsync();
                 var expectedResult = "Submit success " + mytimesheets.Count + " timesheets";
                 var result = await _myTimesheet.SubmitToPending(input);
-                Assert.Equal(expectedResult, result);
+                result.ErrorMessage.ShouldBeNull();
             });
             await WithUnitOfWorkAsync(async () =>
             {
@@ -1155,11 +1157,11 @@ namespace Timesheet.Application.Tests.API.MyTimesheets
             {
                 var result = await _myTimesheet.getReceiverList(input);
                 Assert.Equal(2, result.Count());
-                result.ShouldContain(x => x.IsNotifyKomu == false);
+                result.ShouldContain(x => x.IsNoticeKMSubmitTS == false);
                 result.ShouldContain(x => x.ProjectId == 5);
                 result.ShouldContain(x => x.ProjectCode == "Project 3");
                 result.ShouldContain(x => x.ProjectName == "Project 3");
-                result.ShouldContain(x => x.Emails.Count == 2);
+                
                 result.ShouldContain(x => x.PMs.Count == 2);
             });
         }

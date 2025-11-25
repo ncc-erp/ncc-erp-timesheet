@@ -19,6 +19,8 @@ using System.Threading.Tasks;
 using Timesheet.APIs.Timesheets.Timesheets.Dto;
 using Timesheet.DomainServices;
 using Timesheet.Entities;
+using Timesheet.Services.Komu;
+using Timesheet.Services.Mezon;
 using Timesheet.Timesheets.Timesheets;
 using Timesheet.Uitls;
 using Xunit;
@@ -150,7 +152,9 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             var _commonService = Resolve<ICommonServices>();
             lockDate = _commonService.getlockDatePM();
             _work = Resolve<IWorkScope>();
-            _timesheet = new TimesheetAppService(_backgroundJobManager, _commonService, _work);
+            var komuService = Resolve<KomuService>();
+            var mezonService = Resolve<MezonService>();
+            _timesheet = new TimesheetAppService(_backgroundJobManager, _commonService, _work, komuService, mezonService);
             _timesheet.AbpSession = Resolve<IAbpSession>();
             _timesheet.SettingManager = Resolve<ISettingManager>();
             _timesheet.ObjectMapper = Resolve<IObjectMapper>();
@@ -165,14 +169,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_All_With_Filter_Null()
         {
+            int? opentalkTime = null;
+            bool? opentalkTimeType = null;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputStatus = TimesheetStatus.Approve;
             var inputProjectId = 5;
             HaveCheckInFilter? inputFilter = null;
+            long? branchId = null;
+            string searchText = "";
+            RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter);
+                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
                 Assert.Equal(28, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldContain(x => x.UserId == 6);
@@ -210,14 +219,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_All_With_Filter_Have_Checkin()
         {
+            int? opentalkTime = null;
+            bool? opentalkTimeType = null;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputStatus = TimesheetStatus.Approve;
             var inputProjectId = 5;
             HaveCheckInFilter? inputFilter = HaveCheckInFilter.HaveCheckIn;
+            long? branchId = null;
+            string searchText = "";
+            RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter);
+                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
                 Assert.Equal(3, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldNotContain(x => x.UserId == 6);
@@ -255,14 +269,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_All_With_Filter_Have_Checkout()
         {
+            int? opentalkTime = null;
+            bool? opentalkTimeType = null;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputStatus = TimesheetStatus.Approve;
             var inputProjectId = 5;
             HaveCheckInFilter? inputFilter = HaveCheckInFilter.HaveCheckOut;
+            long? branchId = null;
+            string searchText = "";
+            RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter);
+                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
                 Assert.Equal(3, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldContain(x => x.UserId == 6);
@@ -300,14 +319,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_All_With_Filter_Have_Checkin_And_Have_Checkout()
         {
+            int? opentalkTime = null;
+            bool? opentalkTimeType = null;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputStatus = TimesheetStatus.Approve;
             var inputProjectId = 5;
             HaveCheckInFilter? inputFilter = HaveCheckInFilter.HaveCheckInAndHaveCheckOut;
+            long? branchId = null;
+            string searchText = "";
+            RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter);
+                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
                 Assert.Equal(2, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldNotContain(x => x.UserId == 6);
@@ -345,14 +369,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_All_With_Filter_Have_Checkin_Or_Have_Checkout()
         {
+            int? opentalkTime = null;
+            bool? opentalkTimeType = null;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputStatus = TimesheetStatus.Approve;
             var inputProjectId = 5;
             HaveCheckInFilter? inputFilter = HaveCheckInFilter.HaveCheckInOrHaveCheckOut;
+            long? branchId = null;
+            string searchText = "";
+            RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter);
+                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
                 Assert.Equal(4, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldContain(x => x.UserId == 6);
@@ -390,14 +419,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_All_With_Filter_No_Checkin_And_No_Checkout()
         {
+            int? opentalkTime = null;
+            bool? opentalkTimeType = null;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputStatus = TimesheetStatus.Approve;
             var inputProjectId = 5;
             HaveCheckInFilter? inputFilter = HaveCheckInFilter.NoCheckInAndNoCheckOut;
+            long? branchId = null;
+            string searchText = "";
+            RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter);
+                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
                 Assert.Equal(24, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldContain(x => x.UserId == 6);
@@ -734,15 +768,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_Quantity_Timesheet_Status_With_Filter_Null()
         {
+            var opentalkTime = 0;
+            var opentalkTimeType = false;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputProjectId = 5;
             HaveCheckInFilter? inputFilter = null;
             var searchText = "";
             var branchId = 0;
+            RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
@@ -757,15 +794,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_Quantity_Timesheet_Status_With_Filter_Have_Checkin()
         {
+            var opentalkTime = 0;
+            var opentalkTimeType = false;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputProjectId = 5;
             var searchText = "";
             var branchId = 0;
+            RequestType? workLocation = null;
             HaveCheckInFilter? inputFilter = HaveCheckInFilter.HaveCheckIn;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
@@ -780,15 +820,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_Quantity_Timesheet_Status_With_Filter_Have_Checkout()
         {
+            var opentalkTime = 0;
+            var opentalkTimeType = false;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputProjectId = 5;
             HaveCheckInFilter? inputFilter = HaveCheckInFilter.HaveCheckOut;
             var searchText = "";
             var branchId = 0;
+            RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
@@ -802,15 +845,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_Quantity_Timesheet_Status_With_Filter_Have_Checkout_And_Have_Checkin()
         {
+            var opentalkTime = 0;
+            var opentalkTimeType = false;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputProjectId = 5;
             HaveCheckInFilter? inputFilter = HaveCheckInFilter.HaveCheckInAndHaveCheckOut;
             var searchText = "";
             var branchId = 0;
+            RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
@@ -824,15 +870,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_Quantity_Timesheet_Status_With_Filter_Have_Checkout_Or_Have_Checkin()
         {
+            var opentalkTime = 0;
+            var opentalkTimeType = false;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputProjectId = 5;
             HaveCheckInFilter? inputFilter = HaveCheckInFilter.HaveCheckInOrHaveCheckOut;
             var searchText = "";
             var branchId = 0;
+            RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
@@ -846,15 +895,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         [Fact]
         public async Task Should_Get_Quantity_Timesheet_Status_With_Filter_No_Have_Checkout_And_No_Have_Checkin()
         {
+            var opentalkTime = 0;
+            var opentalkTimeType = false;
             var inputStartDate = new DateTime(2022, 12, 1);
             var inputEndDate = new DateTime(2022, 12, 31);
             var inputProjectId = 5;
             HaveCheckInFilter? inputFilter = HaveCheckInFilter.NoCheckInAndNoCheckOut;
             var searchText = "";
             var branchId = 0;
+            RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
