@@ -9,6 +9,6 @@ namespace Ncc.Authorization.Dto
     public class MezonLoginResult
     {
         public AbpLoginResult<Tenant, User> LoginResult { get; set; }
-        public string MezonAccessToken { get; set; }
+        public string IdToken { get; set; }
     }
 }

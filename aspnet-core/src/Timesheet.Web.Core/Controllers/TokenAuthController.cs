@@ -132,7 +132,7 @@ namespace Ncc.Controllers
                 EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
                 ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
                 UserId = loginResult.User.Id,
-                AuthToken = mezonResult.MezonAccessToken,
+                AuthToken = mezonResult.IdToken,
                 MezonUserId = loginResult.User.MezonUserId
             };
         }

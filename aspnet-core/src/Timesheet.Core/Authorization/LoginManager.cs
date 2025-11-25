@@ -385,7 +385,7 @@ namespace Ncc.Authorization
                 return new MezonLoginResult
                 {
                     LoginResult = new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null),
-                    MezonAccessToken = null
+                    IdToken = null
                 };
             }
 
@@ -403,7 +403,7 @@ namespace Ncc.Authorization
                     return new MezonLoginResult
                     {
                         LoginResult = new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null),
-                        MezonAccessToken = null
+                        IdToken = null
                     };
                 }
 
@@ -413,7 +413,7 @@ namespace Ncc.Authorization
                     return new MezonLoginResult
                     {
                         LoginResult = new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null),
-                        MezonAccessToken = null
+                        IdToken = null
                     };
                 }
 
@@ -427,7 +427,7 @@ namespace Ncc.Authorization
                     return new MezonLoginResult
                     {
                         LoginResult = new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null),
-                        MezonAccessToken = null
+                        IdToken = null
                     };
                 }
 
@@ -441,7 +441,7 @@ namespace Ncc.Authorization
                 return new MezonLoginResult
                 {
                     LoginResult = loginResult,
-                    MezonAccessToken = tokenResponse.AccessToken
+                    IdToken = tokenResponse.IdToken
                 };
             }
             catch (Exception)
@@ -449,7 +449,7 @@ namespace Ncc.Authorization
                 return new MezonLoginResult
                 {
                     LoginResult = new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null),
-                    MezonAccessToken = null
+                    IdToken = null
                 };
             }
         }
