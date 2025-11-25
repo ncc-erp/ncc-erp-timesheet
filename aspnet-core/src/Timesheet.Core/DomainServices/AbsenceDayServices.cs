@@ -532,9 +532,6 @@ namespace Timesheet.DomainServices
 
             var result = new AnomaliesTimelogReportDto
             {
-                Yesterday = yesterday.ToString("dd/MM/yyyy"),
-                LastWeekStart = lastWeekStart.ToString("dd/MM/yyyy"),
-                LastWeekEnd = lastWeekEnd.ToString("dd/MM/yyyy"),
                 YesterdayAnomalies = new List<YesterdayAnomalyDTO>(),
                 LastWeekAnomalies = new List<LastWeekAnomalyDTO>()
             };

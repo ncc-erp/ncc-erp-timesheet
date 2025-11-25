@@ -41,19 +41,5 @@ namespace Timesheet.APIs.BotReportDaily
         {
             return await _absenceDayService.GetAnomaliesTimelogReport(input);
         }
-
-        [HttpGet]
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_Report, Ncc.Authorization.PermissionNames.BranchDirector_OfficeWorkingReport_View)]
-        public async Task<OfficeWorkingTimelogReportDto> GetOfficeWorkingTimelogReport(GetOfficeWorkingTimelogReportInput input)
-        {
-            return await _officeWorkingReportAppService.GetOfficeWorkingTimelogReport(input);
-        }
-
-        [HttpGet]
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_Report, Ncc.Authorization.PermissionNames.BranchDirector_ProjectWorkingReport_View)]
-        public async Task<DailyProjectTimelogReportDto> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input)
-        {
-            return await _botReportDailyService.GetDailyProjectTimelogReport(input);
-        }
     }
 }
