@@ -39,7 +39,6 @@ export class TranferDialogComponent implements OnInit {
 
     this.amountControl = new FormControl("", [
       Validators.required,
-      // CẬP NHẬT: Regex cho phép số và dấu phẩy
       Validators.pattern("^[0-9,]+(\\.[0-9]*)?$"),
       this.minAmountValidator
     ]);
@@ -120,7 +119,7 @@ export class TranferDialogComponent implements OnInit {
 
         this.amountControl.setValidators([
           Validators.required,
-          Validators.pattern("^[0-9,]+(\\.[0-9]*)?$"), // Regex mới
+          Validators.pattern("^[0-9,]+(\\.[0-9]*)?$"),
           this.minAmountValidator,
           this.maxAmountValidator 
         ]);
