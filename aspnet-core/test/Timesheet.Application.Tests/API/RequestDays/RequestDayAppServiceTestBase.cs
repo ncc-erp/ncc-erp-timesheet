@@ -25,6 +25,7 @@ using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.FaceIdService;
 using Timesheet.Services.Komu;
+using Timesheet.Services.Mezon;
 using Timesheet.Services.Tracker;
 using Timesheet.Services.W2;
 using Timesheet.Services.W2.Dto;
@@ -86,7 +87,7 @@ namespace Timesheet.Application.Tests.API.RequestDays
             var trackerServiceLogger = Resolve<ILogger<TrackerService>>();
             var faceIdServiceLogger = Resolve<ILogger<FaceIdService>>();
             var backgroundJobManager = Resolve<IBackgroundJobManager>();
-
+            var mezonService = Substitute.For<MezonService>();
             var trackerService = Substitute.For<TrackerService>(
                 httpClientTrackerService,
                 trackerServiceConfiguration,
@@ -143,7 +144,7 @@ namespace Timesheet.Application.Tests.API.RequestDays
                 timeKeepingService,
                 workScope,
                 approveRequestOffService,
-                w2Service);
+                w2Service, mezonService);
             requestDayAppService.AbpSession = Resolve<IAbpSession>();
             requestDayAppService.SettingManager = settingManager;
             requestDayAppService.UnitOfWorkManager = Resolve<IUnitOfWorkManager>();
