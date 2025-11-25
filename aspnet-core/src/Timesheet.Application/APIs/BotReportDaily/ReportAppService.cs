@@ -22,14 +22,18 @@ namespace Timesheet.APIs.BotReportDaily
         private readonly IWorkScope _workScope;
         private readonly MezonService _mezonService;
         private readonly ISettingManager _settingManager;
+        private readonly IAbsenceDayServices _absenceDayService;
         private readonly OfficeWorkingReportAppService _officeWorkingReportAppService;
+        private readonly IBotReportDailyService _botReportDailyService;
 
-        public ReportAppService(IWorkScope workScope, MezonService mezonService, ISettingManager settingManager, OfficeWorkingReportAppService officeWorkingReportAppService)
+        public ReportAppService(IWorkScope workScope, MezonService mezonService, ISettingManager settingManager, DomainServices.AbsenceDayServices absenceDayService, OfficeWorkingReportAppService officeWorkingReportAppService, DomainServices.BotReportDailyService botReportDailyService)
         {
             _workScope = workScope;
             _mezonService = mezonService;
             _settingManager = settingManager;
+            _absenceDayService = absenceDayService;
             _officeWorkingReportAppService = officeWorkingReportAppService;
+            _botReportDailyService = botReportDailyService;
         }
 
         [HttpGet]
