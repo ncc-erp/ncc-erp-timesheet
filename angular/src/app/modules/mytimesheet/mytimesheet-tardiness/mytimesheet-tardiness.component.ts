@@ -7,11 +7,11 @@ import { FormControl } from '@angular/forms';
 import { PERMISSIONS_CONSTANT } from './../../../constant/permission.constant';
 import { AppComponentBase } from 'shared/app-component-base';
 import { Component, OnInit, Injector } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog, MatDialogRef } from '@angular/material';
 import { ComplainDialogComponent } from './complain-dialog/complain-dialog.component';
 import { TimesheetConfirmationDialogComponent } from './timesheet-confirmation-dialog/timesheet-confirmation-dialog.component';
 import { UserServiceProxy } from '@shared/service-proxies/service-proxies';
-import { UserPunishmentPaidService, GetUserPunishmentBalanceDto } from '@app/service/api/user-punishment-paid.service';
+import { UserPunishmentPaidService, GetUserPunishmentBalanceDto, UserPunishmentSummaryDto } from '@app/service/api/user-punishment-paid.service';
 
 @Component({
   selector: 'app-mytimesheet-tardiness',
@@ -77,6 +77,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       const now = new Date();
       this.isCurrentMonth = (this.year === now.getFullYear() && (this.month + 1) === (now.getMonth() + 1));
       this.getData();
+      this.loadUserBalance();
     });
   }
 
@@ -108,7 +109,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
 
   getData() {
     this.isTableLoading = true;
-    this.loadUserBalance(); 
     this.timekeepingService.getMyDetails(this.year, this.month + 1).subscribe(res => {
       this.listTimekeeping = res.result;
       this.totalMonthlyPunishment = 0;
@@ -330,7 +330,6 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     this.viewDate = new Date(this.year, this.month, this.selectedDay);
     this.getDayByMonthAndYear(this.month, this.year)
     this.getData();
-    this.loadUserBalance();
     this.countLate = this.countPunish(this.listTimekeeping)
     const now = new Date();
     this.isCurrentMonth = (this.year === now.getFullYear() && (this.month + 1) === (now.getMonth() + 1));
@@ -545,6 +544,46 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     );
   }
 
+  private applySummaryToDialogAndParent(
+    dialogRef: MatDialogRef<TimesheetConfirmationDialogComponent>, 
+    summary: UserPunishmentSummaryDto
+  ): void {
+    if (!summary || !summary.success) {
+      return;
+    }
+
+    const dialogComponent = dialogRef.componentInstance;
+    const { userBalance, totalRemainPointsUsedInMonth, totalPaidPunishmentInMonth } = summary;
+
+    if (userBalance) {
+      this.userBalance = userBalance;
+    }
+
+    dialogComponent.totalUsedRemainPoints = totalRemainPointsUsedInMonth || 0;
+    dialogComponent.userBalance = userBalance || dialogComponent.userBalance;
+    dialogComponent.totalFine = dialogComponent.userBalance 
+      ? dialogComponent.userBalance.totalPunishmentMoney || 0 
+      : 0;
+    dialogComponent.totalPaidPunishmentInMonth = totalPaidPunishmentInMonth || 0;
+    dialogComponent.totalRemainPointsUsedInMonth = totalRemainPointsUsedInMonth || 0;
+
+    dialogComponent.updateOwedAmount();
+    dialogComponent.updateUsePointsTooltip();
+  }
+
+  private reloadSummaryAndApply(dialogRef: MatDialogRef<TimesheetConfirmationDialogComponent>): void {
+    this.userPunishmentPaidService
+      .previewApplyAndGetSummary(this.year, this.month + 1)
+      .subscribe({
+        next: (summary) => {
+          this.applySummaryToDialogAndParent(dialogRef, summary);
+        },
+        error: (error) => {
+          console.error('Error reloading punishment summary:', error);
+        }
+      });
+  }
+
   openConfirmationDialog() {
     if (this.isConfirmLoading) {
       return;
@@ -569,74 +608,13 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
             summaryData: summaryResult, 
             onPaidSuccess: () => {
               this.notify.success('Paid Successfully');
-
-              this.userPunishmentPaidService
-                .previewApplyAndGetSummary(this.year, this.month + 1)
-                .subscribe((latestSummary) => {
-                  if (!latestSummary || !latestSummary.success) {
-                    return;
-                  }
-
-                  this.userBalance = latestSummary.userBalance;
-
-                  this.getData();
-
-                  dialogRef.componentInstance.totalUsedRemainPoints =
-                    latestSummary.totalRemainPointsUsedInMonth || 0;
-
-                  dialogRef.componentInstance.userBalance = latestSummary.userBalance
-                    ? latestSummary.userBalance
-                    : dialogRef.componentInstance.userBalance;
-
-                  dialogRef.componentInstance.totalFine = dialogRef.componentInstance.userBalance
-                    ? dialogRef.componentInstance.userBalance.totalPunishmentMoney
-                    : 0;
-
-                  dialogRef.componentInstance.totalPaidPunishmentInMonth =
-                    latestSummary.totalPaidPunishmentInMonth;
-
-                  dialogRef.componentInstance.totalRemainPointsUsedInMonth =
-                    latestSummary.totalRemainPointsUsedInMonth || 0;
-
-                  (dialogRef.componentInstance as any).updateOwedAmount &&
-                    (dialogRef.componentInstance as any).updateOwedAmount();
-                  (dialogRef.componentInstance as any).updateUsePointsTooltip &&
-                    (dialogRef.componentInstance as any).updateUsePointsTooltip();
-                });
+              this.reloadSummaryAndApply(dialogRef);
             }
           }
         });
 
         dialogRef.componentInstance.remainPointsUsed.subscribe(() => {
-          this.userPunishmentPaidService
-            .previewApplyAndGetSummary(this.year, this.month + 1)
-            .subscribe((summaryResult) => {
-
-              const updatedTotalUsed = summaryResult && summaryResult.totalRemainPointsUsedInMonth
-                ? summaryResult.totalRemainPointsUsedInMonth
-                : 0;
-              dialogRef.componentInstance.totalUsedRemainPoints = updatedTotalUsed;
-
-              dialogRef.componentInstance.userBalance = summaryResult && summaryResult.userBalance
-                ? summaryResult.userBalance
-                : dialogRef.componentInstance.userBalance;
-              dialogRef.componentInstance.totalFine = dialogRef.componentInstance.userBalance
-                ? dialogRef.componentInstance.userBalance.totalPunishmentMoney
-                : 0;
-              dialogRef.componentInstance.totalPaidPunishmentInMonth = summaryResult.totalPaidPunishmentInMonth;
-              dialogRef.componentInstance.totalRemainPointsUsedInMonth = summaryResult.totalRemainPointsUsedInMonth || 0;
-
-              (dialogRef.componentInstance as any).updateOwedAmount &&
-                (dialogRef.componentInstance as any).updateOwedAmount();
-              (dialogRef.componentInstance as any).updateUsePointsTooltip &&
-                (dialogRef.componentInstance as any).updateUsePointsTooltip();
-
-              if (summaryResult && summaryResult.userBalance) {
-                this.userBalance = summaryResult.userBalance;
-              }
-            }, (error) => {
-              console.error('Error reloading total used RemainPoints:', error);
-            });
+          this.reloadSummaryAndApply(dialogRef);
         });
 
         dialogRef.afterClosed().subscribe(() => {

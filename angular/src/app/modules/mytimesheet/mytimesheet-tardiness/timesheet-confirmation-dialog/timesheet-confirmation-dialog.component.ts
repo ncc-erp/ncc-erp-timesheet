@@ -190,7 +190,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     );
   }
 
-  private updateUsePointsTooltip(): void {
+  public updateUsePointsTooltip(): void {
     if (!this.userBalance) {
       this.usePointsTooltip = '';
       return;
@@ -305,7 +305,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     );
   }
 
-  private updateOwedAmount(): void {
+  public updateOwedAmount(): void {
     const totalPunishment = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
     const remainPoints = this.userBalance ? this.userBalance.remainPoints : 0;
     
