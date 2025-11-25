@@ -89,7 +89,6 @@ export class LoginService {
             ephemeralPublicKey: keyPair.publicKey,
             jwt: authenticateResult.authToken,
             address: senderAddress,
-            clientType: EZkClientType.OAUTH,
           });
         if (authenticateResult.accessToken) {
             this.login(
