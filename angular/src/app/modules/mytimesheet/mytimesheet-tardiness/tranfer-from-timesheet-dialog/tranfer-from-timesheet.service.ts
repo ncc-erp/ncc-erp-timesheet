@@ -3,7 +3,7 @@ import { from, Observable } from "rxjs"; // 1. Import `from` và `Observable`
 import { mmnClient } from "@shared/mmn-clients";
 
 @Injectable({ providedIn: "root" })
-export class MmnTestService {
+export class MmnService {
   private mmn = mmnClient;
   transfer(amountToTransfer: number): Observable<any> {
     return from(this.executeTransfer(amountToTransfer));

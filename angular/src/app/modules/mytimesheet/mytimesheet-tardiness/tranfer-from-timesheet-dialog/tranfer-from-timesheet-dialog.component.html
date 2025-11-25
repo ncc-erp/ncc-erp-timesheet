@@ -1,5 +1,7 @@
 <h1 mat-dialog-title>Submit Fine Payment</h1>
-<div mat-dialog-content>
+
+<div mat-dialog-content class="transaction-dialog-content">
+
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Recipient Address</mat-label>
     <input matInput [formControl]="recipientAddressControl" required readonly />
@@ -13,10 +15,12 @@
     <input
       matInput
       type="text"
+      (input)="onAmountInput($event)"
       [formControl]="amountControl"
-      placeholder="E.g. 10000"
+      placeholder="E.g. 1,000" 
       required
     />
+
     <mat-error *ngIf="amountControl.hasError('required')">
       Amount is required.
     </mat-error>
@@ -26,19 +30,29 @@
     <mat-error *ngIf="amountControl.hasError('minAmount')">
       Amount must be at least {{ minAmount | number }}.
     </mat-error>
+    <mat-error *ngIf="amountControl.hasError('max')">
+      Insufficient balance.
+    </mat-error>
   </mat-form-field>
 
-  <div *ngIf="errorMessage" class="error-message">
+  <div class="balance-info">
+    <span class="balance-label">Available Balance:</span>
+    <span class="balance-value">{{ userBalanceDisplay }} đồng</span>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-alert">
     {{ errorMessage }}
   </div>
 </div>
+
 <div mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()" [disabled]="isSubmitting">
+  <button mat-button type="button" (click)="onCancel()" [disabled]="isSubmitting">
     Cancel
   </button>
   <button
     mat-raised-button
     color="primary"
+    type="button"
     (click)="onSubmit()"
     [disabled]="isSubmitting"
   >

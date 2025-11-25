@@ -13,7 +13,7 @@ export interface TransactionSuccessDialogData {
   styleUrls: ['./transaction-success-dialog.component.css']
 })
 export class TransactionSuccessDialogComponent {
-  transactionExplorerUrl = 'https://dev-mmn.nccsoft.vn/transactions/';
+  baseUrl = 'https://dev-mmn.nccsoft.vn/transactions/';
 
   constructor(
     public dialogRef: MatDialogRef<TransactionSuccessDialogComponent>,

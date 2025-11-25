@@ -1,38 +1,36 @@
-<div class="success-dialog-container">
-  <div class="header">
-    <mat-icon class="success-icon">check_circle</mat-icon>
-    <h2 mat-dialog-title>Payment Recorded</h2>
+<div class="dialog-container">
+  <div class="header-section">
+    <div class="icon-circle">
+      <mat-icon class="check-icon">check</mat-icon>
+    </div>
+    <h3 class="title">Payment Successful</h3>
+    <p class="description">Your transaction has been processed successfully.</p>
   </div>
 
-  <div mat-dialog-content>
-    <p class="subtitle">
-      Your payment information has been submitted successfully.
-    </p>
-
-    <div class="details-wrapper">
-      <div class="detail-row">
-        <span>Transaction hash</span>
-        <a
-          class="monospace"
-          [href]="transactionExplorerUrl + data.transactionHash"
-          target="_blank"
-          rel="noopener noreferrer"
-          matTooltip="View transaction on explorer"
-        >
-          {{ data.transactionHash || 'N/A' }}
-        </a>
+  <div class="detail-card">
+    <div class="info-group">
+      <p class="label">AMOUNT PAID</p>
+      <div class="amount-value">
+        {{ data.amountPaid | number }}
+        <span class="currency">đồng</span>
       </div>
+    </div>
 
-      <div class="detail-row">
-        <span>Amount Paid</span>
-        <span>
-          {{ data.amountPaid ? (data.amountPaid | number:'1.0-4') : 'N/A' }} đồng
-        </span>
-      </div>
+    <div class="divider" *ngIf="data.transactionHash"></div>
+
+    <div class="info-group" *ngIf="data.transactionHash">
+      <p class="label">TRANSACTION HASH</p>
+      <a [href]="baseUrl + data.transactionHash" 
+         target="_blank" 
+         class="hash-link"
+         matTooltip="Click the transaction hash to view details on dong.mezon.ai"
+         matTooltipPosition="above">
+        {{ data.transactionHash }}
+      </a>
     </div>
   </div>
 
-  <div mat-dialog-actions align="end">
-    <button mat-flat-button color="primary" (click)="close()">Close</button>
-  </div>
+  <button mat-raised-button color="primary" class="close-btn" (click)="close()">
+    Close
+  </button>
 </div>
