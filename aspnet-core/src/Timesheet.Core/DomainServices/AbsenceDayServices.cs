@@ -700,22 +700,15 @@ namespace Timesheet.DomainServices
             {
                 try
                 {
-                    var branchResult = await GetBranchDataAsync(branchName);
-                    var branch = (Timesheet.Entities.Branch)branchResult;
-                    if (branch == null)
-                    {
-                        continue;
-                    }
-
                     if (!isWeekly)
                     {
-                        await SendSmartDailyReport(input.botUri, branch.Name, now.AddDays(-1).Date);
+                        await SendSmartDailyReport(input.botUri, branchName, now.AddDays(-1).Date);
                     }
                     else
                     {
                         DateTime lastMonday = now.AddDays(-(int)now.DayOfWeek - 6).Date;
                         DateTime lastWeekEnd = lastMonday.AddDays(5).Date.AddSeconds(-1);
-                        await SendSmartWeeklyReport(input.botUri, branch.Name, lastMonday, lastWeekEnd);
+                        await SendSmartWeeklyReport(input.botUri, branchName, lastMonday, lastWeekEnd);
                     }
                 }
                 catch (Exception ex)
