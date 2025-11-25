@@ -289,18 +289,18 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     this.userPunishmentPaidService.applyRemainPoints(target.year, target.month).subscribe(
       (result) => {
         if (result && result.success) {
-          this.snackBar.open('Applied remain points successfully.', 'Close', { duration: 3000 });
+          this.snackBar.open('Applied remain points successfully.', 'Close', { duration: 3000, panelClass: ['snackbar-success'] });
 
           if (this.remainPointsUsed) {
             this.remainPointsUsed.emit();
           }
         } else {
-          this.snackBar.open(result && result.message ? result.message : 'Failed to apply remain points.', 'Close', { duration: 5000 });
+          this.snackBar.open(result && result.message ? result.message : 'Failed to apply remain points.', 'Close', { duration: 5000, panelClass: ['snackbar-error'] });
         }
       },
       (error) => {
         console.error('Error applying remain points:', error);
-        this.snackBar.open('Error applying remain points. Please try again.', 'Close', { duration: 5000 });
+        this.snackBar.open('Error applying remain points. Please try again.', 'Close', { duration: 5000, panelClass: ['snackbar-error'] });
       }
     );
   }
