@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Timesheet.APIs.Reports;
+using Timesheet.Core;
 using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Services.Mezon;
@@ -20,13 +21,17 @@ namespace Timesheet.APIs.BotReportDaily
         private readonly IWorkScope _workScope;
         private readonly MezonService _mezonService;
         private readonly ISettingManager _settingManager;
+        private readonly IAbsenceDayServices _absenceDayService;
+        private readonly OfficeWorkingReportAppService _officeWorkingReportAppService;
         private readonly IBotReportDailyService _botReportDailyService;
 
-        public ReportAppService(IWorkScope workScope, MezonService mezonService, ISettingManager settingManager, DomainServices.BotReportDailyService botReportDailyService)
+        public ReportAppService(IWorkScope workScope, MezonService mezonService, ISettingManager settingManager, DomainServices.AbsenceDayServices absenceDayService, OfficeWorkingReportAppService officeWorkingReportAppService, DomainServices.BotReportDailyService botReportDailyService)
         {
             _workScope = workScope;
             _mezonService = mezonService;
             _settingManager = settingManager;
+            _absenceDayService = absenceDayService;
+            _officeWorkingReportAppService = officeWorkingReportAppService;
             _botReportDailyService = botReportDailyService;
         }
 
