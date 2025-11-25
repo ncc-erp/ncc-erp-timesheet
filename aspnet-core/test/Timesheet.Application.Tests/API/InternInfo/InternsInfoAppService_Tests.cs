@@ -134,7 +134,7 @@ namespace Timesheet.Application.Tests.API.InternsInfo
                 Assert.NotNull(result);
                 foreach (var item in result.ListInternInfo.Items)
                 {
-                    item.BasicTrannerFullName.ShouldBe(managerId3.FullName);
+                    item.BasicTrainerFullName.ShouldBe(managerId3.FullName);
                 };
             });
         }

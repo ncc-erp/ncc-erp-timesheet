@@ -482,7 +482,7 @@ namespace Timesheet.Application.Tests.API.RequestDays
             await WithUnitOfWorkAsync(async () =>
             {
                 // action
-                await _requestDayAppService.ApproveRequest(requestId);
+                await _requestDayAppService.ApproveRequest(new long[] { requestId });
 
                 // Get request that has been just updated
                 var requestDetail = workScope.Get<AbsenceDayDetail>(requestDayDetail.Id);
@@ -528,7 +528,7 @@ namespace Timesheet.Application.Tests.API.RequestDays
                 var expectedMessage = "This WFH request cannot be approved because it has not been approved/created on the W2 system!";
                 var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
                 {
-                    await _requestDayAppService.ApproveRequest(requestId);
+                    await _requestDayAppService.ApproveRequest(new long[] { requestId });
                 });
 
                 Assert.Equal(expectedMessage, exception.Message);
@@ -568,7 +568,7 @@ namespace Timesheet.Application.Tests.API.RequestDays
             await WithUnitOfWorkAsync(async () =>
             {
                 // action
-                await _requestDayAppService.ApproveRequest(requestId);
+                await _requestDayAppService.ApproveRequest(new long[] { requestId });
 
                 // Get request that has been just updated
                 var requestDetail = workScope.Get<AbsenceDayDetail>(requestDayDetail.Id);
@@ -597,7 +597,7 @@ namespace Timesheet.Application.Tests.API.RequestDays
             await WithUnitOfWorkAsync(async () =>
             {
                 // action
-                await _requestDayAppService.RejectRequest(requestId);
+                await _requestDayAppService.RejectRequest(new long[] { requestId });
 
                 // Get request that has been just updated
                 var requestDetail = workScope.Get<AbsenceDayDetail>(requestDayDetail.Id);
@@ -618,7 +618,7 @@ namespace Timesheet.Application.Tests.API.RequestDays
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _requestDayAppService.GetAllRequestByUserIdForTeamMember(startDate, endDate, userId);
+                var result = await _requestDayAppService.GetAllRequestByUserIdForTeamMember(startDate, endDate, userId, status: null, type: null, dayType: null);
 
                 Assert.Equal(expectedCount, result.Count);
                 Assert.True(result.All(request => request.UserId == userId));
@@ -637,7 +637,7 @@ namespace Timesheet.Application.Tests.API.RequestDays
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _requestDayAppService.GetAllRequestByUserId(startDate, endDate, userId);
+                var result = await _requestDayAppService.GetAllRequestByUserId(startDate, endDate, userId, status: null, type: null, dayType: null);
 
                 Assert.Equal(expectedCount, result.Count);
                 Assert.True(result.All(request => request.UserId == userId));
