@@ -26,7 +26,7 @@ namespace Timesheet.APIs.Reports.Dto
         public double WfhLMHours => WfhLM;
         
     }
-    public class UserLite
+    public class UserLiteDto
     {
         public long Id { get; set; }
         public string Name { get; set; }
@@ -45,5 +45,33 @@ namespace Timesheet.APIs.Reports.Dto
             Morning = morning;
             Afternoon = afternoon;
         }
+    }
+    public class TopOfficeWorkingTimeDto
+    {
+        public long OfficeId { get; set; }
+        public int Limit { get; set; }
+        public DateTime? ReportDate { get; set; }
+        public long? UserId { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+    }
+    public class SendTopOfficeWorkingTimeNotificationDto
+    {
+        public long? OfficeId { get; set; }
+        public int Limit { get; set; }
+        public DateTime? ReportDate { get; set; }
+        public string MezonUrl { get; set; }
+        public long? UserId { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public bool ShowAll { get; set; }
+    }
+    public class UserMapDto
+    {
+        public string Name { get; set; }
+        public string BranchName { get; set; }
+        public string BranchCode { get; set; }
+        public string BranchColor { get; set; }
+        public int Minutes { get; set; }
     }
 }
