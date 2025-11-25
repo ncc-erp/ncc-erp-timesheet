@@ -604,6 +604,16 @@ namespace Ncc.Users
                 user.EndDateAt = user.EndDateAt.HasValue ? user.EndDateAt : DateTimeUtils.GetNow();
                 user.IsActive = false;
                 await _ws.GetRepo<User, long>().UpdateAsync(user);
+
+                var projectUsers = await _ws.GetAll<ProjectUser>()
+                .Where(pu => pu.UserId == input.Id && pu.Type != ProjectUserType.DeActive)
+                .ToListAsync();
+
+                foreach (var projectUser in projectUsers)
+                {
+                    projectUser.Type = ProjectUserType.DeActive;
+                    await _ws.GetRepo<ProjectUser, long>().UpdateAsync(projectUser);
+                }
             }
             else
             {
