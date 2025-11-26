@@ -18,5 +18,6 @@
       "to": "he"
     }
   ],
-  "sentryDsn": "http://8a866748ea9b44efa0116e591c92b71c@localhost:9000/15"
+  "sentryDsn": "http://8a866748ea9b44efa0116e591c92b71c@localhost:9000/15",
+  "mmnBaseUrl": ""
 }
