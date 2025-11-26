@@ -138,7 +138,7 @@ namespace Ncc.Controllers
         private async Task<MezonLoginResult> GetLoginResultMezonAsync(string token, string tenancyName)
         {
             Logger.Info("GetLoginResultMezonAsync");
-            var mezonResult = await _logInManager.LoginInternalOAuth2Async(token, tenancyName, false);
+            var mezonResult = await _logInManager.LoginOAuth2Async(token, tenancyName, false);
             var loginResult = mezonResult.LoginResult;
             switch (loginResult.Result)
             {

@@ -368,14 +368,14 @@ namespace Ncc.Authorization
         }
 
         [UnitOfWork]
-        public async Task<AbpLoginResult<Tenant, User>> LoginOAuth2Async(string token, string tenancyName = null, bool shouldLockout = true)
+        public async Task<MezonLoginResult> LoginOAuth2Async(string token, string tenancyName = null, bool shouldLockout = true)
         {
             Logger.Info("LoginOAuth2");
             var mezonResult = await LoginInternalOAuth2Async(token, tenancyName, shouldLockout);
             var result = mezonResult.LoginResult;
             var user = result.User;
             SaveLoginAttempt(result, tenancyName, user?.EmailAddress);
-            return result;
+            return mezonResult;
         }
 
         public async Task<MezonLoginResult> LoginInternalOAuth2Async(string token, string tenancyName, bool shouldLockout)
