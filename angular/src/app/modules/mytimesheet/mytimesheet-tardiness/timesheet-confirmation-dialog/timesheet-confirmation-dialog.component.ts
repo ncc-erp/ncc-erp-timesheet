@@ -153,19 +153,19 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       this.userPunishmentPaidService.markPaidTransaction(transactionHash, year, month).subscribe(
       result => {
         if (result && result.success) {
-            this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
+            this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000, panelClass: ['snackbar-success'] });
 
           this.loadPunishmentPaidData();
           if (this.data && typeof this.data.onPaidSuccess === 'function') {
             this.data.onPaidSuccess();
           }
         } else {
-            this.snackBar.open(result.message || 'Failed to process transaction', 'Close', { duration: 5000 });
+            this.snackBar.open(result.message || 'Failed to process transaction', 'Close', { duration: 5000, panelClass: ['snackbar-error'] });
         }
       },
       error => {
           console.error('Error marking transaction as paid:', error);
-          this.snackBar.open('Error processing transaction. Please try again.', 'Close', { duration: 5000 });
+          this.snackBar.open('Error processing transaction. Please try again.', 'Close', { duration: 5000, panelClass: ['snackbar-error'] });
       }
     );
     });
@@ -289,7 +289,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     this.userPunishmentPaidService.applyRemainPoints(target.year, target.month).subscribe(
       (result) => {
         if (result && result.success) {
-          this.snackBar.open('Applied remain points successfully.', 'Close', { duration: 3000, panelClass: ['snackbar-success'] });
+          this.snackBar.open('Applied remain points successfully.', 'Close', { duration: 5000, panelClass: ['snackbar-success'] });
 
           if (this.remainPointsUsed) {
             this.remainPointsUsed.emit();

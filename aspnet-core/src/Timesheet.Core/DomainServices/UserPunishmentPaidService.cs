@@ -367,6 +367,17 @@ namespace Timesheet.DomainServices
         public async Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummaryAsync(int year, int month)
         {
             var result = new UserPunishmentSummaryDto();
+
+            if (!_abpSession.UserId.HasValue)
+            {
+                result.Success = false;
+                result.Message = "User not logged in";
+                return result;
+            }
+
+            var userId = _abpSession.UserId.Value;
+            _logger.LogInformation($"PreviewApplyAndGetSummary: User {userId}, {year}/{month}");
+
             using (var uow = UnitOfWorkManager.Begin(new UnitOfWorkOptions
             {
                 IsTransactional = true
@@ -374,16 +385,6 @@ namespace Timesheet.DomainServices
             {
                 try
                 {
-                    if (!_abpSession.UserId.HasValue)
-                    {
-                        result.Success = false;
-                        result.Message = "User not logged in";
-                        return result;
-                    }
-
-                    var userId = _abpSession.UserId.Value;
-                    _logger.LogInformation($"PreviewApplyAndGetSummary: User {userId}, {year}/{month}");
-
                     var targetMonth = new DateTime(year, month, 1);
                     var startOfMonth = targetMonth;
                     var endOfMonth = targetMonth.AddMonths(1);
@@ -506,6 +507,17 @@ namespace Timesheet.DomainServices
         public async Task<UserPunishmentSummaryDto> ApplyRemainPointsAsync(int year, int month)
         {
             var result = new UserPunishmentSummaryDto();
+
+            if (!_abpSession.UserId.HasValue)
+            {
+                result.Success = false;
+                result.Message = "User not logged in";
+                return result;
+            }
+
+            var userId = _abpSession.UserId.Value;
+            _logger.LogInformation($"ApplyRemainPoints: User {userId}, {year}/{month}");
+
             using (var uow = UnitOfWorkManager.Begin(new UnitOfWorkOptions
             {
                 IsTransactional = true
@@ -513,16 +525,6 @@ namespace Timesheet.DomainServices
             {
                 try
                 {
-                    if (!_abpSession.UserId.HasValue)
-                    {
-                        result.Success = false;
-                        result.Message = "User not logged in";
-                        return result;
-                    }
-
-                    var userId = _abpSession.UserId.Value;
-                    _logger.LogInformation($"ApplyRemainPoints: User {userId}, {year}/{month}");
-
                     var targetMonth = new DateTime(year, month, 1);
                     var startOfMonth = targetMonth;
                     var endOfMonth = targetMonth.AddMonths(1);
