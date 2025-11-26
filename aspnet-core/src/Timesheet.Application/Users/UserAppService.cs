@@ -599,29 +599,44 @@ namespace Ncc.Users
         public async System.Threading.Tasks.Task DeactiveUser(EntityDto<long> input)
         {
             var user = await _ws.GetAsync<User>(input.Id);
-            if (user != null)
+            if (user == null)
             {
-                user.EndDateAt = user.EndDateAt.HasValue ? user.EndDateAt : DateTimeUtils.GetNow();
-                user.IsActive = false;
-                await _ws.GetRepo<User, long>().UpdateAsync(user);
+                throw new UserFriendlyException("User is not exist");
+            }
+            var allProjectUsers = await _ws.GetAll<ProjectUser>()
+                            .Where(pu => pu.Type != ProjectUserType.DeActive)
+                            .ToListAsync();
+            var userPmProjectIds =
+                allProjectUsers
+                    .Where(pu => pu.UserId == input.Id && pu.Type == ProjectUserType.PM)
+                    .Select(pu => pu.ProjectId)
+                    .ToHashSet();
+            foreach (var projectId in userPmProjectIds)
+            {
+                var otherPMsCount = allProjectUsers.Count(
+                    pu => pu.ProjectId == projectId && pu.UserId != input.Id &&
+                          pu.Type == ProjectUserType.PM);
 
-                var projectUsers = await _ws.GetAll<ProjectUser>()
-                .Where(pu => pu.UserId == input.Id && pu.Type != ProjectUserType.DeActive)
-                .ToListAsync();
-
-                foreach (var projectUser in projectUsers)
+                if (otherPMsCount == 0)
                 {
-                    projectUser.Type = ProjectUserType.DeActive;
-                    await _ws.GetRepo<ProjectUser, long>().UpdateAsync(projectUser);
+                    throw new UserFriendlyException("Cannot deactivate the only PM in one or more projects. Please assign another PM first.");
                 }
             }
-            else
+            user.EndDateAt = user.EndDateAt ?? DateTimeUtils.GetNow();
+            user.IsActive = false;
+            await _ws.GetRepo<User, long>().UpdateAsync(user);
+            var userProjectUsers =
+                allProjectUsers.Where(pu => pu.UserId == input.Id).ToList();
+
+            if (userProjectUsers.Any())
             {
-                throw new UserFriendlyException(string.Format("User is not exist"));
+                foreach (var projectUser in userProjectUsers)
+                {
+                    projectUser.Type = ProjectUserType.DeActive;
+                }
+                await _ws.GetRepo<ProjectUser, long>().GetDbContext().SaveChangesAsync();
             }
-
         }
-
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_ChangeStatus)]
         public async System.Threading.Tasks.Task ActiveUser(EntityDto<long> input)
