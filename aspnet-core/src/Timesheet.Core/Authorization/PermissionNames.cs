@@ -295,6 +295,7 @@ namespace Ncc.Authorization
 
         public const string Timekeeping_UserNote = "Timekeeping.UserNote";
         public const string Timekeeping_ReplyUserNote = "Timekeeping.ReplyUserNote";
+        public const string Admin_Timekeeping_Snapshot = "Admin.Timekeeping.Snapshot";
 
         public const string ReviewIntern = "ReviewIntern";
         public const string ReviewIntern_ViewAllReport = "ReviewIntern.ViewAllReport";
@@ -655,6 +656,7 @@ namespace Ncc.Authorization
                     PermissionNames.Report_TardinessLeaveEarly_GetData,
                     PermissionNames.Report_TardinessLeaveEarly_ExportExcel,
                     PermissionNames.Report_TardinessLeaveEarly_Edit,
+                    PermissionNames.Admin_Timekeeping_Snapshot,
                     PermissionNames.Admin_UserPunishments_AddNew,
                     PermissionNames.Admin_UserPunishments_Import,
                     PermissionNames.Admin_UserPunishments_DownloadTemplate,
@@ -1187,6 +1189,7 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Report_TardinessLeaveEarly_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit checkin, checkout time of user" },
             new SystemPermission{ Name =  PermissionNames.Timekeeping_UserNote, MultiTenancySides = MultiTenancySides.Host , DisplayName = "User khiếu lại đi muộn" },
             new SystemPermission{ Name =  PermissionNames.Timekeeping_ReplyUserNote, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Trả lời khiếu lại, chốt phạt user" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Timekeeping_Snapshot, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Snapshot timekeeping data for a day" },
 
             new SystemPermission{ Name =  PermissionNames.ReviewIntern, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Review interns" },
             new SystemPermission{ Name =  PermissionNames.ReviewIntern_ViewAllReport, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View all report" },
@@ -1922,6 +1925,7 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.Report_TardinessLeaveEarly_GetData, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Get data from FaceID" },
                             new SystemPermission{ Name =  PermissionNames.Report_TardinessLeaveEarly_ExportExcel, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Export excel" },
                             new SystemPermission{ Name =  PermissionNames.Report_TardinessLeaveEarly_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit checkin, checkout time of user" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Timekeeping_Snapshot, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Snapshot and Retrieve punishment data for a day" },
                             new SystemPermission{ Name =  PermissionNames.Timekeeping_ReplyUserNote, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Trả lời khiếu lại, chốt phạt user" },
                             new SystemPermission{ Name =  PermissionNames.Admin_UserPunishments_AddNew, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add user punishment" },
                             new SystemPermission{ Name =  PermissionNames.Admin_UserPunishments_Import, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Import user punishment" },

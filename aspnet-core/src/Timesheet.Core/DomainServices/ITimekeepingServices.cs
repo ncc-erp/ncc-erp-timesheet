@@ -16,5 +16,7 @@ namespace Timesheet.DomainServices
         Task CheckIsPunished(Timekeeping timekeeping);
         Task<object> NoticePunishUserCheckInOut(DateTime now);
         Task CheckIsPunishedByRule(Timekeeping timekeeping, int limitedMinute, float trackerTime);
+        Task<bool> SnapshotUserPunishmentsForDay(DateTime date);
+        Task<List<Timekeeping>> RebuildTimekeepingDay(DateTime selectedDate);
     }
 }

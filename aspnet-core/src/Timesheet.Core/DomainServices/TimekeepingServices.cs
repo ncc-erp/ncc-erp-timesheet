@@ -1377,5 +1377,135 @@ namespace Timesheet.DomainServices
                 .GroupBy(s => s.UserName)
                 .ToDictionary(s => s.Key, s => 60 * (8 - s.Sum(x => x.Hour)));
         }
+
+        public async Task<bool> SnapshotUserPunishmentsForDay(DateTime date)
+        {
+            var selectedDate = date.Date; 
+
+            var existingSnapshot = await WorkScope.GetAll<UserPunishmentHistory>()
+                .AnyAsync(h => h.DateAt.Date == selectedDate);
+
+            if (existingSnapshot)
+            {
+                throw new UserFriendlyException($"Snapshot for {selectedDate:yyyy-MM-dd} already exists. Cannot create duplicate snapshot.");
+            }
+
+            var punishmentsToSnapshot = await WorkScope.GetAll<UserPunishment>()
+                .Where(p => p.DateAt.Date == selectedDate)
+                .ToListAsync();
+
+            if (!punishmentsToSnapshot.Any())
+            {
+                Logger.Warn($"No UserPunishment records found for {selectedDate:yyyy-MM-dd} to snapshot.");
+                return false;
+            }
+
+            var historyRecords = punishmentsToSnapshot.Select(p => new UserPunishmentHistory
+            {
+                UserId = p.UserId,
+                UserPunishmentId = p.Id,
+                PunishmentSystemId = p.PunishmentSystemId,
+                DateAt = p.DateAt,
+                Type = p.Type,
+                Count = p.Count,
+                TotalMoney = p.TotalMoney,
+                UserNote = p.UserNote,
+                NoteReply = p.NoteReply,
+                IsPaid = p.IsPaid,
+                UserPunishmentPaidId = p.UserPunishmentPaidId
+            }).ToList();
+
+            await WorkScope.InsertRangeAsync(historyRecords);
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            Logger.Info($"Successfully snapshotted {historyRecords.Count} UserPunishment records for {selectedDate:yyyy-MM-dd}.");
+            return true;
+        }
+
+        [UnitOfWork(TransactionScopeOption.RequiresNew)]
+        public async Task<List<Timekeeping>> RebuildTimekeepingDay(DateTime selectedDate)
+        {
+            var uow = UnitOfWorkManager.Begin(TransactionScopeOption.RequiresNew);
+            try
+            {
+                var date = selectedDate.Date;
+
+                var hasHistory = await WorkScope.GetAll<UserPunishmentHistory>()
+                    .AnyAsync(h => h.DateAt.Date == date);
+
+                if (!hasHistory)
+                {
+                    throw new UserFriendlyException($"Vui lòng snapshot trước khi get lại data phạt ngày {date:yyyy-MM-dd}.");
+                }
+
+                var result = await AddTimekeepingByDay(date);
+
+                var snapshotHistories = await WorkScope.GetAll<UserPunishmentHistory>()
+                    .Where(h => h.DateAt.Date == date)
+                    .ToListAsync();
+
+                if (snapshotHistories.Any())
+                {
+                    var snapshotByUserAndType = snapshotHistories
+                        .GroupBy(h => new { h.UserId, h.Type })
+                        .ToDictionary(
+                            g => g.Key,
+                            g => new
+                            {
+                                IsPaid = g.Any(x => x.IsPaid),
+                                UserNote = g.Select(x => x.UserNote).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
+                                NoteReply = g.Select(x => x.NoteReply).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
+                                UserPunishmentPaidId = g.Select(x => x.UserPunishmentPaidId).FirstOrDefault(x => x.HasValue)
+                            });
+
+                    var newPunishments = await WorkScope.GetAll<UserPunishment>()
+                        .Where(p => p.DateAt.Date == date)
+                        .ToListAsync();
+
+                    foreach (var pun in newPunishments)
+                    {
+                        var key = new { pun.UserId, pun.Type };
+                        if (snapshotByUserAndType.TryGetValue(key, out var snap))
+                        {
+                            if (snap.IsPaid)
+                            {
+                                pun.IsPaid = true;
+                            }
+
+                            if (!string.IsNullOrEmpty(snap.UserNote))
+                            {
+                                pun.UserNote = snap.UserNote;
+                            }
+
+                            if (!string.IsNullOrEmpty(snap.NoteReply))
+                            {
+                                pun.NoteReply = snap.NoteReply;
+                            }
+
+                            if (snap.UserPunishmentPaidId.HasValue)
+                            {
+                                pun.UserPunishmentPaidId = snap.UserPunishmentPaidId;
+                            }
+                        }
+                    }
+
+                    if (newPunishments.Any())
+                    {
+                        foreach (var pun in newPunishments)
+                        {
+                            await WorkScope.UpdateAsync(pun);
+                        }
+                    }
+                }
+
+                await uow.CompleteAsync();
+                Logger.Info($"✅ Successfully processed retrieve punishment data for date {selectedDate:yyyy-MM-dd}.");
+                return result;
+            }
+            finally
+            {
+                uow.Dispose();
+            }
+        }
     }
 }
