@@ -51,6 +51,7 @@ using System.Net.Mail;
 using Timesheet.APIs.Public;
 using Ncc.Net.MimeTypes;
 using Timesheet.DataExport;
+using Abp.EntityFrameworkCore.Repositories;
 
 namespace Ncc.Users
 {
