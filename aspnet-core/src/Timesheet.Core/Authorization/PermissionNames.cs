@@ -748,6 +748,7 @@ namespace Ncc.Authorization
                     PermissionNames.TeamBuilding_Request_ViewDetailRequest,
                     PermissionNames.TeamBuilding_Project,
                     PermissionNames.TeamBuilding_Project_SelectProjectTeamBuilding,
+
                     PermissionNames.BranchDirector_Report,
                     PermissionNames.ProjectManagementBranchDirectors,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs,
@@ -918,7 +919,7 @@ namespace Ncc.Authorization
                     PermissionNames.BranchDirector_Report,
                     PermissionNames.BranchDirector_OfficeWorkingReport_View,
                     PermissionNames.BranchDirector_ProjectWorkingReport_View,
-                    PermissionNames.BranchDirector_AnomaliesReport_View,
+                    PermissionNames.BranchDirector_AnomaliesReport_View
                 }
             },
         };

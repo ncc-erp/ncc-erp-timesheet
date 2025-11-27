@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Timesheet.APIs.Reports;
+using Timesheet.APIs.Reports.Dto;
 using Timesheet.Uitls;
 
 namespace Timesheet.BackgroundWorker
@@ -115,17 +116,18 @@ namespace Timesheet.BackgroundWorker
                     {
                         Task.Run(async () =>
                         {
-                            await _reportAppService.SendTopOfficeUsersNotification(
-                                officeId: null,
-                                limit: limit,
-                                reportDate: now.Date,
-                                mezonUrl: mezonUrl,
-                                userId: null,
-                                startDate: null,
-                                endDate: null,
-                                showAll: false,
-                                allOffices: true
-                            );
+                            var input = new SendTopOfficeWorkingTimeNotificationDto
+                            {
+                                OfficeId = null,
+                                Limit = limit,
+                                ReportDate = now.Date,
+                                MezonUrl = mezonUrl,
+                                UserId = null,
+                                StartDate = null,
+                                EndDate = null,
+                                ShowAll = false
+                            };
+                            await _reportAppService.SendTopOfficeUsersNotification(input);
                         }).GetAwaiter().GetResult();
                     }
                     catch (Exception ex)
@@ -160,15 +162,17 @@ namespace Timesheet.BackgroundWorker
                         {
                             Task.Run(async () =>
                             {
-                                await _reportAppService.SendTopOfficeUsersNotification(
-                                    officeId: officeId,
-                                    limit: limit,
-                                    reportDate: now.Date,
-                                    mezonUrl: mezonUrl,
-                                    userId: null,
-                                    startDate: null,
-                                    endDate: null
-                                );
+                                var input = new SendTopOfficeWorkingTimeNotificationDto
+                                {
+                                    OfficeId = officeId,
+                                    Limit = limit,
+                                    ReportDate = now.Date,
+                                    MezonUrl = mezonUrl,
+                                    UserId = null,
+                                    StartDate = null,
+                                    EndDate = null
+                                };
+                                await _reportAppService.SendTopOfficeUsersNotification(input);
                             }).GetAwaiter().GetResult();
                         }
                         catch (Exception ex)
@@ -178,6 +182,7 @@ namespace Timesheet.BackgroundWorker
                         }
                     }
                 }
+                Logger.Info("RunOfficeBotReportJob() finished.");
             }
             catch (Exception ex)
             {

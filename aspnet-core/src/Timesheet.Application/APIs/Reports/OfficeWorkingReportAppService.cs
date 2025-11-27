@@ -15,6 +15,7 @@ using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Timesheet.APIs.BotReportDaily.Dto;
 using Timesheet.APIs.Reports.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.Mezon;
@@ -33,53 +34,6 @@ namespace Timesheet.APIs.Reports
         public OfficeWorkingReportAppService(IWorkScope workScope, MezonService mezonService) : base(workScope)
         {
             _mezonService = mezonService;
-        }
-        private class UserLite
-        {
-            public long Id
-            {
-                get;
-                set;
-            }
-            public string Name
-            {
-                get;
-                set;
-            }
-            public string Email
-            {
-                get;
-                set;
-            }
-            public string OfficeName
-            {
-                get;
-                set;
-            }
-            public string OfficeCode
-            {
-                get;
-                set;
-            }
-        }
-        public struct RemoteFlags
-        {
-            public bool Morning
-            {
-                get;
-                set;
-            }
-            public bool Afternoon
-            {
-                get;
-                set;
-            }
-
-            public RemoteFlags(bool morning, bool afternoon)
-            {
-                Morning = morning;
-                Afternoon = afternoon;
-            }
         }
 
         private static void AddBold(List<object> mkList, int start, int end)
@@ -144,20 +98,6 @@ namespace Timesheet.APIs.Reports
             }
         }
 
-        private static void AddBoldForOfficeTitles(List<object> mkList, string messageText)
-        {
-            int current = 0;
-            while (true)
-            {
-                int start = messageText.IndexOf("**VP ", current);
-                if (start == -1) break;
-                int end = messageText.IndexOf("**", start + 8);
-                if (end == -1) break;
-                AddBold(mkList, start, end + 2);
-                current = end + 2;
-            }
-        }
-
         private static (DateTime start, DateTime end) GetLastWeekRange(DateTime reportDate)
         {
             var thisWeekStart = DateTimeUtils.FirstDayOfWeek(reportDate);
@@ -170,27 +110,14 @@ namespace Timesheet.APIs.Reports
         {
             minutes = 0;
             if (string.IsNullOrWhiteSpace(input)) return false;
-            if (TimeSpan.TryParseExact(input, new[] {
-            @"hh\:mm",
-              @"h\:mm"
-          },
-                CultureInfo.InvariantCulture, out
-                var ts))
+            if (TimeSpan.TryParseExact(input, new[] { @"hh\:mm", @"h\:mm" }, CultureInfo.InvariantCulture, out var ts))
             {
                 minutes = (int)ts.TotalMinutes;
                 return true;
             }
-            if (DateTime.TryParse(input, CultureInfo.InvariantCulture, DateTimeStyles.None, out
-                var dt))
-            {
-                minutes = dt.Hour * 60 + dt.Minute;
-                return true;
-            }
             if (input.Length >= 5 && input[2] == ':')
             {
-                if (int.TryParse(input.Substring(0, 2), out
-                    var h) && int.TryParse(input.Substring(3, 2), out
-                    var m))
+                if (int.TryParse(input.Substring(0, 2), out var h) && int.TryParse(input.Substring(3, 2), out var m))
                 {
                     minutes = h * 60 + m;
                     return true;
@@ -201,9 +128,7 @@ namespace Timesheet.APIs.Reports
 
         private static int ComputeWorkingMinutes(string checkIn, string checkOut)
         {
-            if (!TryParseMinutes(checkIn, out
-                var ciMin) || !TryParseMinutes(checkOut, out
-                var coMin))
+            if (!TryParseMinutes(checkIn, out var ciMin) || !TryParseMinutes(checkOut, out var coMin))
             {
                 return 0;
             }
@@ -219,38 +144,15 @@ namespace Timesheet.APIs.Reports
             return Math.Max(total, 0);
         }
 
-        private static (int morning, int afternoon) ComputeSplitWorkingMinutes(string checkIn, string checkOut)
+        private async Task<List<OfficeWorkingTopLWLMDto>> ListTopOfficeWorkingTimeInternal(TopOfficeWorkingTimeDto input)
         {
-            if (!TryParseMinutes(checkIn, out
-                var ciMin) || !TryParseMinutes(checkOut, out
-                var coMin))
-            {
-                return (0, 0);
-            }
-            if (coMin <= ciMin) return (0, 0);
-            int noonStart = 12 * 60, noonEnd = 13 * 60;
-            int morning = 0, afternoon = 0;
-            if (ciMin < noonStart)
-            {
-                morning = Math.Max(0, Math.Min(coMin, noonStart) - ciMin);
-            }
-            if (coMin > noonEnd)
-            {
-                afternoon = Math.Max(0, coMin - Math.Max(ciMin, noonEnd));
-            }
-            return (morning, afternoon);
-        }
-
-        private async Task<List<OfficeWorkingTopLWLMDto>> ListTopOfficeWorkingTimeInternal(
-          long officeId, int limit = 20, DateTime? reportDate = null, long? userId = null, DateTime? startDate = null, DateTime? endDate = null)
-        {
-            var now = reportDate?.Date ?? DateTimeUtils.GetNow().Date;
+            var now = input.ReportDate?.Date ?? DateTimeUtils.GetNow().Date;
             DateTime rangeStart;
             DateTime rangeEnd;
-            if (startDate.HasValue && endDate.HasValue)
+            if (input.StartDate.HasValue && input.EndDate.HasValue)
             {
-                rangeStart = startDate.Value.Date;
-                rangeEnd = endDate.Value.Date;
+                rangeStart = input.StartDate.Value.Date;
+                rangeEnd = input.EndDate.Value.Date;
             }
             else
             {
@@ -260,21 +162,17 @@ namespace Timesheet.APIs.Reports
             }
 
             var users = await WorkScope.GetAll<Ncc.Authorization.Users.User>()
-                    .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork && u.BranchId == officeId)
-                    .Join(WorkScope.GetAll<Branch>(),
-                          u => u.BranchId,
-                          b => b.Id,
-                          (u, b) => new { User = u, Branch = b })
-                    .Select(x => new UserLite
+                    .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork && u.BranchId == input.OfficeId)
+                    .Select(x => new UserLiteDto
                     {
-                        Id = x.User.Id,
-                        Name = !string.IsNullOrEmpty(x.User.UserName) ? x.User.UserName :
-                               (!string.IsNullOrEmpty(x.User.Name) ? x.User.Name : "Unknown"),
-                        Email = x.User.EmailAddress,
-                        OfficeName = x.Branch != null ? x.Branch.Name : string.Empty,
-                        OfficeCode = x.Branch != null ? x.Branch.Code : string.Empty
+                        Id = x.Id,
+                        Name = !string.IsNullOrEmpty(x.UserName) ? x.UserName :
+                               (!string.IsNullOrEmpty(x.Name) ? x.Name : "Unknown"),
+                        Email = x.EmailAddress,
+                        BranchName = x.Branch != null ? x.Branch.Name : "",
+                        BranchCode = x.Branch != null ? x.Branch.Code : "",
+                        BranchColor = x.Branch != null ? x.Branch.Color : ""
                     })
-                    .AsNoTracking()
                     .ToListAsync();
 
             var mapUserId = users.ToDictionary(x => x.Id, x => x);
@@ -287,17 +185,15 @@ namespace Timesheet.APIs.Reports
                 t.DateAt,
                 t.CheckIn,
                 t.CheckOut
-            }).AsNoTracking().ToListAsync();
+            }).ToListAsync();
 
-            var aggMap = new Dictionary<long,
-              (string name, string officeName, string officeCode, int minutes)>();
+            var aggMap = new Dictionary<long, UserMapDto>();
 
             foreach (var t in tkList)
             {
                 long? userIdResolved = t.UserId;
-                UserLite userInfo = null;
-                if (userIdResolved.HasValue && mapUserId.TryGetValue(userIdResolved.Value, out
-                    var infoById))
+                UserLiteDto userInfo = null;
+                if (userIdResolved.HasValue && mapUserId.TryGetValue(userIdResolved.Value, out var infoById))
                 {
                     userInfo = infoById;
                 }
@@ -316,7 +212,7 @@ namespace Timesheet.APIs.Reports
                 {
                     continue;
                 }
-                if (userId.HasValue && userIdResolved.Value != userId.Value)
+                if (input.UserId.HasValue && userIdResolved.Value != input.UserId.Value)
                 {
                     continue;
                 }
@@ -324,32 +220,38 @@ namespace Timesheet.APIs.Reports
                 var minutes = ComputeWorkingMinutes(t.CheckIn, t.CheckOut);
                 if (minutes <= 0) continue;
 
-                if (!aggMap.TryGetValue(userIdResolved.Value, out
-                    var current))
+                if (!aggMap.TryGetValue(userIdResolved.Value, out var current))
                 {
-                    current = (userInfo.Name, userInfo.OfficeName, userInfo.OfficeCode, 0);
+                    current = new UserMapDto
+                    {
+                        Name = userInfo.Name,
+                        BranchName = userInfo.BranchName,
+                        BranchCode = userInfo.BranchCode,
+                        BranchColor = userInfo.BranchColor,
+                        Minutes = 0
+                    };
                 }
-                current.minutes += minutes;
+                current.Minutes += minutes;
                 aggMap[userIdResolved.Value] = current;
             }
 
             var result = aggMap.Select(kv => new OfficeWorkingTopLWLMDto
             {
                 UserId = kv.Key,
-                UserName = kv.Value.name,
-                OfficeName = kv.Value.officeName,
-                OfficeCode = kv.Value.officeCode,
-                TotalAllLW = kv.Value.minutes / 60.0,
-                OfficeLW = kv.Value.minutes / 60.0
+                UserName = kv.Value.Name,
+                BranchName = kv.Value.BranchName,
+                BranchCode = kv.Value.BranchCode,
+                TotalAllLW = kv.Value.Minutes / 60.0,
+                OfficeLW = kv.Value.Minutes / 60.0
             }).OrderByDescending(x => x.TotalAllLW);
 
-            if (limit == int.MaxValue)
+            if (input.Limit == int.MaxValue)
             {
                 return result.ToList();
             }
             else
             {
-                return result.Take(limit).ToList();
+                return result.Take(input.Limit).ToList();
             }
         }
 
@@ -363,56 +265,31 @@ namespace Timesheet.APIs.Reports
             }
             return chunks;
         }
-        private async Task<string> SendTopOfficeUsersNotificationInternal(
-          long? officeId = null, int limit = 20, DateTime? reportDate = null, string mezonUrl = null, long? userId = null, DateTime? startDate = null, DateTime? endDate = null, bool showAll = false, bool allOffices = false)
+        private async Task<string> SendTopOfficeUsersNotificationInternal(SendTopOfficeWorkingTimeNotificationDto input)
         {
             const int BATCH_SIZE = 5;
             const int MESSAGE_DELAY_MS = 1000;
-            var actualLimit = showAll ? int.MaxValue : limit;
+            var actualLimit = input.ShowAll ? int.MaxValue : input.Limit;
             var sb = new StringBuilder();
             var webhookUrl = await SettingManager.GetSettingValueAsync(AppSettingNames.BotReportWebhookUrl);
-            if (allOffices)
-            {
-                var allOfficesReport = await GetAllOfficesReport(actualLimit, reportDate, userId, startDate, endDate);
-                var notificationUrl = mezonUrl;
-                if (string.IsNullOrWhiteSpace(notificationUrl))
-                {
-                    notificationUrl = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportMezonUrl);
-                }
-
-                if (!string.IsNullOrWhiteSpace(notificationUrl))
-                {
-                    var messageText = allOfficesReport;
-                    var mkList = new List<object>();
-                    AddBoldForLabel(mkList, messageText, "Working Report");
-                    AddBoldForLabel(mkList, messageText, "Total branches:");
-                    AddBoldForLabel(mkList, messageText, "Time:");
-                    AddBoldForOfficeTitles(mkList, messageText);
-                    AddBoldForUsernames(mkList, messageText);
-                    AddBoldForAllOccurrences(mkList, messageText, "LW:");
-                    AddBoldForAllOccurrences(mkList, messageText, "LM:");
-
-                    _mezonService.Post(notificationUrl, new
-                    {
-                        type = "hook",
-                        message = new
-                        {
-                            t = messageText,
-                            mk = mkList
-                        }
-                    });
-                }
-
-                return allOfficesReport;
-            }
-            if (!officeId.HasValue)
+            if (!input.OfficeId.HasValue)
             {
                 return "Please provide officeId or set allOffices=true";
             }
 
-            var items = await ListTopOfficeWorkingTimeInternal(officeId.Value, actualLimit, reportDate, userId, startDate, endDate);
+            var inputDto = new TopOfficeWorkingTimeDto
+            {
+                OfficeId = input.OfficeId.Value,
+                Limit = actualLimit,
+                ReportDate = input.ReportDate,
+                UserId = input.UserId,
+                StartDate = input.StartDate,
+                EndDate = input.EndDate
+            };
 
-            var branchInfo = await WorkScope.GetAll<Branch>().Where(b => b.Id == officeId.Value).Select(b => new
+            var items = await ListTopOfficeWorkingTimeInternal(inputDto);
+
+            var branchInfo = await WorkScope.GetAll<Branch>().Where(b => b.Id == input.OfficeId.Value).Select(b => new
             {
                 b.Name,
                 b.Code,
@@ -420,18 +297,18 @@ namespace Timesheet.APIs.Reports
             }).FirstOrDefaultAsync();
 
             var vpName = branchInfo?.Code ?? branchInfo?.Name ?? "Office#{officeId.Value}";
-            var now = (reportDate?.Date ?? DateTimeUtils.GetNow().Date);
+            var now = (input.ReportDate?.Date ?? DateTimeUtils.GetNow().Date);
             DateTime s, e;
 
-            var baseTime = reportDate?.Date ?? DateTimeUtils.GetNow().Date;
-            var combined = await ListTopOfficeWorkingTimeLWLMInternal(officeId.Value, actualLimit, reportDate, userId);
+            var baseTime = input.ReportDate?.Date ?? DateTimeUtils.GetNow().Date;
+            var combined = await ListTopOfficeWorkingTimeLWLMInternal(input.OfficeId.Value, actualLimit, input.ReportDate, input.UserId);
             var (lwStart, lwEnd) = GetLastWeekRange(baseTime);
             var lmStart = DateTimeUtils.FirstDayOfMonth(baseTime.AddMonths(-1));
             var lmEnd = DateTimeUtils.LastDayOfMonth(baseTime.AddMonths(-1));
-            if (startDate.HasValue && endDate.HasValue)
+            if (input.StartDate.HasValue && input.EndDate.HasValue)
             {
-                s = startDate.Value.Date;
-                e = endDate.Value.Date;
+                s = input.StartDate.Value.Date;
+                e = input.EndDate.Value.Date;
             }
             else
             {
@@ -439,7 +316,7 @@ namespace Timesheet.APIs.Reports
                 s = lw.start;
                 e = lw.end;
             }
-            if (!startDate.HasValue || !endDate.HasValue)
+            if (!input.StartDate.HasValue || !input.EndDate.HasValue)
             {
                 var headerSb = new StringBuilder();
                 headerSb.AppendLine($"{(actualLimit == int.MaxValue ? "All " : $"Top {actualLimit}")} Employees By Working Hours – Branch {vpName}");
@@ -467,9 +344,9 @@ namespace Timesheet.APIs.Reports
                 else
                 {
                     int idx = 1;
-                    var itemsToShow = showAll ? combined.ToList() : combined.Take(actualLimit).ToList();
+                    var itemsToShow = input.ShowAll ? combined.ToList() : combined.Take(actualLimit).ToList();
                     var chunks = SplitIntoChunks(itemsToShow, BATCH_SIZE);
-                    for (int i=0; i<chunks.Count; i++)
+                    for (int i = 0; i < chunks.Count; i++)
                     {
                         var chunk = chunks[i];
                         bool isLastChunk = i == chunks.Count - 1;
@@ -528,7 +405,7 @@ namespace Timesheet.APIs.Reports
                         await Task.Delay(MESSAGE_DELAY_MS);
                     }
 
-                    
+
 
                     if (combined.Count > itemsToShow.Count())
                     {
@@ -538,13 +415,13 @@ namespace Timesheet.APIs.Reports
             }
             else
             {
-                if (userId.HasValue)
+                if (input.UserId.HasValue)
                 {
                     sb.AppendLine("Report Sorted By TotalTime – Branch {vpName} – UserId {userId.Value} ({s:dd/MM}–{e:dd/MM})");
                 }
                 else
                 {
-                    sb.AppendLine($"{(showAll ? "All " : $"Top {actualLimit}")} sorted by TotalTime – VP {vpName} ({s:dd/MM}–{e:dd/MM})");
+                    sb.AppendLine($"{(input.ShowAll ? "All " : $"Top {actualLimit}")} sorted by TotalTime – VP {vpName} ({s:dd/MM}–{e:dd/MM})");
                 }
                 if (items.Count == 0)
                 {
@@ -555,14 +432,14 @@ namespace Timesheet.APIs.Reports
                     int idx = 1;
                     foreach (var i in items)
                     {
-                        var officeShown = string.IsNullOrWhiteSpace(i.OfficeCode) ? i.OfficeName : i.OfficeCode;
+                        var officeShown = string.IsNullOrWhiteSpace(i.BranchCode) ? i.BranchName : i.BranchCode;
                         sb.AppendLine("{idx}) {i.UserName} | {officeShown} | {i.TotalAllLW}h");
                         idx++;
                     }
                 }
             }
 
-            var url = mezonUrl;
+            var url = input.MezonUrl;
             if (string.IsNullOrWhiteSpace(url))
             {
                 url = SettingManager.GetSettingValueForApplication(AppSettingNames.OfficeWorkingReportMezonUrl);
@@ -571,10 +448,9 @@ namespace Timesheet.APIs.Reports
             return sb.ToString();
         }
 
-        public Task<string> SendTopOfficeUsersNotification(
-          long? officeId = null, int limit = 20, DateTime? reportDate = null, string mezonUrl = null, long? userId = null, DateTime? startDate = null, DateTime? endDate = null, bool showAll = false, bool allOffices = false)
+        public Task<string> SendTopOfficeUsersNotification(SendTopOfficeWorkingTimeNotificationDto input)
         {
-            return SendTopOfficeUsersNotificationInternal(officeId, limit, reportDate, mezonUrl, userId, startDate, endDate, showAll, allOffices);
+            return SendTopOfficeUsersNotificationInternal(input);
         }
         private async Task<List<OfficeWorkingTopLWLMDto>> ListTopOfficeWorkingTimeLWLMInternal(
             long officeId, int limit = int.MaxValue, DateTime? reportDate = null, long? userId = null)
@@ -583,6 +459,8 @@ namespace Timesheet.APIs.Reports
             var (lwStart, lwEnd) = GetLastWeekRange(now);
             var lmStart = DateTimeUtils.FirstDayOfMonth(now.AddMonths(-1));
             var lmEnd = DateTimeUtils.LastDayOfMonth(now.AddMonths(-1));
+            var minStart = lwStart < lmStart ? lwStart : lmStart;
+            var maxEnd = lwEnd > lmEnd ? lwEnd : lmEnd;
 
             var users = await WorkScope.GetAll<Ncc.Authorization.Users.User>()
                     .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork && u.BranchId == officeId)
@@ -590,264 +468,186 @@ namespace Timesheet.APIs.Reports
                           u => u.BranchId,
                           b => b.Id,
                           (u, b) => new { User = u, Branch = b })
-                    .Select(x => new UserLite
+                    .Select(x => new UserLiteDto
                     {
                         Id = x.User.Id,
                         Name = x.User.FullName,
+                        UserName = x.User.UserName,
                         Email = x.User.EmailAddress,
-                        OfficeName = x.Branch != null ? x.Branch.Name : string.Empty,
-                        OfficeCode = x.Branch != null ? x.Branch.Code : string.Empty
+                        BranchName = x.Branch != null ? x.Branch.Name : "",
+                        BranchCode = x.Branch != null ? x.Branch.Code : "",
+                        BranchColor = x.Branch != null ? x.Branch.Color : ""
                     })
-                    .AsNoTracking()
                     .ToListAsync();
 
-            var mapUserId = users.ToDictionary(x => x.Id, x => x);
-            var mapEmail = users.Where(x => !string.IsNullOrEmpty(x.Email)).GroupBy(x => x.Email.Trim().ToLower()).ToDictionary(g => g.Key, g => g.First());
+            if (!users.Any())
+                return new List<OfficeWorkingTopLWLMDto>();
 
-            var minStart = lwStart < lmStart ? lwStart : lmStart;
-            var maxEnd = lwEnd > lmEnd ? lwEnd : lmEnd;
+            var userIds = new HashSet<long>(users.Select(u => u.Id));
 
-            var tkList = await WorkScope.GetAll<Timekeeping>().Where(t => t.DateAt >= minStart && t.DateAt <= maxEnd).Select(t => new
+            var userEmails = users
+                .Where(u => !string.IsNullOrEmpty(u.Email))
+                .ToDictionary(u => u.Email.Trim().ToLower(), u => u.Id);
+
+            var timekeepings = await WorkScope.GetAll<Timekeeping>()
+                                    .Where(t => t.DateAt >= minStart && t.DateAt <= maxEnd)
+                                    .Where(t => (t.UserId.HasValue && userIds.Contains(t.UserId.Value)) ||
+                                               (!t.UserId.HasValue && !string.IsNullOrEmpty(t.UserEmail) &&
+                                                userEmails.ContainsKey(t.UserEmail.Trim().ToLower())))
+                                    .Select(t => new
+                                    {
+                                        UserId = t.UserId ?? userEmails[t.UserEmail.Trim().ToLower()],
+                                        t.DateAt,
+                                        t.CheckIn,
+                                        t.CheckOut,
+                                        t.TrackerTime
+                                    })
+                                    .ToListAsync();
+
+            var remoteDetails = await (from d in WorkScope.GetAll<AbsenceDayDetail>()
+                                      .Where(d => d.DateAt >= minStart && d.DateAt <= maxEnd)
+                                       join r in WorkScope.GetAll<AbsenceDayRequest>()
+                                           .Where(r => r.Status == RequestStatus.Approved &&
+                                                     r.Type == RequestType.Remote &&
+                                                     userIds.Contains(r.UserId))
+                                           on d.RequestId equals r.Id
+                                       select new
+                                       {
+                                           d.DateAt,
+                                           d.DateType,
+                                           r.UserId
+                                       })
+                                     .ToListAsync();
+
+            var remoteMap = remoteDetails
+                .GroupBy(x => (x.UserId, x.DateAt.Date))
+                .ToDictionary(
+                    g => g.Key,
+                    g => new RemoteFlags(
+                        g.Any(x => x.DateType == DayType.Morning || x.DateType == DayType.Fullday),
+                        g.Any(x => x.DateType == DayType.Afternoon || x.DateType == DayType.Fullday)
+                    )
+                );
+
+            var result = new Dictionary<long, OfficeWorkingTopLWLMDto>();
+            var userMap = users.ToDictionary(u => u.Id, u => u);
+            foreach (var tk in timekeepings)
             {
-                t.UserId,
-                t.UserEmail,
-                t.DateAt,
-                t.CheckIn,
-                t.CheckOut,
-                t.TrackerTime
-            }).AsNoTracking().ToListAsync();
-            var remoteDetails = await WorkScope.GetAll<AbsenceDayDetail>().Include(d => d.Request).Where(d => d.DateAt >= minStart && d.DateAt <= maxEnd).Where(d => d.Request.Status == RequestStatus.Approved).Where(d => d.Request.Type == RequestType.Remote).Select(d => new
-            {
-                d.DateAt,
-                d.DateType,
-                UserId = d.Request.UserId
-            }).AsNoTracking().ToListAsync();
+                if (!userMap.TryGetValue(tk.UserId, out var userInfo))
+                    continue;
 
-            var remoteMap = new Dictionary<(long userId, DateTime date),
-              RemoteFlags>();
-            foreach (var d in remoteDetails)
-            {
-                var key = (d.UserId, d.DateAt.Date);
-                remoteMap.TryGetValue(key, out
-                  var val);
+                var workingMinutes = ComputeWorkingMinutes(tk.CheckIn, tk.CheckOut);
+                if (workingMinutes <= 0 && string.IsNullOrEmpty(tk.TrackerTime))
+                    continue;
 
-                switch (d.DateType)
+                if (!result.TryGetValue(tk.UserId, out var userReport))
                 {
-                    case DayType.Fullday:
-                        val = new RemoteFlags(true, true);
-                        break;
-                    case DayType.Morning:
-                        val = new RemoteFlags(true, val.Afternoon);
-                        break;
-                    case DayType.Afternoon:
-                        val = new RemoteFlags(val.Morning, true);
-                        break;
-                }
-                remoteMap[key] = val;
-            }
-
-            var agg = new Dictionary<long,
-              OfficeWorkingTopLWLMDto>();
-
-            foreach (var t in tkList)
-            {
-                long? uid = t.UserId;
-                UserLite uinfo = null;
-                if (uid.HasValue && mapUserId.TryGetValue(uid.Value, out
-                    var i1))
-                {
-                    uinfo = i1;
-                }
-                else if (!uid.HasValue && !string.IsNullOrWhiteSpace(t.UserEmail))
-                {
-                    var k = t.UserEmail.Trim().ToLower();
-                    if (mapEmail.TryGetValue(k, out
-                        var i2))
+                    userReport = new OfficeWorkingTopLWLMDto
                     {
-                        uid = i2.Id;
-                        uinfo = i2;
-                    }
-                }
-                if (uinfo == null || !uid.HasValue) continue;
-                if (userId.HasValue && uid.Value != userId.Value) continue;
-
-                var trackerMinutes = 0;
-                if (!string.IsNullOrWhiteSpace(t.TrackerTime) && TimeSpan.TryParse(t.TrackerTime, out
-                    var trackerSpan))
-                {
-                    trackerMinutes = (int)trackerSpan.TotalMinutes;
-                }
-
-                var (mMin, aMin) = ComputeSplitWorkingMinutes(t.CheckIn, t.CheckOut);
-                if (mMin + aMin + trackerMinutes <= 0) continue;
-
-                if (!agg.ContainsKey(uid.Value))
-                {
-                    agg[uid.Value] = new OfficeWorkingTopLWLMDto
-                    {
-                        UserId = uid.Value,
-                        UserName = uinfo.Name,
-                        OfficeName = uinfo.OfficeName,
-                        OfficeCode = uinfo.OfficeCode
+                        UserId = userInfo.Id,
+                        FullName = userInfo.Name,
+                        UserName = userInfo.UserName,
+                        BranchName = userInfo.BranchName,
+                        BranchCode = userInfo.BranchCode,
+                        BranchColor = userInfo.BranchColor
                     };
+                    result[tk.UserId] = userReport;
                 }
-                var row = agg[uid.Value];
+                var isInLW = tk.DateAt.Date >= lwStart && tk.DateAt.Date <= lwEnd;
+                var isInLM = tk.DateAt.Date >= lmStart && tk.DateAt.Date <= lmEnd;
+                var isRemote = remoteMap.TryGetValue((tk.UserId, tk.DateAt.Date), out var flags) &&
+                              (flags.Morning || flags.Afternoon);
 
-                var remoteFlags = remoteMap.TryGetValue((uid.Value, t.DateAt.Date), out
-                  var rf) ? rf : new RemoteFlags(false, false);
+                var trackerMinutes = !string.IsNullOrWhiteSpace(tk.TrackerTime) &&
+                                   TimeSpan.TryParse(tk.TrackerTime, out var ts)
+                                   ? (int)ts.TotalMinutes
+                                   : 0;
 
-                bool inLW = t.DateAt.Date >= lwStart && t.DateAt.Date <= lwEnd;
-                bool inLM = t.DateAt.Date >= lmStart && t.DateAt.Date <= lmEnd;
+                var workingMin = isRemote
+                    ? (trackerMinutes > 0 ? trackerMinutes : workingMinutes)
+                    : (workingMinutes > 0 ? workingMinutes : trackerMinutes);
 
-                if (inLW)
+                var hours = Math.Round(workingMin / 60.0, 1);
+                double wfhHours = isRemote ? hours : 0;
+                double officeHours = isRemote ? 0 : hours;
+
+                if (isInLW)
                 {
-                    if (remoteFlags.Morning || remoteFlags.Afternoon)
-                    {
-                        int workingMinutes = trackerMinutes > 0 ? trackerMinutes : (mMin + aMin);
-                        var trackerHours = workingMinutes / 60.0;
-                        row.TotalAllLW += trackerHours;
-                        row.WfhLW += trackerHours;
-                    }
-                    else
-                    {
-                        int officeTime = (mMin + aMin) > 0 ? (mMin + aMin) : trackerMinutes;
-                        var officeHours = officeTime / 60.0;
-                        row.TotalAllLW += officeHours;
-                        row.OfficeLW += officeHours;
-                    }
+                    userReport.TotalAllLW += hours;
+                    userReport.WfhLW += wfhHours;
+                    userReport.OfficeLW += officeHours;
                 }
-                if (inLM)
+
+                if (isInLM)
                 {
-                    if (remoteFlags.Morning || remoteFlags.Afternoon)
-                    {
-                        int workingMinutes = trackerMinutes > 0 ? trackerMinutes : (mMin + aMin);
-                        var trackerHours = workingMinutes / 60.0;
-                        row.TotalAllLM += trackerHours;
-                        row.WfhLM += trackerHours;
-                    }
-                    else
-                    {
-                        int officeTime = (mMin + aMin) > 0 ? (mMin + aMin) : trackerMinutes;
-                        var officeHours = officeTime / 60.0;
-                        row.TotalAllLM += officeHours;
-                        row.OfficeLM += officeHours;
-                    }
+                    userReport.TotalAllLM += hours;
+                    userReport.WfhLM += wfhHours;
+                    userReport.OfficeLM += officeHours;
                 }
             }
 
-            Logger.Error("DEBUG: Final aggregated users: {agg.Count}");
-            foreach (var user in users)
+            foreach (var user in users.Where(u => !result.ContainsKey(u.Id)))
             {
-                if (!agg.ContainsKey(user.Id))
+                result[user.Id] = new OfficeWorkingTopLWLMDto
                 {
-                    agg[user.Id] = new OfficeWorkingTopLWLMDto
-                    {
-                        UserId = user.Id,
-                        UserName = user.Name,
-                        OfficeName = user.OfficeName,
-                        OfficeCode = user.OfficeCode,
-                        TotalAllLW = 0,
-                        OfficeLW = 0,
-                        WfhLW = 0,
-                        TotalAllLM = 0,
-                        OfficeLM = 0,
-                        WfhLM = 0
-                    };
-                }
+                    UserId = user.Id,
+                    FullName = user.Name,
+                    UserName = user.UserName,
+                    BranchName = user.BranchName,
+                    BranchCode = user.BranchCode,
+                    BranchColor = user.BranchColor
+                };
             }
-
-            var rs = agg.Values.OrderByDescending(x => x.TotalAllLW).ThenByDescending(x => x.TotalAllLM);
-
-            var result = limit == int.MaxValue ? rs.ToList() : rs.Take(limit).ToList();
-            Logger.Error("DEBUG: Returning {result.Count} results");
-
-            return result;
+            return result.Values
+                .OrderByDescending(x => x.TotalAllLW)
+                .ThenByDescending(x => x.TotalAllLM)
+                .Take(limit)
+                .ToList();
         }
-        [AbpAuthorize]
-        [HttpGet]
-        public Task<List<OfficeWorkingTopLWLMDto>> GetListTopOfficeWorkingTimeLWLM(
-        long officeId, int limit = int.MaxValue, DateTime? reportDate = null, long? userId = null)
-        {
-            return ListTopOfficeWorkingTimeLWLMInternal(officeId, limit, reportDate, userId);
-        }
-        private async Task<string> GetAllOfficesReport(int actualLimit, DateTime? reportDate, long? userId, DateTime? startDate, DateTime? endDate)
-        {
-            var sb = new StringBuilder();
 
-            var offices = await WorkScope.GetAll<Branch>().Where(b => b.Id > 0).Select(b => new
-            {
-                b.Id,
-                b.Name,
-                b.Code,
-                b.DisplayName
-            }).OrderBy(b => b.Code ?? b.Name).AsNoTracking().ToListAsync();
 
-            if (offices.Count == 0)
+        public async Task<List<OfficeWorkingTopLWLMDto>> GetOfficeWorkingTimelogReport(GetOfficeWorkingTimelogReportInputDto input)
+        {
+            var now = DateTimeUtils.GetNow().Date;
+            var (lwStart, lwEnd) = GetLastWeekRange(now);
+            var lmStart = DateTimeUtils.FirstDayOfMonth(now.AddMonths(-1));
+            var lmEnd = DateTimeUtils.LastDayOfMonth(now.AddMonths(-1));
+            var allBranchIds = await WorkScope.GetAll<Branch>()
+                .Select(b => b.Id)
+                .ToListAsync();
+            List<long> officeIds;
+            if (input.BranchId == null || !input.BranchId.Any())
             {
-                return "No branch found";
+                officeIds = allBranchIds;
             }
-
-            var baseTime = reportDate?.Date ?? DateTimeUtils.GetNow().Date;
-            var (lwStart, lwEnd) = GetLastWeekRange(baseTime);
-            var lmStart = DateTimeUtils.FirstDayOfMonth(baseTime.AddMonths(-1));
-            var lmEnd = DateTimeUtils.LastDayOfMonth(baseTime.AddMonths(-1));
-
-            sb.AppendLine("Employee Report");
-            sb.AppendLine("LW ({lwStart:dd/MM}–{lwEnd:dd/MM}) | LM ({lmStart:dd/MM}–{lmEnd:dd/MM})");
-            sb.AppendLine("Total branches: {offices.Count}");
-            sb.AppendLine();
-
-            foreach (var office in offices)
+            else
             {
-                try
+                officeIds = input.BranchId
+                    .Where(id => allBranchIds.Contains(id))
+                    .ToList();
+
+                if (!officeIds.Any())
                 {
-                    var combined = await ListTopOfficeWorkingTimeLWLMInternal(office.Id, int.MaxValue, reportDate, userId);
-                    var officeName = office.Code ?? office.Name ?? "Office#{office.Id}";
-
-                    sb.AppendLine("Branch {officeName} ({combined.Count} employees)");
-
-                    if (combined.Count == 0)
-                    {
-                        sb.AppendLine("No data");
-                    }
-                    else
-                    {
-                        var topItems = combined.Take(actualLimit);
-                        int idx = 1;
-
-                        foreach (var item in topItems)
-                        {
-                            var username = item.UserName ?? "N/A";
-                            var atIndex = username.IndexOf('@');
-                            if (atIndex >= 0)
-                            {
-                                username = username.Substring(0, atIndex);
-                            }
-
-                            sb.AppendLine("{idx}. {username}");
-                            sb.AppendLine("- LW: Total {item.TotalAllLWHours:F1}h (Office {item.OfficeLWHours:F1}h, WFH {item.WfhLWHours:F1}h)");
-                            sb.AppendLine("- LM: Total {item.TotalAllLMHours:F1}h (Office {item.OfficeLMHours:F1}h, WFH {item.WfhLMHours:F1}h)");
-                            sb.AppendLine("═══════════════════════════");
-                            idx++;
-                        }
-
-                        if (combined.Count > actualLimit)
-                        {
-                            sb.AppendLine("... and {combined.Count - actualLimit} other employees");
-                        }
-                    }
-
-                    sb.AppendLine();
-                }
-                catch (Exception ex)
-                {
-                    sb.AppendLine("Branch {office.Code ?? office.Name} - Error: {ex.Message}");
-                    sb.AppendLine();
+                    throw new Abp.UI.UserFriendlyException("No valid branch codes provided.");
                 }
             }
-            sb.AppendLine("Total branches: {offices.Count}");
-            sb.AppendLine("Time: LW ({lwStart:dd/MM}–{lwEnd:dd/MM}) | LM ({lmStart:dd/MM}–{lmEnd:dd/MM})");
-            return sb.ToString();
+            var allUsers = new List<OfficeWorkingTopLWLMDto>();
+            foreach (var officeId in officeIds)
+            {
+                var officeData = await ListTopOfficeWorkingTimeLWLMInternal(
+                    officeId: officeId,
+                    limit: int.MaxValue,
+                    reportDate: now
+                );
+                allUsers.AddRange(officeData);
+            }
+            var topUsers = allUsers
+                .OrderByDescending(u => u.TotalAllLW)
+                .ThenByDescending(u => u.TotalAllLM)
+                .ThenBy(u => u.UserName)
+                .Take(input.Limit)
+                .ToList();
+            return topUsers;
         }
     }
 }

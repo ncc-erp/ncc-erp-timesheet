@@ -1,29 +1,31 @@
-﻿using Abp.BackgroundJobs;
-using Ncc.IoC;
-using Timesheet.APIs.ReviewDetails;
-using Timesheet.Services.File;
-using Timesheet.Services.HRM;
-using Timesheet.Services.Project;
-using Microsoft.AspNetCore.Hosting;
-using System.Threading.Tasks;
-using Xunit;
-using Timesheet.Paging;
-using Shouldly;
-using Microsoft.Extensions.Logging;
-using System.Net.Http;
-using NSubstitute;
-using Microsoft.Extensions.Configuration;
-using Timesheet.APIs.ReviewDetails.Dto;
-using Ncc.Entities.Enum;
-using Timesheet.Entities;
-using System.Linq;
-using Abp.UI;
-using Abp.Application.Services.Dto;
+﻿using Abp.Application.Services.Dto;
+using Abp.BackgroundJobs;
 using Abp.Configuration;
 using Abp.Runtime.Session;
-using Timesheet.APIs.ReviewInternCapabilities.Dto;
-using static Ncc.Entities.Enum.StatusEnum;
+using Abp.UI;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Ncc.Entities.Enum;
+using Ncc.IoC;
+using NSubstitute;
+using Shouldly;
 using System;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Timesheet.APIs.ReviewDetails;
+using Timesheet.APIs.ReviewDetails.Dto;
+using Timesheet.APIs.ReviewInternCapabilities.Dto;
+using Timesheet.DomainServices;
+using Timesheet.Entities;
+using Timesheet.Paging;
+using Timesheet.Services.File;
+using Timesheet.Services.HRM;
+using Timesheet.Services.Komu;
+using Timesheet.Services.Project;
+using Xunit;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.Application.Tests.API.ReviewDetails
 {
@@ -41,7 +43,9 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
         {
             var _configuration = Substitute.For<IConfiguration>();
             var _httpClient = Resolve<HttpClient>();
-
+            var komuService = Substitute.For<KomuService>(Resolve<HttpClient>(), Resolve<ILogger<KomuService>>(), _configuration, Resolve<ISettingManager>());
+            var configuration = Substitute.For<IConfiguration>();
+            var userServices = Substitute.For<UserServices>();
             _workScope = Resolve<IWorkScope>();
 
             _backgroundJobManager = Resolve<IBackgroundJobManager>();
@@ -63,7 +67,7 @@ namespace Timesheet.Application.Tests.API.ReviewDetails
             _configuration.GetValue<string>("HRMService:SecurityCode").Returns("secretCode");
             _hRMService = new HRMService(_httpClient, _configuration, _loggerHRMService);
 
-            _reviewDetailAppService = new ReviewDetailAppService(_backgroundJobManager, _projectService, _hRMService, _mockEnvironment, _fileService, _workScope);
+            _reviewDetailAppService = new ReviewDetailAppService(_backgroundJobManager, _projectService, _hRMService, _mockEnvironment, _fileService, _workScope, komuService, configuration, userServices);
 
             _reviewDetailAppService.ObjectMapper = Resolve<Abp.ObjectMapping.IObjectMapper>();
             _reviewDetailAppService.SettingManager = Resolve<ISettingManager>();

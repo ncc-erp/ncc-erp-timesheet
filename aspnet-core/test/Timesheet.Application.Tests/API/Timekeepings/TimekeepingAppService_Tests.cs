@@ -31,6 +31,7 @@ using Timesheet.Paging;
 using Timesheet.Services.FaceIdService;
 using Timesheet.Services.Komu;
 using Timesheet.Services.Komu.Dto;
+using Timesheet.Services.Project;
 using Timesheet.Services.Tracker;
 using Timesheet.Services.Tracker.Dto;
 using Xunit;
@@ -61,7 +62,7 @@ namespace Timesheet.Application.Tests.API.Timekeepings
             configuration.GetValue<string>("TrackerService:SecurityCode").Returns("1BCD4F3799EE95C4");
             var logger = Resolve<ILogger<TrackerService>>();
             var trackerService = Substitute.For<TrackerService>(httpClientTrackerService, configuration, logger);
-
+            var projectService = Substitute.For<ProjectService>();
             var loggerKomu = Resolve<ILogger<KomuService>>();
             configuration.GetValue<string>("KomuService:BaseAddress").Returns("http://example.com");
             configuration.GetValue<string>("KomuService:SecurityCode").Returns("secretCode");
@@ -85,7 +86,7 @@ namespace Timesheet.Application.Tests.API.Timekeepings
             configuration.GetValue<string>("FaceIdService:PathImage").Returns("https://example.com");
 
             var komuService = Substitute.For<KomuService>(httpClient, loggerKomu, configuration, settingManager);
-            //  var faceIdService=Substitute.For<FaceIdService>(_workScope);
+            //var faceIdService=Substitute.For<FaceIdService>(_workScope);
             var faceIdService = Substitute.For<FaceIdService>(httpClientFaceId, loggerFaceIdService, settingManager, _workScope);
 
             List<UserCheckInDto> userCheckinDtoList = new List<UserCheckInDto>();
@@ -107,8 +108,8 @@ namespace Timesheet.Application.Tests.API.Timekeepings
             komuService.GetDailyReport(Arg.Any<DateTime>()).Returns(dailyReport);
 
             // _timekeepingServices = Substitute.For<TimekeepingServices>(komuService, trackerService, _workScope, faceIdService);
-            _timekeepingServices = new TimekeepingServices(komuService, trackerService, _workScope, faceIdService);
-            _timekeepingServices.SettingManager = settingManager;
+            _timekeepingServices = new TimekeepingServices(komuService, _workScope, faceIdService, projectService, settingManager);
+           //_timekeepingServices.SettingManager = settingManager;
             _timekeepingServices.UnitOfWorkManager = Resolve<IUnitOfWorkManager>();
 
             _timekeeping = new TimekeepingAppService(_timekeepingServices, _workScope)
@@ -136,12 +137,13 @@ namespace Timesheet.Application.Tests.API.Timekeepings
             await WithUnitOfWorkAsync(async () =>
             {
                 var result = await _timekeeping.GetAllPagging(gridParam, 2022, 12, 1, 1);
-                Assert.Equal(expectTotalCount, result.TotalCount);
-                Assert.Equal(expectItemCount, result.Items.Count);
-
-                result.Items.First().UserId.ShouldBe(1);
-                result.Items.First().UserName.ShouldBe("admin admin");
-                result.Items.First().UserEmail.ShouldBe("admin@aspnetboilerplate.com");
+                result.GridResult.TotalCount.ShouldBe(1);
+                result.GridResult.Items.Count.ShouldBe(1);
+                var firstItem = result.GridResult.Items.First();
+                firstItem.UserId.ShouldBe(1);
+                firstItem.UserName.ShouldBe("admin admin");
+                firstItem.UserEmail.ShouldBe("admin@aspnetboilerplate.com");
+                result.TotalPunishmentAmount.ShouldBe(0);
             });
         }
 
@@ -161,12 +163,14 @@ namespace Timesheet.Application.Tests.API.Timekeepings
             await WithUnitOfWorkAsync(async () =>
             {
                 var result = await _timekeeping.GetAllPagging(gridParam, 2022, 12, 1, 1);
-                Assert.Equal(expectTotalCount, result.TotalCount);
-                Assert.Equal(expectItemCount, result.Items.Count);
+                result.GridResult.TotalCount.ShouldBe(1);
+                result.GridResult.Items.Count.ShouldBe(1);
 
-                result.Items.First().UserId.ShouldBe(1);
-                result.Items.First().UserName.ShouldBe("admin admin");
-                result.Items.First().UserEmail.ShouldBe("admin@aspnetboilerplate.com");
+                var firstItem = result.GridResult.Items.First();
+                firstItem.UserId.ShouldBe(1);
+                firstItem.UserName.ShouldBe("admin admin");
+                firstItem.UserEmail.ShouldBe("admin@aspnetboilerplate.com");
+                result.TotalPunishmentAmount.ShouldBe(0);
             });
         }
 
@@ -186,8 +190,8 @@ namespace Timesheet.Application.Tests.API.Timekeepings
             await WithUnitOfWorkAsync(async () =>
             {
                 var result = await _timekeeping.GetAllPagging(gridParam, 2022, 12, 1, 1);
-                Assert.Equal(expectTotalCount, result.TotalCount);
-                Assert.Equal(expectItemCount, result.Items.Count);
+                result.GridResult.TotalCount.ShouldBe(1);
+                result.GridResult.Items.Count.ShouldBe(1);
             });
         }
 
@@ -206,8 +210,8 @@ namespace Timesheet.Application.Tests.API.Timekeepings
             await WithUnitOfWorkAsync(async () =>
             {
                 var result = await _timekeeping.GetAllPagging(gridParam, 2022, 12, 1, 1);
-                Assert.Equal(expectTotalCount, result.TotalCount);
-                Assert.Equal(expectItemCount, result.Items.Count);
+                result.GridResult.TotalCount.ShouldBe(1);
+                result.GridResult.Items.Count.ShouldBe(1);
             });
         }
 
@@ -218,7 +222,7 @@ namespace Timesheet.Application.Tests.API.Timekeepings
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timekeeping.GetDetailTimekeeping(2022, 12, 26, 4, 2, false, false, CheckInCheckOutPunishmentType.NoPunish);
+                var result = await _timekeeping.GetDetailTimekeeping(2022, 12, 26, 4, 2, false, false, UserPunishmentType.NoPunish);
                 Assert.Equal(expectTotalCount, result.Count);
 
                 result.Last().TimekeepingId.ShouldBe(22);
@@ -230,8 +234,7 @@ namespace Timesheet.Application.Tests.API.Timekeepings
                 result.Last().ResultCheckIn.ShouldBe(0);
                 result.Last().ResultCheckOut.ShouldBe(0);
                 result.Last().Date.ShouldBe(new DateTime(2022, 12, 26).Date);
-                result.Last().Status.ShouldBe(PunishmentStatus.Normal);
-                result.Last().StatusPunish.ShouldBe(CheckInCheckOutPunishmentType.NoPunish);
+                result.Last().StatusPunish.ShouldBe(UserPunishmentType.NoPunish);
                 result.Last().MoneyPunish.ShouldBe(0);
                 result.Last().NoteReply.ShouldBe("Email not match");
             });
@@ -244,7 +247,7 @@ namespace Timesheet.Application.Tests.API.Timekeepings
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timekeeping.GetDetailTimekeeping(3077, 12, 26, 4, 2, false, false, CheckInCheckOutPunishmentType.NoPunish);
+                var result = await _timekeeping.GetDetailTimekeeping(3077, 12, 26, 4, 2, false, false, UserPunishmentType.NoPunish);
                 Assert.Equal(expectTotalCount, result.Count);
             });
         }
@@ -383,9 +386,9 @@ namespace Timesheet.Application.Tests.API.Timekeepings
         [Fact]
         public async Task UserKhieuLai_Should_khieuLai()
         {
-            var userNote = new TimekeepingUserNoteDto
+            var userNote = new SubmitUserComplaintDto
             {
-                Id = 1,
+                UserPunishmentId = 1,
                 UserNote = "WFH",
             };
 
@@ -397,9 +400,9 @@ namespace Timesheet.Application.Tests.API.Timekeepings
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var updatedTimekeeping = await _workScope.GetAsync<Timekeeping>(userNote.Id);
+                var updatedTimekeeping = await _workScope.GetAsync<Timekeeping>(userNote.UserPunishmentId);
 
-                updatedTimekeeping.Id.ShouldBe(userNote.Id);
+                updatedTimekeeping.Id.ShouldBe(userNote.UserPunishmentId);
                 updatedTimekeeping.UserNote.ShouldBe(userNote.UserNote);
             });
 
@@ -409,10 +412,10 @@ namespace Timesheet.Application.Tests.API.Timekeepings
         [Fact]
         public async Task UserKhieuLai_Should_Not_KhieuLai()
         {
-            var userNote = new TimekeepingUserNoteDto
+            var userNote = new SubmitUserComplaintDto
             {
-                Id = 91,
-                UserNote = "WFH",
+                UserPunishmentId = 91,
+                UserNote = "WFH"
             };
 
             await WithUnitOfWorkAsync(async () =>
@@ -421,7 +424,7 @@ namespace Timesheet.Application.Tests.API.Timekeepings
                 {
                     await _timekeeping.UserKhieuLai(userNote);
                 });
-                Assert.Equal("Bạn chỉ có thể khiếu lại cho bản ghi của mình", exception.Message);
+                Assert.Equal("You can only submit complaints for your own records", exception.Message);
             });
 
         }
@@ -429,23 +432,23 @@ namespace Timesheet.Application.Tests.API.Timekeepings
         [Fact]
         public async Task TraLoiKhieuLai_Test()
         {
-            var replyNote = new TimekeepingDto
+            var replyNote = new RespondToComplaintDto
             {
-                Id = 1,
+                UserpunishmentId = 1,
                 NoteReply = "Khong duoc xac nhan",
-                IsPunishedCheckIn = true,
+                StatusPunish = (UserPunishmentType)2,
             };
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var timekeeping = await _timekeeping.TraLoiKhieuLai(replyNote);
+                var timekeeping = await _timekeeping.RespondToComplaint(replyNote);
             });
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var updatedTimekeeping = await _workScope.GetAsync<Timekeeping>(replyNote.Id);
+                var updatedTimekeeping = await _workScope.GetAsync<Timekeeping>(replyNote.UserpunishmentId);
 
-                updatedTimekeeping.Id.ShouldBe(replyNote.Id);
+                updatedTimekeeping.Id.ShouldBe(replyNote.UserpunishmentId);
                 updatedTimekeeping.NoteReply.ShouldBe(replyNote.NoteReply);
             });
         }
