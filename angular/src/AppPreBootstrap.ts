@@ -34,6 +34,10 @@ export class AppPreBootstrap {
             if (typeof result.sentryDsn != "undefined" && result.sentryDsn !== "") {
                 AppConsts.sentryDsn = result.sentryDsn;
             }
+            if (typeof result.mmnBaseUrl != "undefined" && result.mmnBaseUrl !== "") {
+                AppConsts.mmnBaseUrl = result.mmnBaseUrl;
+            }
+           
             callback();
         });
     }

@@ -1,0 +1,36 @@
+<div class="dialog-container">
+  <div class="header-section">
+    <div class="icon-circle">
+      <mat-icon class="check-icon">check</mat-icon>
+    </div>
+    <h3 class="title">Payment Successful</h3>
+    <p class="description">Your transaction has been processed successfully.</p>
+  </div>
+
+  <div class="detail-card">
+    <div class="info-group">
+      <p class="label">AMOUNT PAID</p>
+      <div class="amount-value">
+        {{ data.amountPaid | number }}
+        <span class="currency">đồng</span>
+      </div>
+    </div>
+
+    <div class="divider" *ngIf="data.transactionHash"></div>
+
+    <div class="info-group" *ngIf="data.transactionHash">
+      <p class="label">TRANSACTION HASH</p>
+      <a [href]="baseUrl + data.transactionHash" 
+         target="_blank" 
+         class="hash-link"
+         matTooltip="Click the transaction hash to view details on dong.mezon.ai"
+         matTooltipPosition="above">
+        {{ data.transactionHash }}
+      </a>
+    </div>
+  </div>
+
+  <button mat-raised-button color="primary" class="close-btn" (click)="close()">
+    Close
+  </button>
+</div>

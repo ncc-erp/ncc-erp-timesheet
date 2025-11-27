@@ -39,10 +39,11 @@ namespace Timesheet.Application.Tests.API.NormalWorkingHours
             bool isThanDefaultWorking = false;
             int? checkInFilter = null;
             int tsStatusFilter = 0;
+            bool? userStatus = null;
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _normal.GetAllPagging(input, year, month, branchId, projectId, isThanDefaultWorking, checkInFilter, tsStatusFilter);
+                var result = await _normal.GetAllPagging(input, year, month, branchId, projectId, isThanDefaultWorking, checkInFilter, tsStatusFilter, userStatus);
                 Assert.NotNull(result);
                 Assert.Equal(10, result.Items.Count);
                 Assert.Equal(21, result.TotalCount);
@@ -56,6 +57,7 @@ namespace Timesheet.Application.Tests.API.NormalWorkingHours
                 result.Items.ShouldContain(item => item.Level == null);
                 result.Items.ShouldContain(item => item.Name == "email3");
                 result.Items.ShouldContain(item => item.Surname == "test");
+                
             });
         }
 
@@ -70,10 +72,11 @@ namespace Timesheet.Application.Tests.API.NormalWorkingHours
             bool isThanDefaultWorking = false;
             int? checkInFilter = null;
             int tsStatusFilter = 1;
+            bool? userStatus = null;
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _normal.GetAllPagging(input, year, month, branchId, projectId, isThanDefaultWorking, checkInFilter, tsStatusFilter);
+                var result = await _normal.GetAllPagging(input, year, month, branchId, projectId, isThanDefaultWorking, checkInFilter, tsStatusFilter, userStatus);
                 Assert.NotNull(result);
                 Assert.Equal(8, result.Items.Count);
                 Assert.Equal(8, result.TotalCount);
@@ -101,10 +104,12 @@ namespace Timesheet.Application.Tests.API.NormalWorkingHours
             bool isThanDefaultWorking = false;
             int? checkInFilter = null;
             int tsStatusFilter = 0;
+            bool? userStatus = null;
+
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _normal.ExportNormalWorking(input, year, month, branchId, projectId, isThanDefaultWorking, checkInFilter, tsStatusFilter);
+                var result = await _normal.ExportNormalWorking(input, year, month, branchId, projectId, isThanDefaultWorking, checkInFilter, tsStatusFilter, userStatus);
                 Assert.NotNull(result);
                 Assert.IsType<Byte[]>(result);
             });
@@ -119,6 +124,7 @@ namespace Timesheet.Application.Tests.API.NormalWorkingHours
             bool isThanDefaultWorking = false;
             int? checkInFilter = null;
             int tsStatusFilter = 0;
+            bool? userStatus = null;
             var year = 2022;
             var month = 2;
             var now = new DateTime(2022, 2, 15);
@@ -153,7 +159,7 @@ namespace Timesheet.Application.Tests.API.NormalWorkingHours
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _normal.ExportNormalWorking(input, year, month, branchId, projectId, isThanDefaultWorking, checkInFilter, tsStatusFilter);
+                var result = await _normal.ExportNormalWorking(input, year, month, branchId, projectId, isThanDefaultWorking, checkInFilter, tsStatusFilter, userStatus);
                 Assert.NotNull(result);
                 Assert.IsType<Byte[]>(result);
             });

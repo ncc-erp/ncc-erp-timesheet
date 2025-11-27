@@ -22,6 +22,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TransactionHashDialogComponent } from './mytimesheet-tardiness/transaction-hash-dialog/transaction-hash-dialog.component';
+import { TransactionSuccessDialogComponent } from './mytimesheet-tardiness/transaction-success-dialog/transaction-success-dialog.component';
+import { TranferDialogComponent } from './mytimesheet-tardiness/tranfer-from-timesheet-dialog/tranfer-from-timesheet-dialog.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @NgModule({
     declarations: [
@@ -33,8 +36,10 @@ import { TransactionHashDialogComponent } from './mytimesheet-tardiness/transact
       MytimesheetNormalWorkingComponent,
       ComplainDialogComponent,
       TimesheetConfirmationDialogComponent,
-      UnlockConfirmDialogComponent,
-      TransactionHashDialogComponent
+      TransactionHashDialogComponent,
+      TranferDialogComponent,
+      TransactionSuccessDialogComponent,
+      UnlockConfirmDialogComponent
     ],
     imports: [
       CommonModule,
@@ -52,7 +57,8 @@ import { TransactionHashDialogComponent } from './mytimesheet-tardiness/transact
     MatButtonModule,
     MatCheckboxModule,
     MatInputModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatFormFieldModule
     ],
     entryComponents: [
       CreateEditTimesheetItemComponent,
@@ -60,8 +66,10 @@ import { TransactionHashDialogComponent } from './mytimesheet-tardiness/transact
       TimesheetWarningDialogComponent,
       ComplainDialogComponent,
       TimesheetConfirmationDialogComponent,
-      UnlockConfirmDialogComponent,
-      TransactionHashDialogComponent
+      TransactionHashDialogComponent,
+      TranferDialogComponent,
+      TransactionSuccessDialogComponent,
+      UnlockConfirmDialogComponent
     ]
   })
   export class MyTimeSheetsModule { }

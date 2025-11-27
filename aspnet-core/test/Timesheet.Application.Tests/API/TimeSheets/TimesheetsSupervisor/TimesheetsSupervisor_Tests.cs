@@ -53,7 +53,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.TimesheetsSupervisor
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheetsSupervisor.GetAll(DateTime.Parse("2022/12/01"), DateTime.Parse("2022/12/31"), TimesheetStatus.Approve, null, null);
+                var result = await _timesheetsSupervisor.GetAll(opentalkTime: null, opentalkTimeType: null, DateTime.Parse("2022/12/01"), DateTime.Parse("2022/12/31"), TimesheetStatus.Approve, ProjectId: null, UserId: null);
                 Assert.Equal(expectTotalCount, result.Count);
 
                 var myTimeSheet = result.Last();
@@ -87,7 +87,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.TimesheetsSupervisor
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheetsSupervisor.GetAll(DateTime.Parse("2022/10/01"), DateTime.Parse("2022/10/30"), TimesheetStatus.Pending, null, null);
+                var result = await _timesheetsSupervisor.GetAll(opentalkTime: null, opentalkTimeType: null, DateTime.Parse("2022/10/01"), DateTime.Parse("2022/10/30"), TimesheetStatus.Pending, ProjectId: null, UserId: null);
                 Assert.Equal(expectTotalCount, result.Count);
             });
         }
@@ -99,7 +99,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.TimesheetsSupervisor
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheetsSupervisor.GetQuantityTimesheetSupervisorStatus(DateTime.Parse("2022/12/01"), DateTime.Parse("2022/12/31"));
+                var result = await _timesheetsSupervisor.GetQuantityTimesheetSupervisorStatus(opentalkTime: null, opentalkTimeType: null, DateTime.Parse("2022/12/01"), DateTime.Parse("2022/12/31"), projectId: null, userId: null);
                 List<Object> list = new List<Object>((IEnumerable<Object>)result);
                 Assert.Equal(expectTotalCount, list.Count);
 

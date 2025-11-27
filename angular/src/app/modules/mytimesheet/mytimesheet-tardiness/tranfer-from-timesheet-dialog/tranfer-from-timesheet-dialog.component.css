@@ -1,0 +1,40 @@
+.transaction-dialog-content {
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; 
+}
+
+.full-width {
+  width: 100%;
+}
+
+.balance-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.balance-label {
+  color: rgba(0, 0, 0, 0.6); 
+}
+
+.balance-value {
+  font-weight: bold;
+}
+
+.error-alert {
+  color: #f44336; 
+  font-size: 13px;
+  margin-top: 8px;
+  padding: 8px;
+  background-color: rgba(244, 67, 54, 0.1);
+  border-radius: 4px;
+}
+
+mat-dialog-actions {
+  margin-bottom: 0;
+  padding-bottom: 10px;
+}
