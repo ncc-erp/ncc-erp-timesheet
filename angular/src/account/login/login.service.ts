@@ -90,12 +90,17 @@ export class LoginService {
         if (authenticateResult.mezonUserId) {
             senderAddress = this.mmn.getAddressFromUserId(authenticateResult.mezonUserId);
             keyPair = this.mmn.generateEphemeralKeyPair();
-            zkProof = await this.zk.getZkProofs({
-                userId: authenticateResult.mezonUserId,
-                ephemeralPublicKey: keyPair.publicKey,
-                jwt: authenticateResult.authToken,
-                address: senderAddress,
-            });
+            try {
+                zkProof = await this.zk.getZkProofs({
+                    userId: authenticateResult.mezonUserId,
+                    ephemeralPublicKey: keyPair.publicKey,
+                    jwt: authenticateResult.authToken,
+                    address: senderAddress,
+                });
+            } catch (error) {
+                console.warn('ZK-API is unavailable, continuing login without zkProof:', error);
+                zkProof = undefined;
+            }
         }
         if (authenticateResult.accessToken) {
             this.login(
