@@ -918,7 +918,7 @@ namespace Ncc.Authorization
                     PermissionNames.BranchDirector_Report,
                     PermissionNames.BranchDirector_OfficeWorkingReport_View,
                     PermissionNames.BranchDirector_ProjectWorkingReport_View,
-                    PermissionNames.BranchDirector_AnomaliesReport_View
+                    PermissionNames.BranchDirector_AnomaliesReport_View,
                 }
             },
         };

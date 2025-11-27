@@ -1,4 +1,4 @@
-using Abp.Application.Services;
+﻿using Abp.Application.Services;
 using Abp.Authorization;
 using Abp.Configuration;
 using Microsoft.AspNetCore.Mvc;
@@ -7,8 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Timesheet.APIs.BotReportDaily.Dto;
 using Timesheet.APIs.Reports;
-using Timesheet.Core;
+using Timesheet.APIs.Reports.Dto;
 using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Services.Mezon;
@@ -33,6 +34,13 @@ namespace Timesheet.APIs.BotReportDaily
             _absenceDayService = absenceDayService;
             _officeWorkingReportAppService = officeWorkingReportAppService;
             _botReportDailyService = botReportDailyService;
+        }
+
+        [HttpGet]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_Report, Ncc.Authorization.PermissionNames.BranchDirector_OfficeWorkingReport_View)]
+        public async Task<List<OfficeWorkingTopLWLMDto>> GetOfficeWorkingTimelogReport(GetOfficeWorkingTimelogReportInputDto input)
+        {
+            return await _officeWorkingReportAppService.GetOfficeWorkingTimelogReport(input);
         }
 
         [HttpGet]
