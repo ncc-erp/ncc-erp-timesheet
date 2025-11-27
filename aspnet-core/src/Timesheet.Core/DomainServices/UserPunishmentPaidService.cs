@@ -393,11 +393,14 @@ namespace Timesheet.DomainServices
                 var currentMonthStart = new DateTime(now.Year, now.Month, 1);
                 var isCurrentMonth = targetMonth == currentMonthStart;
 
-                var unpaidPunishments = await WorkScope.GetAll<UserPunishment>()
+                var allPunishments = await WorkScope.GetAll<UserPunishment>()
                     .Where(p => p.UserId == userId)
                     .Where(p => !p.IsDeleted)
-                    .Where(p => p.IsPaid == false || p.IsPaid == null)
                     .ToListAsync();
+
+                var unpaidPunishments = allPunishments
+                    .Where(p => p.IsPaid == false || p.IsPaid == null)
+                    .ToList();
 
                 var totalUnpaidPunishments = unpaidPunishments.Sum(p => p.TotalMoney);
 
@@ -528,12 +531,10 @@ namespace Timesheet.DomainServices
                     .Where(r => r.CreationTime >= startOfMonth && r.CreationTime < endOfMonth)
                     .Sum(r => r.Points);
 
-                var totalPaidPunishmentInMonth = await WorkScope.GetAll<UserPunishment>()
-                     .Where(p => p.UserId == userId)
-                     .Where(p => !p.IsDeleted)
-                     .Where(p => p.IsPaid == true)
-                     .Where(p => p.DateAt >= startOfMonth && p.DateAt < endOfMonth)
-                     .SumAsync(p => p.TotalMoney);
+                var totalPaidPunishmentInMonth = allPunishments
+                    .Where(p => p.IsPaid == true)
+                    .Where(p => p.DateAt >= startOfMonth && p.DateAt < endOfMonth)
+                    .Sum(p => p.TotalMoney);
 
                 result.TotalRemainPointsUsedInMonth = totalRemainPointsUsedInMonth;
 
