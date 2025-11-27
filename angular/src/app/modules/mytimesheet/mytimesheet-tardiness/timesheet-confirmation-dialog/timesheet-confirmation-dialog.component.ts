@@ -11,6 +11,7 @@ import { ConfigurationService } from '@app/service/api/configuration.service';
 import { AppComponentBase } from '@shared/app-component-base';
 import { TranferDialogComponent } from '../tranfer-from-timesheet-dialog/tranfer-from-timesheet-dialog.component';
 import { TransactionSuccessDialogComponent } from '../transaction-success-dialog/transaction-success-dialog.component';
+import { STORAGE_KEYS } from '@app/constant/storage-keys.constant';
 
 @Component({
   selector: 'app-timesheet-confirmation-dialog',
@@ -46,6 +47,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   activeDayIsOpen: boolean = false;
   refresh: Subject<any> = new Subject();
   timesheetData: any[] = [];
+  zkProofAvailable: boolean = false;
 
   constructor(
     injector: Injector,
@@ -59,7 +61,15 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     super(injector);
   }
 
-  ngOnInit() {    
+  ngOnInit() { 
+    
+    try {
+    const zkProof = localStorage.getItem(STORAGE_KEYS.ZK_PROOF);
+    this.zkProofAvailable = !!(zkProof && zkProof !== 'undefined');
+    } catch (e) {
+    this.zkProofAvailable = false;
+    }
+
     this.loadConfiguration();
     const punishmentItemsRaw = this.data.timekeepingData.filter(item => {
       const hasPunishment = item.moneyPunish > 0;
