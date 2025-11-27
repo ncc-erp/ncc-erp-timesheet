@@ -18,11 +18,26 @@
           (Paid: {{calculateTotalPaidAmount() | number}})
         </div>
       </div>
-      <div class="summary-item" matTooltip="You receive these points when HR removes/reduces fines, or when you overpay. They are used to reduce your total fine.">
-        <div class="summary-label">Refund Points</div>
+      <div class="summary-item" >
+        <div class="summary-label" matTooltip="You receive these points when HR removes/reduces fines, or when you overpay. They are used to reduce your total fine.">Refund Points</div>
         <div class="summary-value" style="color: green;">{{userBalance?.remainPoints | number}}</div>
         <div class="summary-note" *ngIf="totalUsedRemainPoints > 0">
           (Used: {{totalUsedRemainPoints | number}})
+        </div>
+        <div *ngIf="isCurrentMonth">
+          <button
+            mat-stroked-button
+            color="primary"
+            class="use-points-button"
+            (click)="confirmApplyRemainPoints()"
+            [disabled]="
+              !userBalance ||
+              userBalance.totalPunishmentMoney <= 0 ||
+              userBalance.remainPoints < userBalance.totalPunishmentMoney
+            "
+            [matTooltip]="usePointsTooltip">
+            Use Points
+          </button>
         </div>
       </div>
       <div class="summary-item" matTooltip="Remaining punishment you still need to pay after subtracting your points. Formula: Remaining Amount = Total Fine - Points.">
@@ -33,22 +48,6 @@
       </div>
     </ng-container>
   </div>
-  <div *ngIf="isCurrentMonth">
-    <button
-      mat-stroked-button
-      color="primary"
-      class="use-points-button"
-      (click)="applyRemainPoints()"
-      [disabled]="
-      !userBalance ||
-      userBalance.totalPunishmentMoney <= 0 ||
-      userBalance.remainPoints < userBalance.totalPunishmentMoney
-    "
-       [matTooltip]="usePointsTooltip">
-      Use Points
-    </button>
-  </div>
-
   <div class="error-summary">
     <h3>Punishment Summarry</h3>
     <table class="error-table">

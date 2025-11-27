@@ -146,11 +146,12 @@
 }
 
 .use-points-button {
-  display: block;
-  margin: -20px 226px 0 auto; 
+  display: inline-block;
+  margin-top: 6px;        
+  margin-right: 0;       
   line-height: 20px;
   min-height: 24px;
-  padding: 0 8px;
+  padding: 0 12px;
   font-size: 12px;
   background-color: #2196f3;
   color: #fff;

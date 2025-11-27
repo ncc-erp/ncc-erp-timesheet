@@ -265,7 +265,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     } else if (this.userBalance.remainPoints < this.userBalance.totalPunishmentMoney) {
       this.usePointsTooltip = 'Your current points are not enough to cover all punishment.';
     } else {
-      this.usePointsTooltip = '';
+      this.usePointsTooltip = 'You can use points to pay all remaining punishments';
     }
   }
 
@@ -346,6 +346,17 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       }
     );
   }
+
+  confirmApplyRemainPoints(): void {
+  abp.message.confirm(
+    'Do you want to use your points to pay all punishments?',
+    (result: boolean) => {
+      if (result) {
+        this.applyRemainPoints();
+      }
+    } 
+  );
+}
 
   applyRemainPoints(): void {
     const target = this.getTargetYearMonth();
