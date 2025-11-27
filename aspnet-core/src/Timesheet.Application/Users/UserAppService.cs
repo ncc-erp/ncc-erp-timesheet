@@ -607,6 +607,8 @@ namespace Ncc.Users
             var allProjectUsers = await _ws.GetAll<ProjectUser>()
                             .Where(pu => pu.Type != ProjectUserType.DeActive)
                             .ToListAsync();
+            var projects = await _ws.GetAll<Project>()
+                    .ToDictionaryAsync(p => p.Id, p => p.Status == ProjectStatus.Active);
             var userPmProjectIds =
                 allProjectUsers
                     .Where(pu => pu.UserId == input.Id && pu.Type == ProjectUserType.PM)
@@ -618,8 +620,9 @@ namespace Ncc.Users
                     pu => pu.ProjectId == projectId && pu.UserId != input.Id &&
                           pu.Type == ProjectUserType.PM);
 
-                if (otherPMsCount == 0)
+                if (otherPMsCount == 0 && projects.ContainsKey(projectId) && projects[projectId])
                 {
+                     var project = await _ws.GetAsync<Project>(projectId);
                     throw new UserFriendlyException("Cannot deactivate the only PM in one or more projects. Please assign another PM first.");
                 }
             }
