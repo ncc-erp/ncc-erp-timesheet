@@ -1396,7 +1396,7 @@ namespace Timesheet.DomainServices
 
             if (!punishmentsToSnapshot.Any())
             {
-                Logger.Warn($"No UserPunishment records found for {selectedDate:yyyy-MM-dd} to snapshot.");
+                throw new UserFriendlyException($"No UserPunishment records found for {selectedDate:yyyy-MM-dd} to snapshot.");
                 return false;
             }
 

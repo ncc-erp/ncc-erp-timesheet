@@ -40,6 +40,7 @@ export class TardinessLeaveEarlyComponent
   EXPORT_EXCEL = PERMISSIONS_CONSTANT.ExportExcelTardinessLeaveEarly;
   VIEW_ONLY_ME_TARDINESS_LEAVE_EARLY =
     PERMISSIONS_CONSTANT.ViewOnlyMeTardinessLeaveEarly;
+  RETRIVE_PUNISHMENT_DATA = PERMISSIONS_CONSTANT.RetrievePunishmentData;
 
   listMonth = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
   listYear = APP_CONSTANT.ListYear;
@@ -259,8 +260,48 @@ export class TardinessLeaveEarlyComponent
   getDataCheckInInternal(): void {
     const dialogRef = this.dialog.open(SelectedDateComponent, {
       disableClose: true,
-      data: {useSignalr: this.isConnectedSignalr}
+      data: {useSignalr: this.isConnectedSignalr, apiType: 'add'}
     });
+  }
+
+  private openSelectedDateDialog(callback: (date: string) => void, apiType: 'add' | 'retrieve' | 'snapshot' = 'add'): void {
+    const dialogRef = this.dialog.open(SelectedDateComponent, {
+      disableClose: true,
+      data: { useSignalr: this.isConnectedSignalr, apiType: apiType }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.date) {
+        callback(result.date);
+      }
+    });
+  }
+
+  snapshotPunishmentForSelectedDay(): void {
+    this.openSelectedDateDialog((date: string) => {
+      this.timekeepingService
+        .getSnapshotTimekeepingDay(date)
+        .pipe(finalize(() => {}))
+        .subscribe(
+          () => {
+            abp.notify.success('Snapshot thành công cho ngày ' + date);
+          }
+        );
+    }, 'snapshot');
+  }
+
+  retrievePunishmentForSelectedDay(): void {
+    this.openSelectedDateDialog((date: string) => {
+      this.timekeepingService
+        .getRetrieveTimekeepingByDay(date)
+        .pipe(finalize(() => {}))
+        .subscribe(
+          () => {
+            abp.notify.success('Get lại data phạt thành công cho ngày ' + date);
+            this.refresh();
+          }
+        );
+    }, 'retrieve');
   }
 
   upLoadTimekeeping(file: File) {

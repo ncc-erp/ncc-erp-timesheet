@@ -1304,14 +1304,14 @@ namespace Timesheet.APIs.Timekeepings
             }
         }
 
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Timekeeping_Snapshot)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_RetrieveData)]
         [HttpPost]
         public async Task<bool> SnapshotTimekeepingDay(DateTime date)
         {
             return await timekeepingServices.SnapshotUserPunishmentsForDay(date);
         }
 
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Timekeeping_Snapshot)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_RetrieveData)]
         [HttpPost]
         public async Task<List<Timekeeping>> RetrieveTimekeepingByDay(string date)
         {

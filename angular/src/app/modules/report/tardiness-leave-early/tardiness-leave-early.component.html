@@ -79,8 +79,10 @@
         </div> -->
 
         <div class="col-sm-3">
-          <button name="getDataBtn" class="control-btn" *ngIf="permission.isGranted(GET_DATA_TARDINESS_LEAVE_EARLY)" mat-flat-button color="primary" (click)="getDataCheckInInternal()" style="margin-right: 10px;">Get data</button>
-          <button name="exportExcelBtn" class="control-btn" *ngIf="permission.isGranted(EXPORT_EXCEL)" mat-flat-button color="primary" (click)="exportExcel()">Export Excel</button>
+          <button name="getDataBtn" class="control-btn" *ngIf="permission.isGranted(GET_DATA_TARDINESS_LEAVE_EARLY)" mat-flat-button style="margin-right: 10px; background-color: #ff0000; color: white;" (click)="getDataCheckInInternal()">Get data</button>
+          <button name="snapshotPunishmentBtn" class="control-btn" *ngIf="permission.isGranted(RETRIVE_PUNISHMENT_DATA)" mat-flat-button style="margin-right: 10px; background-color: #4CAF50; color: white;" (click)="snapshotPunishmentForSelectedDay()">Snapshot ngày</button>
+          <button name="rebuildPunishmentBtn" class="control-btn" *ngIf="permission.isGranted(RETRIVE_PUNISHMENT_DATA)" mat-flat-button style="margin-right: 10px; background-color: #ff9900; color: white;" (click)="retrievePunishmentForSelectedDay()">Get lại data ngày</button>
+          <button name="exportExcelBtn" class="control-btn" *ngIf="permission.isGranted(EXPORT_EXCEL)" mat-flat-button style="margin-right: 10px; background-color: #007bff; color: white;" (click)="exportExcel()">Export Excel</button>
         </div>
       </div>
 

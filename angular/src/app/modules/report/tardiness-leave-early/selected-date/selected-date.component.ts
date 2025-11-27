@@ -21,7 +21,7 @@ export class SelectedDateComponent implements OnInit, OnDestroy {
   constructor(public dialogref: MatDialogRef<SelectedDateComponent>,
      private service: TimekeepingService,
      private timekeepSignalRService: TimekeepingSignalRService,
-    @Inject(MAT_DIALOG_DATA) public data: {useSignalr: boolean},
+    @Inject(MAT_DIALOG_DATA) public data: {useSignalr: boolean, apiType?: 'add' | 'retrieve' | 'snapshot'},
      ) {
   }
 
@@ -53,8 +53,24 @@ export class SelectedDateComponent implements OnInit, OnDestroy {
         if (result) {
           this.isSaving=true;
           const date = moment(this.dateValue).format("YYYY-MM-DD");
-          if(!this.data.useSignalr) {
-            this.service.getAddTimeByDay(date).subscribe(res => {
+
+          if(!this.data.useSignalr || (this.data.apiType && this.data.apiType !== 'add')) {
+            let apiCall;
+
+            switch(this.data.apiType) {
+              case 'retrieve':
+                apiCall = this.service.getRetrieveTimekeepingByDay(date);
+                break;
+              case 'snapshot':
+                apiCall = this.service.getSnapshotTimekeepingDay(date);
+                break;
+              case 'add':
+              default:
+                apiCall = this.service.getAddTimeByDay(date);
+                break;
+            }
+            
+            apiCall.subscribe(res => {
               this.isSaving=false
               this.resultMessage = `<font color='green'>Successful on ${moment(this.dateValue).format("DD/MM/YYYY")}</font>`
             },
