@@ -46,8 +46,23 @@ export class SelectedDateComponent implements OnInit, OnDestroy {
     this.resultMessage = '' ;
   }
   saveData() {
+    let confirmMessage = '';
+    
+    switch(this.data.apiType) {
+      case 'snapshot':
+        confirmMessage = `<p>Snapshot punishment data for day ${moment(this.dateValue).format("DD/MM/YYYY")}?</p>`;
+        break;
+      case 'retrieve':
+        confirmMessage = `<p>Retrieve punishment data for day ${moment(this.dateValue).format("DD/MM/YYYY")}? (will remove all current data and get back from snapshot)</p>`;
+        break;
+      case 'add':
+      default:
+        confirmMessage = `<p>Click Submit button will remove all current data on ${moment(this.dateValue).format("DD/MM/YYYY")} and collect data again</p>`;
+        break;
+    }
+
     abp.message.confirm(
-     `<p>Click Submit button will remove all current data on ${ moment(this.dateValue).format("DD/MM/YYYY")} and collect data again</p>`,
+      confirmMessage,
       "",
       (result: boolean) => {
         if (result) {
