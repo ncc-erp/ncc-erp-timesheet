@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BaseApiService } from './base-api.service';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export interface UserPunishmentPaidDto {
@@ -78,6 +78,20 @@ export class UserPunishmentPaidService extends BaseApiService {
   }
 
   previewApplyAndGetSummary(year: number, month: number): Observable<UserPunishmentSummaryDto> {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    if (year !== currentYear || month !== currentMonth) {
+      return of({
+        success: false,
+        message: 'Can only get balance for current month',
+        userBalance: { totalPunishmentMoney: 0, remainPoints: 0, effectiveAmount: 0 },
+        totalRemainPointsUsedInMonth: 0,
+        totalPaidPunishmentInMonth: 0
+      } as UserPunishmentSummaryDto);
+    }
+
     const url = `${this.rootUrl}/PreviewApplyAndGetSummary`;
     const body = { year: year, month: month };
     return this.http.post<any>(url, body).pipe(
@@ -97,6 +111,20 @@ export class UserPunishmentPaidService extends BaseApiService {
   }
 
   applyRemainPoints(year: number, month: number): Observable<UserPunishmentSummaryDto> {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    if (year !== currentYear || month !== currentMonth) {
+      return of({
+        success: false,
+        message: 'Can only apply remain points for current month',
+        userBalance: { totalPunishmentMoney: 0, remainPoints: 0, effectiveAmount: 0 },
+        totalRemainPointsUsedInMonth: 0,
+        totalPaidPunishmentInMonth: 0
+      } as UserPunishmentSummaryDto);
+    }
+
     const url = `${this.rootUrl}/ApplyRemainPoints`;
     const body = { year: year, month: month };
     return this.http.post<any>(url, body).pipe(
