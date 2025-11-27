@@ -13,7 +13,7 @@ using Timesheet.Entities;
 using Timesheet.Services.Mezon;
 using static Ncc.Entities.Enum.StatusEnum;
 
-namespace Timesheet.Core
+namespace Timesheet.DomainServices
 {
     public class AbsenceDayServices : IAbsenceDayServices, ITransientDependency
     {

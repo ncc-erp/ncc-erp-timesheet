@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Timesheet.DomainServices.Dto;
 using static Ncc.Entities.Enum.StatusEnum;
 
-namespace Timesheet.Core
+namespace Timesheet.DomainServices
 {
     public interface IAbsenceDayServices : IDomainService
     {
