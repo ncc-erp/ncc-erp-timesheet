@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace Timesheet.DomainServices.Dto
 {
-    public class ProjectTimelogDto
+    public class TotalTimelogProjectDto
     {
         public string Name { get; set; }
         public List<string> Members { get; set; }
         public double TotalTimelogLW { get; set; }
         public double TotalTimelogLM { get; set; }
 
-        public ProjectTimelogDto()
+        public TotalTimelogProjectDto()
         {
             Members = new List<string>();
         }
@@ -20,8 +20,9 @@ namespace Timesheet.DomainServices.Dto
     {
         public List<long> BranchId { get; set; } = new List<long>();
         public double? MinHours { get; set; } = 0;
-        public int? TopN { get; set; }
+        public int? Limit { get; set; }
         public List<long> ProjectIds { get; set; } = new List<long>();
+        public bool IsAllBranch { get; set; }
     }
 
     public class GetDailyProjectTimelogReportByBranchCodesInput

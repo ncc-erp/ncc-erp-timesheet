@@ -26,6 +26,7 @@ namespace Timesheet.DomainServices
         private readonly IWorkScope _workScope;
         private readonly ISettingManager _settingManager;
         private readonly MezonService _mezonService;
+        const double MinutesPerHour = 60.0;
 
         public BotReportDailyService(IWorkScope workScope, MezonService mezonService, ISettingManager settingManager) : base(workScope)
         {
@@ -34,7 +35,7 @@ namespace Timesheet.DomainServices
             _mezonService = mezonService;
         }
 
-        public async Task<List<ProjectTimelogDto>> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input)
+        public async Task<List<TotalTimelogProjectDto>> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input)
         {
             var today = DateTime.Now.Date;
 
@@ -62,43 +63,28 @@ namespace Timesheet.DomainServices
                 .Select(p => new { p.Id, p.Name })
                 .ToListAsync();
 
-            var branchNames = new List<string>();
+            var inputBranchIds = input.BranchId ?? new List<long>();
+
             List<long> officeUsers;
 
-            var validInputBranchIds = input.BranchId.Where(id => allBranches.Any(b => b.Id == id)).ToList() ?? new List<long>();
-            bool isAllBranchesSelected = validInputBranchIds.Count == allBranches.Count;
-
-            if (isAllBranchesSelected)
+            if (input.IsAllBranch)
             {
                 officeUsers = allUsers
                     .Where(u => u.IsActive && u.BranchId.HasValue)
                     .Select(u => u.Id)
                     .ToList();
-                branchNames.Add("All Branches");
             }
             else
             {
-                var branchDict = allBranches
-                    .Where(b => validInputBranchIds.Contains(b.Id))
-                    .ToDictionary(b => b.Id, b => b.DisplayName);
-
-                if (!branchDict.Any())
-                {
-                    branchDict = allBranches.ToDictionary(b => b.Id, b => b.DisplayName);
-                    branchNames.Add("All Branches");
-                }
-
                 officeUsers = allUsers
-                    .Where(u => u.IsActive && u.BranchId.HasValue && branchDict.ContainsKey(u.BranchId.Value))
+                    .Where(u => u.IsActive && u.BranchId.HasValue && inputBranchIds.Contains(u.BranchId.Value))
                     .Select(u => u.Id)
                     .ToList();
-
-                branchNames.AddRange(branchDict.Values);
             }
 
             if (!officeUsers.Any())
             {
-                return new List<ProjectTimelogDto>();
+                return new List<TotalTimelogProjectDto>();
             }
 
             var activeProjectIds = (input.ProjectIds != null && input.ProjectIds.Any())
@@ -109,7 +95,7 @@ namespace Timesheet.DomainServices
                 .Where(mt => officeUsers.Contains(mt.UserId) &&
                        ((mt.DateAt >= lastWeekStart && mt.DateAt <= lastWeekEnd) ||
                         (mt.DateAt >= lastMonthStart && mt.DateAt <= lastMonthEnd)) &&
-                       mt.Status == Ncc.Entities.Enum.StatusEnum.TimesheetStatus.Approve &&
+                       mt.Status == TimesheetStatus.Approve &&
                        mt.ProjectTask != null &&
                        mt.ProjectTask.Project != null &&
                        !mt.ProjectTask.Project.IsDeleted &&
@@ -119,7 +105,7 @@ namespace Timesheet.DomainServices
                     mt.UserId,
                     mt.DateAt,
                     mt.WorkingTime,
-                    ProjectId = mt.ProjectTask.ProjectId
+                    mt.ProjectTask.ProjectId
                 })
                 .ToListAsync();
 
@@ -135,7 +121,7 @@ namespace Timesheet.DomainServices
                 .ToList();
 
             var result = projectTimesheets
-                    .Select(p => new ProjectTimelogDto
+                    .Select(p => new TotalTimelogProjectDto
                     {
                         Name = allProjects.FirstOrDefault(proj => proj.Id == p.ProjectId)?.Name ?? "Unknown Project",
                         Members = allUsers
@@ -143,8 +129,8 @@ namespace Timesheet.DomainServices
                             .Select(u => u.FullName)
                             .OrderBy(name => name)
                             .ToList(),
-                        TotalTimelogLW = Math.Round(p.TotalMinutesLW / 60.0, 2),
-                        TotalTimelogLM = Math.Round(p.TotalMinutesLM / 60.0, 2)
+                        TotalTimelogLW = Math.Round(p.TotalMinutesLW / MinutesPerHour, 2),
+                        TotalTimelogLM = Math.Round(p.TotalMinutesLM / MinutesPerHour, 2)
                     })
                     .Where(p => p.TotalTimelogLW >= (input.MinHours ?? 0))
                     .OrderByDescending(p => p.TotalTimelogLW)
@@ -152,9 +138,9 @@ namespace Timesheet.DomainServices
                     .ThenBy(p => p.Name)
                     .ToList();
 
-            if (input.TopN.HasValue && input.TopN.Value > 0 && result.Count > input.TopN.Value)
+            if (input.Limit.HasValue && input.Limit.Value > 0 && result.Count > input.Limit.Value)
             {
-                result = result.Take(input.TopN.Value).ToList();
+                result = result.Take(input.Limit.Value).ToList();
             }
 
             return result;
@@ -248,7 +234,7 @@ namespace Timesheet.DomainServices
             {
                 BranchId = branchIds,
                 MinHours = input.MinHours,
-                TopN = input.TopN,
+                Limit = input.TopN,
                 ProjectIds = input.ProjectIds ?? new List<long>()
             };
 
