@@ -604,20 +604,15 @@ namespace Ncc.Users
             {
                 throw new UserFriendlyException("User is not exist");
             }
-
-            // Query 1: Lấy các Active project mà user là PM
             var userActivePmProjects = await _ws.GetAll<ProjectUser>()
                 .Where(pu => pu.UserId == input.Id
                     && pu.Type == ProjectUserType.PM
                     && pu.Type != ProjectUserType.DeActive
-                    && pu.Project.Status == ProjectStatus.Active) // Join với Project
+                    && pu.Project.Status == ProjectStatus.Active) 
                 .Select(pu => pu.ProjectId)
                 .ToListAsync();
-
-            // Chỉ validate nếu user là PM của ít nhất 1 Active project
             if (userActivePmProjects.Any())
             {
-                // Query 2: Đếm PM trong các Active projects đó (1 query duy nhất)
                 var pmCounts = await _ws.GetAll<ProjectUser>()
                     .Where(pu => userActivePmProjects.Contains(pu.ProjectId)
                         && pu.Type == ProjectUserType.PM
@@ -626,7 +621,6 @@ namespace Ncc.Users
                     .Select(g => new { ProjectId = g.Key, PmCount = g.Count() })
                     .ToListAsync();
 
-                // Tìm project chỉ có 1 PM (là user hiện tại)
                 var projectWithOnlyOnePM = pmCounts.FirstOrDefault(p => p.PmCount == 1);
 
                 if (projectWithOnlyOnePM != null)
@@ -636,13 +630,9 @@ namespace Ncc.Users
                         $"Cannot deactivate the only PM in project '{project.Name}'. Please assign another PM first.");
                 }
             }
-
-            // Deactivate user
             user.EndDateAt = user.EndDateAt ?? DateTimeUtils.GetNow();
             user.IsActive = false;
             await _ws.GetRepo<User, long>().UpdateAsync(user);
-
-            // Query 3: Deactivate tất cả ProjectUser của user
             var userProjectUsers = await _ws.GetAll<ProjectUser>()
                 .Where(pu => pu.UserId == input.Id && pu.Type != ProjectUserType.DeActive)
                 .ToListAsync();
