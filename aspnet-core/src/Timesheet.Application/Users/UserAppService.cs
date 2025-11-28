@@ -604,33 +604,48 @@ namespace Ncc.Users
             {
                 throw new UserFriendlyException("User is not exist");
             }
-            var allProjectUsers = await _ws.GetAll<ProjectUser>()
-                            .Where(pu => pu.Type != ProjectUserType.DeActive)
-                            .ToListAsync();
-            var projects = await _ws.GetAll<Project>()
-                    .ToDictionaryAsync(p => p.Id, p => p.Status == ProjectStatus.Active);
-            var userPmProjectIds =
-                allProjectUsers
-                    .Where(pu => pu.UserId == input.Id && pu.Type == ProjectUserType.PM)
-                    .Select(pu => pu.ProjectId)
-                    .ToHashSet();
-            foreach (var projectId in userPmProjectIds)
-            {
-                var otherPMsCount = allProjectUsers.Count(
-                    pu => pu.ProjectId == projectId && pu.UserId != input.Id &&
-                          pu.Type == ProjectUserType.PM);
 
-                if (otherPMsCount == 0 && projects.ContainsKey(projectId) && projects[projectId])
+            // Query 1: Lấy các Active project mà user là PM
+            var userActivePmProjects = await _ws.GetAll<ProjectUser>()
+                .Where(pu => pu.UserId == input.Id
+                    && pu.Type == ProjectUserType.PM
+                    && pu.Type != ProjectUserType.DeActive
+                    && pu.Project.Status == ProjectStatus.Active) // Join với Project
+                .Select(pu => pu.ProjectId)
+                .ToListAsync();
+
+            // Chỉ validate nếu user là PM của ít nhất 1 Active project
+            if (userActivePmProjects.Any())
+            {
+                // Query 2: Đếm PM trong các Active projects đó (1 query duy nhất)
+                var pmCounts = await _ws.GetAll<ProjectUser>()
+                    .Where(pu => userActivePmProjects.Contains(pu.ProjectId)
+                        && pu.Type == ProjectUserType.PM
+                        && pu.Type != ProjectUserType.DeActive)
+                    .GroupBy(pu => pu.ProjectId)
+                    .Select(g => new { ProjectId = g.Key, PmCount = g.Count() })
+                    .ToListAsync();
+
+                // Tìm project chỉ có 1 PM (là user hiện tại)
+                var projectWithOnlyOnePM = pmCounts.FirstOrDefault(p => p.PmCount == 1);
+
+                if (projectWithOnlyOnePM != null)
                 {
-                     var project = await _ws.GetAsync<Project>(projectId);
-                    throw new UserFriendlyException("Cannot deactivate the only PM in one or more projects. Please assign another PM first.");
+                    var project = await _ws.GetAsync<Project>(projectWithOnlyOnePM.ProjectId);
+                    throw new UserFriendlyException(
+                        $"Cannot deactivate the only PM in project '{project.Name}'. Please assign another PM first.");
                 }
             }
+
+            // Deactivate user
             user.EndDateAt = user.EndDateAt ?? DateTimeUtils.GetNow();
             user.IsActive = false;
             await _ws.GetRepo<User, long>().UpdateAsync(user);
-            var userProjectUsers =
-                allProjectUsers.Where(pu => pu.UserId == input.Id).ToList();
+
+            // Query 3: Deactivate tất cả ProjectUser của user
+            var userProjectUsers = await _ws.GetAll<ProjectUser>()
+                .Where(pu => pu.UserId == input.Id && pu.Type != ProjectUserType.DeActive)
+                .ToListAsync();
 
             if (userProjectUsers.Any())
             {
