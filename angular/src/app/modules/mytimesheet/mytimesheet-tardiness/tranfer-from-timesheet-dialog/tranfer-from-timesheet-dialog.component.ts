@@ -13,6 +13,7 @@ export class TranferDialogComponent implements OnInit {
   readonly SCALE = 1_000_000;
 
   minAmount: number = 0;
+  remainingAmount: number = 0;
   userBalanceScaled: number = 0;    
   userBalanceDisplay: string = '0'; 
 
@@ -30,6 +31,9 @@ export class TranferDialogComponent implements OnInit {
     const rawMinAmount = (data && data.minAmount) ? data.minAmount : 0;
     this.minAmount = rawMinAmount / this.SCALE; 
     
+    const rawRemainingAmount = (data && data.remainingAmount) ? data.remainingAmount : 0;
+    this.remainingAmount = rawRemainingAmount; 
+    
     const recipientAddress = data && data.donationWallet
       ? data.donationWallet
       : "";
@@ -37,7 +41,11 @@ export class TranferDialogComponent implements OnInit {
       Validators.required,
     ]);
 
-    this.amountControl = new FormControl("", [
+    const defaultAmount = this.remainingAmount > 0 
+      ? this.remainingAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      : "";
+    
+    this.amountControl = new FormControl(defaultAmount, [
       Validators.required,
       Validators.pattern("^[0-9,]+(\\.[0-9]*)?$"),
       this.minAmountValidator

@@ -9,6 +9,24 @@
   width: 100%;
 }
 
+.info-section {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.remaining-amount-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -15px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  padding: 8px;
+  background-color: rgba(76, 175, 80, 0.1);
+  border-radius: 4px;
+  border-left: 4px solid #ff0000;
+}
+
 .balance-info {
   display: flex;
   justify-content: space-between;
@@ -17,12 +35,17 @@
   font-size: 14px;
 }
 
-.balance-label {
+.info-label {
   color: rgba(0, 0, 0, 0.6); 
 }
 
-.balance-value {
+.info-value {
   font-weight: bold;
+}
+
+.info-value.highlight {
+  color: #f80000;
+  font-weight: 600;
 }
 
 .error-alert {

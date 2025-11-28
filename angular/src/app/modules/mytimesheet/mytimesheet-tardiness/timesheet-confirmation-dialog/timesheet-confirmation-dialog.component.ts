@@ -191,6 +191,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       data: {
         minAmount: minAmount,
         donationWallet: this.donationWallet,
+        remainingAmount: this.owedAmount || 0,
       }
     });
 
