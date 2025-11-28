@@ -764,7 +764,7 @@ namespace Timesheet.Timesheets.Timesheets
                     userMessage.AppendLine("```");
                     userMessage.Append(project.TimesheetsKomuMsg());
                     userMessage.AppendLine("```");
-                    _komuService.SendMessageToUser(userMessage.ToString(), requester.UserName);
+                    _komuService.SendSimpleNotificationToUser(userMessage.ToString(), requester.UserName);
                     Logger.Info(userMessage.ToString());
                 }
             }

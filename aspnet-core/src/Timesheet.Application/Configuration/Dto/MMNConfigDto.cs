@@ -8,5 +8,6 @@ namespace Timesheet.Configuration.Dto
     {
         public string IndexerUrl { get; set; }
         public string DonationUrl { get; set; }
+        public string DonationWallet { get; set; }
     }
 }

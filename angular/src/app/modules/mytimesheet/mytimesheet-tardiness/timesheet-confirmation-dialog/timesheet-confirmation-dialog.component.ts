@@ -2,13 +2,16 @@ import { Component, OnInit, Inject, Injector, Output, EventEmitter } from '@angu
 import { MAT_DIALOG_DATA, MatDialog, MatSnackBar } from '@angular/material';
 import * as moment from 'moment';
 import { APP_CONSTANT } from '@app/constant/api.constants';
-import { UserPunishmentPaidService, UserPunishmentPaidDto, GetUserPunishmentBalanceDto } from '@app/service/api/user-punishment-paid.service';
+import { UserPunishmentPaidService, UserPunishmentPaidDto, GetUserPunishmentBalanceDto, MarkPaidTransactionResultDto } from '@app/service/api/user-punishment-paid.service';
 import { TransactionHashDialogComponent } from '../transaction-hash-dialog/transaction-hash-dialog.component';
 import { CalendarEvent, CalendarView } from 'angular-calendar';
 import { Subject } from 'rxjs';
 import { MyTimesheetService } from '@app/service/api/mytimesheet.service';
 import { ConfigurationService } from '@app/service/api/configuration.service';
 import { AppComponentBase } from '@shared/app-component-base';
+import { TranferDialogComponent } from '../tranfer-from-timesheet-dialog/tranfer-from-timesheet-dialog.component';
+import { TransactionSuccessDialogComponent } from '../transaction-success-dialog/transaction-success-dialog.component';
+import { STORAGE_KEYS } from '@app/constant/storage-keys.constant';
 
 @Component({
   selector: 'app-timesheet-confirmation-dialog',
@@ -25,6 +28,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   weekRange: string;
   indexerUrl: string = '';
   donationUrl: string = '';
+  donationWallet: string = '';
   punishmentItems: any[] = [];
   punishmentPaidItems: UserPunishmentPaidDto[] = [];
   userBalance: GetUserPunishmentBalanceDto | null = null;
@@ -43,6 +47,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   activeDayIsOpen: boolean = false;
   refresh: Subject<any> = new Subject();
   timesheetData: any[] = [];
+  zkProofAvailable: boolean = false;
 
   constructor(
     injector: Injector,
@@ -56,7 +61,15 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     super(injector);
   }
 
-  ngOnInit() {    
+  ngOnInit() { 
+    
+    try {
+    const zkProof = localStorage.getItem(STORAGE_KEYS.ZK_PROOF);
+    this.zkProofAvailable = !!(zkProof && zkProof !== 'undefined');
+    } catch (e) {
+    this.zkProofAvailable = false;
+    }
+
     this.loadConfiguration();
     const punishmentItemsRaw = this.data.timekeepingData.filter(item => {
       const hasPunishment = item.moneyPunish > 0;
@@ -151,7 +164,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       this.userPunishmentPaidService.markPaidTransaction(transactionHash, year, month).subscribe(
       result => {
         if (result && result.success) {
-            this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
+          this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
           
           this.loadPunishmentPaidData();
           this.loadAllPunishmentData();
@@ -170,6 +183,65 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     });
   }
 
+  paidFinedFromTimesheet(): void {
+    const minAmount = this.owedAmount || 0;
+    const dialogRef = this.dialog.open(TranferDialogComponent, {
+      width: '500px',
+      disableClose: true,
+      data: {
+        minAmount: minAmount,
+        donationWallet: this.donationWallet,
+        remainingAmount: this.owedAmount || 0,
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(transferResult => {
+      if (!transferResult || !transferResult.txhash) return;
+
+      const transactionHash = transferResult.txhash;
+      const amountPaid = transferResult.amount
+      
+      this.snackBar.open('Processing transaction...', '', { duration: 2000 });
+      
+      const { year, month } = this.getTargetYearMonth();
+    
+      setTimeout(() => {
+        this.userPunishmentPaidService.markPaidTransaction(transactionHash, year, month).subscribe(
+          result => {
+            if (result && result.success) {
+              this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
+              this.openTransactionSuccessDialog(result, transactionHash, amountPaid);
+              
+              this.loadPunishmentPaidData();
+              this.loadAllPunishmentData();
+              if (this.data && typeof this.data.onPaidSuccess === 'function') {
+                this.data.onPaidSuccess();
+              }
+            } else {
+              this.snackBar.open(result.message || 'Failed to process transaction', 'Close', { duration: 5000 });
+            }
+          },
+          error => {
+              console.error('Error marking transaction as paid:', error);
+              this.snackBar.open('Error processing transaction. Please try again.', 'Close', { duration: 5000 });
+          }
+        );
+      }, 2000);
+    });
+  }
+
+  private openTransactionSuccessDialog(result: MarkPaidTransactionResultDto, fallbackHash: string, fallbackAmount: number): void {
+    const dialogData = {
+      transactionHash: result.transactionHash || fallbackHash,
+      amountPaid: fallbackAmount,
+    };
+
+    this.dialog.open(TransactionSuccessDialogComponent, {
+      width: '420px',
+      data: dialogData
+    });
+  }
+  
   private loadConfiguration(): void {
     this.configService.getDonationUrl().subscribe(
       (data) => {
@@ -180,6 +252,9 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
           }
           if (data.result.donationUrl) {
             this.donationUrl = data.result.donationUrl;
+          }
+          if (data.result.donationWallet) {
+          this.donationWallet = data.result.donationWallet;
           }
         }
       },

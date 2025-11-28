@@ -14,6 +14,7 @@ using Timesheet.APIs.MyWorkingTimes;
 using Timesheet.APIs.MyWorkingTimes.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.Komu;
+using Timesheet.Services.Mezon;
 using Xunit;
 using static Ncc.Entities.Enum.StatusEnum;
 using Task = System.Threading.Tasks.Task;
@@ -45,8 +46,9 @@ namespace Timesheet.Application.Tests.MyWorkingTimes
             configuration.GetValue<string>("KomuService:DevModeChannelId").Returns("_channelIdDevMode");
             configuration.GetValue<string>("KomuService:EnableKomuNotification").Returns("_isNotifyToKomu");
             var settingManager = Substitute.For<ISettingManager>();
+            var mezonService = Substitute.For<MezonService>();
             var _komuService = Substitute.For<KomuService>(httpClient, logger, configuration, settingManager);
-            _time = new MyWorkingTimeAppService(_backgroundJobManager, _komuService, _work);
+            _time = new MyWorkingTimeAppService(_backgroundJobManager, _komuService, _work, mezonService);
             _time.UnitOfWorkManager = Resolve<IUnitOfWorkManager>();
             _time.AbpSession = Resolve<IAbpSession>();
             _time.SettingManager = Resolve<ISettingManager>();
