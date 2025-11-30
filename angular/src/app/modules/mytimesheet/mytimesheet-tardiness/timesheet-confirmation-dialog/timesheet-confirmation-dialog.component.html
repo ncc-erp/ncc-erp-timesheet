@@ -194,7 +194,11 @@
     <button mat-raised-button color="accent" [disabled]="!contributeToFund" (click)="markAsPaid()" class="paid-button">
       Mark as Paid
     </button>
-    <button mat-raised-button color="accent"  [disabled]="!contributeToFund" (click)="paidFinedFromTimesheet()" class="paid-button">
+    <button mat-raised-button color="accent" 
+            [disabled]="!contributeToFund || !zkProofAvailable" 
+            (click)="paidFinedFromTimesheet()" 
+            class="paid-button"
+            [matTooltip]="!zkProofAvailable ? 'Please re-login to transfer from timesheet or use Mark as Paid instead.' : ''">
       Paid your fined
     </button>
   </div>

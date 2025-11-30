@@ -35,9 +35,16 @@
     </mat-error>
   </mat-form-field>
 
-  <div class="balance-info">
-    <span class="balance-label">Available Balance:</span>
-    <span class="balance-value">{{ userBalanceDisplay }} đồng</span>
+  <div class="info-section">
+    <div class="remaining-amount-info">
+      <span class="info-label">Punishment Amount:</span>
+      <span class="info-value highlight">{{ remainingAmount | number:'1.0-0' }} đồng</span>
+    </div>
+    
+    <div class="balance-info">
+      <span class="info-label">Available Balance:</span>
+      <span class="info-value">{{ userBalanceDisplay }} đồng</span>
+    </div>
   </div>
 
   <div *ngIf="errorMessage" class="error-alert">
