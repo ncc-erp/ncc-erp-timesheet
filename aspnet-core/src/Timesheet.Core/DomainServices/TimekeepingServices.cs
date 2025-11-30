@@ -1440,62 +1440,53 @@ namespace Timesheet.DomainServices
 
                 var result = await AddTimekeepingByDay(date);
 
-                var snapshotHistories = await WorkScope.GetAll<UserPunishmentHistory>()
-                    .Where(h => h.DateAt.Date == date)
-                    .ToListAsync();
+                var punishmentsNeedUpdate = await (
+                    from p in WorkScope.GetAll<UserPunishment>()
+                    join h in WorkScope.GetAll<UserPunishmentHistory>()
+                        on new { p.UserId, p.Type } equals new { h.UserId, h.Type }
+                    where p.DateAt.Date == date && h.DateAt.Date == date
+                    group h by new { p.UserId, p.Type, p } into g
+                    let snap = new
+                    {
+                        IsPaid = g.Any(x => x.IsPaid),
+                        UserNote = g.Select(x => x.UserNote).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
+                        NoteReply = g.Select(x => x.NoteReply).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
+                        UserPunishmentPaidId = g.Select(x => x.UserPunishmentPaidId).FirstOrDefault(x => x.HasValue)
+                    }
+                    where (snap.IsPaid && (g.Key.p.IsPaid != true)) ||
+                          (!string.IsNullOrEmpty(snap.UserNote) && g.Key.p.UserNote != snap.UserNote) ||
+                          (!string.IsNullOrEmpty(snap.NoteReply) && g.Key.p.NoteReply != snap.NoteReply) ||
+                          (snap.UserPunishmentPaidId.HasValue && g.Key.p.UserPunishmentPaidId != snap.UserPunishmentPaidId)
+                    select new { Punishment = g.Key.p, Snapshot = snap }
+                ).ToListAsync();
 
-                if (snapshotHistories.Any())
+                if (punishmentsNeedUpdate.Any())
                 {
-                    var snapshotByUserAndType = snapshotHistories
-                        .GroupBy(h => new { h.UserId, h.Type })
-                        .ToDictionary(
-                            g => g.Key,
-                            g => new
-                            {
-                                IsPaid = g.Any(x => x.IsPaid),
-                                UserNote = g.Select(x => x.UserNote).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
-                                NoteReply = g.Select(x => x.NoteReply).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
-                                UserPunishmentPaidId = g.Select(x => x.UserPunishmentPaidId).FirstOrDefault(x => x.HasValue)
-                            });
-
-                    var newPunishments = await WorkScope.GetAll<UserPunishment>()
-                        .Where(p => p.DateAt.Date == date)
-                        .ToListAsync();
-
-                    foreach (var pun in newPunishments)
+                    foreach (var item in punishmentsNeedUpdate)
                     {
-                        var key = new { pun.UserId, pun.Type };
-                        if (snapshotByUserAndType.TryGetValue(key, out var snap))
-                        {
-                            if (snap.IsPaid)
-                            {
-                                pun.IsPaid = true;
-                            }
+                        var pun = item.Punishment;
+                        var snap = item.Snapshot;
 
-                            if (!string.IsNullOrEmpty(snap.UserNote))
-                            {
-                                pun.UserNote = snap.UserNote;
-                            }
+                        if (snap.IsPaid)
+                            pun.IsPaid = true;
 
-                            if (!string.IsNullOrEmpty(snap.NoteReply))
-                            {
-                                pun.NoteReply = snap.NoteReply;
-                            }
+                        if (!string.IsNullOrEmpty(snap.UserNote))
+                            pun.UserNote = snap.UserNote;
 
-                            if (snap.UserPunishmentPaidId.HasValue)
-                            {
-                                pun.UserPunishmentPaidId = snap.UserPunishmentPaidId;
-                            }
-                        }
+                        if (!string.IsNullOrEmpty(snap.NoteReply))
+                            pun.NoteReply = snap.NoteReply;
+
+                        if (snap.UserPunishmentPaidId.HasValue)
+                            pun.UserPunishmentPaidId = snap.UserPunishmentPaidId;
+
+                        await WorkScope.UpdateAsync(pun);
                     }
-
-                    if (newPunishments.Any())
-                    {
-                        foreach (var pun in newPunishments)
-                        {
-                            await WorkScope.UpdateAsync(pun);
-                        }
-                    }
+                    
+                    Logger.Info($"Restored {punishmentsNeedUpdate.Count} punishment records from snapshot for {selectedDate:yyyy-MM-dd}.");
+                }
+                else
+                {
+                    Logger.Info($"No punishment records need to be restored for {selectedDate:yyyy-MM-dd}.");
                 }
 
                 await uow.CompleteAsync();
