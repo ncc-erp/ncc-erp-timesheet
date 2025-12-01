@@ -1,0 +1,298 @@
+/* Table Container */
+.table-container {
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.pr-0 {
+  padding-right: 0 !important;
+}
+/* Fixed Header */
+.table-header-wrapper {
+  overflow: hidden;
+  border-bottom: 2px solid #ddd;
+  padding-right: 8px;
+}
+
+.table-header-fixed {
+  margin-bottom: 0;
+  table-layout: fixed;
+}
+
+.table-header-fixed thead th {
+  background: #f5f5f5;
+  font-weight: 600;
+  padding: 12px 8px;
+  border: none;
+  border-right: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  text-align: center;
+}
+
+/* Sortable Headers */
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.table-header-wrapper .table-header-fixed th:hover {
+  background-color: #e9ecef;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.sort-icon {
+  font-size: 18px;
+  width: 16px;
+  height: 16px;
+  color: #666;
+}
+
+.header-content .special-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: #007bff;
+}
+
+::ng-deep .custom-search-icon {
+  position: relative;
+  top: -5px;
+}
+
+.special-icon {
+  display: inline-block;
+  touch-action: none;
+  user-select: none;
+  position: relative;
+}
+
+/* Virtual Scroll */
+.virtual-scroll-viewport {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.virtual-scroll-viewport .table {
+  margin-bottom: 0;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.virtual-scroll-row td {
+  padding: 10px 8px;
+  border-right: 1px solid #ddd;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.virtual-scroll-row:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.virtual-scroll-row:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.virtual-scroll-row:hover {
+  background-color: #e9ecef;
+  transition: background-color 0.2s;
+}
+
+/* Column Widths */
+.col-index {
+  width: 5%;
+  text-align: center;
+}
+
+.col-project-name {
+  width: 20%;
+  font-weight: 600;
+}
+
+.col-members {
+  width: 30%;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  padding: 8px !important;
+  vertical-align: middle;
+}
+
+.col-data {
+  width: 15%;
+  text-align: center;
+}
+
+.members-wrapper,
+.members-collapsed {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  align-items: center;
+}
+
+.members-ellipsis {
+  font-size: 14px;
+  color: #666;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+/* Table Footer */
+.table-footer {
+  padding: 12px;
+  background: #f9f9f9;
+  border-top: 2px solid #dee2e6;
+  text-align: right;
+}
+
+.total-count {
+  font-size: 14px;
+  color: #666;
+}
+
+.total-count strong {
+  color: #007bff;
+  font-size: 16px;
+}
+
+/* Loading and No Data */
+.text-center {
+  text-align: center;
+}
+
+.p-4 {
+  padding: 2rem;
+}
+
+/* Scrollbar Styling */
+.virtual-scroll-viewport::-webkit-scrollbar {
+  width: 8px;
+}
+
+.virtual-scroll-viewport::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.virtual-scroll-viewport::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.virtual-scroll-viewport::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Row Hover Effect */
+.virtual-scroll-row:hover {
+  background-color: #f5f5f5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .col-index {
+    width: 5%;
+  }
+
+  .col-project-name {
+    width: 20%;
+  }
+
+  .col-members {
+    width: 30%;
+  }
+
+  .col-data {
+    width: 15%;
+    font-size: 12px;
+  }
+
+  .virtual-scroll-row td {
+    padding: 8px 4px;
+  }
+}
+
+/* Material Select Search Input */
+mat-select input[matInput] {
+  padding: 8px;
+  margin: 8px;
+  width: calc(100% - 16px) !important;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Select All Checkbox Styling */
+.mat-option .mat-checkbox {
+  width: 100%;
+}
+
+.mat-option .mat-checkbox .mat-checkbox-label {
+  width: 100%;
+}
+
+/* Fix for Angular Material Select with Search */
+.mat-select-panel {
+  max-height: 400px !important;
+}
+
+/* Form Field Adjustments */
+.row-item {
+  padding-bottom: 0;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  min-height: 100px;
+}
+
+.filter-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 4px;
+  color: #1976d2;
+  font-size: 14px;
+  width: 250px;
+}
+
+.filter-note mat-icon {
+  font-size: 16px;
+  height: 16px;
+  width: 16px;
+  color: #1976d2;
+}
+
+.expand-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  padding: 0;
+  text-decoration: none;
+  text-align: left;
+  line-height: 0;
+}

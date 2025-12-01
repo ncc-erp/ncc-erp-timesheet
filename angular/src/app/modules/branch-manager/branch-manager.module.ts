@@ -18,6 +18,7 @@ import {
 import {MatDialogModule} from '@node_modules/@angular/material';
 import {ProjectTargetUserPipe} from '@shared/pipes/projectTargetUser.pipe';
 import { DailyEmployeeReportComponent } from './daily-employee-report/daily-employee-report.component';
+import { DailyProjectReportComponent } from './daily-project-report/daily-project-report.component';
 import { ScrollingModule } from '@node_modules/@angular/cdk/scrolling';
 
 
@@ -33,6 +34,7 @@ import { ScrollingModule } from '@node_modules/@angular/cdk/scrolling';
     DetailParticipatingProjectsComponent,
     ProjectManagementMemberDetailComponent,
     DailyEmployeeReportComponent,
+    DailyProjectReportComponent
   ],
   imports: [
     CommonModule,
