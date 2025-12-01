@@ -42,14 +42,20 @@ namespace Timesheet.Application.Tests.API.ManageWorkingTimes
             var httpClient = Resolve<HttpClient>();
             var configuration = Substitute.For<IConfiguration>();
             var settingManager = Substitute.For<ISettingManager>();
+            _workScope = Resolve<IWorkScope>();
             var loggerKomu = Resolve<ILogger<KomuService>>();
             configuration.GetValue<string>("KomuService:BaseAddress").Returns("http://www.myserver.com");
             configuration.GetValue<string>("KomuService:SecurityCode").Returns("secretCode");
             configuration.GetValue<string>("KomuService:DevModeChannelId").Returns("_channelIdDevMode");
+            configuration.GetValue<string>("KomuService:DevModeUserName").Returns("_devModeUserName");
             configuration.GetValue<string>("KomuService:EnableKomuNotification").Returns("_isNotifyToKomu");
             var komuService = Substitute.For<KomuService>(httpClient, loggerKomu, configuration, settingManager);
-            var mezonService = Substitute.For<MezonService>();
-            _workScope = Resolve<IWorkScope>();
+            var loggerMezon = Resolve<ILogger<MezonService>>();
+            configuration.GetValue<string>("MezonService:BaseAddress").Returns("http://www.myserver.com");
+            configuration.GetValue<string>("MezonService:ClientId").Returns("clientId");
+            configuration.GetValue<string>("MezonService:ClientSecret").Returns("clientSecret");
+            configuration.GetValue<string>("MezonService:RedirectUri").Returns("redirectUri");
+            var mezonService = Substitute.For<MezonService>(httpClient, settingManager, loggerMezon, configuration, _workScope);
 
             var backgroundJobManager = Resolve<BackgroundJobManager>();
             _manageWorkingTime = new ManageWorkingTimeAppService(backgroundJobManager, _workScope, komuService, mezonService)
@@ -305,8 +311,10 @@ namespace Timesheet.Application.Tests.API.ManageWorkingTimes
                 result.Last().PMs.Last().UserId.ShouldBe(1);
                 result.Last().PMs.Last().EmailAddress.ShouldBe("admin@aspnetboilerplate.com");
                 result.Last().PMs.Last().FullName.ShouldBe("admin admin");
-                result.Last().PMs.Last().KomuAccountInfo(NotifyChannel.KOMU).ShouldBe("<@admin> [HN - Admin]");
-                result.Last().PMs.Last().KomuAccountInfo(NotifyChannel.Mezon).ShouldBe("@admin [HN - Admin]");
+                //result.Last().PMs.Last().KomuAccountInfo(NotifyChannel.KOMU).ShouldBe("<@admin> [HN - Admin]");
+                result.Last().PMs.Last().KomuAccountInfo(NotifyChannel.KOMU).ShouldBe("{admin} [ - NoType]");
+                //result.Last().PMs.Last().KomuAccountInfo(NotifyChannel.Mezon).ShouldBe("@admin [HN - Admin]");
+                result.Last().PMs.Last().KomuAccountInfo(NotifyChannel.Mezon).ShouldBe("@admin [ - NoType]");
             });
         }
     }

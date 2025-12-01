@@ -129,7 +129,7 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.NotifyHRTheEmployeeMayHaveLeftEnableWorker,"false",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NotifyHRTheEmployeeMayHaveLeftAtHour, "11", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.NotifyHRTheEmployeeMayHaveLeftTimePeriod, "-7", scopes: SettingScopes.Application|SettingScopes.Tenant),
-                new SettingDefinition(AppSettingNames.MoneyPMUnlockTimeSheet,"20000",scopes:SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.MoneyPMUnlockTimeSheet,"50000",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendMessageToPunishUserEnableWorker,"false",scopes:SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendMessageToPunishUserAtHour, "11", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.SendMessageRequestPendingTeamBuildingToHRToChannels, "123456789", scopes: SettingScopes.Application | SettingScopes.Tenant),

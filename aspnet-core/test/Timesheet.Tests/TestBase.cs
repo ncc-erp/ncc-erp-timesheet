@@ -20,7 +20,7 @@ namespace Timesheet.Tests
         {
             //SeedUserData();
             SeedData();
-            LoginAsHostAdmin();
+            FakeHostAdminSession();
         }
 
         public void UsingDbContext(Action<TimesheetDbContext> action)
@@ -67,6 +67,14 @@ namespace Timesheet.Tests
             });
         }
 
+        private void FakeHostAdminSession()
+        {
+            var adminId = 1;
+
+            AbpSession.UserId = adminId;
+            AbpSession.TenantId = null;
+        }
+
         private void SeedUserData()
         {
             UsingDbContext((context) =>
@@ -76,12 +84,12 @@ namespace Timesheet.Tests
             });
         }
 
-        private void LoginAsHostAdmin()
-        {
-            var logInManager = Resolve<LogInManager>();
-            var loginResult = logInManager.LoginAsync("admin", "123qwe").Result;
-            AbpSession.UserId = loginResult.User.Id;
-            AbpSession.TenantId = loginResult.User.TenantId;
-        }
+        //private void LoginAsHostAdmin()
+        //{
+        //    var logInManager = Resolve<LogInManager>();
+        //    var loginResult = logInManager.LoginAsync("admin", "123qwe").Result;
+        //    AbpSession.UserId = loginResult.User.Id;
+        //    AbpSession.TenantId = loginResult.User.TenantId;
+        //}
     }
 }

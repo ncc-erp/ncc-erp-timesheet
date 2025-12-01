@@ -65,6 +65,8 @@ namespace Timesheet.Application.Tests.API.Info
             var expectedAmountPM = 0;
             var currentTime = DateTime.Now;
             var expectedDate = (await _infoAppService.getStartDateToCheckUnlockTS()).ToString("dd/MM/yyyy");
+            List<EmployeeLockedWeekDto> listLockedDate = null;
+            int timesLockedEm = 0, lockedPM = 0;
             //var expectedDate = string.Format("01/{0}/{1}", currentTime.Month < 10 ? "0" + currentTime.Month.ToString() : currentTime.Month.ToString(), currentTime.Year);
 
             // Action
@@ -72,6 +74,13 @@ namespace Timesheet.Application.Tests.API.Info
             {
 
                 var result = await _infoAppService.GetAllTimesheetLocked(idParam);
+
+                listLockedDate = await _infoAppService.getMyTimesheetLockedAsync(idParam);
+                lockedPM = await _infoAppService.getTimesheetLockedOfPMAsync(idParam);
+
+                timesLockedEm = listLockedDate == null ? 0 : listLockedDate.Count();
+                expectedAmount = timesLockedEm >= 4 ? 100000 : timesLockedEm * 20000;
+                expectedAmountPM = 50000 * lockedPM;
 
                 Assert.True(result.IsPM);
                 Assert.True(result.IsUnlockLog);
