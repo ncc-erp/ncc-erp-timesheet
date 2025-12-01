@@ -204,7 +204,7 @@ namespace Timesheet.DomainServices
 
                 await _userPunishmentPaidRepository.InsertAsync(userPunishmentPaid);
 
-                await MarkPunishmentsAsPaid(_abpSession.UserId.Value, targetMonthDate, userPunishmentPaid.Id);
+                await MarkPunishmentsAsPaid(_abpSession.UserId.Value, userPunishmentPaid.Id);
 
                 await RecalculateUserPunishmentBalanceWithRemainPoints(_abpSession.UserId.Value, amount, extraAmount);
 
@@ -276,13 +276,11 @@ namespace Timesheet.DomainServices
             }
         }
 
-        private async Task MarkPunishmentsAsPaid(long userId, DateTime targetMonth, long userPunishmentPaidId)
-        {
-            var endOfMonth = targetMonth.AddMonths(1);
-            
+        private async Task MarkPunishmentsAsPaid(long userId, long userPunishmentPaidId)
+        {       
             var unpaidPunishments = await WorkScope.GetAll<UserPunishment>()
                 .Where(p => p.UserId == userId)
-                .Where(p => p.DateAt >= targetMonth && p.DateAt < endOfMonth)
+                .Where(p => !p.IsDeleted)
                 .Where(p => !p.IsPaid)
                 .ToListAsync();
 
@@ -293,7 +291,7 @@ namespace Timesheet.DomainServices
                 await WorkScope.UpdateAsync(punishment);
             }
 
-            _logger.LogInformation($"Marked {unpaidPunishments.Count} punishments as paid for user {userId} in {targetMonth:yyyy-MM}");
+            _logger.LogInformation($"Marked {unpaidPunishments.Count} punishments as paid for user {userId}");
         }
 
         private async Task RecalculateUserPunishmentBalanceWithRemainPoints(long userId, int hashAmount, int extraAmount)
