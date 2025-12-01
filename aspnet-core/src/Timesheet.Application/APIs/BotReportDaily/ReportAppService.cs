@@ -42,5 +42,12 @@ namespace Timesheet.APIs.BotReportDaily
         {
             return await _officeWorkingReportAppService.GetOfficeWorkingTimelogReport(input);
         }
+
+        [HttpGet]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_Report, Ncc.Authorization.PermissionNames.BranchDirector_ProjectWorkingReport_View)]
+        public async Task<List<TotalTimelogProjectDto>> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input)
+        {
+            return await _botReportDailyService.GetDailyProjectTimelogReport(input);
+        }
     }
 }

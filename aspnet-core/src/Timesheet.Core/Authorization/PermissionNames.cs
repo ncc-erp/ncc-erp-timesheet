@@ -392,7 +392,6 @@ namespace Ncc.Authorization
         public const string BranchDirector_OfficeWorkingReport_View = "BranchDirector_OfficeWorkingReport_View";
         public const string BranchDirector_ProjectWorkingReport_View = "BranchDirector_ProjectWorkingReport_View";
         public const string BranchDirector_AnomaliesReport_View = "BranchDirector_AnomaliesReport_View";
-
     }
 
     public class GrantPermissionRoles
