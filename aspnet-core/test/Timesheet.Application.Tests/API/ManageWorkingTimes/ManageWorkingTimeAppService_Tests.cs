@@ -3,6 +3,7 @@ using Abp.Configuration;
 using Abp.Domain.Uow;
 using Abp.Runtime.Session;
 using Abp.UI;
+using DocumentFormat.OpenXml.Bibliography;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Ncc.Authorization.Users;
@@ -18,6 +19,7 @@ using Timesheet.APIs.ManageWorkingTimes;
 using Timesheet.APIs.ManageWorkingTimes.Dto;
 using Timesheet.Entities;
 using Timesheet.Services.Komu;
+using Timesheet.Services.Mezon;
 using Timesheet.Uitls;
 using Xunit;
 using static Ncc.Entities.Enum.StatusEnum;
@@ -46,11 +48,11 @@ namespace Timesheet.Application.Tests.API.ManageWorkingTimes
             configuration.GetValue<string>("KomuService:DevModeChannelId").Returns("_channelIdDevMode");
             configuration.GetValue<string>("KomuService:EnableKomuNotification").Returns("_isNotifyToKomu");
             var komuService = Substitute.For<KomuService>(httpClient, loggerKomu, configuration, settingManager);
-
+            var mezonService = Substitute.For<MezonService>();
             _workScope = Resolve<IWorkScope>();
 
             var backgroundJobManager = Resolve<BackgroundJobManager>();
-            _manageWorkingTime = new ManageWorkingTimeAppService(backgroundJobManager, _workScope, komuService)
+            _manageWorkingTime = new ManageWorkingTimeAppService(backgroundJobManager, _workScope, komuService, mezonService)
             {
                 AbpSession = Resolve<IAbpSession>(),
                 UnitOfWorkManager = Resolve<IUnitOfWorkManager>(),
@@ -303,7 +305,8 @@ namespace Timesheet.Application.Tests.API.ManageWorkingTimes
                 result.Last().PMs.Last().UserId.ShouldBe(1);
                 result.Last().PMs.Last().EmailAddress.ShouldBe("admin@aspnetboilerplate.com");
                 result.Last().PMs.Last().FullName.ShouldBe("admin admin");
-                result.Last().PMs.Last().KomuAccountInfo.ShouldBe("**admin admin** [ - NoType]");
+                result.Last().PMs.Last().KomuAccountInfo(NotifyChannel.KOMU).ShouldBe("<@admin> [HN - Admin]");
+                result.Last().PMs.Last().KomuAccountInfo(NotifyChannel.Mezon).ShouldBe("@admin [HN - Admin]");
             });
         }
     }

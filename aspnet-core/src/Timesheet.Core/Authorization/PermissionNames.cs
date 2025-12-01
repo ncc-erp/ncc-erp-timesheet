@@ -749,7 +749,7 @@ namespace Ncc.Authorization
                     PermissionNames.TeamBuilding_Request_ViewDetailRequest,
                     PermissionNames.TeamBuilding_Project,
                     PermissionNames.TeamBuilding_Project_SelectProjectTeamBuilding,
-                    PermissionNames.BranchDirector_Report,
+
                     PermissionNames.ProjectManagementBranchDirectors,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs,

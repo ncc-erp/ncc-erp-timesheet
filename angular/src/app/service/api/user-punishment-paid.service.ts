@@ -13,6 +13,7 @@ export interface UserPunishmentPaidDto {
 export interface MarkPaidTransactionResultDto {
   success: boolean;
   message: string;
+  transactionHash?: string;
 }
 
 export interface GetUserPunishmentBalanceDto {

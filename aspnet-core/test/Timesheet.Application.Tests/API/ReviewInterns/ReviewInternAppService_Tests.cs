@@ -1,33 +1,35 @@
-﻿using Abp.BackgroundJobs;
-using Microsoft.Extensions.Logging;
-using System.Net.Http;
-using Timesheet.APIs.ReviewInterns;
-using Timesheet.Services.HRM;
-using NSubstitute;
-using Microsoft.Extensions.Configuration;
-using Timesheet.Services.HRMv2;
-using Timesheet.Services.Project;
-using Ncc.IoC;
-using Xunit;
-using System.Threading.Tasks;
-using Timesheet.APIs.ReviewInterns.Dto;
-using Shouldly;
+﻿using Abp.Application.Services.Dto;
+using Abp.BackgroundJobs;
 using Abp.Configuration;
-using Abp.Runtime.Session;
-using Timesheet.Entities;
-using System.Linq.Dynamic.Core;
-using System.Linq;
-using Abp.UI;
-using Abp.Application.Services.Dto;
-using Timesheet.Extension;
-using static Ncc.Entities.Enum.StatusEnum;
 using Abp.Domain.Uow;
-using System.Collections.Generic;
-using Timesheet.DynamicFilter;
-using Timesheet.Paging;
-using Timesheet.APIs.ReviewDetails;
-using Timesheet.Services.File;
+using Abp.Runtime.Session;
+using Abp.UI;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Ncc.IoC;
+using NSubstitute;
+using Shouldly;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Timesheet.APIs.ReviewDetails;
+using Timesheet.APIs.ReviewInterns;
+using Timesheet.APIs.ReviewInterns.Dto;
+using Timesheet.DomainServices;
+using Timesheet.DynamicFilter;
+using Timesheet.Entities;
+using Timesheet.Extension;
+using Timesheet.Paging;
+using Timesheet.Services.File;
+using Timesheet.Services.HRM;
+using Timesheet.Services.HRMv2;
+using Timesheet.Services.Komu;
+using Timesheet.Services.Project;
+using Xunit;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.Application.Tests.API.ReviewInterns
 {
@@ -72,18 +74,20 @@ namespace Timesheet.Application.Tests.API.ReviewInterns
             var _mockEnvironment = Substitute.For<IHostingEnvironment>();
             _mockEnvironment.EnvironmentName.Returns("Hosting:UnitTestEnviroment");
             _mockEnvironment.WebRootPath.Returns("http://www.myserver.com");
-
+            var komuService = Substitute.For<KomuService>(Resolve<HttpClient>(), Resolve<ILogger<KomuService>>(), _configuration, Resolve<ISettingManager>());
+            var userServices = Substitute.For<UserServices>();
+            var reviewInternServices = Substitute.For<IReviewInternServices>();
             var _loggerFileService = Resolve<ILogger<ExportFileService>>();
             _fileService = new ExportFileService(_loggerFileService);
 
             _workScope = Resolve<IWorkScope>();
 
-            _reviewDetailAppService = new ReviewDetailAppService(_backgroundJobManager, _projectService, _hRMService, _mockEnvironment, _fileService, _workScope);
+            _reviewDetailAppService = new ReviewDetailAppService(_backgroundJobManager, _projectService, _hRMService, _mockEnvironment, _fileService, _workScope, komuService, _configuration, userServices);
             _reviewDetailAppService.ObjectMapper = Resolve<Abp.ObjectMapping.IObjectMapper>();
             _reviewDetailAppService.SettingManager = Resolve<ISettingManager>();
             _reviewDetailAppService.AbpSession = Resolve<IAbpSession>();
 
-            _reviewInternAppService = new ReviewInternAppService(_backgroundJobManager, _hRMv2Service, _workScope, _projectService, _hRMService, _reviewDetailAppService);
+            _reviewInternAppService = new ReviewInternAppService(_backgroundJobManager, _hRMv2Service, _workScope, _projectService, _hRMService, _reviewDetailAppService, reviewInternServices);
             _reviewInternAppService.ObjectMapper = Resolve<Abp.ObjectMapping.IObjectMapper>();
             _reviewInternAppService.SettingManager = Resolve<ISettingManager>();
             _reviewInternAppService.AbpSession = Resolve<IAbpSession>();
