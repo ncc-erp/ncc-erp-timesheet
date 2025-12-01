@@ -2,12 +2,15 @@
 using Abp.Domain.Uow;
 using Abp.ObjectMapping;
 using Abp.Runtime.Session;
+using Abp.UI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Ncc.Authorization.Roles;
 using Ncc.Authorization.Users;
+using Ncc.Entities;
 using Ncc.IoC;
 using NSubstitute;
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -16,7 +19,11 @@ using Timesheet.APIs.ProjectManagement.Dto;
 using Timesheet.DomainServices;
 using Timesheet.Services.Komu;
 using Timesheet.Timesheets.Customers.Dto;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using Xunit;
+using static Ncc.Entities.Enum.StatusEnum;
+using System.Linq.Dynamic.Core;
 
 namespace Timesheet.Application.Tests.API.ProjectManagement
 {
@@ -459,6 +466,254 @@ namespace Timesheet.Application.Tests.API.ProjectManagement
                 Assert.Equal("testemail9@gmail.com", result[0].Email);
                 Assert.Equal(2, result[1].PointHistories.Count);
                 Assert.Equal("testemail17@gmail.com", result[1].Email);
+            });
+        }
+        [Fact]
+        public async void ReleaseUserFromProject_Should_Success()
+        {
+            // Arrange
+            var projectCode = "TEST_PROJECT";
+            var userEmail = "test@example.com";
+            long projectId = 0;
+            long userId = 0;
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var project = new Project
+                {
+                    Code = projectCode,
+                    Name = "Test Project",
+                    Status = ProjectStatus.Active,
+                    ProjectType = ProjectType.Product
+                };
+                await _work.InsertAsync(project);
+                projectId = project.Id;
+
+                var user = new User
+                {
+                    EmailAddress = userEmail,
+                    NormalizedEmailAddress = userEmail.ToUpper(),
+                    UserName = "testuser",
+                    Name = "Test User",
+                    Surname = "User",
+                    IsActive = true
+                };
+                await _userManager.CreateAsync(user);
+                userId = user.Id;
+
+                var projectUser = new ProjectUser
+                {
+                    ProjectId = projectId,
+                    UserId = userId,
+                    Type = ProjectUserType.Member
+                };
+                await _work.InsertAsync(projectUser);
+            });
+
+            // Act
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _project.ReleaseUserFromProject(projectCode, userEmail);
+            });
+
+            // Assert
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var updatedProjectUser = _work.GetAll<ProjectUser>()
+                    .FirstOrDefault(pu => pu.ProjectId == projectId && pu.UserId == userId);
+
+                updatedProjectUser.ShouldNotBeNull();
+                updatedProjectUser.Type.ShouldBe(ProjectUserType.DeActive);
+            });
+        }
+
+        [Fact]
+        public async void ReleaseUserFromProject_Should_Throw_Exception_When_Project_Not_Found()
+        {
+            // Arrange
+            var invalidProjectCode = "INVALID_PROJECT";
+            var userEmail = "test@example.com";
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var user = new User
+                {
+                    EmailAddress = userEmail,
+                    NormalizedEmailAddress = userEmail.ToUpper(),
+                    UserName = "testuser",
+                    Name = "Test User",
+                    Surname = "User",
+                    IsActive = true
+                };
+                await _userManager.CreateAsync(user);
+            });
+
+            // Act & Assert
+            var exception = await Should.ThrowAsync<UserFriendlyException>(async () =>
+            {
+                await WithUnitOfWorkAsync(async () =>
+                {
+                    await _project.ReleaseUserFromProject(invalidProjectCode, userEmail);
+                });
+            });
+
+            exception.Message.ShouldBe($"There is no project with code {invalidProjectCode}");
+        }
+
+        [Fact]
+        public async void ReleaseUserFromProject_Should_Throw_Exception_When_User_Not_Found()
+        {
+            // Arrange
+            var projectCode = "TEST_PROJECT";
+            var invalidUserEmail = "invalid@example.com";
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var project = new Project
+                {
+                    Code = projectCode,
+                    Name = "Test Project",
+                    Status = ProjectStatus.Active,
+                    ProjectType = ProjectType.Product
+                };
+                await _work.InsertAsync(project);
+            });
+
+            // Act & Assert
+            var exception = await Should.ThrowAsync<UserFriendlyException>(async () =>
+            {
+                await WithUnitOfWorkAsync(async () =>
+                {
+                    await _project.ReleaseUserFromProject(projectCode, invalidUserEmail);
+                });
+            });
+
+            exception.Message.ShouldBe($"There is no user with useremail {invalidUserEmail}");
+        }
+
+        [Fact]
+        public async void ReleaseUserFromProject_Should_Throw_Exception_When_User_Not_In_Project()
+        {
+            // Arrange
+            var projectCode = "TEST_PROJECT";
+            var userEmail = "test@example.com";
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var project = new Project
+                {
+                    Code = projectCode,
+                    Name = "Test Project",
+                    Status = ProjectStatus.Active,
+                    ProjectType = ProjectType.Product
+                };
+                await _work.InsertAsync(project);
+
+                var user = new User
+                {
+                    EmailAddress = userEmail,
+                    NormalizedEmailAddress = userEmail.ToUpper(),
+                    UserName = "testuser",
+                    Name = "Test User",
+                    Surname = "User",
+                    IsActive = true
+                };
+                await _userManager.CreateAsync(user);
+            });
+
+            // Act & Assert
+            var exception = await Should.ThrowAsync<UserFriendlyException>(async () =>
+            {
+                await WithUnitOfWorkAsync(async () =>
+                {
+                    await _project.ReleaseUserFromProject(projectCode, userEmail);
+                });
+            });
+
+            exception.Message.ShouldBe($"User is not in the project with projectCode is + {projectCode}");
+        }
+
+        [Fact]
+        public async void ReleaseUserFromProject_Should_Only_Deactivate_Specific_User()
+        {
+            // Arrange
+            var projectCode = "TEST_PROJECT";
+            var userEmail1 = "user1@example.com";
+            var userEmail2 = "user2@example.com";
+            long projectId = 0;
+            long userId1 = 0;
+            long userId2 = 0;
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var project = new Project
+                {
+                    Code = projectCode,
+                    Name = "Test Project",
+                    Status = ProjectStatus.Active,
+                    ProjectType = ProjectType.Product
+                };
+                await _work.InsertAsync(project);
+                projectId = project.Id;
+
+                var user1 = new User
+                {
+                    EmailAddress = userEmail1,
+                    NormalizedEmailAddress = userEmail1.ToUpper(),
+                    UserName = "user1",
+                    Name = "User1",
+                    Surname = "Test",
+                    IsActive = true
+                };
+                await _userManager.CreateAsync(user1);
+                userId1 = user1.Id;
+
+                var user2 = new User
+                {
+                    EmailAddress = userEmail2,
+                    NormalizedEmailAddress = userEmail2.ToUpper(),
+                    UserName = "user2",
+                    Name = "User2",
+                    Surname = "Test",
+                    IsActive = true
+                };
+                await _userManager.CreateAsync(user2);
+                userId2 = user2.Id;
+
+                var projectUser1 = new ProjectUser
+                {
+                    ProjectId = projectId,
+                    UserId = userId1,
+                    Type = ProjectUserType.Member
+                };
+                await _work.InsertAsync(projectUser1);
+
+                var projectUser2 = new ProjectUser
+                {
+                    ProjectId = projectId,
+                    UserId = userId2,
+                    Type = ProjectUserType.Member
+                };
+                await _work.InsertAsync(projectUser2);
+            });
+
+            // Act
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _project.ReleaseUserFromProject(projectCode, userEmail1);
+            });
+
+            // Assert
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var projectUser1 = _work.GetAll<ProjectUser>()
+                    .FirstOrDefault(pu => pu.ProjectId == projectId && pu.UserId == userId1);
+
+                var projectUser2 = _work.GetAll<ProjectUser>()
+                    .FirstOrDefault(pu => pu.ProjectId == projectId && pu.UserId == userId2);
+
+                projectUser1.Type.ShouldBe(ProjectUserType.DeActive);
+                projectUser2.Type.ShouldBe(ProjectUserType.Member);
             });
         }
     }
