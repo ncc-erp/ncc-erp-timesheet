@@ -152,18 +152,15 @@ namespace Timesheet.DomainServices
                 throw new UserFriendlyException($"Transaction must be sent from your own wallet. Please use your personal wallet to make the payment.");
             }
 
-            var endOfMonth = targetMonthDate.AddMonths(1);
             var hasUnpaidPunishments = await WorkScope.GetAll<UserPunishment>()
                 .AnyAsync(p => p.UserId == _abpSession.UserId.Value 
                     && !p.IsDeleted 
-                    && (p.IsPaid == false || p.IsPaid == null)
-                    && p.DateAt >= targetMonthDate 
-                    && p.DateAt < endOfMonth);
+                    && (p.IsPaid == false || p.IsPaid == null));
 
             if (!hasUnpaidPunishments)
             {
-                _logger.LogWarning($"User {_abpSession.UserId.Value} attempted to make payment for {targetMonthDate:yyyy-MM} but has no unpaid punishments in that month");
-                throw new UserFriendlyException($"You cannot make a payment for {targetMonthDate:yyyy-MM} because you have no unpaid punishments in that month.");
+                _logger.LogWarning($"User {_abpSession.UserId.Value} attempted to make payment but has no unpaid punishments");
+                throw new UserFriendlyException($"You cannot make a payment because you have no unpaid punishments.");
             }
 
             var existingTransaction = await _userPunishmentPaidRepository
