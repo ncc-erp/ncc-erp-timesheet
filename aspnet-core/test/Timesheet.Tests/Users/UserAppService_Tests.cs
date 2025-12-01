@@ -76,11 +76,10 @@ namespace Ncc.Tests.Users
                 await context.SaveChangesAsync();
                 testUserId = user.Id;
 
-                // ✅ Thêm Status = Active
                 var project = new Project
                 {
                     Name = "Test Project",
-                    Status = ProjectStatus.Active  // ← Thêm dòng này
+                    Status = ProjectStatus.Active  
                 };
                 context.Projects.Add(project);
                 await context.SaveChangesAsync();
@@ -144,11 +143,10 @@ namespace Ncc.Tests.Users
                 await context.SaveChangesAsync();
                 testUserId = user.Id;
 
-                // ✅ Thêm Status = Active (quan trọng!)
                 var project = new Project
                 {
                     Name = "PM Project",
-                    Status = ProjectStatus.Active  // ← Thêm dòng này
+                    Status = ProjectStatus.Active 
                 };
                 context.Projects.Add(project);
                 await context.SaveChangesAsync();
@@ -191,11 +189,10 @@ namespace Ncc.Tests.Users
                 await context.SaveChangesAsync();
                 testUserId = user.Id;
 
-                // Project InActive - nên được phép deactivate
                 var project = new Project
                 {
                     Name = "Inactive Project",
-                    Status = ProjectStatus.Deactive  // ← InActive
+                    Status = ProjectStatus.Deactive  
                 };
                 context.Projects.Add(project);
                 await context.SaveChangesAsync();
@@ -255,7 +252,6 @@ namespace Ncc.Tests.Users
                 context.Projects.Add(project);
                 await context.SaveChangesAsync();
 
-                // 2 PMs trong cùng 1 project
                 context.ProjectUsers.AddRange(
                     new ProjectUser
                     {
@@ -274,7 +270,6 @@ namespace Ncc.Tests.Users
                 await context.SaveChangesAsync();
             });
 
-            // Act - Should NOT throw (vì còn PM khác)
             await _userAppService.DeactiveUser(new EntityDto<long>(testUserId));
 
             // Assert
