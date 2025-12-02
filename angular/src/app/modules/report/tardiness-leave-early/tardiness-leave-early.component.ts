@@ -284,7 +284,7 @@ export class TardinessLeaveEarlyComponent
         .pipe(finalize(() => {}))
         .subscribe(
           () => {
-            abp.notify.success('Snapshot thành công cho ngày ' + date);
+            abp.notify.success('Snapshot successfully for date ' + date);
           }
         );
     }, 'snapshot');
@@ -297,7 +297,7 @@ export class TardinessLeaveEarlyComponent
         .pipe(finalize(() => {}))
         .subscribe(
           () => {
-            abp.notify.success('Get lại data phạt thành công cho ngày ' + date);
+            abp.notify.success('Successfully retrieved punishment data for ' + date);
             this.refresh();
           }
         );

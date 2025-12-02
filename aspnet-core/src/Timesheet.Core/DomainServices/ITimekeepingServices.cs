@@ -11,6 +11,7 @@ namespace Timesheet.DomainServices
     public interface ITimekeepingServices : IDomainService
     {
         Task<List<Timekeeping>> AddTimekeepingByDay(DateTime selectedDate);
+        Task<List<Timekeeping>> AddTimekeepingByDay2(DateTime selectedDate);
         CheckInOutTimeDto CaculateCheckInOutTime(Dictionary<long, MapAbsenceUserDto> mapAbsenceUsers, TimesheetUserDto user);
         Task CheckIsPunished(Timekeeping timekeeping, int LimitMinute);
         Task CheckIsPunished(Timekeeping timekeeping);

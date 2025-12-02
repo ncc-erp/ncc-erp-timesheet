@@ -491,6 +491,184 @@ namespace Timesheet.DomainServices
             var uow = UnitOfWorkManager.Begin(TransactionScopeOption.RequiresNew);
             try
             {
+                var hasExistingPunishments = await WorkScope.GetAll<UserPunishment>()
+                    .AnyAsync(p => p.DateAt.Date == selectedDate.Date && !p.IsDeleted);
+
+                if (hasExistingPunishments)
+                {
+                    throw new UserFriendlyException($"Punishment data already exists for {selectedDate:yyyy-MM-dd}. Please use the 'Retrieve data by day' function if you want to rebuild.");
+                }
+
+                await EnsureNotOffDate(selectedDate);
+
+                var users = await GetWorkingUsers(selectedDate);
+
+                var oldTimekeepingNotes = await SoftDeleteOldTimekeeping(selectedDate);
+                await SoftDeleteOldPunishments(selectedDate);
+
+                var (mapAbsenceUsers, mapRemoteUsers) = await GetAbsenceAndRemoteUsers(selectedDate);
+                var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, mapWFHUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
+
+
+                int batchSize = 100;
+                for (int i = 0; i < users.Count; i += batchSize)
+                {
+                    var batch = users.Skip(i).Take(batchSize).ToList();
+
+                    try
+                    {
+                        Logger.Info($"Processing batch {i / batchSize + 1} with {batch.Count} users...");
+
+                        var tasks = batch.Select(user =>
+                            GenerateTimekeepingRecords(
+                                selectedDate,
+                                user,
+                                mapCheckInUsers,
+                                mapDailyUsers,
+                                mapMentionUsers,
+                                mapWFHUsers,
+                                dicUserNameToTracker,
+                                punishmentSystems,
+                                oldTimekeepingNotes,
+                                mapAbsenceUsers,
+                                mapRemoteUsers
+                            )
+                        );
+
+                        var result = await System.Threading.Tasks.Task.WhenAll(tasks);
+
+                        allTimekeepings.AddRange(result.SelectMany(r => r.rs));
+                        allPunishments.AddRange(result.SelectMany(r => r.userPunishmentsToInsert));
+
+
+                        Logger.Info($"Finished batch {i / batchSize + 1}. " +
+                                    $"Accumulated {allTimekeepings.Count} records so far.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error($"❌ Error in batch {i / batchSize + 1}, " +
+                                     $"users {batch.First().UserId} → {batch.Last().UserId}. " +
+                                     $"Error: {ex}");
+                    }
+                }
+
+                // TODO: check again
+                var userEmail = users.Select(u => u.EmailAddress).ToHashSet();
+                var checkInUsersOnly = mapCheckInUsers.Values
+                    .Where(u => !userEmail.Contains(u.Email))
+                    .ToList();
+
+                foreach (var checkIn in checkInUsersOnly)
+                {
+                    var t = new Timekeeping
+                    {
+                        UserEmail = checkIn.Email,
+                        CheckIn = checkIn?.VerifyStartTimeStr,
+                        CheckOut = checkIn?.VerifyEndTimeStr,
+                        DateAt = selectedDate,
+                        NoteReply = "Email not match",
+                        TrackerTime = dicUserNameToTracker.ContainsKey(checkIn.Email.Split("@")[0]) ? dicUserNameToTracker[checkIn.Email.Split("@")[0]].spent_time : "0",
+                    };
+                    ChangeCheckInCheckOutTimeIfCheckOutIsEmpty(t);
+
+                    try
+                    {
+                        allTimekeepings.Add(t);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error($"INSERT DATA ISSUE email: {t.User?.EmailAddress} Error: {e.Message}");
+                    }
+                }
+
+
+                await WorkScope.InsertRangeAsync(allTimekeepings);
+                await WorkScope.InsertRangeAsync(allPunishments);
+
+                await CurrentUnitOfWork.SaveChangesAsync();
+
+                if (allPunishments.Count() > 0)
+                {
+                    var newPunishmentByUsers = allPunishments
+                        .GroupBy(p => p.UserId)
+                        .Select(g => new
+                        {
+                            UserId = g.Key,
+                            Total = g.Sum(p => (long)p.TotalMoney)
+                        })
+                        .ToDictionary(x => x.UserId, x => x.Total);
+
+                    var balanceRepo = WorkScope.GetRepo<UserPunishmentBalance>();
+                    var existingBalances = await balanceRepo.GetAll()
+                        .Where(b => newPunishmentByUsers.ContainsKey(b.UserId))
+                        .ToListAsync();
+
+                    var existingBalanceMap = existingBalances.ToDictionary(b => b.UserId);
+
+                    var balancesToInsert = new List<UserPunishmentBalance>();
+                    var balancesToUpdate = new List<UserPunishmentBalance>();
+
+                    foreach (var kvp in newPunishmentByUsers)
+                    {
+                        var userId = kvp.Key;
+                        var newPunishmentAmount = kvp.Value;
+
+                        if (!existingBalanceMap.TryGetValue(userId, out var balance))
+                        {
+                            balance = new UserPunishmentBalance
+                            {
+                                UserId = userId,
+                                TotalPunishmentMoney = (int)newPunishmentAmount,
+                                RemainPoints = 0
+                            };
+                            balancesToInsert.Add(balance);
+                        }
+                        else
+                        {
+                            balance.TotalPunishmentMoney += (int)newPunishmentAmount;
+                            balancesToUpdate.Add(balance);
+                        }
+                    }
+
+                    if (balancesToInsert.Any())
+                    {
+                        await WorkScope.InsertRangeAsync(balancesToInsert);
+                    }
+
+                    if (balancesToUpdate.Any())
+                    {
+                        foreach (var balance in balancesToUpdate)
+                        {
+                            await WorkScope.UpdateAsync(balance);
+                        }
+                    }
+                }
+
+                await uow.CompleteAsync();
+            }
+            finally
+            {
+                uow.Dispose();
+            }
+
+            var elapsed = DateTime.Now - start;
+            Console.WriteLine($"Thời gian chạy: {elapsed.TotalMilliseconds} ms");
+            Logger.Info($"✅ Successfully processed timekeeping for date {selectedDate:yyyy-MM-dd}. " +
+            $"Total {allTimekeepings.Count} records, {allPunishments.Count} punishments.");
+            return allTimekeepings;
+        }
+
+        [UnitOfWork(TransactionScopeOption.RequiresNew)]
+        public async Task<List<Timekeeping>> AddTimekeepingByDay2(DateTime selectedDate)
+        {
+            var allTimekeepings = new List<Timekeeping>();
+            var allPunishments = new List<UserPunishment>();
+
+            var start = DateTime.Now;
+            var now = DateTimeUtils.GetNow();
+            var uow = UnitOfWorkManager.Begin(TransactionScopeOption.RequiresNew);
+            try
+            {
                 await EnsureNotOffDate(selectedDate);
 
                 var users = await GetWorkingUsers(selectedDate);
@@ -1435,10 +1613,10 @@ namespace Timesheet.DomainServices
 
                 if (!hasHistory)
                 {
-                    throw new UserFriendlyException($"Vui lòng snapshot trước khi get lại data phạt ngày {date:yyyy-MM-dd}.");
+                    throw new UserFriendlyException($"Please snapshot before retrieving punishment data on day {date:yyyy-MM-dd}.");
                 }
 
-                var result = await AddTimekeepingByDay(date);
+                var result = await AddTimekeepingByDay2(date);
 
                 var punishmentsNeedUpdate = await (
                     from p in WorkScope.GetAll<UserPunishment>()
