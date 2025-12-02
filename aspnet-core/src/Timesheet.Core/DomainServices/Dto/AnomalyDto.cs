@@ -76,7 +76,7 @@ namespace Timesheet.DomainServices.Dto
         public double? TotalWorkingTime { get; set; }
         public string Notes { get; set; }
         public bool IsYesterdayInFunction { get; set; }
-        public string ViolationType { get; set; } = "DatesBelowThreshold";
+        public ViolationStatus ViolationType { get; set; }
         public BranchToDisplayDto Branch { get; set; }
     }
     public class ProcessAnomaliesInputDto

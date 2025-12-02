@@ -77,9 +77,9 @@ namespace Timesheet.DomainServices
             else
             {
                 var lastWeekDto = lastWeek.FirstOrDefault(a => a.UserId == input.UserId) ?? new LastWeekAnomalyDTO { UserId = input.UserId, EmployeeName = input.EmployeeName, UserName = input.UserName, Branch = input.Branch };
-                if (input.ViolationType == "DatesMissed")
+                if (input.ViolationType == ViolationStatus.DatesMissed)
                     lastWeekDto.DatesMissed.Add(input.Date);
-                else if (input.ViolationType == "DatesNoTrackerTime")
+                else if (input.ViolationType == ViolationStatus.DatesNoTrackerTime)
                     lastWeekDto.DatesNoTrackerTime.Add(input.Date);
                 else
                     lastWeekDto.DatesBelowThreshold.Add(input.Date);
@@ -329,7 +329,7 @@ namespace Timesheet.DomainServices
                     if (isTimeViolation || isZeroTimeViolation)
                     {
                         string notes = isZeroTimeViolation ? "No tracker time for approved WFH" : "No early leave/late arrival approval";
-                        string violationType = isZeroTimeViolation ? "DatesNoTrackerTime" : "DatesBelowThreshold";
+                        ViolationStatus violationType = isZeroTimeViolation ? ViolationStatus.DatesNoTrackerTime : ViolationStatus.DatesBelowThreshold;
                         var anomalyInput = new AnomalyInputDto
                         {
                             UserId = tk.UserId.Value,
@@ -360,7 +360,7 @@ namespace Timesheet.DomainServices
                                 TotalWorkingTime = officeActualHours,
                                 Notes = "No early leave/late arrival approval",
                                 IsYesterdayInFunction = input.IsYesterday,
-                                ViolationType = "DatesBelowThreshold",
+                                ViolationType = ViolationStatus.DatesBelowThreshold,
                                 Branch = input.Branch
                             };
                             AddOrUpdateAnomaly(anomalyInput, yesterdayAnomalies, lastWeekAnomalies);
@@ -382,7 +382,7 @@ namespace Timesheet.DomainServices
                                 TotalWorkingTime = officeActualHours,
                                 Notes = "No early leave/late arrival approval",
                                 IsYesterdayInFunction = input.IsYesterday,
-                                ViolationType = "DatesBelowThreshold",
+                                ViolationType = ViolationStatus.DatesBelowThreshold,
                                 Branch = input.Branch
                             };
                             AddOrUpdateAnomaly(anomalyInput, yesterdayAnomalies, lastWeekAnomalies);
@@ -406,7 +406,7 @@ namespace Timesheet.DomainServices
                             TotalWorkingTime = officeActualHours,
                             Notes = "No leave/WFH record",
                             IsYesterdayInFunction = input.IsYesterday,
-                            ViolationType = "DatesMissed",
+                            ViolationType = ViolationStatus.DatesMissed,
                             Branch = input.Branch
                         };
                         AddOrUpdateAnomaly(anomalyInput, yesterdayAnomalies, lastWeekAnomalies);
@@ -425,8 +425,6 @@ namespace Timesheet.DomainServices
             DateTime startDate,
             DateTime endDate)
         {
-            var sw = Stopwatch.StartNew();
-
             var allUsers = await _workScope.GetAll<User>()
                 .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork &&
                             u.BranchId.HasValue && branchIds.Contains(u.BranchId.Value))
@@ -476,7 +474,7 @@ namespace Timesheet.DomainServices
                         RequestType = d.Request.Type,
                         UserId = d.Request.UserId
                     },
-                    Request = new
+                    Request = new AbsenceRequestDto
                     {
                         Id = d.Request.Id,
                         UserId = d.Request.UserId,
@@ -497,11 +495,6 @@ namespace Timesheet.DomainServices
                     Type = g.First().Request.Type
                 })
                 .ToList();
-
-            sw.Stop();
-            Console.WriteLine($"[LoadAnomalyData] Loaded in {sw.ElapsedMilliseconds}ms | " +
-                              $"Users: {allUsers.Count}, Timekeepings: {allTimekeepings.Count}, " +
-                              $"Requests: {allAbsenceRequests.Count}, Details: {allAbsenceDetails.Count}");
 
             return new AnomalyData
             {
