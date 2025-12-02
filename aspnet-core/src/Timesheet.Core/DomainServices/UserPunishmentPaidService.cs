@@ -498,7 +498,7 @@ namespace Timesheet.DomainServices
             }
         }
 
-        public async Task<UserPunishmentSummaryDto> ApplyRemainPointsAsync(int year, int month)
+        public async Task<UserPunishmentSummaryDto> ApplyRemainPointsAsync()
         {
             var result = new UserPunishmentSummaryDto();
 
@@ -510,7 +510,7 @@ namespace Timesheet.DomainServices
             }
 
             var userId = _abpSession.UserId.Value;
-            _logger.LogInformation($"ApplyRemainPoints: User {userId}, {year}/{month}");
+            _logger.LogInformation($"ApplyRemainPoints: User {userId}");
 
             using (var uow = UnitOfWorkManager.Begin(new UnitOfWorkOptions
             {
@@ -519,25 +519,9 @@ namespace Timesheet.DomainServices
             {
                 try
                 {
-                    var targetMonth = new DateTime(year, month, 1);
-                    var startOfMonth = targetMonth;
-                    var endOfMonth = targetMonth.AddMonths(1);
-
-                    var now = DateTime.Now;
-                    var currentMonthStart = new DateTime(now.Year, now.Month, 1);
-                    var isCurrentMonth = targetMonth == currentMonthStart;
-
-                    if (!isCurrentMonth)
-                    {
-                        result.Success = false;
-                        result.Message = "Can only apply remain points for current month";
-                        return result;
-                    }
-
                     var unpaidPunishments = await WorkScope.GetAll<UserPunishment>()
                         .Where(p => p.UserId == userId)
                         .Where(p => !p.IsDeleted)
-                        .Where(p => p.DateAt >= startOfMonth && p.DateAt < endOfMonth)
                         .Where(p => p.IsPaid == false || p.IsPaid == null)
                         .ToListAsync();
 

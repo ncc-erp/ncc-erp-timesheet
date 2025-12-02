@@ -110,24 +110,9 @@ export class UserPunishmentPaidService extends BaseApiService {
     );
   }
 
-  applyRemainPoints(year: number, month: number): Observable<UserPunishmentSummaryDto> {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
-
-    if (year !== currentYear || month !== currentMonth) {
-      return of({
-        success: false,
-        message: 'Can only apply remain points for current month',
-        userBalance: { totalPunishmentMoney: 0, remainPoints: 0, effectiveAmount: 0 },
-        totalRemainPointsUsedInMonth: 0,
-        totalPaidPunishmentInMonth: 0
-      } as UserPunishmentSummaryDto);
-    }
-
+  applyRemainPoints(): Observable<UserPunishmentSummaryDto> {
     const url = `${this.rootUrl}/ApplyRemainPoints`;
-    const body = { year: year, month: month };
-    return this.http.post<any>(url, body).pipe(
+    return this.http.post<any>(url, {}).pipe(
       map(response => {
         if (response && response.result) {
           return response.result;

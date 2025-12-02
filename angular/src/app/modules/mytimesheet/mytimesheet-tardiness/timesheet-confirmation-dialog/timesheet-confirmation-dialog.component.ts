@@ -370,9 +370,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
 }
 
   applyRemainPoints(): void {
-    const target = this.getTargetYearMonth();
-
-    this.userPunishmentPaidService.applyRemainPoints(target.year, target.month).subscribe(
+    this.userPunishmentPaidService.applyRemainPoints().subscribe(
       (result) => {
         if (result && result.success) {
           this.snackBar.open('Applied remain points successfully.', 'Close', { duration: 5000, panelClass: ['snackbar-success'] });

@@ -67,9 +67,9 @@ namespace Timesheet.APIs.UserPunishmentPaids
 
         [HttpPost]
         [AbpAuthorize]
-        public async Task<UserPunishmentSummaryDto> ApplyRemainPoints(PreviewAndApplyPunishmentPointsDto input)
+        public async Task<UserPunishmentSummaryDto> ApplyRemainPoints()
         {
-            return await _userPunishmentPaidService.ApplyRemainPointsAsync(input.Year, input.Month);
+            return await _userPunishmentPaidService.ApplyRemainPointsAsync();
         }
     }
 }

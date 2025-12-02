@@ -14,6 +14,6 @@ namespace Timesheet.DomainServices
 
         Task<UserPunishmentSummaryDto> PreviewApplyAndGetSummaryAsync(int year, int month);
 
-        Task<UserPunishmentSummaryDto> ApplyRemainPointsAsync(int year, int month);
+        Task<UserPunishmentSummaryDto> ApplyRemainPointsAsync();
     }
 }
