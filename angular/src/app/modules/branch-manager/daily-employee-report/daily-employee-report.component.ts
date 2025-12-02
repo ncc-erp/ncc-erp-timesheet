@@ -45,6 +45,8 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
 
   @ViewChild('scrollViewport') scrollViewport: CdkVirtualScrollViewport;
 
+  private hasSetItemSize: boolean = false;
+
   constructor(private dailyEmployeeReportService: DailyEmployeeReportService) {}
 
   ngOnInit(): void {
@@ -84,13 +86,29 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
           this.projects = this.reportData || [];
           this.applyFilters();
           this.isLoading = false;
-          setTimeout(() => this.checkViewports(), 0);
+          setTimeout(() => {
+            this.checkViewports();
+            this.setDynamicItemSize();
+          }, 0);
         },
         error: (error) => {
           console.error("API Error:", error);
           this.isLoading = false;
         },
       });
+  }
+
+  private setDynamicItemSize(): void {
+    if (this.hasSetItemSize || !this.scrollViewport || this.filteredProjects.length === 0) {
+      return;
+    }
+    const rowElement = this.scrollViewport.elementRef.nativeElement.querySelector('tr');
+    if (rowElement) {
+      this.itemSize = rowElement.offsetHeight;
+      this.hasSetItemSize = true;
+      this.checkViewports();
+    }
+
   }
 
   getBranchCodes(): number[] {
