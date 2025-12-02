@@ -11,9 +11,7 @@ import {
   OfficeWorkingItem,
 } from "@app/service/api/daily-employee-report.service";
 import { BranchDto } from "@shared/service-proxies/service-proxies";
-
-type SortColumn = 'fullName' | 'branchName' | 'wfhLW' | 'officeLW' | 'totalAllLW' | 'wfhLM' | 'officeLM' | 'totalAllLM';
-type SortDirection = 'asc' | 'desc' | '';
+import { SortColumn, SortDirection, SelectAllText, SortArrow } from './enum/daily-employee-report.enum';
 
 @Component({
   selector: "app-daily-employee-report",
@@ -35,9 +33,8 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
   itemSize: number = 48;
   maxHeight = 400;
 
-  // Sort state
-  sortColumn: SortColumn | '' = '';
-  sortDirection: SortDirection = '';
+  sortColumn: SortColumn = SortColumn.None;
+  sortDirection: SortDirection = SortDirection.None;
 
   reportData: OfficeWorkingItem[];
   isLoading: boolean = false;
@@ -81,8 +78,7 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
   getBranchCodes(): number[] {
     if (
       !this.branchIds ||
-      this.branchIds.length === 0 ||
-      this.branchIds.indexOf("all" as any) !== -1
+      this.branchIds.length === 0
     ) {
       return this.listBranch ? this.listBranch.map((branch) => branch.id) : [];
     }
@@ -127,39 +123,42 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
       let valueA: any = a[column] || '';
       let valueB: any = b[column] || '';
 
-      if (column === 'fullName' || column === 'branchName') {
+      if (column === SortColumn.FullName || column === SortColumn.BranchName) {
         valueA = valueA.toLowerCase();
         valueB = valueB.toLowerCase();
-        return direction === 'asc'
+        return direction === SortDirection.Asc
           ? valueA.localeCompare(valueB)
           : valueB.localeCompare(valueA);
       }
 
       const numA = Number(valueA) || 0;
       const numB = Number(valueB) || 0;
-      return direction === 'asc' ? numA - numB : numB - numA;
+      return direction === SortDirection.Asc ? numA - numB : numB - numA;
     });
   }
 
   onSort(column: SortColumn): void {
-    if (this.sortColumn === column) {
-      if (this.sortDirection === 'asc') {
-        this.sortDirection = 'desc';
-      } else if (this.sortDirection === 'desc') {
-        this.sortDirection = '';
-        this.sortColumn = '';
+    const currentCol = this.sortColumn as SortColumn;
+    const currentDir = this.sortDirection as SortDirection;
+
+    if (currentCol === column) {
+      if (currentDir === SortDirection.Asc) {
+        this.sortDirection = SortDirection.Desc;
+      } else if (currentDir === SortDirection.Desc) {
+        this.sortDirection = SortDirection.None;
+        this.sortColumn = SortColumn.None;
       }
     } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
+      this.sortColumn = column as SortColumn;
+      this.sortDirection = SortDirection.Asc;
     }
 
     this.applyFilters();
   }
 
   getSortIcon(column: SortColumn): string {
-    if (this.sortColumn !== column) return 'unfold_more';
-    return this.sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
+    if (this.sortColumn !== column) return SortArrow.NONE;
+    return this.sortDirection === SortDirection.Asc ? SortArrow.UP : SortArrow.DOWN;
   }
 
   onSearchChange(): void {
@@ -200,18 +199,17 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
     return (
       this.branchIds &&
       this.listBranch &&
-      this.branchIds.length === this.listBranch.length &&
-      this.branchIds.indexOf('all' as any) === -1
+      this.branchIds.length === this.listBranch.length
     );
   }
 
   getSelectAllText(): string {
     if (this.isAllSelected()) {
-      return 'Deselect All';
+      return SelectAllText.DESELECT_ALL;
     } else if (this.branchIds && this.branchIds.length > 0) {
-      return 'Deselect';
+      return SelectAllText.DESELECT;
     } else {
-      return 'Select All';
+      return SelectAllText.SELECT_ALL;
     }
   }
 
@@ -220,8 +218,8 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
     this.branchSearchText = "";
     this.branchIds = [];
     this.limit = undefined;
-    this.sortColumn = '';
-    this.sortDirection = '';
+    this.sortColumn = SortColumn.None;
+    this.sortDirection = SortDirection.None;
     this.searchOrFilter();
   }
 
