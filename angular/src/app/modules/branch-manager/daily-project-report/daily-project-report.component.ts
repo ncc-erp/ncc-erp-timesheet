@@ -12,6 +12,7 @@ import {
   DailyProjectTimelogReportResponse,
 } from "@app/service/api/daily-project-report.service";
 import { BranchDto } from "@shared/service-proxies/service-proxies";
+import { SortColumn, SortDirection, SelectAllText, SortArrow } from './enum/daily-project-report.enum';
 
 declare var ResizeObserver: any;
 
@@ -23,9 +24,6 @@ interface ProjectReportItem {
   memberCount: number;
   expanded?: boolean;
 }
-
-type SortColumn = 'name' | 'memberCount' | 'totalTimelogLW' | 'totalTimelogLM';
-type SortDirection = 'asc' | 'desc' | '';
 
 @Component({
   selector: "app-daily-project-report",
@@ -47,8 +45,8 @@ export class DailyProjectReportComponent implements OnInit, OnChanges, AfterView
   itemSize: number = 48;
   maxHeight = 400;
 
-  sortColumn: SortColumn | '' = '';
-  sortDirection: SortDirection = '';
+  sortColumn: SortColumn = SortColumn.None;
+  sortDirection: SortDirection = SortDirection.None;
 
   reportData: DailyProjectTimelogReportResponse[];
   isLoading: boolean = false;
@@ -124,8 +122,7 @@ export class DailyProjectReportComponent implements OnInit, OnChanges, AfterView
   getBranchCodes(): number[] {
     if (
       !this.branchIds ||
-      this.branchIds.length === 0 ||
-      this.branchIds.indexOf("all" as any) !== -1
+      this.branchIds.length === 0
     ) {
       return this.listBranch ? this.listBranch.map((branch) => branch.id) : [];
     }
@@ -173,37 +170,40 @@ export class DailyProjectReportComponent implements OnInit, OnChanges, AfterView
       let valueA: any = a[column] || 0;
       let valueB: any = b[column] || 0;
 
-      if (column === 'name') {
+      if (column === SortColumn.Name) {
         valueA = valueA.toLowerCase();
         valueB = valueB.toLowerCase();
-        return direction === 'asc'
+        return direction === SortDirection.Asc
           ? valueA.localeCompare(valueB)
           : valueB.localeCompare(valueA);
       }
 
-      return direction === 'asc' ? valueA - valueB : valueB - valueA;
+      return direction === SortDirection.Asc ? valueA - valueB : valueB - valueA;
     });
   }
 
   onSort(column: SortColumn): void {
-    if (this.sortColumn === column) {
-      if (this.sortDirection === 'asc') {
-        this.sortDirection = 'desc';
-      } else if (this.sortDirection === 'desc') {
-        this.sortDirection = '';
-        this.sortColumn = '';
+    const currentCol = this.sortColumn as SortColumn;
+    const currentDir = this.sortDirection as SortDirection;
+
+    if (currentCol === column) {
+      if (currentDir === SortDirection.Asc) {
+        this.sortDirection = SortDirection.Desc;
+      } else if (currentDir === SortDirection.Desc) {
+        this.sortDirection = SortDirection.None;
+        this.sortColumn = SortColumn.None;
       }
     } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
+      this.sortColumn = column as SortColumn;
+      this.sortDirection = SortDirection.Asc;
     }
 
     this.applyFilters();
   }
 
   getSortIcon(column: SortColumn): string {
-    if (this.sortColumn !== column) return 'unfold_more';
-    return this.sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
+    if (this.sortColumn !== column) return SortArrow.NONE;
+    return this.sortDirection === SortDirection.Asc ? SortArrow.UP : SortArrow.DOWN;
   }
 
   onSearchChange(): void {
@@ -247,11 +247,11 @@ export class DailyProjectReportComponent implements OnInit, OnChanges, AfterView
 
   getSelectAllText(): string {
     if (this.isAllSelected()) {
-      return 'Deselect All';
+      return SelectAllText.DESELECT_ALL;
     } else if (this.branchIds && this.branchIds.length > 0) {
-      return 'Deselect';
+      return SelectAllText.DESELECT;
     } else {
-      return 'Select All';
+      return SelectAllText.SELECT_ALL;
     }
   }
   toggleSelectAll(event?: MouseEvent): void {
@@ -279,8 +279,8 @@ export class DailyProjectReportComponent implements OnInit, OnChanges, AfterView
     this.branchIds = [];
     this.minHours = undefined;
     this.limit = undefined;
-    this.sortColumn = '';
-    this.sortDirection = '';
+    this.sortColumn = SortColumn.None;
+    this.sortDirection = SortDirection.None;
     
     this.projects = [];
     this.filteredProjects = [];
