@@ -4,6 +4,7 @@ import {
   OnInit,
   OnChanges,
   SimpleChanges,
+  ViewChild,
 } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@app/service/api/daily-employee-report.service";
 import { BranchDto } from "@shared/service-proxies/service-proxies";
 import { SortColumn, SortDirection, SelectAllText, SortArrow } from './enum/daily-employee-report.enum';
+import { CdkVirtualScrollViewport } from '@node_modules/@angular/cdk/scrolling';
 
 @Component({
   selector: "app-daily-employee-report",
@@ -41,6 +43,8 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
 
   Math = Math;
 
+  @ViewChild('scrollViewport') scrollViewport: CdkVirtualScrollViewport;
+
   constructor(private dailyEmployeeReportService: DailyEmployeeReportService) {}
 
   ngOnInit(): void {
@@ -53,6 +57,19 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.listBranch && changes.listBranch.currentValue) {
       this.listBranchFilter = changes.listBranch.currentValue;
+      if (this.filteredProjects) {
+        setTimeout(() => this.checkViewports(), 0);
+      }
+    }
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.checkViewports(), 100);
+  }
+
+  checkViewports(): void {
+    if (this.scrollViewport) {
+      this.scrollViewport.checkViewportSize();
     }
   }
 
@@ -67,6 +84,7 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
           this.projects = this.reportData || [];
           this.applyFilters();
           this.isLoading = false;
+          setTimeout(() => this.checkViewports(), 0);
         },
         error: (error) => {
           console.error("API Error:", error);
