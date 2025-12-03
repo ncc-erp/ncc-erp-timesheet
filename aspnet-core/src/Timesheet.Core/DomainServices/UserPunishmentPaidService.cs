@@ -519,11 +519,18 @@ namespace Timesheet.DomainServices
             {
                 try
                 {
-                    var unpaidPunishments = await WorkScope.GetAll<UserPunishment>()
+                    var now = DateTime.Now;
+                    var currentMonthStart = new DateTime(now.Year, now.Month, 1);
+                    var currentMonthEnd = currentMonthStart.AddMonths(1);
+
+                    var allPunishments = await WorkScope.GetAll<UserPunishment>()
                         .Where(p => p.UserId == userId)
                         .Where(p => !p.IsDeleted)
-                        .Where(p => p.IsPaid == false || p.IsPaid == null)
                         .ToListAsync();
+
+                    var unpaidPunishments = allPunishments
+                        .Where(p => p.IsPaid == false || p.IsPaid == null)
+                        .ToList();
 
                     var balance = await WorkScope.GetAll<UserPunishmentBalance>()
                         .Where(b => b.UserId == userId)
@@ -539,19 +546,19 @@ namespace Timesheet.DomainServices
                     var currentTotalPunishmentMoney = balance.TotalPunishmentMoney;
                     var currentRemainPoints = balance.RemainPoints;
 
+                    if (currentTotalPunishmentMoney <= 0)
+                    {
+                        result.Success = false;
+                        result.Message = "No unpaid punishments to apply points to";
+                        return result;
+                    }
+
                     bool canPayAll = currentRemainPoints >= currentTotalPunishmentMoney;
 
                     if (!canPayAll)
                     {
                         result.Success = false;
                         result.Message = $"Insufficient remain points. Required: {currentTotalPunishmentMoney:N0}, Available: {currentRemainPoints:N0}";
-                        return result;
-                    }
-
-                    if (currentTotalPunishmentMoney <= 0)
-                    {
-                        result.Success = false;
-                        result.Message = "No unpaid punishments to apply points to";
                         return result;
                     }
 
@@ -579,6 +586,28 @@ namespace Timesheet.DomainServices
                         punishment.IsPaid = true;
                         await WorkScope.UpdateAsync(punishment);
                     }
+
+                    var totalPaidPunishmentInMonth = allPunishments
+                      .Where(p => p.IsPaid == true)
+                      .Where(p => p.DateAt >= currentMonthStart && p.DateAt < currentMonthEnd)
+                      .Sum(p => p.TotalMoney);
+
+                    var existingUsedPoints = await WorkScope.GetAll<UserPunishmentRefund>()
+                      .Where(r => r.UserId == userId)
+                      .Where(r => !r.IsDeleted)
+                      .Where(r => r.Type == PointType.IsUse)
+                      .Where(r => r.CreationTime >= currentMonthStart && r.CreationTime < currentMonthEnd)
+                      .SumAsync(r => r.Points);
+
+                    var totalRemainPointsUsedInMonth = existingUsedPoints + currentTotalPunishmentMoney;
+
+                    result.UserBalance = new GetUserPunishmentBalanceDto
+                    {
+                        TotalPunishmentMoney = newTotalPunishmentMoney,
+                        RemainPoints = newRemainPoints
+                    };
+                    result.TotalRemainPointsUsedInMonth = totalRemainPointsUsedInMonth;
+                    result.TotalPaidPunishmentInMonth = totalPaidPunishmentInMonth;
 
                     result.Success = true;
                     result.Message = $"Successfully applied {currentTotalPunishmentMoney:N0} reward points. All penalties paid.";

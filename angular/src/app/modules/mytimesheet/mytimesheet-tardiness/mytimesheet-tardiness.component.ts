@@ -613,8 +613,10 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
           }
         });
 
-        dialogRef.componentInstance.remainPointsUsed.subscribe(() => {
-          this.reloadSummaryAndApply(dialogRef);
+        dialogRef.componentInstance.remainPointsUsed.subscribe((summaryResult) => {
+          if (summaryResult) {
+            this.applySummaryToDialogAndParent(dialogRef, summaryResult);
+          }
         });
 
         dialogRef.afterClosed().subscribe(() => {
@@ -638,15 +640,10 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
           }
         });
 
-        dialogRef.componentInstance.remainPointsUsed.subscribe(() => {
-          this.userPunishmentPaidService
-            .previewApplyAndGetSummary(this.year, this.month + 1)
-            .subscribe((summaryResult) => {
-              const updatedTotalUsed = summaryResult && summaryResult.totalRemainPointsUsedInMonth ? summaryResult.totalRemainPointsUsedInMonth : 0;
-              dialogRef.componentInstance.totalUsedRemainPoints = updatedTotalUsed;
-            }, (error) => {
-              console.error('Error reloading total used RemainPoints:', error);
-            });
+        dialogRef.componentInstance.remainPointsUsed.subscribe((summaryResult) => {
+          if (summaryResult) {
+            this.applySummaryToDialogAndParent(dialogRef, summaryResult);
+          }
         });
 
         dialogRef.afterClosed().subscribe(() => {
