@@ -59,9 +59,6 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.listBranch && changes.listBranch.currentValue) {
       this.listBranchFilter = changes.listBranch.currentValue;
-      if (this.filteredProjects) {
-        setTimeout(() => this.checkViewports(), 0);
-      }
     }
   }
 
@@ -87,7 +84,6 @@ export class DailyEmployeeReportComponent implements OnInit, OnChanges {
           this.applyFilters();
           this.isLoading = false;
           setTimeout(() => {
-            this.checkViewports();
             this.setDynamicItemSize();
           }, 0);
         },
