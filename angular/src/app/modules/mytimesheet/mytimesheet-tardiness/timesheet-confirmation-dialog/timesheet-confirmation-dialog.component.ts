@@ -19,7 +19,7 @@ import { STORAGE_KEYS } from '@app/constant/storage-keys.constant';
   styleUrls: ['./timesheet-confirmation-dialog.component.css']
 })
 export class TimesheetConfirmationDialogComponent extends AppComponentBase implements OnInit {
-  @Output() remainPointsUsed = new EventEmitter<void>();
+  @Output() remainPointsUsed = new EventEmitter<any>();
   totalErrors: number = 0;
   totalFine: number = 0;
   totalRemainPointsUsedInMonth: number = 0;
@@ -375,8 +375,21 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
         if (result && result.success) {
           this.snackBar.open('Applied remain points successfully.', 'Close', { duration: 5000, panelClass: ['snackbar-success'] });
 
+          if (result.userBalance) {
+            this.userBalance = result.userBalance;
+            this.totalFine = this.userBalance.totalPunishmentMoney;
+          }
+          if (result.totalRemainPointsUsedInMonth !== undefined) {
+            this.totalUsedRemainPoints = result.totalRemainPointsUsedInMonth;
+          }
+          if (result.totalPaidPunishmentInMonth !== undefined) {
+            this.totalPaidPunishmentInMonth = result.totalPaidPunishmentInMonth;
+          }
+          
+          this.updateOwedAmount();
+
           if (this.remainPointsUsed) {
-            this.remainPointsUsed.emit();
+            this.remainPointsUsed.emit(result);
           }
         } else {
           this.snackBar.open(result && result.message ? result.message : 'Failed to apply remain points.', 'Close', { duration: 5000, panelClass: ['snackbar-error'] });
