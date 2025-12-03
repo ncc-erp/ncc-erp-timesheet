@@ -11,7 +11,7 @@
 .table-header-wrapper {
   overflow: hidden;
   border-bottom: 2px solid #ddd;
-  padding-right: 8px;
+  padding-right: 2px;
 }
 
 .table-header-fixed {
@@ -178,7 +178,7 @@
 
 /* Scrollbar Styling */
 .virtual-scroll-viewport::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
 }
 
 .virtual-scroll-viewport::-webkit-scrollbar-track {
