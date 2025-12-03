@@ -5,7 +5,8 @@ import {
   OnChanges,
   SimpleChanges,
   ElementRef,
-  AfterViewInit
+  AfterViewInit,
+  ViewChild,
 } from "@angular/core";
 import {
   DailyProjectTimelogReportService,
@@ -13,6 +14,7 @@ import {
 } from "@app/service/api/daily-project-report.service";
 import { BranchDto } from "@shared/service-proxies/service-proxies";
 import { SortColumn, SortDirection, SelectAllText, SortArrow } from './enum/daily-project-report.enum';
+import { CdkVirtualScrollViewport } from '@node_modules/@angular/cdk/scrolling';
 
 declare var ResizeObserver: any;
 
@@ -53,6 +55,10 @@ export class DailyProjectReportComponent implements OnInit, OnChanges, AfterView
 
   Math = Math;
 
+  @ViewChild('scrollViewport') scrollViewport: CdkVirtualScrollViewport;
+
+  private hasSetItemSize: boolean = false;
+
   constructor(
     private dailyProjectReportService: DailyProjectTimelogReportService,
     private elementRef: ElementRef
@@ -68,21 +74,20 @@ export class DailyProjectReportComponent implements OnInit, OnChanges, AfterView
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.listBranch && changes.listBranch.currentValue) {
       this.listBranchFilter = changes.listBranch.currentValue;
+      if (this.filteredProjects) {
+        setTimeout(() => this.checkViewports(), 0);
+      }
     }
   }
 
-  ngAfterViewInit() {
-    const viewport = this.elementRef.nativeElement.querySelector('cdk-virtual-scroll-viewport');
-    const header = this.elementRef.nativeElement.querySelector('.table-header-wrapper');
-    if (!viewport || !header) return;
+  ngAfterViewInit(): void {
+    setTimeout(() => this.checkViewports(), 100);
+  }
 
-    const sync = () => {
-      const hasScroll = viewport.scrollHeight > viewport.clientHeight;
-      header.classList.toggle('has-scroll', hasScroll);
-    };
-
-    new ResizeObserver(sync).observe(viewport);
-    setTimeout(sync, 100);
+  checkViewports(): void {
+    if (this.scrollViewport) {
+      this.scrollViewport.checkViewportSize();
+    }
   }
 
   searchOrFilter(): void {
@@ -109,6 +114,10 @@ export class DailyProjectReportComponent implements OnInit, OnChanges, AfterView
           }));
           this.applyFilters();
           this.isLoading = false;
+          setTimeout(() => {
+            this.checkViewports();
+            this.setDynamicItemSize();
+          }, 0);
         },
         error: (error) => {
           console.error("API Error:", error);
@@ -117,6 +126,19 @@ export class DailyProjectReportComponent implements OnInit, OnChanges, AfterView
           this.isLoading = false;
         },
       });
+  }
+
+  private setDynamicItemSize(): void {
+    if (this.hasSetItemSize || !this.scrollViewport || this.filteredProjects.length === 0) {
+      return;
+    }
+    const rowElement = this.scrollViewport.elementRef.nativeElement.querySelector('tr');
+    if (rowElement) {
+      this.itemSize = rowElement.offsetHeight;
+      this.hasSetItemSize = true;
+      this.checkViewports();
+    }
+
   }
 
   getBranchCodes(): number[] {
