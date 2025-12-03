@@ -604,47 +604,43 @@ namespace Ncc.Users
             {
                 throw new UserFriendlyException("User is not exist");
             }
-            var userProjectData = await (
-                from pu in _ws.GetAll<ProjectUser>()
-                join p in _ws.GetAll<Project>() on pu.ProjectId equals p.Id
-                join pmCount in (
-                    from pm in _ws.GetAll<ProjectUser>()
-                    where pm.Type == ProjectUserType.PM && pm.Type != ProjectUserType.DeActive
-                    group pm by pm.ProjectId into g
-                    select new { ProjectId = g.Key, TotalPMs = g.Count() }
-                ) on pu.ProjectId equals pmCount.ProjectId
-                where pu.UserId == input.Id && pu.Type != ProjectUserType.DeActive
-                select new
+            var projectPmInfo = await _ws.GetAll<ProjectUser>()
+                .Where(pu => pu.Type == ProjectUserType.PM && pu.Type != ProjectUserType.DeActive)
+                .GroupBy(pu => pu.ProjectId)
+                .Select(g => new
                 {
-                    ProjectUser = pu,
-                    ProjectId = pu.ProjectId,
-                    UserType = pu.Type,
-                    ProjectName = p.Name,
-                    ProjectStatus = p.Status,
-                    TotalPMs = pmCount.TotalPMs
-                }
-            ).ToListAsync();
-            var isOnlyPMInActiveProject = userProjectData
-                .Where(x => x.UserType == ProjectUserType.PM && x.ProjectStatus == ProjectStatus.Active)
-                .FirstOrDefault(x => x.TotalPMs == 1);
-
-            if (isOnlyPMInActiveProject != null)
+                    ProjectId = g.Key,
+                    PmCount = g.Count(),
+                    PmUserIds = g.Select(pu => pu.UserId).ToList()
+                })
+                .Where(x => x.PmUserIds.Contains(input.Id))
+                .ToListAsync();
+            var projectWithSinglePm = projectPmInfo.FirstOrDefault(p => p.PmCount == 1);
+            if (projectWithSinglePm != null)
             {
+                var projectName = await _ws.GetAll<Project>()
+                    .Where(p => p.Id == projectWithSinglePm.ProjectId)
+                    .Select(p => p.Name)
+                    .FirstOrDefaultAsync();
+
                 throw new UserFriendlyException(
-                    $"Cannot deactivate the only PM in project '{isOnlyPMInActiveProject.ProjectName}'. " +
+                    $"Cannot deactivate the only PM in project '{projectName}'. " +
                     "Please assign another PM first.");
             }
             user.EndDateAt = user.EndDateAt ?? DateTimeUtils.GetNow();
             user.IsActive = false;
-            await _ws.GetRepo<User, long>().UpdateAsync(user);
-            if (userProjectData.Any())
+            var projectIdsToUpdate = projectPmInfo.Select(p => p.ProjectId).ToList();
+            var projectUsersToUpdate = await _ws.GetAll<ProjectUser>()
+                .Where(pu => pu.UserId == input.Id
+                          && pu.Type != ProjectUserType.DeActive
+                          && projectIdsToUpdate.Contains(pu.ProjectId))
+                .ToListAsync();
+
+            foreach (var pu in projectUsersToUpdate)
             {
-                foreach (var item in userProjectData)
-                {
-                    item.ProjectUser.Type = ProjectUserType.DeActive;
-                }
-                await _ws.GetRepo<ProjectUser, long>().GetDbContext().SaveChangesAsync();
+                pu.Type = ProjectUserType.DeActive;
             }
+            await _ws.GetRepo<User, long>().GetDbContext().SaveChangesAsync();
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_ChangeStatus)]
