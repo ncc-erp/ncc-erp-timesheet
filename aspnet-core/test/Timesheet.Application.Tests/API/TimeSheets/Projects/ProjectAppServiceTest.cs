@@ -427,5 +427,82 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
                 Assert.Equal(expectedMessage, exception.Message);
             });
         }
+        [Fact]
+        public async void Should_Throw_Exception_When_User_Not_In_Project()
+        {
+            long projectId = 1;
+            long nonExistUserId = 9999;
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+                    await _projectAppService.ReleaseUserFromProject(projectId, nonExistUserId));
+
+                exception.Message.ShouldBe($"User with id {nonExistUserId} is not in the project with Id {projectId}");
+            });
+        }
+
+        [Fact]
+        public async void Should_Throw_Exception_When_Try_To_Deactivate_The_Only_PM()
+        {
+            long projectId = 6;
+            long onlyPmUserId = 10; 
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+                    await _projectAppService.ReleaseUserFromProject(projectId, onlyPmUserId));
+
+                exception.Message.ShouldBe("Cannot deactivate the only PM in the project. Please assign another PM first.");
+            });
+        }
+
+        [Fact]
+        public async void Should_Deactivate_Normal_Member_Successfully()
+        {
+            long projectId = 1;
+            long normalUserId = 7; 
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _projectAppService.ReleaseUserFromProject(projectId, normalUserId);
+
+                UsingDbContext(context =>
+                {
+                    var projectUser = context.ProjectUsers
+                        .FirstOrDefault(pu => pu.ProjectId == projectId && pu.UserId == normalUserId);
+
+                    projectUser.ShouldNotBeNull();
+                    projectUser.Type.ShouldBe(ProjectUserType.DeActive);
+                });
+            });
+        }
+
+        [Fact]
+        public async void Should_Deactivate_One_Of_Many_PMs_Successfully()
+        {
+            long projectId = 1;
+            long pmUserId = 2; 
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _projectAppService.ReleaseUserFromProject(projectId, pmUserId);
+
+                UsingDbContext(context =>
+                {
+                    var projectUser = context.ProjectUsers
+                        .FirstOrDefault(pu => pu.ProjectId == projectId && pu.UserId == pmUserId);
+
+                    projectUser.ShouldNotBeNull();
+                    projectUser.Type.ShouldBe(ProjectUserType.DeActive);
+
+                    var remainingPMs = context.ProjectUsers
+                        .Count(pu => pu.ProjectId == projectId && pu.Type == ProjectUserType.PM);
+
+                    remainingPMs.ShouldBeGreaterThan(0);
+                });
+            });
+        }
+
     }
 }
