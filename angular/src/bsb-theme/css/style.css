@@ -10409,6 +10409,18 @@ section.content {
   border-radius: 0 !important;
 }
 
+/* Snackbar colors ============================= */
+
+.snackbar-success {
+  background-color: #4caf50 !important;
+  color: #fff !important;
+}
+
+.snackbar-error {
+  background-color: #f44336 !important;
+  color: #fff !important;
+}
+
 /* For Internet Explorer 10 ===================== */
 
 html.ie10 .sidebar .menu .list li {
