@@ -17,5 +17,6 @@
       "to": "he"
     }
   ],
-  "sentryDsn": ""
+  "sentryDsn": "",
+  "mmnBaseUrl": ""
 }

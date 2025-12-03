@@ -13,5 +13,7 @@ namespace Timesheet.Services.Mezon.Dto
         [JsonProperty("scope")]
         public string Scope { get; set; }
         public string RefreshToken { get; set; }
+        [JsonProperty("id_token")]
+        public string IdToken { get; set; }
     }
 }

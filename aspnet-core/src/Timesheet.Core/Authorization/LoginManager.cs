@@ -29,6 +29,7 @@ using Timesheet.Authorization.Users;
 using Timesheet.Helper;
 using Timesheet.Services.Mezon;
 using Timesheet.Services.Mezon.Dto;
+using Ncc.Authorization.Dto;
 
 namespace Ncc.Authorization
 {
@@ -367,20 +368,25 @@ namespace Ncc.Authorization
         }
 
         [UnitOfWork]
-        public async Task<AbpLoginResult<Tenant, User>> LoginOAuth2Async(string token, string tenancyName = null, bool shouldLockout = true)
+        public async Task<MezonLoginResult> LoginOAuth2Async(string token, string tenancyName = null, bool shouldLockout = true)
         {
             Logger.Info("LoginOAuth2");
-            var result = await LoginInternalOAuth2Async(token, tenancyName, shouldLockout);
+            var mezonResult = await LoginInternalOAuth2Async(token, tenancyName, shouldLockout);
+            var result = mezonResult.LoginResult;
             var user = result.User;
             SaveLoginAttempt(result, tenancyName, user?.EmailAddress);
-            return result;
+            return mezonResult;
         }
 
-        public async Task<AbpLoginResult<Tenant, User>> LoginInternalOAuth2Async(string token, string tenancyName, bool shouldLockout)
+        public async Task<MezonLoginResult> LoginInternalOAuth2Async(string token, string tenancyName, bool shouldLockout)
         {
             if (token.IsNullOrEmpty())
             {
-                return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null);
+                return new MezonLoginResult
+                {
+                    LoginResult = new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null),
+                    IdToken = null
+                };
             }
 
             try
@@ -394,13 +400,21 @@ namespace Ncc.Authorization
 
                 if (tokenResponse == null || string.IsNullOrEmpty(tokenResponse.AccessToken))
                 {
-                    return new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null);
+                    return new MezonLoginResult
+                    {
+                        LoginResult = new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null),
+                        IdToken = null
+                    };
                 }
 
                 var userInfo = await _mezonService.GetUserInfoAsync(tokenResponse.AccessToken);
                 if (userInfo == null)
                 {
-                    return new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null);
+                    return new MezonLoginResult
+                    {
+                        LoginResult = new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null),
+                        IdToken = null
+                    };
                 }
 
                 var correctAudience = userInfo.Audience.Any(s => s == mezonConfig.ClientId);
@@ -410,7 +424,11 @@ namespace Ncc.Authorization
 
                 if (!correctAudience || !correctIssuer || !correctSub || !correctExpiryTime)
                 {
-                    return new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null);
+                    return new MezonLoginResult
+                    {
+                        LoginResult = new AbpLoginResult<Tenant, User>(AbpLoginResultType.InvalidUserNameOrEmailAddress, null),
+                        IdToken = null
+                    };
                 }
 
                 var loginResult = await HandleAuthWithEmail(
@@ -420,11 +438,19 @@ namespace Ncc.Authorization
                     shouldLockout: shouldLockout
                     );
 
-                return loginResult;
+                return new MezonLoginResult
+                {
+                    LoginResult = loginResult,
+                    IdToken = tokenResponse.IdToken
+                };
             }
             catch (Exception)
             {
-                return new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null);
+                return new MezonLoginResult
+                {
+                    LoginResult = new AbpLoginResult<Tenant, User>(AbpLoginResultType.UnknownExternalLogin, null),
+                    IdToken = null
+                };
             }
         }
     }

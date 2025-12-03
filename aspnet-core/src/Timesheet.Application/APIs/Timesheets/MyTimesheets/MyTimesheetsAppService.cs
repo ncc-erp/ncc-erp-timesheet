@@ -737,12 +737,6 @@ namespace Timesheet.Timesheets.MyTimesheets
 
         private async Task<bool> HasPaidEnoughPunishment(long userId)
         {
-            var currentDate = DateTimeUtils.GetNow();
-            var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
-
-            var startDate = firstDayOfMonth;
-            var endDate = currentDate;
-
             var balance = await WorkScope.GetAll<UserPunishmentBalance>()
                 .FirstOrDefaultAsync(b => b.UserId == userId);
 
