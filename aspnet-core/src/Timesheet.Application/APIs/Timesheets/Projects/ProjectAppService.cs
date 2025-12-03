@@ -868,16 +868,12 @@ namespace Timesheet.Timesheets.Projects
             }
             if (projectUser.Type == ProjectUserType.PM)
             {
-                var otherPMsCount = WorkScope.GetAll<ProjectUser>()
-                    .Count(pu => pu.Project.Id == projectId 
-                       && pu.User.Id != userId 
-                       && pu.Type == ProjectUserType.PM);
-                if (otherPMsCount == 0)
-                {
-                    throw new UserFriendlyException("Cannot deactivate the only PM in the project. Please assign another PM first.");
-                }
+                throw new UserFriendlyException("You can't deactive PM of this project!");
             }
-            
+            else
+            {
+                projectUser.Type = ProjectUserType.DeActive;
+            }
             projectUser.Type = ProjectUserType.DeActive;
             await WorkScope.UpdateAsync(projectUser);
         }
