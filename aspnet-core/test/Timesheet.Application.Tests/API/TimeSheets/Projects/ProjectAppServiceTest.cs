@@ -209,7 +209,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
 
                 Assert.Equal(expectedMessage, exception.Message);
             });
-         }
+        }
 
         [Fact]
         public async void GetById()
@@ -250,13 +250,13 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
                 Assert.Equal(expectedIsNotifyToKomu, result.IsNotifyToKomu);
                 Assert.Equal(expectedIsNoticeKMSubmitTimeSheet, result.IsNoticeKMSubmitTS);
             });
-         }
+        }
 
         [Fact]
         public async void ClearDefaultProjectTask()
         {
             var workScope = Resolve<IWorkScope>();
-            
+
 
             await WithUnitOfWorkAsync(async () =>
             {
@@ -302,7 +302,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
             await WithUnitOfWorkAsync(async () =>
             {
                 var result = await _projectAppService.GetFilter();
-                
+
                 Assert.Equal(expectedCount, result.Count);
                 result.ShouldContain(project => project.Name == expectedName);
                 result.ShouldContain(project => project.Code == expectedCode);
@@ -319,7 +319,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
             await WithUnitOfWorkAsync(async () =>
             {
                 var result = await _projectAppService.GetProjectPM();
-                
+
                 Assert.Equal(expectedCount, result.Count);
                 result.ShouldContain(project => project.Name == expectedName);
                 result.ShouldContain(project => project.Code == expectedCode);
@@ -336,7 +336,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
             await WithUnitOfWorkAsync(async () =>
             {
                 var result = await _projectAppService.GetProjectWorkingTimePM();
-                
+
                 Assert.Equal(expectedCount, result.Count);
                 result.ShouldContain(project => project.Name == expectedName);
                 result.ShouldContain(project => project.Code == expectedCode);
@@ -353,7 +353,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
             await WithUnitOfWorkAsync(async () =>
             {
                 var result = await _projectAppService.GetProjectUser();
-                
+
                 Assert.Equal(expectedCount, result.Count);
                 result.ShouldContain(project => project.Name == expectedName);
                 result.ShouldContain(project => project.Code == expectedCode);
@@ -427,5 +427,82 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
                 Assert.Equal(expectedMessage, exception.Message);
             });
         }
+        [Fact]
+        public async void Should_Throw_Exception_When_User_Not_In_Project()
+        {
+            long projectId = 1;
+            long nonExistUserId = 9999;
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+                    await _projectAppService.ReleaseUserFromProject(projectId, nonExistUserId));
+
+                exception.Message.ShouldBe($"User with id {nonExistUserId} is not in the project with Id {projectId}");
+            });
+        }
+
+        [Fact]
+        public async void Should_Throw_Exception_When_Try_To_Deactivate_The_Only_PM()
+        {
+            long projectId = 6;
+            long onlyPmUserId = 10;
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+                    await _projectAppService.ReleaseUserFromProject(projectId, onlyPmUserId));
+
+                exception.Message.ShouldBe("Cannot deactivate the only PM in the project. Please assign another PM first.");
+            });
+        }
+
+        [Fact]
+        public async void Should_Deactivate_Normal_Member_Successfully()
+        {
+            long projectId = 1;
+            long normalUserId = 7;
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _projectAppService.ReleaseUserFromProject(projectId, normalUserId);
+
+                UsingDbContext(context =>
+                {
+                    var projectUser = context.ProjectUsers
+                        .FirstOrDefault(pu => pu.ProjectId == projectId && pu.UserId == normalUserId);
+
+                    projectUser.ShouldNotBeNull();
+                    projectUser.Type.ShouldBe(ProjectUserType.DeActive);
+                });
+            });
+        }
+
+        [Fact]
+        public async void Should_Deactivate_One_Of_Many_PMs_Successfully()
+        {
+            long projectId = 1;
+            long pmUserId = 2;
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _projectAppService.ReleaseUserFromProject(projectId, pmUserId);
+
+                UsingDbContext(context =>
+                {
+                    var projectUser = context.ProjectUsers
+                        .FirstOrDefault(pu => pu.ProjectId == projectId && pu.UserId == pmUserId);
+
+                    projectUser.ShouldNotBeNull();
+                    projectUser.Type.ShouldBe(ProjectUserType.DeActive);
+
+                    var remainingPMs = context.ProjectUsers
+                        .Count(pu => pu.ProjectId == projectId && pu.Type == ProjectUserType.PM);
+
+                    remainingPMs.ShouldBeGreaterThan(0);
+                });
+            });
+        }
+
     }
 }
