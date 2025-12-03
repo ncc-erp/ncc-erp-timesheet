@@ -51,6 +51,7 @@ using System.Net.Mail;
 using Timesheet.APIs.Public;
 using Ncc.Net.MimeTypes;
 using Timesheet.DataExport;
+using Abp.EntityFrameworkCore.Repositories;
 
 namespace Ncc.Users
 {
@@ -599,19 +600,48 @@ namespace Ncc.Users
         public async System.Threading.Tasks.Task DeactiveUser(EntityDto<long> input)
         {
             var user = await _ws.GetAsync<User>(input.Id);
-            if (user != null)
+            if (user == null)
             {
-                user.EndDateAt = user.EndDateAt.HasValue ? user.EndDateAt : DateTimeUtils.GetNow();
-                user.IsActive = false;
-                await _ws.GetRepo<User, long>().UpdateAsync(user);
+                throw new UserFriendlyException("User is not exist");
             }
-            else
+            var projectPmInfo = await _ws.GetAll<ProjectUser>()
+                .Where(pu => pu.Type == ProjectUserType.PM && pu.Type != ProjectUserType.DeActive)
+                .GroupBy(pu => pu.ProjectId)
+                .Select(g => new
+                {
+                    ProjectId = g.Key,
+                    PmCount = g.Count(),
+                    PmUserIds = g.Select(pu => pu.UserId).ToList()
+                })
+                .Where(x => x.PmUserIds.Contains(input.Id))
+                .ToListAsync();
+            var projectWithSinglePm = projectPmInfo.FirstOrDefault(p => p.PmCount == 1);
+            if (projectWithSinglePm != null)
             {
-                throw new UserFriendlyException(string.Format("User is not exist"));
-            }
+                var projectName = await _ws.GetAll<Project>()
+                    .Where(p => p.Id == projectWithSinglePm.ProjectId)
+                    .Select(p => p.Name)
+                    .FirstOrDefaultAsync();
 
+                throw new UserFriendlyException(
+                    $"Cannot deactivate the only PM in project '{projectName}'. " +
+                    "Please assign another PM first.");
+            }
+            user.EndDateAt = user.EndDateAt ?? DateTimeUtils.GetNow();
+            user.IsActive = false;
+            var projectIdsToUpdate = projectPmInfo.Select(p => p.ProjectId).ToList();
+            var projectUsersToUpdate = await _ws.GetAll<ProjectUser>()
+                .Where(pu => pu.UserId == input.Id
+                          && pu.Type != ProjectUserType.DeActive
+                          && projectIdsToUpdate.Contains(pu.ProjectId))
+                .ToListAsync();
+
+            foreach (var pu in projectUsersToUpdate)
+            {
+                pu.Type = ProjectUserType.DeActive;
+            }
+            await _ws.GetRepo<User, long>().GetDbContext().SaveChangesAsync();
         }
-
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_ChangeStatus)]
         public async System.Threading.Tasks.Task ActiveUser(EntityDto<long> input)
@@ -825,5 +855,3 @@ namespace Ncc.Users
         }
     }
 }
-
-
