@@ -599,42 +599,69 @@ namespace Ncc.Users
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_ChangeStatus)]
         public async System.Threading.Tasks.Task DeactiveUser(EntityDto<long> input)
         {
-            var projectUsers = await _ws.GetAll<ProjectUser>()
-            .Where(pu => pu.Type == ProjectUserType.PM && pu.Type != ProjectUserType.DeActive)
-            .GroupBy(pu => pu.ProjectId)
-            .Select(g => new
+            var user = await _ws.GetAll<User>().FirstOrDefaultAsync(u => u.Id == input.Id);
+            if (user == null)
             {
-                ProjectId = g.Key,
-                PmCount = g.Count(),
-                PmUserIds = g.Select(pu => pu.UserId).ToList(),
-                ProjectUsers = g.Select(pu => new { pu.Id, pu.UserId, pu.ProjectId, pu.Type }).ToList()
-            })
-            .Where(x => x.PmUserIds.Contains(input.Id))
-            .ToListAsync();
+                throw new UserFriendlyException("User is not exist");
+            }
+            var allProjectUsers = await _ws.GetAll<ProjectUser>()
+                .Where(pu => pu.Type == ProjectUserType.PM || pu.UserId == input.Id)
+                .Select(pu => new
+                {
+                    pu.Id,
+                    pu.ProjectId,
+                    pu.UserId,
+                    pu.Type
+                })
+                .ToListAsync();
+            var pmProjectIds = allProjectUsers
+                .Where(pu => pu.Type == ProjectUserType.PM)
+                .Select(pu => pu.ProjectId)
+                .Distinct()
+                .ToList();
+            var activeProjects = await _ws.GetAll<Project>()
+                .Where(p => pmProjectIds.Contains(p.Id) && p.Status == ProjectStatus.Active)
+                .Select(p => new { p.Id, p.Name })
+                .ToListAsync();
 
-            var projectWithSinglePm = projectUsers.FirstOrDefault(p => p.PmCount == 1);
+            var activeProjectIds = activeProjects.Select(p => p.Id).ToHashSet();
+            var projectPmInfo = allProjectUsers
+                .Where(pu => pu.Type == ProjectUserType.PM && activeProjectIds.Contains(pu.ProjectId))
+                .GroupBy(pu => pu.ProjectId)
+                .Select(g => new
+                {
+                    ProjectId = g.Key,
+                    PmCount = g.Count(),
+                    PmUserIds = g.Select(pu => pu.UserId).ToList()
+                })
+                .Where(x => x.PmUserIds.Contains(input.Id))
+                .ToList();
+            var projectWithSinglePm = projectPmInfo.FirstOrDefault(p => p.PmCount == 1);
+
             if (projectWithSinglePm != null)
             {
-            var projectName = await _ws.GetAll<Project>()
-            .Where(p => p.Id == projectWithSinglePm.ProjectId)
-            .Select(p => p.Name)
-            .FirstOrDefaultAsync();
+                var projectName = activeProjects
+                    .FirstOrDefault(p => p.Id == projectWithSinglePm.ProjectId)?.Name;
 
-            throw new UserFriendlyException(
-            $"Cannot deactivate the only PM in project '{projectName}'. " +
-            "Please assign another PM first.");
+                throw new UserFriendlyException(
+                    $"Cannot deactivate the only PM in active project '{projectName}'. " +
+                    "Please assign another PM first.");
             }
             user.EndDateAt = user.EndDateAt ?? DateTimeUtils.GetNow();
             user.IsActive = false;
-            var projectUsersToUpdate = projectUsers
-            .SelectMany(x => x.ProjectUsers)
-            .Where(pu => pu.UserId == input.Id && pu.Type != ProjectUserType.DeActive)
-            .ToList();
+            var projectUserIds = allProjectUsers
+                .Where(pu => pu.UserId == input.Id)
+                .Select(pu => pu.Id)
+                .ToList();
 
+            var projectUsersToUpdate = await _ws.GetAll<ProjectUser>()
+                .Where(pu => projectUserIds.Contains(pu.Id))
+                .ToListAsync();
             foreach (var pu in projectUsersToUpdate)
             {
                 pu.Type = ProjectUserType.DeActive;
             }
+
             await _ws.GetRepo<User, long>().GetDbContext().SaveChangesAsync();
         }
 
