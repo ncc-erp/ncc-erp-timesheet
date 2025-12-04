@@ -19,7 +19,7 @@ import { STORAGE_KEYS } from '@app/constant/storage-keys.constant';
   styleUrls: ['./timesheet-confirmation-dialog.component.css']
 })
 export class TimesheetConfirmationDialogComponent extends AppComponentBase implements OnInit {
-  @Output() remainPointsUsed = new EventEmitter<void>();
+  @Output() remainPointsUsed = new EventEmitter<any>();
   totalErrors: number = 0;
   totalFine: number = 0;
   totalRemainPointsUsedInMonth: number = 0;
@@ -47,6 +47,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   activeDayIsOpen: boolean = false;
   refresh: Subject<any> = new Subject();
   timesheetData: any[] = [];
+  usePointsTooltip: string = '';
   zkProofAvailable: boolean = false;
 
   constructor(
@@ -143,6 +144,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       this.totalPaidPunishmentInMonth = this.data.summaryData.totalPaidPunishmentInMonth;
       this.totalRemainPointsUsedInMonth = this.data.summaryData.totalRemainPointsUsedInMonth || 0;
       this.updateOwedAmount();
+      this.updateUsePointsTooltip();
     } else {
       this.loadAllPunishmentData();
     }
@@ -164,20 +166,19 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       this.userPunishmentPaidService.markPaidTransaction(transactionHash, year, month).subscribe(
       result => {
         if (result && result.success) {
-          this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000 });
-          
+            this.snackBar.open('Transaction processed successfully!', 'Close', { duration: 5000, panelClass: ['snackbar-success'] });
+
           this.loadPunishmentPaidData();
-          this.loadAllPunishmentData();
           if (this.data && typeof this.data.onPaidSuccess === 'function') {
             this.data.onPaidSuccess();
           }
         } else {
-            this.snackBar.open(result.message || 'Failed to process transaction', 'Close', { duration: 5000 });
+            this.snackBar.open(result.message || 'Failed to process transaction', 'Close', { duration: 5000, panelClass: ['snackbar-error'] });
         }
       },
       error => {
           console.error('Error marking transaction as paid:', error);
-          this.snackBar.open('Error processing transaction. Please try again.', 'Close', { duration: 5000 });
+          this.snackBar.open('Error processing transaction. Please try again.', 'Close', { duration: 5000, panelClass: ['snackbar-error'] });
       }
     );
     });
@@ -264,6 +265,21 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     );
   }
 
+  public updateUsePointsTooltip(): void {
+    if (!this.userBalance) {
+      this.usePointsTooltip = '';
+      return;
+    }
+
+    if (this.userBalance.totalPunishmentMoney <= 0) {
+      this.usePointsTooltip = 'No punishment amount to pay.';
+    } else if (this.userBalance.remainPoints < this.userBalance.totalPunishmentMoney) {
+      this.usePointsTooltip = 'Your current points are not enough to cover all punishment.';
+    } else {
+      this.usePointsTooltip = 'You can use points to pay all remaining punishments';
+    }
+  }
+
   donate(): void {
     if (this.contributeToFund && this.donationUrl) {
       window.open(this.donationUrl, '_blank');
@@ -331,6 +347,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
           this.totalRemainPointsUsedInMonth = result.totalRemainPointsUsedInMonth || 0;
           this.updateOwedAmount();
           this.totalUsedRemainPoints = result.totalRemainPointsUsedInMonth || 0;
+          this.updateUsePointsTooltip();
         }
       },
       (error) => {
@@ -341,10 +358,59 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     );
   }
 
-  private updateOwedAmount(): void {
+  confirmApplyRemainPoints(): void {
+  abp.message.confirm(
+    'Do you want to use your points to pay all punishments?',
+    (result: boolean) => {
+      if (result) {
+        this.applyRemainPoints();
+      }
+    } 
+  );
+}
+
+  applyRemainPoints(): void {
+    this.userPunishmentPaidService.applyRemainPoints().subscribe(
+      (result) => {
+        if (result && result.success) {
+          this.snackBar.open('Applied remain points successfully.', 'Close', { duration: 5000, panelClass: ['snackbar-success'] });
+
+          if (result.userBalance) {
+            this.userBalance = result.userBalance;
+            this.totalFine = this.userBalance.totalPunishmentMoney;
+          }
+          if (result.totalRemainPointsUsedInMonth !== undefined) {
+            this.totalUsedRemainPoints = result.totalRemainPointsUsedInMonth;
+          }
+          if (result.totalPaidPunishmentInMonth !== undefined) {
+            this.totalPaidPunishmentInMonth = result.totalPaidPunishmentInMonth;
+          }
+          
+          this.updateOwedAmount();
+
+          if (this.remainPointsUsed) {
+            this.remainPointsUsed.emit(result);
+          }
+        } else {
+          this.snackBar.open(result && result.message ? result.message : 'Failed to apply remain points.', 'Close', { duration: 5000, panelClass: ['snackbar-error'] });
+        }
+      },
+      (error) => {
+        console.error('Error applying remain points:', error);
+        this.snackBar.open('Error applying remain points. Please try again.', 'Close', { duration: 5000, panelClass: ['snackbar-error'] });
+      }
+    );
+  }
+
+  public updateOwedAmount(): void {
     const totalPunishment = this.userBalance ? this.userBalance.totalPunishmentMoney : 0;
     const remainPoints = this.userBalance ? this.userBalance.remainPoints : 0;
-    this.owedAmount = Math.max(0, totalPunishment - remainPoints);
+    
+    if (totalPunishment > remainPoints) {
+      this.owedAmount = totalPunishment - remainPoints;
+    } else {
+      this.owedAmount = totalPunishment;
+    }
   }
   
   loadTimesheetData(): void {

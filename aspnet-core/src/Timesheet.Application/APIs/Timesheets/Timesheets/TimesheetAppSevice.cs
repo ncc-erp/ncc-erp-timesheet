@@ -70,7 +70,6 @@ namespace Timesheet.Timesheets.Timesheets
                 .Where(s => projectIds.Contains(s.ProjectId))
                 .Select(s => s.UserId).Distinct().ToListAsync();
 
-
             var absencedays = await WorkScope.GetAll<AbsenceDayDetail>()
                 .Where(s => !startDate.HasValue || s.DateAt >= startDate.Value.Date)
                 .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
@@ -79,11 +78,19 @@ namespace Timesheet.Timesheets.Timesheets
                 .Where(s => s.Request.Type == RequestType.Off)
                 .Select(s => new
                 {
-                    UserId = s.Request.UserId,
-                    DateAt = s.DateAt,
-                    Hour = s.Hour
+                    s.Request.UserId,
+                    s.DateAt,
+                    s.Hour
                 })
                 .ToListAsync();
+
+            var absenceHoursDict = absencedays
+                .GroupBy(s => (UserId: s.UserId, DateAt: s.DateAt.Date))
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Sum(h => h.Hour)
+                );
+
             var userWorkLocations = await WorkScope.GetAll<AbsenceDayDetail>()
                 .Where(s => !startDate.HasValue || s.DateAt >= startDate.Value.Date)
                 .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
@@ -99,21 +106,56 @@ namespace Timesheet.Timesheets.Timesheets
                 })
                 .ToListAsync();
 
-            var q = from a in WorkScope.GetRepo<MyTimesheet>().GetAllIncluding(
-                       s => s.ProjectTask,
-                       s => s.ProjectTask.Task,
-                       s => s.ProjectTask.Project,
-                       s => s.ProjectTask.Project.Customer
-                       )
-                    where (status == TimesheetStatus.All) || (a.Status == status)
-                    where (userIds.Contains(a.UserId))
-                    where (!startDate.HasValue || a.DateAt >= startDate)
-                    where (!endDate.HasValue || a.DateAt.Date <= endDate)
-                    where (projectIds.Contains(a.ProjectTask.ProjectId))
-                    where (!opentalkTime.HasValue || a.ProjectTaskId == OpenTalkID)
-                    where (searchText == null || a.User.EmailAddress.Contains(searchText) || a.User.UserName.Contains(searchText) || a.User.FullName.Contains(searchText))
-                    where (branchId == null || a.User.BranchId == branchId)
-                    select new MyTimeSheetDto
+            var openTalks = await WorkScope.GetAll<OpenTalk>()
+                .Where(s => userIds.Contains(s.UserId))
+                .Where(s => !startDate.HasValue || s.DateAt.Date >= startDate.Value.Date)
+                .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate.Value.Date)
+                .Select(s => new { s.UserId, DateAt = s.DateAt.Date, s.totalTime })
+                .ToListAsync();
+
+            var openTalkTimeDict = openTalks
+                .GroupBy(s => (UserId: s.UserId, DateAt: s.DateAt))
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.FirstOrDefault()?.totalTime ?? 0
+                );
+
+            var queryable = WorkScope.GetAll<MyTimesheet>();
+
+            if (status != TimesheetStatus.All)
+            {
+                queryable = queryable.Where(a => a.Status == status);
+            }
+
+            if (startDate.HasValue)
+            {
+                queryable = queryable.Where(a => a.DateAt >= startDate);
+            }
+
+            if (endDate.HasValue)
+            {
+                queryable = queryable.Where(a => a.DateAt.Date <= endDate);
+            }    
+
+            if (opentalkTime.HasValue)
+            {
+                queryable = queryable.Where(a => a.ProjectTaskId == OpenTalkID);
+            }
+
+            if (branchId != null)
+            {
+                queryable = queryable.Where(a => a.User.BranchId == branchId);
+            }
+
+            queryable = queryable.Where(a => userIds.Contains(a.UserId));
+            queryable = queryable.Where(a => projectIds.Contains(a.ProjectTask.ProjectId));
+
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                queryable = queryable.Where(a => a.User.EmailAddress.Contains(searchText) || a.User.UserName.Contains(searchText) || a.User.FullName.Contains(searchText));
+            }
+
+            var q = queryable.Select(a => new MyTimeSheetDto
                     {
                         Id = a.Id,
                         Status = a.Status,
@@ -123,7 +165,6 @@ namespace Timesheet.Timesheets.Timesheets
                         EmailAddress = a.User.EmailAddress,
                         UserId = a.User.Id,
                         AvatarPath = a.User.AvatarPath,
-                        //Level = a.User.Level,
                         Type = a.User.Type,
                         TaskName = a.ProjectTask.Task.Name,
                         TaskId = a.ProjectTask.TaskId,
@@ -139,14 +180,11 @@ namespace Timesheet.Timesheets.Timesheets
                         LastModificationTime = a.LastModificationTime,
                         BranchColor = a.User.Branch.Color,
                         BranchDisplayName = a.User.Branch.DisplayName,
-                        OffHour = absencedays.Where(s => s.DateAt.Date == a.DateAt.Date && s.UserId == a.User.Id).Select(h => h.Hour).Sum(),
-                        IsOffDay = DateTimeUtils.IsOffDay(dayOffSettings, a.DateAt),
                         IsUnlockedByEmployee = a.IsUnlockedByEmployee,
                         projectTargetUser = a.ProjectTargetUser.User.FullName,
                         workingTimeTargetUser = a.TargetUserWorkingTime,
-                        openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == a.User.Id && a.DateAt == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault(),
                         ProjectTargetRoleName = a.ProjectTargetUser.RoleName
-                    };
+                    });
 
             var query = q.OrderBy(i => i.EmailAddress)
                          .ThenByDescending(s => s.DateAt)
@@ -154,24 +192,16 @@ namespace Timesheet.Timesheets.Timesheets
 
             foreach (var item in query)
             {
-                var totalOffHours = absencedays
-                    .Where(x => x.UserId == item.UserId && x.DateAt.Date == item.DateAt.Date)
-                    .Sum(x => x.Hour);
+                var workLocationRequest = userWorkLocations
+                    .Where(w => w.UserId == item.UserId && w.DateAt.Date == item.DateAt.Date)
+                    .FirstOrDefault();
 
-                var isFullDayOff = totalOffHours >= ConstantUploadFile.FullDay;
+                item.WorkLocation = workLocationRequest?.WorkLocation ?? (RequestType)3; // Default office = 3
 
-                if (isFullDayOff)
-                {
-                    item.WorkLocation = null; // off => null
-                }
-                else
-                {
-                    var workLocationRequest = userWorkLocations
-                        .Where(w => w.UserId == item.UserId && w.DateAt.Date == item.DateAt.Date)
-                        .FirstOrDefault();
-
-                    item.WorkLocation = workLocationRequest?.WorkLocation ?? (RequestType)3; // Default office = 3
-                }
+                var key = (UserId: item.UserId, DateAt: item.DateAt.Date);
+                item.OffHour = absenceHoursDict.TryGetValue(key, out var sumHour) ? sumHour : 0;
+                item.openTalkTime = openTalkTimeDict.TryGetValue(key, out var talkTime) ? talkTime : 0;
+                item.IsOffDay = DateTimeUtils.IsOffDay(dayOffSettings, item.DateAt);
             }
 
             if (workLocation.HasValue)

@@ -48,7 +48,8 @@ export class TranferDialogComponent implements OnInit {
     this.amountControl = new FormControl(defaultAmount, [
       Validators.required,
       Validators.pattern("^[0-9,]+(\\.[0-9]*)?$"),
-      this.minAmountValidator
+      this.minAmountValidator,
+      this.remainingAmountValidator
     ]);
   }
 
@@ -100,6 +101,24 @@ export class TranferDialogComponent implements OnInit {
     return null;
   };
 
+  remainingAmountValidator = (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value) return null;
+    const value = this.parseNumber(control.value);
+    if (isNaN(value)) return null;
+    
+    // Nếu không có tiền phạt (remainingAmount = 0), không cho phép trả tiền
+    if (this.remainingAmount <= 0) {
+      return { noPunishment: { message: 'No punishment amount to pay' } };
+    }
+    
+    // Nếu có tiền phạt, phải trả ít nhất bằng số tiền phạt
+    if (value < this.remainingAmount) {
+      return { remainingAmount: { min: this.remainingAmount, actual: value } };
+    }
+    
+    return null;
+  };
+
   maxAmountValidator = (control: AbstractControl): ValidationErrors | null => {
     if (!control.value) return null;
     const value = this.parseNumber(control.value);
@@ -129,6 +148,7 @@ export class TranferDialogComponent implements OnInit {
           Validators.required,
           Validators.pattern("^[0-9,]+(\\.[0-9]*)?$"),
           this.minAmountValidator,
+          this.remainingAmountValidator,
           this.maxAmountValidator 
         ]);
         this.amountControl.updateValueAndValidity();
