@@ -18,6 +18,8 @@
       (input)="onAmountInput($event)"
       [formControl]="amountControl"
       placeholder="E.g. 1,000" 
+      [matTooltip]="'You must pay an amount that is at least equal to the punishment amount.'"
+      matTooltipPosition="above"
       required
     />
 
@@ -30,14 +32,27 @@
     <mat-error *ngIf="amountControl.hasError('minAmount')">
       Amount must be at least {{ minAmount | number }}.
     </mat-error>
+    <mat-error *ngIf="amountControl.hasError('remainingAmount')">
+      Amount must be at least {{ remainingAmount | number:'1.0-0' }} đồng (punishment amount).
+    </mat-error>
+    <mat-error *ngIf="amountControl.hasError('noPunishment')">
+      You have no punishment amount to pay.
+    </mat-error>
     <mat-error *ngIf="amountControl.hasError('max')">
       Insufficient balance.
     </mat-error>
   </mat-form-field>
 
-  <div class="balance-info">
-    <span class="balance-label">Available Balance:</span>
-    <span class="balance-value">{{ userBalanceDisplay }} đồng</span>
+  <div class="info-section">
+    <div class="remaining-amount-info">
+      <span class="info-label">Punishment Amount:</span>
+      <span class="info-value highlight">{{ remainingAmount | number:'1.0-0' }} đồng</span>
+    </div>
+    
+    <div class="balance-info">
+      <span class="info-label">Available Balance:</span>
+      <span class="info-value">{{ userBalanceDisplay }} đồng</span>
+    </div>
   </div>
 
   <div *ngIf="errorMessage" class="error-alert">

@@ -683,6 +683,7 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
               this.getAllTimeSheet();
               if (this.tardinessComponent) {
                 this.tardinessComponent.getData();
+                this.tardinessComponent.loadUserBalance();
               }
             },
             (error) => {

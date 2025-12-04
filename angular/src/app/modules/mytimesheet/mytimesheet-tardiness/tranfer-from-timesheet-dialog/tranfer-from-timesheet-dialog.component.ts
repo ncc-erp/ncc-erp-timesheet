@@ -13,6 +13,7 @@ export class TranferDialogComponent implements OnInit {
   readonly SCALE = 1_000_000;
 
   minAmount: number = 0;
+  remainingAmount: number = 0;
   userBalanceScaled: number = 0;    
   userBalanceDisplay: string = '0'; 
 
@@ -30,6 +31,9 @@ export class TranferDialogComponent implements OnInit {
     const rawMinAmount = (data && data.minAmount) ? data.minAmount : 0;
     this.minAmount = rawMinAmount / this.SCALE; 
     
+    const rawRemainingAmount = (data && data.remainingAmount) ? data.remainingAmount : 0;
+    this.remainingAmount = rawRemainingAmount; 
+    
     const recipientAddress = data && data.donationWallet
       ? data.donationWallet
       : "";
@@ -37,10 +41,15 @@ export class TranferDialogComponent implements OnInit {
       Validators.required,
     ]);
 
-    this.amountControl = new FormControl("", [
+    const defaultAmount = this.remainingAmount > 0 
+      ? this.remainingAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      : "";
+    
+    this.amountControl = new FormControl(defaultAmount, [
       Validators.required,
       Validators.pattern("^[0-9,]+(\\.[0-9]*)?$"),
-      this.minAmountValidator
+      this.minAmountValidator,
+      this.remainingAmountValidator
     ]);
   }
 
@@ -92,6 +101,24 @@ export class TranferDialogComponent implements OnInit {
     return null;
   };
 
+  remainingAmountValidator = (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value) return null;
+    const value = this.parseNumber(control.value);
+    if (isNaN(value)) return null;
+    
+    // Nếu không có tiền phạt (remainingAmount = 0), không cho phép trả tiền
+    if (this.remainingAmount <= 0) {
+      return { noPunishment: { message: 'No punishment amount to pay' } };
+    }
+    
+    // Nếu có tiền phạt, phải trả ít nhất bằng số tiền phạt
+    if (value < this.remainingAmount) {
+      return { remainingAmount: { min: this.remainingAmount, actual: value } };
+    }
+    
+    return null;
+  };
+
   maxAmountValidator = (control: AbstractControl): ValidationErrors | null => {
     if (!control.value) return null;
     const value = this.parseNumber(control.value);
@@ -121,6 +148,7 @@ export class TranferDialogComponent implements OnInit {
           Validators.required,
           Validators.pattern("^[0-9,]+(\\.[0-9]*)?$"),
           this.minAmountValidator,
+          this.remainingAmountValidator,
           this.maxAmountValidator 
         ]);
         this.amountControl.updateValueAndValidity();
