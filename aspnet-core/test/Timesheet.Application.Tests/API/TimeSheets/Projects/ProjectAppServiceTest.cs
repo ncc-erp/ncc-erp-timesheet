@@ -430,7 +430,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
         [Fact]
         public async void Should_Throw_Exception_When_User_Not_In_Project()
         {
-            long projectId = 1;
+            long projectId = 20072;
             long nonExistUserId = 9999;
 
             await WithUnitOfWorkAsync(async () =>
@@ -445,9 +445,33 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
         [Fact]
         public async void Should_Throw_Exception_When_Try_To_Deactivate_The_Only_PM()
         {
-            long projectId = 6;
-            long onlyPmUserId = 10;
+            long projectId = 0;
+            long onlyPmUserId = 0;
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var workScope = Resolve<IWorkScope>();
+                var project = new Project
+                {
+                    Name = "Test Project Only PM",
+                    Code = "TEST_ONLY_PM",
+                    CustomerId = 1,
+                    Status = ProjectStatus.Active,
+                    ProjectType = ProjectType.TimeAndMaterials,
+                    TimeStart = DateTime.Now,
+                    TimeEnd = DateTime.Now.AddMonths(6)
+                };
 
+                projectId = await workScope.InsertAndGetIdAsync(project);
+                var projectUser = new ProjectUser
+                {
+                    ProjectId = projectId,
+                    UserId = 1,
+                    Type = ProjectUserType.PM
+                };
+
+                await workScope.InsertAsync(projectUser);
+                onlyPmUserId = 1;
+            });
             await WithUnitOfWorkAsync(async () =>
             {
                 var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
@@ -456,17 +480,55 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
                 exception.Message.ShouldBe("Cannot deactivate the only PM in the project. Please assign another PM first.");
             });
         }
-
         [Fact]
         public async void Should_Deactivate_Normal_Member_Successfully()
         {
-            long projectId = 1;
-            long normalUserId = 7;
+            long projectId = 0;
+            long pmUserId = 0;
+            long normalUserId = 0;
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var workScope = Resolve<IWorkScope>();
+
+                var project = new Project
+                {
+                    Name = "Test Project Normal Member",
+                    Code = "TEST_NORMAL_MEMBER",
+                    CustomerId = 1,
+                    Status = ProjectStatus.Active,
+                    ProjectType = ProjectType.TimeAndMaterials,
+                    TimeStart = DateTime.Now,
+                    TimeEnd = DateTime.Now.AddMonths(6)
+                };
+
+                projectId = await workScope.InsertAndGetIdAsync(project);
+
+                var pmUser = new ProjectUser
+                {
+                    ProjectId = projectId,
+                    UserId = 1,
+                    Type = ProjectUserType.PM
+                };
+                await workScope.InsertAsync(pmUser);
+                pmUserId = 1;
+
+                var normalMember = new ProjectUser
+                {
+                    ProjectId = projectId,
+                    UserId = 2,
+                    Type = ProjectUserType.Member
+                };
+                await workScope.InsertAsync(normalMember);
+                normalUserId = 2;
+            });
 
             await WithUnitOfWorkAsync(async () =>
             {
                 await _projectAppService.ReleaseUserFromProject(projectId, normalUserId);
+            });
 
+            await WithUnitOfWorkAsync(async () =>
+            {
                 UsingDbContext(context =>
                 {
                     var projectUser = context.ProjectUsers
@@ -481,21 +543,60 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
         [Fact]
         public async void Should_Deactivate_One_Of_Many_PMs_Successfully()
         {
-            long projectId = 1;
-            long pmUserId = 2;
+            long projectId = 0;
+            long pm1UserId = 0;
+            long pm2UserId = 0;
 
             await WithUnitOfWorkAsync(async () =>
             {
-                await _projectAppService.ReleaseUserFromProject(projectId, pmUserId);
+                var workScope = Resolve<IWorkScope>();
 
+                var project = new Project
+                {
+                    Name = "Test Project Many PMs",
+                    Code = "TEST_MANY_PMS",
+                    CustomerId = 1,
+                    Status = ProjectStatus.Active,
+                    ProjectType = ProjectType.TimeAndMaterials,
+                    TimeStart = DateTime.Now,
+                    TimeEnd = DateTime.Now.AddMonths(6)
+                };
+
+                projectId = await workScope.InsertAndGetIdAsync(project);
+
+                var pm1 = new ProjectUser
+                {
+                    ProjectId = projectId,
+                    UserId = 1,
+                    Type = ProjectUserType.PM
+                };
+                await workScope.InsertAsync(pm1);
+                pm1UserId = 1;
+
+                var pm2 = new ProjectUser
+                {
+                    ProjectId = projectId,
+                    UserId = 2,
+                    Type = ProjectUserType.PM
+                };
+                await workScope.InsertAsync(pm2);
+                pm2UserId = 2;
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _projectAppService.ReleaseUserFromProject(projectId, pm1UserId);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
                 UsingDbContext(context =>
                 {
                     var projectUser = context.ProjectUsers
-                        .FirstOrDefault(pu => pu.ProjectId == projectId && pu.UserId == pmUserId);
+                        .FirstOrDefault(pu => pu.ProjectId == projectId && pu.UserId == pm1UserId);
 
                     projectUser.ShouldNotBeNull();
                     projectUser.Type.ShouldBe(ProjectUserType.DeActive);
-
                     var remainingPMs = context.ProjectUsers
                         .Count(pu => pu.ProjectId == projectId && pu.Type == ProjectUserType.PM);
 
