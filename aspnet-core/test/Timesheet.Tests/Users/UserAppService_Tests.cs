@@ -26,28 +26,52 @@ namespace Ncc.Tests.Users
             _userAppService = InstanceUserAppService();
         }
 
+        //[Fact]
+        //public async Task GetUsers_Test()
+        //{
+        //    // Act
+        //    var output = await _userAppService.GetAll(new PagedUserResultRequestDto{MaxResultCount=20, SkipCount=0} );
+
+        //    // Assert
+        //    output.Items.Count.ShouldBeGreaterThan(0);
+        //}
+
+        //[Fact]
+        //public async Task CreateUser_Test()
+        //{
+        //    // Act
+        //    await _userAppService.Create(
+        //        new CreateUserDto
+        //        {
+        //            EmailAddress = "john@volosoft.com",
+        //            IsActive = true,
+        //            Name = "John",
+        //            Surname = "Nash",
+        //            Password = "123qwe",
+        //            UserName = "john.nash"
+        //        });
+
+        //    await UsingDbContextAsync(async context =>
+        //    {
+        //        var johnNashUser = await context.Users.FirstOrDefaultAsync(u => u.UserName == "john.nash");
+        //        johnNashUser.ShouldNotBeNull();   
+        //    });
+        //}
         [Fact]
         public async void DeactiveUser_Should_Deactive_Success()
         {
+            // Arrange
             await WithUnitOfWorkAsync(async () =>
             {
-                long testUserId = 0;
+                var testUserId = await CreateTestUserAsync();
                 long testProjectId = 0;
 
                 await UsingDbContextAsync(async context =>
                 {
-                    var existingUser = await context.Users
-                        .Where(u => u.IsActive)
-                        .FirstOrDefaultAsync();
-
-                    existingUser.ShouldNotBeNull("Không tìm thấy user active trong DB");
-                    testUserId = existingUser.Id;
-
                     var project = new Project
                     {
                         Name = "Test Project",
-                        Status = ProjectStatus.Active,
-                        Code = "TEST_" + Guid.NewGuid().ToString().Substring(0, 8)
+                        Status = ProjectStatus.Active
                     };
                     context.Projects.Add(project);
                     await context.SaveChangesAsync();
@@ -59,11 +83,10 @@ namespace Ncc.Tests.Users
                         ProjectId = testProjectId,
                         Type = ProjectUserType.Member
                     });
+
                     await context.SaveChangesAsync();
                 });
-
                 await _userAppService.DeactiveUser(new EntityDto<long>(testUserId));
-
                 await UsingDbContextAsync(async context =>
                 {
                     var user = await context.Users.FirstOrDefaultAsync(u => u.Id == testUserId);
@@ -72,7 +95,7 @@ namespace Ncc.Tests.Users
                     user.EndDateAt.ShouldNotBeNull();
 
                     var projectUsers = await context.ProjectUsers
-                        .Where(pu => pu.UserId == testUserId && pu.ProjectId == testProjectId)
+                        .Where(pu => pu.UserId == testUserId)
                         .ToListAsync();
 
                     projectUsers.ShouldAllBe(pu => pu.Type == ProjectUserType.DeActive);
@@ -85,16 +108,9 @@ namespace Ncc.Tests.Users
         {
             await WithUnitOfWorkAsync(async () =>
             {
-                long nonExistentUserId = 0;
-                await UsingDbContextAsync(async context =>
-                {
-                    var maxId = await context.Users.MaxAsync(u => (long?)u.Id) ?? 0;
-                    nonExistentUserId = maxId + 1000;
-                });
-
                 await Assert.ThrowsAsync<UserFriendlyException>(async () =>
                 {
-                    await _userAppService.DeactiveUser(new EntityDto<long>(nonExistentUserId));
+                    await _userAppService.DeactiveUser(new EntityDto<long>(9999));
                 });
             });
         }
@@ -102,184 +118,125 @@ namespace Ncc.Tests.Users
         [Fact]
         public async void DeactiveUser_Should_Throw_When_PM_Is_Only_PM_In_Active_Project()
         {
-            long testUserId = 0;
-            long testProjectId = 0;
+            var userId = await CreateTestUserAsync();
 
-            await UsingDbContextAsync(async context =>
+            long projectId = await UsingDbContextAsync(async context =>
             {
-                var existingUser = await context.Users
-                    .Where(u => u.IsActive)
-                    .FirstOrDefaultAsync();
-
-                existingUser.ShouldNotBeNull("Không tìm thấy user active trong DB");
-                testUserId = existingUser.Id;
-
                 var project = new Project
                 {
                     Name = "PM Project",
                     Status = ProjectStatus.Active,
-                    Code = "PM_TEST_" + Guid.NewGuid().ToString().Substring(0, 8)
+                    Code = "TEST001"
                 };
+
                 context.Projects.Add(project);
                 await context.SaveChangesAsync();
-                testProjectId = project.Id;
 
                 context.ProjectUsers.Add(new ProjectUser
                 {
-                    UserId = testUserId,
-                    ProjectId = testProjectId,
+                    UserId = userId,
+                    ProjectId = project.Id,
                     Type = ProjectUserType.PM
                 });
                 await context.SaveChangesAsync();
-            });
 
+                return project.Id;
+            });
             await WithUnitOfWorkAsync(async () =>
             {
                 var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
-                {
-                    await _userAppService.DeactiveUser(new EntityDto<long>(testUserId));
-                });
+                    await _userAppService.DeactiveUser(new EntityDto<long>(userId)));
 
                 exception.Message.ShouldContain("Cannot deactivate the only PM");
                 exception.Message.ShouldContain("active project");
             });
-
-            await UsingDbContextAsync(async context =>
-            {
-                var projectUser = await context.ProjectUsers
-                    .FirstOrDefaultAsync(pu => pu.UserId == testUserId && pu.ProjectId == testProjectId);
-                if (projectUser != null)
-                {
-                    context.ProjectUsers.Remove(projectUser);
-                }
-
-                var project = await context.Projects.FindAsync(testProjectId);
-                if (project != null)
-                {
-                    context.Projects.Remove(project);
-                }
-
-                await context.SaveChangesAsync();
-            });
         }
+
 
         [Fact]
         public async void DeactiveUser_Should_Allow_When_Project_Is_Deactive()
         {
-            long testUserId = 0;
-            long testProjectId = 0;
+            var userId = await CreateTestUserAsync();
 
-            await UsingDbContextAsync(async context =>
+            var projectId = await UsingDbContextAsync(async context =>
             {
-                var existingUser = await context.Users
-                    .Where(u => u.IsActive)
-                    .FirstOrDefaultAsync();
-
-                existingUser.ShouldNotBeNull("Không tìm thấy user active trong DB");
-                testUserId = existingUser.Id;
-
                 var project = new Project
                 {
                     Name = "Deactive Project",
                     Status = ProjectStatus.Deactive,
-                    Code = "DEACT_TEST_" + Guid.NewGuid().ToString().Substring(0, 8)
+                    Code = "TEST002"
                 };
                 context.Projects.Add(project);
                 await context.SaveChangesAsync();
-                testProjectId = project.Id;
 
                 context.ProjectUsers.Add(new ProjectUser
                 {
-                    UserId = testUserId,
-                    ProjectId = testProjectId,
+                    UserId = userId,
+                    ProjectId = project.Id,
                     Type = ProjectUserType.PM
                 });
+
                 await context.SaveChangesAsync();
+                return project.Id;
             });
-
-            // Act
             await WithUnitOfWorkAsync(async () =>
-            {
-                await _userAppService.DeactiveUser(new EntityDto<long>(testUserId));
-            });
-
-            // Assert
+                await _userAppService.DeactiveUser(new EntityDto<long>(userId))
+            );
             await UsingDbContextAsync(async context =>
             {
-                var user = await context.Users.FirstOrDefaultAsync(u => u.Id == testUserId);
-                user.ShouldNotBeNull();
+                var user = await context.Users.FirstAsync(u => u.Id == userId);
                 user.IsActive.ShouldBeFalse();
                 user.EndDateAt.ShouldNotBeNull();
 
                 var projectUser = await context.ProjectUsers
-                    .FirstOrDefaultAsync(pu => pu.UserId == testUserId && pu.ProjectId == testProjectId);
+                    .FirstAsync(pu => pu.UserId == userId && pu.ProjectId == projectId);
+
                 projectUser.Type.ShouldBe(ProjectUserType.DeActive);
             });
         }
+
 
         [Fact]
         public async void DeactiveUser_Should_Allow_When_Multiple_PMs_In_Active_Project()
         {
-            long testUserId1 = 0;
-            long testUserId2 = 0;
-            long testProjectId = 0;
+            var pm1Id = await CreateTestUserAsync();
+            var pm2Id = await CreateTestUserAsync();
 
-            await UsingDbContextAsync(async context =>
+            var projectId = await UsingDbContextAsync(async context =>
             {
-                var existingUsers = await context.Users
-                    .Where(u => u.IsActive)
-                    .Take(2)
-                    .ToListAsync();
-
-                existingUsers.Count.ShouldBeGreaterThanOrEqualTo(2, "Cần ít nhất 2 users active trong DB");
-                testUserId1 = existingUsers[0].Id;
-                testUserId2 = existingUsers[1].Id;
-
                 var project = new Project
                 {
                     Name = "Multi PM Project",
                     Status = ProjectStatus.Active,
-                    Code = "MULTI_PM_" + Guid.NewGuid().ToString().Substring(0, 8)
+                    Code = "TEST003"
                 };
+
                 context.Projects.Add(project);
                 await context.SaveChangesAsync();
-                testProjectId = project.Id;
 
                 context.ProjectUsers.AddRange(
-                    new ProjectUser
-                    {
-                        UserId = testUserId1,
-                        ProjectId = testProjectId,
-                        Type = ProjectUserType.PM
-                    },
-                    new ProjectUser
-                    {
-                        UserId = testUserId2,
-                        ProjectId = testProjectId,
-                        Type = ProjectUserType.PM
-                    }
+                    new ProjectUser { UserId = pm1Id, ProjectId = project.Id, Type = ProjectUserType.PM },
+                    new ProjectUser { UserId = pm2Id, ProjectId = project.Id, Type = ProjectUserType.PM }
                 );
+
                 await context.SaveChangesAsync();
+                return project.Id;
             });
-
-            // Act
             await WithUnitOfWorkAsync(async () =>
-            {
-                await _userAppService.DeactiveUser(new EntityDto<long>(testUserId1));
-            });
-
-            // Assert
+                await _userAppService.DeactiveUser(new EntityDto<long>(pm1Id))
+            );
             await UsingDbContextAsync(async context =>
             {
-                var user = await context.Users.FirstOrDefaultAsync(u => u.Id == testUserId1);
-                user.ShouldNotBeNull();
+                var user = await context.Users.FirstAsync(u => u.Id == pm1Id);
                 user.IsActive.ShouldBeFalse();
                 user.EndDateAt.ShouldNotBeNull();
 
                 var projectUser = await context.ProjectUsers
-                    .FirstOrDefaultAsync(pu => pu.UserId == testUserId1 && pu.ProjectId == testProjectId);
+                    .FirstAsync(pu => pu.UserId == pm1Id && pu.ProjectId == projectId);
                 projectUser.Type.ShouldBe(ProjectUserType.DeActive);
             });
         }
+
+
     }
 }
