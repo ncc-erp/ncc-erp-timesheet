@@ -222,4 +222,9 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
       }
       this.refresh();
   }
+  
+  getLabel(userType: number): string {
+    const found = this.userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
+  }
 }
