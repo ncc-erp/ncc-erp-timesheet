@@ -1375,7 +1375,8 @@ namespace Timesheet.APIs.RequestDays
                     userMessage.Clear();
                     userMessage.AppendLine($"PM **{approver.FullName}**" + $" has **{(isApprove ? "approved" : "rejected")}** your request:");
                     userMessage.AppendLine("```");
-                    userMessage.Append($"{GetRequestName(request, requestDetail, offTypeName)} - " + $"{requestDetail.ToKomuString()} - Reason: {request.Reason}");
+                    userMessage.AppendLine($"{GetRequestName(request, requestDetail, offTypeName)} - " + $"{requestDetail.ToKomuString()}");
+                    userMessage.AppendLine($"Reason: {request.Reason}");
                     userMessage.AppendLine("```");
 
                     switch (project.notifyChannel)
