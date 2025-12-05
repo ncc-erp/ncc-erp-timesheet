@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
+using System.Text;
 using System.Threading.Tasks;
 using Timesheet.APIs.MyAbsenceDays.Dto;
 using Timesheet.APIs.RequestDays.Dto;
@@ -1362,6 +1363,7 @@ namespace Timesheet.APIs.RequestDays
                 }).FirstOrDefaultAsync();
 
             var alreadySentToPMIds = new HashSet<long>();
+            var userMessage = new StringBuilder();
             foreach (var project in receivers)
             {
                 if (!project.IsNoticeKMApproveRequestOffDate)
@@ -1370,20 +1372,20 @@ namespace Timesheet.APIs.RequestDays
                 }
                 else
                 {
-                    var pmsTag = project.KomuPMsTag(alreadySentToPMIds);
-                    pmsTag = string.IsNullOrEmpty(pmsTag) ? "" : $"PM {pmsTag}:";
-
-                    var Message = $"{pmsTag} **{approver.FullName}** " +
-                        $"has **{(isApprove ? "approved" : "rejected")}** the request: {requester.KomuAccountInfo(project.notifyChannel)} " +
-                        $"**{GetRequestName(request, requestDetail, offTypeName)}** {requestDetail.ToKomuString()}";
+                    userMessage.Clear();
+                    userMessage.AppendLine($"PM **{approver.FullName}**" + $" has **{(isApprove ? "approved" : "rejected")}** your request:");
+                    userMessage.AppendLine("```");
+                    userMessage.Append($"{GetRequestName(request, requestDetail, offTypeName)} - " + $"{requestDetail.ToKomuString()} - Reason: {request.Reason}");
+                    userMessage.AppendLine("```");
 
                     switch (project.notifyChannel)
                     {
                         case NotifyChannel.KOMU:
-                            _komuService.NotifyToChannel(Message, project.KomuChannelId);
+                            _komuService.NotifyToChannel(userMessage.ToString(), project.KomuChannelId);
+                            _komuService.SendSimpleNotificationToUser(userMessage.ToString(), requester.UserName);
                             break;
                         case NotifyChannel.Mezon:
-                            _mezonService.NotifyToChannel(project.mezonUrl, Message);
+                            _mezonService.NotifyToChannel(project.mezonUrl, userMessage.ToString());
                             break;
                     }
                     processAlreadySentToPMs(alreadySentToPMIds, project.PMs);

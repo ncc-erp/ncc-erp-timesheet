@@ -23,14 +23,14 @@ namespace Timesheet.APIs.MyAbsenceDays.Dto
         {
             if (this.DateType != DayType.Custom)
             {
-                return $"{DateTimeUtils.ToString(DateAt)} [{Enum.GetName(typeof(DayType), DateType)}] - {StatusName()}";
+                return $"{DateTimeUtils.ToString(DateAt)} [{Enum.GetName(typeof(DayType), DateType)}]";
             }
 
             if (!AbsenceTime.HasValue)
             {
-                return $"{DateTimeUtils.ToString(DateAt)} [{this.Hour}h] - {StatusName()}";
+                return $"{DateTimeUtils.ToString(DateAt)} [{this.Hour}h]";
             }
-            return $"{DateTimeUtils.ToString(DateAt)} [{Enum.GetName(typeof(OnDayType), AbsenceTime)}: {Hour}h] - {StatusName()}";
+            return $"{DateTimeUtils.ToString(DateAt)} [{Enum.GetName(typeof(OnDayType), AbsenceTime)}: {Hour}h]";
         }
 
         public string ToEmailString()
