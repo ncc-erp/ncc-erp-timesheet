@@ -11,13 +11,11 @@ namespace Timesheet.DomainServices
     public interface ITimekeepingServices : IDomainService
     {
         Task<List<Timekeeping>> AddTimekeepingByDay(DateTime selectedDate);
-        Task<List<Timekeeping>> AddTimekeepingByDay2(DateTime selectedDate);
         CheckInOutTimeDto CaculateCheckInOutTime(Dictionary<long, MapAbsenceUserDto> mapAbsenceUsers, TimesheetUserDto user);
         Task CheckIsPunished(Timekeeping timekeeping, int LimitMinute);
         Task CheckIsPunished(Timekeeping timekeeping);
         Task<object> NoticePunishUserCheckInOut(DateTime now);
         Task CheckIsPunishedByRule(Timekeeping timekeeping, int limitedMinute, float trackerTime);
         Task<bool> SnapshotUserPunishmentsForDay(DateTime date);
-        Task<List<Timekeeping>> RebuildTimekeepingDay(DateTime selectedDate);
     }
 }

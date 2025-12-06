@@ -290,20 +290,6 @@ export class TardinessLeaveEarlyComponent
     }, 'snapshot');
   }
 
-  retrievePunishmentForSelectedDay(): void {
-    this.openSelectedDateDialog((date: string) => {
-      this.timekeepingService
-        .getRetrieveTimekeepingByDay(date)
-        .pipe(finalize(() => {}))
-        .subscribe(
-          () => {
-            abp.notify.success('Successfully retrieved punishment data for ' + date);
-            this.refresh();
-          }
-        );
-    }, 'retrieve');
-  }
-
   upLoadTimekeeping(file: File) {
     if (!file.name.toLowerCase().endsWith("xlsx")) {
       this.isFileSupported = false;

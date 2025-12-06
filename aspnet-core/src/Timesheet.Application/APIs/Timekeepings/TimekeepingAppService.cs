@@ -1310,22 +1310,5 @@ namespace Timesheet.APIs.Timekeepings
         {
             return await timekeepingServices.SnapshotUserPunishmentsForDay(date);
         }
-
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_RetrieveData)]
-        [HttpPost]
-        public async Task<List<Timekeeping>> RetrieveTimekeepingByDay(string date)
-        {
-            if (string.IsNullOrEmpty(date))
-                throw new UserFriendlyException("Selected date is null!");
-
-            DateTime selectedDate = DateTime.Parse(date);
-
-            if (selectedDate.Date > DateTimeUtils.GetNow().Date)
-            {
-                throw new UserFriendlyException("The selected date cannot greater than the current date!");
-            }
-
-            return await timekeepingServices.RebuildTimekeepingDay(selectedDate.Date);
-        }
     }
 }

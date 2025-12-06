@@ -21,7 +21,7 @@ export class SelectedDateComponent implements OnInit, OnDestroy {
   constructor(public dialogref: MatDialogRef<SelectedDateComponent>,
      private service: TimekeepingService,
      private timekeepSignalRService: TimekeepingSignalRService,
-    @Inject(MAT_DIALOG_DATA) public data: {useSignalr: boolean, apiType?: 'add' | 'retrieve' | 'snapshot'},
+    @Inject(MAT_DIALOG_DATA) public data: {useSignalr: boolean, apiType?: 'add' | 'snapshot'},
      ) {
   }
 
@@ -50,10 +50,7 @@ export class SelectedDateComponent implements OnInit, OnDestroy {
     
     switch(this.data.apiType) {
       case 'snapshot':
-        confirmMessage = `<p>Snapshot punishment data for day ${moment(this.dateValue).format("DD/MM/YYYY")}?</p>`;
-        break;
-      case 'retrieve':
-        confirmMessage = `<p>Retrieve punishment data for day ${moment(this.dateValue).format("DD/MM/YYYY")}? (will remove all current data and get back from snapshot)</p>`;
+        confirmMessage = `<p>Snapshot punishment data for day ${moment(this.dateValue).format("DD/MM/YYYY")}?` + `</p>`;
         break;
       case 'add':
       default:
@@ -73,9 +70,6 @@ export class SelectedDateComponent implements OnInit, OnDestroy {
             let apiCall;
 
             switch(this.data.apiType) {
-              case 'retrieve':
-                apiCall = this.service.getRetrieveTimekeepingByDay(date);
-                break;
               case 'snapshot':
                 apiCall = this.service.getSnapshotTimekeepingDay(date);
                 break;
