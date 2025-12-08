@@ -1298,6 +1298,7 @@ namespace Timesheet.APIs.RequestDays
 
                     var approverId = AbpSession.UserId.Value;
                     await notifyKomuWhenApproveOrRejectRequest(request, true, approverId);
+                    await sendDirectMessageWhenApproveOrRejectRequest(request, true, approverId);
                 }
                 else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
@@ -1321,6 +1322,7 @@ namespace Timesheet.APIs.RequestDays
 
                     var approverId = AbpSession.UserId.Value;
                     await notifyKomuWhenApproveOrRejectRequest(request, false, approverId);
+                    await sendDirectMessageWhenApproveOrRejectRequest(request, false, approverId);
                 }
                 else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
@@ -1335,6 +1337,70 @@ namespace Timesheet.APIs.RequestDays
             if (enableNotify != "true")
             {
                 Logger.Info("notifyKomuWhenApproveOrRejectRequest() SendKomuRequest=" + enableNotify + ", AbpSessionUserId=" + approverId);
+                return;
+            }
+            var offTypeName = "";
+            if (request.Type == RequestType.Off)
+            {
+                offTypeName = await WorkScope.GetAll<DayOffType>()
+                    .Where(s => s.Id == request.DayOffTypeId)
+                    .Select(s => s.Name)
+                    .FirstOrDefaultAsync();
+            }
+
+            var approver = await getNotifyUserInfoDto(approverId);
+            var receivers = await getReceiverApproveRejectList(request.UserId);
+            var requester = await getNotifyUserInfoDto(request.UserId);
+
+            var requestDetail = await WorkScope.GetAll<AbsenceDayDetail>()
+                .Where(s => s.RequestId == request.Id)
+                .Select(s => new AbsenceDayDetailDto
+                {
+                    Id = s.Id,
+                    RequestId = s.RequestId,
+                    AbsenceTime = s.AbsenceTime,
+                    DateAt = s.DateAt,
+                    DateType = s.DateType,
+                    Hour = s.Hour
+                }).FirstOrDefaultAsync();
+
+            var alreadySentToPMIds = new HashSet<long>();
+            foreach (var project in receivers)
+            {
+                if (!project.IsNoticeKMApproveRequestOffDate)
+                {
+                    Logger.Info($"notifyKomuWhenApproveRequest() projectId={project.ProjectId}: IsNotifyKomu={project.IsNoticeKMApproveRequestOffDate}, KomuChannelId={project.KomuChannelId}");
+                }
+                else
+                {
+                    var pmsTag = project.KomuPMsTag(alreadySentToPMIds);
+                    pmsTag = string.IsNullOrEmpty(pmsTag) ? "" : $"PM {pmsTag}:";
+
+                    var Message = $"{pmsTag} **{approver.FullName}** " +
+                        $"has **{(isApprove ? "approved" : "rejected")}** the request: {requester.KomuAccountInfo(project.notifyChannel)} " +
+                        $"**{GetRequestName(request, requestDetail, offTypeName)}** {requestDetail.ToKomuString()}";
+
+                    switch (project.notifyChannel)
+                    {
+                        case NotifyChannel.KOMU:
+                            _komuService.NotifyToChannel(Message, project.KomuChannelId);
+                            break;
+                        case NotifyChannel.Mezon:
+                            _mezonService.NotifyToChannel(project.mezonUrl, Message);
+                            break;
+                    }
+                    processAlreadySentToPMs(alreadySentToPMIds, project.PMs);
+                }
+
+            }
+        }
+
+        public async System.Threading.Tasks.Task sendDirectMessageWhenApproveOrRejectRequest(AbsenceDayRequest request, bool isApprove, long approverId)
+        {
+            var enableNotify = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendKomuRequest);
+            if (enableNotify != "true")
+            {
+                Logger.Info("sendDirectMessageWhenApproveOrRejectRequest() SendKomuRequest=" + enableNotify + ", AbpSessionUserId=" + approverId);
                 return;
             }
             var offTypeName = "";
@@ -1378,18 +1444,9 @@ namespace Timesheet.APIs.RequestDays
                     userMessage.AppendLine($"{GetRequestName(request, requestDetail, offTypeName)} - " + $"{requestDetail.ToKomuString()}");
                     userMessage.AppendLine($"Reason: {request.Reason}");
                     userMessage.AppendLine("```");
-
-                    switch (project.notifyChannel)
-                    {
-                        case NotifyChannel.KOMU:
-                            _komuService.NotifyToChannel(userMessage.ToString(), project.KomuChannelId);
-                            _komuService.SendSimpleNotificationToUser(userMessage.ToString(), requester.UserName);
-                            break;
-                        case NotifyChannel.Mezon:
-                            _mezonService.NotifyToChannel(project.mezonUrl, userMessage.ToString());
-                            break;
-                    }
+                    _komuService.SendSimpleNotificationToUser(userMessage.ToString(), requester.UserName);
                     processAlreadySentToPMs(alreadySentToPMIds, project.PMs);
+                    break;
                 }
 
             }
