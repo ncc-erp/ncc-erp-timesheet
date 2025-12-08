@@ -1413,7 +1413,6 @@ namespace Timesheet.APIs.RequestDays
             }
 
             var approver = await getNotifyUserInfoDto(approverId);
-            var receivers = await getReceiverApproveRejectList(request.UserId);
             var requester = await getNotifyUserInfoDto(request.UserId);
 
             var requestDetail = await WorkScope.GetAll<AbsenceDayDetail>()
@@ -1428,28 +1427,13 @@ namespace Timesheet.APIs.RequestDays
                     Hour = s.Hour
                 }).FirstOrDefaultAsync();
 
-            var alreadySentToPMIds = new HashSet<long>();
             var userMessage = new StringBuilder();
-            foreach (var project in receivers)
-            {
-                if (!project.IsNoticeKMApproveRequestOffDate)
-                {
-                    Logger.Info($"notifyKomuWhenApproveRequest() projectId={project.ProjectId}: IsNotifyKomu={project.IsNoticeKMApproveRequestOffDate}, KomuChannelId={project.KomuChannelId}");
-                }
-                else
-                {
-                    userMessage.Clear();
-                    userMessage.AppendLine($"PM **{approver.FullName}**" + $" has **{(isApprove ? "approved" : "rejected")}** your request:");
-                    userMessage.AppendLine("```");
-                    userMessage.AppendLine($"{GetRequestName(request, requestDetail, offTypeName)} - " + $"{requestDetail.ToKomuString()}");
-                    userMessage.AppendLine($"Reason: {request.Reason}");
-                    userMessage.AppendLine("```");
-                    _komuService.SendSimpleNotificationToUser(userMessage.ToString(), requester.UserName);
-                    processAlreadySentToPMs(alreadySentToPMIds, project.PMs);
-                    break;
-                }
-
-            }
+            userMessage.AppendLine($"PM **{approver.FullName}**" + $" has **{(isApprove ? "approved" : "rejected")}** your request:");
+            userMessage.AppendLine("```");
+            userMessage.AppendLine($"{GetRequestName(request, requestDetail, offTypeName)} - " + $"{requestDetail.ToKomuString()}");
+            userMessage.AppendLine($"Reason: {request.Reason}");
+            userMessage.AppendLine("```");
+            _komuService.SendSimpleNotificationToUser(userMessage.ToString(), requester.UserName);
         }
 
         private string GetRequestName(AbsenceDayRequest request, AbsenceDayDetailDto absenceDayDetail, string offTypeName)
