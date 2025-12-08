@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
+using System.Text;
 using System.Threading.Tasks;
 using Timesheet.APIs.MyAbsenceDays.Dto;
 using Timesheet.APIs.RequestDays.Dto;
@@ -1297,6 +1298,7 @@ namespace Timesheet.APIs.RequestDays
 
                     var approverId = AbpSession.UserId.Value;
                     await notifyKomuWhenApproveOrRejectRequest(request, true, approverId);
+                    await sendDirectMessageWhenApproveOrRejectRequest(request, true, approverId);
                 }
                 else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
@@ -1320,6 +1322,7 @@ namespace Timesheet.APIs.RequestDays
 
                     var approverId = AbpSession.UserId.Value;
                     await notifyKomuWhenApproveOrRejectRequest(request, false, approverId);
+                    await sendDirectMessageWhenApproveOrRejectRequest(request, false, approverId);
                 }
                 else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
@@ -1390,6 +1393,47 @@ namespace Timesheet.APIs.RequestDays
                 }
 
             }
+        }
+
+        public async System.Threading.Tasks.Task sendDirectMessageWhenApproveOrRejectRequest(AbsenceDayRequest request, bool isApprove, long approverId)
+        {
+            var enableNotify = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendKomuRequest);
+            if (enableNotify != "true")
+            {
+                Logger.Info("sendDirectMessageWhenApproveOrRejectRequest() SendKomuRequest=" + enableNotify + ", AbpSessionUserId=" + approverId);
+                return;
+            }
+            var offTypeName = "";
+            if (request.Type == RequestType.Off)
+            {
+                offTypeName = await WorkScope.GetAll<DayOffType>()
+                    .Where(s => s.Id == request.DayOffTypeId)
+                    .Select(s => s.Name)
+                    .FirstOrDefaultAsync();
+            }
+
+            var approver = await getNotifyUserInfoDto(approverId);
+            var requester = await getNotifyUserInfoDto(request.UserId);
+
+            var requestDetail = await WorkScope.GetAll<AbsenceDayDetail>()
+                .Where(s => s.RequestId == request.Id)
+                .Select(s => new AbsenceDayDetailDto
+                {
+                    Id = s.Id,
+                    RequestId = s.RequestId,
+                    AbsenceTime = s.AbsenceTime,
+                    DateAt = s.DateAt,
+                    DateType = s.DateType,
+                    Hour = s.Hour
+                }).FirstOrDefaultAsync();
+
+            var userMessage = new StringBuilder();
+            userMessage.AppendLine($"PM **{approver.FullName}**" + $" has **{(isApprove ? "approved" : "rejected")}** your request:");
+            userMessage.AppendLine("```");
+            userMessage.AppendLine($"{GetRequestName(request, requestDetail, offTypeName)} - " + $"{requestDetail.ToKomuString()}");
+            userMessage.AppendLine($"Reason: {request.Reason}");
+            userMessage.AppendLine("```");
+            _komuService.SendSimpleNotificationToUser(userMessage.ToString(), requester.UserName);
         }
 
         private string GetRequestName(AbsenceDayRequest request, AbsenceDayDetailDto absenceDayDetail, string offTypeName)
