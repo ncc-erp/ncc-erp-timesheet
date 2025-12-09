@@ -2,7 +2,7 @@
   width: 800px;
   max-width: 100%;
   max-height: 80vh; 
-  padding: 20px;
+  padding:0px 20px;
   background-color: #fff;
   color: #333;
   overflow-y: auto;
@@ -143,6 +143,18 @@
 .tx-hash.clickable:hover {
   color: #1a237e;
   text-decoration: none;
+}
+
+.use-points-button {
+  display: inline-block;
+  margin-top: 6px;        
+  margin-right: 0;       
+  line-height: 20px;
+  min-height: 24px;
+  padding: 0 12px;
+  font-size: 12px;
+  background-color: #2196f3;
+  color: #fff;
 }
 
 .error-table {
