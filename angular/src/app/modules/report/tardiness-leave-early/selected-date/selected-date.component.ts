@@ -1,5 +1,6 @@
 import { Component, Inject, Injector, OnInit, Output, EventEmitter, Input, OnDestroy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { APP_CONSTANT } from '@app/constant/api.constants';
 import { TimekeepingSignalRService } from '@app/service/api/timekeeping-signalR.service';
 import { TimekeepingService } from '@app/service/api/timekeeping.service';
 import * as moment from 'moment';
@@ -16,12 +17,14 @@ export class SelectedDateComponent implements OnInit, OnDestroy {
   isSaving: boolean;
   resultMessage:string;
 
+  readonly TimekeepingApiType = APP_CONSTANT.TimekeepingApiType;
+
   public subscriptionsProcessingDate: SubscriptionLike = null;
 
   constructor(public dialogref: MatDialogRef<SelectedDateComponent>,
      private service: TimekeepingService,
      private timekeepSignalRService: TimekeepingSignalRService,
-    @Inject(MAT_DIALOG_DATA) public data: {useSignalr: boolean, apiType?: 'add' | 'snapshot'},
+    @Inject(MAT_DIALOG_DATA) public data: {useSignalr: boolean, apiType?: string},
      ) {
   }
 
@@ -49,10 +52,10 @@ export class SelectedDateComponent implements OnInit, OnDestroy {
     let confirmMessage = '';
     
     switch(this.data.apiType) {
-      case 'snapshot':
+      case APP_CONSTANT.TimekeepingApiType.Snapshot:
         confirmMessage = `<p>Snapshot punishment data for day ${moment(this.dateValue).format("DD/MM/YYYY")}?` + `</p>`;
         break;
-      case 'add':
+      case APP_CONSTANT.TimekeepingApiType.Add:
       default:
         confirmMessage = `<p>Click Submit button will remove all current data on ${moment(this.dateValue).format("DD/MM/YYYY")} and collect data again</p>`;
         break;
@@ -66,14 +69,14 @@ export class SelectedDateComponent implements OnInit, OnDestroy {
           this.isSaving=true;
           const date = moment(this.dateValue).format("YYYY-MM-DD");
 
-          if(!this.data.useSignalr || (this.data.apiType && this.data.apiType !== 'add')) {
+          if(!this.data.useSignalr || (this.data.apiType && this.data.apiType !== APP_CONSTANT.TimekeepingApiType.Add)) {
             let apiCall;
 
             switch(this.data.apiType) {
-              case 'snapshot':
+              case APP_CONSTANT.TimekeepingApiType.Snapshot:
                 apiCall = this.service.getSnapshotTimekeepingDay(date);
                 break;
-              case 'add':
+              case APP_CONSTANT.TimekeepingApiType.Add:
               default:
                 apiCall = this.service.getAddTimeByDay(date);
                 break;

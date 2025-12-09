@@ -25,6 +25,7 @@ import {
   TimekeepingSignalRService,
 } from "@app/service/api/timekeeping-signalR.service";
 import { SubscriptionLike } from "rxjs";
+import * as moment from "moment";
 
 @Component({
   selector: "app-tardiness-leave-early",
@@ -260,11 +261,11 @@ export class TardinessLeaveEarlyComponent
   getDataCheckInInternal(): void {
     const dialogRef = this.dialog.open(SelectedDateComponent, {
       disableClose: true,
-      data: {useSignalr: this.isConnectedSignalr, apiType: 'add'}
+      data: {useSignalr: this.isConnectedSignalr, apiType: APP_CONSTANT.TimekeepingApiType.Add}
     });
   }
 
-  private openSelectedDateDialog(callback: (date: string) => void, apiType: 'add' | 'retrieve' | 'snapshot' = 'add'): void {
+  private openSelectedDateDialog(callback: (date: string) => void, apiType: string = APP_CONSTANT.TimekeepingApiType.Add): void {
     const dialogRef = this.dialog.open(SelectedDateComponent, {
       disableClose: true,
       data: { useSignalr: this.isConnectedSignalr, apiType: apiType }
@@ -287,7 +288,7 @@ export class TardinessLeaveEarlyComponent
             abp.notify.success('Snapshot successfully for date ' + date);
           }
         );
-    }, 'snapshot');
+    }, APP_CONSTANT.TimekeepingApiType.Snapshot);
   }
 
   upLoadTimekeeping(file: File) {

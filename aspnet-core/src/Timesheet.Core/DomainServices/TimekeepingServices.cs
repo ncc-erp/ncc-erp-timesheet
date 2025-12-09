@@ -234,7 +234,7 @@ namespace Timesheet.DomainServices
         }
 
         private void ApplySnapshotIfAny(
-            Dictionary<(long UserId, UserPunishmentType Type), (bool IsPaid, string UserNote, string NoteReply, long? UserPunishmentPaidId)> snapshotByUserAndType,
+            Dictionary<(long UserId, UserPunishmentType Type), UserPunishmentSnapshotDto> snapshotByUserAndType,
             UserPunishment punishment)
         {
             if (snapshotByUserAndType == null || punishment == null)
@@ -281,7 +281,7 @@ namespace Timesheet.DomainServices
             Dictionary<long, List<(string NoteReply, string UserNote)>> oldTimekeepingNotes,
             Dictionary<long, List<MapAbsenceUserDto>> mapAbsenceUsers,
             Dictionary<long, List<MapAbsenceUserDto>> mapRemoteUsers,
-            Dictionary<(long UserId, UserPunishmentType Type), (bool IsPaid, string UserNote, string NoteReply, long? UserPunishmentPaidId)> snapshotByUserAndType)
+            Dictionary<(long UserId, UserPunishmentType Type), UserPunishmentSnapshotDto> snapshotByUserAndType)
         {
             var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
             var rs = new List<Timekeeping>();
@@ -549,12 +549,13 @@ namespace Timesheet.DomainServices
                 .GroupBy(h => new { h.UserId, h.Type })
                 .ToDictionary(
                     g => (g.Key.UserId, g.Key.Type),
-                    g => (
-                        IsPaid: g.Any(x => x.IsPaid),
-                        UserNote: g.Select(x => x.UserNote).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
-                        NoteReply: g.Select(x => x.NoteReply).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
-                        UserPunishmentPaidId: g.Select(x => x.UserPunishmentPaidId).FirstOrDefault(x => x.HasValue)
-                    )
+                    g => new UserPunishmentSnapshotDto
+                    {
+                        IsPaid = g.Any(x => x.IsPaid),
+                        UserNote = g.Select(x => x.UserNote).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
+                        NoteReply = g.Select(x => x.NoteReply).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
+                        UserPunishmentPaidId = g.Select(x => x.UserPunishmentPaidId).FirstOrDefault(x => x.HasValue)
+                    }
                 );
 
             var rebuildResult = await SaveUserPunishments(selectedDate, snapshotByUserAndType);
@@ -565,7 +566,7 @@ namespace Timesheet.DomainServices
 
         private async Task<List<Timekeeping>> SaveUserPunishments(
             DateTime selectedDate,
-            Dictionary<(long UserId, UserPunishmentType Type), (bool IsPaid, string UserNote, string NoteReply, long? UserPunishmentPaidId)> snapshotByUserAndType = null)
+            Dictionary<(long UserId, UserPunishmentType Type), UserPunishmentSnapshotDto> snapshotByUserAndType = null)
         {
             var allTimekeepings = new List<Timekeeping>();
             var allPunishments = new List<UserPunishment>();
@@ -1464,6 +1465,15 @@ namespace Timesheet.DomainServices
         {
             var selectedDate = date.Date; 
             
+            var punishmentsToSnapshot = await WorkScope.GetAll<UserPunishment>()
+                .Where(p => p.DateAt.Date == selectedDate)
+                .ToListAsync();
+
+            if (!punishmentsToSnapshot.Any())
+            {
+                throw new UserFriendlyException($"No UserPunishment records found for {selectedDate:yyyy-MM-dd} to snapshot.");
+            }
+
             var existingSnapshots = await WorkScope.GetAll<UserPunishmentHistory>()
                 .Where(h => h.DateAt.Date == selectedDate)
                 .ToListAsync();
@@ -1473,15 +1483,6 @@ namespace Timesheet.DomainServices
                 await WorkScope.DeleteRangeAsync(existingSnapshots);
                 await CurrentUnitOfWork.SaveChangesAsync();
                 Logger.Info($"Deleted {existingSnapshots.Count} existing UserPunishmentHistory records for {selectedDate:yyyy-MM-dd} before creating new snapshot.");
-            }
-
-            var punishmentsToSnapshot = await WorkScope.GetAll<UserPunishment>()
-                .Where(p => p.DateAt.Date == selectedDate)
-                .ToListAsync();
-
-            if (!punishmentsToSnapshot.Any())
-            {
-                throw new UserFriendlyException($"No UserPunishment records found for {selectedDate:yyyy-MM-dd} to snapshot.");
             }
 
             var historyRecords = punishmentsToSnapshot.Select(p => new UserPunishmentHistory
