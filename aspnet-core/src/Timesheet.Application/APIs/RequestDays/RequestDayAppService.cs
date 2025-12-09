@@ -545,7 +545,7 @@ namespace Timesheet.APIs.RequestDays
                 .Select(s => s.DayOff.Date)
                 .ToHashSet();
 
-            int MAX_ALLOW_REMOTE_DAY = 3;
+            int MAX_ALLOW_REMOTE_DAY = 4;
 
             int.TryParse(await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting), out MAX_ALLOW_REMOTE_DAY);
 
@@ -618,7 +618,7 @@ namespace Timesheet.APIs.RequestDays
                     var startOfWeekContainRequest = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
                     var previousMonday = startOfWeekContainRequest.AddDays(-7);
                     var previousFriday = previousMonday.AddDays(4);
-                    int standardWorkingDays = 5;
+
                     var absenceDaysLastWeek = WorkScope.GetAll<AbsenceDayRequest>()
                         .Join(WorkScope.GetAll<AbsenceDayDetail>(),
                             r => r.Id,
@@ -632,8 +632,12 @@ namespace Timesheet.APIs.RequestDays
                         .Distinct()
                         .Count();
 
-                    int workingDaysLastWeek = standardWorkingDays - absenceDaysLastWeek;
-                    bool rejectRemoteDueToLowWorkingDays = workingDaysLastWeek < 2;
+                    var numberOfDayOffSettingsLastWeek = WorkScope.GetAll<DayOffSetting>()
+                        .Where(x => x.DayOff.Date >= previousMonday && x.DayOff.Date <= previousFriday)
+                        .Select(x => x.DayOff.Date)
+                        .Count();
+
+                    bool rejectRemoteDueToLowWorkingDays = absenceDaysLastWeek > (MAX_ALLOW_REMOTE_DAY - numberOfDayOffSettingsLastWeek);
 
                     var monday = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
                     var numberRemoteDayInWeek = 0;
