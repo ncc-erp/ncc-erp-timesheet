@@ -1303,5 +1303,12 @@ namespace Timesheet.APIs.Timekeepings
                 Logger.Info($"Updated UserPunishmentBalance for user {userId}: {(isPaid ? $"added {punishmentAmountReduced} to RemainPoints" : $"reduced TotalPunishmentMoney by {punishmentAmountReduced}")}. TotalPunishmentMoney = {balance.TotalPunishmentMoney}, RemainPoints = {balance.RemainPoints}");
             }
         }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_RetrieveData)]
+        [HttpPost]
+        public async Task<bool> SnapshotTimekeepingDay(DateTime date)
+        {
+            return await timekeepingServices.SnapshotUserPunishmentsForDay(date);
+        }
     }
 }

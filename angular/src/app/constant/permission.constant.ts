@@ -242,6 +242,7 @@ export const PERMISSIONS_CONSTANT = {
     //tardiness & leave early
     ViewTardinessLeaveEarly: "Report.TardinessLeaveEarly.View",
     GetDataFromFaceId: "Report.TardinessLeaveEarly.GetData",
+    RetrievePunishmentData: "Report.TardinessLeaveEarly.RetrieveData",
     ExportExcelTardinessLeaveEarly: "Report.TardinessLeaveEarly.ExportExcel",
     EditTardinessLeaveEarly: "Report.TardinessLeaveEarly.Edit",
     ViewOnlyMeTardinessLeaveEarly:"MyTimeSheet.ViewMyTardinessDetail",

@@ -91,6 +91,10 @@ export const APP_CONSTANT = {
     Month: 2,
     Year: 3
   },
+  TimekeepingApiType: {
+    Add: 'add',
+    Snapshot: 'snapshot'
+  },
   MyTimesheetView: {
     Day: 0,
     Week: 1
