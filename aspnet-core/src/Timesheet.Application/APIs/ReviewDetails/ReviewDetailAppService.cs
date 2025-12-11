@@ -1379,6 +1379,10 @@ namespace Timesheet.APIs.ReviewDetails
 
                 var targetEmails = new List<string> { reviewerEmail };
 
+                var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
+                            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                targetEmails.AddRange(hrEmails);
+
                 await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                 {
                     TargetEmails = targetEmails,
@@ -1410,16 +1414,12 @@ namespace Timesheet.APIs.ReviewDetails
 
             var reviewer = await WorkScope.GetAll<User>()
                 .Where(s => s.Id == reviewerId)
-                .Select(s => new
-                {
-                    s.FullName,
-                    s.EmailAddress,
-                    s.UserName
-                })
                 .FirstOrDefaultAsync();
 
             int monthReviewIntern = reviewIntern.Month;
             int yearReviewIntern = reviewIntern.Year;
+
+            var usersToNotify = new List<User> { reviewer };
 
             var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
                             .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -1429,20 +1429,25 @@ namespace Timesheet.APIs.ReviewDetails
                 var hrUser = _userServices.GetUserByEmail(hrEmail);
                 if (hrUser != null)
                 {
-                    var userMessage = new StringBuilder();
-                    userMessage.AppendLine($"Kính gửi anh/chị {hrUser.FullName},");
-                    userMessage.AppendLine($"Một review detail mới đã được tạo trong đợt đánh giá intern tháng {monthReviewIntern}/{yearReviewIntern}.");
-                    userMessage.AppendLine("");
-                    userMessage.AppendLine($"- Thông tin intern: {internName}");
-                    userMessage.AppendLine($"- Reviewer: Anh/chị {reviewer.FullName}");
-                    userMessage.AppendLine($"- Level hiện tại: {reviewDetail.CurrentLevel}");
-                    userMessage.AppendLine($"- Trạng thái: Draft");
-                    userMessage.AppendLine("");
-                    userMessage.AppendLine($"Kính mong anh/chị xem xét và thực hiện đánh giá trên Timesheet.");
-                    userMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
-
-                    _komuService.SendSimpleNotificationToUser(userMessage.ToString(), hrUser.UserName);
+                    usersToNotify.Add(hrUser);
                 }
+            }
+
+            foreach (var user in usersToNotify)
+            {
+                StringBuilder userMessage = new StringBuilder();
+                userMessage.AppendLine($"Kính gửi anh/chị**{user.FullName}**");
+                userMessage.AppendLine($"Một review detail mới đã được tạo trong đợt đánh giá intern tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                userMessage.AppendLine("");
+                userMessage.AppendLine($"- Thông tin intern:**{internName}**");
+                userMessage.AppendLine($"- Reviewer:**{reviewer.FullName}**");
+                userMessage.AppendLine($"- Level hiện tại:**{reviewDetail.CurrentLevel}**");
+                userMessage.AppendLine($"- Trạng thái:**Draft**");
+                userMessage.AppendLine("");
+                userMessage.AppendLine($"Anh/chị vui lòng xem xét và thực hiện đánh giá trên Timesheet.");
+                userMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
+
+                _komuService.SendSimpleNotificationToUser(userMessage.ToString(), user.UserName);
             }
         }
 
