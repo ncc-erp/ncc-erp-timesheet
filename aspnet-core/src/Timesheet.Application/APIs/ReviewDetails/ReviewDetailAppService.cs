@@ -1562,38 +1562,26 @@ namespace Timesheet.APIs.ReviewDetails
             string statusExpected;
             try
             {
-                var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
-                            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string headPmMail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
+                User headPM = _userServices.GetUserByEmail(headPmMail);
+                string nameHeadPm = headPM.FullName;
 
-                User headPM = _userServices.GetUserByEmail(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail));
-                List<User> allUsers = new List<User> { headPM };
-                foreach (var hrEmail in hrEmails)
+                StringBuilder content = new StringBuilder("");
+                content.AppendLine($"Kính gửi anh**{nameHeadPm}**");
+                if (status == ReviewInternStatus.Reviewed)
                 {
-                    var hr = _userServices.GetUserByEmail(hrEmail);
-                    allUsers.Add(hr);
+                    content.AppendLine($"Anh {nameHeadPm} đã hoàn tất giai đoạn review và chuyển trạng thái**{status}**trên Timesheet cho đợt đánh giá intern tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                    statusExpected = "Approved";
                 }
-
-                foreach (var user in allUsers)
+                else
                 {
-                    StringBuilder content = new StringBuilder("");
-                    content.AppendLine($"Kính gửi anh/chị**{user.FullName}**");
-                    if (status == ReviewInternStatus.Reviewed)
-                    {
-                        string headPmMail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
-                        string nameHeadPm = _userServices.GetUserByEmail(headPmMail).FullName;
-                        content.AppendLine($"Anh {nameHeadPm} đã hoàn tất giai đoạn review và chuyển trạng thái**{status}**trên Timesheet cho đợt đánh giá intern tháng**{monthReviewIntern}/{yearReviewIntern}**");
-                        statusExpected = "Approved";
-                    }
-                    else
-                    {
-                        content.AppendLine($"Hiện tại, tất cả các PM đã hoàn tất việc đánh giá intern tháng**{reviewIntern.Month}/{reviewIntern.Year}**trên Timesheet.");
-                        statusExpected = "Reviewed";
-                    }
-                    content.AppendLine($"Kính mong anh/chị xem xét và thực hiện chuyển trạng thái sang**{statusExpected}**trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**.");
-                    content.AppendLine($"Trân trọng cảm ơn anh/chị!");
-
-                    _komuService.SendSimpleNotificationToUser(content.ToString(), user.UserName);
+                    content.AppendLine($"Hiện tại, tất cả các PM đã hoàn tất việc đánh giá intern tháng**{reviewIntern.Month}/{reviewIntern.Year}**trên Timesheet.");
+                    statusExpected = "Reviewed";
                 }
+                content.AppendLine($"Kính mong anh/chị xem xét và thực hiện chuyển trạng thái sang**{statusExpected}**trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**.");
+                content.AppendLine($"Trân trọng cảm ơn anh/chị!");
+
+                _komuService.SendSimpleNotificationToUser(content.ToString(), headPM.UserName);
             }
             catch (Exception e)
             {
