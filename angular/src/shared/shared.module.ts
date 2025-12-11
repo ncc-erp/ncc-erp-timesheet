@@ -79,6 +79,10 @@ import { AddUserOtherProjectComponent } from './add-user-other-project/add-user-
 import { SentryService } from './sentry-service';
 import { ShowProjectInActivePipe } from './pipes/show-project-in-active.pipe';
 import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
+import { ButtonComponent } from './button/button.component';
+import { BadgeComponent } from './badge/badge.component';
+import { TableToolbarComponent } from './table-toolbar/table-toolbar.component';
+import { PaginationBarComponent } from './pagination-bar/pagination-bar.component';
 @NgModule({
   imports: [
     FormsModule,
@@ -151,6 +155,10 @@ import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
     DayTypePipe,
     AddUserOtherProjectComponent,
     ShowProjectInActivePipe,
+    ButtonComponent,
+    BadgeComponent,
+    TableToolbarComponent,
+    PaginationBarComponent,
   ],
   exports: [
     AbpPaginationControlsComponent,
@@ -217,6 +225,10 @@ import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
     DayTypePipe,
     AddUserOtherProjectComponent,
     ShowProjectInActivePipe,
+    ButtonComponent,
+    BadgeComponent,
+    TableToolbarComponent,
+    PaginationBarComponent,
   ],
   entryComponents: [
     PopupComponent,

@@ -17,6 +17,8 @@ class UiThemeInfo {
 export class RightSideBarComponent extends AppComponentBase implements OnInit {
 
     themes: UiThemeInfo[] = [
+        new UiThemeInfo('Light', 'light'),
+        new UiThemeInfo('Dark', 'dark'),
         new UiThemeInfo('Red', 'red'),
         new UiThemeInfo('Pink', 'pink'),
         new UiThemeInfo('Purple', 'purple'),

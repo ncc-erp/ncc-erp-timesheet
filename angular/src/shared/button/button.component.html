@@ -1,0 +1,21 @@
+<button
+  mat-button
+  [attr.type]="type"
+  [disabled]="disabled || loading"
+  [ngClass]="hostClasses"
+  (click)="onClick($event)"
+>
+  <mat-progress-spinner
+    *ngIf="loading"
+    class="btn__spinner"
+    mode="indeterminate"
+    diameter="16"
+    strokeWidth="3"
+  ></mat-progress-spinner>
+
+  <mat-icon *ngIf="icon && iconPosition === 'left' && !loading" class="btn__icon-left">{{ icon }}</mat-icon>
+
+  <ng-content></ng-content>
+
+  <mat-icon *ngIf="icon && iconPosition === 'right' && !loading" class="btn__icon-right">{{ icon }}</mat-icon>
+</button>

@@ -1,0 +1,37 @@
+<div class="table-toolbar">
+  <div class="table-toolbar__left">
+    <div class="table-toolbar__filters" *ngIf="filters && filters.length">
+      <mat-form-field *ngFor="let f of filters" appearance="outline">
+        <mat-label>{{ f.placeholder }}</mat-label>
+        <mat-select (selectionChange)="onFilterChange(f.key, $event.value)">
+          <mat-option [value]="null">All</mat-option>
+          <mat-option *ngFor="let o of f.options" [value]="o.value">{{ o.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="table-toolbar__right">
+    <mat-form-field *ngIf="showSearch" appearance="outline" class="table-toolbar__search">
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        matInput
+        [placeholder]="searchPlaceholder"
+        [ngModel]="searchText"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </mat-form-field>
+
+    <ng-container *ngFor="let action of actions">
+      <app-button
+        class="table-toolbar__action"
+        [color]="action.color || 'primary'"
+        [icon]="action.icon"
+        iconPosition="left"
+        (clicked)="onActionClick(action.key)"
+      >
+        {{ action.label }}
+      </app-button>
+    </ng-container>
+  </div>
+</div>

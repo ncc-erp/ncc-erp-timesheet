@@ -1,0 +1,33 @@
+<nav class="sidebar__nav-wrapper">
+    <ul class="sidebar__nav-groups">
+        <ng-template ngFor let-menuItem [ngForOf]="menuItems">
+            <li *ngIf="!menuItem.children && isMenuItemVisible(menuItem)">
+                <div class="sidebar__section-title">{{ menuItem.name }}</div>
+                <ul class="sidebar__nav">
+                    <li class="sidebar__nav-item" routerLinkActive="sidebar__nav-link--active">
+                        <a class="sidebar__nav-link" [routerLink]="[menuItem.route]">
+                            <div class="sidebar__nav-dot"></div>
+                            <span>{{ menuItem.name }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li *ngIf="menuItem.children && isMenuItemVisible(menuItem)">
+                <div class="sidebar__section-title">{{ menuItem.name }}</div>
+                <ul class="sidebar__nav">
+                    <ng-template ngFor let-subMenuItem [ngForOf]="menuItem.children">
+                        <li *ngIf="isMenuItemVisible(subMenuItem)" class="sidebar__nav-item"
+                            routerLinkActive="sidebar__nav-link--active">
+                            <a class="sidebar__nav-link" [routerLink]="[subMenuItem.route]"
+                                *ngIf="!subMenuItem.children">
+                                <div class="sidebar__nav-dot"></div>
+                                <span>{{ subMenuItem.name }}</span>
+                            </a>
+                        </li>
+                    </ng-template>
+                </ul>
+            </li>
+        </ng-template>
+    </ul>
+</nav>

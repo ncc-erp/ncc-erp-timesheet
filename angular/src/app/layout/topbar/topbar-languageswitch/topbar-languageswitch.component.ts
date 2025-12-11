@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 @Component({
   templateUrl: './topbar-languageswitch.component.html',
   selector: 'topbar-languageswitch',
+  styleUrls: ['./topbar-languageswitch.component.css'],
   encapsulation: ViewEncapsulation.None
 })
 export class TopBarLanguageSwitchComponent extends AppComponentBase implements OnInit {

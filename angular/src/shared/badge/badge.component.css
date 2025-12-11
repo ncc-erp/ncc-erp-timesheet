@@ -1,0 +1,43 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.badge--pill {
+  border-radius: 9999px;
+}
+
+.badge--default {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.badge--success {
+  background-color: #e0f2fe;
+  color: #075985;
+}
+
+.badge--warning {
+  background-color: #fef9c3;
+  color: #854d0e;
+}
+
+.badge--danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.badge--info {
+  background-color: #e0f2fe;
+  color: #1d4ed8;
+}
+
+.badge--neutral {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
