@@ -1347,24 +1347,24 @@ namespace Timesheet.APIs.ReviewDetails
             try
             {
                 content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị {reviewer.FullName}</span>, <br> ");
-                content.Append($"Một review detail mới đã được tạo trong đợt đánh giá intern tháng {monthReviewIntern}/{yearReviewIntern}. ");
+                content.Append($"Một chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
                 content.Append($"Thông tin bao gồm: <br>");
 
                 var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
                                     <thead>
                                         <tr>
-                                            <th width='40%'>Thông tin intern</th>
-                                            <th width='20%'>Reviewer</th>
-                                            <th width='20%'>Level hiện tại</th>
-                                            <th width='20%'>Trạng thái</th>
+                                            <th width='20%'><span style='font-weight: 600'>Intern name</span></th>
+                                            <th width='20%'><span style='font-weight: 600'>Reviewer name</span></th>
+                                            <th width='20%'><span style='font-weight: 600'>Current level</span></th>
+                                            <th width='20%'><span style='font-weight: 600'>Status</span></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td style='padding-left: 5px'>{internName}/td>
-                                            <td style='padding-left: 5px'>{reviewer.FullName}</td>
-                                            <td style='padding-left: 5px'>{reviewDetail.CurrentLevel}</td>
-                                            <td style='padding-left: 5px'><span style='font-weight: 600'>Draft</span></td>
+                                            <td style='padding-left: 5px; text-align: center'>{internName}</td>
+                                            <td style='padding-left: 5px; text-align: center'>{reviewer.FullName}</td>
+                                            <td style='padding-left: 5px; text-align: center'>{reviewDetail.CurrentLevel}</td>
+                                            <td style='padding-left: 5px; text-align: center'>Draft</td>
                                         </tr>
                                     </tbody>
                                 </table>";
@@ -1375,13 +1375,9 @@ namespace Timesheet.APIs.ReviewDetails
                 content.Append("<br>");
                 content.Append("Trân trọng cảm ơn anh/chị!");
 
-                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo review detail mới cho intern {internName}";
+                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo chi tiết đánh giá mới cho thực tập sinh {internName}";
 
                 var targetEmails = new List<string> { reviewerEmail };
-
-                var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
-                            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                targetEmails.AddRange(hrEmails);
 
                 await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                 {
@@ -1437,12 +1433,12 @@ namespace Timesheet.APIs.ReviewDetails
             {
                 StringBuilder userMessage = new StringBuilder();
                 userMessage.AppendLine($"Kính gửi anh/chị**{user.FullName}**");
-                userMessage.AppendLine($"Một review detail mới đã được tạo trong đợt đánh giá intern tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                userMessage.AppendLine($"Một chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
                 userMessage.AppendLine("");
-                userMessage.AppendLine($"- Thông tin intern:**{internName}**");
-                userMessage.AppendLine($"- Reviewer:**{reviewer.FullName}**");
-                userMessage.AppendLine($"- Level hiện tại:**{reviewDetail.CurrentLevel}**");
-                userMessage.AppendLine($"- Trạng thái:**Draft**");
+                userMessage.AppendLine($"- Intern name:**{internName}**");
+                userMessage.AppendLine($"- Reviewer name:**{reviewer.FullName}**");
+                userMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
+                userMessage.AppendLine($"- Status:**Draft**");
                 userMessage.AppendLine("");
                 userMessage.AppendLine($"Anh/chị vui lòng xem xét và thực hiện đánh giá trên Timesheet.");
                 userMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
