@@ -1353,12 +1353,104 @@ namespace Timesheet.APIs.ReviewDetails
 
             if (input.Status == ReviewInternStatus.Rejected)
             {
+                long reviewDetailId = detail.Id;
+                long reviewId = detail.ReviewId;
+                long internshipId = detail.InternshipId;
+                long reviewerId = detail.ReviewerId.Value;
+                await SendMailWhenHeadPMReject(reviewDetailId, reviewId, internshipId, reviewerId);
+                await SendDirectMessageWhenHeadPMReject(reviewDetailId, reviewId, internshipId, reviewerId);
                 detail.NewLevel = detail.CurrentLevel;
             }
             detail.Status = input.Status;
             await WorkScope.UpdateAsync(detail);
             List<long> listId = new List<long> { detail.Id };
             await CheckSendMailToPresident(detail.ReviewId, listId);
+        }
+
+        public async Task SendMailWhenHeadPMReject(long reviewDetailId, long reviewId, long internshipId, long? reviewerId)
+        {
+            ReviewDetail reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
+            ReviewIntern reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            User internship = await WorkScope.GetAsync<User>(internshipId);
+            User reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
+
+            string reviewerEmail = reviewer.EmailAddress;
+            var monthReviewIntern = reviewIntern.Month;
+            var yearReviewIntern = reviewIntern.Year;
+
+            StringBuilder content = new StringBuilder();
+            try
+            {
+                content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị, </span><br> ");
+                content.Append($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
+                content.Append($"Thông tin bao gồm: <br>");
+                var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
+                                        <thead> 
+                                            <tr>
+                                                <th width='20%'><span style='font-weight: 600'>Intern name</span></th> 
+                                                <th width='20%'><span style='font-weight: 600'>Reviewer name</span></th> 
+                                                <th width='20%'><span style='font-weight: 600'>Current level</span></th> 
+                                                <th width='20%'><span style='font-weight: 600'>Level after PM reviewed</span></th>
+                                            </tr>
+                                        </thead> 
+                                        <tbody> 
+                                            <tr> 
+                                                <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td> 
+                                                <td style='padding-left: 5px; text-align: center'>{reviewer.FullName}</td> 
+                                                <td style='padding-left: 5px; text-align: center'>{reviewDetail.CurrentLevel}</td>
+                                                <td style='padding-left: 5px; text-align: center'>{reviewDetail.NewLevel}</td> 
+                                            </tr> 
+                                        </tbody> 
+                                </table>";
+                content.Append(tableHtml);
+                content.Append("<br>");
+                content.Append($"Anh/chị vui lòng xem xét và thực hiện đánh giá lại trên Timesheet.");
+                content.Append("<br>");
+                content.Append("Trân trọng cảm ơn anh/chị!");
+
+                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Head PM từ chối chi tiết đánh giá cho thực tập sinh {internship.FullName}";
+                var targetEmails = new List<string> { reviewerEmail };
+
+                var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
+                            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                targetEmails.AddRange(hrEmails);
+
+                await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
+                {
+                    TargetEmails = targetEmails,
+                    Body = content.ToString(),
+                    Subject = emailSubject
+                }, BackgroundJobPriority.High);
+            }
+            catch (Exception e)
+            {
+                Logger.Error("SendMailToNotifyNewReviewDetail() error => " + e.Message);
+            }
+        }
+
+        public async Task SendDirectMessageWhenHeadPMReject(long reviewDetailId, long reviewId, long internshipId, long? reviewerId)
+        {
+            ReviewDetail reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
+            ReviewIntern reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            int monthReviewIntern = reviewIntern.Month;
+            int yearReviewIntern = reviewIntern.Year;
+            User internship = await WorkScope.GetAsync<User>(internshipId);
+            User reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
+            var dateNow = DateTimeUtils.GetNow();
+
+            StringBuilder userMessage = new StringBuilder();
+            userMessage.AppendLine($"Kính gửi anh/chị**{reviewer.FullName}**");
+            userMessage.AppendLine($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
+            userMessage.AppendLine("");
+            userMessage.AppendLine($"- Intern name:**{internship.FullName}**");
+            userMessage.AppendLine($"- Reviewer name:**{reviewer.FullName}**");
+            userMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
+            userMessage.AppendLine($"- Level after PM reviewed:**{reviewDetail.NewLevel}**");
+            userMessage.AppendLine("");
+            userMessage.AppendLine($"Anh/chị vui lòng xem xét và thực hiện đánh giá lại trên Timesheet.");
+            userMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
+
+            _komuService.SendSimpleNotificationToUser(userMessage.ToString(), reviewer.UserName);
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote)]
@@ -1446,6 +1538,12 @@ namespace Timesheet.APIs.ReviewDetails
 
                 if (inputItem.Status == ReviewInternStatus.Rejected)
                 {
+                    long reviewDetailId = detail.Id;
+                    long reviewId = detail.ReviewId;
+                    long internshipId = detail.InternshipId;
+                    long reviewerId = detail.ReviewerId.Value;
+                    await SendMailWhenHeadPMReject(reviewDetailId, reviewId, internshipId, reviewerId);
+                    await SendDirectMessageWhenHeadPMReject(reviewDetailId, reviewId, internshipId, reviewerId);
                     detail.NewLevel = detail.CurrentLevel;
                 }
 
