@@ -1247,6 +1247,7 @@ namespace Timesheet.APIs.ReviewDetails
                 string headPmEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
                 int notifyHeadPmReviewInternOnDate = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMReviewInternOnDate));
                 await SendMailToNotifyTransition(headPmEmail, ReviewInternStatus.PmReviewed, detail.ReviewId, notifyHeadPmReviewInternOnDate);
+                await SendDirectMessageToNotifyTransition(headPmEmail, ReviewInternStatus.PmReviewed, detail.ReviewId, notifyHeadPmReviewInternOnDate);
             }
 
             return input;
@@ -1549,6 +1550,54 @@ namespace Timesheet.APIs.ReviewDetails
             catch (Exception e)
             {
                 Logger.Error("SendEmails() error=>" + e.Message);
+            }
+        }
+
+        public async Task SendDirectMessageToNotifyTransition(string email, ReviewInternStatus status, long reviewId, int date)
+        {
+            ReviewIntern reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            int monthReviewIntern = reviewIntern.Month;
+            int yearReviewIntern = reviewIntern.Year;
+            var dateNow = DateTimeUtils.GetNow();
+            string statusExpected;
+            try
+            {
+                var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
+                            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                User headPM = _userServices.GetUserByEmail(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail));
+                List<User> allUsers = new List<User> { headPM };
+                foreach (var hrEmail in hrEmails)
+                {
+                    var hr = _userServices.GetUserByEmail(hrEmail);
+                    allUsers.Add(hr);
+                }
+
+                foreach (var user in allUsers)
+                {
+                    StringBuilder content = new StringBuilder("");
+                    content.AppendLine($"Kính gửi anh/chị**{user.FullName}**");
+                    if (status == ReviewInternStatus.Reviewed)
+                    {
+                        string headPmMail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
+                        string nameHeadPm = _userServices.GetUserByEmail(headPmMail).FullName;
+                        content.AppendLine($"Anh {nameHeadPm} đã hoàn tất giai đoạn review và chuyển trạng thái**{status}**trên Timesheet cho đợt đánh giá intern tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                        statusExpected = "Approved";
+                    }
+                    else
+                    {
+                        content.AppendLine($"Hiện tại, tất cả các PM đã hoàn tất việc đánh giá intern tháng**{reviewIntern.Month}/{reviewIntern.Year}**trên Timesheet.");
+                        statusExpected = "Reviewed";
+                    }
+                    content.AppendLine($"Kính mong anh/chị xem xét và thực hiện chuyển trạng thái sang**{statusExpected}**trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**.");
+                    content.AppendLine($"Trân trọng cảm ơn anh/chị!");
+
+                    _komuService.SendSimpleNotificationToUser(content.ToString(), user.UserName);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error("SendDirectMessage() error=>" + e.Message);
             }
         }
     }
