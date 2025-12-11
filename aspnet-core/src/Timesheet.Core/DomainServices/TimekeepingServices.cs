@@ -527,8 +527,23 @@ namespace Timesheet.DomainServices
         [UnitOfWork(TransactionScopeOption.RequiresNew)]
         public async Task<List<Timekeeping>> AddTimekeepingByDay(DateTime selectedDate)
         {
+            var typesToCheck = new List<UserPunishmentType>
+            {
+                UserPunishmentType.Late,
+                UserPunishmentType.NoCheckIn,
+                UserPunishmentType.NoCheckOut,
+                UserPunishmentType.LateAndNoCheckOut,
+                UserPunishmentType.NoCheckInAndNoCheckOut,
+                UserPunishmentType.Daily,
+                UserPunishmentType.Mention,
+                UserPunishmentType.Tracker_20k,
+                UserPunishmentType.Tracker_50k,
+                UserPunishmentType.Tracker_100k,
+                UserPunishmentType.Tracker_200k,
+            };
+
             var hasExistingPunishments = await WorkScope.GetAll<UserPunishment>()
-                .AnyAsync(p => p.DateAt.Date == selectedDate.Date && !p.IsDeleted);
+                .AnyAsync(p => p.DateAt.Date == selectedDate.Date && !p.IsDeleted && typesToCheck.Contains(p.Type));
 
             if (!hasExistingPunishments)
             {
