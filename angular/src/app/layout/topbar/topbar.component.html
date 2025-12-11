@@ -1,0 +1,45 @@
+﻿<header class="topbar">
+    <div class="topbar__left">
+        <a routerLink="/app/home" class="topbar__brand-link">
+            <div class="topbar__brand-logo">T</div>
+            <div class="topbar__brand-text">
+                <div class="topbar__title">Timesheet</div>
+                <div class="topbar__subtitle">Attendance &amp; Tracking</div>
+            </div>
+        </a>
+    </div>
+    <div class="topbar__right">
+        <theme-selector></theme-selector>
+        <div class="topbar__language-wrapper">
+            <topbar-languageswitch></topbar-languageswitch>
+        </div>
+        <div class="topbar__user-wrapper" [class.show]="isUserMenuOpen">
+            <button class="topbar__user-trigger" (click)="toggleUserMenu()">
+                <div class="topbar__avatar">{{ appSession.user.name?.charAt(0) }}{{ appSession.user.surname?.charAt(0)
+                    }}</div>
+                <div class="topbar__user-info">
+                    <div class="topbar__user-name">{{ appSession.user.name }} {{ appSession.user.surname }}</div>
+                    <div class="topbar__user-email">{{ appSession.user.emailAddress }}</div>
+                </div>
+            </button>
+            <ul class="topbar__user-menu" [class.show]="isUserMenuOpen">
+                <li class="topbar__user-menu-header">
+                    <div class="topbar__avatar topbar__avatar--large">{{ appSession.user.name?.charAt(0) }}{{
+                        appSession.user.surname?.charAt(0) }}</div>
+                    <div>
+                        <div class="topbar__user-menu-name">{{ appSession.user.name }} {{ appSession.user.surname }}
+                        </div>
+                        <div class="topbar__user-menu-email">{{ appSession.user.emailAddress }}</div>
+                    </div>
+                </li>
+                <li class="topbar__user-menu-divider"></li>
+                <li>
+                    <a class="topbar__user-menu-item" (click)="logout()">
+                        <i class="material-icons">logout</i>
+                        <span>{{ 'Logout' | localize }}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>

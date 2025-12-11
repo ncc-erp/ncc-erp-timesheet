@@ -2,7 +2,7 @@ import { Component, Injector, ViewEncapsulation } from "@angular/core";
 import { AppComponentBase } from "@shared/app-component-base";
 import { MenuItem } from "@shared/layout/menu-item";
 import { MatDialog } from "@angular/material";
-import { EditSidebarComponent } from "./edit-sidebar/edit-sidebar.component";
+import { EditSidebarComponent } from "../../edit-sidebar/edit-sidebar.component";
 import {
     Router,
     ActivatedRoute,
@@ -16,6 +16,7 @@ import { filter } from "rxjs/operators";
 @Component({
     templateUrl: "./sidebar-nav.component.html",
     selector: "sidebar-nav",
+    styleUrls: ["./sidebar-nav.component.css"],
     encapsulation: ViewEncapsulation.None,
 })
 export class SideBarNavComponent extends AppComponentBase {

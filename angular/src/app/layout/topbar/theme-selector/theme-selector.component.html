@@ -1,0 +1,34 @@
+<div class="theme-selector">
+  <button 
+    class="theme-selector__trigger" 
+    (click)="toggleThemeMenu()"
+    [class.active]="isThemeMenuOpen"
+    title="Change theme"
+  >
+    <i class="material-icons">{{ selectedTheme.icon }}</i>
+    <span class="theme-selector__current-color" [style.background-color]="getThemeColor(selectedTheme)"></span>
+    <i class="material-icons theme-selector__arrow">expand_more</i>
+  </button>
+
+  <div class="theme-selector__menu" [class.show]="isThemeMenuOpen">
+    <div class="theme-selector__menu-header">
+      <span>Choose Theme</span>
+    </div>
+    
+    <div class="theme-selector__menu-grid">
+      <button
+        *ngFor="let theme of themes"
+        class="theme-selector__theme-item"
+        [class.active]="selectedTheme.cssClass === theme.cssClass"
+        (click)="setTheme(theme)"
+        [title]="theme.name"
+      >
+        <div 
+          class="theme-selector__theme-color" 
+          [style.background-color]="getThemeColor(theme)"
+        ></div>
+        <span class="theme-selector__theme-name">{{ theme.name }}</span>
+      </button>
+    </div>
+  </div>
+</div>

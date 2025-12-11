@@ -25,12 +25,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { HomeComponent } from '@app/home/home.component';
-import { TopBarComponent } from '@app/layout/topbar.component';
-import { TopBarLanguageSwitchComponent } from '@app/layout/topbar-languageswitch.component';
-import { SideBarUserAreaComponent } from '@app/layout/sidebar-user-area.component';
-import { SideBarNavComponent } from '@app/layout/sidebar-nav.component';
-import { SideBarFooterComponent } from '@app/layout/sidebar-footer.component';
-import { RightSideBarComponent } from '@app/layout/right-sidebar.component';
+import { TopBarComponent } from '@app/layout/topbar/topbar.component';
+import { TopBarLanguageSwitchComponent } from '@app/layout/topbar/topbar-languageswitch/topbar-languageswitch.component';
+import { SideBarUserAreaComponent } from '@app/layout/sidebar/sidebar-user/sidebar-user-area.component';
+import { SideBarNavComponent } from '@app/layout/sidebar/sidebar-nav/sidebar-nav.component';
+import { SideBarFooterComponent } from '@app/layout/sidebar/sidebar-footer/sidebar-footer.component';
+// import { RightSideBarComponent } from '@app/layout/right-sidebar.component';
+import { ThemeSelectorComponent } from '@app/layout/topbar/theme-selector/theme-selector.component';
 // tenants
 import { TenantsComponent } from '@app/tenants/tenants.component';
 import { CreateTenantDialogComponent } from './tenants/create-tenant/create-tenant-dialog.component';
@@ -80,7 +81,8 @@ export function provideConfig() {
     SideBarUserAreaComponent,
     SideBarNavComponent,
     SideBarFooterComponent,
-    RightSideBarComponent,
+    // RightSideBarComponent,
+    ThemeSelectorComponent,
     // tenants
     TenantsComponent,
     CreateTenantDialogComponent,

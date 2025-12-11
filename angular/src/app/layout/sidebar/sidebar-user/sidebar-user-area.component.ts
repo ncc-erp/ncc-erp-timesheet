@@ -1,6 +1,6 @@
-import { AppConsts } from './../../shared/AppConsts';
-import { UserService } from './../service/api/user.service';
-import { UploadAvatarComponent } from './../modules/user/upload-avatar/upload-avatar.component';
+import { AppConsts } from '../../../../shared/AppConsts';
+import { UserService } from '../../../service/api/user.service';
+import { UploadAvatarComponent } from '../../../modules/user/upload-avatar/upload-avatar.component';
 import { Component, OnInit, Injector, ViewEncapsulation } from '@angular/core';
 import { AppComponentBase } from '@shared/app-component-base';
 import { AppAuthService } from '@shared/auth/app-auth.service';

@@ -898,3 +898,92 @@
   .theme-black .sidebar .legal .copyright a {
     color: #000 !important; }
 
+.theme-light .navbar {
+  background-color: #2563EB; }
+
+.theme-light .navbar-brand {
+  color: #fff; }
+  .theme-light .navbar-brand:hover {
+    color: #fff; }
+  .theme-light .navbar-brand:active {
+    color: #fff; }
+  .theme-light .navbar-brand:focus {
+    color: #fff; }
+
+.theme-light .nav > li > a {
+  color: #fff; }
+  .theme-light .nav > li > a:hover {
+    background-color: transparent; }
+  .theme-light .nav > li > a:focus {
+    background-color: transparent; }
+
+.theme-light .nav .open > a {
+  background-color: transparent; }
+  .theme-light .nav .open > a:hover {
+    background-color: transparent; }
+  .theme-light .nav .open > a:focus {
+    background-color: transparent; }
+
+.theme-light .bars {
+  color: #fff; }
+
+.theme-light .sidebar .menu .list li.active {
+  background-color: transparent; }
+  .theme-light .sidebar .menu .list li.active > :first-child i, .theme-light .sidebar .menu .list li.active > :first-child span {
+    color: #2563EB; }
+
+.theme-light .sidebar .menu .list .toggled {
+  background-color: transparent; }
+
+.theme-light .sidebar .menu .list .ml-menu {
+  background-color: transparent; }
+
+.theme-light .sidebar .legal {
+  background-color: #fff; }
+  .theme-light .sidebar .legal .copyright a {
+    color: #2563EB !important; }
+
+.theme-dark .navbar {
+  background-color: #60A5FA; }
+
+.theme-dark .navbar-brand {
+  color: #fff; }
+  .theme-dark .navbar-brand:hover {
+    color: #fff; }
+  .theme-dark .navbar-brand:active {
+    color: #fff; }
+  .theme-dark .navbar-brand:focus {
+    color: #fff; }
+
+.theme-dark .nav > li > a {
+  color: #fff; }
+  .theme-dark .nav > li > a:hover {
+    background-color: transparent; }
+  .theme-dark .nav > li > a:focus {
+    background-color: transparent; }
+
+.theme-dark .nav .open > a {
+  background-color: transparent; }
+  .theme-dark .nav .open > a:hover {
+    background-color: transparent; }
+  .theme-dark .nav .open > a:focus {
+    background-color: transparent; }
+
+.theme-dark .bars {
+  color: #fff; }
+
+.theme-dark .sidebar .menu .list li.active {
+  background-color: transparent; }
+  .theme-dark .sidebar .menu .list li.active > :first-child i, .theme-dark .sidebar .menu .list li.active > :first-child span {
+    color: #60A5FA; }
+
+.theme-dark .sidebar .menu .list .toggled {
+  background-color: transparent; }
+
+.theme-dark .sidebar .menu .list .ml-menu {
+  background-color: transparent; }
+
+.theme-dark .sidebar .legal {
+  background-color: #fff; }
+  .theme-dark .sidebar .legal .copyright a {
+    color: #60A5FA !important; }

@@ -1,0 +1,250 @@
+body {
+  background: #f3f4f6;
+}
+
+.topbar {
+  height: 56px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06),
+              0 1px 3px rgba(15, 23, 42, 0.1);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.topbar__left {
+  display: flex;
+  align-items: center;
+}
+
+.topbar__brand-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.topbar__brand-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(120deg, #2563eb, #1d4ed8);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  color: #eff6ff;
+
+  margin-right: 10px;
+}
+
+.topbar__brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar__title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.topbar__subtitle {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar__right theme-selector {
+  display: flex;
+}
+
+@media (max-width: 640px) {
+  .topbar__right theme-selector {
+    display: none;
+  }
+}
+
+.topbar__icon-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.topbar__icon-button:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.topbar__language-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.topbar__language-wrapper topbar-languageswitch {
+  float: none;
+  margin-top: 0;
+  margin-left: 0;
+}
+
+.topbar__user-wrapper {
+  position: relative;
+}
+
+.topbar__user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.topbar__user-trigger:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.topbar__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e5e7eb;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+
+  flex-shrink: 0;
+}
+
+.topbar__avatar--large {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+}
+
+.topbar__user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.topbar__user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+
+  line-height: 1.2;
+}
+
+.topbar__user-email {
+  font-size: 11px;
+  color: #6b7280;
+
+  line-height: 1.2;
+}
+
+.topbar__user-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 280px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: none;
+  z-index: 1001;
+}
+
+.topbar__user-menu.show {
+  display: block;
+}
+
+.topbar__user-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.topbar__user-menu-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 2px;
+}
+
+.topbar__user-menu-email {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.topbar__user-menu-divider {
+  height: 1px;
+  background: #e5e7eb;
+
+  margin: 0 12px;
+}
+
+.topbar__user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #111827;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.2s;
+  cursor: pointer;
+  border-radius: 0 0 12px 12px;
+}
+
+.topbar__user-menu-item:hover {
+  background: #f9fafb;
+  color: #111827;
+}
+
+.topbar__user-menu-item .material-icons {
+  font-size: 20px;
+  color: #6b7280;
+}
+
+.topbar__user-menu-item:hover .material-icons {
+  color: #ef4444;
+}

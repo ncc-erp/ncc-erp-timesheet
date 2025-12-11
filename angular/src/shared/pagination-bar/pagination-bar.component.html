@@ -1,0 +1,21 @@
+<div class="pagination-bar">
+  <div class="pagination-bar__left">
+    <span class="pagination-bar__label">Rows per page:</span>
+    <mat-form-field appearance="outline" class="pagination-bar__page-size">
+      <mat-select [value]="pageSize" (selectionChange)="onPageEvent({ pageIndex: pageIndex, pageSize: $event.value })">
+        <mat-option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="pagination-bar__right">
+    <mat-paginator
+      [length]="length"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [pageSizeOptions]="pageSizeOptions"
+      [showFirstLastButtons]="true"
+      [hidePageSize]="true"
+      (page)="onPageEvent($event)"
+    ></mat-paginator>
+  </div>
+</div>

@@ -1,0 +1,76 @@
+.btn--size-sm {
+  padding: 0 14px;
+  height: 32px;
+  font-size: 12px;
+}
+
+.btn--size-md {
+  padding: 0 18px;
+  height: 38px;
+  font-size: 13px;
+}
+
+.btn--size-lg {
+  padding: 0 22px;
+  height: 42px;
+  font-size: 14px;
+}
+
+button.mat-button.btn--color-primary.btn--variant-solid {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06),
+              0 1px 3px rgba(15, 23, 42, 0.1);
+}
+
+button.mat-button.btn--color-primary.btn--variant-solid:hover {
+  background-color: #1d4ed8;
+}
+
+button.mat-button.btn--color-secondary.btn--variant-solid {
+  background-color: #f9fafb;
+  color: #111827;
+  border-radius: 6px;
+}
+
+button.mat-button.btn--color-danger.btn--variant-solid {
+  background-color: #b91c1c;
+  color: #ffffff;
+  border-radius: 6px;
+}
+
+button.mat-button.btn--variant-outline {
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  border-radius: 6px;
+  color: #111827;
+}
+
+button.mat-button.btn--variant-outline:hover {
+  background-color: #f9fafb;
+}
+
+button.mat-button.btn--variant-text {
+  padding-left: 8px;
+  padding-right: 8px;
+  background-color: transparent;
+  border-radius: 4px;
+}
+
+.btn__spinner {
+  margin-right: 8px;
+}
+
+.btn__icon-left {
+  margin-right: 6px;
+}
+
+.btn__icon-right {
+  margin-left: 6px;
+}
+
+.btn--loading {
+  pointer-events: none;
+  opacity: 0.8;
+}

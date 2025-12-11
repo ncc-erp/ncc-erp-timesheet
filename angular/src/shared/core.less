@@ -19,6 +19,8 @@
 @grey: #9E9E9E;
 @blue-grey: #607D8B;
 @black: #000;
+@light: #2563EB;
+@dark: #60A5FA;
 .make-theme(@color) {
     .sidebar .menu .list .ml-menu li.active a.toggled:not(.menu-toggle):before {
         color: @color;
@@ -111,6 +113,14 @@
 
 .theme-red {
     .make-theme(@red)
+}
+
+.theme-light {
+    .make-theme(@light)
+}
+
+.theme-dark {
+    .make-theme(@dark)
 }
 
 .theme-pink {
@@ -345,3 +355,29 @@ ngx-stars{
 .justify-content-center{
     justify-content : center;
 }
+
+.mat-raised-button {
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    min-width: auto !important;
+    height: auto !important;
+    line-height: normal !important;
+}
+
+.mat-raised-button .mat-button-wrapper {
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+
