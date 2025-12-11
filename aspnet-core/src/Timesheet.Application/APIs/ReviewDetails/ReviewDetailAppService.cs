@@ -1578,8 +1578,8 @@ namespace Timesheet.APIs.ReviewDetails
                     content.AppendLine($"Hiện tại, tất cả các PM đã hoàn tất việc đánh giá intern tháng**{reviewIntern.Month}/{reviewIntern.Year}**trên Timesheet.");
                     statusExpected = "Reviewed";
                 }
-                content.AppendLine($"Kính mong anh/chị xem xét và thực hiện chuyển trạng thái sang**{statusExpected}**trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**.");
-                content.AppendLine($"Trân trọng cảm ơn anh/chị!");
+                content.AppendLine($"Kính mong anh xem xét và thực hiện chuyển trạng thái sang**{statusExpected}**trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**");
+                content.AppendLine($"Trân trọng cảm ơn anh!");
 
                 _komuService.SendSimpleNotificationToUser(content.ToString(), headPM.UserName);
             }
