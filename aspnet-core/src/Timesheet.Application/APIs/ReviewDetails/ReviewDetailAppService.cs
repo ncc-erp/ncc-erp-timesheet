@@ -1321,23 +1321,12 @@ namespace Timesheet.APIs.ReviewDetails
             await SendDirectMessageToNotifyNewReviewDetail(input.Id, input.ReviewId, input.InternshipId, input.ReviewerId);
         }
 
-        public async Task SendMailToNotifyNewReviewDetail(long reviewDetailId, long reviewId, long internshipId, long? reviewerId) // Gui mail cho reviewer
+        public async Task SendMailToNotifyNewReviewDetail(long reviewDetailId, long reviewId, long internshipId, long? reviewerId)
         {
-            var reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
             var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
-            var internName = await WorkScope.GetAll<User>()
-                .Where(s => s.Id == internshipId)
-                .Select(s => s.FullName)
-                .FirstOrDefaultAsync();
-
-            var reviewer = await WorkScope.GetAll<User>()
-                .Where(s => s.Id == reviewerId)
-                .Select(s => new
-                {
-                    s.FullName,
-                    s.EmailAddress
-                })
-                .FirstOrDefaultAsync();
+            var reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
+            var internship = await WorkScope.GetAsync<User>(internshipId);
+            var reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
 
             string reviewerEmail = reviewer.EmailAddress;
             int monthReviewIntern = reviewIntern.Month;
@@ -1361,7 +1350,7 @@ namespace Timesheet.APIs.ReviewDetails
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td style='padding-left: 5px; text-align: center'>{internName}</td>
+                                            <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td>
                                             <td style='padding-left: 5px; text-align: center'>{reviewer.FullName}</td>
                                             <td style='padding-left: 5px; text-align: center'>{reviewDetail.CurrentLevel}</td>
                                             <td style='padding-left: 5px; text-align: center'>Draft</td>
@@ -1375,7 +1364,7 @@ namespace Timesheet.APIs.ReviewDetails
                 content.Append("<br>");
                 content.Append("Trân trọng cảm ơn anh/chị!");
 
-                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo chi tiết đánh giá mới cho thực tập sinh {internName}";
+                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo chi tiết đánh giá mới cho thực tập sinh {internship.FullName}";
 
                 var targetEmails = new List<string> { reviewerEmail };
 
@@ -1401,16 +1390,10 @@ namespace Timesheet.APIs.ReviewDetails
                 return;
             }
 
-            var reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
             var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
-            var internName = await WorkScope.GetAll<User>()
-                .Where(s => s.Id == internshipId)
-                .Select(s => s.FullName)
-                .FirstOrDefaultAsync();
-
-            var reviewer = await WorkScope.GetAll<User>()
-                .Where(s => s.Id == reviewerId)
-                .FirstOrDefaultAsync();
+            var reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
+            var internship = await WorkScope.GetAsync<User>(internshipId);
+            var reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
 
             int monthReviewIntern = reviewIntern.Month;
             int yearReviewIntern = reviewIntern.Year;
@@ -1435,7 +1418,7 @@ namespace Timesheet.APIs.ReviewDetails
                 userMessage.AppendLine($"Kính gửi anh/chị**{user.FullName}**");
                 userMessage.AppendLine($"Một chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
                 userMessage.AppendLine("");
-                userMessage.AppendLine($"- Intern name:**{internName}**");
+                userMessage.AppendLine($"- Intern name:**{internship.FullName}**");
                 userMessage.AppendLine($"- Reviewer name:**{reviewer.FullName}**");
                 userMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
                 userMessage.AppendLine($"- Status:**Draft**");
