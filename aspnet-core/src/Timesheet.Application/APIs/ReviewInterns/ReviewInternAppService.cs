@@ -2,6 +2,7 @@
 using Abp.Authorization;
 using Abp.BackgroundJobs;
 using Abp.Collections.Extensions;
+using Abp.Configuration;
 using Abp.UI;
 using Castle.Core.Internal;
 using ClosedXML.Excel;
@@ -37,6 +38,7 @@ using Timesheet.Paging;
 using Timesheet.Services.HRM;
 using Timesheet.Services.HRM.Dto;
 using Timesheet.Services.HRMv2;
+using Timesheet.Services.Komu;
 using Timesheet.Services.Project;
 using Timesheet.Services.Project.Dto;
 using Timesheet.Uitls;
@@ -55,10 +57,12 @@ namespace Timesheet.APIs.ReviewInterns
         private readonly ProjectService _projectService;
         private readonly ReviewDetailAppService _reviewDetailAppService;
         private readonly IReviewInternServices _reviewInternServices;
-
+        private readonly KomuService _komuService;
+        private readonly UserServices _userServices;
 
         public ReviewInternAppService(IBackgroundJobManager backgroundJobManager, HRMv2Service hrmv2Service, IWorkScope workScope,
-            ProjectService projectService, HRMService hRMService, ReviewDetailAppService reviewDetailAppService, IReviewInternServices reviewInternServices) : base(workScope)
+            ProjectService projectService, HRMService hRMService, ReviewDetailAppService reviewDetailAppService, IReviewInternServices reviewInternServices,
+            KomuService komuService, UserServices userServices) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _hrmService = hRMService;
@@ -66,6 +70,8 @@ namespace Timesheet.APIs.ReviewInterns
             _projectService = projectService;
             _reviewDetailAppService = reviewDetailAppService;
             _reviewInternServices = reviewInternServices;
+            _komuService = komuService;
+            _userServices = userServices;
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_AddNewReview)]
@@ -1137,8 +1143,158 @@ namespace Timesheet.APIs.ReviewInterns
                     await WorkScope.InsertAsync(reviewInternCapability);
                 }
             }
+            await SendMailToNotifyNewReviewDetail(input.Id);
+            await SendDirectMessageToNotifyNewReviewDetail(input.Id);
             return fails;
         }
+
+        public async System.Threading.Tasks.Task SendMailToNotifyNewReviewDetail(long reviewId)
+        {
+            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
+                .Where(rd => rd.ReviewId == reviewId && rd.ReviewerId.HasValue)
+                .ToListAsync();
+            if (!reviewDetails.Any())
+            {
+                return;
+            }
+
+            var internshipIds = reviewDetails.Select(rd => rd.InternshipId).ToList();
+            var reviewerIds = reviewDetails.Select(rd => rd.ReviewerId.Value).Distinct().ToList();
+            var userIds = internshipIds.Concat(reviewerIds).Distinct().ToList();
+
+            var users = await WorkScope.GetAll<User>()
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
+            var targetEmails = reviewers.Select(r => r.EmailAddress).Distinct().ToList();
+
+            int monthReviewIntern = reviewIntern.Month;
+            int yearReviewIntern = reviewIntern.Year;
+
+            StringBuilder content = new StringBuilder("");
+            try
+            {
+                content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị,</span> <br> ");
+                content.Append($"Các chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
+                content.Append($"Thông tin bao gồm: <br>");
+
+                var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
+                            <thead>
+                                <tr>
+                                    <th width='20%'><span style='font-weight: 600'>Intern name</span></th>
+                                    <th width='20%'><span style='font-weight: 600'>Reviewer name</span></th>
+                                    <th width='20%'><span style='font-weight: 600'>Current level</span></th>
+                                    <th width='20%'><span style='font-weight: 600'>Status</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>";
+                foreach (var reviewDetail in reviewDetails)
+                {
+                    var internship = users.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                    var reviewer = users.FirstOrDefault(u => u.Id == reviewDetail.ReviewerId.Value);
+                    tableHtml += $@"
+                                <tr>
+                                    <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td>
+                                    <td style='padding-left: 5px; text-align: center'>{reviewer.FullName}</td>
+                                    <td style='padding-left: 5px; text-align: center'>{reviewDetail.CurrentLevel}</td>
+                                    <td style='padding-left: 5px; text-align: center'>Draft</td>
+                                </tr>";
+                }
+                tableHtml += @"
+                            </tbody>
+                        </table>";
+                content.Append(tableHtml);
+
+                content.Append("<br>");
+                content.Append($"Kính mong anh/chị xem xét và thực hiện đánh giá trên Timesheet. ");
+                content.Append("<br>");
+                content.Append("Trân trọng cảm ơn anh/chị!");
+
+                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo yêu cầu đánh giá cho thực tập sinh";
+
+                await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
+                {
+                    TargetEmails = targetEmails,
+                    Body = content.ToString(),
+                    Subject = emailSubject
+                }, BackgroundJobPriority.High);
+            }
+            catch (Exception e)
+            {
+                Logger.Error("SendMailToNotifyNewReviewDetail() error => " + e.Message);
+            }
+        }
+
+        public async System.Threading.Tasks.Task SendDirectMessageToNotifyNewReviewDetail(long reviewId)
+        {
+            var enableNotify = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendKomuRequest);
+            if (enableNotify != "true")
+            {
+                Logger.Info("SendKomuMessageToNotifyNewReviewDetail() SendKomuRequest=" + enableNotify);
+                return;
+            }
+
+            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
+                .Where(rd => rd.ReviewId == reviewId && rd.ReviewerId.HasValue)
+                .ToListAsync();
+            if (!reviewDetails.Any())
+            {
+                return;
+            }
+
+            var internshipIds = reviewDetails.Select(rd => rd.InternshipId).ToList();
+            var reviewerIds = reviewDetails.Select(rd => rd.ReviewerId.Value).Distinct().ToList();
+            var userIds = internshipIds.Concat(reviewerIds).Distinct().ToList();
+
+            var users = await WorkScope.GetAll<User>()
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
+
+            var usersToNotify = reviewers.ToList();
+
+            var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
+                            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var hrEmail in hrEmails)
+            {
+                var hrUser = _userServices.GetUserByEmail(hrEmail);
+                if (hrUser != null)
+                {
+                    usersToNotify.Add(hrUser);
+                }
+            }
+
+            int monthReviewIntern = reviewIntern.Month;
+            int yearReviewIntern = reviewIntern.Year;
+
+            foreach (var user in usersToNotify)
+            {
+                StringBuilder userMessage = new StringBuilder();
+                userMessage.AppendLine($"Kính gửi anh/chị**{user.UserName}**");
+                userMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                userMessage.AppendLine("");
+                foreach (var reviewDetail in reviewDetails)
+                {
+                    var internship = users.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                    var reviewer = users.FirstOrDefault(u => u.Id == reviewDetail.ReviewerId.Value);
+                    userMessage.AppendLine($"- Intern name:**{internship.UserName}**");
+                    userMessage.AppendLine($"- Reviewer name:**{reviewer.UserName}**");
+                    userMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
+                    userMessage.AppendLine($"- Status:**Draft**");
+                    userMessage.AppendLine("");
+                }
+                userMessage.AppendLine($"Anh/chị vui lòng xem xét và thực hiện đánh giá trên Timesheet.");
+                userMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
+
+                _komuService.SendSimpleNotificationToUser(userMessage.ToString(), user.UserName);
+            }
+        }
+
         [HttpDelete]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_Delete)]
         public async System.Threading.Tasks.Task DeleteInternCapability(EntityDto<long> input)
