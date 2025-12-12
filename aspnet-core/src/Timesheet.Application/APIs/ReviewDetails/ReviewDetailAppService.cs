@@ -1371,8 +1371,19 @@ namespace Timesheet.APIs.ReviewDetails
         {
             var reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
             var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
-            var internship = await WorkScope.GetAsync<User>(internshipId);
-            var reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
+            var userIds = new List<long> { internshipId };
+            if (reviewerId.HasValue)
+            {
+                userIds.Add(reviewerId.Value);
+            }
+            userIds = userIds.Distinct().ToList();
+
+            var users = await WorkScope.GetAll<User>()
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            var internship = users.FirstOrDefault(u => u.Id == internshipId);
+            var reviewer = users.FirstOrDefault(u => u.Id == reviewerId.Value);
 
             string reviewerEmail = reviewer.EmailAddress;
             var monthReviewIntern = reviewIntern.Month;
@@ -1434,8 +1445,19 @@ namespace Timesheet.APIs.ReviewDetails
             var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
             int monthReviewIntern = reviewIntern.Month;
             int yearReviewIntern = reviewIntern.Year;
-            var internship = await WorkScope.GetAsync<User>(internshipId);
-            var reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
+            var userIds = new List<long> { internshipId };
+            if (reviewerId.HasValue)
+            {
+                userIds.Add(reviewerId.Value);
+            }
+            userIds = userIds.Distinct().ToList();
+
+            var users = await WorkScope.GetAll<User>()
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            var internship = users.FirstOrDefault(u => u.Id == internshipId);
+            var reviewer = users.FirstOrDefault(u => u.Id == reviewerId.Value);
             var dateNow = DateTimeUtils.GetNow();
 
             StringBuilder userMessage = new StringBuilder();
