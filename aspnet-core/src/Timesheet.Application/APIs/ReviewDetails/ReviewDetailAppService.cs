@@ -1325,8 +1325,19 @@ namespace Timesheet.APIs.ReviewDetails
         {
             var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
             var reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
-            var internship = await WorkScope.GetAsync<User>(internshipId);
-            var reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
+            var userIds = new List<long> { internshipId };
+            if (reviewerId.HasValue)
+            {
+                userIds.Add(reviewerId.Value);
+            }
+            userIds = userIds.Distinct().ToList();
+
+            var users = await WorkScope.GetAll<User>()
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            var internship = users.FirstOrDefault(u => u.Id == internshipId);
+            var reviewer = users.FirstOrDefault(u => u.Id == reviewerId.Value);
 
             string reviewerEmail = reviewer.EmailAddress;
             int monthReviewIntern = reviewIntern.Month;
@@ -1364,7 +1375,7 @@ namespace Timesheet.APIs.ReviewDetails
                 content.Append("<br>");
                 content.Append("Trân trọng cảm ơn anh/chị!");
 
-                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo chi tiết đánh giá mới cho thực tập sinh {internship.FullName}";
+                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo yêu cầu đánh giá cho thực tập sinh {internship.FullName}";
 
                 var targetEmails = new List<string> { reviewerEmail };
 
@@ -1392,8 +1403,19 @@ namespace Timesheet.APIs.ReviewDetails
 
             var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
             var reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
-            var internship = await WorkScope.GetAsync<User>(internshipId);
-            var reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
+            var userIds = new List<long> { internshipId };
+            if (reviewerId.HasValue)
+            {
+                userIds.Add(reviewerId.Value);
+            }
+            userIds = userIds.Distinct().ToList();
+
+            var users = await WorkScope.GetAll<User>()
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            var internship = users.FirstOrDefault(u => u.Id == internshipId);
+            var reviewer = users.FirstOrDefault(u => u.Id == reviewerId.Value);
 
             int monthReviewIntern = reviewIntern.Month;
             int yearReviewIntern = reviewIntern.Year;
@@ -1415,11 +1437,11 @@ namespace Timesheet.APIs.ReviewDetails
             foreach (var user in usersToNotify)
             {
                 StringBuilder userMessage = new StringBuilder();
-                userMessage.AppendLine($"Kính gửi anh/chị**{user.FullName}**");
+                userMessage.AppendLine($"Kính gửi anh/chị**{user.UserName}**");
                 userMessage.AppendLine($"Một chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
                 userMessage.AppendLine("");
-                userMessage.AppendLine($"- Intern name:**{internship.FullName}**");
-                userMessage.AppendLine($"- Reviewer name:**{reviewer.FullName}**");
+                userMessage.AppendLine($"- Intern name:**{internship.UserName}**");
+                userMessage.AppendLine($"- Reviewer name:**{reviewer.UserName}**");
                 userMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
                 userMessage.AppendLine($"- Status:**Draft**");
                 userMessage.AppendLine("");
