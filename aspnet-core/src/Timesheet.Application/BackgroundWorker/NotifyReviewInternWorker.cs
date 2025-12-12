@@ -377,6 +377,7 @@ namespace Timesheet.BackgroundWorker
             string presidentEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentEmail);
 
             _reviewDetailAppService.SendMailToNotifyTransition(presidentEmail, ReviewInternStatus.Reviewed, reviewId, dateSendMailToPresident);
+            _reviewDetailAppService.SendDirectMessageToNotifyTransition(presidentEmail, ReviewInternStatus.Reviewed, reviewId, dateSendMailToPresident);
             return true;
         }
 
