@@ -1369,10 +1369,10 @@ namespace Timesheet.APIs.ReviewDetails
 
         public async Task SendMailWhenHeadPMReject(long reviewDetailId, long reviewId, long internshipId, long? reviewerId)
         {
-            ReviewDetail reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
-            ReviewIntern reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
-            User internship = await WorkScope.GetAsync<User>(internshipId);
-            User reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
+            var reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
+            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            var internship = await WorkScope.GetAsync<User>(internshipId);
+            var reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
 
             string reviewerEmail = reviewer.EmailAddress;
             var monthReviewIntern = reviewIntern.Month;
@@ -1430,12 +1430,12 @@ namespace Timesheet.APIs.ReviewDetails
 
         public async Task SendDirectMessageWhenHeadPMReject(long reviewDetailId, long reviewId, long internshipId, long? reviewerId)
         {
-            ReviewDetail reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
-            ReviewIntern reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            var reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
+            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
             int monthReviewIntern = reviewIntern.Month;
             int yearReviewIntern = reviewIntern.Year;
-            User internship = await WorkScope.GetAsync<User>(internshipId);
-            User reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
+            var internship = await WorkScope.GetAsync<User>(internshipId);
+            var reviewer = await WorkScope.GetAsync<User>(reviewerId.Value);
             var dateNow = DateTimeUtils.GetNow();
 
             StringBuilder userMessage = new StringBuilder();
