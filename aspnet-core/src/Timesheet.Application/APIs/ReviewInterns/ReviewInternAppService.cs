@@ -1168,62 +1168,63 @@ namespace Timesheet.APIs.ReviewInterns
                 .ToListAsync();
 
             var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
-            var targetEmails = reviewers.Select(r => r.EmailAddress).Distinct().ToList();
-
             int monthReviewIntern = reviewIntern.Month;
             int yearReviewIntern = reviewIntern.Year;
-
-            StringBuilder content = new StringBuilder("");
-            try
+            foreach (var reviewer in reviewers)
             {
-                content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị,</span> <br> ");
-                content.Append($"Các chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
-                content.Append($"Thông tin bao gồm: <br>");
-
-                var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
-                            <thead>
-                                <tr>
-                                    <th width='20%'><span style='font-weight: 600'>Intern name</span></th>
-                                    <th width='20%'><span style='font-weight: 600'>Reviewer name</span></th>
-                                    <th width='20%'><span style='font-weight: 600'>Current level</span></th>
-                                    <th width='20%'><span style='font-weight: 600'>Status</span></th>
-                                </tr>
-                            </thead>
-                            <tbody>";
-                foreach (var reviewDetail in reviewDetails)
+                var reviewerToReviewDetails = reviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
+                if (!reviewerToReviewDetails.Any())
                 {
-                    var internship = users.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
-                    var reviewer = users.FirstOrDefault(u => u.Id == reviewDetail.ReviewerId.Value);
-                    tableHtml += $@"
-                                <tr>
-                                    <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td>
-                                    <td style='padding-left: 5px; text-align: center'>{reviewer.FullName}</td>
-                                    <td style='padding-left: 5px; text-align: center'>{reviewDetail.CurrentLevel}</td>
-                                    <td style='padding-left: 5px; text-align: center'>Draft</td>
-                                </tr>";
+                    continue;
                 }
-                tableHtml += @"
-                            </tbody>
-                        </table>";
-                content.Append(tableHtml);
 
-                content.Append("<br>");
-                content.Append($"Kính mong anh/chị xem xét và thực hiện đánh giá trên Timesheet. ");
-                content.Append("<br>");
-                content.Append("Trân trọng cảm ơn anh/chị!");
-
-                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo yêu cầu đánh giá cho thực tập sinh";
-
-                await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
+                StringBuilder content = new StringBuilder("");
+                try
                 {
-                    TargetEmails = targetEmails,
-                    Body = content.ToString(),
-                    Subject = emailSubject
-                }, BackgroundJobPriority.High);
-            }
-            catch (Exception e)
-            {
-                Logger.Error("SendMailToNotifyNewReviewDetail() error => " + e.Message);
+                    content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị {reviewer.FullName},</span> <br> ");
+                    content.Append($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
+                    content.Append($"Thông tin bao gồm: <br>");
+                    var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
+                        <thead>
+                            <tr>
+                                <th width='20%'><span style='font-weight: 600'>Intern name</span></th>
+                                <th width='20%'><span style='font-weight: 600'>Reviewer name</span></th>
+                                <th width='20%'><span style='font-weight: 600'>Current level</span></th>
+                                <th width='20%'><span style='font-weight: 600'>Status</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>";
+                    foreach (var reviewDetail in reviewerToReviewDetails)
+                    {
+                        var internship = users.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                        tableHtml += $@"
+                            <tr>
+                                <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td>
+                                <td style='padding-left: 5px; text-align: center'>{reviewer.FullName}</td>
+                                <td style='padding-left: 5px; text-align: center'>{reviewDetail.CurrentLevel}</td>
+                                <td style='padding-left: 5px; text-align: center'>Draft</td>
+                            </tr>";
+                    }
+                    tableHtml += @"
+                        </tbody>
+                    </table>";
+                    content.Append(tableHtml);
+                    content.Append("<br>");
+                    content.Append($"Kính mong anh/chị xem xét và thực hiện đánh giá trên Timesheet. ");
+                    content.Append("<br>");
+                    content.Append("Trân trọng cảm ơn anh/chị!");
+                    var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo yêu cầu đánh giá cho thực tập sinh";
+                    await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
+                    {
+                        TargetEmails = new List<string> { reviewer.EmailAddress },
+                        Body = content.ToString(),
+                        Subject = emailSubject
+                    }, BackgroundJobPriority.High);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("SendMailToNotifyNewReviewDetail() error for reviewer => " + e.Message);
+                }
             }
         }
 
@@ -1254,8 +1255,11 @@ namespace Timesheet.APIs.ReviewInterns
                 .ToListAsync();
 
             var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
+            var internships = users.Where(u => internshipIds.Contains(u.Id)).ToList();
+            int monthReviewIntern = reviewIntern.Month;
+            int yearReviewIntern = reviewIntern.Year;
 
-            var usersToNotify = reviewers.ToList();
+            var hrUsersToNotify = new List<User>();
 
             var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
                             .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -1265,33 +1269,64 @@ namespace Timesheet.APIs.ReviewInterns
                 var hrUser = _userServices.GetUserByEmail(hrEmail);
                 if (hrUser != null)
                 {
-                    usersToNotify.Add(hrUser);
+                    hrUsersToNotify.Add(hrUser);
                 }
             }
 
-            int monthReviewIntern = reviewIntern.Month;
-            int yearReviewIntern = reviewIntern.Year;
-
-            foreach (var user in usersToNotify)
+            foreach (var user in hrUsersToNotify)
             {
                 StringBuilder userMessage = new StringBuilder();
-                userMessage.AppendLine($"Kính gửi anh/chị**{user.UserName}**");
+                userMessage.AppendLine($"Kính gửi HR,**");
                 userMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                userMessage.AppendLine($"Thông tin bao gồm tất cả các thực tập sinh:");
                 userMessage.AppendLine("");
                 foreach (var reviewDetail in reviewDetails)
                 {
-                    var internship = users.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
-                    var reviewer = users.FirstOrDefault(u => u.Id == reviewDetail.ReviewerId.Value);
+                    var internship = internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                    var reviewer = reviewers.FirstOrDefault(u => u.Id == reviewDetail.ReviewerId.Value);
                     userMessage.AppendLine($"- Intern name:**{internship.UserName}**");
                     userMessage.AppendLine($"- Reviewer name:**{reviewer.UserName}**");
                     userMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
                     userMessage.AppendLine($"- Status:**Draft**");
                     userMessage.AppendLine("");
                 }
-                userMessage.AppendLine($"Anh/chị vui lòng xem xét và thực hiện đánh giá trên Timesheet.");
-                userMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
+                userMessage.AppendLine($"Kính mong HR xem xét và theo dõi. ");
+                userMessage.AppendLine("Trân trọng!");
 
                 _komuService.SendSimpleNotificationToUser(userMessage.ToString(), user.UserName);
+            }
+
+            foreach (var reviewer in reviewers)
+            {
+                var reviewerToReviewDetails = reviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
+                if (!reviewerToReviewDetails.Any())
+                {
+                    continue;
+                }
+                StringBuilder content = new StringBuilder("");
+                try
+                {
+                    content.AppendLine($"Kính gửi anh/chị {reviewer.FullName},**");
+                    content.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**.");
+                    content.AppendLine($"Thông tin thực tập sinh bao gồm:");
+                    content.AppendLine("");
+                    foreach (var reviewDetail in reviewerToReviewDetails)
+                    {
+                        var internship = internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                        content.AppendLine($"- Intern name:**{internship.UserName}**");
+                        content.AppendLine($"- Reviewer name:**{reviewer.UserName}**");
+                        content.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
+                        content.AppendLine($"- Status:**Draft**");
+                        content.AppendLine("");
+                    }
+                    content.AppendLine($"Kính mong anh/chị xem xét và thực hiện đánh giá trên Timesheet. ");
+                    content.AppendLine("Trân trọng cảm ơn anh/chị!");
+                    _komuService.SendSimpleNotificationToUser(content.ToString(), reviewer.UserName);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("SendKomuMessageToNotifyNewReviewDetail() error for reviewer => " + e.Message);
+                }
             }
         }
 
