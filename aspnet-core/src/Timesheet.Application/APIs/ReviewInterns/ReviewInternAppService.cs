@@ -1184,13 +1184,11 @@ namespace Timesheet.APIs.ReviewInterns
                     content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị {reviewer.FullName},</span> <br> ");
                     content.Append($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
                     content.Append($"Thông tin bao gồm: <br>");
-                    var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
+                    var tableHtml = $@"<table border-collapse='collapse' border='1' width='30%' style='margin-top: 15px'>
                         <thead>
                             <tr>
                                 <th width='20%'><span style='font-weight: 600'>Intern name</span></th>
-                                <th width='20%'><span style='font-weight: 600'>Reviewer name</span></th>
-                                <th width='20%'><span style='font-weight: 600'>Current level</span></th>
-                                <th width='20%'><span style='font-weight: 600'>Status</span></th>
+                                <th width='10%'><span style='font-weight: 600'>Current level</span></th>
                             </tr>
                         </thead>
                         <tbody>";
@@ -1200,9 +1198,7 @@ namespace Timesheet.APIs.ReviewInterns
                         tableHtml += $@"
                             <tr>
                                 <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td>
-                                <td style='padding-left: 5px; text-align: center'>{reviewer.FullName}</td>
                                 <td style='padding-left: 5px; text-align: center'>{reviewDetail.CurrentLevel}</td>
-                                <td style='padding-left: 5px; text-align: center'>Draft</td>
                             </tr>";
                     }
                     tableHtml += @"
@@ -1276,7 +1272,7 @@ namespace Timesheet.APIs.ReviewInterns
             foreach (var user in hrUsersToNotify)
             {
                 StringBuilder userMessage = new StringBuilder();
-                userMessage.AppendLine($"Kính gửi HR,**");
+                userMessage.AppendLine($"Kính gửi chị**{user.UserName}");
                 userMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
                 userMessage.AppendLine($"Thông tin bao gồm tất cả các thực tập sinh:");
                 userMessage.AppendLine("");
@@ -1287,10 +1283,9 @@ namespace Timesheet.APIs.ReviewInterns
                     userMessage.AppendLine($"- Intern name:**{internship.UserName}**");
                     userMessage.AppendLine($"- Reviewer name:**{reviewer.UserName}**");
                     userMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
-                    userMessage.AppendLine($"- Status:**Draft**");
                     userMessage.AppendLine("");
                 }
-                userMessage.AppendLine($"Kính mong HR xem xét và theo dõi. ");
+                userMessage.AppendLine($"Kính mong chị xem xét và theo dõi. ");
                 userMessage.AppendLine("Trân trọng!");
 
                 _komuService.SendSimpleNotificationToUser(userMessage.ToString(), user.UserName);
@@ -1306,17 +1301,15 @@ namespace Timesheet.APIs.ReviewInterns
                 StringBuilder content = new StringBuilder("");
                 try
                 {
-                    content.AppendLine($"Kính gửi anh/chị {reviewer.FullName},**");
-                    content.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**.");
+                    content.AppendLine($"Kính gửi anh/chị**{reviewer.FullName}**");
+                    content.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
                     content.AppendLine($"Thông tin thực tập sinh bao gồm:");
                     content.AppendLine("");
                     foreach (var reviewDetail in reviewerToReviewDetails)
                     {
                         var internship = internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
                         content.AppendLine($"- Intern name:**{internship.UserName}**");
-                        content.AppendLine($"- Reviewer name:**{reviewer.UserName}**");
                         content.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
-                        content.AppendLine($"- Status:**Draft**");
                         content.AppendLine("");
                     }
                     content.AppendLine($"Kính mong anh/chị xem xét và thực hiện đánh giá trên Timesheet. ");
