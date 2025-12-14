@@ -1269,58 +1269,98 @@ namespace Timesheet.APIs.ReviewInterns
                 }
             }
 
+            const int BATCH_SIZE = 5;
+            const int MESSAGE_DELAY_MS = 1000;
+
             foreach (var user in hrUsersToNotify)
             {
-                StringBuilder userMessage = new StringBuilder();
-                userMessage.AppendLine($"Kính gửi chị**{user.UserName}");
-                userMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
-                userMessage.AppendLine($"Thông tin bao gồm tất cả các thực tập sinh:");
-                userMessage.AppendLine("");
-                foreach (var reviewDetail in reviewDetails)
-                {
-                    var internship = internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
-                    var reviewer = reviewers.FirstOrDefault(u => u.Id == reviewDetail.ReviewerId.Value);
-                    userMessage.AppendLine($"- Intern name:**{internship.UserName}**");
-                    userMessage.AppendLine($"- Reviewer name:**{reviewer.UserName}**");
-                    userMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
-                    userMessage.AppendLine("");
-                }
-                userMessage.AppendLine($"Kính mong chị xem xét và theo dõi. ");
-                userMessage.AppendLine("Trân trọng!");
+                StringBuilder hrHeaderMessage = new StringBuilder();
+                hrHeaderMessage.AppendLine($"Kính gửi chị**{user.UserName}**");
+                hrHeaderMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                hrHeaderMessage.AppendLine($"Thông tin bao gồm các thực tập sinh:");
+                hrHeaderMessage.AppendLine("");
+                _komuService.SendSimpleNotificationToUser(hrHeaderMessage.ToString(), user.UserName);
 
-                _komuService.SendSimpleNotificationToUser(userMessage.ToString(), user.UserName);
+                var chunks = SplitIntoChunks(reviewDetails, BATCH_SIZE);
+                int idx = 1;
+                for (int i = 0; i < chunks.Count; i++)
+                {
+                    var chunk = chunks[i];
+                    bool isLastChunk = i == chunks.Count - 1;
+                    StringBuilder hrChunkMessage = new StringBuilder();
+                    foreach (var reviewDetail in chunk)
+                    {
+                        var internship = internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                        var reviewer = reviewers.FirstOrDefault(u => u.Id == reviewDetail.ReviewerId.Value);
+                        hrChunkMessage.AppendLine($"{idx}. Intern name:**{internship.UserName}**");
+                        hrChunkMessage.AppendLine($"- Reviewer name:**{reviewer.UserName}**");
+                        hrChunkMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
+                        hrChunkMessage.AppendLine("");
+                        idx++;
+                    }
+                    if (isLastChunk)
+                    {
+                        hrChunkMessage.AppendLine($"Kính mong chị xem xét và theo dõi. ");
+                        hrChunkMessage.AppendLine("Trân trọng!");
+                    }
+
+                    _komuService.SendSimpleNotificationToUser(hrChunkMessage.ToString(), user.UserName);
+                    await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
+                }
             }
 
             foreach (var reviewer in reviewers)
             {
-                var reviewerToReviewDetails = reviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
-                if (!reviewerToReviewDetails.Any())
-                {
-                    continue;
-                }
-                StringBuilder content = new StringBuilder("");
+                var reviewDetailsByReviewer = reviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
                 try
                 {
-                    content.AppendLine($"Kính gửi anh/chị**{reviewer.FullName}**");
-                    content.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
-                    content.AppendLine($"Thông tin thực tập sinh bao gồm:");
-                    content.AppendLine("");
-                    foreach (var reviewDetail in reviewerToReviewDetails)
+                    StringBuilder reviewerHeaderMessage = new StringBuilder();
+                    reviewerHeaderMessage.AppendLine($"Kính gửi anh/chị**{reviewer.UserName}**");
+                    reviewerHeaderMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                    reviewerHeaderMessage.AppendLine($"Thông tin thực tập sinh bao gồm:");
+                    reviewerHeaderMessage.AppendLine("");
+                    _komuService.SendSimpleNotificationToUser(reviewerHeaderMessage.ToString(), reviewer.UserName);
+
+                    var chunks = SplitIntoChunks(reviewDetailsByReviewer, BATCH_SIZE);
+                    int idx = 1;
+                    for (int i = 0; i < chunks.Count; i++)
                     {
-                        var internship = internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
-                        content.AppendLine($"- Intern name:**{internship.UserName}**");
-                        content.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
-                        content.AppendLine("");
+                        var chunk = chunks[i];
+                        bool isLastChunk = i == chunks.Count - 1;
+                        StringBuilder reviewerChunkMessage = new StringBuilder();
+                        foreach (var reviewDetail in chunk)
+                        {
+                            var internship = internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                            reviewerChunkMessage.AppendLine($"{idx}. Intern name:**{internship.UserName}**");
+                            reviewerChunkMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
+                            reviewerChunkMessage.AppendLine("");
+                            idx++;
+                        }
+                        if (isLastChunk)
+                        {
+                            reviewerChunkMessage.AppendLine($"Kính mong anh/chị xem xét và thực hiện đánh giá trên Timesheet. ");
+                            reviewerChunkMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
+                        }
+                        _komuService.SendSimpleNotificationToUser(reviewerChunkMessage.ToString(), reviewer.UserName);
+                        await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
                     }
-                    content.AppendLine($"Kính mong anh/chị xem xét và thực hiện đánh giá trên Timesheet. ");
-                    content.AppendLine("Trân trọng cảm ơn anh/chị!");
-                    _komuService.SendSimpleNotificationToUser(content.ToString(), reviewer.UserName);
                 }
                 catch (Exception e)
                 {
                     Logger.Error("SendKomuMessageToNotifyNewReviewDetail() error for reviewer => " + e.Message);
                 }
             }
+        }
+
+        private List<List<ReviewDetail>> SplitIntoChunks(List<ReviewDetail> details, int batchSize)
+        {
+            var chunks = new List<List<ReviewDetail>>();
+            for (int i = 0; i < details.Count; i += batchSize)
+            {
+                var chunk = details.Skip(i).Take(batchSize).ToList();
+                chunks.Add(chunk);
+            }
+            return chunks;
         }
 
         [HttpDelete]
