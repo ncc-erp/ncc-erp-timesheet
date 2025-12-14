@@ -1542,43 +1542,73 @@ namespace Timesheet.APIs.ReviewDetails
             var monthReviewIntern = reviewIntern.Month;
             var yearReviewIntern = reviewIntern.Year;
 
-            var userIds = reviewDetails.Select(d => d.InternshipId)
-                 .Concat(reviewDetails.Where(d => d.ReviewerId.HasValue).Select(d => d.ReviewerId.Value))
-                 .Distinct()
-                 .ToList();
+            var internshipIds = reviewDetails.Select(rd => rd.InternshipId).ToList();
+            var reviewerIds = reviewDetails.Select(rd => rd.ReviewerId.Value).Distinct().ToList();
+            var userIds = internshipIds.Concat(reviewerIds).Distinct().ToList();
 
             var users = await WorkScope.GetAll<User>()
                 .Where(u => userIds.Contains(u.Id))
                 .ToListAsync();
 
-            var groupedDetails = reviewDetails
-                .Where(d => d.ReviewerId.HasValue)
-                .GroupBy(d => d.ReviewerId.Value)
-                .ToList();
+            var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
+            var internships = users.Where(u => internshipIds.Contains(u.Id)).ToList();
 
-            foreach (var group in groupedDetails)
+            const int BATCH_SIZE = 5;
+            const int MESSAGE_DELAY_MS = 1000;
+
+            foreach (var reviewer in reviewers)
             {
-                var reviewerId = group.Key;
-                var reviewer = users.FirstOrDefault(u => u.Id == reviewerId);
-
-                StringBuilder userMessage = new StringBuilder();
-                userMessage.AppendLine($"Kính gửi anh/chị**{reviewer.UserName}**");
-                userMessage.AppendLine($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
-                userMessage.AppendLine("");
-
-                foreach (var detail in group)
+                var reviewDetailsByReviewer = reviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
+                try
                 {
-                    var internship = users.FirstOrDefault(u => u.Id == detail.InternshipId);
-                    userMessage.AppendLine($"- Intern name:**{internship.UserName}**");
-                    userMessage.AppendLine($"- Current level:**{detail.CurrentLevel}**");
-                    userMessage.AppendLine($"- Level after PM reviewed:**{detail.NewLevel}**");
-                    userMessage.AppendLine("");
-                }
-                userMessage.AppendLine($"Anh/chị vui lòng xem xét và thực hiện đánh giá lại trên Timesheet.");
-                userMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
+                    StringBuilder reviewerHeaderMessage = new StringBuilder();
+                    reviewerHeaderMessage.AppendLine($"Kính gửi anh/chị**{reviewer.UserName}**");
+                    reviewerHeaderMessage.AppendLine($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                    reviewerHeaderMessage.AppendLine("");
+                    _komuService.SendSimpleNotificationToUser(reviewerHeaderMessage.ToString(), reviewer.UserName);
+                    await Task.Delay(MESSAGE_DELAY_MS);
 
-                _komuService.SendSimpleNotificationToUser(userMessage.ToString(), reviewer.UserName);
+                    var chunks = SplitIntoChunks(reviewDetailsByReviewer, BATCH_SIZE);
+                    int idx = 1;
+                    for (int i = 0; i < chunks.Count; i++)
+                    {
+                        var chunk = chunks[i];
+                        bool isLastChunk = i == chunks.Count - 1;
+                        StringBuilder reviewerChunkMessage = new StringBuilder();
+                        foreach (var reviewDetail in chunk)
+                        {
+                            var internship = users.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                            reviewerChunkMessage.AppendLine($"{idx}. Intern name:**{internship.UserName}**");
+                            reviewerChunkMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
+                            reviewerChunkMessage.AppendLine($"- Level after PM reviewed:**{reviewDetail.NewLevel}**");
+                            reviewerChunkMessage.AppendLine("");
+                            idx++;
+                        }
+                        if (isLastChunk)
+                        {
+                            reviewerChunkMessage.AppendLine($"Anh/chị vui lòng xem xét và thực hiện đánh giá lại trên Timesheet.");
+                            reviewerChunkMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
+                        }
+                        _komuService.SendSimpleNotificationToUser(reviewerChunkMessage.ToString(), reviewer.UserName);
+                        await Task.Delay(MESSAGE_DELAY_MS);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("SendKomuMessageWhenHeadPMReject() error for reviewer => " + e.Message);
+                }
             }
+        }
+
+        private List<List<ReviewDetail>> SplitIntoChunks(List<ReviewDetail> details, int batchSize)
+        {
+            var chunks = new List<List<ReviewDetail>>();
+            for (int i = 0; i < details.Count; i += batchSize)
+            {
+                var chunk = details.Skip(i).Take(batchSize).ToList();
+                chunks.Add(chunk);
+            }
+            return chunks;
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote)]
