@@ -1172,12 +1172,7 @@ namespace Timesheet.APIs.ReviewInterns
             int yearReviewIntern = reviewIntern.Year;
             foreach (var reviewer in reviewers)
             {
-                var reviewerToReviewDetails = reviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
-                if (!reviewerToReviewDetails.Any())
-                {
-                    continue;
-                }
-
+                var reviewDetailsByReviewer = reviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
                 StringBuilder content = new StringBuilder("");
                 try
                 {
@@ -1192,7 +1187,7 @@ namespace Timesheet.APIs.ReviewInterns
                             </tr>
                         </thead>
                         <tbody>";
-                    foreach (var reviewDetail in reviewerToReviewDetails)
+                    foreach (var reviewDetail in reviewDetailsByReviewer)
                     {
                         var internship = users.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
                         tableHtml += $@"
