@@ -1422,7 +1422,7 @@ namespace Timesheet.APIs.ReviewDetails
                 StringBuilder content = new StringBuilder();
                 try
                 {
-                    content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị, </span><br> ");
+                    content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị {reviewer.FullName}, </span><br> ");
                     content.Append($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
                     content.Append($"Thông tin bao gồm: <br>");
                     var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
@@ -1474,7 +1474,7 @@ namespace Timesheet.APIs.ReviewDetails
                 StringBuilder hrContent = new StringBuilder();
                 try
                 {
-                    hrContent.Append($"<span style='font-weight: 600'> Kính gửi anh/chị, </span><br> ");
+                    hrContent.Append($"<span style='font-weight: 600'> Kính gửi chị HR, </span><br> ");
                     hrContent.Append($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
                     hrContent.Append($"Thông tin bao gồm: <br>");
                     var hrTableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
