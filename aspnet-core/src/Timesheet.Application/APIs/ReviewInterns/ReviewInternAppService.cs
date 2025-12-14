@@ -1275,6 +1275,7 @@ namespace Timesheet.APIs.ReviewInterns
                 hrHeaderMessage.AppendLine($"Thông tin bao gồm các thực tập sinh:");
                 hrHeaderMessage.AppendLine("");
                 _komuService.SendSimpleNotificationToUser(hrHeaderMessage.ToString(), user.UserName);
+                await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
 
                 var chunks = SplitIntoChunks(reviewDetails, BATCH_SIZE);
                 int idx = 1;
@@ -1315,6 +1316,7 @@ namespace Timesheet.APIs.ReviewInterns
                     reviewerHeaderMessage.AppendLine($"Thông tin thực tập sinh bao gồm:");
                     reviewerHeaderMessage.AppendLine("");
                     _komuService.SendSimpleNotificationToUser(reviewerHeaderMessage.ToString(), reviewer.UserName);
+                    await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
 
                     var chunks = SplitIntoChunks(reviewDetailsByReviewer, BATCH_SIZE);
                     int idx = 1;
