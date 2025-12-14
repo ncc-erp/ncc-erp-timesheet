@@ -1351,14 +1351,21 @@ namespace Timesheet.APIs.ReviewDetails
                 throw new UserFriendlyException("Review này chưa được PM review hoặc đã review xong");
             }
 
+            var rejectedIds = new List<long>();
+
             if (input.Status == ReviewInternStatus.Rejected)
             {
-                long reviewDetailId = detail.Id;
-                long reviewId = detail.ReviewId;
-                long internshipId = detail.InternshipId;
-                long reviewerId = detail.ReviewerId.Value;
-                await SendMailWhenHeadPMReject(reviewDetailId, reviewId, internshipId, reviewerId);
-                await SendDirectMessageWhenHeadPMReject(reviewDetailId, reviewId, internshipId, reviewerId);
+                rejectedIds.Add(detail.Id);
+            }
+
+            if (rejectedIds.Any())
+            {
+                await SendMailWhenHeadPMReject(rejectedIds);
+                await SendDirectMessageWhenHeadPMReject(rejectedIds);
+            }
+
+            if (input.Status == ReviewInternStatus.Rejected)
+            {
                 detail.NewLevel = detail.CurrentLevel;
             }
             detail.Status = input.Status;
@@ -1367,112 +1374,211 @@ namespace Timesheet.APIs.ReviewDetails
             await CheckSendMailToPresident(detail.ReviewId, listId);
         }
 
-        public async Task SendMailWhenHeadPMReject(long reviewDetailId, long reviewId, long internshipId, long? reviewerId)
+        public async Task SendMailWhenHeadPMReject(List<long> reviewDetailIds)
         {
-            var reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
-            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
-            var userIds = new List<long> { internshipId };
-            if (reviewerId.HasValue)
+            if (!reviewDetailIds.Any())
             {
-                userIds.Add(reviewerId.Value);
+                return;
             }
-            userIds = userIds.Distinct().ToList();
 
-            var users = await WorkScope.GetAll<User>()
-                .Where(u => userIds.Contains(u.Id))
+            var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
+                .Where(d => reviewDetailIds.Contains(d.Id))
                 .ToListAsync();
 
-            var internship = users.FirstOrDefault(u => u.Id == internshipId);
-            var reviewer = users.FirstOrDefault(u => u.Id == reviewerId.Value);
+            if (!reviewDetails.Any())
+            {
+                return;
+            }
 
-            string reviewerEmail = reviewer.EmailAddress;
+            var reviewId = reviewDetails.First().ReviewId;
+            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
             var monthReviewIntern = reviewIntern.Month;
             var yearReviewIntern = reviewIntern.Year;
 
-            StringBuilder content = new StringBuilder();
-            try
-            {
-                content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị, </span><br> ");
-                content.Append($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
-                content.Append($"Thông tin bao gồm: <br>");
-                var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
-                                        <thead> 
-                                            <tr>
-                                                <th width='20%'><span style='font-weight: 600'>Intern name</span></th> 
-                                                <th width='20%'><span style='font-weight: 600'>Reviewer name</span></th> 
-                                                <th width='20%'><span style='font-weight: 600'>Current level</span></th> 
-                                                <th width='20%'><span style='font-weight: 600'>Level after PM reviewed</span></th>
-                                            </tr>
-                                        </thead> 
-                                        <tbody> 
-                                            <tr> 
-                                                <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td> 
-                                                <td style='padding-left: 5px; text-align: center'>{reviewer.FullName}</td> 
-                                                <td style='padding-left: 5px; text-align: center'>{reviewDetail.CurrentLevel}</td>
-                                                <td style='padding-left: 5px; text-align: center'>{reviewDetail.NewLevel}</td> 
-                                            </tr> 
-                                        </tbody> 
-                                </table>";
-                content.Append(tableHtml);
-                content.Append("<br>");
-                content.Append($"Anh/chị vui lòng xem xét và thực hiện đánh giá lại trên Timesheet.");
-                content.Append("<br>");
-                content.Append("Trân trọng cảm ơn anh/chị!");
-
-                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Head PM từ chối chi tiết đánh giá cho thực tập sinh {internship.FullName}";
-                var targetEmails = new List<string> { reviewerEmail };
-
-                var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
-                            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                targetEmails.AddRange(hrEmails);
-
-                await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
-                {
-                    TargetEmails = targetEmails,
-                    Body = content.ToString(),
-                    Subject = emailSubject
-                }, BackgroundJobPriority.High);
-            }
-            catch (Exception e)
-            {
-                Logger.Error("SendMailToNotifyNewReviewDetail() error => " + e.Message);
-            }
-        }
-
-        public async Task SendDirectMessageWhenHeadPMReject(long reviewDetailId, long reviewId, long internshipId, long? reviewerId)
-        {
-            var reviewDetail = await WorkScope.GetAsync<ReviewDetail>(reviewDetailId);
-            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
-            int monthReviewIntern = reviewIntern.Month;
-            int yearReviewIntern = reviewIntern.Year;
-            var userIds = new List<long> { internshipId };
-            if (reviewerId.HasValue)
-            {
-                userIds.Add(reviewerId.Value);
-            }
-            userIds = userIds.Distinct().ToList();
+            var userIds = reviewDetails.Select(d => d.InternshipId)
+                .Concat(reviewDetails.Where(d => d.ReviewerId.HasValue).Select(d => d.ReviewerId.Value))
+                .Distinct()
+                .ToList();
 
             var users = await WorkScope.GetAll<User>()
                 .Where(u => userIds.Contains(u.Id))
                 .ToListAsync();
 
-            var internship = users.FirstOrDefault(u => u.Id == internshipId);
-            var reviewer = users.FirstOrDefault(u => u.Id == reviewerId.Value);
-            var dateNow = DateTimeUtils.GetNow();
+            var groupedDetails = reviewDetails
+                .Where(d => d.ReviewerId.HasValue)
+                .GroupBy(d => d.ReviewerId.Value)
+                .ToList();
 
-            StringBuilder userMessage = new StringBuilder();
-            userMessage.AppendLine($"Kính gửi anh/chị**{reviewer.FullName}**");
-            userMessage.AppendLine($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
-            userMessage.AppendLine("");
-            userMessage.AppendLine($"- Intern name:**{internship.FullName}**");
-            userMessage.AppendLine($"- Reviewer name:**{reviewer.FullName}**");
-            userMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
-            userMessage.AppendLine($"- Level after PM reviewed:**{reviewDetail.NewLevel}**");
-            userMessage.AppendLine("");
-            userMessage.AppendLine($"Anh/chị vui lòng xem xét và thực hiện đánh giá lại trên Timesheet.");
-            userMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
+            var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
 
-            _komuService.SendSimpleNotificationToUser(userMessage.ToString(), reviewer.UserName);
+            foreach (var group in groupedDetails)
+            {
+                var reviewerId = group.Key;
+                var reviewer = users.FirstOrDefault(u => u.Id == reviewerId);
+
+                string reviewerEmail = reviewer.EmailAddress;
+                StringBuilder content = new StringBuilder();
+                try
+                {
+                    content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị, </span><br> ");
+                    content.Append($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
+                    content.Append($"Thông tin bao gồm: <br>");
+                    var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
+                                            <thead> 
+                                                <tr>
+                                                    <th width='20%'><span style='font-weight: 600'>Intern name</span></th>
+                                                    <th width='20%'><span style='font-weight: 600'>Current level</span></th> 
+                                                    <th width='20%'><span style='font-weight: 600'>Level after PM reviewed</span></th>
+                                                </tr>
+                                            </thead> 
+                                            <tbody>";
+                    foreach (var detail in group)
+                    {
+                        var internship = users.FirstOrDefault(u => u.Id == detail.InternshipId);
+                        tableHtml += $@"
+                                    <tr> 
+                                        <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td> 
+                                        <td style='padding-left: 5px; text-align: center'>{detail.CurrentLevel}</td>
+                                        <td style='padding-left: 5px; text-align: center'>{detail.NewLevel}</td> 
+                                    </tr>";
+                    }
+                    tableHtml += @"
+                        </tbody> 
+                    </table>";
+                    content.Append(tableHtml);
+                    content.Append("<br>");
+                    content.Append($"Anh/chị vui lòng xem xét và thực hiện đánh giá lại trên Timesheet.");
+                    content.Append("<br>");
+                    content.Append("Trân trọng cảm ơn anh/chị!");
+
+                    var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Head PM từ chối chi tiết đánh giá cho thực tập sinh";
+                    var targetEmails = new List<string> { reviewerEmail };
+
+                    await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
+                    {
+                        TargetEmails = targetEmails,
+                        Body = content.ToString(),
+                        Subject = emailSubject
+                    }, BackgroundJobPriority.High);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("SendMailToNotifyNewReviewDetail() error => " + e.Message);
+                }
+            }
+
+            if (hrEmails.Any())
+            {
+                StringBuilder hrContent = new StringBuilder();
+                try
+                {
+                    hrContent.Append($"<span style='font-weight: 600'> Kính gửi anh/chị, </span><br> ");
+                    hrContent.Append($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
+                    hrContent.Append($"Thông tin bao gồm: <br>");
+                    var hrTableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
+                                            <thead>
+                                                <tr>
+                                                    <th width='20%'><span style='font-weight: 600'>Intern name</span></th>
+                                                    <th width='20%'><span style='font-weight: 600'>Reviewer name</span></th>
+                                                    <th width='20%'><span style='font-weight: 600'>Current level</span></th>
+                                                    <th width='20%'><span style='font-weight: 600'>Level after PM reviewed</span></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>";
+                    foreach (var detail in reviewDetails)
+                    {
+                        var internship = users.FirstOrDefault(u => u.Id == detail.InternshipId);
+                        var reviewer = users.FirstOrDefault(u => u.Id == detail.ReviewerId.Value);
+
+                        hrTableHtml += $@"
+                            <tr>
+                                <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td>
+                                <td style='padding-left: 5px; text-align: center'>{reviewer.FullName}</td>
+                                <td style='padding-left: 5px; text-align: center'>{detail.CurrentLevel}</td>
+                                <td style='padding-left: 5px; text-align: center'>{detail.NewLevel}</td>
+                            </tr>";
+                    }
+                    hrTableHtml += @"
+                        </tbody>
+                    </table>";
+                    hrContent.Append(hrTableHtml);
+                    hrContent.Append("<br>");
+                    hrContent.Append("Trân trọng cảm ơn anh/chị!");
+                    var hrEmailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Head PM từ chối chi tiết đánh giá cho thực tập sinh";
+                    await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
+                    {
+                        TargetEmails = hrEmails,
+                        Body = hrContent.ToString(),
+                        Subject = hrEmailSubject
+                    }, BackgroundJobPriority.High);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("SendMailWhenHeadPMReject() error => " + e.Message);
+                }
+            }
+        }
+        
+        public async Task SendDirectMessageWhenHeadPMReject(List<long> reviewDetailIds)
+        {
+            if (!reviewDetailIds.Any())
+            {
+                return;
+            }
+
+            var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
+                .Where(d => reviewDetailIds.Contains(d.Id))
+                .ToListAsync();
+
+            if (!reviewDetails.Any())
+            {
+                return;
+            }
+
+            var reviewId = reviewDetails.First().ReviewId;
+            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            var monthReviewIntern = reviewIntern.Month;
+            var yearReviewIntern = reviewIntern.Year;
+
+            var userIds = reviewDetails.Select(d => d.InternshipId)
+                 .Concat(reviewDetails.Where(d => d.ReviewerId.HasValue).Select(d => d.ReviewerId.Value))
+                 .Distinct()
+                 .ToList();
+
+            var users = await WorkScope.GetAll<User>()
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            var groupedDetails = reviewDetails
+                .Where(d => d.ReviewerId.HasValue)
+                .GroupBy(d => d.ReviewerId.Value)
+                .ToList();
+
+            foreach (var group in groupedDetails)
+            {
+                var reviewerId = group.Key;
+                var reviewer = users.FirstOrDefault(u => u.Id == reviewerId);
+
+                StringBuilder userMessage = new StringBuilder();
+                userMessage.AppendLine($"Kính gửi anh/chị**{reviewer.UserName}**");
+                userMessage.AppendLine($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                userMessage.AppendLine("");
+
+                foreach (var detail in group)
+                {
+                    var internship = users.FirstOrDefault(u => u.Id == detail.InternshipId);
+                    userMessage.AppendLine($"- Intern name:**{internship.UserName}**");
+                    userMessage.AppendLine($"- Current level:**{detail.CurrentLevel}**");
+                    userMessage.AppendLine($"- Level after PM reviewed:**{detail.NewLevel}**");
+                    userMessage.AppendLine("");
+                }
+                userMessage.AppendLine($"Anh/chị vui lòng xem xét và thực hiện đánh giá lại trên Timesheet.");
+                userMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
+
+                _komuService.SendSimpleNotificationToUser(userMessage.ToString(), reviewer.UserName);
+            }
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote)]
@@ -1548,6 +1654,7 @@ namespace Timesheet.APIs.ReviewDetails
         public async Task HeadPmVerifyOrRejectAll(List<HeadPmVerifyDto> input)
         {
             var listReviewDetail = new List<ReviewDetail>();
+            var rejectedIds = new List<long>();
 
             foreach (var inputItem in input)
             {
@@ -1560,20 +1667,30 @@ namespace Timesheet.APIs.ReviewDetails
 
                 if (inputItem.Status == ReviewInternStatus.Rejected)
                 {
-                    long reviewDetailId = detail.Id;
-                    long reviewId = detail.ReviewId;
-                    long internshipId = detail.InternshipId;
-                    long reviewerId = detail.ReviewerId.Value;
-                    await SendMailWhenHeadPMReject(reviewDetailId, reviewId, internshipId, reviewerId);
-                    await SendDirectMessageWhenHeadPMReject(reviewDetailId, reviewId, internshipId, reviewerId);
-                    detail.NewLevel = detail.CurrentLevel;
+                    rejectedIds.Add(detail.Id);
                 }
 
                 detail.Status = inputItem.Status;
                 listReviewDetail.Add(detail);
+
+            }
+
+            if (rejectedIds.Any())
+            {
+                await SendMailWhenHeadPMReject(rejectedIds);
+                await SendDirectMessageWhenHeadPMReject(rejectedIds);
+            }
+
+            foreach (var rejectedId in rejectedIds)
+            {
+                var detail = listReviewDetail.FirstOrDefault(x => x.Id == rejectedId);
+                if (detail != null)
+                {
+                    detail.NewLevel = detail.CurrentLevel;
+                }
             }
             await WorkScope.UpdateRangeAsync(listReviewDetail);
-            
+
             List<long> listId = listReviewDetail.Select(x => x.Id).ToList();
             await CheckSendMailToPresident(listReviewDetail.FirstOrDefault().ReviewId, listId);
             Logger.Info("send mail to GD ");
