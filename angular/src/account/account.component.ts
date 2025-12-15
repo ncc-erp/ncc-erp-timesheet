@@ -45,6 +45,7 @@ export class AccountComponent extends AppComponentBase implements OnInit {
 
     ngOnInit(): void {
         const hashFromUrl = this.mezonWebViewService.getHashDataFromUrl();
+        $('body').attr('class', 'login-page');
         if (hashFromUrl) {
             this.isMezonApp = true;
             this.hashData = hashFromUrl;
@@ -53,9 +54,6 @@ export class AccountComponent extends AppComponentBase implements OnInit {
         } else {
             this.mezonWebViewService.isInMezon$.subscribe((status) => {
             this.isMezonApp = status;
-            if (!this.isMezonApp) {
-                $('body').attr('class', 'login-page');
-            }
         });
       }
     }
