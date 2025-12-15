@@ -1547,7 +1547,7 @@ namespace Timesheet.APIs.ReviewDetails
             }
         }
 
-        public async Task<ReviewDataDto> GetReviewDataByDetailIdsAsync(List<long> reviewDetailIds)
+        public async Task<Dto.ReviewDataDto> GetReviewDataByDetailIdsAsync(List<long> reviewDetailIds)
         {
             if (!reviewDetailIds.Any())
             {
@@ -1573,7 +1573,7 @@ namespace Timesheet.APIs.ReviewDetails
             var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
             var internships = users.Where(u => internshipIds.Contains(u.Id)).ToList();
 
-            return new ReviewDataDto
+            return new Dto.ReviewDataDto
             {
                 ReviewIntern = reviewIntern,
                 ReviewDetails = reviewDetails,
