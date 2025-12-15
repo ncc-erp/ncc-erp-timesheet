@@ -1376,54 +1376,24 @@ namespace Timesheet.APIs.ReviewDetails
 
         public async Task SendMailWhenHeadPMReject(List<long> reviewDetailIds)
         {
-            if (!reviewDetailIds.Any())
+            var data = await GetReviewDataByDetailIdsAsync(reviewDetailIds);
+            if (data == null)
             {
                 return;
             }
-
-            var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
-                .Where(d => reviewDetailIds.Contains(d.Id))
-                .ToListAsync();
-
-            if (!reviewDetails.Any())
-            {
-                return;
-            }
-
-            var reviewId = reviewDetails.First().ReviewId;
-            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
-            var monthReviewIntern = reviewIntern.Month;
-            var yearReviewIntern = reviewIntern.Year;
-
-            var userIds = reviewDetails.Select(d => d.InternshipId)
-                .Concat(reviewDetails.Where(d => d.ReviewerId.HasValue).Select(d => d.ReviewerId.Value))
-                .Distinct()
-                .ToList();
-
-            var users = await WorkScope.GetAll<User>()
-                .Where(u => userIds.Contains(u.Id))
-                .ToListAsync();
-
-            var groupedDetails = reviewDetails
-                .Where(d => d.ReviewerId.HasValue)
-                .GroupBy(d => d.ReviewerId.Value)
-                .ToList();
 
             var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                 .ToList();
 
-            foreach (var group in groupedDetails)
+            foreach (var reviewer in data.Reviewers)
             {
-                var reviewerId = group.Key;
-                var reviewer = users.FirstOrDefault(u => u.Id == reviewerId);
-
-                string reviewerEmail = reviewer.EmailAddress;
+                var reviewDetailsByReviewer = data.ReviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
                 StringBuilder content = new StringBuilder();
                 try
                 {
                     content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị {reviewer.FullName}, </span><br> ");
-                    content.Append($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
+                    content.Append($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {data.MonthReviewIntern} / {data.YearReviewIntern}. ");
                     content.Append($"Thông tin bao gồm: <br>");
                     var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
                                             <thead> 
@@ -1434,14 +1404,14 @@ namespace Timesheet.APIs.ReviewDetails
                                                 </tr>
                                             </thead> 
                                             <tbody>";
-                    foreach (var detail in group)
+                    foreach (var reviewDetail in reviewDetailsByReviewer)
                     {
-                        var internship = users.FirstOrDefault(u => u.Id == detail.InternshipId);
+                        var internship = data.Internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
                         tableHtml += $@"
                                     <tr> 
                                         <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td> 
-                                        <td style='padding-left: 5px; text-align: center'>{detail.CurrentLevel}</td>
-                                        <td style='padding-left: 5px; text-align: center'>{detail.NewLevel}</td> 
+                                        <td style='padding-left: 5px; text-align: center'>{reviewDetail.CurrentLevel}</td>
+                                        <td style='padding-left: 5px; text-align: center'>{reviewDetail.NewLevel}</td> 
                                     </tr>";
                     }
                     tableHtml += @"
@@ -1453,8 +1423,8 @@ namespace Timesheet.APIs.ReviewDetails
                     content.Append("<br>");
                     content.Append("Trân trọng cảm ơn anh/chị!");
 
-                    var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Head PM từ chối chi tiết đánh giá cho thực tập sinh";
-                    var targetEmails = new List<string> { reviewerEmail };
+                    var emailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Head PM từ chối chi tiết đánh giá cho thực tập sinh";
+                    var targetEmails = new List<string> { reviewer.EmailAddress };
 
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
@@ -1475,7 +1445,7 @@ namespace Timesheet.APIs.ReviewDetails
                 try
                 {
                     hrContent.Append($"<span style='font-weight: 600'> Kính gửi chị HR, </span><br> ");
-                    hrContent.Append($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
+                    hrContent.Append($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {data.MonthReviewIntern} / {data.YearReviewIntern}. ");
                     hrContent.Append($"Thông tin bao gồm: <br>");
                     var hrTableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
                                             <thead>
@@ -1487,10 +1457,10 @@ namespace Timesheet.APIs.ReviewDetails
                                                 </tr>
                                             </thead>
                                             <tbody>";
-                    foreach (var detail in reviewDetails)
+                    foreach (var detail in data.ReviewDetails)
                     {
-                        var internship = users.FirstOrDefault(u => u.Id == detail.InternshipId);
-                        var reviewer = users.FirstOrDefault(u => u.Id == detail.ReviewerId.Value);
+                        var internship = data.Internships.FirstOrDefault(u => u.Id == detail.InternshipId);
+                        var reviewer = data.Reviewers.FirstOrDefault(u => u.Id == detail.ReviewerId);
 
                         hrTableHtml += $@"
                             <tr>
@@ -1506,7 +1476,7 @@ namespace Timesheet.APIs.ReviewDetails
                     hrContent.Append(hrTableHtml);
                     hrContent.Append("<br>");
                     hrContent.Append("Trân trọng cảm ơn anh/chị!");
-                    var hrEmailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Head PM từ chối chi tiết đánh giá cho thực tập sinh";
+                    var hrEmailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Head PM từ chối chi tiết đánh giá cho thực tập sinh";
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
                         TargetEmails = hrEmails,
@@ -1523,52 +1493,28 @@ namespace Timesheet.APIs.ReviewDetails
         
         public async Task SendDirectMessageWhenHeadPMReject(List<long> reviewDetailIds)
         {
-            if (!reviewDetailIds.Any())
+            var data = await GetReviewDataByDetailIdsAsync(reviewDetailIds);
+            if (data == null)
             {
                 return;
             }
-
-            var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
-                .Where(d => reviewDetailIds.Contains(d.Id))
-                .ToListAsync();
-
-            if (!reviewDetails.Any())
-            {
-                return;
-            }
-
-            var reviewId = reviewDetails.First().ReviewId;
-            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
-            var monthReviewIntern = reviewIntern.Month;
-            var yearReviewIntern = reviewIntern.Year;
-
-            var internshipIds = reviewDetails.Select(rd => rd.InternshipId).ToList();
-            var reviewerIds = reviewDetails.Select(rd => rd.ReviewerId.Value).Distinct().ToList();
-            var userIds = internshipIds.Concat(reviewerIds).Distinct().ToList();
-
-            var users = await WorkScope.GetAll<User>()
-                .Where(u => userIds.Contains(u.Id))
-                .ToListAsync();
-
-            var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
-            var internships = users.Where(u => internshipIds.Contains(u.Id)).ToList();
 
             const int BATCH_SIZE = 5;
             const int MESSAGE_DELAY_MS = 1000;
 
-            foreach (var reviewer in reviewers)
+            foreach (var reviewer in data.Reviewers)
             {
-                var reviewDetailsByReviewer = reviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
+                var reviewDetailsByReviewer = data.ReviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
                 try
                 {
                     StringBuilder reviewerHeaderMessage = new StringBuilder();
                     reviewerHeaderMessage.AppendLine($"Kính gửi anh/chị**{reviewer.UserName}**");
-                    reviewerHeaderMessage.AppendLine($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                    reviewerHeaderMessage.AppendLine($"Head PM đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
                     reviewerHeaderMessage.AppendLine("");
                     _komuService.SendSimpleNotificationToUser(reviewerHeaderMessage.ToString(), reviewer.UserName);
                     await Task.Delay(MESSAGE_DELAY_MS);
 
-                    var chunks = SplitIntoChunks(reviewDetailsByReviewer, BATCH_SIZE);
+                    var chunks = CommonUtils.SplitIntoChunks(reviewDetailsByReviewer.Cast<dynamic>().ToList(), BATCH_SIZE);
                     int idx = 1;
                     for (int i = 0; i < chunks.Count; i++)
                     {
@@ -1577,7 +1523,7 @@ namespace Timesheet.APIs.ReviewDetails
                         StringBuilder reviewerChunkMessage = new StringBuilder();
                         foreach (var reviewDetail in chunk)
                         {
-                            var internship = users.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                            var internship = data.Internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
                             reviewerChunkMessage.AppendLine($"{idx}. Intern name:**{internship.UserName}**");
                             reviewerChunkMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
                             reviewerChunkMessage.AppendLine($"- Level after PM reviewed:**{reviewDetail.NewLevel}**");
@@ -1600,15 +1546,41 @@ namespace Timesheet.APIs.ReviewDetails
             }
         }
 
-        private List<List<ReviewDetail>> SplitIntoChunks(List<ReviewDetail> details, int batchSize)
+        public async Task<ReviewDataDto> GetReviewDataByDetailIdsAsync(List<long> reviewDetailIds)
         {
-            var chunks = new List<List<ReviewDetail>>();
-            for (int i = 0; i < details.Count; i += batchSize)
+            if (!reviewDetailIds.Any())
             {
-                var chunk = details.Skip(i).Take(batchSize).ToList();
-                chunks.Add(chunk);
+                return null;
             }
-            return chunks;
+            var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
+                .Where(d => reviewDetailIds.Contains(d.Id))
+                .ToListAsync();
+            if (!reviewDetails.Any())
+            {
+                return null;
+            }
+            var reviewId = reviewDetails.First().ReviewId;
+            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            var monthReviewIntern = reviewIntern.Month;
+            var yearReviewIntern = reviewIntern.Year;
+            var internshipIds = reviewDetails.Select(rd => rd.InternshipId).ToList();
+            var reviewerIds = reviewDetails.Select(rd => rd.ReviewerId.Value).Distinct().ToList();
+            var userIds = internshipIds.Concat(reviewerIds).Distinct().ToList();
+            var users = await WorkScope.GetAll<User>()
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+            var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
+            var internships = users.Where(u => internshipIds.Contains(u.Id)).ToList();
+
+            return new ReviewDataDto
+            {
+                ReviewIntern = reviewIntern,
+                ReviewDetails = reviewDetails,
+                Reviewers = reviewers,
+                Internships = internships,
+                MonthReviewIntern = monthReviewIntern,
+                YearReviewIntern = yearReviewIntern
+            };
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_ReviewDetail_CreatePMNote)]
