@@ -27,6 +27,19 @@ export class MezonWebViewService {
         return this._isInMezon;
     }
 
+    getHashDataFromUrl(): string | null {
+        try {
+            const url = new URL(window.location.href);
+            const queryData = url.searchParams.get('data');
+            if (queryData) {
+                return queryData;
+            }
+        } catch {
+        }
+
+        return null;
+    }
+
     ping() {
         window.Mezon.WebView.postEvent("PING" as MezonWebViewEvent, { message: "PING" }, () => {
         });
