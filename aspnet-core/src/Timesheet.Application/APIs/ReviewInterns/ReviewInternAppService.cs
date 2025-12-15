@@ -1311,7 +1311,7 @@ namespace Timesheet.APIs.ReviewInterns
             }
         }
 
-        private async Task<ReviewDataDto> GetReviewDataAsync(long reviewId)
+        public async Task<Dto.ReviewDataDto> GetReviewDataAsync(long reviewId)
         {
             var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
             var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
@@ -1331,7 +1331,7 @@ namespace Timesheet.APIs.ReviewInterns
             var internships = users.Where(u => internshipIds.Contains(u.Id)).ToList();
             int monthReviewIntern = reviewIntern.Month;
             int yearReviewIntern = reviewIntern.Year;
-            return new ReviewDataDto
+            return new Dto.ReviewDataDto
             {
                 ReviewIntern = reviewIntern,
                 ReviewDetails = reviewDetails,
