@@ -1311,7 +1311,7 @@ namespace Timesheet.APIs.ReviewInterns
             }
         }
 
-        private async Task<Dto.ReviewDataDto> GetReviewDataAsync(long reviewId)
+        public async Task<Dto.ReviewDataDto> GetReviewDataAsync(long reviewId)
         {
             var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
             var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
