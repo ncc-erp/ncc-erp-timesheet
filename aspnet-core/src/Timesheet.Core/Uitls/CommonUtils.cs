@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using static Ncc.Entities.Enum.StatusEnum;
 
@@ -395,6 +396,17 @@ namespace Timesheet.Uitls
 
             };
             return listDes;
+        }
+
+        public static List<List<dynamic>> SplitIntoChunks(List<dynamic> details, int batchSize)
+        {
+            var chunks = new List<List<dynamic>>();
+            for (int i = 0; i < details.Count; i += batchSize)
+            {
+                var chunk = details.Skip(i).Take(batchSize).ToList();
+                chunks.Add(chunk);
+            }
+            return chunks;
         }
     }
 }

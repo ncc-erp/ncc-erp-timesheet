@@ -1143,41 +1143,26 @@ namespace Timesheet.APIs.ReviewInterns
                     await WorkScope.InsertAsync(reviewInternCapability);
                 }
             }
-            await SendMailToNotifyNewReviewDetail(input.Id);
-            await SendDirectMessageToNotifyNewReviewDetail(input.Id);
+            await SendMailToNotifyNewReviewIntern(input.Id);
+            await SendDirectMessageToNotifyNewReviewIntern(input.Id);
             return fails;
         }
 
-        public async System.Threading.Tasks.Task SendMailToNotifyNewReviewDetail(long reviewId)
+        public async System.Threading.Tasks.Task SendMailToNotifyNewReviewIntern(long reviewId)
         {
-            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
-            var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
-                .Where(rd => rd.ReviewId == reviewId && rd.ReviewerId.HasValue)
-                .ToListAsync();
-            if (!reviewDetails.Any())
+            var data = await GetReviewDataAsync(reviewId);
+            if (data == null)
             {
                 return;
             }
-
-            var internshipIds = reviewDetails.Select(rd => rd.InternshipId).ToList();
-            var reviewerIds = reviewDetails.Select(rd => rd.ReviewerId.Value).Distinct().ToList();
-            var userIds = internshipIds.Concat(reviewerIds).Distinct().ToList();
-
-            var users = await WorkScope.GetAll<User>()
-                .Where(u => userIds.Contains(u.Id))
-                .ToListAsync();
-
-            var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
-            int monthReviewIntern = reviewIntern.Month;
-            int yearReviewIntern = reviewIntern.Year;
-            foreach (var reviewer in reviewers)
+            foreach (var reviewer in data.Reviewers)
             {
-                var reviewDetailsByReviewer = reviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
+                var reviewDetailsByReviewer = data.ReviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
                 StringBuilder content = new StringBuilder("");
                 try
                 {
                     content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị {reviewer.FullName},</span> <br> ");
-                    content.Append($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng {monthReviewIntern}/{yearReviewIntern}. ");
+                    content.Append($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng {data.MonthReviewIntern}/{data.YearReviewIntern}. ");
                     content.Append($"Thông tin bao gồm: <br>");
                     var tableHtml = $@"<table border-collapse='collapse' border='1' width='30%' style='margin-top: 15px'>
                         <thead>
@@ -1189,7 +1174,7 @@ namespace Timesheet.APIs.ReviewInterns
                         <tbody>";
                     foreach (var reviewDetail in reviewDetailsByReviewer)
                     {
-                        var internship = users.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                        var internship = data.Internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
                         tableHtml += $@"
                             <tr>
                                 <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td>
@@ -1204,7 +1189,7 @@ namespace Timesheet.APIs.ReviewInterns
                     content.Append($"Kính mong anh/chị xem xét và thực hiện đánh giá trên Timesheet. ");
                     content.Append("<br>");
                     content.Append("Trân trọng cảm ơn anh/chị!");
-                    var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo yêu cầu đánh giá cho thực tập sinh";
+                    var emailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo yêu cầu đánh giá cho thực tập sinh";
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
                         TargetEmails = new List<string> { reviewer.EmailAddress },
@@ -1219,36 +1204,13 @@ namespace Timesheet.APIs.ReviewInterns
             }
         }
 
-        public async System.Threading.Tasks.Task SendDirectMessageToNotifyNewReviewDetail(long reviewId)
+        public async System.Threading.Tasks.Task SendDirectMessageToNotifyNewReviewIntern(long reviewId)
         {
-            var enableNotify = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendKomuRequest);
-            if (enableNotify != "true")
-            {
-                Logger.Info("SendKomuMessageToNotifyNewReviewDetail() SendKomuRequest=" + enableNotify);
-                return;
-            }
-
-            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
-            var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
-                .Where(rd => rd.ReviewId == reviewId && rd.ReviewerId.HasValue)
-                .ToListAsync();
-            if (!reviewDetails.Any())
+            var data = await GetReviewDataAsync(reviewId);
+            if (data == null)
             {
                 return;
             }
-
-            var internshipIds = reviewDetails.Select(rd => rd.InternshipId).ToList();
-            var reviewerIds = reviewDetails.Select(rd => rd.ReviewerId.Value).Distinct().ToList();
-            var userIds = internshipIds.Concat(reviewerIds).Distinct().ToList();
-
-            var users = await WorkScope.GetAll<User>()
-                .Where(u => userIds.Contains(u.Id))
-                .ToListAsync();
-
-            var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
-            var internships = users.Where(u => internshipIds.Contains(u.Id)).ToList();
-            int monthReviewIntern = reviewIntern.Month;
-            int yearReviewIntern = reviewIntern.Year;
 
             var hrUsersToNotify = new List<User>();
 
@@ -1271,13 +1233,13 @@ namespace Timesheet.APIs.ReviewInterns
             {
                 StringBuilder hrHeaderMessage = new StringBuilder();
                 hrHeaderMessage.AppendLine($"Kính gửi chị**{user.UserName}**");
-                hrHeaderMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                hrHeaderMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
                 hrHeaderMessage.AppendLine($"Thông tin bao gồm các thực tập sinh:");
                 hrHeaderMessage.AppendLine("");
                 _komuService.SendSimpleNotificationToUser(hrHeaderMessage.ToString(), user.UserName);
                 await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
 
-                var chunks = SplitIntoChunks(reviewDetails, BATCH_SIZE);
+                var chunks = CommonUtils.SplitIntoChunks(data.ReviewDetails.Cast<dynamic>().ToList(), BATCH_SIZE);
                 int idx = 1;
                 for (int i = 0; i < chunks.Count; i++)
                 {
@@ -1286,8 +1248,8 @@ namespace Timesheet.APIs.ReviewInterns
                     StringBuilder hrChunkMessage = new StringBuilder();
                     foreach (var reviewDetail in chunk)
                     {
-                        var internship = internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
-                        var reviewer = reviewers.FirstOrDefault(u => u.Id == reviewDetail.ReviewerId.Value);
+                        var internship = data.Internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                        var reviewer = data.Reviewers.FirstOrDefault(u => u.Id == reviewDetail.ReviewerId);
                         hrChunkMessage.AppendLine($"{idx}. Intern name:**{internship.UserName}**");
                         hrChunkMessage.AppendLine($"- Reviewer name:**{reviewer.UserName}**");
                         hrChunkMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
@@ -1305,20 +1267,20 @@ namespace Timesheet.APIs.ReviewInterns
                 }
             }
 
-            foreach (var reviewer in reviewers)
+            foreach (var reviewer in data.Reviewers)
             {
-                var reviewDetailsByReviewer = reviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
+                var reviewDetailsByReviewer = data.ReviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
                 try
                 {
                     StringBuilder reviewerHeaderMessage = new StringBuilder();
                     reviewerHeaderMessage.AppendLine($"Kính gửi anh/chị**{reviewer.UserName}**");
-                    reviewerHeaderMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                    reviewerHeaderMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
                     reviewerHeaderMessage.AppendLine($"Thông tin thực tập sinh bao gồm:");
                     reviewerHeaderMessage.AppendLine("");
                     _komuService.SendSimpleNotificationToUser(reviewerHeaderMessage.ToString(), reviewer.UserName);
                     await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
 
-                    var chunks = SplitIntoChunks(reviewDetailsByReviewer, BATCH_SIZE);
+                    var chunks = CommonUtils.SplitIntoChunks(reviewDetailsByReviewer.Cast<dynamic>().ToList(), BATCH_SIZE);
                     int idx = 1;
                     for (int i = 0; i < chunks.Count; i++)
                     {
@@ -1327,7 +1289,7 @@ namespace Timesheet.APIs.ReviewInterns
                         StringBuilder reviewerChunkMessage = new StringBuilder();
                         foreach (var reviewDetail in chunk)
                         {
-                            var internship = internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                            var internship = data.Internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
                             reviewerChunkMessage.AppendLine($"{idx}. Intern name:**{internship.UserName}**");
                             reviewerChunkMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
                             reviewerChunkMessage.AppendLine("");
@@ -1349,15 +1311,35 @@ namespace Timesheet.APIs.ReviewInterns
             }
         }
 
-        private List<List<ReviewDetail>> SplitIntoChunks(List<ReviewDetail> details, int batchSize)
+        private async Task<ReviewDataDto> GetReviewDataAsync(long reviewId)
         {
-            var chunks = new List<List<ReviewDetail>>();
-            for (int i = 0; i < details.Count; i += batchSize)
+            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
+                .Where(rd => rd.ReviewId == reviewId && rd.ReviewerId.HasValue)
+                .ToListAsync();
+            if (!reviewDetails.Any())
             {
-                var chunk = details.Skip(i).Take(batchSize).ToList();
-                chunks.Add(chunk);
+                return null;
             }
-            return chunks;
+            var internshipIds = reviewDetails.Select(rd => rd.InternshipId).ToList();
+            var reviewerIds = reviewDetails.Select(rd => rd.ReviewerId.Value).Distinct().ToList();
+            var userIds = internshipIds.Concat(reviewerIds).Distinct().ToList();
+            var users = await WorkScope.GetAll<User>()
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+            var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
+            var internships = users.Where(u => internshipIds.Contains(u.Id)).ToList();
+            int monthReviewIntern = reviewIntern.Month;
+            int yearReviewIntern = reviewIntern.Year;
+            return new ReviewDataDto
+            {
+                ReviewIntern = reviewIntern,
+                ReviewDetails = reviewDetails,
+                Reviewers = reviewers,
+                Internships = internships,
+                MonthReviewIntern = monthReviewIntern,
+                YearReviewIntern = yearReviewIntern
+            };
         }
 
         [HttpDelete]
