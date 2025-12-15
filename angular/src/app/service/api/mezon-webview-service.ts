@@ -34,10 +34,10 @@ export class MezonWebViewService {
             if (queryData) {
                 return queryData;
             }
-        } catch {
+            return null;
+        } catch (error) { 
+            console.error('No data parameter in URL', error);
         }
-
-        return null;
     }
 
     ping() {

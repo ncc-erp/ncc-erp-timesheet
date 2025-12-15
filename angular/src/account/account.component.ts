@@ -50,15 +50,14 @@ export class AccountComponent extends AppComponentBase implements OnInit {
             this.hashData = hashFromUrl;
             this.isAuthenticating = true;
             this.signInWithHash(hashFromUrl);
-            return;
-        }
-
-        this.mezonWebViewService.isInMezon$.subscribe((status) => {
-        this.isMezonApp = status;
-        if (!this.isMezonApp) {
-            $('body').attr('class', 'login-page');
-        }
-    });
+        } else {
+            this.mezonWebViewService.isInMezon$.subscribe((status) => {
+            this.isMezonApp = status;
+            if (!this.isMezonApp) {
+                $('body').attr('class', 'login-page');
+            }
+        });
+      }
     }
 
     signInWithHash(hashData: string) {
