@@ -2,6 +2,7 @@
 using Abp.Authorization;
 using Abp.BackgroundJobs;
 using Abp.Collections.Extensions;
+using Abp.Configuration;
 using Abp.UI;
 using Castle.Core.Internal;
 using ClosedXML.Excel;
@@ -37,6 +38,7 @@ using Timesheet.Paging;
 using Timesheet.Services.HRM;
 using Timesheet.Services.HRM.Dto;
 using Timesheet.Services.HRMv2;
+using Timesheet.Services.Komu;
 using Timesheet.Services.Project;
 using Timesheet.Services.Project.Dto;
 using Timesheet.Uitls;
@@ -55,10 +57,12 @@ namespace Timesheet.APIs.ReviewInterns
         private readonly ProjectService _projectService;
         private readonly ReviewDetailAppService _reviewDetailAppService;
         private readonly IReviewInternServices _reviewInternServices;
-
+        private readonly KomuService _komuService;
+        private readonly UserServices _userServices;
 
         public ReviewInternAppService(IBackgroundJobManager backgroundJobManager, HRMv2Service hrmv2Service, IWorkScope workScope,
-            ProjectService projectService, HRMService hRMService, ReviewDetailAppService reviewDetailAppService, IReviewInternServices reviewInternServices) : base(workScope)
+            ProjectService projectService, HRMService hRMService, ReviewDetailAppService reviewDetailAppService, IReviewInternServices reviewInternServices,
+            KomuService komuService, UserServices userServices) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _hrmService = hRMService;
@@ -66,6 +70,8 @@ namespace Timesheet.APIs.ReviewInterns
             _projectService = projectService;
             _reviewDetailAppService = reviewDetailAppService;
             _reviewInternServices = reviewInternServices;
+            _komuService = komuService;
+            _userServices = userServices;
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_AddNewReview)]
@@ -1137,8 +1143,205 @@ namespace Timesheet.APIs.ReviewInterns
                     await WorkScope.InsertAsync(reviewInternCapability);
                 }
             }
+            await SendMailToNotifyNewReviewIntern(input.Id);
+            await SendDirectMessageToNotifyNewReviewIntern(input.Id);
             return fails;
         }
+
+        public async System.Threading.Tasks.Task SendMailToNotifyNewReviewIntern(long reviewId)
+        {
+            var data = await GetReviewDataAsync(reviewId);
+            if (data == null)
+            {
+                return;
+            }
+            foreach (var reviewer in data.Reviewers)
+            {
+                var reviewDetailsByReviewer = data.ReviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
+                StringBuilder content = new StringBuilder("");
+                try
+                {
+                    content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị {reviewer.FullName},</span> <br> ");
+                    content.Append($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng {data.MonthReviewIntern}/{data.YearReviewIntern}. ");
+                    content.Append($"Thông tin bao gồm: <br>");
+                    var tableHtml = $@"<table border-collapse='collapse' border='1' width='30%' style='margin-top: 15px'>
+                        <thead>
+                            <tr>
+                                <th width='20%'><span style='font-weight: 600'>Intern name</span></th>
+                                <th width='10%'><span style='font-weight: 600'>Current level</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>";
+                    foreach (var reviewDetail in reviewDetailsByReviewer)
+                    {
+                        var internship = data.Internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                        tableHtml += $@"
+                            <tr>
+                                <td style='padding-left: 5px; text-align: center'>{internship.FullName}</td>
+                                <td style='padding-left: 5px; text-align: center'>{reviewDetail.CurrentLevel}</td>
+                            </tr>";
+                    }
+                    tableHtml += @"
+                        </tbody>
+                    </table>";
+                    content.Append(tableHtml);
+                    content.Append("<br>");
+                    content.Append($"Kính mong anh/chị xem xét và thực hiện đánh giá trên Timesheet. ");
+                    content.Append("<br>");
+                    content.Append("Trân trọng cảm ơn anh/chị!");
+                    var emailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo yêu cầu đánh giá cho thực tập sinh";
+                    await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
+                    {
+                        TargetEmails = new List<string> { reviewer.EmailAddress },
+                        Body = content.ToString(),
+                        Subject = emailSubject
+                    }, BackgroundJobPriority.High);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("SendMailToNotifyNewReviewDetail() error for reviewer => " + e.Message);
+                }
+            }
+        }
+
+        public async System.Threading.Tasks.Task SendDirectMessageToNotifyNewReviewIntern(long reviewId)
+        {
+            var data = await GetReviewDataAsync(reviewId);
+            if (data == null)
+            {
+                return;
+            }
+
+            var hrUsersToNotify = new List<User>();
+
+            var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
+                            .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var hrEmail in hrEmails)
+            {
+                var hrUser = _userServices.GetUserByEmail(hrEmail);
+                if (hrUser != null)
+                {
+                    hrUsersToNotify.Add(hrUser);
+                }
+            }
+
+            const int BATCH_SIZE = 5;
+            const int MESSAGE_DELAY_MS = 1000;
+
+            foreach (var user in hrUsersToNotify)
+            {
+                StringBuilder hrHeaderMessage = new StringBuilder();
+                hrHeaderMessage.AppendLine($"Kính gửi chị**{user.UserName}**");
+                hrHeaderMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
+                hrHeaderMessage.AppendLine($"Thông tin bao gồm các thực tập sinh:");
+                hrHeaderMessage.AppendLine("");
+                _komuService.SendSimpleNotificationToUser(hrHeaderMessage.ToString(), user.UserName);
+                await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
+
+                var chunks = CommonUtils.SplitIntoChunks(data.ReviewDetails.Cast<dynamic>().ToList(), BATCH_SIZE);
+                int idx = 1;
+                for (int i = 0; i < chunks.Count; i++)
+                {
+                    var chunk = chunks[i];
+                    bool isLastChunk = i == chunks.Count - 1;
+                    StringBuilder hrChunkMessage = new StringBuilder();
+                    foreach (var reviewDetail in chunk)
+                    {
+                        var internship = data.Internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                        var reviewer = data.Reviewers.FirstOrDefault(u => u.Id == reviewDetail.ReviewerId);
+                        hrChunkMessage.AppendLine($"{idx}. Intern name:**{internship.UserName}**");
+                        hrChunkMessage.AppendLine($"- Reviewer name:**{reviewer.UserName}**");
+                        hrChunkMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
+                        hrChunkMessage.AppendLine("");
+                        idx++;
+                    }
+                    if (isLastChunk)
+                    {
+                        hrChunkMessage.AppendLine($"Kính mong chị xem xét và theo dõi. ");
+                        hrChunkMessage.AppendLine("Trân trọng!");
+                    }
+
+                    _komuService.SendSimpleNotificationToUser(hrChunkMessage.ToString(), user.UserName);
+                    await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
+                }
+            }
+
+            foreach (var reviewer in data.Reviewers)
+            {
+                var reviewDetailsByReviewer = data.ReviewDetails.Where(rd => rd.ReviewerId == reviewer.Id).ToList();
+                try
+                {
+                    StringBuilder reviewerHeaderMessage = new StringBuilder();
+                    reviewerHeaderMessage.AppendLine($"Kính gửi anh/chị**{reviewer.UserName}**");
+                    reviewerHeaderMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
+                    reviewerHeaderMessage.AppendLine($"Thông tin thực tập sinh bao gồm:");
+                    reviewerHeaderMessage.AppendLine("");
+                    _komuService.SendSimpleNotificationToUser(reviewerHeaderMessage.ToString(), reviewer.UserName);
+                    await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
+
+                    var chunks = CommonUtils.SplitIntoChunks(reviewDetailsByReviewer.Cast<dynamic>().ToList(), BATCH_SIZE);
+                    int idx = 1;
+                    for (int i = 0; i < chunks.Count; i++)
+                    {
+                        var chunk = chunks[i];
+                        bool isLastChunk = i == chunks.Count - 1;
+                        StringBuilder reviewerChunkMessage = new StringBuilder();
+                        foreach (var reviewDetail in chunk)
+                        {
+                            var internship = data.Internships.FirstOrDefault(u => u.Id == reviewDetail.InternshipId);
+                            reviewerChunkMessage.AppendLine($"{idx}. Intern name:**{internship.UserName}**");
+                            reviewerChunkMessage.AppendLine($"- Current level:**{reviewDetail.CurrentLevel}**");
+                            reviewerChunkMessage.AppendLine("");
+                            idx++;
+                        }
+                        if (isLastChunk)
+                        {
+                            reviewerChunkMessage.AppendLine($"Kính mong anh/chị xem xét và thực hiện đánh giá trên Timesheet. ");
+                            reviewerChunkMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
+                        }
+                        _komuService.SendSimpleNotificationToUser(reviewerChunkMessage.ToString(), reviewer.UserName);
+                        await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("SendKomuMessageToNotifyNewReviewDetail() error for reviewer => " + e.Message);
+                }
+            }
+        }
+
+        public async Task<Dto.ReviewDataDto> GetReviewDataAsync(long reviewId)
+        {
+            var reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
+            var reviewDetails = await WorkScope.GetAll<ReviewDetail>()
+                .Where(rd => rd.ReviewId == reviewId && rd.ReviewerId.HasValue)
+                .ToListAsync();
+            if (!reviewDetails.Any())
+            {
+                return null;
+            }
+            var internshipIds = reviewDetails.Select(rd => rd.InternshipId).ToList();
+            var reviewerIds = reviewDetails.Select(rd => rd.ReviewerId.Value).Distinct().ToList();
+            var userIds = internshipIds.Concat(reviewerIds).Distinct().ToList();
+            var users = await WorkScope.GetAll<User>()
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+            var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
+            var internships = users.Where(u => internshipIds.Contains(u.Id)).ToList();
+            int monthReviewIntern = reviewIntern.Month;
+            int yearReviewIntern = reviewIntern.Year;
+            return new Dto.ReviewDataDto
+            {
+                ReviewIntern = reviewIntern,
+                ReviewDetails = reviewDetails,
+                Reviewers = reviewers,
+                Internships = internships,
+                MonthReviewIntern = monthReviewIntern,
+                YearReviewIntern = yearReviewIntern
+            };
+        }
+
         [HttpDelete]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.ReviewIntern_Delete)]
         public async System.Threading.Tasks.Task DeleteInternCapability(EntityDto<long> input)

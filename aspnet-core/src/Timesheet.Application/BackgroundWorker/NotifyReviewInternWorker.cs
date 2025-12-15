@@ -250,6 +250,7 @@ namespace Timesheet.BackgroundWorker
             string headPmMail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
 
             _reviewDetailAppService.SendMailToNotifyTransition(headPmMail, ReviewInternStatus.PmReviewed, reviewId, notifyHeadPmReviewInternOnDate);
+            _reviewDetailAppService.SendDirectMessageToNotifyTransition(headPmMail, ReviewInternStatus.PmReviewed, reviewId, notifyHeadPmReviewInternOnDate);
             return true;
         }
 
