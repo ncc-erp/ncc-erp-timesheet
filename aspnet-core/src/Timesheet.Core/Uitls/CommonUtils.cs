@@ -397,6 +397,7 @@ namespace Timesheet.Uitls
             };
             return listDes;
         }
+
         public static List<List<dynamic>> SplitIntoChunks(List<dynamic> details, int batchSize)
         {
             var chunks = new List<List<dynamic>>();
