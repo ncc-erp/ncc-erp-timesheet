@@ -1371,8 +1371,11 @@ namespace Timesheet.APIs.ReviewDetails
             }
             detail.Status = input.Status;
             await WorkScope.UpdateAsync(detail);
-            List<long> listId = new List<long> { detail.Id };
-            await CheckSendMailToPresident(detail.ReviewId, listId);
+            if (input.Status == ReviewInternStatus.Reviewed)
+            {
+                List<long> listId = new List<long> { detail.Id };
+                await CheckSendMailToPresident(detail.ReviewId, listId);
+            }
         }
 
         public async Task SendMailWhenHeadPMReject(List<long> reviewDetailIds)
@@ -1547,7 +1550,7 @@ namespace Timesheet.APIs.ReviewDetails
             }
         }
 
-        public async Task<Dto.ReviewDataDto> GetReviewDataByDetailIdsAsync(List<long> reviewDetailIds)
+        public async Task<ReviewDataDto> GetReviewDataByDetailIdsAsync(List<long> reviewDetailIds)
         {
             if (!reviewDetailIds.Any())
             {
@@ -1573,7 +1576,7 @@ namespace Timesheet.APIs.ReviewDetails
             var reviewers = users.Where(u => reviewerIds.Contains(u.Id)).ToList();
             var internships = users.Where(u => internshipIds.Contains(u.Id)).ToList();
 
-            return new Dto.ReviewDataDto
+            return new ReviewDataDto
             {
                 ReviewIntern = reviewIntern,
                 ReviewDetails = reviewDetails,
@@ -1659,6 +1662,7 @@ namespace Timesheet.APIs.ReviewDetails
             var listReviewDetail = new List<ReviewDetail>();
             var rejectedIds = new List<long>();
 
+            var listId = new List<long>();
             foreach (var inputItem in input)
             {
                 var detail = await WorkScope.GetAsync<ReviewDetail>(inputItem.ReviewDetailId);
@@ -1675,6 +1679,10 @@ namespace Timesheet.APIs.ReviewDetails
 
                 detail.Status = inputItem.Status;
                 listReviewDetail.Add(detail);
+                if (inputItem.Status == ReviewInternStatus.Reviewed)
+                {
+                    listId.Add(detail.Id);
+                }
 
             }
 
@@ -1693,9 +1701,10 @@ namespace Timesheet.APIs.ReviewDetails
                 }
             }
             await WorkScope.UpdateRangeAsync(listReviewDetail);
-
-            List<long> listId = listReviewDetail.Select(x => x.Id).ToList();
-            await CheckSendMailToPresident(listReviewDetail.FirstOrDefault().ReviewId, listId);
+            if (listId.Any())
+            {
+                await CheckSendMailToPresident(listReviewDetail.FirstOrDefault().ReviewId, listId);
+            }
             Logger.Info("send mail to GD ");
         }
 
@@ -1725,6 +1734,7 @@ namespace Timesheet.APIs.ReviewDetails
             string presidentEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentEmail);
             int dateSendMailToPresident = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentReviewInternOnDate));
             await SendMailToNotifyTransition(presidentEmail, ReviewInternStatus.Reviewed, reviewId, dateSendMailToPresident);
+            await SendDirectMessageToNotifyTransition(presidentEmail, ReviewInternStatus.Reviewed, reviewId, dateSendMailToPresident);
         }
 
         public (bool hasAllSameStatus, int totalPendingInterns) GetReviewInternStatusSummary(long reviewId, ReviewInternStatus status, List<long> listId = null)
@@ -1809,7 +1819,7 @@ namespace Timesheet.APIs.ReviewDetails
                 content.AppendLine($"Kính gửi anh**{nameHeadPm}**");
                 if (status == ReviewInternStatus.Reviewed)
                 {
-                    content.AppendLine($"Anh {nameHeadPm} đã hoàn tất giai đoạn review và chuyển trạng thái**{status}**trên Timesheet cho đợt đánh giá intern tháng**{monthReviewIntern}/{yearReviewIntern}**");
+                    content.AppendLine($"Anh**{nameHeadPm}**đã hoàn tất giai đoạn review và chuyển trạng thái**{status}**trên Timesheet cho đợt đánh giá intern tháng**{monthReviewIntern}/{yearReviewIntern}**");
                     statusExpected = "Approved";
                 }
                 else
