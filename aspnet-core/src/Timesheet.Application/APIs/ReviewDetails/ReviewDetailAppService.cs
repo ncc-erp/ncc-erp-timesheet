@@ -1479,7 +1479,7 @@ namespace Timesheet.APIs.ReviewDetails
                     </table>";
                     hrContent.Append(hrTableHtml);
                     hrContent.Append("<br>");
-                    hrContent.Append("Trân trọng cảm ơn anh/chị!");
+                    hrContent.Append("Trân trọng cảm ơn chị!");
                     var hrEmailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Head PM từ chối chi tiết đánh giá cho thực tập sinh";
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
