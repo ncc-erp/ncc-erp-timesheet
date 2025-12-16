@@ -1117,15 +1117,6 @@ namespace Timesheet.APIs.ReviewDetails
         {
             //var detail = await WorkScope.GetAsync<ReviewDetail>(input.Id);
             var detail = await WorkScope.GetAll<ReviewDetail>().Where(x => x.Id == input.Id).Include(x => x.InterShip).Include(s => s.Review).FirstOrDefaultAsync();
-
-            if (detail.Status == ReviewInternStatus.Rejected)
-            {
-                string headPmEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
-                int notifyHeadPmReviewInternOnDate = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMReviewInternOnDate));
-                await SendMailForReReview(headPmEmail, detail.ReviewerId.Value, detail.InternshipId, detail.ReviewId, notifyHeadPmReviewInternOnDate);
-                await SendDirectMessageForReReview(headPmEmail, detail.ReviewerId.Value, detail.InternshipId, detail.ReviewId, notifyHeadPmReviewInternOnDate);
-            }    
-
             if (detail == null)
             {
                 throw new UserFriendlyException("Review detail Id = " + input.Id + " not exist");
@@ -1144,6 +1135,9 @@ namespace Timesheet.APIs.ReviewDetails
             {
                 throw new UserFriendlyException("Bạn không thể sửa vì kết quả review cho tts này đã được gửi mail");
             }
+
+            bool isReReview = detail.Status == ReviewInternStatus.Rejected;
+
             detail.NewLevel = input.NewLevel;
             //detail.Note = input.Note;
             detail.Status = ReviewInternStatus.PmReviewed;
@@ -1248,6 +1242,14 @@ namespace Timesheet.APIs.ReviewDetails
                 await WorkScope.InsertAsync(reviewInternComment);
             }
             await WorkScope.UpdateAsync(detail);
+
+            if (isReReview)
+            {
+                string headPmEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
+                int notifyHeadPmReviewInternOnDate = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMReviewInternOnDate));
+                await SendMailForReReview(headPmEmail, detail.ReviewerId.Value, detail.InternshipId, detail.ReviewId, notifyHeadPmReviewInternOnDate);
+                await SendDirectMessageForReReview(headPmEmail, detail.ReviewerId.Value, detail.InternshipId, detail.ReviewId, notifyHeadPmReviewInternOnDate);
+            }
 
             List<long> listId = new List<long> { detail.Id };
             bool check = GetReviewInternStatusSummary(detail.ReviewId, ReviewInternStatus.PmReviewed, listId).hasAllSameStatus;
@@ -1614,7 +1616,7 @@ namespace Timesheet.APIs.ReviewDetails
             {
                 MonthReviewIntern = reviewIntern.Month,
                 YearReviewIntern = reviewIntern.Year,
-                Reviewers = reviewersDto,
+                Reviewers = reviewersDto
             };
         }
 
