@@ -1751,7 +1751,15 @@ namespace Timesheet.APIs.ReviewDetails
                       .ToList();
 
             var totalPendingInterns = result.FirstOrDefault(x => x.Status == status)?.Count ?? 0;
-            var hasAllSameStatus = result.Count == 0 || (result.Count == 1 && result.First().Status == status);
+            bool hasAllSameStatus = false;
+            if (status == ReviewInternStatus.Reviewed)
+            {
+                hasAllSameStatus = result.Count == 0 || (result.Count == 1 && result.First().Status == status);
+            }
+            else if (status == ReviewInternStatus.PmReviewed)
+            {
+                hasAllSameStatus = result.Count == 0 || result.All(g => g.Status == ReviewInternStatus.Reviewed || g.Status == ReviewInternStatus.PmReviewed);
+            }
             return (hasAllSameStatus, totalPendingInterns);
         }
 
@@ -1804,6 +1812,7 @@ namespace Timesheet.APIs.ReviewDetails
 
         public async Task SendDirectMessageToNotifyTransition(string email, ReviewInternStatus status, long reviewId, int date)
         {
+            var user = _userServices.GetUserByEmail(email);
             ReviewIntern reviewIntern = await WorkScope.GetAsync<ReviewIntern>(reviewId);
             int monthReviewIntern = reviewIntern.Month;
             int yearReviewIntern = reviewIntern.Year;
@@ -1812,11 +1821,11 @@ namespace Timesheet.APIs.ReviewDetails
             try
             {
                 string headPmMail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
-                User headPM = _userServices.GetUserByEmail(headPmMail);
-                string nameHeadPm = headPM.FullName;
+                var headPM = _userServices.GetUserByEmail(headPmMail);
+                string nameHeadPm = headPM.UserName;
 
                 StringBuilder content = new StringBuilder("");
-                content.AppendLine($"Kính gửi anh**{nameHeadPm}**");
+                content.AppendLine($"Kính gửi anh**{user.UserName}**");
                 if (status == ReviewInternStatus.Reviewed)
                 {
                     content.AppendLine($"Anh**{nameHeadPm}**đã hoàn tất giai đoạn review và chuyển trạng thái**{status}**trên Timesheet cho đợt đánh giá intern tháng**{monthReviewIntern}/{yearReviewIntern}**");
@@ -1830,7 +1839,7 @@ namespace Timesheet.APIs.ReviewDetails
                 content.AppendLine($"Kính mong anh xem xét và thực hiện chuyển trạng thái sang**{statusExpected}**trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**");
                 content.AppendLine($"Trân trọng cảm ơn anh!");
 
-                _komuService.SendSimpleNotificationToUser(content.ToString(), headPM.UserName);
+                _komuService.SendSimpleNotificationToUser(content.ToString(), user.UserName);
             }
             catch (Exception e)
             {
