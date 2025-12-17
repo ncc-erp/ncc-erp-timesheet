@@ -1393,7 +1393,7 @@ namespace Timesheet.APIs.ReviewDetails
                 try
                 {
                     content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị {reviewer.ReviewerFullName}, </span><br> ");
-                    content.Append($"<span style='font-weight: 600'>{rejectorDisplay}</span> đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {data.MonthReviewIntern}/{data.YearReviewIntern}. ");
+                    content.Append($"<span style='font-weight: 600'>{rejectorDisplay}</span> đã từ chối đánh giá cho thực tập sinh trong đợt đánh giá tháng {data.MonthReviewIntern}/{data.YearReviewIntern}. ");
                     content.Append($"Thông tin bao gồm: <br>");
                     var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
                                             <thead> 
@@ -1418,11 +1418,11 @@ namespace Timesheet.APIs.ReviewDetails
                     </table>";
                     content.Append(tableHtml);
                     content.Append("<br>");
-                    content.Append($"Anh/chị vui lòng trao đổi với head PM về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày <span style='font-weight: 600'>{date + 1}/{dateNow.Month}/{dateNow.Year}. </span>");
+                    content.Append($"Anh/chị vui lòng trao đổi với<span style='font-weight: 600'> {rejectorDisplay} </span>về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày <span style='font-weight: 600'>{date + 1}/{dateNow.Month}/{dateNow.Year}. </span>");
                     content.Append("<br>");
                     content.Append("Trân trọng cảm ơn anh/chị!");
 
-                    var emailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] {rejectorDisplay} từ chối chi tiết đánh giá cho thực tập sinh";
+                    var emailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] {rejectorDisplay} từ chối đánh giá cho thực tập sinh";
                     var targetEmails = new List<string> { reviewer.ReviewerEmail };
 
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
@@ -1460,7 +1460,7 @@ namespace Timesheet.APIs.ReviewDetails
                 try
                 {
                     hrContent.Append($"<span style='font-weight: 600'> Kính gửi chị HR, </span><br> ");
-                    hrContent.Append($"<span style='font-weight: 600'>{rejectorDisplay}</span> đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng {data.MonthReviewIntern}/{data.YearReviewIntern}. ");
+                    hrContent.Append($"<span style='font-weight: 600'>{rejectorDisplay}</span> đã từ chối đánh giá cho thực tập sinh trong đợt đánh giá tháng {data.MonthReviewIntern}/{data.YearReviewIntern}. ");
                     hrContent.Append($"Thông tin bao gồm: <br>");
                     var hrTableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
                                             <thead>
@@ -1488,7 +1488,7 @@ namespace Timesheet.APIs.ReviewDetails
                     hrContent.Append(hrTableHtml);
                     hrContent.Append("<br>");
                     hrContent.Append("Trân trọng cảm ơn chị!");
-                    var hrEmailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] {rejectorDisplay} từ chối chi tiết đánh giá cho thực tập sinh";
+                    var hrEmailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] {rejectorDisplay} từ chối đánh giá cho thực tập sinh";
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
                         TargetEmails = hrEmails,
@@ -1524,7 +1524,7 @@ namespace Timesheet.APIs.ReviewDetails
                 {
                     StringBuilder reviewerHeaderMessage = new StringBuilder();
                     reviewerHeaderMessage.AppendLine($"Kính gửi anh/chị**{reviewer.ReviewerUserName}**");
-                    reviewerHeaderMessage.AppendLine($"**{rejectorDisplay}**đã từ chối chi tiết đánh giá cho thực tập sinh trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
+                    reviewerHeaderMessage.AppendLine($"{rejectorDisplay} đã từ chối đánh giá cho thực tập sinh trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
                     reviewerHeaderMessage.AppendLine("");
                     _komuService.SendSimpleNotificationToUser(reviewerHeaderMessage.ToString(), reviewer.ReviewerUserName);
                     await Task.Delay(MESSAGE_DELAY_MS);
@@ -1546,7 +1546,7 @@ namespace Timesheet.APIs.ReviewDetails
                         }
                         if (isLastChunk)
                         {
-                            reviewerChunkMessage.AppendLine($"Anh/chị vui lòng trao đổi với head PM về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**");
+                            reviewerChunkMessage.AppendLine($"Anh/chị vui lòng trao đổi với {rejectorDisplay} về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**");
                             reviewerChunkMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
                         }
                         _komuService.SendSimpleNotificationToUser(reviewerChunkMessage.ToString(), reviewer.ReviewerUserName);
