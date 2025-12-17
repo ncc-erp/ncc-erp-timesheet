@@ -250,6 +250,7 @@ namespace Timesheet.BackgroundWorker
             string headPmMail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
 
             _reviewDetailAppService.SendMailToNotifyTransition(headPmMail, ReviewInternStatus.PmReviewed, reviewId, notifyHeadPmReviewInternOnDate);
+            _reviewDetailAppService.SendDirectMessageToNotifyTransition(headPmMail, ReviewInternStatus.PmReviewed, reviewId, notifyHeadPmReviewInternOnDate);
             return true;
         }
 
@@ -377,6 +378,7 @@ namespace Timesheet.BackgroundWorker
             string presidentEmail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyPresidentEmail);
 
             _reviewDetailAppService.SendMailToNotifyTransition(presidentEmail, ReviewInternStatus.Reviewed, reviewId, dateSendMailToPresident);
+            _reviewDetailAppService.SendDirectMessageToNotifyTransition(presidentEmail, ReviewInternStatus.Reviewed, reviewId, dateSendMailToPresident);
             return true;
         }
 
