@@ -21,8 +21,15 @@ export class AppRouteGuard implements CanActivate, CanActivateChild {
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
         if (!this._sessionService.user) {
-            AppConsts.urlBeforeLogin = location.href
-            this._router.navigate(['/account/login']);
+            AppConsts.urlBeforeLogin = location.href;
+
+            const dataParam = route.queryParams && route.queryParams['data'];
+            if (dataParam) {
+                this._router.navigate(['/account/login'], { queryParams: { data: dataParam } });
+            } else {
+                this._router.navigate(['/account/login']);
+            }
+
             return false;
         }
 
