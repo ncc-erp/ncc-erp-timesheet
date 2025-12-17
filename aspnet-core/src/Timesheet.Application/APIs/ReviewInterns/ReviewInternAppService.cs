@@ -1161,7 +1161,7 @@ namespace Timesheet.APIs.ReviewInterns
                 try
                 {
                     content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị {reviewer.ReviewerFullName},</span> <br> ");
-                    content.Append($"Các chi tiết đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng {data.MonthReviewIntern}/{data.YearReviewIntern}. ");
+                    content.Append($"Các đánh giá thực tập sinh mới đã được tạo cho anh/chị trong đợt đánh giá tháng {data.MonthReviewIntern}/{data.YearReviewIntern}. ");
                     content.Append($"Thông tin bao gồm: <br>");
                     var tableHtml = $@"<table border-collapse='collapse' border='1' width='30%' style='margin-top: 15px'>
                         <thead>
@@ -1278,7 +1278,7 @@ namespace Timesheet.APIs.ReviewInterns
             {
                 StringBuilder hrHeaderMessage = new StringBuilder();
                 hrHeaderMessage.AppendLine($"Kính gửi chị**{user.UserName}**");
-                hrHeaderMessage.AppendLine($"Các chi tiết đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
+                hrHeaderMessage.AppendLine($"Các đánh giá thực tập sinh mới đã được tạo trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
                 hrHeaderMessage.AppendLine($"Thông tin bao gồm các thực tập sinh:");
                 hrHeaderMessage.AppendLine("");
                 _komuService.SendSimpleNotificationToUser(hrHeaderMessage.ToString(), user.UserName);
