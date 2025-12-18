@@ -53,7 +53,6 @@ export class LoginComponent extends AppComponentBase implements OnInit {
         const hashAuthData: IHashMezonAuthModel = {
           hashData: Base64.encode(hashFromUrl),
         };
-        console.log("Mezon hash data from URL: ", hashFromUrl);
         this.loginService.authenticateMezonHash(hashAuthData, () => {
           this.isMezonApp = true;
         });

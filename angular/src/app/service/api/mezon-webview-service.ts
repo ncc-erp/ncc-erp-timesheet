@@ -58,11 +58,7 @@ export class MezonWebViewService {
     getHashDataFromUrl(): string | null {
         const url = new URL(window.location.href);
         const queryData = url.searchParams.get('data');
-        if (queryData) {
-            console.log('Hash data from URL: ', queryData);
-            return queryData;
-        }
-        return null;
+        return queryData ? queryData : null;
     }
 
     removeEventListeners() {
