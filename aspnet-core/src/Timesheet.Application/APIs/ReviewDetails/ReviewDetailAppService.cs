@@ -660,8 +660,8 @@ namespace Timesheet.APIs.ReviewDetails
             if (detail.Status == ReviewInternStatus.Approved || detail.Status == ReviewInternStatus.Reviewed)
             {
                 detail.Status = ReviewInternStatus.Rejected;
-                await SendMailWhenRejected(new List<long> { Id }, Rejector.CEO);
-                await SendDirectMessageWhenRejected(new List<long> { Id }, Rejector.CEO);
+                await SendMailWhenRejected(new List<long> { Id }, ReviewDetailRejector.CEO);
+                await SendDirectMessageWhenRejected(new List<long> { Id }, ReviewDetailRejector.CEO);
                 if (detail.Status == ReviewInternStatus.Rejected)
                 {
                     detail.NewLevel = detail.CurrentLevel;
@@ -1357,8 +1357,8 @@ namespace Timesheet.APIs.ReviewDetails
 
             if (input.Status == ReviewInternStatus.Rejected)
             {
-                await SendMailWhenRejected(new List<long> { input.ReviewDetailId }, Rejector.HeadPM);
-                await SendDirectMessageWhenRejected(new List<long> { input.ReviewDetailId }, Rejector.HeadPM);
+                await SendMailWhenRejected(new List<long> { input.ReviewDetailId }, ReviewDetailRejector.HeadPM);
+                await SendDirectMessageWhenRejected(new List<long> { input.ReviewDetailId }, ReviewDetailRejector.HeadPM);
                 detail.NewLevel = detail.CurrentLevel;
             }
 
@@ -1371,7 +1371,7 @@ namespace Timesheet.APIs.ReviewDetails
             }
         }
 
-        public async Task SendMailWhenRejected(List<long> reviewDetailIds, Rejector rejector)
+        public async Task SendMailWhenRejected(List<long> reviewDetailIds, ReviewDetailRejector rejector)
         {
             var data = await GetReviewDataByDetailIdsAsync(reviewDetailIds);
             int date = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMReviewInternOnDate));
@@ -1385,7 +1385,7 @@ namespace Timesheet.APIs.ReviewDetails
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                 .ToList();
 
-            string rejectorDisplay = rejector == Rejector.HeadPM ? "Head PM" : "CEO";
+            string rejectorDisplay = rejector == ReviewDetailRejector.HeadPM ? "Head PM" : "CEO";
 
             foreach (var reviewer in data.Reviewers)
             {
@@ -1418,7 +1418,7 @@ namespace Timesheet.APIs.ReviewDetails
                     </table>";
                     content.Append(tableHtml);
                     content.Append("<br>");
-                    content.Append($"Anh/chị vui lòng trao đổi với<span style='font-weight: 600'> {rejectorDisplay} </span>về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày <span style='font-weight: 600'>{date + 1}/{dateNow.Month}/{dateNow.Year}. </span>");
+                    content.Append($"Anh/chị vui lòng trao đổi với<span style='font-weight: 600'> Head PM </span>về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày <span style='font-weight: 600'>{date + 1}/{dateNow.Month}/{dateNow.Year}. </span>");
                     content.Append("<br>");
                     content.Append("Trân trọng cảm ơn anh/chị!");
 
@@ -1503,7 +1503,7 @@ namespace Timesheet.APIs.ReviewDetails
             }
         }
         
-        public async Task SendDirectMessageWhenRejected(List<long> reviewDetailIds, Rejector rejector)
+        public async Task SendDirectMessageWhenRejected(List<long> reviewDetailIds, ReviewDetailRejector rejector)
         {
             var data = await GetReviewDataByDetailIdsAsync(reviewDetailIds);
             int date = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMReviewInternOnDate));
@@ -1513,7 +1513,7 @@ namespace Timesheet.APIs.ReviewDetails
                 return;
             }
 
-            string rejectorDisplay = rejector == Rejector.HeadPM ? "Head PM" : "CEO";
+            string rejectorDisplay = rejector == ReviewDetailRejector.HeadPM ? "Head PM" : "CEO";
 
             const int BATCH_SIZE = 5;
             const int MESSAGE_DELAY_MS = 1000;
@@ -1546,7 +1546,7 @@ namespace Timesheet.APIs.ReviewDetails
                         }
                         if (isLastChunk)
                         {
-                            reviewerChunkMessage.AppendLine($"Anh/chị vui lòng trao đổi với {rejectorDisplay} về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**");
+                            reviewerChunkMessage.AppendLine($"Anh/chị vui lòng trao đổi với Head PM về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**");
                             reviewerChunkMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
                         }
                         _komuService.SendSimpleNotificationToUser(reviewerChunkMessage.ToString(), reviewer.ReviewerUserName);
@@ -1721,8 +1721,8 @@ namespace Timesheet.APIs.ReviewDetails
 
             if (rejectedIds.Any())
             {
-                await SendMailWhenRejected(rejectedIds, Rejector.HeadPM);
-                await SendDirectMessageWhenRejected(rejectedIds, Rejector.HeadPM);
+                await SendMailWhenRejected(rejectedIds, ReviewDetailRejector.HeadPM);
+                await SendDirectMessageWhenRejected(rejectedIds, ReviewDetailRejector.HeadPM);
             }
 
             foreach (var rejectedId in rejectedIds)
