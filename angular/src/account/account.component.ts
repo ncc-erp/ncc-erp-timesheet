@@ -44,20 +44,26 @@ export class AccountComponent extends AppComponentBase implements OnInit {
     }
 
     ngOnInit(): void {
-        const hashFromUrl = this.mezonWebViewService.getHashDataFromUrl();
-        if (hashFromUrl) {
-            this.isMezonApp = true;
-            this.hashData = hashFromUrl;
-            this.isAuthenticating = true;
-            this.signInWithHash(hashFromUrl);
-        } else {
-            this.mezonWebViewService.isInMezon$.subscribe((status) => {
+        this.mezonWebViewService.ping();
+        this.mezonWebViewService.listenToPong();
+        this.mezonWebViewService.sendBotId();
+        this.mezonWebViewService.listenToUserHashInfo();
+
+
+        this.mezonWebViewService.isInMezon$.subscribe((status) => {
             this.isMezonApp = status;
-            if (!this.isMezonApp) {
-                $('body').attr('class', 'login-page');
-            }
         });
-      }
+
+        if (!this.isMezonApp) {
+            $('body').attr('class', 'login-page');
+        }
+
+        this.mezonWebViewService.userHashData$.subscribe((userHashData) => {
+            this.hashData = userHashData;
+            this.isAuthenticating = true;
+            this.signInWithHash(userHashData);
+            this._router.navigate(['app/main/mytimesheets']);
+        });
     }
 
     signInWithHash(hashData: string) {
