@@ -382,7 +382,7 @@ namespace Ncc.Entities.Enum
             PUNISHMENT_UNPAID = 2
         }
 
-        public enum Rejector
+        public enum ReviewDetailRejector
         {
             HeadPM,
             CEO
