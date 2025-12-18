@@ -117,7 +117,12 @@ export class LoginService {
         } else {
             // Unexpected result!
             this._logService.warn('Unexpected authenticateResult!');
-            this._router.navigate(['account/login']);
+            this.mezonWebViewService.ping();
+            this.mezonWebViewService.isInMezon$.subscribe((status) => {
+                if (!status) {
+                    this._router.navigate(['account/login']);
+                }
+            });
         }
     }
 
