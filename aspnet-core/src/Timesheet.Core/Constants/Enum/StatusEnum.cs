@@ -381,5 +381,11 @@ namespace Ncc.Entities.Enum
             TIMESHEET_LOCKED = 1,
             PUNISHMENT_UNPAID = 2
         }
+
+        public enum ReviewDetailRejector
+        {
+            HeadPM,
+            CEO
+        }
     }
 }

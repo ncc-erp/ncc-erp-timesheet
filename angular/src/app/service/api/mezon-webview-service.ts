@@ -27,19 +27,6 @@ export class MezonWebViewService {
         return this._isInMezon;
     }
 
-    getHashDataFromUrl(): string | null {
-        try {
-            const url = new URL(window.location.href);
-            const queryData = url.searchParams.get('data');
-            if (queryData) {
-                return queryData;
-            }
-            return null;
-        } catch (error) { 
-            console.error('No data parameter in URL', error);
-        }
-    }
-
     ping() {
         window.Mezon.WebView.postEvent("PING" as MezonWebViewEvent, { message: "PING" }, () => {
         });
@@ -66,6 +53,12 @@ export class MezonWebViewService {
         window.Mezon.WebView.onEvent("USER_HASH_INFO" as MezonAppEvent, async (_, userHashData: any) => {
             this.userHashData.next(userHashData.message.web_app_data);
         });
+    }
+
+    getHashDataFromUrl(): string | null {
+        const url = new URL(window.location.href);
+        const queryData = url.searchParams.get('data');
+        return queryData ? queryData : null;
     }
 
     removeEventListeners() {
