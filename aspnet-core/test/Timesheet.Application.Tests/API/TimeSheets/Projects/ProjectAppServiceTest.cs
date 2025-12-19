@@ -427,5 +427,167 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
                 Assert.Equal(expectedMessage, exception.Message);
             });
         }
+
+        [Fact]
+        public async void Should_Throw_Exception_When_Try_To_Deactivate_The_Only_PM()
+        {
+            var projectDto = ProjectDto();
+
+            var (projectId, pmUserId) = await WithUnitOfWorkAsync(async () =>
+            {
+                var workScope = Resolve<IWorkScope>();
+
+                var pUserId = await workScope.InsertAndGetIdAsync(new User
+                {
+                    IsActive = true,
+                    UserName = "pm_test",
+                    EmailAddress = "pm@ncc.asia",
+                    Name = "PM",
+                    Surname = "Test"
+                });
+
+                var mUserId = await workScope.InsertAndGetIdAsync(new User
+                {
+                    IsActive = true,
+                    UserName = "mem_test",
+                    EmailAddress = "mem@ncc.asia",
+                    Name = "Mem",
+                    Surname = "Test"
+                });
+
+                var pId = await workScope.InsertAndGetIdAsync(new Project
+                {
+                    Name = projectDto.Name,
+                    Code = projectDto.Code,
+                    Status = projectDto.Status,
+                    CustomerId = projectDto.CustomerId,
+                    TimeStart = projectDto.TimeStart,
+                    ProjectType = projectDto.ProjectType
+                });
+
+                await workScope.InsertAsync(new ProjectUser { ProjectId = pId, UserId = pUserId, Type = ProjectUserType.PM });
+                await workScope.InsertAsync(new ProjectUser { ProjectId = pId, UserId = mUserId, Type = ProjectUserType.Member });
+
+                return (pId, pUserId);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+                    await _projectAppService.ReleaseUserFromProject(projectId, pmUserId));
+
+                exception.Message.ShouldBe("Cannot deactivate the only PM in this project.");
+            });
+        }
+
+        [Fact]
+        public async void Should_Deactivate_One_Of_Many_PMs_Successfully()
+        {
+            var projectDto = ProjectDto();
+
+            var (projectId, pm1Id, pm2Id) = await WithUnitOfWorkAsync(async () =>
+            {
+                var workScope = Resolve<IWorkScope>();
+
+                var user1Id = await workScope.InsertAndGetIdAsync(new User
+                {
+                    IsActive = true,
+                    UserName = "pm1",
+                    EmailAddress = "pm1@ncc.asia",
+                    Name = "PM",
+                    Surname = "One"
+                });
+
+                var user2Id = await workScope.InsertAndGetIdAsync(new User
+                {
+                    IsActive = true,
+                    UserName = "pm2",
+                    EmailAddress = "pm2@ncc.asia",
+                    Name = "PM",
+                    Surname = "Two"
+                });
+
+                var pId = await workScope.InsertAndGetIdAsync(new Project
+                {
+                    Name = projectDto.Name,
+                    Code = projectDto.Code,
+                    CustomerId = projectDto.CustomerId,
+                    Status = ProjectStatus.Active,
+                    ProjectType = projectDto.ProjectType,
+                    TimeStart = projectDto.TimeStart
+                });
+
+                await workScope.InsertAsync(new ProjectUser { ProjectId = pId, UserId = user1Id, Type = ProjectUserType.PM });
+                await workScope.InsertAsync(new ProjectUser { ProjectId = pId, UserId = user2Id, Type = ProjectUserType.PM });
+
+                return (pId, user1Id, user2Id);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _projectAppService.ReleaseUserFromProject(projectId, pm1Id);
+            });
+
+            UsingDbContext(context =>
+            {
+                var releasedUser = context.ProjectUsers.First(pu => pu.ProjectId == projectId && pu.UserId == pm1Id);
+                releasedUser.Type.ShouldBe(ProjectUserType.DeActive);
+
+                var remainingPM = context.ProjectUsers.First(pu => pu.ProjectId == projectId && pu.UserId == pm2Id);
+                remainingPM.Type.ShouldBe(ProjectUserType.PM);
+            });
+        }
+
+        [Fact]
+        public async void Should_Throw_Exception_When_Other_PM_User_Is_Inactive()
+        {
+            var projectDto = ProjectDto();
+
+            var (projectId, currentPmId) = await WithUnitOfWorkAsync(async () =>
+            {
+                var workScope = Resolve<IWorkScope>();
+
+                var user1Id = await workScope.InsertAndGetIdAsync(new User
+                {
+                    IsActive = true,
+                    UserName = "active_pm",
+                    EmailAddress = "active@ncc.asia",
+                    Name = "Active",
+                    Surname = "PM"
+                });
+
+                var user2Id = await workScope.InsertAndGetIdAsync(new User
+                {
+                    IsActive = false,
+                    UserName = "inactive_pm",
+                    EmailAddress = "inactive@ncc.asia",
+                    Name = "Inactive",
+                    Surname = "PM"
+                });
+
+                var pId = await workScope.InsertAndGetIdAsync(new Project
+                {
+                    Name = "Project Inactive PM Test",
+                    Code = "P_INACTIVE_PM",
+                    CustomerId = projectDto.CustomerId,
+                    Status = ProjectStatus.Active,
+                    ProjectType = projectDto.ProjectType,
+                    TimeStart = DateTime.Now
+                });
+
+                await workScope.InsertAsync(new ProjectUser { ProjectId = pId, UserId = user1Id, Type = ProjectUserType.PM });
+                await workScope.InsertAsync(new ProjectUser { ProjectId = pId, UserId = user2Id, Type = ProjectUserType.PM });
+
+                return (pId, user1Id);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+                    await _projectAppService.ReleaseUserFromProject(projectId, currentPmId));
+
+                exception.Message.ShouldBe("Cannot deactivate the only PM in this project.");
+            });
+        }
     }
 }

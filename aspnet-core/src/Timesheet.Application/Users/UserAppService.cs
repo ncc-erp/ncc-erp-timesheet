@@ -601,6 +601,19 @@ namespace Ncc.Users
             var user = await _ws.GetAsync<User>(input.Id);
             if (user != null)
             {
+                var violatingProjectNames = await _ws.GetAll<ProjectUser>()
+                    .Where(pu => pu.Project.Status == ProjectStatus.Active && pu.Type == ProjectUserType.PM)
+                    .GroupBy(pu => pu.ProjectId)
+                    .Where(g => g.Any(pu => pu.UserId == user.Id) && g.Count(pu => pu.User.IsActive) == 1)
+                    .Select(g => g.First().Project.Name)
+                    .ToListAsync();
+
+                if (violatingProjectNames.Any())
+                {
+                    var projectsStr = violatingProjectNames.Count == 1 ? violatingProjectNames[0] : string.Join(", ", violatingProjectNames);
+                    throw new UserFriendlyException($"Cannot deactivate the only PM in active project \"{projectsStr}\".");
+                }
+
                 user.EndDateAt = user.EndDateAt.HasValue ? user.EndDateAt : DateTimeUtils.GetNow();
                 user.IsActive = false;
                 await _ws.GetRepo<User, long>().UpdateAsync(user);
