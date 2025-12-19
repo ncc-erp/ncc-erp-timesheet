@@ -55,6 +55,12 @@ export class MezonWebViewService {
         });
     }
 
+    getHashDataFromUrl(): string | null {
+        const url = new URL(window.location.href);
+        const queryData = url.searchParams.get('data');
+        return queryData ? queryData : null;
+    }
+
     removeEventListeners() {
         window.Mezon.WebView.offEvent("CURRENT_USER_INFO" as MezonAppEvent, () => { });
         window.Mezon.WebView.offEvent("USER_HASH_INFO" as MezonAppEvent, () => { });

@@ -25,6 +25,7 @@ import {
   TimekeepingSignalRService,
 } from "@app/service/api/timekeeping-signalR.service";
 import { SubscriptionLike } from "rxjs";
+import * as moment from "moment";
 
 @Component({
   selector: "app-tardiness-leave-early",
@@ -40,6 +41,7 @@ export class TardinessLeaveEarlyComponent
   EXPORT_EXCEL = PERMISSIONS_CONSTANT.ExportExcelTardinessLeaveEarly;
   VIEW_ONLY_ME_TARDINESS_LEAVE_EARLY =
     PERMISSIONS_CONSTANT.ViewOnlyMeTardinessLeaveEarly;
+  RETRIVE_PUNISHMENT_DATA = PERMISSIONS_CONSTANT.RetrievePunishmentData;
 
   listMonth = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
   listYear = APP_CONSTANT.ListYear;
@@ -259,8 +261,34 @@ export class TardinessLeaveEarlyComponent
   getDataCheckInInternal(): void {
     const dialogRef = this.dialog.open(SelectedDateComponent, {
       disableClose: true,
-      data: {useSignalr: this.isConnectedSignalr}
+      data: {useSignalr: this.isConnectedSignalr, apiType: APP_CONSTANT.TimekeepingApiType.Add}
     });
+  }
+
+  private openSelectedDateDialog(callback: (date: string) => void, apiType: string = APP_CONSTANT.TimekeepingApiType.Add): void {
+    const dialogRef = this.dialog.open(SelectedDateComponent, {
+      disableClose: true,
+      data: { useSignalr: this.isConnectedSignalr, apiType: apiType }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.date) {
+        callback(result.date);
+      }
+    });
+  }
+
+  snapshotPunishmentForSelectedDay(): void {
+    this.openSelectedDateDialog((date: string) => {
+      this.timekeepingService
+        .getSnapshotTimekeepingDay(date)
+        .pipe(finalize(() => {}))
+        .subscribe(
+          () => {
+            abp.notify.success('Snapshot successfully for date ' + date);
+          }
+        );
+    }, APP_CONSTANT.TimekeepingApiType.Snapshot);
   }
 
   upLoadTimekeeping(file: File) {

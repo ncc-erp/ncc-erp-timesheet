@@ -62,6 +62,10 @@ export class TimekeepingService extends BaseApiService {
     return this.http.post<any>(this.rootUrl + `/AddTimekeepingByDay?date=${request}`, {});
   }
 
+  getSnapshotTimekeepingDay(date: string): Observable<any> {
+    return this.http.post<any>(this.rootUrl + `/SnapshotTimekeepingDay?date=${date}`, {});
+  }
+
   ImportTimekeepingFromFile(file: File): Observable<any> {
     const formData = new FormData();
     const url = '/api/services/app/Timekeeping/ImportTimekeepingFromFile';

@@ -53,6 +53,7 @@ namespace Ncc.EntityFrameworkCore
         public DbSet<UserPunishmentPaid> UserPunishmentPaids { get; set; }
         public DbSet<UserPunishmentBalance> UserPunishmentBalances { get; set; }
         public DbSet<UserPunishmentRefund> UserPunishmentRefunds { get; set; }
+        public DbSet<UserPunishmentHistory> UserPunishmentHistories { get; set; }
         public TimesheetDbContext(DbContextOptions<TimesheetDbContext> options)
             : base(options)
         {

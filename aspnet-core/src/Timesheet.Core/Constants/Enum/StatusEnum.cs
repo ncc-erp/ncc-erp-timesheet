@@ -387,5 +387,11 @@ namespace Ncc.Entities.Enum
             DatesBelowThreshold = 1,
             DatesNoTrackerTime = 2
         }
+
+        public enum ReviewDetailRejector
+        {
+            HeadPM,
+            CEO
+        }
     }
 }

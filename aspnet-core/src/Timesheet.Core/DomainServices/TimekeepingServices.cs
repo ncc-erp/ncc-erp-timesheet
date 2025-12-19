@@ -233,6 +233,42 @@ namespace Timesheet.DomainServices
             );
         }
 
+        private void ApplySnapshotIfAny(
+            Dictionary<(long UserId, UserPunishmentType Type), UserPunishmentSnapshotDto> snapshotByUserAndType,
+            UserPunishment punishment)
+        {
+            if (snapshotByUserAndType == null || punishment == null)
+            {
+                return;
+            }
+
+            var key = (punishment.UserId, punishment.Type);
+            if (!snapshotByUserAndType.TryGetValue(key, out var snap))
+            {
+                return;
+            }
+
+            if (snap.IsPaid)
+            {
+                punishment.IsPaid = true;
+            }
+
+            if (!string.IsNullOrEmpty(snap.UserNote))
+            {
+                punishment.UserNote = snap.UserNote;
+            }
+
+            if (!string.IsNullOrEmpty(snap.NoteReply))
+            {
+                punishment.NoteReply = snap.NoteReply;
+            }
+
+            if (snap.UserPunishmentPaidId.HasValue)
+            {
+                punishment.UserPunishmentPaidId = snap.UserPunishmentPaidId;
+            }
+        }
+
         private async Task<(List<Timekeeping> rs, List<UserPunishment> userPunishmentsToInsert)> GenerateTimekeepingRecords(
             DateTime selectedDate,
             TimesheetUserDto user,
@@ -244,7 +280,8 @@ namespace Timesheet.DomainServices
             Dictionary<UserPunishmentType, PunishmentSystem> punishmentSystems,
             Dictionary<long, List<(string NoteReply, string UserNote)>> oldTimekeepingNotes,
             Dictionary<long, List<MapAbsenceUserDto>> mapAbsenceUsers,
-            Dictionary<long, List<MapAbsenceUserDto>> mapRemoteUsers)
+            Dictionary<long, List<MapAbsenceUserDto>> mapRemoteUsers,
+            Dictionary<(long UserId, UserPunishmentType Type), UserPunishmentSnapshotDto> snapshotByUserAndType)
         {
             var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
             var rs = new List<Timekeeping>();
@@ -306,7 +343,7 @@ namespace Timesheet.DomainServices
                     {
                         t.CountPunishDaily = mapDailyUsers[user.UserName];
                         var dailyPunishment = punishmentSystems[UserPunishmentType.Daily];
-                        userPunishmentsToInsert.Add(new UserPunishment
+                        var daily = new UserPunishment
                         {
                             DateAt = selectedDate,
                             UserId = user.UserId,
@@ -315,14 +352,16 @@ namespace Timesheet.DomainServices
                             Count = mapDailyUsers[user.UserName],
                             TotalMoney = mapDailyUsers[user.UserName] * dailyPunishment.Money,
                             IsPaid = false
-                        });
+                        };
+                        ApplySnapshotIfAny(snapshotByUserAndType, daily);
+                        userPunishmentsToInsert.Add(daily);
                     }
 
                     if (mapMentionUsers.ContainsKey(user.UserName))
                     {
                         t.CountPunishMention = mapMentionUsers[user.UserName];
                         var mentionPunishment = punishmentSystems[UserPunishmentType.Mention];
-                        userPunishmentsToInsert.Add(new UserPunishment
+                        var mention = new UserPunishment
                         {
                             DateAt = selectedDate,
                             UserId = user.UserId,
@@ -331,7 +370,9 @@ namespace Timesheet.DomainServices
                             Count = mapMentionUsers[user.UserName],
                             TotalMoney = mapMentionUsers[user.UserName] * mentionPunishment.Money,
                             IsPaid = false
-                        });
+                        };
+                        ApplySnapshotIfAny(snapshotByUserAndType, mention);
+                        userPunishmentsToInsert.Add(mention);
                     }
 
                     if (mapWFHUsers.ContainsKey(user.UserName))
@@ -348,7 +389,7 @@ namespace Timesheet.DomainServices
                         }
                         else
                         {
-                            userPunishmentsToInsert.Add(new UserPunishment
+                            var newMention = new UserPunishment
                             {
                                 DateAt = selectedDate,
                                 UserId = user.UserId,
@@ -357,12 +398,13 @@ namespace Timesheet.DomainServices
                                 Count = mapWFHUsers[user.UserName],
                                 TotalMoney = mapWFHUsers[user.UserName] * mentionPunishment.Money,
                                 IsPaid = false
-                            });
+                            };
+                            ApplySnapshotIfAny(snapshotByUserAndType, newMention);
+                            userPunishmentsToInsert.Add(newMention);
                         }
                     }
                 }
             }
-
 
             if (oldTimekeepingNotes.ContainsKey(user.UserId))
             {
@@ -380,7 +422,6 @@ namespace Timesheet.DomainServices
                 });
 
             }
-
 
             t.UserEmail = user.EmailAddress;
             t.DateAt = selectedDate;
@@ -438,7 +479,7 @@ namespace Timesheet.DomainServices
                     (StatusEnum.CheckInCheckOutPunishmentType)x.Type == t.StatusPunish);
                     if (punishmentSystem != null)
                     {
-                        userPunishmentsToInsert.Add(new UserPunishment
+                        var checkInOutPunishment = new UserPunishment
                         {
                             DateAt = selectedDate,
                             UserId = user.UserId,
@@ -449,7 +490,9 @@ namespace Timesheet.DomainServices
                             UserNote = t.UserNote,
                             NoteReply = t.NoteReply,
                             IsPaid = false
-                        });
+                        };
+                        ApplySnapshotIfAny(snapshotByUserAndType, checkInOutPunishment);
+                        userPunishmentsToInsert.Add(checkInOutPunishment);
                     }
                 }
 
@@ -468,6 +511,7 @@ namespace Timesheet.DomainServices
                         punishmentSystems);
                     if (trackerPunishment != null)
                     {
+                        ApplySnapshotIfAny(snapshotByUserAndType, trackerPunishment);
                         userPunishmentsToInsert.Add(trackerPunishment);
                     }
                 }
@@ -482,6 +526,62 @@ namespace Timesheet.DomainServices
 
         [UnitOfWork(TransactionScopeOption.RequiresNew)]
         public async Task<List<Timekeeping>> AddTimekeepingByDay(DateTime selectedDate)
+        {
+            var typesToCheck = new List<UserPunishmentType>
+            {
+                UserPunishmentType.Late,
+                UserPunishmentType.NoCheckIn,
+                UserPunishmentType.NoCheckOut,
+                UserPunishmentType.LateAndNoCheckOut,
+                UserPunishmentType.NoCheckInAndNoCheckOut,
+                UserPunishmentType.Daily,
+                UserPunishmentType.Mention,
+                UserPunishmentType.Tracker_20k,
+                UserPunishmentType.Tracker_50k,
+                UserPunishmentType.Tracker_100k,
+                UserPunishmentType.Tracker_200k,
+            };
+
+            var hasExistingPunishments = await WorkScope.GetAll<UserPunishment>()
+                .AnyAsync(p => p.DateAt.Date == selectedDate.Date && !p.IsDeleted && typesToCheck.Contains(p.Type));
+
+            if (!hasExistingPunishments)
+            {
+                var result = await SaveUserPunishments(selectedDate);
+                return result;
+            }
+
+            var histories = await WorkScope.GetAll<UserPunishmentHistory>()
+                .Where(h => h.DateAt.Date == selectedDate.Date)
+                .ToListAsync();
+
+            if (!histories.Any())
+            {
+                throw new UserFriendlyException($"Punishment data already exists for {selectedDate:yyyy-MM-dd} but no snapshot was found. Please snapshot before rebuilding this day.");
+            }
+
+            var snapshotByUserAndType = histories
+                .GroupBy(h => new { h.UserId, h.Type })
+                .ToDictionary(
+                    g => (g.Key.UserId, g.Key.Type),
+                    g => new UserPunishmentSnapshotDto
+                    {
+                        IsPaid = g.Any(x => x.IsPaid),
+                        UserNote = g.Select(x => x.UserNote).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
+                        NoteReply = g.Select(x => x.NoteReply).FirstOrDefault(x => !string.IsNullOrEmpty(x)),
+                        UserPunishmentPaidId = g.Select(x => x.UserPunishmentPaidId).FirstOrDefault(x => x.HasValue)
+                    }
+                );
+
+            var rebuildResult = await SaveUserPunishments(selectedDate, snapshotByUserAndType);
+
+            Logger.Info($"✅ Successfully processed timekeeping (with snapshot restore) for date {selectedDate:yyyy-MM-dd}.");
+            return rebuildResult;
+        }
+
+        private async Task<List<Timekeeping>> SaveUserPunishments(
+            DateTime selectedDate,
+            Dictionary<(long UserId, UserPunishmentType Type), UserPunishmentSnapshotDto> snapshotByUserAndType = null)
         {
             var allTimekeepings = new List<Timekeeping>();
             var allPunishments = new List<UserPunishment>();
@@ -500,7 +600,6 @@ namespace Timesheet.DomainServices
 
                 var (mapAbsenceUsers, mapRemoteUsers) = await GetAbsenceAndRemoteUsers(selectedDate);
                 var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, mapWFHUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
-
 
                 int batchSize = 100;
                 for (int i = 0; i < users.Count; i += batchSize)
@@ -523,7 +622,8 @@ namespace Timesheet.DomainServices
                                 punishmentSystems,
                                 oldTimekeepingNotes,
                                 mapAbsenceUsers,
-                                mapRemoteUsers
+                                mapRemoteUsers,
+                                snapshotByUserAndType
                             )
                         );
 
@@ -531,7 +631,6 @@ namespace Timesheet.DomainServices
 
                         allTimekeepings.AddRange(result.SelectMany(r => r.rs));
                         allPunishments.AddRange(result.SelectMany(r => r.userPunishmentsToInsert));
-
 
                         Logger.Info($"Finished batch {i / batchSize + 1}. " +
                                     $"Accumulated {allTimekeepings.Count} records so far.");
@@ -572,7 +671,6 @@ namespace Timesheet.DomainServices
                         Logger.Error($"INSERT DATA ISSUE email: {t.User?.EmailAddress} Error: {e.Message}");
                     }
                 }
-
 
                 await WorkScope.InsertRangeAsync(allTimekeepings);
                 await WorkScope.InsertRangeAsync(allPunishments);
@@ -646,7 +744,7 @@ namespace Timesheet.DomainServices
             var elapsed = DateTime.Now - start;
             Console.WriteLine($"Thời gian chạy: {elapsed.TotalMilliseconds} ms");
             Logger.Info($"✅ Successfully processed timekeeping for date {selectedDate:yyyy-MM-dd}. " +
-            $"Total {allTimekeepings.Count} records, {allPunishments.Count} punishments.");
+                        $"Total {allTimekeepings.Count} records, {allPunishments.Count} punishments.");
             return allTimekeepings;
         }
 
@@ -1376,6 +1474,52 @@ namespace Timesheet.DomainServices
             return UserOffHours
                 .GroupBy(s => s.UserName)
                 .ToDictionary(s => s.Key, s => 60 * (8 - s.Sum(x => x.Hour)));
+        }
+
+        public async Task<bool> SnapshotUserPunishmentsForDay(DateTime date)
+        {
+            var selectedDate = date.Date; 
+            
+            var punishmentsToSnapshot = await WorkScope.GetAll<UserPunishment>()
+                .Where(p => p.DateAt.Date == selectedDate)
+                .ToListAsync();
+
+            if (!punishmentsToSnapshot.Any())
+            {
+                throw new UserFriendlyException($"No UserPunishment records found for {selectedDate:yyyy-MM-dd} to snapshot.");
+            }
+
+            var existingSnapshots = await WorkScope.GetAll<UserPunishmentHistory>()
+                .Where(h => h.DateAt.Date == selectedDate)
+                .ToListAsync();
+
+            if (existingSnapshots.Any())
+            {
+                await WorkScope.DeleteRangeAsync(existingSnapshots);
+                await CurrentUnitOfWork.SaveChangesAsync();
+                Logger.Info($"Deleted {existingSnapshots.Count} existing UserPunishmentHistory records for {selectedDate:yyyy-MM-dd} before creating new snapshot.");
+            }
+
+            var historyRecords = punishmentsToSnapshot.Select(p => new UserPunishmentHistory
+            {
+                UserId = p.UserId,
+                UserPunishmentId = p.Id,
+                PunishmentSystemId = p.PunishmentSystemId,
+                DateAt = p.DateAt,
+                Type = p.Type,
+                Count = p.Count,
+                TotalMoney = p.TotalMoney,
+                UserNote = p.UserNote,
+                NoteReply = p.NoteReply,
+                IsPaid = p.IsPaid,
+                UserPunishmentPaidId = p.UserPunishmentPaidId
+            }).ToList();
+
+            await WorkScope.InsertRangeAsync(historyRecords);
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            Logger.Info($"Successfully snapshotted {historyRecords.Count} UserPunishment records for {selectedDate:yyyy-MM-dd}. (Previous snapshots, if any, were replaced.)");
+            return true;
         }
     }
 }
