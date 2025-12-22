@@ -43,6 +43,16 @@
     </mat-error>
   </mat-form-field>
 
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Description (optional)</mat-label>
+    <textarea
+      matInput
+      rows="3"
+      [formControl]="descriptionControl"
+      placeholder="Enter description for this fine payment"
+    ></textarea>
+  </mat-form-field>
+
   <div class="info-section">
     <div class="remaining-amount-info">
       <span class="info-label">Punishment Amount:</span>

@@ -262,7 +262,8 @@ namespace Timesheet.DomainServices
                         TransactionTimestamp = transactionResponse.Data.Transaction.TransactionTimestamp,
                         FromAddress = transactionResponse.Data.Transaction.FromAddress,
                         ToAddress = transactionResponse.Data.Transaction.ToAddress,
-                        Status = transactionResponse.Data.Transaction.Status
+                        Status = transactionResponse.Data.Transaction.Status,
+                        TextData = transactionResponse.Data.Transaction.TextData
                     };
                 }
             }
