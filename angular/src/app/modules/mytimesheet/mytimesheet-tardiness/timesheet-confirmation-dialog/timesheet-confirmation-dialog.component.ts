@@ -167,15 +167,15 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
       console.error('Error clearing localStorage during redirect to login:', e);
     }
 
-    this.snackBar.open(
+    abp.message.confirm(
       'Your Mezon session has expired. Please sign in again.',
-      undefined,
-      { duration: 3000 }
+      'Session expired',
+      (isConfirmed: boolean) => {
+        if (isConfirmed) {
+          window.location.href = '/account/login';
+        }
+      }
     );
-
-    setTimeout(() => {
-      window.location.href = '/account/login';
-    }, 3000);
   }
 
   markAsPaid(): void {
