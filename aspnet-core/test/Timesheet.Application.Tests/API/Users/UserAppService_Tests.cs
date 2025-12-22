@@ -32,7 +32,7 @@ namespace Timesheet.Application.Tests.API.Users
                 var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
                     await _userAppService.DeactiveUser(new EntityDto<long>(userId)));
 
-                exception.Message.ShouldBe($"Cannot deactivate the only PM in active project \"{projectName}\".");
+                exception.Message.ShouldBe($"Cannot deactivate because this user is the only active PM in project(s): \"{projectName}\".");
             });
         }
 
@@ -83,7 +83,7 @@ namespace Timesheet.Application.Tests.API.Users
                 var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
                     await _userAppService.DeactiveUser(new EntityDto<long>(userAId)));
 
-                exception.Message.ShouldBe($"Cannot deactivate the only PM in active project \"{projectName}\".");
+                exception.Message.ShouldBe($"Cannot deactivate because this user is the only active PM in project(s): \"{projectName}\".");
             });
         }
     }

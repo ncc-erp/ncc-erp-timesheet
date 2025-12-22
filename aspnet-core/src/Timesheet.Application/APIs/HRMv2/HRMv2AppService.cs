@@ -458,11 +458,49 @@ namespace Timesheet.APIs.HRMv2
                 throw new UserFriendlyException("Can't found user with the same email with HRM Tool");
             }
 
+            var userProjects = await WorkScope.GetAll<ProjectUser>()
+                .Where(pu => pu.UserId == userToUpdate.Id)
+                .ToListAsync();
+
+            var pmProjectIds = userProjects
+                .Where(pu => pu.Type == ProjectUserType.PM)
+                .Select(pu => pu.ProjectId)
+                .ToList();
+
+            if (pmProjectIds.Any())
+            {
+                var projectsWithOtherPMs = await WorkScope.GetAll<ProjectUser>()
+                    .Where(pu => pmProjectIds.Contains(pu.ProjectId)
+                                 && pu.UserId != userToUpdate.Id
+                                 && pu.Type == ProjectUserType.PM
+                                 && pu.User.IsActive)
+                    .Select(pu => pu.ProjectId)
+                    .Distinct()
+                    .ToListAsync();
+
+                var onlyPMProjectIds = pmProjectIds.Except(projectsWithOtherPMs).ToList();
+
+                if (onlyPMProjectIds.Any())
+                {
+                    var projectNames = await WorkScope.GetAll<Project>()
+                        .Where(p => onlyPMProjectIds.Contains(p.Id))
+                        .Select(p => p.Name)
+                        .ToListAsync();
+                    var projectsStr = string.Join(", ", projectNames.Select(name => $"\"{name}\""));
+                    throw new UserFriendlyException($"Cannot deactivate because this user is the only active PM in project(s): {projectsStr}.");
+                }
+            }
+
             userToUpdate.IsActive = input.IsActive;
             userToUpdate.IsStopWork = input.IsStopWork;
             userToUpdate.EndDateAt = input.StopWorkingTime;
             
             await WorkScope.UpdateAsync(userToUpdate);
+
+            foreach (var pu in userProjects)
+            {
+                pu.Type = ProjectUserType.DeActive;
+            }
 
             return input;
              

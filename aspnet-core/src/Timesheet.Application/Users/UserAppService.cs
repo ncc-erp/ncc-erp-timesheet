@@ -601,22 +601,47 @@ namespace Ncc.Users
             var user = await _ws.GetAsync<User>(input.Id);
             if (user != null)
             {
-                var violatingProjectNames = await _ws.GetAll<ProjectUser>()
-                    .Where(pu => pu.Project.Status == ProjectStatus.Active && pu.Type == ProjectUserType.PM)
-                    .GroupBy(pu => pu.ProjectId)
-                    .Where(g => g.Any(pu => pu.UserId == user.Id) && g.Count(pu => pu.User.IsActive) == 1)
-                    .Select(g => g.First().Project.Name)
+                var userProjects = await _ws.GetAll<ProjectUser>()
+                    .Where(pu => pu.UserId == user.Id)
                     .ToListAsync();
 
-                if (violatingProjectNames.Any())
+                var pmProjectIds = userProjects
+                    .Where(pu => pu.Type == ProjectUserType.PM)
+                    .Select(pu => pu.ProjectId)
+                    .ToList();
+
+                if (pmProjectIds.Any())
                 {
-                    var projectsStr = violatingProjectNames.Count == 1 ? violatingProjectNames[0] : string.Join(", ", violatingProjectNames);
-                    throw new UserFriendlyException($"Cannot deactivate the only PM in active project \"{projectsStr}\".");
+                    var projectsWithOtherPMs = await _ws.GetAll<ProjectUser>()
+                        .Where(pu => pmProjectIds.Contains(pu.ProjectId)
+                                     && pu.UserId != user.Id
+                                     && pu.Type == ProjectUserType.PM
+                                     && pu.User.IsActive)
+                        .Select(pu => pu.ProjectId)
+                        .Distinct()
+                        .ToListAsync();
+
+                    var onlyPMProjectIds = pmProjectIds.Except(projectsWithOtherPMs).ToList();
+
+                    if (onlyPMProjectIds.Any())
+                    {
+                        var projectNames = await _ws.GetAll<Project>()
+                            .Where(p => onlyPMProjectIds.Contains(p.Id))
+                            .Select(p => p.Name)
+                            .ToListAsync();
+                        var projectsStr = string.Join(", ", projectNames.Select(name => $"\"{name}\""));
+                        throw new UserFriendlyException($"Cannot deactivate because this user is the only active PM in project(s): {projectsStr}.");
+                    }
                 }
 
                 user.EndDateAt = user.EndDateAt.HasValue ? user.EndDateAt : DateTimeUtils.GetNow();
                 user.IsActive = false;
                 await _ws.GetRepo<User, long>().UpdateAsync(user);
+
+                foreach (var pu in userProjects)
+                {
+                    pu.Type = ProjectUserType.DeActive;
+                }
             }
             else
             {
