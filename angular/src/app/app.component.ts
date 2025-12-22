@@ -1,6 +1,5 @@
 import { Component, ViewContainerRef, Injector, OnInit, AfterViewInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { AppComponentBase } from '@shared/app-component-base';
-import { STORAGE_KEYS } from '@app/constant/storage-keys.constant';
 
 import { SignalRAspNetCoreHelper } from '@shared/helpers/SignalRAspNetCoreHelper';
 
