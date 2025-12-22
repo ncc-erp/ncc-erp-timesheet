@@ -10,7 +10,7 @@ export interface AnomaliesTimelogReportResponse {
     userId: number;
     employeeName: string;
     userName: string;
-    date: string;
+    date: string | Date;
     actualHours: string;
     notes: string;
     branch: {
@@ -22,9 +22,9 @@ export interface AnomaliesTimelogReportResponse {
     userId: number;
     employeeName: string;
     userName: string;
-    datesMissed: string[];
-    datesNoTrackerTime: string[];
-    datesBelowThreshold: string[];
+    datesMissed: (string | Date)[];
+    datesNoTrackerTime: (string | Date)[];
+    datesBelowThreshold: (string | Date)[];
     count: number;
     notes: string;
     branch: {

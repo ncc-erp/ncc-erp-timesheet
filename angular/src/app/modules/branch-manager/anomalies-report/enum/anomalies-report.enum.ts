@@ -18,3 +18,22 @@ export enum TableType {
   ABSENCE = 'absence',
   SHORT = 'short'
 }
+
+export enum SortColumn {
+  EMPLOYEE_NAME = 'employeeName',
+  BRANCH = 'branch',
+  ACTUAL_HOURS = 'actualHours',
+  COUNT = 'count',
+}
+
+export enum SortDirection {
+  ASC = 'asc',
+  DESC = 'desc',
+  NONE = '',
+}
+
+export enum SortIcon {
+  UNSORTED = 'unfold_more',
+  ASCENDING = 'arrow_upward',
+  DESCENDING = 'arrow_downward',
+}

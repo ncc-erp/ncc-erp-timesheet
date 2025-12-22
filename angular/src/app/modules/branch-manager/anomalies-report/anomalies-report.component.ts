@@ -3,10 +3,7 @@ import { MatTabChangeEvent } from '@angular/material/tabs';
 import { AnomaliesReportService, AnomaliesTimelogReportResponse } from '@app/service/api/anomalies-report.service';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { AppComponentBase } from '@shared/app-component-base';
-import { AnomaliesNotes, DataType, SelectAllText, TableType } from './enum/anomalies-report.enum';
-
-type SortColumn = 'employeeName' | 'branch' | 'actualHours' | 'count';
-type SortDirection = 'asc' | 'desc' | '';
+import { AnomaliesNotes, DataType, SelectAllText, TableType, SortColumn, SortDirection, SortIcon } from './enum/anomalies-report.enum';
 
 @Component({
   selector: 'app-anomalies-report',
@@ -30,20 +27,20 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   yesterdayReportData: AnomaliesTimelogReportResponse | null = null;
   lastWeekReportData: AnomaliesTimelogReportResponse | null = null;
   
-  yesterdayUnplannedAbsences: any[] = [];
-  yesterdayShortWorkingHours: any[] = [];
-  lastWeekUnplannedAbsences: any[] = [];
-  lastWeekShortWorkingHours: any[] = [];
+  yesterdayUnplannedAbsences: AnomaliesTimelogReportResponse['yesterdayAnomalies'] = [];
+  yesterdayShortWorkingHours: AnomaliesTimelogReportResponse['yesterdayAnomalies'] = [];
+  lastWeekUnplannedAbsences: AnomaliesTimelogReportResponse['lastWeekAnomalies'] = [];
+  lastWeekShortWorkingHours: AnomaliesTimelogReportResponse['lastWeekAnomalies'] = [];
 
-  filteredYesterdayAbsences: any[] = [];
-  filteredYesterdayShortHours: any[] = [];
-  filteredLastWeekAbsences: any[] = [];
-  filteredLastWeekShortHours: any[] = [];
+  filteredYesterdayAbsences: AnomaliesTimelogReportResponse['yesterdayAnomalies'] = [];
+  filteredYesterdayShortHours: AnomaliesTimelogReportResponse['yesterdayAnomalies'] = [];
+  filteredLastWeekAbsences: AnomaliesTimelogReportResponse['lastWeekAnomalies'] = [];
+  filteredLastWeekShortHours: AnomaliesTimelogReportResponse['lastWeekAnomalies'] = [];
 
-  yesterdayAbsenceSort: { column: SortColumn | '', direction: SortDirection } = { column: '', direction: '' };
-  yesterdayShortSort: { column: SortColumn | '', direction: SortDirection } = { column: '', direction: '' };
-  lastWeekAbsenceSort: { column: SortColumn | '', direction: SortDirection } = { column: '', direction: '' };
-  lastWeekShortSort: { column: SortColumn | '', direction: SortDirection } = { column: '', direction: '' };
+  yesterdayAbsenceSort: { column: SortColumn | '', direction: SortDirection } = { column: '', direction: SortDirection.NONE };
+  yesterdayShortSort: { column: SortColumn | '', direction: SortDirection } = { column: '', direction: SortDirection.NONE };
+  lastWeekAbsenceSort: { column: SortColumn | '', direction: SortDirection } = { column: '', direction: SortDirection.NONE };
+  lastWeekShortSort: { column: SortColumn | '', direction: SortDirection } = { column: '', direction: SortDirection.NONE };
 
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -270,12 +267,13 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     if (typeof dateStr !== 'string') return null;
     const parts = dateStr.split('/');
     if (parts.length === 3) {
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const year = parseInt(parts[2], 10);
-      if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-        return new Date(year, month, day);
-      }
+      const day = ('0' + parts[0]).slice(-2);
+      const month = ('0' + parts[1]).slice(-2);
+      const year = parts[2];
+
+      const isoFormat = `${year}/${month}/${day}`;
+      const date = new Date(isoFormat);
+      return isNaN(date.getTime()) ? null : date;
     }
     const parsed = Date.parse(dateStr);
     return isNaN(parsed) ? null : new Date(parsed);
@@ -329,15 +327,15 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     const sortState = this.getSortState(dataType, tableType);
     
     if (sortState.column === column) {
-      if (sortState.direction === 'asc') {
-        sortState.direction = 'desc';
-      } else if (sortState.direction === 'desc') {
-        sortState.direction = '';
+      if (sortState.direction === SortDirection.ASC) {
+        sortState.direction = SortDirection.DESC;
+      } else if (sortState.direction === SortDirection.DESC) {
+        sortState.direction = SortDirection.NONE;
         sortState.column = '';
       }
     } else {
       sortState.column = column;
-      sortState.direction = 'asc';
+      sortState.direction = SortDirection.ASC;
     }
 
     this.applySort(dataType, tableType);
@@ -371,13 +369,13 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       let valA: any;
       let valB: any;
 
-      if (column === 'branch') {
+      if (column === SortColumn.BRANCH) {
         valA = a.branch.branchName || '';
         valB = b.branch.branchName || '';
-      } else if (column === 'actualHours' || column === 'count') {
+      } else if (column === SortColumn.ACTUAL_HOURS || column === SortColumn.COUNT) {
         valA = parseFloat(a[column]) || 0;
         valB = parseFloat(b[column]) || 0;
-        return direction === 'asc' ? valA - valB : valB - valA;
+        return direction === SortDirection.ASC ? valA - valB : valB - valA;
       } else {
         valA = (a[column] !== null && a[column] !== undefined) ? a[column] : '';
         valB = (b[column] !== null && b[column] !== undefined) ? b[column] : '';
@@ -424,9 +422,9 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   getSortIcon(column: SortColumn, dataType: DataType, tableType: TableType): string {
     const sortState = this.getSortState(dataType, tableType);
     if (sortState.column !== column) {
-      return 'unfold_more';
+      return SortIcon.UNSORTED;
     }
-    return sortState.direction === 'asc' ? 'arrow_upward' : 'arrow_downward';
+    return sortState.direction === SortDirection.ASC ? SortIcon.ASCENDING : SortIcon.DESCENDING;
   }
 }
 export {DataType, TableType};
