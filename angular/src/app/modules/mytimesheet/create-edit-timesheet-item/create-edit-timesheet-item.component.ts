@@ -250,6 +250,12 @@ export class CreateEditTimesheetItemComponent extends AppComponentBase implement
     //   return false;
     // }
 
+    if (this.myTimesheet.workingTime <= 0) {
+      this.notify.error('WorkingTime must be greater than 0');
+      this.isLoading = false;
+      return false;
+    }
+
     return true;
   }
 

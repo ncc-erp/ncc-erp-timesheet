@@ -1,5 +1,6 @@
 import { Component, ViewContainerRef, Injector, OnInit, AfterViewInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { AppComponentBase } from '@shared/app-component-base';
+import { STORAGE_KEYS } from '@app/constant/storage-keys.constant';
 
 import { SignalRAspNetCoreHelper } from '@shared/helpers/SignalRAspNetCoreHelper';
 
@@ -18,7 +19,7 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
     }
 
     ngOnInit(): void {
-
+        this.checkZkProof();
         //SignalRAspNetCoreHelper.initSignalR();
 
         abp.event.on('abp.notifications.received', userNotification => {
@@ -35,6 +36,26 @@ export class AppComponent extends AppComponentBase implements OnInit, AfterViewI
                 }
             });
         });
+    }
+
+    private checkZkProof(): void {
+        const zkProof = localStorage.getItem(STORAGE_KEYS.ZK_PROOF);
+        if (!zkProof || zkProof === 'undefined') {
+            this.redirectToLogin();
+        }
+    }
+
+    private redirectToLogin(): void {
+        try {
+            localStorage.removeItem(STORAGE_KEYS.ZK_PROOF);
+            localStorage.removeItem(STORAGE_KEYS.KEY_PAIR);
+            localStorage.removeItem(STORAGE_KEYS.MEZON_USER_ID);
+            localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        } catch (e) {
+            console.error('Error clearing localStorage during redirect to login:', e);
+        }
+
+        window.location.href = '/account/login';
     }
 
     ngAfterViewInit(): void {
