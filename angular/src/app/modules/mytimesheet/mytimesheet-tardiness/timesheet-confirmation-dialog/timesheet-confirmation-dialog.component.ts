@@ -63,7 +63,7 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
   }
 
   ngOnInit() { 
-    
+    this.checkZkProof();
     try {
     const zkProof = localStorage.getItem(STORAGE_KEYS.ZK_PROOF);
     this.zkProofAvailable = !!(zkProof && zkProof !== 'undefined');
@@ -148,6 +148,34 @@ export class TimesheetConfirmationDialogComponent extends AppComponentBase imple
     } else {
       this.loadAllPunishmentData();
     }
+  }
+
+  private checkZkProof(): void {
+    const zkProof = localStorage.getItem(STORAGE_KEYS.ZK_PROOF);
+    if (!zkProof || zkProof === 'undefined') {
+      this.redirectToLogin();
+    }
+  }
+
+  private redirectToLogin(): void {
+    try {
+      localStorage.removeItem(STORAGE_KEYS.ZK_PROOF);
+      localStorage.removeItem(STORAGE_KEYS.KEY_PAIR);
+      localStorage.removeItem(STORAGE_KEYS.MEZON_USER_ID);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    } catch (e) {
+      console.error('Error clearing localStorage during redirect to login:', e);
+    }
+
+    this.snackBar.open(
+      'Your Mezon session has expired. Please sign in again.',
+      undefined,
+      { duration: 3000 }
+    );
+
+    setTimeout(() => {
+      window.location.href = '/account/login';
+    }, 3000);
   }
 
   markAsPaid(): void {
