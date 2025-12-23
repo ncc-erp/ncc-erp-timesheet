@@ -87,7 +87,7 @@ namespace Timesheet.Application.Tests.API.ReviewInterns
             _reviewDetailAppService.SettingManager = Resolve<ISettingManager>();
             _reviewDetailAppService.AbpSession = Resolve<IAbpSession>();
 
-            _reviewInternAppService = new ReviewInternAppService(_backgroundJobManager, _hRMv2Service, _workScope, _projectService, _hRMService, _reviewDetailAppService, reviewInternServices);
+            _reviewInternAppService = new ReviewInternAppService(_backgroundJobManager, _hRMv2Service, _workScope, _projectService, _hRMService, _reviewDetailAppService, reviewInternServices, komuService, userServices);
             _reviewInternAppService.ObjectMapper = Resolve<Abp.ObjectMapping.IObjectMapper>();
             _reviewInternAppService.SettingManager = Resolve<ISettingManager>();
             _reviewInternAppService.AbpSession = Resolve<IAbpSession>();
