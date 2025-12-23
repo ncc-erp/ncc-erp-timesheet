@@ -506,6 +506,62 @@ namespace Timesheet.Application.Tests.API.HRMV2
         }
 
         [Fact]
+        public async Task ConfirmUserQuit_Should_Throw_Exception_When_Try_To_Deactivate_The_Only_PM()
+        {
+            var projectName = "Project 2";
+            var input = new UpdateUserStatusFromHRMDto
+            {
+                EmailAddress = "testemail4@gmail.com",
+                DateAt = DateTime.Now,
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+                {
+                    await _appService.ConfirmUserQuit(input);
+                });
+                exception.Message.ShouldBe($"Cannot deactivate because this user is the only active PM in project(s): \"{projectName}\".");
+            });
+        }
+
+        [Fact]
+        public async Task ConfirmUserQuit_Should_Deactivate_One_Of_Many_PMs_Successfully()
+        {
+            var user1 = new UpdateUserStatusFromHRMDto
+            {
+                EmailAddress = "testemail20@gmail.com",
+                DateAt = DateTime.Now,
+            };
+
+            var user2 = new UpdateUserStatusFromHRMDto
+            {
+                EmailAddress = "testemail3@gmail.com",
+                DateAt = DateTime.Now,
+            };
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _appService.ConfirmUserQuit(user1);
+            });
+
+            UsingDbContext(context =>
+            {
+                var releasedUser = context.Users.Where(x => x.EmailAddress.ToLower().Trim() == user1.EmailAddress.ToLower().Trim()).First();
+                releasedUser.IsActive.ShouldBeFalse();
+
+                var releasedUserInProject = context.ProjectUsers.Where(x => x.UserId == releasedUser.Id).First();
+                releasedUserInProject.Type.ShouldBe(Ncc.Entities.ProjectUserType.DeActive);
+
+                var remainingPM = context.Users.Where(x => x.EmailAddress.ToLower().Trim() == user2.EmailAddress.ToLower().Trim()).First();
+                remainingPM.IsActive.ShouldBeTrue();
+
+                var remainingPMInProject = context.ProjectUsers.Where(x => x.UserId == remainingPM.Id && x.Type != Ncc.Entities.ProjectUserType.Member).First();
+                remainingPMInProject.Type.ShouldBe(Ncc.Entities.ProjectUserType.PM);
+            });
+        }
+
+        [Fact]
         public async Task ConfirmUserPause_Test()
         {
             var input = new UpdateUserStatusFromHRMDto

@@ -601,11 +601,12 @@ namespace Ncc.Users
             var user = await _ws.GetAsync<User>(input.Id);
             if (user != null)
             {
-                var userProjects = await _ws.GetAll<ProjectUser>()
-                    .Where(pu => pu.UserId == user.Id)
+                var activeProjectUsers = await _ws.GetAll<ProjectUser>()
+                    .Include(pu => pu.Project)
+                    .Where(pu => pu.UserId == user.Id && pu.Project.Status == ProjectStatus.Active)
                     .ToListAsync();
 
-                var pmProjectIds = userProjects
+                var pmProjectIds = activeProjectUsers
                     .Where(pu => pu.Type == ProjectUserType.PM)
                     .Select(pu => pu.ProjectId)
                     .ToList();
@@ -625,10 +626,10 @@ namespace Ncc.Users
 
                     if (onlyPMProjectIds.Any())
                     {
-                        var projectNames = await _ws.GetAll<Project>()
-                            .Where(p => onlyPMProjectIds.Contains(p.Id))
-                            .Select(p => p.Name)
-                            .ToListAsync();
+                        var projectNames = activeProjectUsers
+                            .Where(pu => onlyPMProjectIds.Contains(pu.ProjectId))
+                            .Select(pu => pu.Project.Name)
+                            .ToList();
                         var projectsStr = string.Join(", ", projectNames.Select(name => $"\"{name}\""));
                         throw new UserFriendlyException($"Cannot deactivate because this user is the only active PM in project(s): {projectsStr}.");
                     }
@@ -638,7 +639,7 @@ namespace Ncc.Users
                 user.IsActive = false;
                 await _ws.GetRepo<User, long>().UpdateAsync(user);
 
-                foreach (var pu in userProjects)
+                foreach (var pu in activeProjectUsers)
                 {
                     pu.Type = ProjectUserType.DeActive;
                 }

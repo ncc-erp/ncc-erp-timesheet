@@ -60,11 +60,8 @@ namespace Timesheet.Application.Tests.API.Users
         public async System.Threading.Tasks.Task DeactiveUser_Should_Throw_Exception_When_Other_PM_Is_Inactive()
         {
             var projectName = "Project X";
-
             var userAId = await CreateUser("user_A_active", true);
-
             var userBId = await CreateUser("user_B_inactive", false);
-
             var projectId = await SetupUserAsOnlyActivePM(userAId, projectName);
 
             await WithUnitOfWorkAsync(async () =>
@@ -84,6 +81,26 @@ namespace Timesheet.Application.Tests.API.Users
                     await _userAppService.DeactiveUser(new EntityDto<long>(userAId)));
 
                 exception.Message.ShouldBe($"Cannot deactivate because this user is the only active PM in project(s): \"{projectName}\".");
+            });
+        }
+
+        [Fact]
+        public async System.Threading.Tasks.Task DeactiveUser_Should_Succeed_When_User_Is_Regular_Member()
+        {
+            var userId = await CreateUser("regular_member");
+            var projectName = "Active Project 1";
+            var projectId = await SetupUserAsMember(userId, projectName);
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _userAppService.DeactiveUser(new EntityDto<long>(userId));
+            });
+
+            UsingDbContext(context =>
+            {
+                var user = context.Users.Find(userId);
+                user.IsActive.ShouldBeFalse();
+                user.EndDateAt.ShouldNotBeNull();
             });
         }
     }

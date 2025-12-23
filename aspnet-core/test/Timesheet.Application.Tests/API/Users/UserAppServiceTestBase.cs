@@ -153,6 +153,36 @@ namespace Timesheet.Application.Tests.API.Users
             return projectId;
         }
 
+        public async Task<long> SetupUserAsMember(long userId, string projectName)
+        {
+            long projectId = 0;
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var workScope = Resolve<IWorkScope>();
+
+                var id = await workScope.InsertAndGetIdAsync(new Project
+                {
+                    Name = projectName,
+                    Code = Guid.NewGuid().ToString().Substring(0, 8),
+                    Status = ProjectStatus.Active,
+                    CustomerId = 1,
+                    TimeStart = DateTime.Now
+                });
+
+                await workScope.InsertAsync(new ProjectUser
+                {
+                    ProjectId = id,
+                    UserId = userId,
+                    Type = ProjectUserType.Member
+                });
+
+                projectId = id;
+            });
+
+            return projectId;
+        }
+
         public async System.Threading.Tasks.Task AddAnotherActivePMToProject(long projectId, string otherPmName)
         {
             await WithUnitOfWorkAsync(async () =>

@@ -18,6 +18,7 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Timesheet.DomainServices;
 using Timesheet.Services.Komu;
 using Timesheet.Services.Project;
@@ -58,6 +59,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
             var komuServiceConfiguration = new ConfigurationBuilder()
               .AddInMemoryCollection(komuServiceConfigOptions)
               .Build();
+
             var httpClient = Resolve<HttpClient>();
             var projectServiceLogger = Resolve<ILogger<ProjectService>>();
             var komuServiceLogger = Resolve<ILogger<KomuService>>();
@@ -72,6 +74,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
                 komuServiceLogger,
                 komuServiceConfiguration,
                 settingManager);
+
             var roleRepository = Resolve<IRepository<Role>>();
             var rolePermissionSettingRepository = Resolve<IRepository<RolePermissionSetting, long>>();
             var roleValidators = Substitute.For<IEnumerable<IRoleValidator<Role>>>();
@@ -111,6 +114,7 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
                 projectService, 
                 userManager, 
                 workScope);
+
             projectAppService.ObjectMapper= objectMapper;
             projectAppService.UnitOfWorkManager= unitOfManager;
             projectAppService.AbpSession= abpSession;
@@ -187,6 +191,41 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
                 IsNoticeKMApproveChangeWorkingTime = false,
                 isAllUserBelongTo = false,
             };
+        }
+
+        public async Task<long> CreateUserAsync(IWorkScope workScope, string userName, string email, bool isActive = true)
+        {
+            return await workScope.InsertAndGetIdAsync(new User
+            {
+                IsActive = isActive,
+                UserName = userName,
+                EmailAddress = email,
+                Name = userName,
+                Surname = "Test"
+            });
+        }
+
+        public async Task<long> CreateProjectAsync(IWorkScope workScope, ProjectDto dto)
+        {
+            return await workScope.InsertAndGetIdAsync(new Project
+            {
+                Name = dto.Name,
+                Code = dto.Code,
+                Status = dto.Status,
+                CustomerId = dto.CustomerId,
+                TimeStart = dto.TimeStart,
+                ProjectType = dto.ProjectType
+            });
+        }
+
+        public async System.Threading.Tasks.Task CreateProjectUserAsync(IWorkScope workScope, long projectId, long userId, ProjectUserType type)
+        {
+            await workScope.InsertAsync(new ProjectUser
+            {
+                ProjectId = projectId,
+                UserId = userId,
+                Type = type
+            });
         }
     }
 }
