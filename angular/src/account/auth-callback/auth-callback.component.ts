@@ -24,11 +24,10 @@ export class AuthCallbackComponent extends AppComponentBase implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.isLoading = true;
-
       const code = params['code'];
       const scope = params['scope'];
       const state = params['state']
-      if (code && scope && state) {
+      if (!code || !scope || !state) {
         this.message.error(this.l('something went wrong!'))
       }
       this.loginService.authenticateMezon(code, scope).subscribe(res => {
