@@ -20,6 +20,7 @@ export class TranferDialogComponent implements OnInit {
   recipientAddressControl: FormControl;
 
   amountControl: FormControl;
+  descriptionControl: FormControl;
   isSubmitting = false;
   errorMessage: string | null = null;
   
@@ -51,6 +52,8 @@ export class TranferDialogComponent implements OnInit {
       this.minAmountValidator,
       this.remainingAmountValidator
     ]);
+
+    this.descriptionControl = new FormControl("");
   }
 
   ngOnInit(): void {
@@ -183,8 +186,9 @@ export class TranferDialogComponent implements OnInit {
 
     const transferAmountRaw = amountInput; 
     const recipientAddress = this.recipientAddressControl.value;
+    const description = this.descriptionControl.value;
 
-    this.mmnService.transfer(transferAmountRaw, recipientAddress).subscribe({
+    this.mmnService.transfer(transferAmountRaw, recipientAddress, description).subscribe({
       next: (transferResult) => {
         this.isSubmitting = false;
         this.dialogRef.close(transferResult);

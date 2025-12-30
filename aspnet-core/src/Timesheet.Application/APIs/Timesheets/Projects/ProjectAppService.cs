@@ -868,11 +868,16 @@ namespace Timesheet.Timesheets.Projects
             }
             if (projectUser.Type == ProjectUserType.PM)
             {
-                throw new UserFriendlyException("You can't deactive PM of this project!");
-            }
-            else
-            {
-                projectUser.Type = ProjectUserType.DeActive;
+                var hasOtherActivePM = WorkScope.GetAll<ProjectUser>()
+                    .Any(s => s.ProjectId == projectId
+                              && s.UserId != userId
+                              && s.Type == ProjectUserType.PM
+                              && s.User.IsActive);
+
+                if (!hasOtherActivePM)
+                {
+                    throw new UserFriendlyException($"Cannot deactivate the only PM in this project.");
+                }
             }
             projectUser.Type = ProjectUserType.DeActive;
             await WorkScope.UpdateAsync(projectUser);
