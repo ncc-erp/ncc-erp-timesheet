@@ -608,6 +608,7 @@ namespace Timesheet.APIs.RequestDays
                     await WorkScope.GetRepo<AbsenceDayDetail>().DeleteAsync(rejectedAbsDetail.Id);
                 }
 
+
                 if (input.Type == RequestType.Remote)
                 {
                     if (abs.DateAt.Date >= mondayNextWeek && (abs.DateAt.Date > fridayNextWeek || today < saturdayThisWeek))
@@ -1267,6 +1268,7 @@ namespace Timesheet.APIs.RequestDays
                 var request = await WorkScope
                 .GetAll<AbsenceDayRequest>()
                 .Include(ar => ar.User) // Eager loading User
+                .Include(ar => ar.DayOffType)
                 .FirstOrDefaultAsync(ar => ar.Id == requestId);
 
                 if (isPM != null && request.UserId == currentUser.Id && !isViewBranch)
@@ -1274,26 +1276,67 @@ namespace Timesheet.APIs.RequestDays
                     throw new UserFriendlyException("You cannot approve your own request!");
                 }
 
-                if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
+				if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
+				{
+					throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+				}
+                else if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
-                    var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
+                    var requestDetails = await WorkScope.GetAll<AbsenceDayDetail>()
                         .Where(s => s.RequestId == requestId)
-                        .Where(s => s.Request.Type == RequestType.Remote)
-                        .Where(s => s.Request.Status == RequestStatus.Rejected)
-                        .Select(s => s.DateAt.ToString("yyyy-MM-dd"))
-                        .FirstOrDefaultAsync();
+                        .Select(s => new { s.DateAt, s.DateType })
+                        .ToListAsync();
 
-                    if (dateRemote != null)
+                    if (requestDetails.Any())
                     {
-                        var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
+                        if (request.Type == RequestType.Remote && request.Status == RequestStatus.Rejected)
+                        {
+                            var dateRemote = requestDetails.First().DateAt.ToString("yyyy-MM-dd");
+                            var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
 
-                        if (wfhRequestDto == null)
-                        {
-                            throw new UserFriendlyException("Cannot get request information from the W2 system!");
+                            if (wfhRequestDto == null)
+                            {
+                                throw new UserFriendlyException("Cannot get request information from the W2 system!");
+                            }
+                            if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
+                            {
+                                throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
+                            }
                         }
-                        if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
+
+                        bool isSpecialOff = request.DayOffType.Status == OffTypeStatus.CoPhep;
+                        if (request.Type == RequestType.Off && isSpecialOff)
                         {
-                            throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
+                            var firstDate = requestDetails.First().DateAt.ToString("yyyy-MM-dd");
+                            var w2Requests = _w2Service.GetRequestStatus(request.User.EmailAddress, firstDate, request.User.MezonUserId);
+
+                            if (w2Requests == null || !w2Requests.Any())
+                            {
+                                throw new UserFriendlyException("This Special Off request information not found on the W2 system!");
+                            }
+
+                            Timesheet.Services.W2.Dto.W2RequestStatusDto validRequest = null;
+                            foreach (var w2Request in w2Requests)
+                            {
+                                if (w2Request.Status != (int)RequestOffW2RequestStatus.Approved)
+                                {
+                                    continue;
+                                }
+
+                                var metaObj = Newtonsoft.Json.JsonConvert.DeserializeObject<Timesheet.Services.W2.Dto.W2RequestMetaDto>(w2Request.Meta);
+                                if (metaObj != null && !string.IsNullOrEmpty(metaObj.Reason_label) &&
+                                    metaObj.Reason_label.Trim().Equals(request.DayOffType.Name.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                                    w2Request.Date.Date == requestDetails.First().DateAt.Date)
+                                {
+                                    validRequest = w2Request;
+                                    break;
+                                }
+                            }
+
+                            if (validRequest == null)
+                            {
+                                throw new UserFriendlyException("This Special Off request has not been approved on the W2 system!");
+                            }
                         }
                     }
 
@@ -1303,10 +1346,6 @@ namespace Timesheet.APIs.RequestDays
                     var approverId = AbpSession.UserId.Value;
                     await notifyKomuWhenApproveOrRejectRequest(request, true, approverId);
                     await sendDirectMessageWhenApproveOrRejectRequest(request, true, approverId);
-                }
-                else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
-                {
-                    throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
                 }
             }
         }
