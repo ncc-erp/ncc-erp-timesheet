@@ -638,7 +638,8 @@ namespace Timesheet.APIs.RequestDays
                         .Select(x => x.DayOff.Date)
                         .Count();
 
-                    bool rejectRemoteDueToLowWorkingDays = absenceDaysLastWeek > (MAX_ALLOW_REMOTE_DAY - numberOfDayOffSettingsLastWeek);
+                    var threshold = Math.Max(0, MAX_ALLOW_REMOTE_DAY - numberOfDayOffSettingsLastWeek);
+                    bool rejectRemoteDueToLowWorkingDays = absenceDaysLastWeek > threshold;
 
                     var monday = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
                     var numberRemoteDayInWeek = 0;
