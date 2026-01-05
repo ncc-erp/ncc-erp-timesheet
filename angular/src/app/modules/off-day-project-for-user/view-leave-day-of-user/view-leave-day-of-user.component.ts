@@ -44,7 +44,7 @@ export class ViewLeaveDayOfUserComponent extends AppComponentBase implements OnI
   monthViewBody: MonthViewDay[];
   branchId;
   isShowRejected: boolean = false;
-  dayAbsentTypeList = Object.keys(this.APP_CONSTANT.DayAbsenceType)
+  dayAbsentTypeList = Object.keys(this.APP_CONSTANT.DayAbsenceType).filter(key => key !== 'Đi muộn Về sớm');
   dayTypeList = Object.keys(this.APP_CONSTANT.AbsenceType)
   dayAbsentStatus = this.APP_CONSTANT.AbsenceStatusFilter["Pending"];
   dayAbsentStatusList = Object.keys(this.APP_CONSTANT.AbsenceStatusFilter);
