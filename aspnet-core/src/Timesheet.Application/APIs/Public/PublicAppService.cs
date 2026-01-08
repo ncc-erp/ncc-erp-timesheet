@@ -659,14 +659,14 @@ namespace Timesheet.APIs.Public
             var startDate = DateTimeUtils.FirstDayOfMonth(input.StartDate);
             var endDate = DateTimeUtils.LastDayOfMonth(input.EndDate);
 
-            return await GetEffortMonthlyChart(input.ProjectCode, input.Emails, startDate, endDate);
+            return await GetEffortMonthlyChart(input.ProjectCode, input.Emails, startDate, endDate, input.OvertimeType);
         }
 
 
-        private async Task<EffortChartDto> GetEffortMonthlyChart(string projectCode, List<string> emails, DateTime startDate, DateTime endDate)
+        private async Task<EffortChartDto> GetEffortMonthlyChart(string projectCode, List<string> emails, DateTime startDate, DateTime endDate, int overtimeType)
         {
             var query = IQueryMyTimesheetNotContainEmails(projectCode, emails, startDate, endDate);
-            return await GroupTSByMonthlyToChart(query, projectCode, startDate, endDate);
+            return await GroupTSByMonthlyToChart(query, projectCode, startDate, endDate, overtimeType);
         }
 
 
@@ -701,7 +701,7 @@ namespace Timesheet.APIs.Public
         }
 
 
-        private async Task<EffortChartDto> GroupTSByMonthlyToChart(IQueryable<MyTimesheet> query, string projectCode, DateTime startDate, DateTime endDate)
+        private async Task<EffortChartDto> GroupTSByMonthlyToChart(IQueryable<MyTimesheet> query, string projectCode, DateTime startDate, DateTime endDate, int? overtimeType)
         {
             var mapTimesheet = await query
                          .GroupBy(s => s.DateAt.AddDays(1 - s.DateAt.Day).Date)
@@ -713,7 +713,7 @@ namespace Timesheet.APIs.Public
 
             var listMonth = DateTimeUtils.GetListMonth(startDate, endDate);
 
-            var listOT = await _overTimeHourAppService.GetListOverTimeForChart(startDate, endDate, projectCode, null);
+            var listOT = await _overTimeHourAppService.GetListOverTimeForChart(startDate, endDate, projectCode, overtimeType, null);
 
             var result = new EffortChartDto()
             {
@@ -769,7 +769,7 @@ namespace Timesheet.APIs.Public
             var endDate = DateTimeUtils.LastDayOfMonth(input.EndDate);
 
             var query = IQueryMyTimesheetOfficial(input.ProjectCode, startDate, endDate);
-            return await GroupTSByMonthlyToChart(query, input.ProjectCode, startDate, endDate);
+            return await GroupTSByMonthlyToChart(query, input.ProjectCode, startDate, endDate, input.OvertimeType);
 
         }
 

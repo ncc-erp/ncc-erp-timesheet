@@ -169,9 +169,9 @@ namespace Timesheet.APIs.HRM
 
         [HttpGet]
         [System.Security.SuppressUnmanagedCodeSecurity]
-        public async Task<List<GetOverTimeHourHRMDto>> GetAllOverTime(int year, int month)
+        public async Task<List<GetOverTimeHourHRMDto>> GetAllOverTime(int year, int month, int overtimeType)
         {
-            return await _overTimeHourAppService.GetAllOverTimeForHRM(year, month);
+            return await _overTimeHourAppService.GetAllOverTimeForHRM(year, month, overtimeType);
         }
 
         [HttpGet]

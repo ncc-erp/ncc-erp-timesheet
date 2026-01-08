@@ -248,7 +248,12 @@ export const APP_CONSTANT = {
     Remote: 2,
     Office: 3,
   },
-    PunishRules: [
+  OvertimeType: {
+    All: -1,
+    NonCharged: 1,
+    Charged: 2
+  },
+  PunishRules: [
     { "name": "No Punish", "value": 0 },
     { "name": "Late", "value": 1 },
     { "name": "No CheckIn", "value": 2 },

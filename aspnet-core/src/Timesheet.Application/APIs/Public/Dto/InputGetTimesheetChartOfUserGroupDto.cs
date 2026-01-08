@@ -10,5 +10,6 @@ namespace Timesheet.APIs.Public.Dto
         public List<string> Emails { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public int OvertimeType { get; set; }
     }
 }

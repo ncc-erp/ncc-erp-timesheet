@@ -16,7 +16,7 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     return 'TimesheetsSupervisor';
   }
 
-  getAll(startDate: string, endDate: string, status: number, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean): Observable<any> {
+  getAll(startDate: string, endDate: string, status: number, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, overtimeType: number): Observable<any> {
     let params : HttpParams = new HttpParams();
     params = params.append("startDate", startDate);
     params = params.append("endDate", endDate);
@@ -25,6 +25,7 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     params = params.append("userId", this.getPara(userId));
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
+    params = params.append("overtimeType", this.getPara(overtimeType));
     return this.http.get(this.getUrl("GetAll"), { params : params });
     //return this.http.get(this.getUrl(`GetAll?startDate=${startDate}&endDate=${endDate}&status=${status}&projectID=${this.getPara(projectId)}&userId=${this.getPara(userId)}`));
   }
@@ -33,7 +34,7 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     return value
   }
 
-  GetQuantityTimesheetSupervisorStatus(startDate: string, endDate: string, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean){
+  GetQuantityTimesheetSupervisorStatus(startDate: string, endDate: string, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, overtimeType: number): Observable<any> {
     let params : HttpParams = new HttpParams();
     params = params.append("startDate", startDate);
     params = params.append("endDate", endDate);
@@ -41,6 +42,7 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     params = params.append("userId", this.getPara(userId));
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
+    params = params.append("overtimeType", this.getPara(overtimeType));
     return this.http.get(this.getUrl("GetQuantityTimesheetSupervisorStatus"), { params : params });
     //return this.http.get(this.getUrl(`GetQuantityTimesheetSupervisorStatus?startDate=${startDate}&endDate=${endDate}`));
   }

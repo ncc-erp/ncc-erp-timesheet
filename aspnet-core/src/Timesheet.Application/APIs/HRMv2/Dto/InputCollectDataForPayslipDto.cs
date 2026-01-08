@@ -8,6 +8,7 @@ namespace Timesheet.APIs.HRMv2.Dto
     {
         public int Year { get; set; }
         public int Month { get; set; }
+        public int? OvertimeType { get; set; }
         public List<string> UpperEmails { get; set; }
     }
 }

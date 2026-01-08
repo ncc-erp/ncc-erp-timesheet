@@ -97,6 +97,20 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
       count: 0
     },
   ]
+  Timesheet_OvertimeTypes = [
+    {
+      value: this.APP_CONSTANT.OvertimeType.All,
+      name: 'All'
+    },
+    {
+      value: this.APP_CONSTANT.OvertimeType.NonCharged,
+      name: 'Non-charged'
+    },
+    {
+      value: this.APP_CONSTANT.OvertimeType.Charged,
+      name: 'Charged'
+    }
+  ]
   checkedCount: number = 0;
   totalCount: number = 0;
 
@@ -117,6 +131,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
 
 
   selectedTypeOfWork: number = this.APP_CONSTANT.EnumTypeOfWork.All;
+  overtimeType: number = this.APP_CONSTANT.OvertimeType.All;
 
 
   projectFilter = []
@@ -255,7 +270,8 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
         Number(this.branchId),
         this.OpenTalkJoinTime,
         this.OpenTalkJoinTimeType,
-        this.workLocationFilter
+        this.workLocationFilter,
+        this.overtimeType
       )
       .subscribe((obj) => {
         //this.timesheets = obj.result;
@@ -281,7 +297,8 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
         this.branchId,
         this.OpenTalkJoinTime,
         this.OpenTalkJoinTimeType,
-        this.workLocationFilter
+        this.workLocationFilter,
+        this.overtimeType
       )
       .subscribe((obj: any) => {
         this.Timesheet_Statuses.forEach((item) => {
