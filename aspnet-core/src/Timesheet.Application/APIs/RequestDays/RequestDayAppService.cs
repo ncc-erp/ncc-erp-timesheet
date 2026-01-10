@@ -637,7 +637,7 @@ namespace Timesheet.APIs.RequestDays
                         .Where(x => x.Request.UserId == userId)
                         .Where(x => x.Detail.DateAt.Date >= previousMonday && x.Detail.DateAt.Date <= previousFriday)
                         .Where(x => x.Request.Status == RequestStatus.Pending || x.Request.Status == RequestStatus.Approved)
-                        .Where(x => (x.Request.Type == RequestType.Off && x.Detail.DateType != DayType.Custom) || x.Request.Type == RequestType.Remote)
+                        .Where(x => x.Request.Type == RequestType.Off || x.Request.Type == RequestType.Remote)
                         .Select(x => x.Detail.DateAt.Date)
                         .Distinct()
                         .Count();
