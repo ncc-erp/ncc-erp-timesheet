@@ -148,10 +148,10 @@ export class TardinessLeaveEarlyDialogComponent extends AppComponentBase impleme
     this.absenceDayService.submitAbsenceDays(this.absenceDayReq).subscribe(resp => {
       if(resp.success) {
         if(resp.result.absences.find(item => item.status == 3)){
-          this.notify.warn(this.l('Submit Đi muộn/ Về sớm bị reject!'));
+          this.notify.error(this.l('Failed to submit Tardiness/Early request!'));
         }
         else {
-          this.notify.success(this.l('Submit Đi muộn/ Về sớm successfully!'));
+          this.notify.success(this.l('Submit Tardiness/Early request successfully!'));
         }
       }
       this.close(true);

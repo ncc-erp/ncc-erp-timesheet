@@ -616,6 +616,15 @@ namespace Timesheet.APIs.RequestDays
                         throw new UserFriendlyException($"You can only submit Remote requests for the next week (from {mondayNextWeek:dd/MM/yyyy} to {fridayNextWeek:dd/MM/yyyy}) starting from Saturday ({saturdayThisWeek:dd/MM/yyyy})");
                     }
 
+                    var hasPendingOrApprovedCustomOff = dbRequests.Any(s => s.Date == abs.DateAt.Date
+                        && s.Type == RequestType.Off
+                        && s.DateType == DayType.Custom
+                        && (s.Status == RequestStatus.Pending || s.Status == RequestStatus.Approved));
+                    if (hasPendingOrApprovedCustomOff)
+                    {
+                        throw new UserFriendlyException($"Cannot submit Remote request for {abs.DateAt:dd/MM/yyyy} due to existing Tardiness/Early request");
+                    }
+
                     var startOfWeekContainRequest = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
                     var previousMonday = startOfWeekContainRequest.AddDays(-7);
                     var previousFriday = previousMonday.AddDays(4);
@@ -628,7 +637,7 @@ namespace Timesheet.APIs.RequestDays
                         .Where(x => x.Request.UserId == userId)
                         .Where(x => x.Detail.DateAt.Date >= previousMonday && x.Detail.DateAt.Date <= previousFriday)
                         .Where(x => x.Request.Status == RequestStatus.Pending || x.Request.Status == RequestStatus.Approved)
-                        .Where(x => (x.Request.Type == RequestType.Off && x.Detail.DateType != DayType.Custom) || x.Request.Type == RequestType.Remote)
+                        .Where(x => x.Request.Type == RequestType.Off || x.Request.Type == RequestType.Remote)
                         .Select(x => x.Detail.DateAt.Date)
                         .Distinct()
                         .Count();
@@ -660,7 +669,6 @@ namespace Timesheet.APIs.RequestDays
                     else if (rejectRemoteDueToLowWorkingDays)
                     {
                         absencedayRequest.Status = RequestStatus.Rejected;
-                        //throw new UserFriendlyException($"Your remote request for {abs.DateAt:dd/MM/yyyy} is rejected because you had less than 2 working days in the previous week due to {absenceDaysLastWeek} days of approved or pending off/remote requests");
                     }
                     else
                     {
@@ -670,11 +678,29 @@ namespace Timesheet.APIs.RequestDays
 
                 if (abs.DateType == DayType.Custom)
                 {
+                    var conflictRequest = dbRequests.FirstOrDefault(s => s.Date == abs.DateAt.Date
+                        && (s.Type == RequestType.Remote || s.Type == RequestType.Off)
+                        && (s.Status == RequestStatus.Pending || s.Status == RequestStatus.Approved));
+                    if (conflictRequest != null)
+                    {
+                        string requestTypeName = "";
+                        if (conflictRequest.Type == RequestType.Remote)
+                        {
+                            requestTypeName = "Remote";
+                        }
+                        else
+                        {
+                            requestTypeName = "Off/Custom";
+                        }
+                        throw new UserFriendlyException($"Cannot submit Tardiness/Early request for {abs.DateAt:dd/MM/yyyy} due to existing {requestTypeName} request");
+                    }
+
                     var firstDayOfMonth = DateTimeUtils.FirstDayOfMonth(abs.DateAt);
                     var numberCustomDayInMonth = 0;
 
                     var firstDayOfWeek = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
                     var numberCustomDayInWeek = 0;
+                    var numberRemoteDayInWeek = 0;
 
                     if (mapDateAtToRequestCount.ContainsKey(firstDayOfMonth) && mapDateAtToRequestCount.ContainsKey(firstDayOfWeek))
                     {
@@ -708,7 +734,27 @@ namespace Timesheet.APIs.RequestDays
                         else
                             mapDateAtToRequestCount.Add(firstDayOfMonth, 1);
                     }
+
+                    numberRemoteDayInWeek = CountRemoteDayOfUserInWeek(abs.DateAt, userId);
+
+                    if (numberRemoteDayInWeek > MAX_ALLOW_REMOTE_DAY - 1)
+                    {
+                        absencedayRequest.Status = RequestStatus.Rejected;
+                    }
                 }
+
+                if (input.Type == RequestType.Off)
+                {
+                    var hasPendingOrApprovedCustomOff = dbRequests.Any(s => s.Date == abs.DateAt.Date
+                        && s.Type == RequestType.Off
+                        && s.DateType == DayType.Custom
+                        && (s.Status == RequestStatus.Pending || s.Status == RequestStatus.Approved));
+                    if (hasPendingOrApprovedCustomOff)
+                    {
+                        throw new UserFriendlyException($"Cannot submit Off request for {abs.DateAt:dd/MM/yyyy} due to existing Tardiness/Early request");
+                    }
+                }
+
                 var requestId = await WorkScope.InsertAndGetIdAsync(absencedayRequest);
                 absenceDayDetail.RequestId = requestId;
 
@@ -873,7 +919,7 @@ namespace Timesheet.APIs.RequestDays
             return WorkScope.All<AbsenceDayDetail>()
                 .Include(s => s.Request)
                 .Where(s => s.Request.UserId == userId)
-                .Where(s => s.Request.Type == RequestType.Remote)
+                .Where(s => s.Request.Type == RequestType.Remote || (s.Request.Type == RequestType.Off && s.DateType == DayType.Custom))
                 .Where(s => s.Request.Status != RequestStatus.Rejected)
                 .Where(s => s.DateAt >= startDayOfWeek && s.DateAt.Date <= endDayOfWeek)
                 .Select(s => s.DateAt.Date)
