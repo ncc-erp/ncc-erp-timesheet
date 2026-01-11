@@ -8,5 +8,6 @@ namespace Timesheet.Services.W2
     public interface IW2Service
     {
         WorkFromHomeRequestDto GetWfhRequest(string email, string date);
+        List<W2RequestStatusDto> GetRequestStatus(string email, string date, string mezonId);
     }
 }

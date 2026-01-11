@@ -336,7 +336,16 @@ namespace Ncc.Entities.Enum
             Pending = 0,
             Approved = 1,
             Reject = 2,
-        } 
+        }
+
+        public enum RequestOffW2RequestStatus
+        {
+            Pending = 0,
+            Approved = 1,
+            Reject = 2,
+            Cancelled = 3,
+            All = -1
+        }
 
         public enum ReviewInternNoteType
         {
