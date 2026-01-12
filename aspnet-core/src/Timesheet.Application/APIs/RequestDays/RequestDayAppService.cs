@@ -1323,11 +1323,12 @@ namespace Timesheet.APIs.RequestDays
                     throw new UserFriendlyException("You cannot approve your own request!");
                 }
 
-				if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
-				{
+                var isPMPermission = await CheckSessionUserIsPMOfUser(request.UserId);
+                if (!isViewBranch && !isPMPermission)
+                {
 					throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
 				}
-                else if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
+                else
                 {
                     var requestDetails = await WorkScope.GetAll<AbsenceDayDetail>()
                         .Where(s => s.RequestId == requestId)
