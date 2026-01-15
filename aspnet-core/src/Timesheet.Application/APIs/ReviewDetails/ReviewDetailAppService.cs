@@ -1376,6 +1376,7 @@ namespace Timesheet.APIs.ReviewDetails
             var data = await GetReviewDataByDetailIdsAsync(reviewDetailIds);
             int date = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMReviewInternOnDate));
             var dateNow = DateTimeUtils.GetNow();
+            var deadlineDate = dateNow.AddDays(1);
             if (data == null)
             {
                 return;
@@ -1418,7 +1419,7 @@ namespace Timesheet.APIs.ReviewDetails
                     </table>";
                     content.Append(tableHtml);
                     content.Append("<br>");
-                    content.Append($"Anh/chị vui lòng trao đổi với<span style='font-weight: 600'> Head PM </span>về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày <span style='font-weight: 600'>{date + 1}/{dateNow.Month}/{dateNow.Year}. </span>");
+                    content.Append($"Anh/chị vui lòng trao đổi với<span style='font-weight: 600'> Head PM </span>về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày <span style='font-weight: 600'>{deadlineDate:dd/MM/yyyy}. </span>");
                     content.Append("<br>");
                     content.Append("Trân trọng cảm ơn anh/chị!");
 
@@ -1508,6 +1509,7 @@ namespace Timesheet.APIs.ReviewDetails
             var data = await GetReviewDataByDetailIdsAsync(reviewDetailIds);
             int date = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMReviewInternOnDate));
             var dateNow = DateTimeUtils.GetNow();
+            var deadlineDate = dateNow.AddDays(1);
             if (data == null)
             {
                 return;
@@ -1546,7 +1548,7 @@ namespace Timesheet.APIs.ReviewDetails
                         }
                         if (isLastChunk)
                         {
-                            reviewerChunkMessage.AppendLine($"Anh/chị vui lòng trao đổi với Head PM về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**");
+                            reviewerChunkMessage.AppendLine($"Anh/chị vui lòng trao đổi với Head PM về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày**{deadlineDate:dd/MM/yyyy}**");
                             reviewerChunkMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
                         }
                         _komuService.SendSimpleNotificationToUser(reviewerChunkMessage.ToString(), reviewer.ReviewerUserName);
@@ -1803,6 +1805,7 @@ namespace Timesheet.APIs.ReviewDetails
             int monthReviewIntern = reviewIntern.Month;
             int yearReviewIntern = reviewIntern.Year;
             var dateNow = DateTimeUtils.GetNow();
+            var deadlineDate = dateNow.AddDays(2);
             StringBuilder content = new StringBuilder("");
             string statusExpected;
             try
@@ -1821,7 +1824,7 @@ namespace Timesheet.APIs.ReviewDetails
                     statusExpected = "Reviewed";
                 }
                 content.Append("<br>");
-                content.Append($"Kính mong anh xem xét và thực hiện chuyển trạng thái sang  <span style='font-weight: 600'> {statusExpected} </span> trước  <span style='font-weight: 600'> ngày {date + 1}/{dateNow.Month}/{dateNow.Year}. </span>");
+                content.Append($"Kính mong anh xem xét và thực hiện chuyển trạng thái sang <span style='font-weight: 600'> {statusExpected} </span> trước ngày <span style='font-weight: 600'> {deadlineDate:dd/MM/yyyy}. </span>");
                 content.Append("<br>");
                 content.Append("Trân trọng cảm ơn anh!");
                 var emailSubject = $"[NCC-Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo giai đoạn review và chuyển trạng thái {statusExpected} trên timesheet";
@@ -1850,6 +1853,7 @@ namespace Timesheet.APIs.ReviewDetails
             int monthReviewIntern = reviewIntern.Month;
             int yearReviewIntern = reviewIntern.Year;
             var dateNow = DateTimeUtils.GetNow();
+            var deadlineDate = dateNow.AddDays(2);
             string statusExpected;
             try
             {
@@ -1869,7 +1873,7 @@ namespace Timesheet.APIs.ReviewDetails
                     content.AppendLine($"Hiện tại, tất cả các PM đã hoàn tất việc đánh giá tháng**{reviewIntern.Month}/{reviewIntern.Year}**trên Timesheet.");
                     statusExpected = "Reviewed";
                 }
-                content.AppendLine($"Kính mong anh xem xét và thực hiện chuyển trạng thái sang**{statusExpected}**trước ngày**{date + 1}/{dateNow.Month}/{dateNow.Year}**");
+                content.AppendLine($"Kính mong anh xem xét và thực hiện chuyển trạng thái sang**{statusExpected}**trước ngày**{deadlineDate:dd/MM/yyyy}**");
                 content.AppendLine($"Trân trọng cảm ơn anh!");
 
                 _komuService.SendSimpleNotificationToUser(content.ToString(), user.UserName);
