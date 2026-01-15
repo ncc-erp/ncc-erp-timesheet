@@ -78,6 +78,11 @@
                           style="margin-top:-10px; padding: 6px 15px; min-width: 90px; border-radius: 10px; float: right"
                           *ngIf="item.status == 0 ">New</span></h4>
                     </td>
+                    <td style="width: 10px; text-align: center; padding: 0; vertical-align: middle;">
+                      <button mat-icon-button *ngIf="item.status == 3" (click)="showReason(item)" style="color: red;">
+                        <mat-icon>warning</mat-icon>
+                      </button>
+                    </td>
                     <td style="width: 1px">
                       <span style="margin-right: 5px" class="label status-label bg-red"
                         *ngIf="item.typeOfWork == '1'">OT</span>
