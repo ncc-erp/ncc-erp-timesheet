@@ -489,6 +489,11 @@ namespace Timesheet.APIs.RequestDays
 
         public async Task<MyRequestDto> ProcessSubmitToPendingNew(MyRequestDto input, long userId, NotifyUserInfoDto requester)
         {
+            if (input.Type == RequestType.Off && input.Absences.Any(s => s.DateType == DayType.Custom))
+            {
+                throw new UserFriendlyException("Cannot send tardiness/early requests!");
+            }
+
             var timesCanLateAndEarlyInMonth = await SettingManager.GetSettingValueAsync(AppSettingNames.TimesCanLateAndEarlyInMonth);
 
             var timesCanLateAndEarlyInWeek = await SettingManager.GetSettingValueAsync(AppSettingNames.TimesCanLateAndEarlyInWeek);
