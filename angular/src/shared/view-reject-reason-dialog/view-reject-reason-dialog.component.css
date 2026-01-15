@@ -1,0 +1,33 @@
+.info-row {
+    display: flex;
+    margin-bottom: 15px;
+    align-items: baseline;
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.label {
+    font-weight: 600;
+    min-width: 120px;
+    color: #555;
+    text-align: left;
+}
+
+.value {
+    flex: 1;
+    color: #333;
+    text-align: left;
+}
+
+.reason-text {
+    white-space: pre-wrap;
+    color: #d32f2f;
+    font-weight: 500;
+}
+
+::ng-deep .mat-dialog-title {
+    font-weight: bold !important;
+    font-size: 20px !important;
+    margin-bottom: 20px !important;
+    text-align: left !important;
+}

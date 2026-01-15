@@ -1360,7 +1360,7 @@ namespace Timesheet.APIs.RequestDays
 
                             if (w2Requests == null || !w2Requests.Any())
                             {
-                                throw new UserFriendlyException("This Special Off request information not found on the W2 system!");
+                                throw new UserFriendlyException("This Off request needs to be approved by HR on the W2 system first!");
                             }
 
                             Timesheet.Services.W2.Dto.W2RequestStatusDto validRequest = null;
@@ -1383,7 +1383,7 @@ namespace Timesheet.APIs.RequestDays
 
                             if (validRequest == null)
                             {
-                                throw new UserFriendlyException("This Special Off request has not been approved on the W2 system!");
+                                throw new UserFriendlyException("This Off request needs to be approved by HR on the W2 system first!");
                             }
                         }
                     }

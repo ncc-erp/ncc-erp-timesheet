@@ -79,6 +79,7 @@ import { AddUserOtherProjectComponent } from './add-user-other-project/add-user-
 import { SentryService } from './sentry-service';
 import { ShowProjectInActivePipe } from './pipes/show-project-in-active.pipe';
 import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
+import { ViewRejectReasonDialogComponent } from './view-reject-reason-dialog/view-reject-reason-dialog.component';
 @NgModule({
   imports: [
     FormsModule,
@@ -151,6 +152,7 @@ import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
     DayTypePipe,
     AddUserOtherProjectComponent,
     ShowProjectInActivePipe,
+    ViewRejectReasonDialogComponent,
   ],
   exports: [
     AbpPaginationControlsComponent,
@@ -217,9 +219,11 @@ import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
     DayTypePipe,
     AddUserOtherProjectComponent,
     ShowProjectInActivePipe,
+    ViewRejectReasonDialogComponent
   ],
   entryComponents: [
     PopupComponent,
+    ViewRejectReasonDialogComponent
   ],
 })
 export class SharedModule {

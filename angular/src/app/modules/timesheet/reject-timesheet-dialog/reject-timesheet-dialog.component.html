@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>Reject Timesheets</h1>
+<div mat-dialog-content>
+  <p>Please enter the reason for rejecting {{data.count}} timesheet(s):</p>
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <mat-label>Reason</mat-label>
+    <textarea matInput [(ngModel)]="reason" rows="4" placeholder="Enter reason here..."></textarea>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-raised-button color="warn" (click)="onConfirm()">Reject</button>
+</div>
