@@ -1,3 +1,4 @@
+import { ViewRejectReasonDialogComponent } from '@shared/view-reject-reason-dialog/view-reject-reason-dialog.component';
 import { SpecialProjectTaskSettingService } from './../../service/api/special-project-task-config.service';
 import { InfoService } from '@app/service/api/info.service';
 import { CreateEditTimesheetItemComponent } from './create-edit-timesheet-item/create-edit-timesheet-item.component';
@@ -724,6 +725,13 @@ export class MyTimeSheetsComponent extends AppComponentBase implements OnInit {
     showMask: false,
     mask: [/\d/, /\d/, '.', /\d/]
   };
+  showReason(item: GetTimeSheetDto) {
+    this._dialog.open(ViewRejectReasonDialogComponent, {
+      data: item,
+      width: '500px'
+    });
+  }
+
 }
 export class SpecialProjectTaskSettingDTO {
   projectTaskId: number;

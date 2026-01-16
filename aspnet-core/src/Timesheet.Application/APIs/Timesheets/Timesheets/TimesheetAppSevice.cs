@@ -155,7 +155,10 @@ namespace Timesheet.Timesheets.Timesheets
                 queryable = queryable.Where(a => a.User.EmailAddress.Contains(searchText) || a.User.UserName.Contains(searchText) || a.User.FullName.Contains(searchText));
             }
 
-            var q = queryable.Select(a => new MyTimeSheetDto
+            var q = from a in queryable
+                    join u in WorkScope.GetAll<User>() on a.LastModifierUserId equals u.Id into uJoined
+                    from u in uJoined.DefaultIfEmpty()
+                    select new MyTimeSheetDto
                     {
                         Id = a.Id,
                         Status = a.Status,
@@ -183,8 +186,10 @@ namespace Timesheet.Timesheets.Timesheets
                         IsUnlockedByEmployee = a.IsUnlockedByEmployee,
                         projectTargetUser = a.ProjectTargetUser.User.FullName,
                         workingTimeTargetUser = a.TargetUserWorkingTime,
-                        ProjectTargetRoleName = a.ProjectTargetUser.RoleName
-                    });
+                        ProjectTargetRoleName = a.ProjectTargetUser.RoleName,
+                        RejectReason = a.RejectReason,
+                        LastModifierUser = u != null ? u.FullName : ""
+                    };
 
             var query = q.OrderBy(i => i.EmailAddress)
                          .ThenByDescending(s => s.DateAt)
@@ -556,7 +561,7 @@ namespace Timesheet.Timesheets.Timesheets
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_Approval)]
-        public async System.Threading.Tasks.Task<object> RejectTimesheets(long[] myTimesheetIds)
+        public async System.Threading.Tasks.Task<object> RejectTimesheets(RejectTimesheetDto input)
         {
             int weeksCanUnlockBefor = int.Parse(SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.WeeksCanUnlockBefor).Result);
             int successTS = 0;
@@ -567,7 +572,7 @@ namespace Timesheet.Timesheets.Timesheets
               .Where(s => s.UserId == AbpSession.UserId && s.Type == ProjectUserType.PM)
               .Select(s => new { s.ProjectId });
 
-            var qMyTimeSheets = from mts in WorkScope.GetAll<MyTimesheet>().Where(s => myTimesheetIds.Contains(s.Id))
+            var qMyTimeSheets = from mts in WorkScope.GetAll<MyTimesheet>().Where(s => input.Ids.Contains(s.Id))
                                 join pt in WorkScope.GetAll<ProjectTask>() on mts.ProjectTaskId equals pt.Id
                                 select new { mts, pt.ProjectId };
 
@@ -581,7 +586,7 @@ namespace Timesheet.Timesheets.Timesheets
             //    throw new UserFriendlyException(String.Format("You are not Project Manager of these Timesheet Ids: {0}", String.Join(", ", hackMtsIds)));
             //}
 
-            myTimesheetIds = mtss.Select(s => s.Id).ToArray();
+            var myTimesheetIds = mtss.Select(s => s.Id).ToArray();
             var timesheetByUserByProject = await WorkScope.GetRepo<MyTimesheet>()
                .GetAllIncluding(s => s.ProjectTask.Task, s => s.ProjectTask.Project, s => s.User)
                .Where(s => myTimesheetIds.Contains(s.Id))
@@ -652,6 +657,10 @@ namespace Timesheet.Timesheets.Timesheets
                             failTS++;
                         }
                     }
+                    if (!string.IsNullOrEmpty(input.Reason))
+                    {
+                        mailBody.Append($@"<div><b>Reason:</b> {input.Reason}</div>");
+                    }
                     mailBody.Append($@"<table border='1'>
                                     <thead>
                                         <tr>
@@ -683,6 +692,12 @@ namespace Timesheet.Timesheets.Timesheets
                 foreach (var item in listReject)
                 {
                     item.Status = TimesheetStatus.Reject;
+                    if (!string.IsNullOrEmpty(input.Reason))
+                    {
+                        item.RejectReason = input.Reason;
+                    }
+                    item.LastModifierUserId = AbpSession.UserId;
+                    item.LastModificationTime = DateTimeUtils.GetNow();
                 }
                 await WorkScope.UpdateRangeAsync(listReject);
 

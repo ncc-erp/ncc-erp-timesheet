@@ -26,6 +26,9 @@ namespace Timesheet.Timesheets.MyTimesheets.Dto
         public string ProjectTargetUser { get; set; }
         public int? WorkingTimeTargetUser { get; set; }
         public int? OpenTalkJoinTime { get; set; }
+        public string RejectReason { get; set; }
+        public DateTime? LastModificationTime { get; set; }
+        public string LastModifierUserName { get; set; }
         public string WorkType
         {
             get

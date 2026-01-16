@@ -465,6 +465,10 @@
                                                   t.status
                                                 )
                                               "></span>
+                                            <button mat-icon-button color="warn" *ngIf="t.status === 3"
+                                              (click)="showReason(t)" matTooltip="View Rejection Reason">
+                                              <mat-icon>info</mat-icon>
+                                            </button>
                                             <span class="label status-label bg-red status"
                                               *ngIf="t.typeOfWork == APP_CONSTANT.EnumTypeOfWork.Overtime">OT</span>
                                             <span class="label status-label status"
@@ -654,14 +658,22 @@
                                       convertMinuteToHour(t.workingTime)
                                       }}</span>
                                   </td>
-                                  <td class="text-center" *ngIf="t.taskName == 'Open Talk'"><span>{{ convertMinuteToHour(t.openTalkTime)}}</span></td>
-                                  <td class="text-center" *ngIf="t.taskName != 'Open Talk' && isOpenTalk(dt.timesheets)">---</td>
-                                  <td [innerHtml]="
+                                  <td class="text-center" *ngIf="t.taskName == 'Open Talk'"><span>{{
+                                      convertMinuteToHour(t.openTalkTime)}}</span></td>
+                                  <td class="text-center"
+                                    *ngIf="t.taskName != 'Open Talk' && isOpenTalk(dt.timesheets)">---</td>
+                                  <td>
+                                    <span [innerHtml]="
                                       convertNumberOfStringStatus(
                                         t.status,
                                         t.typeOfWork
                                       )
-                                    "></td>
+                                    "></span>
+                                    <button mat-icon-button color="warn" *ngIf="t.status === 3" (click)="showReason(t)"
+                                      matTooltip="View Rejection Reason">
+                                      <mat-icon>info</mat-icon>
+                                    </button>
+                                  </td>
                                   <td *ngIf="t.projectTargetUser">{{t.projectTargetUser || ''}}</td>
                                   <td *ngIf="t.projectTargetUser">{{convertMinuteToFloat(t.workingTimeTargetUser) || ''}}h</td>
                                   <td class="text-center"><span [ngClass]="t.isTemp? 'temp':'official'">{{ t.workType

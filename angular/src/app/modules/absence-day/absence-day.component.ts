@@ -82,7 +82,7 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
     this.selectedDays = new Map<string, any>();
     this.months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
     this.years = this.APP_CONSTANT.ListYear;
-    this.initMapChangeRequest();
+    this.initMapChangeRequestNew();
   }
 
   ngOnInit() {
@@ -206,35 +206,52 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
     event.day.events = event.day.events.filter(s => s.status != this.APP_CONSTANT.AbsenceStatus.Rejected);
   }
 
-  private initMapChangeRequest() {
-    this.mapChanegRequest.set('empty', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  // private initMapChangeRequest() {
+  //   this.mapChanegRequest.set('empty', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  //   this.mapChanegRequest.set('off-full', null);
+  //   this.mapChanegRequest.set('off-morning', [this.AFTERNOON, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  //   this.mapChanegRequest.set('off-afternoon', [this.MORMING, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  //   this.mapChanegRequest.set('remote-full', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  //   this.mapChanegRequest.set('remote-morning', [this.AFTERNOON, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  //   this.mapChanegRequest.set('remote-afternoon', [this.MORMING, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  //   this.mapChanegRequest.set('di-muon', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('ve-som', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('onsite-morning', [this.AFTERNOON, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  //   this.mapChanegRequest.set('onsite-afternoon', [this.MORMING, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+
+  //   this.mapChanegRequest.set('off-morning__remote-afternoon', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  //   this.mapChanegRequest.set('off-morning__di-muon', [this.AFTERNOON, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('off-morning__ve-som', [this.AFTERNOON, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('off-afternoon__remote-morning', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  //   this.mapChanegRequest.set('off-afternoon__di-muon', [this.MORMING, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('off-afternoon__ve-som', [this.MORMING, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('remote-full__di-muon', [this.EVENT_VE_SOM_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('remote-full__ve-som', [this.EVENT_DI_MUON_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('remote-morning__di-muon', [this.AFTERNOON, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('remote-morning__ve-som', [this.AFTERNOON, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('remote-afternoon__di-muon', [this.MORMING, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('remote-afternoon__ve-som', [this.MORMING, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
+  //   this.mapChanegRequest.set('di-muon__ve-som', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EMPTY]);
+
+  //   this.mapChanegRequest.set('off-morning__onsite-afternoon', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  //   this.mapChanegRequest.set('onsite-morning__off-afternoon', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+  // }
+
+  private initMapChangeRequestNew() {
+    this.mapChanegRequest.set('empty', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EMPTY]);
     this.mapChanegRequest.set('off-full', null);
-    this.mapChanegRequest.set('off-morning', [this.AFTERNOON, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
-    this.mapChanegRequest.set('off-afternoon', [this.MORMING, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
-    this.mapChanegRequest.set('remote-full', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
-    this.mapChanegRequest.set('remote-morning', [this.AFTERNOON, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
-    this.mapChanegRequest.set('remote-afternoon', [this.MORMING, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
-    this.mapChanegRequest.set('di-muon', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('ve-som', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('onsite-morning', [this.AFTERNOON, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
-    this.mapChanegRequest.set('onsite-afternoon', [this.MORMING, this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+    this.mapChanegRequest.set('off-morning', [this.AFTERNOON, this.EMPTY]);
+    this.mapChanegRequest.set('off-afternoon', [this.MORMING, this.EMPTY]);
+    this.mapChanegRequest.set('remote-full', [this.EMPTY]);
+    this.mapChanegRequest.set('remote-morning', [this.AFTERNOON, this.EMPTY]);
+    this.mapChanegRequest.set('remote-afternoon', [this.MORMING, this.EMPTY]);
+    this.mapChanegRequest.set('onsite-morning', [this.AFTERNOON, this.EMPTY]);
+    this.mapChanegRequest.set('onsite-afternoon', [this.MORMING, this.EMPTY]);
 
-    this.mapChanegRequest.set('off-morning__remote-afternoon', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
-    this.mapChanegRequest.set('off-morning__di-muon', [this.AFTERNOON, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('off-morning__ve-som', [this.AFTERNOON, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('off-afternoon__remote-morning', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
-    this.mapChanegRequest.set('off-afternoon__di-muon', [this.MORMING, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('off-afternoon__ve-som', [this.MORMING, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('remote-full__di-muon', [this.EVENT_VE_SOM_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('remote-full__ve-som', [this.EVENT_DI_MUON_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('remote-morning__di-muon', [this.AFTERNOON, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('remote-morning__ve-som', [this.AFTERNOON, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('remote-afternoon__di-muon', [this.MORMING, this.EVENT_VE_SOM_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('remote-afternoon__ve-som', [this.MORMING, this.EVENT_DI_MUON_ONLY, this.EMPTY]);
-    this.mapChanegRequest.set('di-muon__ve-som', [this.FULLDAY, this.MORMING, this.AFTERNOON, this.EMPTY]);
-
-    this.mapChanegRequest.set('off-morning__onsite-afternoon', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
-    this.mapChanegRequest.set('onsite-morning__off-afternoon', [this.EVENT_DI_MUON_VA_VE_SOM, this.EMPTY]);
+    this.mapChanegRequest.set('off-morning__remote-afternoon', [this.EMPTY]);
+    this.mapChanegRequest.set('off-afternoon__remote-morning', [this.EMPTY]);
+    this.mapChanegRequest.set('off-morning__onsite-afternoon', [this.EMPTY]);
+    this.mapChanegRequest.set('onsite-morning__off-afternoon', [this.EMPTY]);
   }
 
   getKey(sentItems: any[]) {

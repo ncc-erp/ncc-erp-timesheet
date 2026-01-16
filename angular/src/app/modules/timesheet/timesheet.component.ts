@@ -11,6 +11,8 @@ import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { NotifyService } from 'abp-ng2-module/dist/src/notify/notify.service';
 import { DatePipe } from '@angular/common';
 import { TimesheetWarningComponent } from './timesheet-warning/timesheet-warning.component';
+import { RejectTimesheetDialogComponent } from './reject-timesheet-dialog/reject-timesheet-dialog.component';
+import { ViewRejectReasonDialogComponent } from '@shared/view-reject-reason-dialog/view-reject-reason-dialog.component';
 import * as moment from 'moment';
 import { FormControl } from '@angular/forms';
 import { ProjectManagerService } from '@app/service/api/project-manager.service';
@@ -625,23 +627,31 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
       )
       return;
     }
-    var msg = rejectTimesheetIds.length == 1 ? `${rejectTimesheetIds.length} Timesheet` : `${rejectTimesheetIds.length} Timesheets`
+    
+    const dialogRef = this._dialog.open(RejectTimesheetDialogComponent, {
+      width: '500px',
+      data: { count: rejectTimesheetIds.length }
+    });
 
-    abp.message.confirm(
-      `Reject ${msg}`,
-      (result: boolean) => {
-        if (result) {
-          this.timesheetService.rejectTimesheet(rejectTimesheetIds).subscribe((res: any) => {
+    dialogRef.afterClosed().subscribe(result => {
+      if (result !== undefined) {
+         this.timesheetService.rejectTimesheet({Ids: rejectTimesheetIds, Reason: result}).subscribe((res: any) => {
             if (res) {
               this.getTimesheets();
               this.notify.info('REJECTED <br />' + res.result.success + '<br /> ' + res.result.fail + '<br /> ' + res.result.lockDate);
             } else {
-              this.notify.warn(this.l(`Reject ${msg} failed`));
+              this.notify.warn(this.l(`Reject failed`));
             }
           });
-        }
       }
-    );
+    });
+  }
+
+  showReason(item: any) {
+    this._dialog.open(ViewRejectReasonDialogComponent, {
+      width: '400px',
+      data: item
+    });
   }
 
   btnExport(type): void {
