@@ -29,7 +29,7 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
 
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.TimesheetSupervision_View)]
-        public async Task<List<MyTimeSheetDto>> GetAll(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, TimesheetStatus? status, long? ProjectId, long? UserId, int? overtimeType)
+        public async Task<List<MyTimeSheetDto>> GetAll(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, TimesheetStatus? status, long? ProjectId, long? UserId, bool? overtimeType)
         {
             var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
             var qUsers = WorkScope.GetAll<User>()
@@ -82,13 +82,13 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                            .WhereIf(ProjectId != null, s => s.ProjectId == ProjectId)
                            .WhereIf(opentalkTime.HasValue, s => s.ProjectTaskId == OpenTalkID)
                            .WhereIf(opentalkTime.HasValue, s => opentalkTimeType.Value ? s.openTalkTime >= opentalkTime : s.openTalkTime < opentalkTime)
-                           .WhereIf(overtimeType.HasValue, s => s.TypeOfWork == TypeOfWork.OverTime && s.IsCharged == (overtimeType.Value == 2))
+                           .WhereIf(overtimeType.HasValue, s => s.TypeOfWork == TypeOfWork.OverTime && s.IsCharged == overtimeType)
                            .WhereIf(UserId != null, s => s.UserId == UserId)
                            .ToListAsync();
         }
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.TimesheetSupervision_View)]
-        public async Task<object> GetQuantityTimesheetSupervisorStatus(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, long? projectId, long? userId, int? overtimeType)
+        public async Task<object> GetQuantityTimesheetSupervisorStatus(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, long? projectId, long? userId, bool? overtimeType)
         {
             var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
             var query = WorkScope.GetAll<MyTimesheet>()
@@ -105,7 +105,7 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                                      openTalkTime = !opentalkTime.HasValue ? 0 : WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == x.UserId && x.DateAt.Date == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
                                  })
                                  .WhereIf(opentalkTime.HasValue, x => opentalkTimeType.Value ? x.openTalkTime >= opentalkTime : x.openTalkTime < opentalkTime)
-                                 .WhereIf(overtimeType.HasValue, x => x.TypeOfWork == TypeOfWork.OverTime && x.IsCharged == (overtimeType.Value == 2))
+                                 .WhereIf(overtimeType.HasValue, x => x.TypeOfWork == TypeOfWork.OverTime && x.IsCharged == overtimeType)
                                  .GroupBy(x => x.Status).Select(x => new
                                  {
                                      Status = x.Key,

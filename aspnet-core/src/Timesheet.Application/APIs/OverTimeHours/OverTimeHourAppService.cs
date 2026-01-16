@@ -31,10 +31,10 @@ namespace Timesheet.APIs.OverTimeHours
 
         [HttpPost]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_OverTime_View)]
-        public async Task<GridResult<GetOverTimeHourDto>> GetAllPagging(GridParam input, int year, int month, long? projectId, int? overtimeType)
+        public async Task<GridResult<GetOverTimeHourDto>> GetAllPagging(GridParam input, int year, int month, long? projectId, bool? overtimeType)
         {
 
-            var query = IQueryGetOverTimeHour(year, month, projectId, overtimeType);
+            var query = IQueryGetOverTimeHour(year, month, projectId, null, false, overtimeType);
 
             var result = await query.GetGridResult(query, input);
 
@@ -43,9 +43,9 @@ namespace Timesheet.APIs.OverTimeHours
             return result;
         }
 
-        public async Task<List<GetOverTimeHourHRMDto>> GetAllOverTimeForHRM(int year, int month, int overtimeType)
+        public async Task<List<GetOverTimeHourHRMDto>> GetAllOverTimeForHRM(int year, int month)
         {
-            var query = IQueryGetOverTimeHour(year, month, null, overtimeType);
+            var query = IQueryGetOverTimeHour(year, month, null);
 
             var result = await query.ToListAsync();
 
@@ -68,7 +68,7 @@ namespace Timesheet.APIs.OverTimeHours
 
         public async Task<List<GetOverTimeHourHRMv2Dto>> GetAllOverTimeForHRMv2(InputCollectDataForPayslipDto input)
         {
-            var query = IQueryGetOverTimeHour(input.Year, input.Month, null, input.OvertimeType, input.UpperEmails, true);
+            var query = IQueryGetOverTimeHour(input.Year, input.Month, null, input.UpperEmails, null);
 
             var result = await query.ToListAsync();
 
@@ -86,11 +86,11 @@ namespace Timesheet.APIs.OverTimeHours
             }).ToList();
         }
 
-        public async Task<List<GetOverTimeHourDto>> GetListOverTimeForChart(DateTime startDate, DateTime endDate, string projectCode, int? overtimeType, List<string> emails)
+        public async Task<List<GetOverTimeHourDto>> GetListOverTimeForChart(DateTime startDate, DateTime endDate, string projectCode, List<string> emails, bool? overtimeType = null)
         {
             long projectId = await GetProjectIdByCode(projectCode);
 
-            var query = IQueryGetOverTimeHour(startDate, endDate, projectId, overtimeType, emails);
+            var query = IQueryGetOverTimeHour(startDate, endDate, projectId, emails, overtimeType);
 
             var result = await query.ToListAsync();
 
@@ -115,13 +115,13 @@ namespace Timesheet.APIs.OverTimeHours
                 .FirstOrDefaultAsync();
         }
 
-        private IQueryable<GetOverTimeHourDto> IQueryGetOverTimeHour(int year, int month, long? projectId, int? overtimeType, List<string> emails = null, bool? isForHrmv2 = false)
+        private IQueryable<GetOverTimeHourDto> IQueryGetOverTimeHour(int year, int month, long? projectId, List<string> emails = null, bool? isForHrmv2 = false, bool? overtimeType = null)
         {
             DateTime startDate = new DateTime(year, month, 1);
             DateTime endDate = startDate.AddMonths(1).AddDays(-1);
-            return IQueryGetOverTimeHour(startDate, endDate, projectId, overtimeType, emails, isForHrmv2);
+            return IQueryGetOverTimeHour(startDate, endDate, projectId, emails, isForHrmv2, overtimeType);
         }
-        private IQueryable<GetOverTimeHourDto> IQueryGetOverTimeHour(DateTime startDate, DateTime endDate, long? projectId, int? overtimeType, List<string> emails, bool? isForHrmv2 = false)
+        private IQueryable<GetOverTimeHourDto> IQueryGetOverTimeHour(DateTime startDate, DateTime endDate, long? projectId, List<string> emails, bool? isForHrmv2 = false, bool? overtimeType = null)
         {
             var query = WorkScope.GetAll<MyTimesheet>()
                 .Include(s => s.User).ThenInclude(s => s.Branch)
@@ -152,7 +152,7 @@ namespace Timesheet.APIs.OverTimeHours
 
             if (overtimeType.HasValue)
             {
-                query = query.Where(ts => ts.IsCharged == (overtimeType.Value == 2));
+                query = query.Where(ts => ts.IsCharged == overtimeType);
             }
 
             if (!emails.IsNullOrEmpty())

@@ -250,8 +250,8 @@ export const APP_CONSTANT = {
   },
   OvertimeType: {
     All: -1,
-    NonCharged: 1,
-    Charged: 2
+    NonCharged: 0,
+    Charged: 1
   },
   PunishRules: [
     { "name": "No Punish", "value": 0 },

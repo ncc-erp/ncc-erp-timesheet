@@ -32,10 +32,20 @@ export class TimesheetService extends BaseApiService {
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
     params = params.append("workLocation", this.getPara(workLocation));
-    params = params.append("overtimeType", this.getPara(overtimeType));
+    params = params.append("overtimeType", this.addOvertimeTypeParam(overtimeType));
     return this.http.get(this.getUrl("GetAll"), { params : params });
     // return this.http.get(this.getUrl(`GetAll?startDate=${startDate}&endDate=${endDate}&status=${status}&projectId=${this.getPara(projectId)}&checkInFilter=${this.getPara(checkInFilter)}&searchText=${searchText}&branchId=${this.getPara(branchId)}`));
   }
+
+  private addOvertimeTypeParam(overtimeType: number) {
+    if (overtimeType === 1) {
+      return "true";
+    } else if (overtimeType === 0) {
+      return "false";
+    }
+    return "";
+  }
+
   private getPara(value){
     if(value <=0 || value == void 0) return '';
     return value
@@ -110,7 +120,7 @@ export class TimesheetService extends BaseApiService {
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
     params = params.append("workLocation", this.getPara(workLocation));
-    params = params.append("overtimeType", this.getPara(overtimeType));
+    params = params.append("overtimeType", this.addOvertimeTypeParam(overtimeType));
     return this.http.get(this.getUrl("GetQuantiyTimesheetStatus"), { params : params });
   }
 

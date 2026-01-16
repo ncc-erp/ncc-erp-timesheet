@@ -53,7 +53,7 @@ namespace Timesheet.Timesheets.Timesheets
         }
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_View)]
-        public async Task<List<MyTimeSheetDto>> GetAll(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, TimesheetStatus status, long? projectId, HaveCheckInFilter? checkInFilter, int? overtimeType, long? branchId = null, string searchText = "", RequestType? workLocation = null)
+        public async Task<List<MyTimeSheetDto>> GetAll(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, TimesheetStatus status, long? projectId, HaveCheckInFilter? checkInFilter, long? branchId = null, string searchText = "", RequestType? workLocation = null, bool? overtimeType = null)
         {
             var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
 
@@ -149,7 +149,7 @@ namespace Timesheet.Timesheets.Timesheets
 
             if (overtimeType.HasValue)
             {
-                queryable = queryable.Where(ts => ts.IsCharged == (overtimeType.Value == 2) && ts.TypeOfWork == TypeOfWork.OverTime);
+                queryable = queryable.Where(ts => ts.IsCharged == overtimeType && ts.TypeOfWork == TypeOfWork.OverTime);
             }
 
             queryable = queryable.Where(a => userIds.Contains(a.UserId));
@@ -895,7 +895,7 @@ namespace Timesheet.Timesheets.Timesheets
 
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_ViewStatus)]
-        public async Task<object> GetQuantiyTimesheetStatus(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, long? projectId, HaveCheckInFilter? checkInFilter, string searchText, int? overtimeType, long? branchId = 0, RequestType? workLocation = null)
+        public async Task<object> GetQuantiyTimesheetStatus(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, long? projectId, HaveCheckInFilter? checkInFilter, string searchText, long? branchId = 0, RequestType? workLocation = null, bool? overtimeType = null)
         {
             var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
             var projectIds = await WorkScope.GetAll<ProjectUser>()
@@ -1010,7 +1010,7 @@ namespace Timesheet.Timesheets.Timesheets
             }
             if (overtimeType.HasValue)
             {
-                listMyTimesheet = listMyTimesheet.Where(s => s.IsCharged == (overtimeType.Value == 2) && s.TypeOfWork == TypeOfWork.OverTime).ToList();
+                listMyTimesheet = listMyTimesheet.Where(s => s.IsCharged == overtimeType && s.TypeOfWork == TypeOfWork.OverTime).ToList();
             }
 
             listMyTimesheet = listMyTimesheet.Where(s => s.WorkLocation != null).ToList();

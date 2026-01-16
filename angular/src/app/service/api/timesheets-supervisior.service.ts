@@ -25,10 +25,20 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     params = params.append("userId", this.getPara(userId));
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
-    params = params.append("overtimeType", this.getPara(overtimeType));
+    params = params.append("overtimeType", this.addOvertimeTypeParam(overtimeType));
     return this.http.get(this.getUrl("GetAll"), { params : params });
     //return this.http.get(this.getUrl(`GetAll?startDate=${startDate}&endDate=${endDate}&status=${status}&projectID=${this.getPara(projectId)}&userId=${this.getPara(userId)}`));
   }
+
+  private addOvertimeTypeParam(overtimeType: number) {
+    if (overtimeType === 1) {
+      return "true";
+    } else if (overtimeType === 0) {
+      return "false";
+    }
+    return "";
+  }
+
   private getPara(value){
     if(value <=0 || value == void 0) return '';
     return value
@@ -42,7 +52,7 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     params = params.append("userId", this.getPara(userId));
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
-    params = params.append("overtimeType", this.getPara(overtimeType));
+    params = params.append("overtimeType", this.addOvertimeTypeParam(overtimeType));
     return this.http.get(this.getUrl("GetQuantityTimesheetSupervisorStatus"), { params : params });
     //return this.http.get(this.getUrl(`GetQuantityTimesheetSupervisorStatus?startDate=${startDate}&endDate=${endDate}`));
   }

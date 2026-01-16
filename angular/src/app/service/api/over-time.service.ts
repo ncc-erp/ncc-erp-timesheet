@@ -21,7 +21,11 @@ export class OverTimeService extends BaseApiService {
     }
 
     private getPara(value){
-        if(value < 0) return '';
-        return value
+        if (value === 1) {
+            return "true";
+        } else if (value === 0) {
+            return "false";
+        }
+        return "";
     }
 }

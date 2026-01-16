@@ -9,6 +9,5 @@ namespace Timesheet.APIs.Public.Dto
         public string ProjectCode { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public int? OvertimeType { get; set; }
     }
 }
