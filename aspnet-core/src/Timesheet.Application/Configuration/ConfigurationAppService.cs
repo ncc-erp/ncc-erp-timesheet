@@ -537,6 +537,23 @@ namespace Ncc.Configuration
             return input;
         }
 
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_UnlockTimesheetSetting_View)]
+        public LockTimesheetConfigDto GetLockTimesheetConfig()
+        {
+            var isLock = SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.LockTimesheet).Result;
+            return new LockTimesheetConfigDto
+            {
+                IsLock = bool.Parse(isLock)
+            };
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_UnlockTimesheetSetting_Update)]
+        public async Task<LockTimesheetConfigDto> SetLockTimesheetConfig(LockTimesheetConfigDto input)
+        {
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.LockTimesheet, input.IsLock.ToString().ToLower());
+            return input;
+        }
+
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_RetroNotifyConfig_View)]
         public async Task<RetroNotifyConfigDto> GetRetroNotifyConfig()
         {

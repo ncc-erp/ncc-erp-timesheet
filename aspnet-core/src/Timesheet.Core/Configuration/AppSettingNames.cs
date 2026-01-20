@@ -58,6 +58,7 @@ namespace Ncc.Configuration
         public const string LockMinuteAfterUnlock = "App.LockMinuteAfterUnlock";
         public const string LogTimesheetInFuture = "App.LockTimesheetInFuture";
         public const string DayAllowLogTimesheetInFuture = "App.DayAllowLockTimesheetInFuture";
+        public const string LockTimesheet = "App.LockTimesheet";
         public const string MaxTimeSheetHourPerDay = "App.MaxTimeSheetHourPerDay";
         public const string AutoSubmitTimesheet = "App.AutoSubmitTimesheet";
         public const string AutoSubmitAt = "App.AutoSubmitAt";
