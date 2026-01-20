@@ -459,6 +459,9 @@ namespace Timesheet.Timesheets.Timesheets
                 }
                 ).ToListAsync();
 
+            var allDates = timesheetByUserByProject.SelectMany(u => u.Project.SelectMany(p => p.Timesheets.Select(t => t.DateAt)));
+            await _commonService.checkIsMonthLocked(allDates);
+
             var approverName = (await WorkScope.GetAsync<User>(AbpSession.UserId.Value)).FullName;
             var isUnlockPM = await WorkScope.GetAll<UnlockTimesheet>().AnyAsync(s => s.UserId == AbpSession.UserId.Value && s.Type == LockUnlockTimesheetType.ApproveRejectTimesheet);
             var myApproveTimesheetIds = new List<long>();
@@ -580,6 +583,8 @@ namespace Timesheet.Timesheets.Timesheets
                               join pu in qprojectUsers on mts.ProjectId equals pu.ProjectId
                               select mts.mts).ToListAsync();
 
+            await _commonService.checkIsMonthLocked(mtss.Select(s => s.DateAt));
+
             //var hackMtsIds = myTimesheetIds.Except(mtss.Select(s => s.Id));
             //if (hackMtsIds != null && hackMtsIds.Count() > 0)
             //{
@@ -637,6 +642,7 @@ namespace Timesheet.Timesheets.Timesheets
                     var timesheetTable = new StringBuilder();
                     foreach (var timesheet in project.Timesheets)
                     {
+                        await _commonService.checkIsMonthLocked(project.Timesheets.Select(t => t.DateAt));
                         if (timesheet.DateAt > lockDate || (isUnlockPM && timesheet.DateAt > lockDate.AddDays(-(7*weeksCanUnlockBefor)).Date) || timesheet.IsUnlockedByEmployee)
                         {
                             myRejectTimesheetIds.Add(timesheet.Id);
@@ -705,6 +711,7 @@ namespace Timesheet.Timesheets.Timesheets
             }
             else if (failTS > 0)
             {
+                await _commonService.checkIsMonthLocked(mtss.Select(t => t.DateAt));
                 if (isUnlockPM) throw new UserFriendlyException(string.Format("Unlock timesheet chỉ có hiệu lực từ {0} đến {1}. Vui lòng liên hệ admin để được hỗ trợ.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy")));
                 throw new UserFriendlyException("PM hãy vào ims.nccsoft.vn để unlock timesheet");
             }

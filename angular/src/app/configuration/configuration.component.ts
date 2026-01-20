@@ -138,6 +138,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditSercurityCode: boolean = false;
   isEditLogoutAllUser: boolean = false;
   isEditWFHSetting: boolean = false;
+  isEditManualLockTimesheet: boolean = false;
   isEditUnlockSetting: boolean = false;
   isLevelSetting: boolean = false;
   isPunishByRule: boolean = false;
@@ -241,6 +242,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.isAllOfficeWorkingBranchesSelected = !this.isAllOfficeWorkingBranchesSelected;
   }
 
+  manualLockTimesheetConfig = {} as LockTimesheetConfigDto;
   unlockSetting = {} as UnlockTimesheetConfigDto;
   timesCanLateAndEarlyInMonthSetting = {} as TimesCanLateAndEarlyInMonthSettingDto;
   percentOfTrackerOnWorking: string = "";
@@ -358,6 +360,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getSpecialProjectTaskSetting();
     this.getNotificationSetting();
     this.geNRITConfig();
+    this.getLockTimesheetConfig();
     this.getUnlockSetting();
     this.getChannelSendPunishCheckIn();
     this.checkConnectToProject();
@@ -737,6 +740,36 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   }
   editUnlockSetting() {
     this.isEditUnlockSetting = true;
+  }
+
+  getLockTimesheetConfig() {
+      if (this.permission.isGranted(this.VIEW_UNLOCK_TIMESHEET_SETTING)) {
+          this.configurationService.GetLockTimesheetConfig().subscribe((res: any) => {
+              this.manualLockTimesheetConfig = res.result;
+          })
+      }
+  }
+
+  editManualLockTimesheetConfig() {
+      this.isEditManualLockTimesheet = true;
+  }
+
+  saveManualLockTimesheetConfig() {
+      this.configurationService.SetLockTimesheetConfig(this.manualLockTimesheetConfig).subscribe((res: any) => {
+          this.isEditManualLockTimesheet = false;
+          if (res) {
+              abp.notify.success("Update Successfully");
+          }
+      })
+  }
+
+  refreshManualLockTimesheetConfig() {
+      this.isEditManualLockTimesheet = false;
+      this.getLockTimesheetConfig();
+  }
+
+  onManualLockTimesheetChange(event) {
+      this.manualLockTimesheetConfig.isLock = event.checked;
   }
 
   editSpecialProjectTaskSetting() {
@@ -2569,4 +2602,8 @@ export class ResetDataTeamBuildingConfigDto {
   resetDataTeamBuildingEnableWorker: string;
   resetDataTeamBuildingAtHour: string;
   resetDataTeamBuildingOnDateAndMonth: string;
+}
+
+export class LockTimesheetConfigDto {
+  isLock: boolean;
 }

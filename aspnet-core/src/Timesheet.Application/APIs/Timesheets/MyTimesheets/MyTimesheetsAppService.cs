@@ -639,6 +639,8 @@ namespace Timesheet.Timesheets.MyTimesheets
                 .Where(s => s.Status == TimesheetStatus.None)
                 .ToListAsync();
 
+            await _commonService.checkIsMonthLocked(mytimesheets.Select(s => s.DateAt));
+
             //Valid :
             DateTime lockDate = _commonService.getlockDateUser();
             if (!isUnLocked && mytimesheets.Any(s => s.DateAt.Date < lockDate))

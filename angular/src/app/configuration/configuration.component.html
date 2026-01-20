@@ -435,6 +435,68 @@
             </div>
           </mat-expansion-panel>
 
+          <!--Manual Lock Timesheet-->
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_UNLOCK_TIMESHEET_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowManualLockTimesheet">
+            <mat-expansion-panel-header (click)="isShowManualLockTimesheet =!isShowManualLockTimesheet"
+              class="panel-header">
+              <mat-panel-title>
+                <p class="title">{{"Manual Lock Timesheet Setting"}}</p>
+                <div *ngIf="isShowManualLockTimesheet">
+                  <div>
+                    <div class="edit-save">
+                      <button
+                        *ngIf="!isEditManualLockTimesheet && permission.isGranted(UPDATE_UNLOCK_TIMESHEET_SETTING)"
+                        large mat-raised-button color="primary"
+                        (click)="editManualLockTimesheetConfig();$event.stopPropagation()">
+                        <mat-icon>edit</mat-icon>
+                        <p>Edit</p>
+                      </button>
+                      <button *ngIf="isEditManualLockTimesheet" large mat-raised-button color="primary"
+                        (click)="saveManualLockTimesheetConfig();$event.stopPropagation()">
+                        <mat-icon>save</mat-icon>
+                        <p>Save</p>
+                      </button>
+                      <button *ngIf="isEditManualLockTimesheet" large mat-raised-button color="primary"
+                        (click)="refreshManualLockTimesheetConfig();$event.stopPropagation()">
+                        <mat-icon>cancel</mat-icon>
+                        <p>Cancel</p>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </mat-panel-title>
+
+              <ul class="header-dropdown m-r--5" *ngIf="isShowManualLockTimesheet">
+                <li>
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenuManualLock" (click)="$event.stopPropagation()"
+                    class="header-dropdown-mat-icon-button">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #headerMenuManualLock="matMenu">
+                    <button mat-menu-item (click)="refreshManualLockTimesheetConfig();$event.stopPropagation()">
+                      <mat-icon>refresh</mat-icon>
+                      <span>{{ "Refresh" | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </li>
+              </ul>
+            </mat-expansion-panel-header>
+            <div class="body">
+              <form>
+                <div class="row">
+                  <div class="col-md-12">
+                    <mat-checkbox style="padding: 0;" class="autoSubmit mb-16"
+                      [checked]="manualLockTimesheetConfig.isLock" (change)="onManualLockTimesheetChange($event)"
+                      [disabled]="!isEditManualLockTimesheet">
+                      Lock Timesheet (Previous Month)
+                    </mat-checkbox>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </mat-expansion-panel>
+
           <!--Unlock Setting-->
           <mat-expansion-panel *ngIf="permission.isGranted(VIEW_UNLOCK_TIMESHEET_SETTING)" style="margin-bottom: 10px;"
             [expanded]="isShowUnlockSetting">
