@@ -15,8 +15,10 @@ export class GetPMOtherPunishmentDialogComponent extends AppComponentBase implem
   months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   years: number[] = [];
 
+  public saving: boolean = false;
+
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data,
+    @Inject(MAT_DIALOG_DATA) public data: any,
     public dialogRef: MatDialogRef<GetPMOtherPunishmentDialogComponent>,
     private userPunishmentService: UserPunishmentService,
     injector: Injector
@@ -43,10 +45,16 @@ export class GetPMOtherPunishmentDialogComponent extends AppComponentBase implem
       'Confirm',
       (result: boolean) => {
         if (result) {
+          this.saving = true;
           this.userPunishmentService.triggerManualPunishment(this.getPMOtherPunishmentAtMonth, this.getPMOtherPunishmentAtYear).subscribe(
             () => {
               abp.notify.success('PM Other Punishment has been applied successfully');
+              this.saving = false;
+              this.dialogRef.close(true);
             },
+            () => {
+              this.saving = false;
+            }
           );
         }
       }
