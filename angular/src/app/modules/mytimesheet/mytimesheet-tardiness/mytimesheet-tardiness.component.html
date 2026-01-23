@@ -93,7 +93,7 @@
                   {{ "Edited by" | localize }}
                 </th>
 
-                <th style="min-width: 490px;" [attr.colspan]="isBasicUser ? 9 : 11">
+                <th style="min-width: 490px;" [attr.colspan]="isBasicUser ? 9 : 12">
                   {{ "Punishments" | localize }}
                 </th>
                 <th style="min-width: 150px; max-width: 300px; width: 200px;" rowspan="2">
@@ -127,7 +127,10 @@
                   {{ "Review Intern" | localize }}
                 </th>
                 <th class="punish-col" rowspan="2" *ngIf="!isBasicUser">
-                  {{ "Pm Report" | localize }}
+                  {{ "PM Report" | localize }}
+                </th>
+                <th class="punish-col" rowspan="2" *ngIf="!isBasicUser">
+                  {{ "PM Others" | localize }}
                 </th>
                 <th class="punish-col" rowspan="2">
                   {{ "Ant" | localize }}
@@ -201,6 +204,12 @@
                 <td class="punish-col" style="text-align: center;" *ngIf="!isBasicUser">
                   <span [class]="getCssClassByPunish(item.pmReportPunish)" *ngIf="item.pmReportPunish > 0">
                     {{ formatPunishmentAmount(item.pmReportPunish) }}
+                  </span>
+                </td>
+
+                <td class="punish-col" style="text-align: center;" *ngIf="!isBasicUser">
+                  <span [class]="getCssClassByPunish(item.pmOtherPunish)" *ngIf="item.pmOtherPunish > 0">
+                    {{ formatPunishmentAmount(item.pmOtherPunish) }}
                   </span>
                 </td>
 

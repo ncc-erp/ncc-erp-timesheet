@@ -60,6 +60,7 @@ import { EditRoleComponent } from './roles/edit-role/edit-role.component';
 import { CreateRoleDialogComponent } from './roles/create-role/create-role-dialog.component';
 import { UpdatePunishMoneyComponent } from './configuration/update-punish-money/update-punish-money.component';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { GetPMOtherPunishmentDialogComponent } from './configuration/get-pm-other-punishment-dialog/get-pm-other-punishment-dialog.component';
 
 let config = new AuthServiceConfig([
   {
@@ -100,6 +101,7 @@ export function provideConfig() {
     UploadAvatarComponent,
     EditSidebarComponent,
     UpdatePunishMoneyComponent,
+    GetPMOtherPunishmentDialogComponent
   ],
   imports: [
     SocialLoginModule,
@@ -147,6 +149,7 @@ export function provideConfig() {
     ResetPasswordDialogComponent,
     UploadAvatarComponent,
     UpdatePunishMoneyComponent,
+    GetPMOtherPunishmentDialogComponent
   ]
 })
 export class AppModule {}

@@ -822,6 +822,29 @@ namespace Ncc.Configuration
 
             return input;
         }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_PMOtherPunishConfig_View)]
+        public async Task<PMOtherPunishSettingDto> GetPMOtherPunishSetting()
+        {
+            return new PMOtherPunishSettingDto
+            {
+                enable = bool.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.PMOtherPunishEnable)),
+                hour = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.PMOtherPunishAtHour)),
+                dayOfMonth = int.Parse(await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.PMOtherPunishAtDayOfMonth)),
+                adminClanName = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.PMOtherPunishAdminClanName)
+            };
+        }
+
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_PMOtherPunishConfig_Update)]
+        public async Task<PMOtherPunishSettingDto> SetPMOtherPunishSetting(PMOtherPunishSettingDto input)
+        {
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.PMOtherPunishEnable, input.enable.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.PMOtherPunishAtHour, input.hour.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.PMOtherPunishAtDayOfMonth, input.dayOfMonth.ToString());
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.PMOtherPunishAdminClanName, input.adminClanName);
+            return input;
+        }
+
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_BotReportConfig_View)]
         public async Task<Timesheet.Configuration.Dto.BotReportSettingDto> GetBotReportSetting()
         {

@@ -1,6 +1,7 @@
 import { TimeStartChangingCheckinToCheckoutSettingService } from './../service/api/time-start-changing-checkin-to-checkout-setting.service';
 import { TimesCanLateAndEarlyInMonthSettingService } from './../service/api/time-can-late-early-setting.service';
 import { UpdatePunishMoneyComponent } from './update-punish-money/update-punish-money.component';
+import { GetPMOtherPunishmentDialogComponent } from './get-pm-other-punishment-dialog/get-pm-other-punishment-dialog.component';
 import { MatDialog } from '@angular/material';
 import { TimekeepingService } from '@app/service/api/timekeeping.service';
 import { CheckInCheckOutPunishmentSettingService } from '../service/api/punish-by-rule.service';
@@ -28,6 +29,7 @@ import { MezonSettingService } from '@app/service/api/mezon-setting.service';
 import { LogoutAllUserService } from '@app/service/api/logout-all-user.service';
 import { LateInternReviewSettingService, LateInternReviewSettingDto } from '@app/service/api/late-intern-review-setting.service';
 import { PMReportPunishSettingService, PMReportPunishSettingDto } from '@app/service/api/pm-report-punish-setting.service';
+import { PMOtherPunishSettingService, PMOtherPunishSettingDto } from '../service/api/pm-other-punish-setting.service';
 import { BotReportSettingService, BotReportSettingDto, ProjectDto } from '../service/api/bot-report-setting.service';
 import { AnomaliesReportSettingService, AnomaliesReportSettingDto } from '../service/api/anomalies-report-setting.service';
 import { BranchService } from '@app/service/api/branch.service';
@@ -84,6 +86,8 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   EDIT_LATE_INTERN_REVIEW_SETTING = PERMISSIONS_CONSTANT.EditLateInternReviewSetting;
   VIEW_PM_REPORT_PUNISH_SETTING = PERMISSIONS_CONSTANT.ViewPMReportSetting;
   EDIT_PM_REPORT_PUNISH_SETTING = PERMISSIONS_CONSTANT.EditPMReportSetting;
+  VIEW_PM_OTHER_PUNISH_SETTING = PERMISSIONS_CONSTANT.ViewPMOtherPunishSetting;
+  EDIT_PM_OTHER_PUNISH_SETTING = PERMISSIONS_CONSTANT.EditPMOtherPunishSetting;
   VIEW_BOT_REPORT_SETTING = PERMISSIONS_CONSTANT.ViewBotReportSetting;
   EDIT_BOT_REPORT_SETTING = PERMISSIONS_CONSTANT.EditBotReportSetting;
   VIEW_ANOMALIES_REPORT_SETTING = PERMISSIONS_CONSTANT.ViewAnomaliesReportSetting;
@@ -213,6 +217,10 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   isEditPMReportPunishSetting: boolean = false;
   pmReportPunishSetting = {} as PMReportPunishSettingDto;
 
+  isShowPMOtherPunishSetting: boolean = false;
+  isEditPMOtherPunishSetting: boolean = false;
+  pmOtherPunishSetting = {} as PMOtherPunishSettingDto;
+
   isShowBotReportSetting: boolean = false;
   isEditBotReportSetting: boolean = false;
   isShowAnomaliesReportSetting: boolean = false;
@@ -330,6 +338,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     private timeStartChangingCheckinToCheckoutSettingService: TimeStartChangingCheckinToCheckoutSettingService,
     private lateInternReviewSettingService: LateInternReviewSettingService,
     private pmReportPunishSettingService: PMReportPunishSettingService,
+    private pmOtherPunishSettingService: PMOtherPunishSettingService,
     private botReportSettingService: BotReportSettingService,
     private anomaliesReportSettingService: AnomaliesReportSettingService,
     private branchService: BranchService,
@@ -377,6 +386,7 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
     this.getResetDataTeamBuildingConfig();
     this.getLateInternReviewSetting();
     this.getPMReportPunishSetting();
+    this.getPMOtherPunishSetting();
     this.getBotReportSetting();
     this.getAnomaliesReportSetting();
     
@@ -2116,6 +2126,57 @@ export class ConfigurationComponent extends AppComponentBase implements OnInit {
   refreshPMReportPunishSetting() {
     this.getPMReportPunishSetting();
     this.isEditPMReportPunishSetting = false;
+  }
+
+  getPMOtherPunishSetting() {
+    if (this.permission.isGranted(this.VIEW_PM_OTHER_PUNISH_SETTING)) {
+      this.pmOtherPunishSettingService.get().subscribe((data: any) => {
+        this.pmOtherPunishSetting = data.result;
+      });
+    }
+  }
+
+  editPMOtherPunishSetting() {
+    this.isEditPMOtherPunishSetting = true;
+  }
+
+  savePMOtherPunishSetting() {
+    if (!this.permission.isGranted(this.EDIT_PM_OTHER_PUNISH_SETTING)) {
+      abp.message.error("You do not have permission to edit this setting!");
+      return;
+    }
+    if (this.pmOtherPunishSetting.hour < 0 || this.pmOtherPunishSetting.hour > 23) {
+      abp.message.error("Hour must be between 0 and 23!");
+      return;
+    }
+    if (!this.pmOtherPunishSetting.dayOfMonth) {
+      abp.message.error("Day of month is required!");
+      return;
+    }
+
+    this.pmOtherPunishSettingService.change(this.pmOtherPunishSetting).subscribe((res: any) => {
+      this.isEditPMOtherPunishSetting = false;
+      if (res) {
+        this.notify.success(this.l('Update Successfully!'));
+      }
+    })
+  }
+  refreshPMOtherPunishSetting() {
+    this.getPMOtherPunishSetting();
+    this.isEditPMOtherPunishSetting = false;
+  }
+
+  openManualGetDataDialog() {
+    const dialogRef = this.dialog.open(GetPMOtherPunishmentDialogComponent, {
+      width: '400px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.getPMOtherPunishSetting();
+      }
+    });
   }
 
   getBotReportSetting() {
