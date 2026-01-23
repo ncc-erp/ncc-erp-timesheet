@@ -147,6 +147,10 @@ namespace Ncc.Configuration
                 new SettingDefinition(AppSettingNames.PMReportPunishEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.PMReportPunishAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.PMReportPunishAtDayOfWeek, "Monday", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.PMOtherPunishEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.PMOtherPunishAtHour, "9", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.PMOtherPunishAtDayOfMonth, "28", scopes: SettingScopes.Application|SettingScopes.Tenant),
+                new SettingDefinition(AppSettingNames.PMOtherPunishAdminClanName, "admin", scopes: SettingScopes.Application|SettingScopes.Tenant),
 
                 new SettingDefinition(AppSettingNames.BotReportEnable, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),
                 new SettingDefinition(AppSettingNames.BotReportEveryday, "True", scopes: SettingScopes.Application|SettingScopes.Tenant),

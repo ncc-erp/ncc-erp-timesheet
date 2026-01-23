@@ -77,4 +77,9 @@ export class UserPunishmentService extends BaseApiService {
       params: { id: id.toString() }
     });
   }
+
+  triggerManualPunishment(getPMOtherPunishmentAtMonth: number, getPMOtherPunishmentAtYear: number): Observable<any> {
+    const payload = { getPMOtherPunishmentAtMonth, getPMOtherPunishmentAtYear };
+    return this.http.post(this.rootUrl + '/ApplyPMOtherPunishmentsAsync', payload);
+  }
 }

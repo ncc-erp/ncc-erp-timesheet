@@ -620,6 +620,13 @@ namespace TimesheetApplication.UserPunishment
             return await _userPunishmentServices.ApplyPMReportPunishmentsAsync();
         }
 
+        [HttpPost]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Configuration_PMOtherPunishConfig_View, Ncc.Authorization.PermissionNames.Admin_Configuration_PMOtherPunishConfig_Update)]
+        public async Task<List<Timesheet.Entities.UserPunishment>> ApplyPMOtherPunishmentsAsync(ApplyPMOtherPunishmentsDto input)
+        {
+            return await _userPunishmentServices.ApplyPMOtherPunishmentsAsync(input.Month, input.Year);  
+        }
+
         [HttpGet]
         [NccAuthentication]
         [AbpAllowAnonymous]

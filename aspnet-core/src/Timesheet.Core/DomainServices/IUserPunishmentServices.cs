@@ -12,5 +12,7 @@ namespace Timesheet.DomainServices
     {
         //Task<List<UserPunishments>> AddUserPunishmentByDay(DateTime selectedDate);
         Task<List<PMReportItemDto>> ApplyPMReportPunishmentsAsync();
+
+        Task<List<UserPunishment>> ApplyPMOtherPunishmentsAsync(int getPMOtherPunishmentAtMonth, int getPMOtherPunishmentAtYear);
     }
 }
