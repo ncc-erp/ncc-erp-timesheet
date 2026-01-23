@@ -521,7 +521,7 @@ namespace Timesheet.Application.Tests.API.HRMV2
                 {
                     await _appService.ConfirmUserQuit(input);
                 });
-                exception.Message.ShouldBe($"Cannot deactivate because this user is the only active PM in project(s): \"{projectName}\".");
+                exception.Message.ShouldBe($"Error: Cannot deactivate because this user is the only active PM in project(s): \"{projectName}\".");
             });
         }
 
@@ -579,6 +579,15 @@ namespace Timesheet.Application.Tests.API.HRMV2
                 .Where(x => x.EmailAddress.ToLower().Trim() == input.EmailAddress.ToLower().Trim()).First();
                 updatedUser.IsActive.ShouldBeTrue();
                 updatedUser.IsStopWork.ShouldBeTrue();
+
+                var projectUsers = _workScope.GetAll<Ncc.Entities.ProjectUser>()
+                    .Where(pu => pu.UserId == updatedUser.Id)
+                    .ToList();
+
+                foreach (var pu in projectUsers)
+                {
+                    pu.Type.ShouldBe(Ncc.Entities.ProjectUserType.Member);
+                }
             });
         }
 
@@ -619,6 +628,15 @@ namespace Timesheet.Application.Tests.API.HRMV2
                 .Where(x => x.EmailAddress.ToLower().Trim() == input.EmailAddress.ToLower().Trim()).First();
                 updatedUser.IsActive.ShouldBeTrue();
                 updatedUser.IsStopWork.ShouldBeTrue();
+
+                var projectUsers = _workScope.GetAll<Ncc.Entities.ProjectUser>()
+                    .Where(pu => pu.UserId == updatedUser.Id)
+                    .ToList();
+
+                foreach (var pu in projectUsers)
+                {
+                    pu.Type.ShouldBe(Ncc.Entities.ProjectUserType.Member);
+                }
             });
         }
 
@@ -659,6 +677,15 @@ namespace Timesheet.Application.Tests.API.HRMV2
                 .Where(x => x.EmailAddress.ToLower().Trim() == input.EmailAddress.ToLower().Trim()).First();
                 updatedUser.IsActive.ShouldBeTrue();
                 updatedUser.IsStopWork.ShouldBeFalse();
+
+                var projectUsers = _workScope.GetAll<Ncc.Entities.ProjectUser>()
+                    .Where(pu => pu.UserId == updatedUser.Id)
+                    .ToList();
+
+                foreach (var pu in projectUsers)
+                {
+                    pu.Type.ShouldBe(Ncc.Entities.ProjectUserType.Member); 
+                }
             });
         }
 

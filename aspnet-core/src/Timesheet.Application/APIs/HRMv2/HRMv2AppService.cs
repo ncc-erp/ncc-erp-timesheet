@@ -458,60 +458,28 @@ namespace Timesheet.APIs.HRMv2
                 throw new UserFriendlyException("Can't found user with the same email with HRM Tool");
             }
 
-            var activeProjectUsers = await WorkScope.GetAll<ProjectUser>()
-                .Include(pu => pu.Project)
-                .Where(pu => pu.UserId == userToUpdate.Id && pu.Project.Status == ProjectStatus.Active)
-                .ToListAsync();
-
-            var pmProjectIds = activeProjectUsers
-                .Where(pu => pu.Type == ProjectUserType.PM)
-                .Select(pu => pu.ProjectId)
-                .ToList();
-
-            if (pmProjectIds.Any())
-            {
-                var projectsWithOtherPMs = await WorkScope.GetAll<ProjectUser>()
-                    .Where(pu => pmProjectIds.Contains(pu.ProjectId)
-                                 && pu.UserId != userToUpdate.Id
-                                 && pu.Type == ProjectUserType.PM
-                                 && pu.User.IsActive)
-                    .Select(pu => pu.ProjectId)
-                    .Distinct()
-                    .ToListAsync();
-
-                var onlyPMProjectIds = pmProjectIds.Except(projectsWithOtherPMs).ToList();
-
-                if (onlyPMProjectIds.Any())
-                {
-                    var projectNames = activeProjectUsers
-                        .Where(pu => onlyPMProjectIds.Contains(pu.ProjectId))
-                        .Select(pu => pu.Project.Name)
-                        .ToList();
-                    var projectsStr = string.Join(", ", projectNames.Select(name => $"\"{name}\""));
-                    throw new UserFriendlyException($"Cannot deactivate because this user is the only active PM in project(s): {projectsStr}.");
-                }
-            }
-
             userToUpdate.IsActive = input.IsActive;
             userToUpdate.IsStopWork = input.IsStopWork;
             userToUpdate.EndDateAt = input.StopWorkingTime;
-            
+
             await WorkScope.UpdateAsync(userToUpdate);
 
-            foreach (var pu in activeProjectUsers)
-            {
-                pu.Type = ProjectUserType.DeActive;
-            }
-
             return input;
-             
-
         }
 
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async Task<UpdateUserStatusFromHRMDto> ConfirmUserQuit(UpdateUserStatusFromHRMDto input)
         {
+            var userToUpdate = await WorkScope.GetAll<User>()
+                .Where(x => x.EmailAddress.ToLower().Trim() == input.EmailAddress.ToLower().Trim())
+                .FirstOrDefaultAsync();
+
+            if (userToUpdate == null)
+            {
+                throw new UserFriendlyException("Can't found user with the same email with HRM Tool");
+            }
+
             var inputToUpdate = new UpdateUserStatusDto()
             {
                 IsActive = false,
@@ -519,6 +487,8 @@ namespace Timesheet.APIs.HRMv2
                 EmailAddress = input.EmailAddress,
                 StopWorkingTime = input.DateAt
             };
+
+            await _userServices.DeactivateUserFromProjects(userToUpdate.Id);
             await UpdateTimesheetUserStatus(inputToUpdate);
             return input;
         }
