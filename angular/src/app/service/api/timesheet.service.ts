@@ -20,7 +20,7 @@ export class TimesheetService extends BaseApiService {
     return 'Timesheet';
   }
 
-  getAllTimesheets(startDate: string, endDate: string, status: number,projectId: number,checkInFilter: number, searchText: string, branchId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, workLocation: number, overtimeType: number): Observable<any> {
+  getAllTimesheets(startDate: string, endDate: string, status: number,projectId: number,checkInFilter: number, searchText: string, branchId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, workLocation: number, isCharged: number): Observable<any> {
     let params : HttpParams = new HttpParams();
     params = params.append("startDate", startDate);
     params = params.append("endDate", endDate);
@@ -32,18 +32,11 @@ export class TimesheetService extends BaseApiService {
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
     params = params.append("workLocation", this.getPara(workLocation));
-    params = params.append("overtimeType", this.addOvertimeTypeParam(overtimeType));
+
+    const isChargedParam = isCharged === 1 ? "true" : (isCharged === 0 ? "false" : "");
+    params = params.append("isCharged", isChargedParam);
     return this.http.get(this.getUrl("GetAll"), { params : params });
     // return this.http.get(this.getUrl(`GetAll?startDate=${startDate}&endDate=${endDate}&status=${status}&projectId=${this.getPara(projectId)}&checkInFilter=${this.getPara(checkInFilter)}&searchText=${searchText}&branchId=${this.getPara(branchId)}`));
-  }
-
-  private addOvertimeTypeParam(overtimeType: number) {
-    if (overtimeType === 1) {
-      return "true";
-    } else if (overtimeType === 0) {
-      return "false";
-    }
-    return "";
   }
 
   private getPara(value){
@@ -109,7 +102,7 @@ export class TimesheetService extends BaseApiService {
   getAllTimeSheetOrRemote(day, type): Observable<any>{
     return this.http.get(this.getUrl(`GetAllTimeSheetOrRemote?day=${day}&type=${type}`));
   }
-  getQuantiyTimesheetStatus(fromDate, toDate, projectId: number, checkInFilter: number, searchText: string, branchId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, workLocation: number, overtimeType: number): Observable<any> {
+  getQuantiyTimesheetStatus(fromDate, toDate, projectId: number, checkInFilter: number, searchText: string, branchId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, workLocation: number, isCharged: number): Observable<any> {
     let params : HttpParams = new HttpParams();
     params = params.append("startDate", fromDate);
     params = params.append("endDate", toDate);
@@ -120,7 +113,9 @@ export class TimesheetService extends BaseApiService {
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
     params = params.append("workLocation", this.getPara(workLocation));
-    params = params.append("overtimeType", this.addOvertimeTypeParam(overtimeType));
+
+    const isChargedParam = isCharged === 1 ? "true" : (isCharged === 0 ? "false" : "");
+    params = params.append("isCharged", isChargedParam);
     return this.http.get(this.getUrl("GetQuantiyTimesheetStatus"), { params : params });
   }
 

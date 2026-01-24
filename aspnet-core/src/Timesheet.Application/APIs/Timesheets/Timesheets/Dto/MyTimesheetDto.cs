@@ -150,7 +150,7 @@ namespace Timesheet.Timesheets.Timesheets.Dto
         public string CheckOut { get; set; }
         public RequestType? WorkLocation { get; set; }
         public TypeOfWork TypeOfWork { get; set; }
-        public bool IsCharged { get; set; }
+        public bool? IsCharged { get; set; }
     }
 
 }

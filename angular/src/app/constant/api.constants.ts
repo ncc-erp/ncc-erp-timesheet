@@ -248,7 +248,7 @@ export const APP_CONSTANT = {
     Remote: 2,
     Office: 3,
   },
-  OvertimeType: {
+  OvertimeFilter: {
     All: -1,
     NonCharged: 0,
     Charged: 1

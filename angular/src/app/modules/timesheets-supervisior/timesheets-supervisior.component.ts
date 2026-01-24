@@ -37,7 +37,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
 
   filterStatus: number = this.APP_CONSTANT.TimesheetStatus.Pending; // ALL
   workingType: number = this.APP_CONSTANT.EnumTypeOfWork.All; // ALL
-  overtimeType: number = this.APP_CONSTANT.OvertimeType.All; // ALL
+  isCharged: number = this.APP_CONSTANT.OvertimeFilter.All; // ALL
   viewBy: number = this.APP_CONSTANT.TimesheetViewBy.Project; // Project
   timesheetsGroup: any[] = []; // Store the final list of timesheet to render
   isLock: boolean = true;
@@ -108,17 +108,17 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     }
   ]
 
-  Timesheet_OvertimeTypes = [
+  Timesheet_OvertimeFilters = [
     {
-      value: this.APP_CONSTANT.OvertimeType.All,
+      value: this.APP_CONSTANT.OvertimeFilter.All,
       name: 'All'
     },
     {
-      value: this.APP_CONSTANT.OvertimeType.NonCharged,
+      value: this.APP_CONSTANT.OvertimeFilter.NonCharged,
       name: 'Non-charged'
     },
     {
-      value: this.APP_CONSTANT.OvertimeType.Charged,
+      value: this.APP_CONSTANT.OvertimeFilter.Charged,
       name: 'Charged'
     }
   ]
@@ -151,7 +151,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
 
   getData() {
     this.isLoading = true;
-    this.timesheetSupervisiorService.getAll(this.fromDate, this.toDate, this.filterStatus, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType, this.overtimeType).subscribe(obj => {
+    this.timesheetSupervisiorService.getAll(this.fromDate, this.toDate, this.filterStatus, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType, this.isCharged).subscribe(obj => {
       // After the supervisior choose another date, status or view.
       this.rawData = obj.result;
       // this.convertData(obj.result);
@@ -162,7 +162,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   }
   getQuantityTimesheetSupervisorStatus(){
     this.isCountLoading = true;
-    this.timesheetSupervisiorService.GetQuantityTimesheetSupervisorStatus(this.fromDate, this.toDate, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType, this.overtimeType).subscribe((obj:any)=>{
+    this.timesheetSupervisiorService.GetQuantityTimesheetSupervisorStatus(this.fromDate, this.toDate, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType, this.isCharged).subscribe((obj:any)=>{
       this.Timesheet_Statuses.forEach(item => {
         if(item.value === this.APP_CONSTANT.TimesheetStatus.All) {
           item.count = obj.result.reduce((previousValue, currentValue) => previousValue + currentValue.quantity, 0);

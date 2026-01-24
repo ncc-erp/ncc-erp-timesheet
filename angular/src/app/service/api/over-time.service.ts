@@ -16,16 +16,8 @@ export class OverTimeService extends BaseApiService {
         return "OverTimeHour";
     }
 
-    getAll(request, month, year, projectId, overtimeType): Observable<any> {
-        return this.http.post(this.rootUrl + "/GetAllPagging?" + `year=${year}&month=${month}&projectId=${projectId < 1 ? '' : projectId}&overtimeType=${this.getPara(overtimeType)}`, request);
-    }
-
-    private getPara(value){
-        if (value === 1) {
-            return "true";
-        } else if (value === 0) {
-            return "false";
-        }
-        return "";
+    getAll(request, month, year, projectId, isCharged): Observable<any> {
+        const isChargedParam = isCharged === 1 ? "true" : (isCharged === 0 ? "false" : "");
+        return this.http.post(this.rootUrl + "/GetAllPagging?" + `year=${year}&month=${month}&projectId=${projectId < 1 ? '' : projectId}&isCharged=${isChargedParam}`, request);
     }
 }
