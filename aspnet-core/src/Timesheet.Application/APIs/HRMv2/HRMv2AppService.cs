@@ -488,8 +488,8 @@ namespace Timesheet.APIs.HRMv2
                 StopWorkingTime = input.DateAt
             };
 
-            await _userServices.DeactivateUserFromProjects(userToUpdate.Id);
             await UpdateTimesheetUserStatus(inputToUpdate);
+            await _userServices.DeactivateUserFromProjects(userToUpdate.Id);
             return input;
         }
         [HttpPost]

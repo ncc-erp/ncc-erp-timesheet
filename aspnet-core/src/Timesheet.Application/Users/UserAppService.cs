@@ -601,10 +601,10 @@ namespace Ncc.Users
             var user = await _ws.GetAsync<User>(input.Id);
             if (user != null)
             {
-                await _userServices.DeactivateUserFromProjects(user.Id);
                 user.EndDateAt = user.EndDateAt.HasValue ? user.EndDateAt : DateTimeUtils.GetNow();
                 user.IsActive = false;
                 await _ws.GetRepo<User, long>().UpdateAsync(user);
+                await _userServices.DeactivateUserFromProjects(user.Id);
             }
             else
             {
