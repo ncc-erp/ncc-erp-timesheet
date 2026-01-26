@@ -83,18 +83,15 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
   Timesheet_TypeOfWorks = [
     {
       value: this.APP_CONSTANT.EnumTypeOfWork.All,
-      name: 'All',
-      count: 0
+      name: 'All'
     },
     {
       value: this.APP_CONSTANT.EnumTypeOfWork.Normalworkinghours,
-      name: 'Normal working ',
-      count: 0
+      name: 'Normal working'
     },
     {
       value: this.APP_CONSTANT.EnumTypeOfWork.Overtime,
-      name: 'OverTime',
-      count: 0
+      name: 'OverTime'
     },
   ]
   Timesheet_OvertimeFilters = [
@@ -130,7 +127,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
   ];
 
 
-  selectedTypeOfWork: number = this.APP_CONSTANT.EnumTypeOfWork.All;
+  typeOfWork: number = this.APP_CONSTANT.EnumTypeOfWork.All;
   isCharged: number = this.APP_CONSTANT.OvertimeFilter.All;
 
 
@@ -271,6 +268,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
         this.OpenTalkJoinTime,
         this.OpenTalkJoinTimeType,
         this.workLocationFilter,
+        this.typeOfWork,
         this.isCharged
       )
       .subscribe((obj) => {
@@ -298,6 +296,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
         this.OpenTalkJoinTime,
         this.OpenTalkJoinTimeType,
         this.workLocationFilter,
+        this.typeOfWork,
         this.isCharged
       )
       .subscribe((obj: any) => {
@@ -325,8 +324,8 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
   }
 
   onSelectedTypeOfWorkChange() {
-    this.filteredTimesheets = this.rawData.filter(s => this.selectedTypeOfWork === this.APP_CONSTANT.EnumTypeOfWork.All
-      || s.typeOfWork === this.selectedTypeOfWork);
+    this.filteredTimesheets = this.rawData.filter(s => this.typeOfWork === this.APP_CONSTANT.EnumTypeOfWork.All
+      || s.typeOfWork === this.typeOfWork);
 
     this.convertData(this.filteredTimesheets);
 

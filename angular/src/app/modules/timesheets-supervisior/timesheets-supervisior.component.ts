@@ -36,7 +36,7 @@ export const MY_FORMATS = {
 export class TimesheetsSupervisiorComponent extends AppComponentBase implements OnInit {
 
   filterStatus: number = this.APP_CONSTANT.TimesheetStatus.Pending; // ALL
-  workingType: number = this.APP_CONSTANT.EnumTypeOfWork.All; // ALL
+  typeOfWork: number = this.APP_CONSTANT.EnumTypeOfWork.All; // ALL
   isCharged: number = this.APP_CONSTANT.OvertimeFilter.All; // ALL
   viewBy: number = this.APP_CONSTANT.TimesheetViewBy.Project; // Project
   timesheetsGroup: any[] = []; // Store the final list of timesheet to render
@@ -151,18 +151,18 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
 
   getData() {
     this.isLoading = true;
-    this.timesheetSupervisiorService.getAll(this.fromDate, this.toDate, this.filterStatus, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType, this.isCharged).subscribe(obj => {
+    this.timesheetSupervisiorService.getAll(this.fromDate, this.toDate, this.filterStatus, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType, this.typeOfWork, this.isCharged).subscribe(obj => {
       // After the supervisior choose another date, status or view.
       this.rawData = obj.result;
       // this.convertData(obj.result);
-      this.onWorkingTypeChange();
+      this.onSelectedTypeOfWorkChange();
       this.isLoading = false;
     });
     this.getQuantityTimesheetSupervisorStatus();
   }
   getQuantityTimesheetSupervisorStatus(){
     this.isCountLoading = true;
-    this.timesheetSupervisiorService.GetQuantityTimesheetSupervisorStatus(this.fromDate, this.toDate, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType, this.isCharged).subscribe((obj:any)=>{
+    this.timesheetSupervisiorService.GetQuantityTimesheetSupervisorStatus(this.fromDate, this.toDate, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType, this.typeOfWork, this.isCharged).subscribe((obj:any)=>{
       this.Timesheet_Statuses.forEach(item => {
         if(item.value === this.APP_CONSTANT.TimesheetStatus.All) {
           item.count = obj.result.reduce((previousValue, currentValue) => previousValue + currentValue.quantity, 0);
@@ -177,9 +177,9 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     })
   }
 
-  onWorkingTypeChange() {
-    this.filteredTimesheets = this.rawData.filter(s => this.workingType === this.APP_CONSTANT.EnumTypeOfWork.All
-      || s.typeOfWork === this.workingType);
+  onSelectedTypeOfWorkChange() {
+    this.filteredTimesheets = this.rawData.filter(s => this.typeOfWork === this.APP_CONSTANT.EnumTypeOfWork.All
+      || s.typeOfWork === this.typeOfWork);
 
     this.convertData(this.filteredTimesheets);
   }

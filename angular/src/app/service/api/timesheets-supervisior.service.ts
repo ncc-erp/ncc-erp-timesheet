@@ -16,7 +16,7 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     return 'TimesheetsSupervisor';
   }
 
-  getAll(startDate: string, endDate: string, status: number, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, isCharged: number): Observable<any> {
+  getAll(startDate: string, endDate: string, status: number, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, typeOfWork: number, isCharged: number): Observable<any> {
     let params : HttpParams = new HttpParams();
     params = params.append("startDate", startDate);
     params = params.append("endDate", endDate);
@@ -25,6 +25,9 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     params = params.append("userId", this.getPara(userId));
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
+
+    const typeOfWorkParam = typeOfWork >= 0 ? typeOfWork.toString() : "";
+    params = params.append("typeOfWork", typeOfWorkParam);
 
     const isChargedParam = isCharged === 1 ? "true" : (isCharged === 0 ? "false" : "");
     params = params.append("isCharged", isChargedParam);
@@ -37,7 +40,7 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     return value
   }
 
-  GetQuantityTimesheetSupervisorStatus(startDate: string, endDate: string, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, isCharged: number): Observable<any> {
+  GetQuantityTimesheetSupervisorStatus(startDate: string, endDate: string, projectId: number, userId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, typeOfWork: number, isCharged: number): Observable<any> {
     let params : HttpParams = new HttpParams();
     params = params.append("startDate", startDate);
     params = params.append("endDate", endDate);
@@ -45,6 +48,9 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     params = params.append("userId", this.getPara(userId));
     params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
     params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
+
+    const typeOfWorkParam = typeOfWork >= 0 ? typeOfWork.toString() : "";
+    params = params.append("typeOfWork", typeOfWorkParam);
 
     const isChargedParam = isCharged === 1 ? "true" : (isCharged === 0 ? "false" : "");
     params = params.append("isCharged", isChargedParam);
