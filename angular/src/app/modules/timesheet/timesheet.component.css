@@ -104,6 +104,12 @@
   gap: 5px;
 } */
 
+@media (min-width: 992px) {
+  .project-width {
+    width: 30%;
+  }
+}
+
 .pr-0 {
   padding-right: 0px;
 }
@@ -211,3 +217,4 @@
     width: 100%;
   }
 }
+

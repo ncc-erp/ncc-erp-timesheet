@@ -21,6 +21,7 @@
         <date-selector [type]="APP_CONSTANT.TypeViewHomePage.Month"
           (onDateSelectorChange)="handleDateSelectorChange($event)">
         </date-selector>
+
         <!-- Filter And View Selector -->
         <div class="row">
           <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
@@ -33,6 +34,7 @@
               </mat-select>
             </mat-form-field>
           </div>
+
           <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
             <mat-form-field>
               <mat-select placeholder="Filter status" [(ngModel)]="filterStatus" name="filterStatus"
@@ -43,6 +45,7 @@
               </mat-select>
             </mat-form-field>
           </div>
+
           <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
             <mat-form-field>
               <mat-select placeholder="Working type" [(ngModel)]="workingType" name="workingType"
@@ -91,7 +94,18 @@
             </mat-form-field>
           </div>
 
+          <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+            <mat-form-field>
+              <mat-select placeholder="Overtime filter" [(ngModel)]="isCharged" name="isCharged"
+                (selectionChange)="refresh()">
+                <mat-option *ngFor="let type of Timesheet_OvertimeFilters" [value]="type.value">
+                  {{type.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
         </div>
+        
         <div class="row">
           <div class="col-sm-3">
             <div class="form-group form-float">

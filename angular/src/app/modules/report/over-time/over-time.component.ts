@@ -18,6 +18,7 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
   year;
   listMonth = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
   listYear = APP_CONSTANT.ListYear;
+  isCharged: number = this.APP_CONSTANT.OvertimeFilter.All;
   listOverTime: OverTimeItem[] = [];
   searchText = '';
   totalOtHours = 0;
@@ -26,6 +27,20 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
   projectSearch: FormControl = new FormControl("")
   projects = []
   isLoading: boolean;
+  Timesheet_OvertimeFilters = [
+    {
+      value: this.APP_CONSTANT.OvertimeFilter.All,
+      name: 'All'
+    },
+    {
+      value: this.APP_CONSTANT.OvertimeFilter.NonCharged,
+      name: 'Non-charged'
+    },
+    {
+      value: this.APP_CONSTANT.OvertimeFilter.Charged,
+      name: 'Charged'
+    }
+  ]
   constructor(
     injector: Injector,
     private overTimeService: OverTimeService,
@@ -55,14 +70,14 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
     const allDataRequest = { ...request, skipCount: 0, maxResultCount: 9999 };
 
     this.overTimeService
-      .getAll(request, this.month + 1, this.year, this.projectId)
+      .getAll(request, this.month + 1, this.year, this.projectId, this.isCharged)
       .pipe(finalize(() => {
         finishedCallback();
       }))
       .subscribe((result: any) => {
         this.listOverTime = result.result.items;
 
-        this.overTimeService.getAll(allDataRequest, this.month + 1, this.year, this.projectId)
+        this.overTimeService.getAll(allDataRequest, this.month + 1, this.year, this.projectId, this.isCharged)
           .subscribe((allDataResult: any) => {
             this.totalOtHours = 0;
             allDataResult.result.items.forEach(data => {
@@ -83,7 +98,7 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
             d.date = moment(d.date).format("DD/MM/YYYY");
           });
         });
-        
+
         this.showPaging(result.result, pageNumber);
       });
 
@@ -118,7 +133,6 @@ export class OverTimeComponent extends PagedListingComponentBase<OverTimeItem> i
       this.projects = this.projectFilter.slice();
     }
   }
-
 }
 
 export class OverTimeHour {
@@ -126,7 +140,8 @@ export class OverTimeHour {
   dayName: string;
   otHour: number;
   coefficient: number;
-  workingHour: number
+  workingHour: number;
+  isCharged: boolean;
 }
 
 export class OverTimeItem {
