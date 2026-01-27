@@ -599,16 +599,16 @@ namespace Ncc.Users
         public async System.Threading.Tasks.Task DeactiveUser(EntityDto<long> input)
         {
             var user = await _ws.GetAsync<User>(input.Id);
-            if (user != null)
+            if (user == null)
             {
-                await _userServices.DeactivateUserFromProjects(user.Id);
-                user.EndDateAt = user.EndDateAt.HasValue ? user.EndDateAt : DateTimeUtils.GetNow();
-                user.IsActive = false;
-                await _ws.GetRepo<User, long>().UpdateAsync(user);
+                throw new UserFriendlyException(string.Format("User is not exist"));
             }
             else
             {
-                throw new UserFriendlyException(string.Format("User is not exist"));
+                user.EndDateAt = user.EndDateAt.HasValue ? user.EndDateAt : DateTimeUtils.GetNow();
+                user.IsActive = false;
+                await _ws.GetRepo<User, long>().UpdateAsync(user);
+                await _userServices.DeactivateUserFromProjects(user.Id);
             }
 
         }

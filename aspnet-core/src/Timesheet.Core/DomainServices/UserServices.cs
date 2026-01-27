@@ -374,7 +374,6 @@ namespace Timesheet.DomainServices
             try
             {
                 var activeProjectUsers = await WorkScope.GetAll<ProjectUser>()
-                    .Include(pu => pu.Project)
                     .Where(pu => pu.UserId == userId && pu.Project.Status == ProjectStatus.Active)
                     .ToListAsync();
 
@@ -383,33 +382,21 @@ namespace Timesheet.DomainServices
                     .Select(pu => pu.ProjectId)
                     .ToList();
 
-                if (pmProjectIds.Any())
-                {
-                    var projectsWithOtherPMs = await WorkScope.GetAll<ProjectUser>()
-                        .Where(pu => pmProjectIds.Contains(pu.ProjectId)
-                                     && pu.UserId != userId
-                                     && pu.Type == ProjectUserType.PM
-                                     && pu.User.IsActive)
-                        .Select(pu => pu.ProjectId)
-                        .Distinct()
-                        .ToListAsync();
-
-                    var onlyPMProjectIds = pmProjectIds.Except(projectsWithOtherPMs).ToList();
-
-                    if (onlyPMProjectIds.Any())
-                    {
-                        var projectNames = activeProjectUsers
-                            .Where(pu => onlyPMProjectIds.Contains(pu.ProjectId))
-                            .Select(pu => pu.Project.Name)
-                            .ToList();
-                        var projectsStr = string.Join(", ", projectNames.Select(name => $"\"{name}\""));
-                        throw new UserFriendlyException($"Cannot deactivate because this user is the only active PM in project(s): {projectsStr}.");
-                    }
-                }
+                var projectsWithOtherPMs = await WorkScope.GetAll<ProjectUser>()
+                    .Where(pu => pmProjectIds.Contains(pu.ProjectId)
+                                    && pu.UserId != userId
+                                    && pu.Type == ProjectUserType.PM
+                                    && pu.User.IsActive)
+                    .Select(pu => pu.ProjectId)
+                    .Distinct()
+                    .ToListAsync();
 
                 foreach (var pu in activeProjectUsers)
                 {
-                    pu.Type = ProjectUserType.DeActive;
+                    if (pu.Type != ProjectUserType.PM || projectsWithOtherPMs.Contains(pu.ProjectId))
+                    {
+                        pu.Type = ProjectUserType.DeActive;
+                    }
                 }
             }
             catch (Exception ex)
