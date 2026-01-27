@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BaseApiService } from './base-api.service';
 import { Observable } from 'rxjs';
+import { GetTimesheetsInputDto } from './model/get-timesheets-input-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -20,23 +21,23 @@ export class TimesheetService extends BaseApiService {
     return 'Timesheet';
   }
 
-  getAllTimesheets(startDate: string, endDate: string, status: number,projectId: number,checkInFilter: number, searchText: string, branchId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, workLocation: number, typeOfWork: number, isCharged: number): Observable<any> {
+  getAllTimesheets(input: GetTimesheetsInputDto): Observable<any> {
     let params : HttpParams = new HttpParams();
-    params = params.append("startDate", startDate);
-    params = params.append("endDate", endDate);
-    params = params.append("status", status.toString());
-    params = params.append("projectId", this.getPara(projectId));
-    params = params.append("checkInFilter", this.getPara(checkInFilter));
-    params = params.append("searchText", searchText);
-    params = params.append("branchId", this.getPara(branchId));
-    params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
-    params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
-    params = params.append("workLocation", this.getPara(workLocation));
+    params = params.append("startDate", input.startDate);
+    params = params.append("endDate", input.endDate);
+    params = params.append("status", input.status.toString());
+    params = params.append("projectId", this.getPara(input.projectId));
+    params = params.append("checkInFilter", this.getPara(input.checkInFilter));
+    params = params.append("searchText", input.searchText);
+    params = params.append("branchId", this.getPara(input.branchId));
+    params = params.append("opentalkTime", this.getPara(input.opentalkTime));
+    params = params.append("opentalkTimeType", this.getPara(input.opentalkTimeType));
+    params = params.append("workLocation", this.getPara(input.workLocation));
     
-    const typeOfWorkParam = typeOfWork >= 0 ? typeOfWork.toString() : "";
+    const typeOfWorkParam = input.typeOfWork >= 0 ? input.typeOfWork.toString() : "";
     params = params.append("typeOfWork", typeOfWorkParam);
 
-    const isChargedParam = isCharged === 1 ? "true" : (isCharged === 0 ? "false" : "");
+    const isChargedParam = input.isCharged === 1 ? "true" : (input.isCharged === 0 ? "false" : "");
     params = params.append("isCharged", isChargedParam);
     return this.http.get(this.getUrl("GetAll"), { params : params });
     // return this.http.get(this.getUrl(`GetAll?startDate=${startDate}&endDate=${endDate}&status=${status}&projectId=${this.getPara(projectId)}&checkInFilter=${this.getPara(checkInFilter)}&searchText=${searchText}&branchId=${this.getPara(branchId)}`));
@@ -105,22 +106,22 @@ export class TimesheetService extends BaseApiService {
   getAllTimeSheetOrRemote(day, type): Observable<any>{
     return this.http.get(this.getUrl(`GetAllTimeSheetOrRemote?day=${day}&type=${type}`));
   }
-  getQuantiyTimesheetStatus(fromDate, toDate, projectId: number, checkInFilter: number, searchText: string, branchId: number, OpenTalkJoinTime : number, OpenTalkJoinTimeType: boolean, workLocation: number, typeOfWork: number, isCharged: number): Observable<any> {
+  getQuantiyTimesheetStatus(input: GetTimesheetsInputDto): Observable<any> {
     let params : HttpParams = new HttpParams();
-    params = params.append("startDate", fromDate);
-    params = params.append("endDate", toDate);
-    params = params.append("projectId", this.getPara(projectId));
-    params = params.append("checkInFilter", this.getPara(checkInFilter));
-    params = params.append("searchText", searchText);
-    params = params.append("branchId", branchId.toString());
-    params = params.append("opentalkTime", this.getPara(OpenTalkJoinTime));
-    params = params.append("opentalkTimeType", this.getPara(OpenTalkJoinTimeType));
-    params = params.append("workLocation", this.getPara(workLocation));
+    params = params.append("startDate", input.startDate);
+    params = params.append("endDate", input.endDate);
+    params = params.append("projectId", this.getPara(input.projectId));
+    params = params.append("checkInFilter", this.getPara(input.checkInFilter));
+    params = params.append("searchText", input.searchText);
+    params = params.append("branchId", input.branchId.toString());
+    params = params.append("opentalkTime", this.getPara(input.opentalkTime));
+    params = params.append("opentalkTimeType", this.getPara(input.opentalkTimeType));
+    params = params.append("workLocation", this.getPara(input.workLocation));
     
-    const typeOfWorkParam = typeOfWork >= 0 ? typeOfWork.toString() : "";
+    const typeOfWorkParam = input.typeOfWork >= 0 ? input.typeOfWork.toString() : "";
     params = params.append("typeOfWork", typeOfWorkParam);
 
-    const isChargedParam = isCharged === 1 ? "true" : (isCharged === 0 ? "false" : "");
+    const isChargedParam = input.isCharged === 1 ? "true" : (input.isCharged === 0 ? "false" : "");
     params = params.append("isCharged", isChargedParam);
     return this.http.get(this.getUrl("GetQuantiyTimesheetStatus"), { params : params });
   }

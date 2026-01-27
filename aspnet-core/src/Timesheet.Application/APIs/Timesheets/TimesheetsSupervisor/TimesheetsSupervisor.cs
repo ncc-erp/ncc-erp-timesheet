@@ -16,6 +16,7 @@ using Ncc.Authorization.Users;
 using Ncc.IoC;
 using Timesheet.Timesheets.Projects.Dto;
 using Ncc.Configuration;
+using Timesheet.APIs.Timesheets.Timesheets.Dto;
 
 namespace Timesheet.Timesheets.TimesheetsSupervisor
 {
@@ -29,7 +30,7 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
 
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.TimesheetSupervision_View)]
-        public async Task<List<MyTimeSheetDto>> GetAll(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, TimesheetStatus? status, long? ProjectId, long? UserId, TypeOfWork? typeOfWork, bool? isCharged)
+        public async Task<List<MyTimeSheetDto>> GetAll(GetTimesheetsInputDto input)
         {
             var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
             var qUsers = WorkScope.GetAll<User>()
@@ -76,38 +77,38 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                               openTalkTime = WorkScope.GetAll<OpenTalk>().Where(s=>s.UserId == a.User.Id && a.DateAt == s.DateAt.Date).Select(s=>s.totalTime).FirstOrDefault(),
                               LastModifierUser = qUsers.Where(x => x.Id == a.LastModifierUserId).Select(x => x.EmailAddress).FirstOrDefault()
                           })
-                           .WhereIf(status.HasValue && status >= 0, s => s.Status == status)
-                           .WhereIf(startDate != null, s => s.DateAt >= startDate)
-                           .WhereIf(endDate != null, s => s.DateAt.Date <= endDate)
-                           .WhereIf(ProjectId != null, s => s.ProjectId == ProjectId)
-                           .WhereIf(opentalkTime.HasValue, s => s.ProjectTaskId == OpenTalkID)
-                           .WhereIf(opentalkTime.HasValue, s => opentalkTimeType.Value ? s.openTalkTime >= opentalkTime : s.openTalkTime < opentalkTime)
-                           .WhereIf(typeOfWork.HasValue, s => s.TypeOfWork == typeOfWork.Value)
-                           .WhereIf(isCharged.HasValue, s => s.IsCharged == isCharged.Value)
-                           .WhereIf(UserId != null, s => s.UserId == UserId)
+                           .WhereIf(input.Status.HasValue && input.Status >= 0, s => s.Status == input.Status)
+                           .WhereIf(input.StartDate != null, s => s.DateAt >= input.StartDate)
+                           .WhereIf(input.EndDate != null, s => s.DateAt.Date <= input.EndDate)
+                           .WhereIf(input.ProjectId != null, s => s.ProjectId == input.ProjectId)
+                           .WhereIf(input.OpentalkTime.HasValue, s => s.ProjectTaskId == OpenTalkID)
+                           .WhereIf(input.OpentalkTime.HasValue, s => input.OpentalkTimeType.Value ? s.openTalkTime >= input.OpentalkTime : s.openTalkTime < input.OpentalkTime)
+                           .WhereIf(input.TypeOfWork.HasValue, s => s.TypeOfWork == input.TypeOfWork.Value)
+                           .WhereIf(input.IsCharged.HasValue, s => s.IsCharged == input.IsCharged.Value)
+                           .WhereIf(input.UserId != null, s => s.UserId == input.UserId)
                            .ToListAsync();
         }
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.TimesheetSupervision_View)]
-        public async Task<object> GetQuantityTimesheetSupervisorStatus(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, long? projectId, long? userId, TypeOfWork? typeOfWork, bool? isCharged)
+        public async Task<object> GetQuantityTimesheetSupervisorStatus(GetTimesheetsInputDto input)
         {
             var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
             var query = WorkScope.GetAll<MyTimesheet>()
-                                 .Where(x => !startDate.HasValue || x.DateAt.Date >= startDate)
-                                 .Where(x => !endDate.HasValue || x.DateAt.Date <= endDate)
-                                 .WhereIf(opentalkTime.HasValue, x => x.ProjectTaskId == OpenTalkID)
-                                 .WhereIf(projectId.HasValue, x => x.ProjectTask.ProjectId == projectId)
-                                 .WhereIf(userId.HasValue, x => x.UserId == userId)
+                                 .Where(x => !input.StartDate.HasValue || x.DateAt.Date >= input.StartDate)
+                                 .Where(x => !input.EndDate.HasValue || x.DateAt.Date <= input.EndDate)
+                                 .WhereIf(input.OpentalkTime.HasValue, x => x.ProjectTaskId == OpenTalkID)
+                                 .WhereIf(input.ProjectId.HasValue, x => x.ProjectTask.ProjectId == input.ProjectId)
+                                 .WhereIf(input.UserId.HasValue, x => x.UserId == input.UserId)
                                  .Select (x => new
                                  {
                                      Status = x.Status,
                                      IsCharged = x.IsCharged,
                                      TypeOfWork = x.TypeOfWork,
-                                     openTalkTime = !opentalkTime.HasValue ? 0 : WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == x.UserId && x.DateAt.Date == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
+                                     openTalkTime = !input.OpentalkTime.HasValue ? 0 : WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == x.UserId && x.DateAt.Date == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
                                  })
-                                 .WhereIf(opentalkTime.HasValue, x => opentalkTimeType.Value ? x.openTalkTime >= opentalkTime : x.openTalkTime < opentalkTime)
-                                 .WhereIf(typeOfWork.HasValue, x => x.TypeOfWork == typeOfWork.Value)
-                                 .WhereIf(isCharged.HasValue, x => x.IsCharged == isCharged.Value)
+                                 .WhereIf(input.OpentalkTime.HasValue, x => input.OpentalkTimeType.Value ? x.openTalkTime >= input.OpentalkTime : x.openTalkTime < input.OpentalkTime)
+                                 .WhereIf(input.TypeOfWork.HasValue, x => x.TypeOfWork == input.TypeOfWork.Value)
+                                 .WhereIf(input.IsCharged.HasValue, x => x.IsCharged == input.IsCharged.Value)
                                  .GroupBy(x => x.Status).Select(x => new
                                  {
                                      Status = x.Key,

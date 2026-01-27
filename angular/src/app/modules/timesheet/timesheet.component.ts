@@ -17,6 +17,7 @@ import { ProjectManagerService } from '@app/service/api/project-manager.service'
 import { BranchDto, UserServiceProxy } from '@shared/service-proxies/service-proxies';
 import { BranchService } from '@app/service/api/branch.service';
 import { InfoService } from '@app/service/api/info.service';
+import { GetTimesheetsInputDto } from '@app/service/api/model/get-timesheets-input-dto';
 
 export const MY_FORMATS = {
   parse: {
@@ -83,15 +84,18 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
   Timesheet_TypeOfWorks = [
     {
       value: this.APP_CONSTANT.EnumTypeOfWork.All,
-      name: 'All'
+      name: 'All',
+      count: 0
     },
     {
       value: this.APP_CONSTANT.EnumTypeOfWork.Normalworkinghours,
-      name: 'Normal working'
+      name: 'Normal working',
+      count: 0
     },
     {
       value: this.APP_CONSTANT.EnumTypeOfWork.Overtime,
-      name: 'OverTime'
+      name: 'OverTime',
+      count: 0
     },
   ]
   Timesheet_OvertimeFilters = [
@@ -127,7 +131,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
   ];
 
 
-  typeOfWork: number = this.APP_CONSTANT.EnumTypeOfWork.All;
+  selectedTypeOfWork: number = this.APP_CONSTANT.EnumTypeOfWork.All;
   isCharged: number = this.APP_CONSTANT.OvertimeFilter.All;
 
 
@@ -254,23 +258,30 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     }
   }
 
+  getFilterInput(): GetTimesheetsInputDto {
+    return {
+        startDate: this.fromDate,
+        endDate: this.toDate,
+        status: this.filterStatus,
+        projectId: Number(this.projectId),
+        checkInFilter: Number(this.checkInFilter),
+        searchText: this.searchText,
+        branchId: Number(this.branchId),
+        opentalkTime: this.OpenTalkJoinTime,
+        opentalkTimeType: this.OpenTalkJoinTimeType,
+        workLocation: this.workLocationFilter,
+        typeOfWork: this.selectedTypeOfWork,
+        isCharged: (this.selectedTypeOfWork === this.APP_CONSTANT.EnumTypeOfWork.Overtime) 
+                    ? this.isCharged 
+                    : this.APP_CONSTANT.OvertimeFilter.All
+    };
+}
+
   getTimesheets() {
     this.isLoading = true;
+    const input = this.getFilterInput();
     this.timesheetService
-      .getAllTimesheets(
-        this.fromDate,
-        this.toDate,
-        this.filterStatus,
-        Number(this.projectId),
-        Number(this.checkInFilter),
-        this.searchText,
-        Number(this.branchId),
-        this.OpenTalkJoinTime,
-        this.OpenTalkJoinTimeType,
-        this.workLocationFilter,
-        this.typeOfWork,
-        this.isCharged
-      )
+      .getAllTimesheets(input)
       .subscribe((obj) => {
         //this.timesheets = obj.result;
         this.rawData = obj.result;
@@ -285,20 +296,9 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     this.getQuantiyTimesheetStatus();
   }
   getQuantiyTimesheetStatus() {
+    const input = this.getFilterInput();
      this.timesheetService
-      .getQuantiyTimesheetStatus(
-        this.fromDate,
-        this.toDate,
-        Number(this.projectId),
-        Number(this.checkInFilter),
-        this.searchText,
-        this.branchId,
-        this.OpenTalkJoinTime,
-        this.OpenTalkJoinTimeType,
-        this.workLocationFilter,
-        this.typeOfWork,
-        this.isCharged
-      )
+      .getQuantiyTimesheetStatus(input)
       .subscribe((obj: any) => {
         this.Timesheet_Statuses.forEach((item) => {
           if (item.value === this.APP_CONSTANT.TimesheetStatus.All) {
@@ -324,8 +324,8 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
   }
 
   onSelectedTypeOfWorkChange() {
-    this.filteredTimesheets = this.rawData.filter(s => this.typeOfWork === this.APP_CONSTANT.EnumTypeOfWork.All
-      || s.typeOfWork === this.typeOfWork);
+    this.filteredTimesheets = this.rawData.filter(s => this.selectedTypeOfWork === this.APP_CONSTANT.EnumTypeOfWork.All
+      || s.typeOfWork === this.selectedTypeOfWork);
 
     this.convertData(this.filteredTimesheets);
 
