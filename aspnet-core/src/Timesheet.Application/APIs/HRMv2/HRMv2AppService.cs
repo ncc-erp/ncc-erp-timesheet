@@ -447,7 +447,7 @@ namespace Timesheet.APIs.HRMv2
 
         [System.Security.SuppressUnmanagedCodeSecurity]
         [NccAuthentication]
-        private async Task<UpdateUserStatusDto> UpdateTimesheetUserStatus(UpdateUserStatusDto input)
+        private async Task<long> UpdateTimesheetUserStatus(UpdateUserStatusDto input)
         {
             var userToUpdate = await WorkScope.GetAll<User>()
                 .Where(x => x.EmailAddress.ToLower().Trim() == input.EmailAddress.ToLower().Trim())
@@ -464,22 +464,13 @@ namespace Timesheet.APIs.HRMv2
 
             await WorkScope.UpdateAsync(userToUpdate);
 
-            return input;
+            return userToUpdate.Id;
         }
 
         [HttpPost]
         [System.Security.SuppressUnmanagedCodeSecurity]
         public async Task<UpdateUserStatusFromHRMDto> ConfirmUserQuit(UpdateUserStatusFromHRMDto input)
         {
-            var userToUpdate = await WorkScope.GetAll<User>()
-                .Where(x => x.EmailAddress.ToLower().Trim() == input.EmailAddress.ToLower().Trim())
-                .FirstOrDefaultAsync();
-
-            if (userToUpdate == null)
-            {
-                throw new UserFriendlyException("Can't found user with the same email with HRM Tool");
-            }
-
             var inputToUpdate = new UpdateUserStatusDto()
             {
                 IsActive = false,
@@ -488,8 +479,8 @@ namespace Timesheet.APIs.HRMv2
                 StopWorkingTime = input.DateAt
             };
 
-            await UpdateTimesheetUserStatus(inputToUpdate);
-            await _userServices.DeactivateUserFromProjects(userToUpdate.Id);
+            var updatedUserId = await UpdateTimesheetUserStatus(inputToUpdate);
+            await _userServices.DeactivateUserFromProjects(updatedUserId);
             return input;
         }
         [HttpPost]

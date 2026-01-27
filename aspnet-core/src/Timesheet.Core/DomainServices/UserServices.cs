@@ -377,9 +377,23 @@ namespace Timesheet.DomainServices
                     .Where(pu => pu.UserId == userId && pu.Project.Status == ProjectStatus.Active)
                     .ToListAsync();
 
+                var pmProjectIds = activeProjectUsers
+                    .Where(pu => pu.Type == ProjectUserType.PM)
+                    .Select(pu => pu.ProjectId)
+                    .ToList();
+
+                var projectsWithOtherPMs = await WorkScope.GetAll<ProjectUser>()
+                    .Where(pu => pmProjectIds.Contains(pu.ProjectId)
+                                    && pu.UserId != userId
+                                    && pu.Type == ProjectUserType.PM
+                                    && pu.User.IsActive)
+                    .Select(pu => pu.ProjectId)
+                    .Distinct()
+                    .ToListAsync();
+
                 foreach (var pu in activeProjectUsers)
                 {
-                    if (pu.Type != ProjectUserType.PM)
+                    if (pu.Type != ProjectUserType.PM || projectsWithOtherPMs.Contains(pu.ProjectId))
                     {
                         pu.Type = ProjectUserType.DeActive;
                     }
