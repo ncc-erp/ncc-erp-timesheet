@@ -3,6 +3,7 @@ import { FormControl } from '@angular/forms';
 import { MomentDateAdapter } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { GetTimesheetsInputDto } from '@app/service/api/model/get-timesheets-input-dto';
 import { TimeSheetDto } from '@app/service/api/model/timesheet-Dto';
 import { ProjectManagerService } from '@app/service/api/project-manager.service';
 import { TimesheetsSupervisiorService } from '@app/service/api/timesheets-supervisior.service';
@@ -149,9 +150,26 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     this.changeDetector.detectChanges();
   }
 
+  getFilterInput(): GetTimesheetsInputDto {
+    return {
+      startDate: this.fromDate,
+      endDate: this.toDate,
+      status: this.filterStatus,
+      projectId: Number(this.projectId),
+      opentalkTime: this.OpenTalkJoinTime,
+      opentalkTimeType: this.OpenTalkJoinTimeType,
+      typeOfWork: this.workingType,
+      isCharged: (this.workingType === this.APP_CONSTANT.EnumTypeOfWork.Overtime) 
+                  ? this.isCharged 
+                  : this.APP_CONSTANT.OvertimeFilter.All,
+      userId: Number(this.userId)
+    };
+}
+
   getData() {
     this.isLoading = true;
-    this.timesheetSupervisiorService.getAll(this.fromDate, this.toDate, this.filterStatus, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType, this.isCharged).subscribe(obj => {
+    const input = this.getFilterInput();
+    this.timesheetSupervisiorService.getAll(input).subscribe(obj => {
       // After the supervisior choose another date, status or view.
       this.rawData = obj.result;
       // this.convertData(obj.result);
@@ -162,7 +180,8 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   }
   getQuantityTimesheetSupervisorStatus(){
     this.isCountLoading = true;
-    this.timesheetSupervisiorService.GetQuantityTimesheetSupervisorStatus(this.fromDate, this.toDate, Number(this.projectId), Number(this.userId), this.OpenTalkJoinTime, this.OpenTalkJoinTimeType, this.isCharged).subscribe((obj:any)=>{
+    const input = this.getFilterInput();
+    this.timesheetSupervisiorService.GetQuantityTimesheetSupervisorStatus(input).subscribe((obj:any)=>{
       this.Timesheet_Statuses.forEach(item => {
         if(item.value === this.APP_CONSTANT.TimesheetStatus.All) {
           item.count = obj.result.reduce((previousValue, currentValue) => previousValue + currentValue.quantity, 0);
