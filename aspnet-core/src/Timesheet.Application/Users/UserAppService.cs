@@ -599,54 +599,16 @@ namespace Ncc.Users
         public async System.Threading.Tasks.Task DeactiveUser(EntityDto<long> input)
         {
             var user = await _ws.GetAsync<User>(input.Id);
-            if (user != null)
+            if (user == null)
             {
-                var activeProjectUsers = await _ws.GetAll<ProjectUser>()
-                    .Include(pu => pu.Project)
-                    .Where(pu => pu.UserId == user.Id && pu.Project.Status == ProjectStatus.Active)
-                    .ToListAsync();
-
-                var pmProjectIds = activeProjectUsers
-                    .Where(pu => pu.Type == ProjectUserType.PM)
-                    .Select(pu => pu.ProjectId)
-                    .ToList();
-
-                if (pmProjectIds.Any())
-                {
-                    var projectsWithOtherPMs = await _ws.GetAll<ProjectUser>()
-                        .Where(pu => pmProjectIds.Contains(pu.ProjectId)
-                                     && pu.UserId != user.Id
-                                     && pu.Type == ProjectUserType.PM
-                                     && pu.User.IsActive)
-                        .Select(pu => pu.ProjectId)
-                        .Distinct()
-                        .ToListAsync();
-
-                    var onlyPMProjectIds = pmProjectIds.Except(projectsWithOtherPMs).ToList();
-
-                    if (onlyPMProjectIds.Any())
-                    {
-                        var projectNames = activeProjectUsers
-                            .Where(pu => onlyPMProjectIds.Contains(pu.ProjectId))
-                            .Select(pu => pu.Project.Name)
-                            .ToList();
-                        var projectsStr = string.Join(", ", projectNames.Select(name => $"\"{name}\""));
-                        throw new UserFriendlyException($"Cannot deactivate because this user is the only active PM in project(s): {projectsStr}.");
-                    }
-                }
-
-                user.EndDateAt = user.EndDateAt.HasValue ? user.EndDateAt : DateTimeUtils.GetNow();
-                user.IsActive = false;
-                await _ws.GetRepo<User, long>().UpdateAsync(user);
-
-                foreach (var pu in activeProjectUsers)
-                {
-                    pu.Type = ProjectUserType.DeActive;
-                }
+                throw new UserFriendlyException(string.Format("User is not exist"));
             }
             else
             {
-                throw new UserFriendlyException(string.Format("User is not exist"));
+                user.EndDateAt = user.EndDateAt.HasValue ? user.EndDateAt : DateTimeUtils.GetNow();
+                user.IsActive = false;
+                await _ws.GetRepo<User, long>().UpdateAsync(user);
+                await _userServices.DeactivateUserFromProjects(user.Id);
             }
 
         }

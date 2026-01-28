@@ -447,7 +447,7 @@ namespace Timesheet.APIs.HRMv2
 
         [System.Security.SuppressUnmanagedCodeSecurity]
         [NccAuthentication]
-        private async Task<UpdateUserStatusDto> UpdateTimesheetUserStatus(UpdateUserStatusDto input)
+        private async Task<long> UpdateTimesheetUserStatus(UpdateUserStatusDto input)
         {
             var userToUpdate = await WorkScope.GetAll<User>()
                 .Where(x => x.EmailAddress.ToLower().Trim() == input.EmailAddress.ToLower().Trim())
@@ -458,54 +458,13 @@ namespace Timesheet.APIs.HRMv2
                 throw new UserFriendlyException("Can't found user with the same email with HRM Tool");
             }
 
-            var activeProjectUsers = await WorkScope.GetAll<ProjectUser>()
-                .Include(pu => pu.Project)
-                .Where(pu => pu.UserId == userToUpdate.Id && pu.Project.Status == ProjectStatus.Active)
-                .ToListAsync();
-
-            var pmProjectIds = activeProjectUsers
-                .Where(pu => pu.Type == ProjectUserType.PM)
-                .Select(pu => pu.ProjectId)
-                .ToList();
-
-            if (pmProjectIds.Any())
-            {
-                var projectsWithOtherPMs = await WorkScope.GetAll<ProjectUser>()
-                    .Where(pu => pmProjectIds.Contains(pu.ProjectId)
-                                 && pu.UserId != userToUpdate.Id
-                                 && pu.Type == ProjectUserType.PM
-                                 && pu.User.IsActive)
-                    .Select(pu => pu.ProjectId)
-                    .Distinct()
-                    .ToListAsync();
-
-                var onlyPMProjectIds = pmProjectIds.Except(projectsWithOtherPMs).ToList();
-
-                if (onlyPMProjectIds.Any())
-                {
-                    var projectNames = activeProjectUsers
-                        .Where(pu => onlyPMProjectIds.Contains(pu.ProjectId))
-                        .Select(pu => pu.Project.Name)
-                        .ToList();
-                    var projectsStr = string.Join(", ", projectNames.Select(name => $"\"{name}\""));
-                    throw new UserFriendlyException($"Cannot deactivate because this user is the only active PM in project(s): {projectsStr}.");
-                }
-            }
-
             userToUpdate.IsActive = input.IsActive;
             userToUpdate.IsStopWork = input.IsStopWork;
             userToUpdate.EndDateAt = input.StopWorkingTime;
-            
+
             await WorkScope.UpdateAsync(userToUpdate);
 
-            foreach (var pu in activeProjectUsers)
-            {
-                pu.Type = ProjectUserType.DeActive;
-            }
-
-            return input;
-             
-
+            return userToUpdate.Id;
         }
 
         [HttpPost]
@@ -519,7 +478,9 @@ namespace Timesheet.APIs.HRMv2
                 EmailAddress = input.EmailAddress,
                 StopWorkingTime = input.DateAt
             };
-            await UpdateTimesheetUserStatus(inputToUpdate);
+
+            var updatedUserId = await UpdateTimesheetUserStatus(inputToUpdate);
+            await _userServices.DeactivateUserFromProjects(updatedUserId);
             return input;
         }
         [HttpPost]

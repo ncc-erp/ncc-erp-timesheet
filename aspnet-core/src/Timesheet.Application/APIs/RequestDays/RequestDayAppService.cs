@@ -51,9 +51,10 @@ namespace Timesheet.APIs.RequestDays
         private readonly IW2Service _w2Service;
         private readonly string TemplateFolder = Path.Combine("wwwroot", "template");
         private readonly MezonService _mezonService;
+        private readonly ICommonServices _commonServices;
         public RequestDayAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
             ITimekeepingServices timeKeepingService, IWorkScope workScope, IApproveRequestOffServices approveRequestOffServices,
-            IW2Service w2Service, MezonService mezonService) : base(workScope)
+            IW2Service w2Service, MezonService mezonService, ICommonServices commonServices) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _timeKeepingService = timeKeepingService;
@@ -61,6 +62,7 @@ namespace Timesheet.APIs.RequestDays
             _approveRequestOffServices = approveRequestOffServices;
             _w2Service = w2Service;
             _mezonService = mezonService;
+            _commonServices = commonServices;
         }
 
         [HttpPost]
@@ -1340,6 +1342,11 @@ namespace Timesheet.APIs.RequestDays
                         .Select(s => new { s.DateAt, s.DateType })
                         .ToListAsync();
 
+                    if (request.Type == RequestType.Off)
+                    {
+                        await _commonServices.checkIsMonthLocked(requestDetails.Select(s => s.DateAt));
+                    }
+
                     if (requestDetails.Any())
                     {
                         if (request.Type == RequestType.Remote && request.Status == RequestStatus.Rejected)
@@ -1413,6 +1420,15 @@ namespace Timesheet.APIs.RequestDays
 
                 if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
+                    var requestDetails = await WorkScope.GetAll<AbsenceDayDetail>()
+                          .Where(s => s.RequestId == requestId)
+                          .Select(s => new { s.DateAt })
+                          .ToListAsync();
+
+                    if (request.Type == RequestType.Off)
+                    {
+                        await _commonServices.checkIsMonthLocked(requestDetails.Select(s => s.DateAt));
+                    }
                     request.Status = RequestStatus.Rejected;
                     await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
 

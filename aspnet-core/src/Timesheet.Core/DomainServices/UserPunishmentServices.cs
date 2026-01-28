@@ -6,6 +6,7 @@ using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Ncc.Authorization.Users;
+using Ncc.Configuration;
 using Ncc.IoC;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
+using Timesheet.Services.Komu;
 using Timesheet.Services.Project;
 using Timesheet.Services.Project.Dto;
 using Timesheet.Uitls;
@@ -23,15 +25,18 @@ namespace Timesheet.DomainServices
     public class UserPunishmentServices : BaseDomainService, IUserPunishmentServices, ITransientDependency
     {
         private readonly ProjectService _projectService;
+        private readonly KomuService _komuService;
         private readonly ILogger<UserPunishmentServices> _logger;
 
         public UserPunishmentServices(
             IWorkScope workScope,
             ProjectService projectService,
+            KomuService komuService,
             ILogger<UserPunishmentServices> logger)
             : base(workScope)
         {
             _projectService = projectService;
+            _komuService = komuService;
             _logger = logger;
         }
 
@@ -153,6 +158,112 @@ namespace Timesheet.DomainServices
             }
 
             return punishedDtos;
+        }
+
+        public async Task<List<UserPunishment>> ApplyPMOtherPunishmentsAsync(int getPMOtherPunishmentAtMonth, int getPMOtherPunishmentAtYear)
+        {
+            try
+            {
+                var pmOtherRecords = await _projectService.GetAllPMOtherPunishment(getPMOtherPunishmentAtMonth, getPMOtherPunishmentAtYear);
+                if (pmOtherRecords == null || !pmOtherRecords.Any())
+                {
+                    Logger.Info("Project tool returned no punishment records.");
+                    return new List<UserPunishment>();
+                }
+
+                var pmOtherType = await WorkScope.GetAll<PunishmentSystem>()
+                    .FirstOrDefaultAsync(x => x.Type == UserPunishmentType.PMOthers && x.IsActive);
+                if (pmOtherType == null)
+                {
+                    throw new UserFriendlyException("Cannot get PM Other Punishment records because this Punishment Type is not found or inactive.");
+                }
+
+                var oldPMOtherPunishments = await WorkScope.GetAll<UserPunishment>()
+                    .Where(p => p.DateAt.Month == getPMOtherPunishmentAtMonth && p.DateAt.Year == getPMOtherPunishmentAtYear)
+                    .Where(p => p.Type == UserPunishmentType.PMOthers && !p.IsDeleted)
+                    .GroupBy(p => $"{p.UserId}_{p.DateAt:yyyyMMdd}")
+                    .ToDictionaryAsync(g => g.Key, g => g.First());
+
+                var punishmentsFilteredByMezonId = pmOtherRecords
+                    .Where(p => !string.IsNullOrEmpty(p.MezonId))
+                    .GroupBy(p => p.MezonId)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                var punishmentsFilteredByEmail = pmOtherRecords
+                    .Where(p => !string.IsNullOrEmpty(p.Email))
+                    .GroupBy(p => p.Email)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                var targetMezonIds = punishmentsFilteredByMezonId.Keys.ToList();
+                var targetEmails = punishmentsFilteredByEmail.Keys.ToList();
+
+                var activeUsers = await WorkScope.GetAll<User>()
+                    .Where(u => targetMezonIds.Contains(u.MezonUserId) || targetEmails.Contains(u.EmailAddress))
+                    .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork)
+                    .Select(u => new { u.Id, u.MezonUserId, u.EmailAddress })
+                    .ToListAsync();
+
+                var userPunishmentsToInsert = new List<UserPunishment>();
+
+                foreach (var user in activeUsers)
+                {
+                    var userPunishmentList = new List<PMOtherPunishmentDto>();
+                    if (!string.IsNullOrEmpty(user.MezonUserId) && punishmentsFilteredByMezonId.TryGetValue(user.MezonUserId, out var listByMezonId))
+                    {
+                        userPunishmentList.AddRange(listByMezonId);
+                    }
+                    else if (!string.IsNullOrEmpty(user.EmailAddress) && punishmentsFilteredByEmail.TryGetValue(user.EmailAddress, out var listByEmail))
+                    {
+                        userPunishmentList.AddRange(listByEmail);
+                    }
+
+                    foreach (var record in userPunishmentList)
+                    {
+                        string keyToCheck = $"{user.Id}_{record.Date:yyyyMMdd}";
+                        if (oldPMOtherPunishments.ContainsKey(keyToCheck))
+                        {
+                            continue;
+                        }
+
+                        var pmOtherPunishmentRecord = new UserPunishment
+                        {
+                            DateAt = record.Date,
+                            UserId = user.Id,
+                            PunishmentSystemId = pmOtherType.Id,
+                            Type = pmOtherType.Type,
+                            Count = 1,
+                            TotalMoney = (int)record.Amount,
+                            NoteReply = record.Reason,
+                            IsPaid = false
+                        };
+
+                        userPunishmentsToInsert.Add(pmOtherPunishmentRecord);
+                    }
+                }
+
+                await WorkScope.InsertRangeAsync(userPunishmentsToInsert);
+
+                var adminClanName = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.PMOtherPunishAdminClanName);
+                DateTime now = DateTimeUtils.GetNow();
+                var executionTime = now.ToString("HH:mm:ss");
+                var executionDate = now.ToString("dd/MM/yyyy");
+
+                string contentBody = userPunishmentsToInsert.Any()
+                    ? $"Hệ thống đã lưu**{userPunishmentsToInsert.Count}**bản ghi thuộc loại phạt PM Others từ tool Project vào tool Timesheet."
+                    : "Không có bản ghi phạt PM Others mới nào được thêm từ tool Project vào tool Timesheet.";
+
+                string userMessage = $"Chào**{adminClanName}**\n" +
+                             $"{contentBody}\n" +
+                             $"Thời gian lấy dữ liệu phạt lúc {executionTime}, ngày {executionDate}";
+
+                _komuService.SendSimpleNotificationToUser(userMessage, adminClanName);
+
+                return userPunishmentsToInsert;
+            }
+            catch (Exception ex)
+            {
+                throw new UserFriendlyException($"Error: " + ex.Message);
+            }
         }
     }
 }

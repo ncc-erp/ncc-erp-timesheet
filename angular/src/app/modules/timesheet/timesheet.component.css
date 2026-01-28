@@ -104,6 +104,19 @@
   gap: 5px;
 } */
 
+@media (min-width: 992px) {
+  .project-width {
+    width: 20%;
+  }
+
+  .branch-selection-width {
+    width: 135px;
+  }
+
+  .mat-option-custom-width {
+    width: 100px;
+  }
+}
 .pr-0 {
   padding-right: 0px;
 }
@@ -211,3 +224,4 @@
     width: 100%;
   }
 }
+

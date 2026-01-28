@@ -31,10 +31,10 @@ namespace Timesheet.APIs.OverTimeHours
 
         [HttpPost]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_OverTime_View)]
-        public async Task<GridResult<GetOverTimeHourDto>> GetAllPagging(GridParam input, int year, int month, long? projectId)
+        public async Task<GridResult<GetOverTimeHourDto>> GetAllPagging(GridParam input, int year, int month, long? projectId, bool? isCharged)
         {
 
-            var query = IQueryGetOverTimeHour(year, month, projectId);
+            var query = IQueryGetOverTimeHour(year, month, projectId, null, false, isCharged);
 
             var result = await query.GetGridResult(query, input);
 
@@ -86,12 +86,11 @@ namespace Timesheet.APIs.OverTimeHours
             }).ToList();
         }
 
-        public async Task<List<GetOverTimeHourDto>> GetListOverTimeForChart(DateTime startDate, DateTime endDate, string projectCode, List<string> emails)
+        public async Task<List<GetOverTimeHourDto>> GetListOverTimeForChart(DateTime startDate, DateTime endDate, string projectCode, List<string> emails, bool? isCharged = null)
         {
             long projectId = await GetProjectIdByCode(projectCode);
 
-            var query = IQueryGetOverTimeHour(startDate, endDate, projectId, emails);
-
+            var query = IQueryGetOverTimeHour(startDate, endDate, projectId, emails, isCharged);
             var result = await query.ToListAsync();
 
             await UpdateOTCoefficient(result);
@@ -115,13 +114,13 @@ namespace Timesheet.APIs.OverTimeHours
                 .FirstOrDefaultAsync();
         }
 
-        private IQueryable<GetOverTimeHourDto> IQueryGetOverTimeHour(int year, int month, long? projectId, List<string> emails = null, bool? isForHrmv2 = false)
+        private IQueryable<GetOverTimeHourDto> IQueryGetOverTimeHour(int year, int month, long? projectId, List<string> emails = null, bool? isForHrmv2 = false, bool? isCharged = null)
         {
             DateTime startDate = new DateTime(year, month, 1);
             DateTime endDate = startDate.AddMonths(1).AddDays(-1);
-            return IQueryGetOverTimeHour(startDate, endDate, projectId, emails, isForHrmv2);
+            return IQueryGetOverTimeHour(startDate, endDate, projectId, emails, isForHrmv2, isCharged);
         }
-        private IQueryable<GetOverTimeHourDto> IQueryGetOverTimeHour(DateTime startDate, DateTime endDate, long? projectId, List<string> emails, bool? isForHrmv2 = false)
+        private IQueryable<GetOverTimeHourDto> IQueryGetOverTimeHour(DateTime startDate, DateTime endDate, long? projectId, List<string> emails, bool? isForHrmv2 = false, bool? isCharged = null)
         {
             var query = WorkScope.GetAll<MyTimesheet>()
                 .Include(s => s.User).ThenInclude(s => s.Branch)
@@ -148,6 +147,11 @@ namespace Timesheet.APIs.OverTimeHours
             if (projectId.HasValue)
             {
                 query = query.Where(s => s.ProjectId == projectId.Value);
+            }
+
+            if (isCharged.HasValue)
+            {
+                query = query.Where(ts => ts.IsCharged == isCharged);
             }
 
             if (!emails.IsNullOrEmpty())
