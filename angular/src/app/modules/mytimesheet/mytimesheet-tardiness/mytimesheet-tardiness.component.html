@@ -116,7 +116,7 @@
                 <tr class="main-row" [class.row-active]="item.isExpanded">
                   <td class="text-left">
                     <div class="date-cell">
-                      <button class="exp-btn" type="button" (click)="item.isExpanded = !item.isExpanded"
+                      <button class="exp-btn" type="button" (click)="toggleRowExpanded(item)"
                         [class.open]="item.isExpanded">
                         <span class="chev">{{item.isExpanded ? "▴" : "▾"}}</span>
                       </button>
@@ -194,7 +194,7 @@
                         </div>
 
                         <div class="acc-header punish-acc-header" [class.active]="item.isPunishmentExpanded"
-                          (click)="item.isPunishmentExpanded = !item.isPunishmentExpanded">
+                          (click)="togglePunishmentExpanded(item)">
                           <span>Punishment details</span>
                           <span class="chev pointer">▼</span>
                         </div>

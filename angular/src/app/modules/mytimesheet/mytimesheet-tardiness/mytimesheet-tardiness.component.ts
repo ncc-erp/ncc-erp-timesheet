@@ -459,6 +459,14 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
     item.isComplainExpanded = !item.isComplainExpanded;
   }
 
+  togglePunishmentExpanded(item: TimekeepingDto) {
+    item.isPunishmentExpanded = !item.isPunishmentExpanded;
+  }
+
+  toggleRowExpanded(item: TimekeepingDto) {
+    item.isExpanded = !item.isExpanded;
+  }
+
   hasMultipleLines(item: any, type: 'complaint' | 'reply'): boolean {
     const items = type === 'complaint' 
       ? (item.structuredUserNotes || []) 
