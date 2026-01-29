@@ -80,170 +80,63 @@
           <table class="table table-hover table-striped styleUser">
             <thead>
               <tr>
-                <th rowspan="2" style="width: 100px;">
+                <th rowspan="2" class="col-date">
                   {{ "Date" | localize }}
                 </th>
-                <th colspan="2" style="min-width: 160px;">
+                <th colspan="2" class="text-center">
                   {{ "Checking time" | localize }}
                 </th>
-                <th style="width: 80px;" rowspan="2">
+                <th rowspan="2" class="col-tracker">
                   {{ "Tracker Time" | localize }}
                 </th>
-                <th rowspan="2" class="edited-by-column">
+                <th rowspan="2" class="col-edited mobile-hidden">
                   {{ "Edited by" | localize }}
                 </th>
-
-                <th style="min-width: 490px;" [attr.colspan]="isBasicUser ? 9 : 12">
+                <th rowspan="2" class="col-punish">
                   {{ "Punishments" | localize }}
                 </th>
-                <th style="min-width: 150px; max-width: 300px; width: 200px;" rowspan="2">
+                <th rowspan="2" class="col-complain mobile-hidden">
                   {{ "Complain" | localize }}
                 </th>
-                <th style="min-width: 150px; max-width: 300px; width: 200px;" rowspan="2">
+                <th rowspan="2" class="col-reply mobile-hidden">
                   {{ "Complain Reply" | localize }}
                 </th>
-                <th style="min-width: 70px; width: 70px;" rowspan="2">
+                <th rowspan="2" class="col-action mobile-hidden">
                   {{ "Action" | localize }}
                 </th>
 
               </tr>
               <tr>
-                <th style="width: 100px;">Check in</th>
-                <th style="width: 100px;">Check out</th>
-
-                <th class="punish-col" rowspan="2">
-                  {{ "CheckIn CheckOut" | localize }}
-                </th>
-                <th class="punish-col" rowspan="2">
-                  {{ "Daily" | localize }}
-                </th>
-                <th class="punish-col" rowspan="2">
-                  {{ "Mention" | localize }}
-                </th>
-                <th class="punish-col" rowspan="2">
-                  {{ "Tracker" | localize }}
-                </th>
-                <th class="punish-col" rowspan="2" *ngIf="!isBasicUser">
-                  {{ "Review Intern" | localize }}
-                </th>
-                <th class="punish-col" rowspan="2" *ngIf="!isBasicUser">
-                  {{ "PM Report" | localize }}
-                </th>
-                <th class="punish-col" rowspan="2" *ngIf="!isBasicUser">
-                  {{ "PM Others" | localize }}
-                </th>
-                <th class="punish-col" rowspan="2">
-                  {{ "Ant" | localize }}
-                </th>
-                <th class="punish-col" rowspan="2">
-                  {{ "UnlockTS Gmail" | localize }}
-                </th>
-                <!-- <th class="punish-col" rowspan="2">
-                  {{ "UnlockTS IMS" | localize }}
-                </th> -->
-                <th class="punish-col" rowspan="2">
-                  {{ "UnlockTS Staff" | localize }}
-                </th>
-                <th class="punish-col" rowspan="2">
-                  {{ "UnlockTS PM" | localize }}
-                </th>
-                <th class="punish-col" rowspan="2">
-                  {{ "Total" | localize }}
-                </th>
+                <th class="col-checkin">Check in</th>
+                <th class="col-checkin">Check out</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of (groupedTimekeeping), index as i">
-                <td style="text-align: center;">{{formatDate(item.date)}}</td>
-                <td style="text-align: center;">
-                  <span>{{item.checkIn}}</span>
+              <ng-container *ngFor="let item of groupedTimekeeping; index as i">
+                <tr class="main-row" [class.row-active]="item.isExpanded">
+                  <td class="text-left">
+                    <div class="date-cell">
+                      <button class="exp-btn" type="button" (click)="item.isExpanded = !item.isExpanded"
+                        [class.open]="item.isExpanded">
+                        <span class="chev">{{item.isExpanded ? "▴" : "▾"}}</span>
+                      </button>
+                      <span>{{formatDate(item.date)}}</span>
+                    </div>
+                  </td>
+                  <td class="text-center">{{item.checkIn}}</td>
+                  <td class="text-center">{{item.checkOut}}</td>
+                  <td class="text-center">{{trackerTimeFormat(item.trackerTime)}}</td>
+                  <td class="text-center edited-by-cell mobile-hidden">
+                    <span class="pm" *ngIf="item.editByUserName">{{item.editByUserName}}</span>
+                  </td>
 
-                </td>
-                <td style="text-align: center;">
-                  <span>{{item.checkOut}}</span>
-
-                </td>
-                <td style="text-align: center;">
-                  <span>{{trackerTimeFormat(item.trackerTime)}}</span>
-                </td>
-
-                <td class="text-center edited-by-cell"><span class="pm" *ngIf="item.editByUserName">{{item.editByUserName}}</span></td>
-
-                <td class="punish-col" style="text-align: center;">
-                  <span [class]="getCssClassByPunish(item.attendancePunish)" 
-                        *ngIf="item.attendancePunish > 0"
-                        [matTooltip]="getAttendancePunishmentTypes(item)">
-                    {{ formatPunishmentAmount(item.attendancePunish) }}
-                  </span>
-                </td>
-
-                <td class="punish-col" style="text-align: center;">
-                  <span [class]="getCssClassByPunish(item.dailyPunish)" *ngIf="item.dailyPunish > 0">
-                    {{ formatPunishmentAmount(item.dailyPunish) }}
-                  </span>
-                </td>
-
-                <td class="punish-col" style="text-align: center;">
-                  <span [class]="getCssClassByPunish(item.mentionPunish)" *ngIf="item.mentionPunish > 0">
-                    {{ formatPunishmentAmount(item.mentionPunish) }}
-                  </span>
-                </td>
-
-                <td class="punish-col" style="text-align: center;">
-                  <span [class]="getCssClassByPunish(item.trackerPunish)" *ngIf="item.trackerPunish > 0">
-                    {{ formatPunishmentAmount(item.trackerPunish) }}
-                  </span>
-                </td>
-
-                <td class="punish-col" style="text-align: center;" *ngIf="!isBasicUser">
-                  <span [class]="getCssClassByPunish(item.reviewInternPunish)" *ngIf="item.reviewInternPunish > 0">
-                    {{ formatPunishmentAmount(item.reviewInternPunish) }}
-                  </span>
-                </td>
-
-                <td class="punish-col" style="text-align: center;" *ngIf="!isBasicUser">
-                  <span [class]="getCssClassByPunish(item.pmReportPunish)" *ngIf="item.pmReportPunish > 0">
-                    {{ formatPunishmentAmount(item.pmReportPunish) }}
-                  </span>
-                </td>
-
-                <td class="punish-col" style="text-align: center;" *ngIf="!isBasicUser">
-                  <span [class]="getCssClassByPunish(item.pmOtherPunish)" *ngIf="item.pmOtherPunish > 0">
-                    {{ formatPunishmentAmount(item.pmOtherPunish) }}
-                  </span>
-                </td>
-
-                <td class="punish-col" style="text-align: center;">
-                  <span [class]="getCssClassByPunish(item.antPunish)" *ngIf="item.antPunish > 0">
-                    {{ formatPunishmentAmount(item.antPunish) }}
-                  </span>
-                </td>
-
-                <td class="punish-col" style="text-align: center;">
-                  <span [class]="getCssClassByPunish(item.unlockTSGmailPunish)" *ngIf="item.unlockTSGmailPunish > 0">
-                    {{ formatPunishmentAmount(item.unlockTSGmailPunish) }}
-                  </span>
-                </td>
-
-                <td class="punish-col" style="text-align: center;">
-                  <span [class]="getCssClassByPunish(item.unlockTSStaffPunish)" *ngIf="item.unlockTSStaffPunish > 0">
-                    {{ formatPunishmentAmount(item.unlockTSStaffPunish) }}
-                  </span>
-                </td>
-
-                <td class="punish-col" style="text-align: center;">
-                  <span [class]="getCssClassByPunish(item.unlockTSPMPunish)" *ngIf="item.unlockTSPMPunish > 0">
-                    {{ formatPunishmentAmount(item.unlockTSPMPunish) }}
-                  </span>
-                </td>
-
-                <td class="punish-col" style="text-align: center;">
+                  <td class="text-center">
                   <span [ngStyle]="{ color: item.totalDayPunishment === 0 ? '#388e3c' : '#d32f2f', 'font-weight': 'bold' }">
                     {{ formatPunishmentAmount(item.totalDayPunishment) }}
                   </span>
                 </td>
                 
-                <td class="text-center complain-col" style="word-wrap: break-word; overflow: hidden;">
+                <td class="text-center complain-col mobile-hidden" style="word-wrap: break-word; overflow: hidden;">
                   <p *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && item.userNote" class="complain-text">
                     {{item.userNote}}
                   </p>
@@ -263,7 +156,7 @@
                     </div>
                   </div>
                 </td>
-                <td class="text-center complain-reply-col" style="word-wrap: break-word; overflow: hidden;">
+                <td class="text-center complain-reply-col mobile-hidden" style="word-wrap: break-word; overflow: hidden;">
                   <span *ngIf="!item.structuredNoteReplies || item.structuredNoteReplies.length === 0">-</span>
                   <div *ngIf="item.structuredNoteReplies && item.structuredNoteReplies.length > 0" class="structured-replies">
                     <div class="complain-content" [class.expanded]="item.showAllReplies">
@@ -280,7 +173,7 @@
                     </div>
                   </div>
                 </td>
-                <td class="text-center">
+                <td class="text-center mobile-hidden">
                   <button *ngIf="permission.isGranted(Timekeeping_UserNote)"
                     [name]="'complainBtn-'+item.timekeepingId" class="btn btn-icon btn-sm"
                     (click)="openComplainDialog(item)" matTooltip="Complain" matTooltipPosition="above">
@@ -288,6 +181,176 @@
                   </button>
                 </td>
               </tr>
+
+                <tr class="details-row">
+                  <td colspan="9">
+                    <div class="details-wrap" [class.expanded]="item.isExpanded">
+                      <div class="details-inner">
+
+                        <div class="details-top desktop-only-header">
+                          <div>Punishments details</div>
+                          <div>Total: <span class="val-red">{{ formatPunishmentAmount(item.totalDayPunishment) }}</span>
+                          </div>
+                        </div>
+
+                        <div class="acc-header punish-acc-header" [class.active]="item.isPunishmentExpanded"
+                          (click)="item.isPunishmentExpanded = !item.isPunishmentExpanded">
+                          <span>Punishment details</span>
+                          <span class="chev pointer">▼</span>
+                        </div>
+
+                        <div class="acc-body punish-acc-body" [class.show]="item.isPunishmentExpanded">
+
+                          <div class="report-punishment-mobile" *ngIf="item.totalDayPunishment > 0">
+                            Total: <span class="val-red">{{ formatPunishmentAmount(item.totalDayPunishment) }}</span>
+                          </div>
+
+                          <div class="punish-grid">
+                            <div class="punish-item">
+                              <div class="punishment-label-text">{{ "CheckIn CheckOut" | localize }}</div>
+                              <div class="punishment-value-text" [class.red]="item.attendancePunish > 0">{{
+                                item.attendancePunish ?
+                                formatPunishmentAmount(item.attendancePunish) : "-" }}</div>
+                            </div>
+                            <div class="punish-item">
+                              <div class="punishment-label-text">{{ "Daily" | localize }}</div>
+                              <div class="punishment-value-text" [class.red]="item.dailyPunish > 0">{{ item.dailyPunish
+                                ?
+                                formatPunishmentAmount(item.dailyPunish) : "-" }}</div>
+                            </div>
+                            <div class="punish-item">
+                              <div class="punishment-label-text">{{ "Mention" | localize }}</div>
+                              <div class="punishment-value-text" [class.red]="item.mentionPunish > 0">{{
+                                item.mentionPunish ?
+                                formatPunishmentAmount(item.mentionPunish) : "-" }}</div>
+                            </div>
+                            <div class="punish-item">
+                              <div class="punishment-label-text">{{ "Tracker" | localize }}</div>
+                              <div class="punishment-value-text" [class.red]="item.trackerPunish > 0">{{
+                                item.trackerPunish ?
+                                formatPunishmentAmount(item.trackerPunish) : "-" }}</div>
+                            </div>
+                            <div class="punish-item" *ngIf="!isBasicUser">
+                              <div class="punishment-label-text">{{ "Review Intern" | localize }}</div>
+                              <div class="punishment-value-text" [class.red]="item.reviewInternPunish > 0">{{
+                                item.reviewInternPunish ?
+                                formatPunishmentAmount(item.reviewInternPunish) : "-" }}</div>
+                            </div>
+                            <div class="punish-item" *ngIf="!isBasicUser">
+                              <div class="punishment-label-text">{{ "Pm Report" | localize }}</div>
+                              <div class="punishment-value-text" [class.red]="item.pmReportPunish > 0">{{
+                                item.pmReportPunish ?
+                                formatPunishmentAmount(item.pmReportPunish) : "-" }}</div>
+                            </div>
+                            <div class="punish-item" *ngIf="!isBasicUser">
+                              <div class="punishment-label-text">{{ "Pm Others" | localize }}</div>
+                              <div class="punishment-value-text" [class.red]="item.pmOtherPunish > 0">{{
+                                item.pmOtherPunish ?
+                                formatPunishmentAmount(item.pmOtherPunish) : "-" }}</div>
+                            </div>
+                            <div class="punish-item">
+                              <div class="punishment-label-text">{{ "Ant" | localize }}</div>
+                              <div class="punishment-value-text" [class.red]="item.antPunish > 0">{{ item.antPunish ?
+                                formatPunishmentAmount(item.antPunish) : "-" }}</div>
+                            </div>
+                            <div class="punish-item">
+                              <div class="punishment-label-text">{{ "UnlockTS Gmail" | localize }}</div>
+                              <div class="punishment-value-text" [class.red]="item.unlockTSGmailPunish > 0">{{
+                                item.unlockTSGmailPunish ?
+                                formatPunishmentAmount(item.unlockTSGmailPunish) : "-" }}</div>
+                            </div>
+                            <div class="punish-item">
+                              <div class="punishment-label-text">{{ "UnlockTS Staff" | localize }}</div>
+                              <div class="punishment-value-text" [class.red]="item.unlockTSStaffPunish > 0">{{
+                                item.unlockTSStaffPunish ?
+                                formatPunishmentAmount(item.unlockTSStaffPunish) : "-" }}</div>
+                            </div>
+                            <div class="punish-item">
+                              <div class="punishment-label-text">{{ "UnlockTS PM" | localize }}</div>
+                              <div class="punishment-value-text" [class.red]="item.unlockTSPMPunish > 0">{{
+                                item.unlockTSPMPunish ?
+                                formatPunishmentAmount(item.unlockTSPMPunish) : "-" }}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="mobile-only-accordion">
+                          <div class="acc-header" [class.active]="item.isComplainExpanded"
+                            (click)="toggleComplainExpanded(item)">
+                            <span>Complain & Reply</span>
+                            <span class="chev pointer">▼</span>
+                          </div>
+                          <div class="acc-body" [class.show]="item.isComplainExpanded">
+                            <div class="cd-row">
+                              <div class="cd-label">Edited by</div>
+                              <div class="cd-val" style="text-align:left; flex:1;">{{item.editByUserName || "-"}}</div>
+                            </div>
+
+                            <div class="cd-row" style="align-items: flex-start;">
+                              <div class="cd-label">Complain</div>
+                              <div class="cd-val" style="text-align:left; flex:1;">
+                                <div
+                                  *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && item.userNote">
+                                  {{item.userNote}}
+                                </div>
+                                <div
+                                  *ngIf="(!item.structuredUserNotes || item.structuredUserNotes.length === 0) && !item.userNote">
+                                  -</div>
+                                <div *ngIf="item.structuredUserNotes && item.structuredUserNotes.length > 0"
+                                  class="structured-complaints" style="text-align: left;">
+                                  <div class="complain-content" [class.expanded]="item.showAllComplaints">
+                                    <div *ngFor="let complaint of item.structuredUserNotes" class="complaint-item">
+                                      <div class="punishment-type">{{ complaint.punishmentName }}:</div>
+                                      <div class="complain-text">{{ complaint.userNote }}</div>
+                                    </div>
+                                  </div>
+                                  <div class="show-more-container" *ngIf="hasMultipleLines(item, 'complaint')">
+                                    <button mat-button color="primary"
+                                      (click)="toggleUserNotes(item); $event.stopPropagation();"
+                                      class="show-more-button">
+                                      <mat-icon>{{ item.showAllComplaints ? 'expand_less' : 'more_horiz' }}</mat-icon>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="cd-row" style="align-items: flex-start;">
+                              <div class="cd-label">Reply</div>
+                              <div class="cd-val" style="text-align:left; flex:1;">
+                                <div *ngIf="!item.structuredNoteReplies || item.structuredNoteReplies.length === 0">-
+                                </div>
+                                <div *ngIf="item.structuredNoteReplies && item.structuredNoteReplies.length > 0"
+                                  class="structured-replies">
+                                  <div class="complain-content" [class.expanded]="item.showAllReplies">
+                                    <div *ngFor="let reply of item.structuredNoteReplies" class="complaint-item">
+                                      <div class="punishment-type">{{reply.punishmentName}}:</div>
+                                      <div class="complain-text">{{reply.noteReply}}</div>
+                                    </div>
+                                  </div>
+                                  <div class="show-more-container" *ngIf="hasMultipleLines(item, 'reply')">
+                                    <button mat-button color="primary"
+                                      (click)="toggleNoteReplies(item); $event.stopPropagation();"
+                                      class="show-more-button">
+                                      <mat-icon>{{ item.showAllReplies ? 'expand_less' : 'more_horiz' }}</mat-icon>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div style="text-align:right; margin-top:8px;"
+                              *ngIf="permission.isGranted(Timekeeping_UserNote)">
+                              <button class="action-btn" (click)="openComplainDialog(item)">Complain</button>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
             </tbody>
           </table>
         </div>

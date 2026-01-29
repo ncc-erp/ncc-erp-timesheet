@@ -156,7 +156,10 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
           structuredNoteReplies: [],
           structuredUserNotes: [],  
           showAllReplies: false,
-          showAllComplaints: false  
+          showAllComplaints: false,
+          isExpanded: false,
+          isComplainExpanded: false,
+          isPunishmentExpanded: false
         });
       }
       
@@ -450,6 +453,10 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   
   toggleUserNotes(item: TimekeepingDto) {
     item.showAllComplaints = !item.showAllComplaints;
+  }
+
+  toggleComplainExpanded(item: TimekeepingDto) {
+    item.isComplainExpanded = !item.isComplainExpanded;
   }
 
   hasMultipleLines(item: any, type: 'complaint' | 'reply'): boolean {
