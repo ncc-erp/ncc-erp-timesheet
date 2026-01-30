@@ -136,8 +136,9 @@ export class TimekeepingDto {
   showAllReplies?: boolean; 
   showAllComplaints?: boolean;
   shouldShowMore?: boolean;
-
-  
+  isExpanded?: boolean;
+  isComplainExpanded?: boolean;
+  isPunishmentExpanded?: boolean;
 }
 
 export class UpdateTimekeepingDto{
