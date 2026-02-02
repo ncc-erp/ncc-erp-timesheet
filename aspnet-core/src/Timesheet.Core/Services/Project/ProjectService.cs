@@ -192,6 +192,13 @@ namespace Timesheet.Services.Project
             return GetAsync<List<CurrentTempProjectUserDto>>(url).Result;
         }
 
+        public async Task<List<PMOtherPunishmentDto>> GetAllPMOtherPunishment(int month, int year)
+        {
+            var url = $"/api/services/app/Public/GetPunishments?month={month}&year={year}";
+            var result = await GetAsync<List<PMOtherPunishmentDto>>(url);
+            return result ?? new List<PMOtherPunishmentDto>();
+        }
+
         public async Task<GetResultConnectDto> CheckConnectToProject()
         {
             var res = await GetAsync<GetResultConnectDto>($"/api/services/app/public/CheckConnect");

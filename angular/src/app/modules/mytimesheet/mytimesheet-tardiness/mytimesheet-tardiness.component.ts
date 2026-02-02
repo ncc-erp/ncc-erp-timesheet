@@ -151,11 +151,15 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
           unlockTSIMSPunish: 0,      
           unlockTSStaffPunish: 0,
           unlockTSPMPunish: 0,
+          pmOtherPunish: 0,
           totalDayPunishment: 0,
           structuredNoteReplies: [],
           structuredUserNotes: [],  
           showAllReplies: false,
-          showAllComplaints: false  
+          showAllComplaints: false,
+          isExpanded: false,
+          isComplainExpanded: false,
+          isPunishmentExpanded: false
         });
       }
       
@@ -235,6 +239,8 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         record.unlockTSPMPunish = (record.unlockTSPMPunish || 0) + moneyAmount;
       } else if (punishType === 19) {
         record.unlockTSStaffPunish = (record.unlockTSStaffPunish || 0) + moneyAmount;
+      } else if (punishType === 20) {
+        record.pmOtherPunish = (record.pmOtherPunish || 0) + moneyAmount;
       }
 
       record.totalDayPunishment = (
@@ -248,7 +254,8 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         (record.unlockTSGmailPunish || 0) + 
         (record.unlockTSIMSPunish || 0) +
         (record.unlockTSStaffPunish || 0) +
-        (record.unlockTSPMPunish || 0)
+        (record.unlockTSPMPunish || 0) +
+        (record.pmOtherPunish || 0)
       );
     });
 
@@ -446,6 +453,18 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
   
   toggleUserNotes(item: TimekeepingDto) {
     item.showAllComplaints = !item.showAllComplaints;
+  }
+
+  toggleComplainExpanded(item: TimekeepingDto) {
+    item.isComplainExpanded = !item.isComplainExpanded;
+  }
+
+  togglePunishmentExpanded(item: TimekeepingDto) {
+    item.isPunishmentExpanded = !item.isPunishmentExpanded;
+  }
+
+  toggleRowExpanded(item: TimekeepingDto) {
+    item.isExpanded = !item.isExpanded;
   }
 
   hasMultipleLines(item: any, type: 'complaint' | 'reply'): boolean {

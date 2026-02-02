@@ -36,6 +36,9 @@ export class GetTimeSheetDto {
   workType: string;
   isTemp: boolean;
   openTalkJoinTime:number;
+  rejectReason: string;
+  lastModificationTime?: any;
+  lastModifierUserName?: string;
 }
 export enum TimeSheetStatus {
   New = 0,

@@ -60,5 +60,37 @@ namespace Timesheet.Services.W2
             }
             return default;
         }
+
+        public virtual System.Collections.Generic.List<W2RequestStatusDto> GetRequestStatus(string email, string date, string mezonId)
+        {
+            try
+            {
+                HttpClientHandler clientHandler = new HttpClientHandler();
+                clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+                using (var client = new HttpClient(clientHandler))
+                {
+                    client.BaseAddress = new Uri(baseAddress);
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Add("X-Secret-Key", securityCode);
+
+                    var url = $"api/app/workflow-instance/request-status?mezonId={mezonId}&email={email}&date={date}";
+                    var response = client.GetAsync(url).Result;
+                    logger.LogInformation($"GetRequestStatus response: {response}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var resultString = response.Content.ReadAsStringAsync().Result;
+                        logger.LogInformation($"GetRequestStatus response content: {resultString}");
+                        return JsonConvert.DeserializeObject<System.Collections.Generic.List<W2RequestStatusDto>>(resultString);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"GetRequestStatus Error: {ex.Message}");
+            }
+            return default;
+        }
     }
 }

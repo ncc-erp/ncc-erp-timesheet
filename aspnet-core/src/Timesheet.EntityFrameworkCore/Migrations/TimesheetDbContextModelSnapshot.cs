@@ -1801,6 +1801,8 @@ namespace Timesheet.Migrations
 
                     b.Property<long>("ProjectTaskId");
 
+                    b.Property<string>("RejectReason");
+
                     b.Property<int>("Status");
 
                     b.Property<int>("TargetUserWorkingTime");

@@ -38,6 +38,7 @@ namespace Timesheet.Timesheets.Timesheets.Dto
         public string LastModifierUser { get; set; }
         public bool IsTemp { get; set; }
         public bool? IsUnlockedByEmployee { get; set; }
+        public string RejectReason { get; set; }
         public string projectTargetUser { get; set; }
         public int workingTimeTargetUser { get; set; }
         public int? openTalkTime {  get; set; }
@@ -149,6 +150,8 @@ namespace Timesheet.Timesheets.Timesheets.Dto
         public string CheckIn { get; set; }
         public string CheckOut { get; set; }
         public RequestType? WorkLocation { get; set; }
+        public TypeOfWork? TypeOfWork { get; set; }
+        public bool? IsCharged { get; set; }
     }
 
 }

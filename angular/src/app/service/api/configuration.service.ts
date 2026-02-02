@@ -1,4 +1,4 @@
-import { HRMConfigDto, KomuDto, ProjectConfigDto, NRITConfigDto, UnlockTimesheetConfigDto, RetroNotifyConfigDto, TeamBuildingConfigDto, ApproveTimesheetNotifyConfigDto, ApproveRequestOffNotifyConfigDto, SendMessageRequestPendingTeamBuildingToHRConfigDto, NotifyHRTheEmployeeMayHaveLeftConfigDto,MoneyPMUnlockTimeSheetConfigDto, SendMessageToPunishUserConfigDto, GenerateRetroResultConfigDto, CreateNewRetroConfigDto, ResetDataTeamBuildingConfigDto, NotifyReviewInternViaMezonAndEmailConfigDto, MMNConfigDto } from './../../configuration/configuration.component';
+import { HRMConfigDto, KomuDto, ProjectConfigDto, NRITConfigDto, UnlockTimesheetConfigDto, LockTimesheetConfigDto, RetroNotifyConfigDto, TeamBuildingConfigDto, ApproveTimesheetNotifyConfigDto, ApproveRequestOffNotifyConfigDto, SendMessageRequestPendingTeamBuildingToHRConfigDto, NotifyHRTheEmployeeMayHaveLeftConfigDto,MoneyPMUnlockTimeSheetConfigDto, SendMessageToPunishUserConfigDto, GenerateRetroResultConfigDto, CreateNewRetroConfigDto, ResetDataTeamBuildingConfigDto, NotifyReviewInternViaMezonAndEmailConfigDto, MMNConfigDto } from './../../configuration/configuration.component';
 import { HttpClient } from '@angular/common/http';
 import { BaseApiService } from '@app/service/api/base-api.service';
 import { Injectable } from '@angular/core';
@@ -70,6 +70,13 @@ export class ConfigurationService extends BaseApiService {
   }
   SetUnlockTimesheetConfig(config: UnlockTimesheetConfigDto): Observable<any> {
     return this.http.post(this.rootUrl + "/SetUnlockTimesheetConfig", config);
+  }
+
+  GetLockTimesheetConfig(): Observable<any> {
+    return this.http.get(this.rootUrl + "/GetLockTimesheetConfig");
+  }
+  SetLockTimesheetConfig(config: LockTimesheetConfigDto): Observable<any> {
+    return this.http.post(this.rootUrl + "/SetLockTimesheetConfig", config);
   }
 
   checkConnectToProject(): Observable<any>{

@@ -167,6 +167,10 @@ namespace Timesheet.APIs.Timekeepings
               {
                 PunishmentGroupType.UnlockTS_Staff,
                 UserPunishmentType.UnlockStaff
+              },
+              {
+                PunishmentGroupType.PMOthers,
+                UserPunishmentType.PMOthers
               }
             };
 

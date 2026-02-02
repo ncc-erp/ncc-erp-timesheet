@@ -51,9 +51,10 @@ namespace Timesheet.APIs.RequestDays
         private readonly IW2Service _w2Service;
         private readonly string TemplateFolder = Path.Combine("wwwroot", "template");
         private readonly MezonService _mezonService;
+        private readonly ICommonServices _commonServices;
         public RequestDayAppService(IBackgroundJobManager backgroundJobManager, KomuService komuService,
             ITimekeepingServices timeKeepingService, IWorkScope workScope, IApproveRequestOffServices approveRequestOffServices,
-            IW2Service w2Service, MezonService mezonService) : base(workScope)
+            IW2Service w2Service, MezonService mezonService, ICommonServices commonServices) : base(workScope)
         {
             _backgroundJobManager = backgroundJobManager;
             _timeKeepingService = timeKeepingService;
@@ -61,6 +62,7 @@ namespace Timesheet.APIs.RequestDays
             _approveRequestOffServices = approveRequestOffServices;
             _w2Service = w2Service;
             _mezonService = mezonService;
+            _commonServices = commonServices;
         }
 
         [HttpPost]
@@ -489,6 +491,11 @@ namespace Timesheet.APIs.RequestDays
 
         public async Task<MyRequestDto> ProcessSubmitToPendingNew(MyRequestDto input, long userId, NotifyUserInfoDto requester)
         {
+            if (input.Type == RequestType.Off && input.Absences.Any(s => s.DateType == DayType.Custom))
+            {
+                throw new UserFriendlyException("Cannot send tardiness/early requests!");
+            }
+
             var timesCanLateAndEarlyInMonth = await SettingManager.GetSettingValueAsync(AppSettingNames.TimesCanLateAndEarlyInMonth);
 
             var timesCanLateAndEarlyInWeek = await SettingManager.GetSettingValueAsync(AppSettingNames.TimesCanLateAndEarlyInWeek);
@@ -608,11 +615,21 @@ namespace Timesheet.APIs.RequestDays
                     await WorkScope.GetRepo<AbsenceDayDetail>().DeleteAsync(rejectedAbsDetail.Id);
                 }
 
+
                 if (input.Type == RequestType.Remote)
                 {
                     if (abs.DateAt.Date >= mondayNextWeek && (abs.DateAt.Date > fridayNextWeek || today < saturdayThisWeek))
                     {
                         throw new UserFriendlyException($"You can only submit Remote requests for the next week (from {mondayNextWeek:dd/MM/yyyy} to {fridayNextWeek:dd/MM/yyyy}) starting from Saturday ({saturdayThisWeek:dd/MM/yyyy})");
+                    }
+
+                    var hasPendingOrApprovedCustomOff = dbRequests.Any(s => s.Date == abs.DateAt.Date
+                        && s.Type == RequestType.Off
+                        && s.DateType == DayType.Custom
+                        && (s.Status == RequestStatus.Pending || s.Status == RequestStatus.Approved));
+                    if (hasPendingOrApprovedCustomOff)
+                    {
+                        throw new UserFriendlyException($"Cannot submit Remote request for {abs.DateAt:dd/MM/yyyy} due to existing Tardiness/Early request");
                     }
 
                     var startOfWeekContainRequest = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
@@ -627,7 +644,7 @@ namespace Timesheet.APIs.RequestDays
                         .Where(x => x.Request.UserId == userId)
                         .Where(x => x.Detail.DateAt.Date >= previousMonday && x.Detail.DateAt.Date <= previousFriday)
                         .Where(x => x.Request.Status == RequestStatus.Pending || x.Request.Status == RequestStatus.Approved)
-                        .Where(x => (x.Request.Type == RequestType.Off && x.Detail.DateType != DayType.Custom) || x.Request.Type == RequestType.Remote)
+                        .Where(x => x.Request.Type == RequestType.Off || x.Request.Type == RequestType.Remote)
                         .Select(x => x.Detail.DateAt.Date)
                         .Distinct()
                         .Count();
@@ -637,7 +654,8 @@ namespace Timesheet.APIs.RequestDays
                         .Select(x => x.DayOff.Date)
                         .Count();
 
-                    bool rejectRemoteDueToLowWorkingDays = absenceDaysLastWeek > (MAX_ALLOW_REMOTE_DAY - numberOfDayOffSettingsLastWeek);
+                    var threshold = Math.Max(0, MAX_ALLOW_REMOTE_DAY - numberOfDayOffSettingsLastWeek);
+                    bool rejectRemoteDueToLowWorkingDays = absenceDaysLastWeek > threshold;
 
                     var monday = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
                     var numberRemoteDayInWeek = 0;
@@ -658,7 +676,6 @@ namespace Timesheet.APIs.RequestDays
                     else if (rejectRemoteDueToLowWorkingDays)
                     {
                         absencedayRequest.Status = RequestStatus.Rejected;
-                        //throw new UserFriendlyException($"Your remote request for {abs.DateAt:dd/MM/yyyy} is rejected because you had less than 2 working days in the previous week due to {absenceDaysLastWeek} days of approved or pending off/remote requests");
                     }
                     else
                     {
@@ -668,11 +685,29 @@ namespace Timesheet.APIs.RequestDays
 
                 if (abs.DateType == DayType.Custom)
                 {
+                    var conflictRequest = dbRequests.FirstOrDefault(s => s.Date == abs.DateAt.Date
+                        && (s.Type == RequestType.Remote || s.Type == RequestType.Off)
+                        && (s.Status == RequestStatus.Pending || s.Status == RequestStatus.Approved));
+                    if (conflictRequest != null)
+                    {
+                        string requestTypeName = "";
+                        if (conflictRequest.Type == RequestType.Remote)
+                        {
+                            requestTypeName = "Remote";
+                        }
+                        else
+                        {
+                            requestTypeName = "Off/Custom";
+                        }
+                        throw new UserFriendlyException($"Cannot submit Tardiness/Early request for {abs.DateAt:dd/MM/yyyy} due to existing {requestTypeName} request");
+                    }
+
                     var firstDayOfMonth = DateTimeUtils.FirstDayOfMonth(abs.DateAt);
                     var numberCustomDayInMonth = 0;
 
                     var firstDayOfWeek = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
                     var numberCustomDayInWeek = 0;
+                    var numberRemoteDayInWeek = 0;
 
                     if (mapDateAtToRequestCount.ContainsKey(firstDayOfMonth) && mapDateAtToRequestCount.ContainsKey(firstDayOfWeek))
                     {
@@ -706,7 +741,27 @@ namespace Timesheet.APIs.RequestDays
                         else
                             mapDateAtToRequestCount.Add(firstDayOfMonth, 1);
                     }
+
+                    numberRemoteDayInWeek = CountRemoteDayOfUserInWeek(abs.DateAt, userId);
+
+                    if (numberRemoteDayInWeek > MAX_ALLOW_REMOTE_DAY - 1)
+                    {
+                        absencedayRequest.Status = RequestStatus.Rejected;
+                    }
                 }
+
+                if (input.Type == RequestType.Off)
+                {
+                    var hasPendingOrApprovedCustomOff = dbRequests.Any(s => s.Date == abs.DateAt.Date
+                        && s.Type == RequestType.Off
+                        && s.DateType == DayType.Custom
+                        && (s.Status == RequestStatus.Pending || s.Status == RequestStatus.Approved));
+                    if (hasPendingOrApprovedCustomOff)
+                    {
+                        throw new UserFriendlyException($"Cannot submit Off request for {abs.DateAt:dd/MM/yyyy} due to existing Tardiness/Early request");
+                    }
+                }
+
                 var requestId = await WorkScope.InsertAndGetIdAsync(absencedayRequest);
                 absenceDayDetail.RequestId = requestId;
 
@@ -871,7 +926,7 @@ namespace Timesheet.APIs.RequestDays
             return WorkScope.All<AbsenceDayDetail>()
                 .Include(s => s.Request)
                 .Where(s => s.Request.UserId == userId)
-                .Where(s => s.Request.Type == RequestType.Remote)
+                .Where(s => s.Request.Type == RequestType.Remote || (s.Request.Type == RequestType.Off && s.DateType == DayType.Custom))
                 .Where(s => s.Request.Status != RequestStatus.Rejected)
                 .Where(s => s.DateAt >= startDayOfWeek && s.DateAt.Date <= endDayOfWeek)
                 .Select(s => s.DateAt.Date)
@@ -1267,6 +1322,7 @@ namespace Timesheet.APIs.RequestDays
                 var request = await WorkScope
                 .GetAll<AbsenceDayRequest>()
                 .Include(ar => ar.User) // Eager loading User
+                .Include(ar => ar.DayOffType)
                 .FirstOrDefaultAsync(ar => ar.Id == requestId);
 
                 if (isPM != null && request.UserId == currentUser.Id && !isViewBranch)
@@ -1274,26 +1330,73 @@ namespace Timesheet.APIs.RequestDays
                     throw new UserFriendlyException("You cannot approve your own request!");
                 }
 
-                if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
+                var isPMPermission = await CheckSessionUserIsPMOfUser(request.UserId);
+                if (!isViewBranch && !isPMPermission)
                 {
-                    var dateRemote = await WorkScope.GetAll<AbsenceDayDetail>()
+					throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
+				}
+                else
+                {
+                    var requestDetails = await WorkScope.GetAll<AbsenceDayDetail>()
                         .Where(s => s.RequestId == requestId)
-                        .Where(s => s.Request.Type == RequestType.Remote)
-                        .Where(s => s.Request.Status == RequestStatus.Rejected)
-                        .Select(s => s.DateAt.ToString("yyyy-MM-dd"))
-                        .FirstOrDefaultAsync();
+                        .Select(s => new { s.DateAt, s.DateType })
+                        .ToListAsync();
 
-                    if (dateRemote != null)
+                    if (request.Type == RequestType.Off)
                     {
-                        var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
+                        await _commonServices.checkIsMonthLocked(requestDetails.Select(s => s.DateAt));
+                    }
 
-                        if (wfhRequestDto == null)
+                    if (requestDetails.Any())
+                    {
+                        if (request.Type == RequestType.Remote && request.Status == RequestStatus.Rejected)
                         {
-                            throw new UserFriendlyException("Cannot get request information from the W2 system!");
+                            var dateRemote = requestDetails.First().DateAt.ToString("yyyy-MM-dd");
+                            var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
+
+                            if (wfhRequestDto == null)
+                            {
+                                throw new UserFriendlyException("Cannot get request information from the W2 system!");
+                            }
+                            if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
+                            {
+                                throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
+                            }
                         }
-                        if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
+
+                        bool isSpecialOff = request.DayOffType.Status == OffTypeStatus.CoPhep;
+                        if (request.Type == RequestType.Off && isSpecialOff)
                         {
-                            throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
+                            var firstDate = requestDetails.First().DateAt.ToString("yyyy-MM-dd");
+                            var w2Requests = _w2Service.GetRequestStatus(request.User.EmailAddress, firstDate, request.User.MezonUserId);
+
+                            if (w2Requests == null || !w2Requests.Any())
+                            {
+                                throw new UserFriendlyException("This Off request needs to be approved by HR on the W2 system first!");
+                            }
+
+                            Timesheet.Services.W2.Dto.W2RequestStatusDto validRequest = null;
+                            foreach (var w2Request in w2Requests)
+                            {
+                                if (w2Request.Status != (int)RequestOffW2RequestStatus.Approved)
+                                {
+                                    continue;
+                                }
+
+                                var metaObj = Newtonsoft.Json.JsonConvert.DeserializeObject<Timesheet.Services.W2.Dto.W2RequestMetaDto>(w2Request.Meta);
+                                if (metaObj != null && !string.IsNullOrEmpty(metaObj.Reason_label) &&
+                                    metaObj.Reason_label.Trim().Equals(request.DayOffType.Name.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                                    w2Request.Date.Date == requestDetails.First().DateAt.Date)
+                                {
+                                    validRequest = w2Request;
+                                    break;
+                                }
+                            }
+
+                            if (validRequest == null)
+                            {
+                                throw new UserFriendlyException("This Off request needs to be approved by HR on the W2 system first!");
+                            }
                         }
                     }
 
@@ -1303,10 +1406,6 @@ namespace Timesheet.APIs.RequestDays
                     var approverId = AbpSession.UserId.Value;
                     await notifyKomuWhenApproveOrRejectRequest(request, true, approverId);
                     await sendDirectMessageWhenApproveOrRejectRequest(request, true, approverId);
-                }
-                else if (!(await CheckSessionUserIsPMOfUser(request.UserId)))
-                {
-                    throw new UserFriendlyException("You are not PM of UserId " + request.UserId);
                 }
             }
         }
@@ -1321,6 +1420,15 @@ namespace Timesheet.APIs.RequestDays
 
                 if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
+                    var requestDetails = await WorkScope.GetAll<AbsenceDayDetail>()
+                          .Where(s => s.RequestId == requestId)
+                          .Select(s => new { s.DateAt })
+                          .ToListAsync();
+
+                    if (request.Type == RequestType.Off)
+                    {
+                        await _commonServices.checkIsMonthLocked(requestDetails.Select(s => s.DateAt));
+                    }
                     request.Status = RequestStatus.Rejected;
                     await WorkScope.UpdateAsync<AbsenceDayRequest>(request);
 

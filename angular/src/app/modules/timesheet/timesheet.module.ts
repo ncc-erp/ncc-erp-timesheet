@@ -7,10 +7,11 @@ import { DetailComponent } from './detail/detail.component';
 import { FormsModule } from '@angular/forms';
 import { TimesheetWarningComponent } from './timesheet-warning/timesheet-warning.component';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { RejectTimesheetDialogComponent } from './reject-timesheet-dialog/reject-timesheet-dialog.component';
 
 
 @NgModule({
-  declarations: [TimesheetComponent, DetailComponent, TimesheetWarningComponent],
+  declarations: [TimesheetComponent, DetailComponent, TimesheetWarningComponent, RejectTimesheetDialogComponent],
   imports: [
     CommonModule,
     TimesheetRoutingModule,
@@ -18,6 +19,6 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
     FormsModule,
     NgxMatSelectSearchModule
   ],
-  entryComponents:[DetailComponent,TimesheetWarningComponent]
+  entryComponents:[DetailComponent,TimesheetWarningComponent, RejectTimesheetDialogComponent]
 })
 export class TimesheetModule { }

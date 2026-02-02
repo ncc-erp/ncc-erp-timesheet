@@ -447,7 +447,7 @@ namespace Timesheet.APIs.HRMv2
 
         [System.Security.SuppressUnmanagedCodeSecurity]
         [NccAuthentication]
-        private async Task<UpdateUserStatusDto> UpdateTimesheetUserStatus(UpdateUserStatusDto input)
+        private async Task<long> UpdateTimesheetUserStatus(UpdateUserStatusDto input)
         {
             var userToUpdate = await WorkScope.GetAll<User>()
                 .Where(x => x.EmailAddress.ToLower().Trim() == input.EmailAddress.ToLower().Trim())
@@ -461,12 +461,10 @@ namespace Timesheet.APIs.HRMv2
             userToUpdate.IsActive = input.IsActive;
             userToUpdate.IsStopWork = input.IsStopWork;
             userToUpdate.EndDateAt = input.StopWorkingTime;
-            
+
             await WorkScope.UpdateAsync(userToUpdate);
 
-            return input;
-             
-
+            return userToUpdate.Id;
         }
 
         [HttpPost]
@@ -480,7 +478,9 @@ namespace Timesheet.APIs.HRMv2
                 EmailAddress = input.EmailAddress,
                 StopWorkingTime = input.DateAt
             };
-            await UpdateTimesheetUserStatus(inputToUpdate);
+
+            var updatedUserId = await UpdateTimesheetUserStatus(inputToUpdate);
+            await _userServices.DeactivateUserFromProjects(updatedUserId);
             return input;
         }
         [HttpPost]

@@ -22,6 +22,7 @@ using Timesheet.Entities;
 using Timesheet.Services.Komu;
 using Timesheet.Services.Mezon;
 using Timesheet.Timesheets.Timesheets;
+using Timesheet.Timesheets.Timesheets.Dto;
 using Timesheet.Uitls;
 using Xunit;
 using static Ncc.Entities.Enum.StatusEnum;
@@ -536,7 +537,11 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         public async Task Should_Allow_Reject_Timesheets()
         {
             var now = DateTimeUtils.GetNow();
-            var input = new long[1] { 115 };
+            var input = new RejectTimesheetDto
+            {
+                Ids = new List<long> { 115 },
+                Reason = "Test reject locked timesheet"
+            };
             await WithUnitOfWorkAsync(async () =>
             {
                 var result = await _timesheet.RejectTimesheets(input);
@@ -556,7 +561,11 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
         public async Task Should_Not_Allow_Reject_Timesheets_With_Timesheet_Locked()
         {
             var now = DateTimeUtils.GetNow();
-            var input = new long[1] { 114 };
+            var input = new RejectTimesheetDto
+            {
+                Ids = new List<long> { 114 },
+                Reason = "Test reject locked timesheet"
+            };
             await WithUnitOfWorkAsync(async () =>
             {
                 var expectedMsg = "PM hãy vào ims.nccsoft.vn để unlock timesheet";

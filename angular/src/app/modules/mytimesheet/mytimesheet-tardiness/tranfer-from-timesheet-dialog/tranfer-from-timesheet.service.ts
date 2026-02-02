@@ -6,10 +6,10 @@ import { STORAGE_KEYS } from "@app/constant/storage-keys.constant";
 @Injectable({ providedIn: "root" })
 export class MmnService {
   private mmn = mmnClient;
-  transfer(amountToTransfer: number, recipientAddress: string): Observable<any> {
-    return from(this.executeTransfer(amountToTransfer, recipientAddress));
+  transfer(amountToTransfer: number, recipientAddress: string, description?: string): Observable<any> {
+    return from(this.executeTransfer(amountToTransfer, recipientAddress, description));
   }
-  async executeTransfer(amountToTransfer: number, recipientAddress: string) {
+  async executeTransfer(amountToTransfer: number, recipientAddress: string, description?: string) {
     const senderUserId = localStorage.getItem(STORAGE_KEYS.MEZON_USER_ID);
     const senderAddress = this.mmn.getAddressFromUserId(senderUserId);
     const keyPairRaw = localStorage.getItem(STORAGE_KEYS.KEY_PAIR);
@@ -20,6 +20,9 @@ export class MmnService {
       const nonceRes = await this.mmn.getCurrentNonce(senderUserId);
       const nonce = nonceRes.nonce + 1;
       const amount = this.mmn.scaleAmountToDecimals(amountToTransfer);
+      const textData = description && description.trim().length > 0
+        ? description
+        : `Tranfer ${amountToTransfer} from timesheet`;
       const res = await this.mmn.sendTransactionByAddress({
         sender: senderAddress,
         recipient: recipientAddress,
@@ -29,7 +32,7 @@ export class MmnService {
         publicKey: keyPair.publicKey,
         zkProof: zkProof.proof,
         zkPub: zkProof.public_input,
-        textData: `Tranfer ${amountToTransfer} from timesheet`,
+        textData,
         extraInfo: { type: "transfer_token" },
       });
 

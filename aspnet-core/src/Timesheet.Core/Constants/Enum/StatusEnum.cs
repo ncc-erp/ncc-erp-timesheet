@@ -283,7 +283,8 @@ namespace Ncc.Entities.Enum
             UnlockTSGmail = 16,
             UnlockTSIMS = 17,
             UnlockPM = 18,
-            UnlockStaff = 19
+            UnlockStaff = 19,
+            PMOthers = 20
         }
         public enum PunishmentGroupType
         {
@@ -298,7 +299,8 @@ namespace Ncc.Entities.Enum
             UnlockTSGmail = 16, 
             UnlockTSIMS = 17,
             UnlockTS_PM = 18,
-            UnlockTS_Staff = 19   
+            UnlockTS_Staff = 19,
+            PMOthers = 20
         }
         public enum CheckInCheckOutPunishmentType
         {
@@ -336,7 +338,16 @@ namespace Ncc.Entities.Enum
             Pending = 0,
             Approved = 1,
             Reject = 2,
-        } 
+        }
+
+        public enum RequestOffW2RequestStatus
+        {
+            Pending = 0,
+            Approved = 1,
+            Reject = 2,
+            Cancelled = 3,
+            All = -1
+        }
 
         public enum ReviewInternNoteType
         {

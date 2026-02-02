@@ -236,6 +236,8 @@ namespace Timesheet.Timesheets.MyTimesheets
                                     join project in WorkScope.All<Project>().AsNoTracking() on ptask.ProjectId equals project.Id
                                     join task in WorkScope.All<Ncc.Entities.Task>().AsNoTracking() on ptask.TaskId equals task.Id
                                     join cus in WorkScope.All<Customer>().AsNoTracking() on project.CustomerId equals cus.Id
+                                    join modifierUser in WorkScope.All<User>().AsNoTracking() on myTimesheet.LastModifierUserId equals modifierUser.Id into modifierUsers
+                                    from modifierUser in modifierUsers.DefaultIfEmpty()
                                     where myTimesheet.UserId == userId && myTimesheet.DateAt >= startDate && myTimesheet.DateAt <= endDate
                                     select new GetTimesheetDto
                                     {
@@ -255,7 +257,10 @@ namespace Timesheet.Timesheets.MyTimesheets
                                         IsTemp = myTimesheet.IsTemp,
                                         ProjectTargetUser = myTimesheet.ProjectTargetUser.User.FullName,
                                         WorkingTimeTargetUser = myTimesheet.TargetUserWorkingTime,
-                                        OpenTalkJoinTime = task.Name == "Open Talk" && openTalkTimes.ContainsKey(myTimesheet.DateAt.Date) ? openTalkTimes[myTimesheet.DateAt.Date] : 0
+                                        OpenTalkJoinTime = task.Name == "Open Talk" && openTalkTimes.ContainsKey(myTimesheet.DateAt.Date) ? openTalkTimes[myTimesheet.DateAt.Date] : 0,
+                                        RejectReason = myTimesheet.RejectReason,
+                                        LastModificationTime = myTimesheet.LastModificationTime,
+                                        LastModifierUserName = modifierUser != null ? modifierUser.FullName : ""
                                     }).ToListAsync();
 
             return timesheets;
@@ -633,6 +638,8 @@ namespace Timesheet.Timesheets.MyTimesheets
                 .Where(s => s.DateAt >= input.StartDate.Date && s.DateAt.Date <= input.EndDate)
                 .Where(s => s.Status == TimesheetStatus.None)
                 .ToListAsync();
+
+            await _commonService.checkIsMonthLocked(mytimesheets.Select(s => s.DateAt));
 
             //Valid :
             DateTime lockDate = _commonService.getlockDateUser();

@@ -427,5 +427,123 @@ namespace Timesheet.Application.Tests.API.TimeSheets.Projects
                 Assert.Equal(expectedMessage, exception.Message);
             });
         }
+
+        [Fact]
+        public async void DeactiveUser_Should_Throw_Exception_When_User_Is_Only_PM()
+        {
+            var projectDto = ProjectDto();
+            long projectId = 0;
+            long pmUserId = 0;
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var workScope = Resolve<IWorkScope>();
+                pmUserId = await CreateUserAsync(workScope, "PM Test", "pm@ncc.asia");
+                var memberId = await CreateUserAsync(workScope, "Member Test", "mem@ncc.asia");
+                projectId = await CreateProjectAsync(workScope, projectDto);
+
+                await CreateProjectUserAsync(workScope, projectId, pmUserId, ProjectUserType.PM);
+                await CreateProjectUserAsync(workScope, projectId, memberId, ProjectUserType.Member);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+                    await _projectAppService.ReleaseUserFromProject(projectId, pmUserId));
+
+                exception.Message.ShouldBe("Cannot deactivate the only PM in this project.");
+            });
+        }
+
+        [Fact]
+        public async System.Threading.Tasks.Task DeactiveUser_Should_Succeed_When_User_Is_Regular_Member()
+        {
+            var projectDto = ProjectDto();
+            long projectId = 0;
+            long memberUserId = 0;
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var workScope = Resolve<IWorkScope>();
+                memberUserId = await CreateUserAsync(workScope, "Member User", "member@ncc.asia");
+                projectId = await CreateProjectAsync(workScope, projectDto);
+                await CreateProjectUserAsync(workScope, projectId, memberUserId, ProjectUserType.Member);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _projectAppService.ReleaseUserFromProject(projectId, memberUserId);
+            });
+
+            UsingDbContext(context =>
+            {
+                var memberInProject = context.ProjectUsers
+                    .FirstOrDefault(pu => pu.ProjectId == projectId && pu.UserId == memberUserId);
+                memberInProject.ShouldNotBeNull();
+                memberInProject.Type.ShouldBe(ProjectUserType.DeActive);
+            });
+        }
+
+        [Fact]
+        public async void DeactiveUser_Should_Succeed_When_Project_Has_Other_Active_PM()
+        {
+            var projectDto = ProjectDto();
+
+            var (projectId, pm1Id, pm2Id) = await WithUnitOfWorkAsync(async () =>
+            {
+                var workScope = Resolve<IWorkScope>();
+                var user1Id = await CreateUserAsync(workScope, "PM One", "pm1@ncc.asia");
+                var user2Id = await CreateUserAsync(workScope, "PM Two", "pm2@ncc.asia");
+                var pId = await CreateProjectAsync(workScope, projectDto);
+
+                await CreateProjectUserAsync(workScope, pId, user1Id, ProjectUserType.PM);
+                await CreateProjectUserAsync(workScope, pId, user2Id, ProjectUserType.PM);
+
+                return (pId, user1Id, user2Id);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _projectAppService.ReleaseUserFromProject(projectId, pm1Id);
+            });
+
+            UsingDbContext(context =>
+            {
+                var releasedUser = context.ProjectUsers.First(pu => pu.ProjectId == projectId && pu.UserId == pm1Id);
+                releasedUser.Type.ShouldBe(ProjectUserType.DeActive);
+
+                var remainingPM = context.ProjectUsers.First(pu => pu.ProjectId == projectId && pu.UserId == pm2Id);
+                remainingPM.Type.ShouldBe(ProjectUserType.PM);
+            });
+        }
+
+        [Fact]
+        public async void DeactiveUser_Should_Throw_Exception_When_Other_PM_Is_Inactive()
+        {
+            var projectDto = ProjectDto();
+
+            var (projectId, currentPmId) = await WithUnitOfWorkAsync(async () =>
+            {
+                var workScope = Resolve<IWorkScope>();
+                var user1Id = await CreateUserAsync(workScope, "Active PM", "active@ncc.asia", isActive: true);
+                var user2Id = await CreateUserAsync(workScope, "Inactive PM", "inactive@ncc.asia", isActive: false);
+                projectDto.Name = "Project Inactive PM Test";
+                projectDto.Code = "P_INACTIVE_PM";
+                var pId = await CreateProjectAsync(workScope, projectDto);
+
+                await CreateProjectUserAsync(workScope, pId, user1Id, ProjectUserType.PM);
+                await CreateProjectUserAsync(workScope, pId, user2Id, ProjectUserType.PM);
+
+                return (pId, user1Id);
+            });
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var exception = await Assert.ThrowsAsync<UserFriendlyException>(async () =>
+                    await _projectAppService.ReleaseUserFromProject(projectId, currentPmId));
+
+                exception.Message.ShouldBe("Cannot deactivate the only PM in this project.");
+            });
+        }
     }
 }

@@ -59,5 +59,6 @@ namespace Timesheet.Services.MMN.Dto
         public string FromAddress { get; set; }
         public string ToAddress { get; set; }
         public MmnTransactionStatus Status { get; set; }
+        public string TextData { get; set; }
     }
 }

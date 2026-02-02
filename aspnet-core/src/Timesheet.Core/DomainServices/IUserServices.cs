@@ -22,5 +22,6 @@ namespace Timesheet.DomainServices
         Task<User> CreateUserFromHrmv2Async(CreateUpdateByHRMV2Dto input);
         Task<User> UpdateUserFromHrmV2Async(CreateUpdateByHRMV2Dto input);
         User GetUserByEmail(string email);
+        Task DeactivateUserFromProjects(long userId);
     }
 }

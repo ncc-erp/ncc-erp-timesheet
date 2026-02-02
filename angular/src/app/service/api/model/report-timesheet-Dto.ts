@@ -105,6 +105,7 @@ export class TimekeepingDto {
   unlockTSIMSPunish?: number;
   unlockTSStaffPunish?: number;
   unlockTSPMPunish?: number;
+  pmOtherPunish?: number;
   
     
   structuredUserNotes?: Array<{
@@ -128,14 +129,16 @@ export class TimekeepingDto {
   totalUnlockTSPunish?: number;
   totalUnlockTSStaffPunish?: number;
   totalUnlockTSPMPunish?: number;
+  totalPMOtherPunish?: number;
   
  
   structuredNoteReplies?: PunishmentNoteReply[];
   showAllReplies?: boolean; 
   showAllComplaints?: boolean;
   shouldShowMore?: boolean;
-
-  
+  isExpanded?: boolean;
+  isComplainExpanded?: boolean;
+  isPunishmentExpanded?: boolean;
 }
 
 export class UpdateTimekeepingDto{
