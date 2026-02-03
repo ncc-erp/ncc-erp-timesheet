@@ -1,3 +1,44 @@
+.filter-row {
+  display: flex;
+  flex-wrap: nowrap;
+  margin: 0 -5px 15px -5px;
+  align-items: flex-start;
+}
+
+.filter-item {
+  flex: 1;
+  padding: 0 5px;
+  min-width: 0;
+}
+
+.filter-search {
+  flex: 3;
+}
+
+.filter-branch {
+  flex: 1;
+}
+
+.filter-row .mat-form-field {
+  width: 100%;
+}
+
+::ng-deep .filter-row .mat-form-field-wrapper {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+@media screen and (max-width: 991px) {
+  .filter-row {
+    flex-wrap: wrap;
+  }
+
+  .filter-item {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
 h1 {
   color: #333;
   margin-bottom: 20px;
@@ -172,7 +213,7 @@ h3 {
   background: #fff;
   border-bottom: 2px solid #dee2e6;
   overflow: hidden;
-  padding-right: 8px;
+  padding-right: 0px;
 }
 
 .table-body {

@@ -24,9 +24,9 @@
 
       <div class="body">
         <div class="group">
-          <div class="row">
+          <div class="row filter-row">
             <!-- Search Filter -->
-            <div class="pr-0 col-md-3 col-sm-12 col-xs-12 mb-0 row-item">
+            <div class="filter-item filter-search">
               <mat-form-field style="padding-bottom: 0;" class="w-100" appearance="outline">
                 <mat-label>{{ "Search" | localize }}</mat-label>
                 <div style="display: flex; flex-direction: row; align-items: center; justify-items: center;">
@@ -39,12 +39,8 @@
             </div>
 
             <!-- Min Hours Filter -->
-            <div class="pr-0 col-md-2 col-sm-6 col-xs-12 mb-0 row-item">
-              <mat-form-field
-                style="padding-bottom: 0"
-                class="w-100"
-                appearance="outline"
-              >
+            <div class="filter-item filter-min-hours">
+              <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
                 <mat-label>{{ "Min Hours" | localize }}</mat-label>
                 <input
                   matInput
@@ -64,12 +60,8 @@
             </div>
 
             <!-- Limit Filter -->
-            <div class="pr-0 col-md-2 col-sm-6 col-xs-12 mb-0 row-item">
-              <mat-form-field
-                style="padding-bottom: 0"
-                class="w-100"
-                appearance="outline"
-              >
+            <div class="filter-item filter-limit">
+              <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
                 <mat-label>{{ "Limit" | localize }}</mat-label>
                 <input
                   matInput
@@ -89,7 +81,7 @@
             </div>
 
             <!-- Branch Filter -->
-            <div class="pr-0 col-md-2 col-sm-6 col-xs-12 mb-0 row-item">
+            <div class="filter-item filter-branch">
               <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
                 <mat-label>{{ "Branch" | localize }}</mat-label>
 

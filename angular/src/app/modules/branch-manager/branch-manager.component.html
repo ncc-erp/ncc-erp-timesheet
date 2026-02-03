@@ -1,9 +1,46 @@
-<app-manage-employee [listPosition]="position" [listPositionFilter]="positionFilter" [listBranch]="branch" [listBranchFilter]="branchFilter"></app-manage-employee>
-
-<app-project-management [listBranch]="branch" [listBranchFilter]="branchFilter"></app-project-management>
-
-<app-daily-employee-report [listBranch] = "branch" [listBranchFilter] = "branchFilter"></app-daily-employee-report>
-
-<app-daily-project-report [listBranch]="branch" [listBranchFilter]="branchFilter"></app-daily-project-report>
-
-<app-anomalies-report [listBranch]="branch" [listBranchFilter]="branchFilter"></app-anomalies-report>
+<div class="card">
+    <div class="body">
+        <mat-tab-group animationDuration="0ms">
+            <mat-tab label="{{'Employees' | localize}}">
+                <ng-template matTabContent>
+                    <div class="m-t-10">
+                        <app-manage-employee [listPosition]="position" [listPositionFilter]="positionFilter"
+                            [listBranch]="branch" [listBranchFilter]="branchFilter"></app-manage-employee>
+                    </div>
+                </ng-template>
+            </mat-tab>
+            <mat-tab label="{{'Projects' | localize}}">
+                <ng-template matTabContent>
+                    <div class="m-t-10">
+                        <app-project-management [listBranch]="branch"
+                            [listBranchFilter]="branchFilter"></app-project-management>
+                    </div>
+                </ng-template>
+            </mat-tab>
+            <mat-tab label="{{'Daily Employee Report' | localize}}">
+                <ng-template matTabContent>
+                    <div class="m-t-10">
+                        <app-daily-employee-report [listBranch]="branch" [listBranchFilter]="branchFilter">
+                        </app-daily-employee-report>
+                    </div>
+                </ng-template>
+            </mat-tab>
+            <mat-tab label="{{'Daily Project Report' | localize}}">
+                <ng-template matTabContent>
+                    <div class="m-t-10">
+                        <app-daily-project-report [listBranch]="branch" [listBranchFilter]="branchFilter">
+                        </app-daily-project-report>
+                    </div>
+                </ng-template>
+            </mat-tab>
+            <mat-tab label="{{'Anomalies' | localize}}">
+                <ng-template matTabContent>
+                    <div class="m-t-10">
+                        <app-anomalies-report [listBranch]="branch"
+                            [listBranchFilter]="branchFilter"></app-anomalies-report>
+                    </div>
+                </ng-template>
+            </mat-tab>
+        </mat-tab-group>
+    </div>
+</div>

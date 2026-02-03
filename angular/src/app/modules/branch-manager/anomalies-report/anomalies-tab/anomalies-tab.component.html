@@ -1,9 +1,8 @@
-
 <div class="tab-content-wrapper">
     <div class="body" style="padding-left: 0;">
         <div class="group">
-            <div class="row">
-                <div class="pr-0 col-md-3 col-sm-12 col-xs-12 mb-0 row-item">
+            <div class="row filter-row">
+                <div class="filter-item filter-search">
                     <mat-form-field style="padding-bottom: 0;" class="w-100" appearance="outline">
                         <mat-label>{{ "Search" | localize }}</mat-label>
                         <div class="search-input-wrapper">
@@ -16,7 +15,7 @@
                 </div>
 
                 <!-- Branch Filter -->
-                <div class="pr-0 col-md-2 col-sm-6 col-xs-12 mb-0 row-item">
+                <div class="filter-item filter-branch">
                     <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
                         <mat-label>{{ "Branch" | localize }}</mat-label>
                         <mat-select name="branchIds" multiple [(ngModel)]="selectedBranchIds"
