@@ -83,7 +83,10 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     }
   }
   
-  filterBranch(): void {
+  filterBranch(searchText?: string): void {
+    if (searchText !== undefined) {
+      this.branchSearchText = searchText;
+    }
     const search = this.branchSearchText.toLowerCase().trim();
     if (!search) {
       this.listBranchFilter = [...this.listBranch];
