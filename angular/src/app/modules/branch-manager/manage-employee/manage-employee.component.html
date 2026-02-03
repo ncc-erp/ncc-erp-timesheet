@@ -21,28 +21,21 @@
       <div class="body">
         <div class="group">
           <div class="search-filter-container">
-            <div class="row search-row">
-              <div class="col-lg-9 col-md-8 col-sm-7 col-xs-12">
-                <mat-form-field class="search-field" appearance="outline">
+            <div class="row filter-row">
+              <div class="filter-item filter-search">
+                <mat-form-field style="padding-bottom: 0;" class="w-100" appearance="outline">
                   <mat-label>Search by Email</mat-label>
-                  <mat-icon matPrefix>search</mat-icon>
-                  <input matInput [(ngModel)]="keyword" name="keyword" (keyup.enter)="searchOrFilter()">
+                  <div style="display: flex; flex-direction: row; align-items: center; justify-items: center;">
+                    <input style="flex-grow: 1;" matInput [(ngModel)]="keyword" name="keyword"
+                      (keyup.enter)="searchOrFilter()">
+                    <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="keyword"
+                      (click)="keyword=''; searchOrFilter()">clear</mat-icon>
+                    <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix>search</mat-icon>
+                  </div>
                 </mat-form-field>
               </div>
-              <div class="col-lg-3 col-md-4 col-sm-5 col-xs-12">
-                <div class="button-group">
-                  <button class="btn-action" mat-raised-button name="clearSearchAndFilter" (click)="clearSearchAndFilter()">
-                    Clear
-                  </button>
-                  <button class="btn-action" mat-raised-button color="primary" [disabled]="!keyword" (click)="searchOrFilter()">
-                    Search
-                  </button>
-                </div>
-              </div>
-            </div>
 
-            <div class="row filter-row">
-              <div class="pr-0 col-lg-2 col-md-6 col-sm-6 col-xs-12">
+              <div class="filter-item">
                 <mat-form-field class="w-100" appearance="outline">
                   <mat-label>{{ "Position" | localize }}</mat-label>
                   <mat-select name="positionId" [(value)]="positionId" (selectionChange)="searchOrFilter()">
@@ -58,8 +51,8 @@
                   </mat-select>
                 </mat-form-field>
               </div>
-            
-              <div class="pr-0 col-lg-2 col-md-6 col-sm-6 col-xs-12">
+
+              <div class="filter-item">
                 <ng-container *ngIf="isShowSelectBranch()">
                   <mat-form-field class="w-100" appearance="outline">
                     <mat-label>{{ "Branch" | localize }}</mat-label>
@@ -77,9 +70,7 @@
                 </ng-container>
               </div>
 
-              <div class="pr-0 col-lg-8 col-md-6 col-sm-6 col-xs-12" style="padding-left: 0px !important;">
-                <app-date-filter (dateSelected)="onDateSelected($event)" class="app-date-filter"></app-date-filter>
-              </div>
+              <app-date-filter (dateSelected)="onDateSelected($event)" class="app-date-filter"></app-date-filter>
             </div>
       </div>
     </div>

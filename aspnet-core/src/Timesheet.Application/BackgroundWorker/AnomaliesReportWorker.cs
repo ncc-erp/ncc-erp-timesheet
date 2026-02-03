@@ -7,7 +7,7 @@ using Ncc.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Timesheet.Core;
+using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Uitls;
 

@@ -392,7 +392,10 @@ namespace Ncc.Authorization
         public const string ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs = "ProjectManagementBranchDirectors.ManageUserForBranchs.ViewAllBranchs";
         public const string ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch = "ProjectManagementBranchDirectors.ManageUserForBranchs.ViewMyBranch";
         public const string ProjectManagementBranchDirectors_ManageUserProjectForBranchs = "ProjectManagementBranchDirectors.ManageUserProjectForBranchs";
-
+        public const string BranchDirector_Report = "BranchDirector_Report";
+        public const string BranchDirector_OfficeWorkingReport_View = "BranchDirector_OfficeWorkingReport_View";
+        public const string BranchDirector_ProjectWorkingReport_View = "BranchDirector_ProjectWorkingReport_View";
+        public const string BranchDirector_AnomaliesReport_View = "BranchDirector_AnomaliesReport_View";
     }
 
     public class GrantPermissionRoles
@@ -758,6 +761,10 @@ namespace Ncc.Authorization
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs,
+                    PermissionNames.BranchDirector_Report,
+                    PermissionNames.BranchDirector_OfficeWorkingReport_View,
+                    PermissionNames.BranchDirector_ProjectWorkingReport_View,
+                    PermissionNames.BranchDirector_AnomaliesReport_View
                 }
             },
 
@@ -915,6 +922,10 @@ namespace Ncc.Authorization
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs,
+                    PermissionNames.BranchDirector_Report,
+                    PermissionNames.BranchDirector_OfficeWorkingReport_View,
+                    PermissionNames.BranchDirector_ProjectWorkingReport_View,
+                    PermissionNames.BranchDirector_AnomaliesReport_View
                 }
             },
         };
@@ -1288,6 +1299,10 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View User from all branchs"},
             new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View User from my branch"},
             new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage User Project For Branchs"},
+            new SystemPermission{ Name =  PermissionNames.BranchDirector_Report, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Report For Branch Director"},
+            new SystemPermission{ Name =  PermissionNames.BranchDirector_OfficeWorkingReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Office Working Report For Branch Director"},
+            new SystemPermission{ Name =  PermissionNames.BranchDirector_ProjectWorkingReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Project Working Report For Branch Director"},
+            new SystemPermission{ Name =  PermissionNames.BranchDirector_AnomaliesReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Anomalies Report For Branch Director"}
         };
 
         public static List<SystemPermission> TreePermissions = new List<SystemPermission>()
@@ -2000,6 +2015,14 @@ namespace Ncc.Authorization
                      },
                      new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage User Project For Branchs" },
                  }
+             },
+             new SystemPermission{ Name =  PermissionNames.BranchDirector_Report, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Report For Branch Director",
+                Childrens = new List<SystemPermission>()
+                {
+                    new SystemPermission{ Name =  PermissionNames.BranchDirector_OfficeWorkingReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Office Working Report For Branch Manager"},
+                    new SystemPermission{ Name =  PermissionNames.BranchDirector_ProjectWorkingReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Project Working Report For Branch Manager"},
+                    new SystemPermission{ Name =  PermissionNames.BranchDirector_AnomaliesReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Anomalies Report For Branch Manager"},
+                }
              }
         };
     }
