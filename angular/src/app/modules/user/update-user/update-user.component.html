@@ -1,341 +1,547 @@
-<form autocomplete="off" #createUserModal="ngForm" [busy]="isSaving">
-  <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>{{l(title)}}
-  </h1>
-  <mat-dialog-content style="height:auto">
-        <div class="row row-fluid">
-          <div class="col-md-6">
-            <mat-form-field>
-              <input [disabled]="user.id !== undefined" matInput name="UserName" [placeholder]="'UserName' | localize"
-                [(ngModel)]="user.userName" required maxlength="32" />
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field>
-              <input matInput name="EmailAddress" [placeholder]="'EmailAddress' | localize"
-                [(ngModel)]="user.emailAddress" (keyup)="onEmailChange()" type="email" required maxlength="255"
-                pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" email="true" />
-            </mat-form-field>
-          </div>
+<form
+  autocomplete="off"
+  #createUserModal="ngForm"
+  [busy]="isSaving"
+  class="user-modal"
+>
+  <div
+    class="user-modal__header"
+    cdkDrag
+    cdkDragRootElement=".cdk-overlay-pane"
+    cdkDragHandle
+    mat-dialog-title
+  >
+    <div>
+      <div class="user-modal__title">
+        {{ l(title) }}
+      </div>
+      <div class="user-modal__subtitle">
+        Manage basic info, working time & permissions for this user.
+      </div>
+    </div>
+  </div>
+
+  <mat-dialog-content class="user-modal__body">
+    <div class="user-modal__section">
+      <div class="user-modal__section-title">Basic information</div>
+
+      <div class="row row-fluid">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>User name</mat-label>
+            <input
+              [disabled]="user.id !== undefined"
+              matInput
+              name="UserName"
+              [(ngModel)]="user.userName"
+              required
+              maxlength="32"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Email address</mat-label>
+            <input
+              matInput
+              name="EmailAddress"
+              [(ngModel)]="user.emailAddress"
+              (keyup)="onEmailChange()"
+              type="email"
+              required
+              maxlength="255"
+              pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+              email="true"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row row-fluid">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Name</mat-label>
+            <input
+              matInput
+              name="First Name"
+              [(ngModel)]="user.name"
+              maxlength="32"
+              required
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Surname</mat-label>
+            <input
+              matInput
+              name="Surname"
+              [(ngModel)]="user.surname"
+              maxlength="32"
+              required
+            />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row row-fluid">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Sex</mat-label>
+            <mat-select
+              [disableOptionCentering]="true"
+              name="Sex"
+              [(value)]="user.sex"
+            >
+              <mat-option
+                *ngFor="let item of sexes"
+                [value]="item.value"
+              >
+                {{ item.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
 
-        <div class="row row-fluid">
-          <div class="col-md-6">
-            <mat-form-field>
-              <input matInput name="First Name" [placeholder]="'Name' | localize" [(ngModel)]="user.name" maxlength="32"
-                required />
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field>
-              <input matInput name="Surname" [placeholder]="'Surname' | localize" [(ngModel)]="user.surname"
-                maxlength="32" required />
-            </mat-form-field>
-          </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Position</mat-label>
+            <mat-select
+              [disableOptionCentering]="true"
+              matInput
+              name="positionId"
+              placeholder="Choose a position..."
+              [(ngModel)]="user.positionId"
+              #positionId="ngModel"
+              required
+            >
+              <mat-option>
+                <ngx-mat-select-search
+                  placeholderLabel="Search"
+                  [formControl]="positionSearch"
+                ></ngx-mat-select-search>
+              </mat-option>
+              <mat-option
+                *ngFor="let position of listPosition"
+                [value]="position.id"
+              >
+                {{ position.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row row-fluid">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Mezon ID</mat-label>
+            <input
+              matInput
+              name="MezonId"
+              [(ngModel)]="user.mezonUserId"
+              maxlength="100"
+              placeholder="Enter Mezon ID"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-md-6 user-modal__checkbox-row">
+          <mat-checkbox
+            name="IsActive"
+            [(ngModel)]="user.isActive"
+          >
+            {{ 'IsActive' | localize }}
+          </mat-checkbox>
+        </div>
+      </div>
+    </div>
+
+    <div class="user-modal__section">
+      <div class="user-modal__section-title">
+        Employment & organization
+      </div>
+
+      <div class="row row-fluid">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Branch</mat-label>
+            <mat-select
+              [disableOptionCentering]="true"
+              matInput
+              name="branchId"
+              (selectionChange)="onChangeBranch()"
+              placeholder="Choose a branch..."
+              [(ngModel)]="user.branchId"
+              #branchId="ngModel"
+              required
+            >
+              <mat-option>
+                <ngx-mat-select-search
+                  placeholderLabel="Search"
+                  [formControl]="branchSearch"
+                  noEntriesFoundLabel="No matching found"
+                ></ngx-mat-select-search>
+              </mat-option>
+              <mat-option
+                *ngFor="let branch of listBranch"
+                [value]="branch.id"
+              >
+                {{ branch.displayName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Basic trainer</mat-label>
+            <mat-select
+              [disableOptionCentering]="true"
+              [(value)]="user.managerId"
+              name="managerId"
+            >
+              <mat-option>
+                <ngx-mat-select-search
+                  [formControl]="managerSearch"
+                  placeholderLabel="Search by Name"
+                  noEntriesFoundLabel="No matching found"
+                >
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option [value]="null">None</mat-option>
+              <mat-option
+                *ngFor="let man of managersFiltered"
+                [value]="man.id"
+              >
+                {{ man.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row row-fluid">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Type</mat-label>
+            <mat-select
+              [disableOptionCentering]="true"
+              name="userType"
+              [(value)]="user.type"
+              (selectionChange)="onUserTypeChange()"
+            >
+              <mat-option [value]="null">None</mat-option>
+              <mat-option [value]="0">Staff</mat-option>
+              <mat-option [value]="1">Internship</mat-option>
+              <mat-option [value]="2">Collaborator</mat-option>
+              <mat-option [value]="3">Probation</mat-option>
+              <mat-option [value]="5">Vendor</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Level</mat-label>
+            <mat-select
+              [disableOptionCentering]="true"
+              name="userLevel"
+              [(value)]="user.level"
+              (selectionChange)="onLevelChange()"
+            >
+              <mat-option [value]="null">None</mat-option>
+              <mat-option
+                *ngFor="let item of listLevelFiltered"
+                [value]="item.value"
+              >
+                {{ item.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row row-fluid">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Start date</mat-label>
+            <input
+              matInput
+              name="StartDate"
+              [(ngModel)]="user.startDateAt"
+              [matDatepicker]="pickerStartDate"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="pickerStartDate"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #pickerStartDate></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Salary at</mat-label>
+            <input
+              matInput
+              name="Salary At"
+              [(ngModel)]="user.salaryAt"
+              [matDatepicker]="pickerSalary"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="pickerSalary"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #pickerSalary></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row row-fluid">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Allowed leave day</mat-label>
+            <input
+              matInput
+              name="Allowed Leaveday"
+              pattern="^[0-9]+$"
+              [(ngModel)]="user.allowedLeaveDay"
+              [readonly]="!!user.id"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Salary</mat-label>
+            <input
+              currencyMask
+              [options]="{
+                prefix: '',
+                align: 'left',
+                thousands: '.',
+                precision: '0'
+              }"
+              matInput
+              name="Salary"
+              [(ngModel)]="user.salary"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row row-fluid">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Address</mat-label>
+            <input
+              matInput
+              name="Address"
+              [(ngModel)]="user.address"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Phone</mat-label>
+            <input
+              matInput
+              name="Phone"
+              [(ngModel)]="user.phoneNumber"
+              pattern="^\w+[0-9]+$"
+              maxlength="14"
+              minlength="10"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row row-fluid">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Begin level</mat-label>
+            <mat-select
+              [disableOptionCentering]="true"
+              [(value)]="user.beginLevel"
+              name="beginLevel"
+            >
+              <mat-option [value]="null">None</mat-option>
+              <mat-option
+                *ngFor="let item of listLevel"
+                [value]="item.value"
+              >
+                {{ item.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
 
-        <div class="row row-fluid">
-          <div class="col-md-6">
-            <mat-form-field>
-              <mat-label>Sex</mat-label>
-              <mat-select [disableOptionCentering]="true" name="Sex" [(value)]="user.sex">
-                <mat-option *ngFor="let item of sexes" [value]="item.value">
-                  {{item.label}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <!-- <div class="col-md-6">
-            <mat-form-field>
-              <input matInput name="UserCode" [placeholder]="'User code' | localize" [(ngModel)]="user.userCode" />
-            </mat-form-field>
-          </div> -->
-          <div class="col-md-6">
-            <mat-form-field>
-              <mat-label>Position</mat-label>
-              <mat-select [disableOptionCentering]="true" matInput name="positionId" placeholder="Choose a position..." [(ngModel)]="user.positionId"
-                #positionId="ngModel" required>
-                <mat-option>
-                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="positionSearch"></ngx-mat-select-search>
-                </mat-option>
-                <mat-option *ngFor="let position of listPosition" [value]="position.id">
-                  {{ position.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field>
-              <mat-label>Mezon ID</mat-label>
-              <input matInput name="MezonId" [(ngModel)]="user.mezonUserId" maxlength="100" placeholder="Enter Mezon ID" />
-            </mat-form-field>
-          </div>
-          <div class="col-md-12">
-            <div class="checkbox-wrapper">
-              <mat-checkbox name="IsActive" [(ngModel)]="user.isActive">
-                {{ "IsActive" | localize }}
-              </mat-checkbox>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Stop working date</mat-label>
+            <input
+              matInput
+              name="Stop Woring Date"
+              [(ngModel)]="user.endDateAt"
+              [matDatepicker]="pickerEndDate"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="pickerEndDate"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #pickerEndDate></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <div class="user-modal__section">
+      <div class="user-modal__section-title">
+        Register working time
+      </div>
+
+      <div class="user-modal__checkbox-line">
+        <span class="user-modal__checkbox-label">
+          Default branch working time
+        </span>
+        <mat-checkbox
+          *ngIf="permission.isGranted(UPDATE_USER_WORKING_TIME)"
+          name="IsActive"
+          (change)="changeValue($event)"
+          [(checked)]="isDefault"
+        >
+          {{ 'Default' | localize }}
+        </mat-checkbox>
+      </div>
+
+      <div class="user-modal__working-time-grid">
+        <div class="user-modal__time-period">
+          <div class="user-modal__time-period-title">Morning shift</div>
+          <div class="row row-fluid">
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="user-modal__field user-modal__field--time">
+                <mat-label>Start</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  name="morningStartAt"
+                  [(ngModel)]="user.morningStartAt"
+                  (ngModelChange)="onChangeMSA($event)"
+                  [textMask]="{ mask: maskTime, guide: false }"
+                  [readonly]="isDefault"
+                  placeholder="08:00"
+                />
+              </mat-form-field>
             </div>
-            <!-- <div class="checkbox-wrapper">
-              <mat-checkbox name="isStopWork" [(ngModel)]="user.isStopWork">
-                {{ "Is Stopped Working" | localize }}
-              </mat-checkbox>
-            </div> -->
-          </div>
-          <!-- <div class="col-md-12">
-            <div class="checkbox-wrapper">
-              <mat-checkbox name="isStopWork" [(ngModel)]="user.isStopWork">
-                {{ "Is Stopped Working" | localize }}
-              </mat-checkbox>
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="user-modal__field user-modal__field--time">
+                <mat-label>End</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  name="morningEndAt"
+                  [(ngModel)]="user.morningEndAt"
+                  (ngModelChange)="onChangeMEA($event)"
+                  [textMask]="{ mask: maskTime, guide: false }"
+                  [readonly]="isDefault"
+                  placeholder="12:00"
+                />
+              </mat-form-field>
             </div>
-          </div> -->
-        </div>
-
-        <div class="row row-fluid">
-          <div class="col-md-12">
-
-            <button *ngIf="!userId && enableNormalLogin" mat-raised-button color="primary" (click)="randomPassword()" name="randomPassword" 
-              style="
-                  padding: 0 10px;
-                  min-width: 45px;
-                  color: white;
-                  height: 33px;
-                  font-size: 12px;
-                  margin-bottom: 1.2rem;">Random PassWord</button>
-
-          </div>
-        </div>
-        <div class="row row-fluid" *ngIf="!userId && enableNormalLogin">
-
-          <div class="col-md-6">
-            <mat-form-field>
-              <input matInput #password="ngModel" [placeholder]="'Password' | localize" [(ngModel)]="user.password"
-                [type]="shPassword ? 'text' : 'password' " name="password" id="password" validateEqual="confirmPassword"
-                reverse="true" required maxlength="16" minlength="4" (focus)="activeRandom = false"
-                (ngModelChange)="backField($event)" />
-              <mat-icon (mousedown)="shPassword = true" (mouseup)="shPassword = false" (onmouseout)="shPassword = false"
-                matSuffix>{{shPassword ? 'visibility' : 'visibility_off'}}</mat-icon>
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field>
-              <input matInput [placeholder]="'ConfirmPassword' | localize" [(ngModel)]="confirmPassword"
-                [type]="shConfirmPassword ? 'text' : 'password' " name="confirmPassword" id="confirmPassword"
-                validateEqual="password" reverse="false" required [value]="confirmPassword" maxlength="16" />
-              <mat-icon (mousedown)="shConfirmPassword = true" (mouseup)="shConfirmPassword = false"
-                (onmouseout)="shConfirmPassword = false" matSuffix>
-                {{shConfirmPassword ? 'visibility' : 'visibility_off'}}</mat-icon>
-            </mat-form-field>
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="user-modal__field user-modal__field--readonly">
+                <mat-label>Hours</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  name="morningWorking"
+                  [(ngModel)]="user.morningWorking"
+                  readonly="true"
+                />
+              </mat-form-field>
+            </div>
           </div>
         </div>
 
-        <div class="row row-fluid">
-          <div class="col-md-6">
-            <mat-form-field>
-              <mat-label>Branch</mat-label>
-              <mat-select [disableOptionCentering]="true" matInput name="branchId" (selectionChange)="onChangeBranch()" placeholder="Choose a branch..." [(ngModel)]="user.branchId"
-                #branchId="ngModel" required>
-                <mat-option>
-                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch" 
-                  noEntriesFoundLabel= "No matching found"></ngx-mat-select-search>
-                </mat-option>
-                <mat-option *ngFor="let branch of listBranch" [value]="branch.id">
-                  {{ branch.displayName }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field>
-              <mat-label>Basic Tranner</mat-label>
-              <mat-select [disableOptionCentering]="true" [(value)]='user.managerId' name="managerId">
-                <mat-option>
-                  <ngx-mat-select-search [formControl]="managerSearch" placeholderLabel="Search by Name"
-                  noEntriesFoundLabel= "No matching found">
-                  </ngx-mat-select-search>
-                </mat-option>
-                <mat-option [value]='null'>None</mat-option>
-                <mat-option *ngFor="let man of managersFiltered" [value]='man.id'>
-                  {{man.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+        <div class="user-modal__time-period">
+          <div class="user-modal__time-period-title">Afternoon shift</div>
+          <div class="row row-fluid">
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="user-modal__field user-modal__field--time">
+                <mat-label>Start</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  name="afternoonStartAt"
+                  [(ngModel)]="user.afternoonStartAt"
+                  (ngModelChange)="onChangeASA($event)"
+                  [textMask]="{ mask: maskTime, guide: false }"
+                  [readonly]="isDefault"
+                  placeholder="13:00"
+                />
+              </mat-form-field>
+            </div>
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="user-modal__field user-modal__field--time">
+                <mat-label>End</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  name="afternoonEndAt"
+                  [(ngModel)]="user.afternoonEndAt"
+                  (ngModelChange)="onChangeAEA($event)"
+                  [textMask]="{ mask: maskTime, guide: false }"
+                  [readonly]="isDefault"
+                  placeholder="17:30"
+                />
+              </mat-form-field>
+            </div>
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="user-modal__field user-modal__field--readonly">
+                <mat-label>Hours</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  name="afternoonWorking"
+                  [(ngModel)]="user.afternoonWorking"
+                  readonly="true"
+                />
+              </mat-form-field>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div class="row row-fluid">
-          <div class="col-md-6">
-            <mat-form-field>
-              <mat-label>Type</mat-label>
-              <mat-select [disableOptionCentering]="true" [(value)]='user.type' (selectionChange)="onUserTypeChange()" name="type">
-                <mat-option [value]='null'>None</mat-option>
-                <mat-option [value]='0'>Staff</mat-option>
-                <mat-option [value]='1'>Internship</mat-option>
-                <mat-option [value]='2'>Collaborator</mat-option>
-                <mat-option [value]='3'>Probation</mat-option>
-                <mat-option [value]='5'>Vendor</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field>
-              <mat-label>Level</mat-label>
-              <mat-select [disableOptionCentering]="true" [(value)]='user.level' (selectionChange)="onLevelChange()" name="level">
-                <mat-option [value]='null'>None</mat-option>
-                <mat-option *ngFor="let item of listLevelFiltered" [value]='item.value'>
-                  {{item.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <div class="row row-fluid">
-          <div class="col-md-6">
-            <mat-form-field>
-              <input matInput name="StartDate" [(ngModel)]="user.startDateAt" [placeholder]="'Start Date' | localize"
-                [matDatepicker]="pickerStartDate" />
-              <mat-datepicker-toggle matSuffix [for]="pickerStartDate"></mat-datepicker-toggle>
-              <mat-datepicker #pickerStartDate></mat-datepicker>
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field>
-              <input matInput name="Salary At" [placeholder]="'Salary At' | localize" [(ngModel)]="user.salaryAt"
-                [matDatepicker]="pickerSalary" />
-              <mat-datepicker-toggle matSuffix [for]="pickerSalary"></mat-datepicker-toggle>
-              <mat-datepicker #pickerSalary></mat-datepicker>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <div class="row row-fluid">
-          <div class="col-md-6">
-            <mat-form-field>
-              <input matInput name="Allowed Leaveday" [placeholder]="'Allow Leaveday' | localize"
-              pattern="^[0-9]+$"  [(ngModel)]="user.allowedLeaveDay" [readonly]='!user.id' />
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field>
-              <input currencyMask [options]="{prefix: '', align: 'left', thousands: '.', precision: '0'}" matInput
-                name="Salary" [placeholder]="'Salary' | localize" [(ngModel)]="user.salary" />
-            </mat-form-field>
-          </div>
-        </div>
- 
-        <div class="row row-fluid">
-          <div class="col-md-6">
-            <mat-form-field>
-              <input matInput name="Address" [placeholder]="'Address' | localize" [(ngModel)]="user.address" />
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field>
-              <input matInput name="Phone" [(ngModel)]="user.phoneNumber" [placeholder]="'Phone' | localize"
-                pattern="^\w+[0-9]+$" maxlength="14" minlength="10" />
-            </mat-form-field>
-          </div>
-        </div>
-        <!-- <div class="row row-fluid">
-          <div class="col-md-6">
-            <mat-form-field>
-              <mat-label>Position</mat-label>
-              <mat-select [disableOptionCentering]="true" matInput name="positionId" placeholder="Choose a position..." [(ngModel)]="user.positionId"
-                #positionId="ngModel" >
-                <mat-option>
-                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="positionSearch"></ngx-mat-select-search>
-                </mat-option>
-                <mat-option *ngFor="let position of listPosition" [value]="position.id">
-                  {{ position.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div> -->
-        <div class="row row-fluid">
-
-          <div class="col-md-6">
-             <mat-form-field>
-               <mat-label>Begin Level</mat-label>
-               <mat-select [disableOptionCentering]="true" [(value)]='user.beginLevel' name="beginLevel">
-                 <mat-option [value]='null'>None</mat-option>
-                 <mat-option *ngFor="let item of listLevel" [value]='item.value'>
-                   {{item.name}}
-                 </mat-option>
-               </mat-select>
-             </mat-form-field>
-           </div>
- 
- 
-           <div class="col-md-6">
-             <mat-form-field>
-               <!-- <input matInput name="Start Date" [placeholder]="'Start Date' | localize" [formControl]="startDate"
-                 [matDatepicker]="picker"/> -->
-               <input matInput name="Stop Woring Date" [(ngModel)]="user.endDateAt" [placeholder]="'Stop Woring Date' | localize"
-                 [matDatepicker]="pickerEndDate"/>
-               <mat-datepicker-toggle matSuffix [for]="pickerEndDate"></mat-datepicker-toggle>
-               <mat-datepicker #pickerEndDate></mat-datepicker>
-             </mat-form-field>
-           </div>
-         </div>
-
-        <div class="row row-fluid">
-          <div style="padding:15px">
-            <mat-label class="col-form-label" required>Register working time</mat-label>
-            <mat-checkbox *ngIf="permission.isGranted(UPDATE_USER_WORKING_TIME)" name="isDefault" style="margin-left: 50px;" (change)='changeValue($event)'
-              [(checked)]="isDefault">
-              {{ "Default" | localize }}
-            </mat-checkbox>
-          </div>
-
-          <div class="col-md-4">
-            <mat-form-field>
-              <input matInput type="text" name="morningStartAt" [placeholder]="'Morning Start At (HH:mm)' | localize"
-                [(ngModel)]="user.morningStartAt" (ngModelChange)="onChangeMSA($event)"
-                [textMask]="{mask: maskTime, guide: false}" [readonly]='isDefault' />
-            </mat-form-field>
-          </div>
-          <div class="col-md-4">
-            <mat-form-field>
-              <input matInput type="text" name="morningEndAt" [placeholder]="'Morning End At (HH:mm)' | localize"
-                [(ngModel)]="user.morningEndAt" (ngModelChange)="onChangeMEA($event)"
-                [textMask]="{mask: maskTime, guide: false}" [readonly]='isDefault' />
-            </mat-form-field>
-          </div>
-          <div class="col-md-4">
-            <mat-form-field>
-              <input matInput type="text" name="morningWorking" [placeholder]="'Morning Working Time' | localize"
-                [(ngModel)]="user.morningWorking" readonly="true" />
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="row row-fluid">
-          <div class="col-md-4">
-            <mat-form-field>
-              <input matInput type="text" name="afternoonStartAt"
-                [placeholder]="'Afternoon Start At (HH:mm)' | localize" [(ngModel)]="user.afternoonStartAt"
-                (ngModelChange)="onChangeASA($event)" [textMask]="{mask: maskTime, guide: false}"
-                [readonly]='isDefault' />
-            </mat-form-field>
-          </div>
-          <div class="col-md-4">
-            <mat-form-field>
-              <input matInput type="text" name="afternoonEndAt" [placeholder]="'Afternoon End At (HH:mm)' | localize"
-                [(ngModel)]="user.afternoonEndAt" (ngModelChange)="onChangeAEA($event)"
-                [textMask]="{mask: maskTime, guide: false}" [readonly]='isDefault' />
-            </mat-form-field>
-          </div>
-          <div class="col-md-4">
-            <mat-form-field>
-              <input matInput type="text" name="afternoonWorking" [placeholder]="'Afternoon Working Time' | localize"
-                [(ngModel)]="user.afternoonWorking" readonly="true" />
-            </mat-form-field>
-          </div>
-        </div>
-    
+      <div class="user-modal__role-note">
+        <mat-checkbox
+          checked="true"
+          disabled="true"
+        >
+          {{ 'Role BasicUser' | localize }}
+        </mat-checkbox>
+      </div>
+    </div>
   </mat-dialog-content>
-  <mat-dialog-actions align="end">
-    <button class="btn btn-default" name="cancelBtn" mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
-    <button mat-raised-button color="primary" name="saveBtn" [disabled]="!createUserModal.form.valid || isSaving" (keyup.enter)="save()" (click)='save()'>{{l('Save')}}</button>
+
+  <mat-dialog-actions
+    align="end"
+    class="user-modal__footer"
+  >
+    <button
+      class="user-modal__btn user-modal__btn--ghost"
+      mat-raised-button
+      mat-dialog-close
+      name="cancelBtn"
+      [disabled]="saving"
+    >
+      {{ l('Cancel') }}
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      name="saveBtn"
+      class="user-modal__btn user-modal__btn--primary"
+      [disabled]="!createUserModal.form.valid || isSaving"
+      (keyup.enter)="save()"
+      (click)="save()"
+    >
+      {{ l('Save') }}
+    </button>
   </mat-dialog-actions>
 </form>

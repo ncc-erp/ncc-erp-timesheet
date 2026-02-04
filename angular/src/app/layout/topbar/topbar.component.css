@@ -1,12 +1,13 @@
 body {
-  background: #f3f4f6;
+  background: var(--bg-page);
+  color: var(--text-main);
 }
 
 .topbar {
   height: 56px;
-  background: #ffffff;
+  background: var(--bg-surface);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06),
-              0 1px 3px rgba(15, 23, 42, 0.1);
+    0 1px 3px rgba(15, 23, 42, 0.1);
 
   display: flex;
   align-items: center;
@@ -17,6 +18,19 @@ body {
   left: 0;
   right: 0;
   z-index: 1000;
+}
+
+.topbar,
+.topbar a,
+.topbar button,
+.topbar .material-icons,
+.topbar .mat-icon {
+  color: var(--text-main);
+}
+
+.topbar .material-icons,
+.topbar .mat-icon {
+  font-weight: 500;
 }
 
 .topbar__left {
@@ -34,7 +48,7 @@ body {
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: linear-gradient(120deg, #2563eb, #1d4ed8);
+  background: var(--primary-color);
 
   display: flex;
   align-items: center;
@@ -54,11 +68,12 @@ body {
 .topbar__title {
   font-size: 16px;
   font-weight: 600;
+  color: var(--text-main);
 }
 
 .topbar__subtitle {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .topbar__right {
@@ -81,8 +96,8 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border: 1px solid var(--bg-soft);
+  background: var(--bg-soft);
 
   display: flex;
   align-items: center;
@@ -93,7 +108,7 @@ body {
 }
 
 .topbar__icon-button:hover {
-  background: #f3f4f6;
+  background: var(--bg-page);
   border-color: #d1d5db;
 }
 
@@ -108,6 +123,10 @@ body {
   margin-left: 0;
 }
 
+.topbar__language-wrapper topbar-languageswitch a {
+  color: var(--text-main);
+}
+
 .topbar__user-wrapper {
   position: relative;
 }
@@ -117,15 +136,15 @@ body {
   align-items: center;
   gap: 10px;
   padding: 6px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--bg-soft);
   border-radius: 24px;
-  background: #f9fafb;
+  background: var(--bg-soft);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .topbar__user-trigger:hover {
-  background: #f3f4f6;
+  background: var(--bg-page);
   border-color: #d1d5db;
 
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -135,7 +154,7 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #e5e7eb;
+  background: var(--bg-soft);
 
   display: flex;
   align-items: center;
@@ -163,15 +182,13 @@ body {
 .topbar__user-name {
   font-size: 13px;
   font-weight: 500;
-  color: #111827;
-
+  color: var(--text-main);
   line-height: 1.2;
 }
 
 .topbar__user-email {
   font-size: 11px;
-  color: #6b7280;
-
+  color: var(--text-secondary);
   line-height: 1.2;
 }
 
@@ -180,8 +197,8 @@ body {
   top: calc(100% + 8px);
   right: 0;
   min-width: 280px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-soft);
 
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -206,18 +223,16 @@ body {
 .topbar__user-menu-name {
   font-size: 14px;
   font-weight: 600;
-  color: #111827;
   margin-bottom: 2px;
 }
 
 .topbar__user-menu-email {
   font-size: 12px;
-  color: #6b7280;
 }
 
 .topbar__user-menu-divider {
   height: 1px;
-  background: #e5e7eb;
+  background: var(--bg-soft);
 
   margin: 0 12px;
 }
@@ -227,7 +242,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  color: #111827;
+  color: var(--text-main);
   font-size: 14px;
   text-decoration: none;
   transition: background 0.2s;
@@ -236,15 +251,26 @@ body {
 }
 
 .topbar__user-menu-item:hover {
-  background: #f9fafb;
-  color: #111827;
+  background: var(--bg-soft);
+  color: var(--text-main);
 }
 
 .topbar__user-menu-item .material-icons {
   font-size: 20px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .topbar__user-menu-item:hover .material-icons {
-  color: #ef4444;
+  color: var(--text-main);
+}
+
+body.theme-dark {
+  background: var(--bg-dark);
+  color: var(--text-main);
+}
+
+body.theme-dark .topbar {
+  background: var(--bg-surface);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.6),
+    0 1px 3px rgba(15, 23, 42, 0.9);
 }

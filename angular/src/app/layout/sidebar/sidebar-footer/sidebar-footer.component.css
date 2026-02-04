@@ -1,8 +1,8 @@
 .sidebar__footer {
   margin-top: 0;
   padding: 10px 0 12px 0;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-divider);
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--text-secondary);
   flex-shrink: 0;
 }

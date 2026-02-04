@@ -1,0 +1,139 @@
+.user-modal__header {
+  padding: 10px 0px 16px;
+  border-bottom: 1px solid var(--border-divider);
+  background: var(--bg-surface);
+}
+
+.user-modal__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.user-modal__subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 0;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.user-modal__body {
+  padding: 12px 20px 16px;
+  background: var(--bg-surface);
+}
+
+.user-modal__section {
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-soft);
+  padding: 10px 12px 12px;
+  margin-bottom: 12px;
+}
+
+.user-modal__section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.user-modal__field {
+  width: 100%;
+}
+
+.user-modal__field .mat-form-field-wrapper {
+  padding-bottom: 8px;
+}
+
+.user-modal__file-upload {
+  margin-top: 8px;
+}
+
+.user-modal input[type="file"] {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+.user-modal input[type="file"]::file-selector-button {
+  background-color: var(--bg-soft);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 4px 10px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.user-modal input[type="file"]::-webkit-file-upload-button {
+  background-color: var(--bg-soft);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 4px 10px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.user-modal .mat-form-field-appearance-outline .mat-form-field-infix {
+  padding: 12px 0 12px 0 !important;
+}
+
+.user-modal .mat-form-field-appearance-outline .mat-form-field-label {
+  top: 1.84375em !important;
+  margin-top: -0.25em !important;
+}
+
+.user-modal .mat-form-field-appearance-outline.mat-form-field-can-float.mat-form-field-should-float .mat-form-field-label {
+  transform: translateY(-1.59375em) scale(0.75) !important;
+  width: 133.33333% !important;
+}
+
+.user-modal__footer {
+  padding: 8px 0 12px;
+  border-top: 1px solid var(--border-divider);
+  background: var(--bg-surface);
+}
+
+.user-modal__btn {
+  height: 36px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+
+.user-modal__btn--ghost {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.user-modal__btn--ghost:hover {
+  background: var(--bg-soft);
+  border-color: var(--border-strong);
+}
+
+.user-modal__btn--primary {
+  background: var(--primary-color);
+  color: #ffffff;
+  border: 1px solid var(--primary-color);
+}
+
+.user-modal__btn--primary:hover {
+  background: var(--primary-color-hover);
+  border-color: var(--primary-color-hover);
+}
+
+.user-modal__btn--primary:disabled {
+  background: var(--border-subtle);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+}

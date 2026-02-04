@@ -1,40 +1,85 @@
-<form [formGroup]="formData">
-  <h2 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>
-    Export Data Check Point
-  </h2>
-
-  <div class="form-control-wrapper">
-      <div class="label-wrapper">
-          <label>Date*</label>
+<form [formGroup]="formData" class="user-modal">
+  <div
+    class="user-modal__header"
+    cdkDrag
+    cdkDragRootElement=".cdk-overlay-pane"
+    cdkDragHandle
+    mat-dialog-title
+  >
+    <div>
+      <div class="user-modal__title">
+        Export Data Check Point
       </div>
-      <div class="date-list">
-          <div class="date-item">
-              <mat-form-field appearance="outline">
-                  <mat-label>Choose start date</mat-label>
-                  <input name="startDatePicker" matInput [matDatepicker]="pickerStartDate"  formControlName="startDate">
-                  <mat-datepicker-toggle matSuffix [for]="pickerStartDate"></mat-datepicker-toggle>
-                  <mat-datepicker #pickerStartDate></mat-datepicker>
-              </mat-form-field>
-          </div>
-          <span class="text-spacing">To</span>
-          <div class="date-item">
-              <mat-form-field appearance="outline">
-                  <mat-label>Choose end date</mat-label>
-                  <input name="endDatePicker" matInput [matDatepicker]="pickerEndDate" formControlName="endDate">
-                  <mat-datepicker-toggle matSuffix [for]="pickerEndDate"></mat-datepicker-toggle>
-                  <mat-datepicker #pickerEndDate></mat-datepicker>
-              </mat-form-field>
-          </div>
+      <div class="user-modal__subtitle">
+        Select date range to export check point data.
       </div>
-
+    </div>
   </div>
-  <mat-dialog-actions align="end">
-      <button class="btn btn-default" name="cancelBtn" mat-raised-button type="button" (click)="close(1)">
-          {{l('Cancel')}}
-      </button>
-      <button mat-raised-button name="submitBtn" color="primary" [disabled]="!formData.valid" type=" export" flex="15"
-          (click)="export()">
-          {{l('Export')}}
-      </button>
+
+  <mat-dialog-content class="user-modal__body">
+    <div class="user-modal__section">
+      <div class="user-modal__section-title">Date range selection</div>
+      
+      <div class="row row-fluid">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>Start date</mat-label>
+            <input
+              name="startDatePicker"
+              matInput
+              [matDatepicker]="pickerStartDate"
+              formControlName="startDate"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="pickerStartDate"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #pickerStartDate></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="user-modal__field">
+            <mat-label>End date</mat-label>
+            <input
+              name="endDatePicker"
+              matInput
+              [matDatepicker]="pickerEndDate"
+              formControlName="endDate"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="pickerEndDate"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #pickerEndDate></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions
+    align="end"
+    class="user-modal__footer"
+  >
+    <button
+      class="user-modal__btn user-modal__btn--ghost"
+      mat-raised-button
+      type="button"
+      name="cancelBtn"
+      (click)="close(1)"
+    >
+      {{ l('Cancel') }}
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      name="submitBtn"
+      class="user-modal__btn user-modal__btn--primary"
+      [disabled]="!formData.valid"
+      type="button"
+      (click)="export()"
+    >
+      {{ l('Export') }}
+    </button>
   </mat-dialog-actions>
 </form>
