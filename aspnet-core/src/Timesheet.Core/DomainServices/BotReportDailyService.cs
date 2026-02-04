@@ -1,12 +1,13 @@
+using Abp.Application.Services.Dto;
 using Abp.Configuration;
 using Abp.Dependency;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using Ncc.Authorization.Users;
 using Ncc.Configuration;
 using Ncc.Entities;
 using Ncc.IoC;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
+using Timesheet.Paging;
 using Timesheet.Services.Mezon;
 using static Ncc.Entities.Enum.StatusEnum;
 
@@ -144,6 +146,17 @@ namespace Timesheet.DomainServices
             }
 
             return result;
+        }
+
+        public async Task<PagedResultDto<TotalTimelogProjectDto>> GetPagedDailyProjectTimelogReport(GridParam param, GetDailyProjectTimelogReportInput input)
+        {
+            var allData = await GetDailyProjectTimelogReport(input);
+            var totalCount = allData.Count();
+            var pagedData = allData
+                .Skip(param.SkipCount)
+                .Take(param.MaxResultCount)
+                .ToList();
+            return new PagedResultDto<TotalTimelogProjectDto>(totalCount, pagedData);
         }
 
         public async Task<bool> SendDailyProjectTimelogToMezon()

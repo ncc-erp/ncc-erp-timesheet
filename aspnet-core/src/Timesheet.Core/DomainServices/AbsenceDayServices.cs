@@ -1,4 +1,5 @@
-﻿using Abp.Dependency;
+﻿using Abp.Application.Services.Dto;
+using Abp.Dependency;
 using Microsoft.EntityFrameworkCore;
 using Ncc.Authorization.Users;
 using Ncc.IoC;
@@ -11,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
+using Timesheet.Paging;
 using Timesheet.Services.Mezon;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
@@ -504,7 +506,7 @@ namespace Timesheet.DomainServices
                 AbsenceDetails = allAbsenceDetails
             };
         }
-        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportInput input)
+        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GridParam param, GetAnomaliesTimelogReportInput input)
         {
             var now = DateTimeUtils.GetNow().Date;
             var yesterday = now.AddDays(-1);
@@ -523,11 +525,8 @@ namespace Timesheet.DomainServices
 
             var data = await LoadAnomalyDataAsync(validBranchIds, lastWeekStart, yesterday.AddDays(1).AddTicks(-1));
 
-            var result = new AnomaliesTimelogReportDto
-            {
-                YesterdayAnomalies = new List<YesterdayAnomalyDTO>(),
-                LastWeekAnomalies = new List<LastWeekAnomalyDTO>()
-            };
+            var allYesterdayAnomalies = new List<YesterdayAnomalyDTO>();
+            var allLastWeekAnomalies = new List<LastWeekAnomalyDTO>();
 
             foreach (var branchId in validBranchIds)
             {
@@ -544,8 +543,9 @@ namespace Timesheet.DomainServices
                     IsYesterday = true,
                     Branch = branch
                 };
+
                 var (yesterdayAnomalies, _) = await ProcessAnomalies(processAnomaliesInput);
-                result.YesterdayAnomalies.AddRange(yesterdayAnomalies);
+                allYesterdayAnomalies.AddRange(yesterdayAnomalies);
             }
 
             var lastWeekLoopStopwatch = Stopwatch.StartNew();
@@ -564,17 +564,33 @@ namespace Timesheet.DomainServices
                     IsYesterday = false,
                     Branch = branch
                 };
+
                 var (_, lastWeekAnomalies) = await ProcessAnomalies(processAnomaliesInput);
-                result.LastWeekAnomalies.AddRange(lastWeekAnomalies);
+                allLastWeekAnomalies.AddRange(lastWeekAnomalies);
             }
             lastWeekLoopStopwatch.Stop();
 
-            result.LastWeekAnomalies = result.LastWeekAnomalies
+            var yesterdayAnomaliesTotalCount = allYesterdayAnomalies.Count();
+            var yesterdayAnomaliesPagedData = allYesterdayAnomalies
+                .Skip(param.SkipCount)
+                .Take(param.MaxResultCount)
+                .ToList();
+
+            allLastWeekAnomalies = allLastWeekAnomalies
                 .OrderByDescending(a => a.Count)
                 .ThenBy(a => a.EmployeeName)
                 .ToList();
+            var lastWeekAnomaliesTotalCount = allLastWeekAnomalies.Count();
+            var lastWeekAnomaliesPagedData = allLastWeekAnomalies
+                .Skip(param.SkipCount)
+                .Take(param.MaxResultCount)
+                .ToList();
 
-            return result;
+            return new AnomaliesTimelogReportDto
+            {
+                YesterdayAnomalies = new PagedResultDto<YesterdayAnomalyDTO>(yesterdayAnomaliesTotalCount, yesterdayAnomaliesPagedData),
+                LastWeekAnomalies = new PagedResultDto<LastWeekAnomalyDTO>(lastWeekAnomaliesTotalCount, lastWeekAnomaliesPagedData)
+            };
         }
 
         private static (DateTime start, DateTime end) GetLastWeekRange(DateTime reportDate)

@@ -1,3 +1,4 @@
+using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Configuration;
 using Abp.Domain.Uow;
@@ -18,6 +19,8 @@ using System.Threading.Tasks;
 using Timesheet.APIs.BotReportDaily.Dto;
 using Timesheet.APIs.Reports.Dto;
 using Timesheet.Entities;
+using Timesheet.Extension;
+using Timesheet.Paging;
 using Timesheet.Services.Mezon;
 using Timesheet.Timesheets.Projects.Dto;
 using Timesheet.Uitls;
@@ -606,7 +609,7 @@ namespace Timesheet.APIs.Reports
         }
 
 
-        public async Task<List<OfficeWorkingTopLWLMDto>> GetOfficeWorkingTimelogReport(GetOfficeWorkingTimelogReportInputDto input)
+        public async Task<PagedResultDto<OfficeWorkingTopLWLMDto>> GetOfficeWorkingTimelogReport(GridParam param, GetOfficeWorkingTimelogReportInputDto input)
         {
             var now = DateTimeUtils.GetNow().Date;
             var (lwStart, lwEnd) = GetLastWeekRange(now);
@@ -641,13 +644,23 @@ namespace Timesheet.APIs.Reports
                 );
                 allUsers.AddRange(officeData);
             }
-            var topUsers = allUsers
+
+            var result = allUsers
                 .OrderByDescending(u => u.TotalAllLW)
                 .ThenByDescending(u => u.TotalAllLM)
                 .ThenBy(u => u.UserName)
                 .Take(input.Limit)
                 .ToList();
-            return topUsers;
+
+            var totalCount = result.Count();
+
+            var pagedData = result
+                .Skip(param.SkipCount)
+                .Take(param.MaxResultCount)
+                .ToList();
+
+
+            return new PagedResultDto<OfficeWorkingTopLWLMDto>(totalCount, result);
         }
     }
 }

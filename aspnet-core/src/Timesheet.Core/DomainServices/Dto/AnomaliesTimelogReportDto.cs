@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Abp.Application.Services.Dto;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Timesheet.DomainServices.Dto;
@@ -7,13 +8,13 @@ namespace Timesheet.DomainServices.Dto
 {
     public class AnomaliesTimelogReportDto
     {
-        public List<YesterdayAnomalyDTO> YesterdayAnomalies { get; set; }
-        public List<LastWeekAnomalyDTO> LastWeekAnomalies { get; set; }
+        public PagedResultDto<YesterdayAnomalyDTO> YesterdayAnomalies { get; set; }
+        public PagedResultDto<LastWeekAnomalyDTO> LastWeekAnomalies { get; set; }
 
         public AnomaliesTimelogReportDto()
         {
-            YesterdayAnomalies = new List<YesterdayAnomalyDTO>();
-            LastWeekAnomalies = new List<LastWeekAnomalyDTO>();
+            YesterdayAnomalies = new PagedResultDto<YesterdayAnomalyDTO>();
+            LastWeekAnomalies = new PagedResultDto<LastWeekAnomalyDTO>();
         }
     }
 
