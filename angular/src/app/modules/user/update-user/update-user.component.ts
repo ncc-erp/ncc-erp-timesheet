@@ -18,6 +18,7 @@ import { PositionDto } from '@app/service/api/model/position-dto';
 @Component({
   selector: 'app-update-user',
   templateUrl: './update-user.component.html',
+  styleUrls: ['./update-user.component.css'],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
   ]

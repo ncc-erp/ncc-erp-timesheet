@@ -22,6 +22,38 @@ class PagedUsersRequestDto extends PagedRequestDto {
           .padding-custom{
             padding: 20px 5px 0px 5px !important;
           }
+
+  onToolbarFilterChange(event: { key: string; value: any }) {
+    if (event && event.key === 'isActive') {
+      this.isActive = event.value;
+      this.searchOrFilter();
+    }
+  }
+
+  onToolbarSearchChange(value: string) {
+    this.keyword = value || '';
+    if (!this.keyword) {
+      this.refresh();
+    } else {
+      this.searchOrFilter();
+    }
+  }
+
+  onToolbarActionClick(key: string) {
+    if (key === 'new') {
+      this.createUser();
+    }
+  }
+
+  onPageChange(event: { pageIndex: number; pageSize: number }) {
+    if (!event) {
+      return;
+    }
+    if (this.pageSize !== event.pageSize) {
+      this.getPageSize(event.pageSize);
+    }
+    this.getDataPage(event.pageIndex + 1);
+  }
         `
   ]
 })
@@ -30,6 +62,20 @@ export class UsersComponent extends PagedListingComponentBase<UserDto> {
   keyword = '';
   isActive: boolean | string = '';
   roles: RoleDto[] = [];
+  toolbarFilters: any[] = [
+    {
+      key: 'isActive',
+      placeholder: 'Active',
+      options: [
+        { value: '', label: 'All' },
+        { value: 'true', label: 'Active' },
+        { value: 'false', label: 'Inactive' }
+      ]
+    }
+  ];
+  toolbarActions: any[] = [
+    { key: 'new', label: 'New user', icon: 'add', color: 'primary' }
+  ];
   constructor(
     injector: Injector,
     private _userService: UserServiceProxy,

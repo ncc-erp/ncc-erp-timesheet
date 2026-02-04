@@ -1,15 +1,61 @@
-<div class="all_dialog">
-  <div class="header_h">
-      <div class="h_drag_and_drop">
-          <h3>Import user working time</h3>
+<div class="user-modal">
+  <div
+    class="user-modal__header"
+    cdkDrag
+    cdkDragRootElement=".cdk-overlay-pane"
+    cdkDragHandle
+    mat-dialog-title
+  >
+    <div>
+      <div class="user-modal__title">
+        Import user working time
       </div>
+      <div class="user-modal__subtitle">
+        Upload Excel file to import user working time data.
+      </div>
+    </div>
   </div>
-  <div style="padding-top: 10px; border-top: 1px solid #eee;">
-      <label style="display: block; margin-bottom: 15px;">Choose file</label>
-      <input type="file" class="form-group" id="file" name="selectFile" (change)="selectFile($event)">
-  </div>
-  <div style="margin-top: 30px;">
-      <button mat-flat-button color="primary" class="btn_accept" name="importBtn" (click)="importExcel()">Import</button>
-      <button mat-raised-button style="margin-left: 10px;" name="cancelBtn" mat-dialog-close>Cancel</button>
-  </div>
+
+  <mat-dialog-content class="user-modal__body">
+    <div class="user-modal__section">
+      <div class="user-modal__section-title">File selection</div>
+      
+      <div class="user-modal__file-upload">
+        <mat-form-field appearance="outline" class="user-modal__field">
+          <mat-label>Choose file</mat-label>
+          <input
+            matInput
+            type="file"
+            id="file"
+            name="selectFile"
+            (change)="selectFile($event)"
+            accept=".xlsx,.xls"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions
+    align="end"
+    class="user-modal__footer"
+  >
+    <button
+      class="user-modal__btn user-modal__btn--ghost"
+      mat-raised-button
+      mat-dialog-close
+      name="cancelBtn"
+    >
+      Cancel
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      name="importBtn"
+      class="user-modal__btn user-modal__btn--primary"
+      (click)="importExcel()"
+    >
+      Import
+    </button>
+  </mat-dialog-actions>
 </div>

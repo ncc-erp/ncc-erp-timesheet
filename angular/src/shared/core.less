@@ -21,6 +21,117 @@
 @black: #000;
 @light: #2563EB;
 @dark: #60A5FA;
+
+:root {
+    --bg-page: #f3f4f6;
+    --bg-surface: #ffffff;
+    --bg-soft: #f9fafb;
+    --bg-dark: #111827;
+    --text-main: #111827;
+    --text-secondary: #6b7280;
+    --border-subtle: #e5e7eb;
+    --border-strong: #d1d5db;
+    --border-divider: #e5e7eb;
+}
+
+body {
+    background-color: var(--bg-page);
+    color: var(--text-main);
+}
+
+body.theme-dark {
+    --bg-page: #0f172a;
+    --bg-surface: #1e293b;
+    --bg-soft: #293548;
+    --bg-dark: #0f172a;
+    --text-main: #f1f5f9;
+    --text-secondary: #9ca3af;
+    --border-subtle: #334155;
+    --border-strong: #475569;
+    --border-divider: #334155;
+}
+
+.mat-dialog-container {
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+}
+
+.mat-dialog-container .mat-dialog-title,
+.mat-dialog-container .mat-dialog-content,
+.mat-dialog-container .mat-dialog-actions {
+    color: var(--text-main);
+}
+
+.mat-form-field-appearance-outline .mat-form-field-flex {
+    color: var(--text-main);
+}
+
+.mat-form-field-appearance-outline .mat-form-field-outline,
+.mat-form-field-appearance-outline .mat-form-field-outline-thick {
+    color: var(--border-strong);
+}
+
+body.theme-dark .mat-form-field-appearance-outline .mat-form-field-outline,
+body.theme-dark .mat-form-field-appearance-outline .mat-form-field-outline-thick {
+    color: var(--border-subtle);
+}
+
+.mat-form-field-label,
+.mat-hint {
+    color: var(--text-secondary);
+}
+
+.mat-input-element {
+    color: var(--text-main);
+}
+
+.mat-select-value,
+.mat-select-arrow {
+    color: var(--text-main);
+}
+
+.mat-select-panel {
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+}
+
+.mat-option {
+    color: var(--text-main);
+}
+
+.mat-option.mat-selected {
+    background-color: var(--bg-soft);
+}
+
+.mat-select-panel input,
+.mat-select-panel .mat-input-element {
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    border-color: var(--border-subtle);
+}
+
+.mat-select-panel input::placeholder,
+.mat-select-panel .mat-input-element::placeholder {
+    color: var(--text-secondary);
+}
+
+table th,
+table td {
+    color: var(--text-main);
+}
+
+label,
+.mat-form-field-label,
+.mat-hint {
+    color: var(--text-secondary);
+}
+
+.mat-paginator {
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    border: 1px solid var(--border-divider);
+}
+
 .make-theme(@color) {
     .sidebar .menu .list .ml-menu li.active a.toggled:not(.menu-toggle):before {
         color: @color;

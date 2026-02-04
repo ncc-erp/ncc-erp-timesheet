@@ -98,6 +98,16 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     { value: 5, label: 'Vendor' }
   ];
 
+  onPageChange(event: { pageIndex: number; pageSize: number }) {
+    if (!event) {
+      return;
+    }
+    if (this.pageSize !== event.pageSize) {
+      this.getPageSize(event.pageSize);
+    }
+    this.getDataPage(event.pageIndex + 1);
+  }
+
   isExpandUserName = false;
 
   TABLE_NAME = 'TABLE_USERS';
@@ -387,7 +397,7 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     let diaLogRef = this.dialog.open(CreateUserComponent, {
       disableClose: true,
       width: `calc(100% - 24px)`,
-      maxWidth: '400px',
+      maxWidth: '900px',
       data: { userId: userId, userss: this.usersNotPagging, sexes: this.sexes },
       panelClass: 'user-custom-dialog-container'
     });
@@ -404,6 +414,8 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     let userId = editUser ? editUser.id : null;
     let diaLogRef = this.dialog.open(UpdateUserComponent, {
       disableClose: true,
+      width: `calc(100% - 24px)`,
+      maxWidth: '900px',
       data: { userId: userId, userss: this.usersNotPagging, sexes: this.sexes },
       panelClass: 'user-custom-dialog-container'
     });
