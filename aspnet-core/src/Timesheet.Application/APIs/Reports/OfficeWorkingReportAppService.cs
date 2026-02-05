@@ -645,6 +645,15 @@ namespace Timesheet.APIs.Reports
                 allUsers.AddRange(officeData);
             }
 
+            if (!string.IsNullOrEmpty(param.SearchText))
+            {
+                var searchText = param.SearchText.ToLower();
+                allUsers = allUsers.Where(u =>
+                    (u.FullName != null && u.FullName.ToLower().Contains(searchText)) ||
+                    (u.UserName != null && u.UserName.ToLower().Contains(searchText))
+                ).ToList();
+            }
+
             IEnumerable<OfficeWorkingTopLWLMDto> orderedQuery;
             bool isDesc = input.SortDirection == ESortDirection.Desc;
             var sortColumn = input.SortColumn;

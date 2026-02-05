@@ -143,6 +143,12 @@ namespace Timesheet.DomainServices
         public async Task<PagedResultDto<TotalTimelogProjectDto>> GetPagedDailyProjectTimelogReport(GridParam param, GetDailyProjectTimelogReportInput input)
         {
             var allData = await GetDailyProjectTimelogReport(input);
+            if (!string.IsNullOrEmpty(param.SearchText))
+            {
+                var searchText = param.SearchText.ToLower();
+                allData = allData.Where(u => u.Name != null && u.Name.ToLower().Contains(searchText)).ToList();
+            }
+
             IEnumerable<TotalTimelogProjectDto> orderedQuery = allData;
             bool isDesc = input.SortDirection == ESortDirection.Desc;
             var sortColumn = input.SortColumn;

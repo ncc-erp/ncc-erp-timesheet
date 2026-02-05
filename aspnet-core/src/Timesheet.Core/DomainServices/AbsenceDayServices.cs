@@ -570,7 +570,15 @@ namespace Timesheet.DomainServices
             }
             lastWeekLoopStopwatch.Stop();
 
-            var yesterdayAnomaliesTotalCount = allYesterdayAnomalies.Count;
+            if (!string.IsNullOrEmpty(param.SearchText))
+            {
+                var searchText = param.SearchText.ToLower();
+                allYesterdayAnomalies = allYesterdayAnomalies.Where(u =>
+                    (u.EmployeeName != null && u.EmployeeName.ToLower().Contains(searchText)) ||
+                    (u.UserName != null && u.UserName.ToLower().Contains(searchText))
+                ).ToList();
+            }
+
             IEnumerable<YesterdayAnomalyDTO> yesterdayQuery = allYesterdayAnomalies;
             bool isDesc = input.SortDirection == ESortDirection.Desc;
             
@@ -599,10 +607,20 @@ namespace Timesheet.DomainServices
                                 .ThenBy(a => a.EmployeeName);
             }
 
+            var yesterdayAnomaliesTotalCount = allYesterdayAnomalies.Count;
             var yesterdayAnomaliesPagedData = yesterdayQuery
                 .Skip(param.SkipCount)
                 .Take(param.MaxResultCount)
                 .ToList();
+
+            if (!string.IsNullOrEmpty(param.SearchText))
+            {
+                var searchText = param.SearchText.ToLower();
+                allLastWeekAnomalies = allLastWeekAnomalies.Where(u =>
+                    (u.EmployeeName != null && u.EmployeeName.ToLower().Contains(searchText)) ||
+                    (u.UserName != null && u.UserName.ToLower().Contains(searchText))
+                ).ToList();
+            }
 
             IEnumerable<LastWeekAnomalyDTO> lastWeekQuery = allLastWeekAnomalies;
             if (input.LastWeekAnomaliesSortColumn.HasValue)
