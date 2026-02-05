@@ -645,22 +645,86 @@ namespace Timesheet.APIs.Reports
                 allUsers.AddRange(officeData);
             }
 
-            var result = allUsers
-                .OrderByDescending(u => u.TotalAllLW)
-                .ThenByDescending(u => u.TotalAllLM)
-                .ThenBy(u => u.UserName)
+            IEnumerable<OfficeWorkingTopLWLMDto> orderedQuery;
+            bool isDesc = input.SortDirection == ESortDirection.Desc;
+            var sortColumn = input.SortColumn;
+
+            switch (sortColumn)
+            {
+                case EOfficeWorkingSortColumn.FullName:
+                    orderedQuery = isDesc
+                        ? allUsers.OrderByDescending(u => u.FullName)
+                        : allUsers.OrderBy(u => u.FullName);
+                    break;
+
+                case EOfficeWorkingSortColumn.BranchName:
+                    orderedQuery = isDesc
+                        ? allUsers.OrderByDescending(u => u.BranchName)
+                        : allUsers.OrderBy(u => u.BranchName);
+                    break;
+
+                case EOfficeWorkingSortColumn.TotalAllLW:
+                    orderedQuery = isDesc
+                        ? allUsers.OrderByDescending(u => u.TotalAllLW)
+                        : allUsers.OrderBy(u => u.TotalAllLW);
+                    break;
+
+                case EOfficeWorkingSortColumn.OfficeLW:
+                    orderedQuery = isDesc
+                        ? allUsers.OrderByDescending(u => u.OfficeLW)
+                        : allUsers.OrderBy(u => u.OfficeLW);
+                    break;
+
+                case EOfficeWorkingSortColumn.WfhLW:
+                    orderedQuery = isDesc
+                        ? allUsers.OrderByDescending(u => u.WfhLW)
+                        : allUsers.OrderBy(u => u.WfhLW);
+                    break;
+
+                case EOfficeWorkingSortColumn.TotalAllLM:
+                    orderedQuery = isDesc
+                        ? allUsers.OrderByDescending(u => u.TotalAllLM)
+                        : allUsers.OrderBy(u => u.TotalAllLM);
+                    break;
+
+                case EOfficeWorkingSortColumn.OfficeLM:
+                    orderedQuery = isDesc
+                        ? allUsers.OrderByDescending(u => u.OfficeLM)
+                        : allUsers.OrderBy(u => u.OfficeLM);
+                    break;
+
+                case EOfficeWorkingSortColumn.WfhLM:
+                    orderedQuery = isDesc
+                        ? allUsers.OrderByDescending(u => u.WfhLM)
+                        : allUsers.OrderBy(u => u.WfhLM);
+                    break;
+
+                default:
+                    orderedQuery = allUsers
+                        .OrderByDescending(u => u.TotalAllLW)
+                        .ThenByDescending(u => u.TotalAllLM)
+                        .ThenBy(u => u.UserName);
+                    break;
+            }
+
+            if (sortColumn.HasValue && sortColumn != EOfficeWorkingSortColumn.FullName)
+            {
+                orderedQuery = ((IOrderedEnumerable<OfficeWorkingTopLWLMDto>)orderedQuery)
+                                .ThenBy(u => u.UserName);
+            }
+
+            var result = orderedQuery
                 .Take(input.Limit)
                 .ToList();
 
-            var totalCount = result.Count();
+            var totalCount = result.Count;
 
             var pagedData = result
                 .Skip(param.SkipCount)
                 .Take(param.MaxResultCount)
                 .ToList();
 
-
-            return new PagedResultDto<OfficeWorkingTopLWLMDto>(totalCount, result);
+            return new PagedResultDto<OfficeWorkingTopLWLMDto>(totalCount, pagedData);
         }
     }
 }

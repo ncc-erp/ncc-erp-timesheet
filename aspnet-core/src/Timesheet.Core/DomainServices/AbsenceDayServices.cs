@@ -570,18 +570,78 @@ namespace Timesheet.DomainServices
             }
             lastWeekLoopStopwatch.Stop();
 
-            var yesterdayAnomaliesTotalCount = allYesterdayAnomalies.Count();
-            var yesterdayAnomaliesPagedData = allYesterdayAnomalies
+            var yesterdayAnomaliesTotalCount = allYesterdayAnomalies.Count;
+            IEnumerable<YesterdayAnomalyDTO> yesterdayQuery = allYesterdayAnomalies;
+            bool isDesc = input.SortDirection == ESortDirection.Desc;
+            
+            if (input.YesterdayAnomaliesSortColumn.HasValue)
+            {
+                switch (input.YesterdayAnomaliesSortColumn.Value)
+                {
+                    case EYesterdayAnomaliesSortColumn.EmployeeName:
+                        yesterdayQuery = isDesc
+                            ? yesterdayQuery.OrderByDescending(a => a.EmployeeName) 
+                            : yesterdayQuery.OrderBy(a => a.EmployeeName);
+                        break;
+
+                    case EYesterdayAnomaliesSortColumn.Branch:
+                        yesterdayQuery = isDesc
+                            ? yesterdayQuery.OrderByDescending(a => a.Branch.BranchName)
+                            : yesterdayQuery.OrderBy(a => a.Branch.BranchName);
+                        break;
+                }
+            }
+
+            if (input.YesterdayAnomaliesSortColumn.HasValue &&
+                input.YesterdayAnomaliesSortColumn != EYesterdayAnomaliesSortColumn.EmployeeName)
+            {
+                yesterdayQuery = ((IOrderedEnumerable<YesterdayAnomalyDTO>)yesterdayQuery)
+                                .ThenBy(a => a.EmployeeName);
+            }
+
+            var yesterdayAnomaliesPagedData = yesterdayQuery
                 .Skip(param.SkipCount)
                 .Take(param.MaxResultCount)
                 .ToList();
 
-            allLastWeekAnomalies = allLastWeekAnomalies
-                .OrderByDescending(a => a.Count)
-                .ThenBy(a => a.EmployeeName)
-                .ToList();
-            var lastWeekAnomaliesTotalCount = allLastWeekAnomalies.Count();
-            var lastWeekAnomaliesPagedData = allLastWeekAnomalies
+            IEnumerable<LastWeekAnomalyDTO> lastWeekQuery = allLastWeekAnomalies;
+            if (input.LastWeekAnomaliesSortColumn.HasValue)
+            {
+                switch (input.LastWeekAnomaliesSortColumn.Value)
+                {
+                    case ELastWeekAnomaliesSortColumn.EmployeeName:
+                        lastWeekQuery = isDesc
+                            ? lastWeekQuery.OrderByDescending(a => a.EmployeeName)
+                            : lastWeekQuery.OrderBy(a => a.EmployeeName);
+                        break;
+
+                    case ELastWeekAnomaliesSortColumn.Branch:
+                        lastWeekQuery = isDesc
+                            ? lastWeekQuery.OrderByDescending(a => a.Branch.BranchName)
+                            : lastWeekQuery.OrderBy(a => a.Branch.BranchName);
+                        break;
+
+                    case ELastWeekAnomaliesSortColumn.Count:
+                        lastWeekQuery = isDesc
+                            ? lastWeekQuery.OrderByDescending(a => a.Count)
+                            : lastWeekQuery.OrderBy(a => a.Count);
+                        break;
+                }
+            }
+            else
+            {
+                lastWeekQuery = lastWeekQuery.OrderByDescending(a => a.Count).ThenBy(a => a.EmployeeName);
+            }
+
+            if (input.LastWeekAnomaliesSortColumn.HasValue &&
+                input.LastWeekAnomaliesSortColumn != ELastWeekAnomaliesSortColumn.EmployeeName)
+            {
+                lastWeekQuery = ((IOrderedEnumerable<LastWeekAnomalyDTO>)lastWeekQuery)
+                                .ThenBy(a => a.EmployeeName);
+            }
+
+            var lastWeekAnomaliesTotalCount = allLastWeekAnomalies.Count;
+            var lastWeekAnomaliesPagedData = lastWeekQuery
                 .Skip(param.SkipCount)
                 .Take(param.MaxResultCount)
                 .ToList();

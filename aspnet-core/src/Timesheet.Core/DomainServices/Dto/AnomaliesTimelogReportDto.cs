@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Timesheet.DomainServices.Dto;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.DomainServices.Dto
 {
@@ -21,5 +22,8 @@ namespace Timesheet.DomainServices.Dto
     public class GetAnomaliesTimelogReportInput
     {
         public List<long> BranchIds { get; set; } = new List<long>();
+        public EYesterdayAnomaliesSortColumn? YesterdayAnomaliesSortColumn { get; set; }
+        public ELastWeekAnomaliesSortColumn? LastWeekAnomaliesSortColumn { get; set; }
+        public ESortDirection SortDirection { get; set; }
     }
 }

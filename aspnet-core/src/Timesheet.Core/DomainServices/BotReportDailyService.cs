@@ -135,15 +135,7 @@ namespace Timesheet.DomainServices
                         TotalTimelogLM = Math.Round(p.TotalMinutesLM / MinutesPerHour, 2)
                     })
                     .Where(p => p.TotalTimelogLW >= (input.MinHours ?? 0))
-                    .OrderByDescending(p => p.TotalTimelogLW)
-                    .ThenByDescending(p => p.TotalTimelogLM)
-                    .ThenBy(p => p.Name)
                     .ToList();
-
-            if (input.Limit.HasValue && input.Limit.Value > 0 && result.Count > input.Limit.Value)
-            {
-                result = result.Take(input.Limit.Value).ToList();
-            }
 
             return result;
         }
@@ -151,8 +143,55 @@ namespace Timesheet.DomainServices
         public async Task<PagedResultDto<TotalTimelogProjectDto>> GetPagedDailyProjectTimelogReport(GridParam param, GetDailyProjectTimelogReportInput input)
         {
             var allData = await GetDailyProjectTimelogReport(input);
-            var totalCount = allData.Count();
-            var pagedData = allData
+            IEnumerable<TotalTimelogProjectDto> orderedQuery = allData;
+            bool isDesc = input.SortDirection == ESortDirection.Desc;
+            var sortColumn = input.SortColumn;
+
+            switch (sortColumn)
+            {
+                case EProjectTimelogSortColumn.ProjectName:
+                    orderedQuery = isDesc
+                        ? allData.OrderByDescending(p => p.Name)
+                        : allData.OrderBy(p => p.Name);
+                    break;
+
+                case EProjectTimelogSortColumn.MemberCount:
+                    orderedQuery = isDesc
+                        ? allData.OrderByDescending(p => p.Members.Count)
+                        : allData.OrderBy(p => p.Members.Count);
+                    break;
+
+                case EProjectTimelogSortColumn.TotalTimelogLW:
+                    orderedQuery = isDesc
+                        ? allData.OrderByDescending(p => p.TotalTimelogLW)
+                        : allData.OrderBy(p => p.TotalTimelogLW);
+                    break;
+
+                case EProjectTimelogSortColumn.TotalTimelogLM:
+                    orderedQuery = isDesc
+                        ? allData.OrderByDescending(p => p.TotalTimelogLM)
+                        : allData.OrderBy(p => p.TotalTimelogLM);
+                    break;
+
+                default:
+                    orderedQuery = allData.OrderByDescending(p => p.TotalTimelogLW).ThenByDescending(p => p.TotalTimelogLM);
+                    break;
+            }
+
+            if (sortColumn.HasValue && sortColumn != EProjectTimelogSortColumn.ProjectName)
+            {
+                orderedQuery = ((IOrderedEnumerable<TotalTimelogProjectDto>)orderedQuery)
+                                .ThenBy(p => p.Name);
+            }
+
+            if (input.Limit.HasValue && input.Limit.Value > 0)
+            {
+                orderedQuery = orderedQuery.Take(input.Limit.Value);
+            }
+
+            var limitedData = orderedQuery.ToList();
+            var totalCount = limitedData.Count;
+            var pagedData = limitedData
                 .Skip(param.SkipCount)
                 .Take(param.MaxResultCount)
                 .ToList();
