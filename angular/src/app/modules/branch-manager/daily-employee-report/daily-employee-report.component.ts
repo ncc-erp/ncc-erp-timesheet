@@ -32,6 +32,7 @@ export class DailyEmployeeReportComponent extends PagedListingComponentBase<Offi
   limit: number;
 
   users: OfficeWorkingItem[] = [];
+  isLoading: boolean = false;
 
   sortColumn: SortColumn = SortColumn.FullName;
   sortDirection: SortDirection = SortDirection.Asc;
