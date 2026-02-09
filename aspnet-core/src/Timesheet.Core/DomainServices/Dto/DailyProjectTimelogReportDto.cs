@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.DomainServices.Dto
 {
@@ -23,6 +24,8 @@ namespace Timesheet.DomainServices.Dto
         public int? Limit { get; set; }
         public List<long> ProjectIds { get; set; } = new List<long>();
         public bool IsAllBranch { get; set; }
+        public EProjectTimelogSortColumn? SortColumn { get; set; }
+        public ESortDirection SortDirection { get; set; }
     }
 
     public class GetDailyProjectTimelogReportByBranchCodesInput

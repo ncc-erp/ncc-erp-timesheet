@@ -33,7 +33,7 @@ export enum SortDirection {
 }
 
 export enum SortIcon {
-  UNSORTED = 'unfold_more',
-  ASCENDING = 'arrow_upward',
-  DESCENDING = 'arrow_downward',
+  UNSORTED = 'pi-sort-alt',
+  ASCENDING = 'pi-sort-amount-up',
+  DESCENDING = 'pi-sort-amount-down',
 }

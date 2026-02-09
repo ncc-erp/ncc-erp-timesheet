@@ -1,15 +1,13 @@
 export enum SortColumn {
-    None = "",
-    Name = "name",
-    MemberCount = "memberCount",
-    TotalTimelogLW = "totalTimelogLW",
-    TotalTimelogLM = "totalTimelogLM",
+    ProjectName = 0,
+    MemberCount = 1,
+    TotalTimelogLW = 2,
+    TotalTimelogLM = 3
 }
 
 export enum SortDirection {
-    None = "",
-    Asc = "asc",
-    Desc = "desc",
+    Desc = 0,
+    Asc = 1
 }
 
 export enum SelectAllText {
@@ -19,7 +17,7 @@ export enum SelectAllText {
 }
 
 export enum SortArrow {
-    UP = 'arrow_upward',
-    DOWN = 'arrow_downward',
-    NONE = 'unfold_more'
+    UP = 'pi-sort-amount-up',
+    DOWN = 'pi-sort-amount-down',
+    NONE = 'pi-sort-alt'
 }

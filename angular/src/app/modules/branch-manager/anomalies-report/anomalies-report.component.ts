@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, Injector } from '@angular/core';
 import { MatTabChangeEvent } from '@angular/material/tabs';
-import { AnomaliesReportService, AnomaliesTimelogReportResponse } from '@app/service/api/anomalies-report.service';
+import { AnomaliesReportService } from '@app/service/api/anomalies-report.service';
+import { AnomaliesTimelogReportResponse, YesterdayAnomaly, LastWeekAnomaly } from '@app/modules/branch-manager/Dto/anomalies-report-dto';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { AppComponentBase } from '@shared/app-component-base';
 import { AnomaliesNotes, DataType, SelectAllText, TableType, SortColumn, SortDirection, SortIcon } from './enum/anomalies-report.enum';
@@ -27,15 +28,15 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   yesterdayReportData: AnomaliesTimelogReportResponse | null = null;
   lastWeekReportData: AnomaliesTimelogReportResponse | null = null;
   
-  yesterdayUnplannedAbsences: AnomaliesTimelogReportResponse['yesterdayAnomalies'] = [];
-  yesterdayShortWorkingHours: AnomaliesTimelogReportResponse['yesterdayAnomalies'] = [];
-  lastWeekUnplannedAbsences: AnomaliesTimelogReportResponse['lastWeekAnomalies'] = [];
-  lastWeekShortWorkingHours: AnomaliesTimelogReportResponse['lastWeekAnomalies'] = [];
+  yesterdayUnplannedAbsences: YesterdayAnomaly[] = [];
+  yesterdayShortWorkingHours: YesterdayAnomaly[] = [];
+  lastWeekUnplannedAbsences: LastWeekAnomaly[] = [];
+  lastWeekShortWorkingHours: LastWeekAnomaly[] = [];
 
-  filteredYesterdayAbsences: AnomaliesTimelogReportResponse['yesterdayAnomalies'] = [];
-  filteredYesterdayShortHours: AnomaliesTimelogReportResponse['yesterdayAnomalies'] = [];
-  filteredLastWeekAbsences: AnomaliesTimelogReportResponse['lastWeekAnomalies'] = [];
-  filteredLastWeekShortHours: AnomaliesTimelogReportResponse['lastWeekAnomalies'] = [];
+  filteredYesterdayAbsences: YesterdayAnomaly[] = [];
+  filteredYesterdayShortHours: YesterdayAnomaly[] = [];
+  filteredLastWeekAbsences: LastWeekAnomaly[] = [];
+  filteredLastWeekShortHours: LastWeekAnomaly[] = [];
 
   yesterdayAbsenceSort: { column: SortColumn | '', direction: SortDirection } = { column: '', direction: SortDirection.NONE };
   yesterdayShortSort: { column: SortColumn | '', direction: SortDirection } = { column: '', direction: SortDirection.NONE };
@@ -47,8 +48,6 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   
   isLoading: boolean = false;
   
-  itemSize: number = 48;
-  maxHeight: number = 600;
   Math = Math;
 
   public DataType = DataType;
@@ -230,11 +229,13 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   }
 
   processYesterdayData(data: AnomaliesTimelogReportResponse): void {
-    this.yesterdayUnplannedAbsences = (data.yesterdayAnomalies || [])
+    const yesterdayData = data.yesterdayAnomalies;
+    const items = Array.isArray(yesterdayData) ? yesterdayData : ((yesterdayData && (yesterdayData as any).items) || []);
+    this.yesterdayUnplannedAbsences = items
       .filter(a => a.notes === AnomaliesNotes.NO_LEAVE_WFH)
       .map(a => ({ ...a, date: this.parseDateFromString(a.date) || a.date }));
 
-    this.yesterdayShortWorkingHours = (data.yesterdayAnomalies || [])
+    this.yesterdayShortWorkingHours = items
       .filter(a => a.notes === AnomaliesNotes.NO_EARLY_LEAVE_APPROVAL)
       .map(a => ({ ...a, date: this.parseDateFromString(a.date) || a.date }));
 
@@ -243,16 +244,19 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   }
 
   processLastWeekData(data: AnomaliesTimelogReportResponse): void {
-    this.lastWeekUnplannedAbsences = (data.lastWeekAnomalies || [])
-      .filter(a => a.datesMissed && a.datesMissed.length > 0)
+    const lastWeekData = data.lastWeekAnomalies;
+    const items = Array.isArray(lastWeekData) ? lastWeekData : ((lastWeekData && (lastWeekData as any).items) || []);
+
+    this.lastWeekUnplannedAbsences = items
+      .filter(a => a.datesMissed && Array.isArray(a.datesMissed) && a.datesMissed.length > 0)
       .map(a => ({
         ...a,
         datesMissed: (a.datesMissed || []).map((d: any) => this.parseDateFromString(d) || d),
         count: (a.datesMissed || []).length
       }));
 
-    this.lastWeekShortWorkingHours = (data.lastWeekAnomalies || [])
-      .filter(a => (a.datesBelowThreshold && a.datesBelowThreshold.length > 0) || (a.datesNoTrackerTime && a.datesNoTrackerTime.length > 0))
+    this.lastWeekShortWorkingHours = items
+      .filter(a => (a.datesBelowThreshold && Array.isArray(a.datesBelowThreshold) && a.datesBelowThreshold.length > 0) || (a.datesNoTrackerTime && Array.isArray(a.datesNoTrackerTime) && a.datesNoTrackerTime.length > 0))
       .map(a => ({
         ...a,
         datesBelowThreshold: (a.datesBelowThreshold || []).map((d: any) => this.parseDateFromString(d) || d),
@@ -302,9 +306,9 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     }
   }
 
-  private getFilterFn(search: string): (items: any[]) => any[] {
+  private getFilterFn(search: string): (items: (YesterdayAnomaly | LastWeekAnomaly)[]) => (YesterdayAnomaly | LastWeekAnomaly)[] {
     const lowerSearch = search.toLowerCase().trim();
-    return (items: any[]) => {
+    return (items: (YesterdayAnomaly | LastWeekAnomaly)[]) => {
       if (!lowerSearch) return [...items];
       return items.filter(item =>
         item.employeeName.toLowerCase().includes(lowerSearch) ||
@@ -316,14 +320,14 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
 
   applyYesterdaySearchFilter(): void {
     const filterFn = this.getFilterFn(this.searchTextYesterday);
-    this.filteredYesterdayAbsences = filterFn(this.yesterdayUnplannedAbsences);
-    this.filteredYesterdayShortHours = filterFn(this.yesterdayShortWorkingHours);
+    this.filteredYesterdayAbsences = filterFn(this.yesterdayUnplannedAbsences) as YesterdayAnomaly[];
+    this.filteredYesterdayShortHours = filterFn(this.yesterdayShortWorkingHours) as YesterdayAnomaly[];
   }
 
   applyLastWeekSearchFilter(): void {
     const filterFn = this.getFilterFn(this.searchTextLastWeek);
-    this.filteredLastWeekAbsences = filterFn(this.lastWeekUnplannedAbsences);
-    this.filteredLastWeekShortHours = filterFn(this.lastWeekShortWorkingHours);
+    this.filteredLastWeekAbsences = filterFn(this.lastWeekUnplannedAbsences) as LastWeekAnomaly[];
+    this.filteredLastWeekShortHours = filterFn(this.lastWeekShortWorkingHours) as LastWeekAnomaly[];
   }
 
   sort(column: SortColumn, dataType: DataType, tableType: TableType): void {
@@ -365,7 +369,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     this.updateFilteredArray(dataType, tableType, sorted);
   }
 
-  sortData(data: any[], column: SortColumn, direction: SortDirection): any[] {
+  sortData(data: (YesterdayAnomaly | LastWeekAnomaly)[], column: SortColumn, direction: SortDirection): (YesterdayAnomaly | LastWeekAnomaly)[] {
     if (!direction) return data;
 
     return [...data].sort((a, b) => {
@@ -390,7 +394,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     });
   }
 
-  getDataArray(dataType: string, tableType: string): any[] {
+  getDataArray(dataType: string, tableType: string): (YesterdayAnomaly | LastWeekAnomaly)[] {
     if (dataType === DataType.YESTERDAY) {
       return tableType === TableType.ABSENCE
         ? this.yesterdayUnplannedAbsences
@@ -401,7 +405,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       : this.lastWeekShortWorkingHours;
   }
 
-  getFilteredArray(dataType: string, tableType: string): any[] {
+  getFilteredArray(dataType: string, tableType: string): (YesterdayAnomaly | LastWeekAnomaly)[] {
     if (dataType === DataType.YESTERDAY) {
       return tableType === TableType.ABSENCE
         ? this.filteredYesterdayAbsences
@@ -412,13 +416,13 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       : this.filteredLastWeekShortHours;
   }
 
-  updateFilteredArray(dataType: string, tableType: string, data: any[]): void {
+  updateFilteredArray(dataType: string, tableType: string, data: (YesterdayAnomaly | LastWeekAnomaly)[]): void {
     if (dataType === DataType.YESTERDAY) {
-      if (tableType === TableType.ABSENCE) this.filteredYesterdayAbsences = data;
-      else this.filteredYesterdayShortHours = data;
+      if (tableType === TableType.ABSENCE) this.filteredYesterdayAbsences = data as YesterdayAnomaly[];
+      else this.filteredYesterdayShortHours = data as YesterdayAnomaly[];
     } else {
-      if (tableType === TableType.ABSENCE) this.filteredLastWeekAbsences = data;
-      else this.filteredLastWeekShortHours = data;
+      if (tableType === TableType.ABSENCE) this.filteredLastWeekAbsences = data as LastWeekAnomaly[];
+      else this.filteredLastWeekShortHours = data as LastWeekAnomaly[];
     }
   }
   

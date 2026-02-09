@@ -39,7 +39,7 @@
             </div>
 
             <!-- Min Hours Filter -->
-            <div class="filter-item filter-min-hours">
+            <div class="filter-item filter-limit">
               <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
                 <mat-label>{{ "Min Hours" | localize }}</mat-label>
                 <input
@@ -89,7 +89,7 @@
                   name="branchIds"
                   multiple
                   [(ngModel)]="branchIds"
-                  (ngModelChange)="onBranchSelectionChange($event)"
+                  (ngModelChange)="searchOrFilter()"
                 >
                   <input
                     matInput
@@ -117,9 +117,6 @@
                     [value]="branch.id"
                   >
                     {{ branch.name }}
-                    <ng-container *ngIf="branch.name === defaultBranchName">
-                      (Default)
-                    </ng-container>
                   </mat-option>
                 </mat-select>
               </mat-form-field>
@@ -127,116 +124,74 @@
           </div>
         </div>
 
-        <!-- Loading Indicator -->
-        <div *ngIf="isLoading" class="text-center p-4 loading-container">
-          <mat-spinner diameter="50"></mat-spinner>
-        </div>
-
         <!-- Data Table -->
-        <div
-          *ngIf="!isLoading && filteredProjects.length > 0"
-          class="table-container"
-        >
-          <!-- Fixed Header -->
-          <div class="table-header-wrapper">
-            <table class="table table-bordered table-header-fixed">
-              <thead>
-                <tr>
-                  <th class="col-index" style="user-select: none;">No.</th>
-                  <th class="col-project-name sortable" (click)="onSort('name')">
-                    <div class="header-content">
-                      <span>{{ "Project Name" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('name') }}</mat-icon>
-                    </div>
-                  </th>
-                  <th class="col-members" matTooltip="List of members from selected branches who participated in the project">{{ "Members" | localize }}</th>
-                  <th class="col-data sortable" (click)="onSort('memberCount')">
-                    <div class="header-content">
-                      <span>{{ "Member Count" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('memberCount') }}</mat-icon>
-                    </div>
-                  </th>
-                  <th class="col-data sortable" (click)="onSort('totalTimelogLW')" matTooltip="Sum of timesheet hours for selected branches' members last week">
-                    <div class="header-content">
-                      <span>{{ "Hours (LW)" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('totalTimelogLW') }}</mat-icon>
-                    </div>
-                  </th>
-                  <th class="col-data sortable" (click)="onSort('totalTimelogLM')" matTooltip="Sum of timesheet hours for selected branches' members last month">
-                    <div class="header-content">
-                      <span>{{ "Hours (LM)" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('totalTimelogLM') }}</mat-icon>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-            </table>
-          </div>
-
-          <!-- Virtual Scroll Body -->
-          <cdk-virtual-scroll-viewport
-            [itemSize]="itemSize"
-            class="virtual-scroll-viewport"
-            [style.height.px]="
-              Math.min(filteredProjects.length * itemSize, maxHeight)
-            "
-          >
-            <table class="table table-bordered">
-              <tbody>
-                <tr
-                  *cdkVirtualFor="let item of filteredProjects; let i = index"
-                  class="virtual-scroll-row"
-                >
-                  <td class="col-index">{{ i + 1 }}</td>
-                  <td class="col-project-name">{{ item.name }}</td>
-                  <td class="col-members" (click)="item.members.length > 3 ? toggleExpanded(item) : null" [style.cursor]="item.members.length > 3 ? 'pointer' : 'default'">
-                    <div *ngIf="!item.expanded" class="members-collapsed">
-                      <ng-container *ngFor="let member of item.members.slice(0, Math.min(item.members.length, 3))">
-                        <div class="label bg-blue" style="padding: 4px;">{{ member }}</div>
-                      </ng-container>
-                      <span *ngIf="item.members.length > 3" class="members-ellipsis"> ...</span>
-                    </div>
-                    <div *ngIf="item.expanded" class="members-wrapper">
-                      <div *ngFor="let member of item.members;" 
-                        class="label bg-blue" style="padding: 4px;" 
-                      >
-                        {{ member }}
-                      </div>
-                    </div>
-                  </td>
-                  <td class="col-data" style="font-weight: 600;">{{ item.memberCount }}</td>
-                  <td class="col-data">{{ round(item.totalTimelogLW) }}</td>
-                  <td class="col-data">{{ round(item.totalTimelogLM) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </cdk-virtual-scroll-viewport>
-
-          <!-- Footer with total count -->
-          <div class="table-footer">
-            <span class="total-count">
-              {{ "Total" | localize }}:
-              <strong>{{ filteredProjects.length }}</strong>
-              {{ filteredProjects.length === 1 ? "project" : "projects" }}
-            </span>
-          </div>
+        <div class="table-responsive" [busy]="isTableLoading">
+          <table class="table customTable table-striped">
+            <thead>
+              <tr>
+                <th class="text-center col-lg-1">No.</th>
+                <th class="sortable" (click)="onSort(SortColumn.ProjectName)">
+                  <div class="header-content justify-left">
+                    <span>{{ "Project Name" | localize }}</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.ProjectName)"></i>
+                  </div>
+                </th>
+                <th class="text-center">
+                  <div class="header-content">
+                    <span>{{ "Members" | localize }}</span>
+                  </div>
+                </th>
+                <th class="text-center sortable" (click)="onSort(SortColumn.MemberCount)">
+                  <div class="header-content">
+                    <span>{{ "Member Count" | localize }}</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.MemberCount)"></i>
+                  </div>
+                </th>
+                <th class="text-center sortable" (click)="onSort(SortColumn.TotalTimelogLW)">
+                  <div class="header-content">
+                    <span>{{ "Hours (LW)" | localize }} (h)</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.TotalTimelogLW)"></i>
+                  </div>
+                </th>
+                <th class="text-center sortable" (click)="onSort(SortColumn.TotalTimelogLM)">
+                  <div class="header-content">
+                    <span>{{ "Hours (LM)" | localize }} (h)</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.TotalTimelogLM)"></i>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of users | paginate :{
+                id: 'daily_project_report_paging',
+                itemsPerPage: pageSize,
+                currentPage: pageNumber,
+                totalItems: totalItems
+               }; let i = index">
+                <td class="text-center">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
+                <td class="text-left" style="font-weight: 600;">{{ item.name }}</td>
+                <td class="text-left">
+                  <div class="member-badges">
+                    <span *ngFor="let member of item.members" class="member-badge">
+                      {{ member }}
+                    </span>
+                  </div>
+                </td>
+                <td class="text-center">{{ item.members?.length || 0 }}</td>
+                <td class="text-center">{{ round(item.totalTimelogLW) }}</td>
+                <td class="text-center">{{ round(item.totalTimelogLM) }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div
-          *ngIf="!isLoading && branchIds.length > 0 && filteredProjects.length === 0 && projects.length > 0"
-          class="text-center p-4"
-        >
-          <p>{{ "No matching records found" | localize }}</p>
-          <button mat-raised-button color="primary" (click)="clearSearch()">
-            {{ "Clear Search" | localize }}
-          </button>
+        <div class="abp-pagination-controls-wrapper">
+          <abp-pagination-controls [totalNumber]="totalItems" id="daily_project_report_paging"
+            (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)"></abp-pagination-controls>
         </div>
 
-        <div
-          *ngIf="!isLoading && branchIds.length > 0 && projects.length === 0"
-          class="text-center p-4"
-        >
-          <p>{{ "No data available for selected branches" | localize }}</p>
+        <div *ngIf="!isTableLoading && users.length === 0" class="text-center p-4">
+          <p>{{ "No records found" | localize }}</p>
         </div>
       </div>
     </div>

@@ -3,42 +3,14 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { BaseApiService } from "./base-api.service";
-
-export interface AnomaliesTimelogReportResponse {
-  result: AnomaliesTimelogReportResponse;
-  yesterdayAnomalies: {
-    userId: number;
-    employeeName: string;
-    userName: string;
-    date: string | Date;
-    actualHours: string;
-    notes: string;
-    branch: {
-      branchName: string;
-      branchColor: string;
-    };
-  }[];
-  lastWeekAnomalies: {
-    userId: number;
-    employeeName: string;
-    userName: string;
-    datesMissed: (string | Date)[];
-    datesNoTrackerTime: (string | Date)[];
-    datesBelowThreshold: (string | Date)[];
-    count: number;
-    notes: string;
-    branch: {
-      branchName: string;
-      branchColor: string;
-    };
-  }[];
-}
+import { AbpResponse } from "@app/modules/branch-manager/Dto/branch-manage-dto";
+import { AnomaliesTimelogReportResponse } from "@app/modules/branch-manager/Dto/anomalies-report-dto";
 
 @Injectable({
   providedIn: "root",
 })
 export class AnomaliesReportService extends BaseApiService {
-  constructor(protected http: HttpClient) {
+  constructor(http: HttpClient) {
     super(http);
   }
 
@@ -55,11 +27,13 @@ export class AnomaliesReportService extends BaseApiService {
       });
     }
 
+    params = params.set("MaxResultCount", "1000");
+
     return this.http
-      .get<AnomaliesTimelogReportResponse>(
+      .get<AbpResponse<AnomaliesTimelogReportResponse>>(
         this.getUrl("GetAnomaliesTimelogReport"),
         { params }
       )
-      .pipe(map(res => res.result as AnomaliesTimelogReportResponse));
+      .pipe(map(res => res.result));
   }
 }

@@ -12,11 +12,10 @@
   <mat-form-field class="w-100" appearance="outline">
     <mat-label> {{ "Time Range" | localize }}</mat-label>
     <span>{{displayDay}}</span>
-    <input matInput [readonly]="true" [matDatepicker]="picker" [(ngModel)]="activeDay"
-      (dateInput)="customDate()" [hidden]="true">
+    <input matInput [readonly]="true" [matDatepicker]="picker" [(ngModel)]="activeDay" (dateInput)="customDate()"
+      [hidden]="true">
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-    <mat-datepicker #picker [startView]="startView"
-      (monthSelected)="setMonth($event,picker)"
+    <mat-datepicker #picker [startView]="startView" (monthSelected)="setMonth($event,picker)"
       (yearSelected)="setYear($event,picker)">
     </mat-datepicker>
   </mat-form-field>

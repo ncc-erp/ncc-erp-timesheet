@@ -369,6 +369,40 @@ namespace Ncc.Entities.Enum
             NUMBER = 1,
             LEVEL = 2,
         }
+        public enum EOfficeWorkingSortColumn
+        {
+            TotalAllLW = 0,
+            OfficeLW = 1,
+            WfhLW = 2,
+            TotalAllLM = 3,
+            OfficeLM = 4,
+            WfhLM = 5,
+            FullName = 6,
+            BranchName = 7
+        }
+        public enum EProjectTimelogSortColumn
+        {
+            ProjectName = 0,
+            MemberCount = 1,
+            TotalTimelogLW = 2,
+            TotalTimelogLM = 3
+        }
+        public enum EYesterdayAnomaliesSortColumn
+        {
+            EmployeeName = 0,
+            Branch = 1
+        }
+        public enum ELastWeekAnomaliesSortColumn
+        {
+            EmployeeName = 0,
+            Branch = 1,
+            Count = 2
+        }
+        public enum ESortDirection
+        {
+            Desc = 0,
+            Asc = 1
+        }
         public enum PointType
         {
             IsClaim = 0,

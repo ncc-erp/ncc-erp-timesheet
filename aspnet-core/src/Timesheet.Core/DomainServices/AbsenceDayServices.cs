@@ -1,4 +1,5 @@
-﻿using Abp.Dependency;
+﻿using Abp.Application.Services.Dto;
+using Abp.Dependency;
 using Microsoft.EntityFrameworkCore;
 using Ncc.Authorization.Users;
 using Ncc.IoC;
@@ -11,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
+using Timesheet.Paging;
 using Timesheet.Services.Mezon;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
@@ -504,7 +506,7 @@ namespace Timesheet.DomainServices
                 AbsenceDetails = allAbsenceDetails
             };
         }
-        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportInput input)
+        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GridParam param, GetAnomaliesTimelogReportInput input)
         {
             var now = DateTimeUtils.GetNow().Date;
             var yesterday = now.AddDays(-1);
@@ -523,11 +525,8 @@ namespace Timesheet.DomainServices
 
             var data = await LoadAnomalyDataAsync(validBranchIds, lastWeekStart, yesterday.AddDays(1).AddTicks(-1));
 
-            var result = new AnomaliesTimelogReportDto
-            {
-                YesterdayAnomalies = new List<YesterdayAnomalyDTO>(),
-                LastWeekAnomalies = new List<LastWeekAnomalyDTO>()
-            };
+            var allYesterdayAnomalies = new List<YesterdayAnomalyDTO>();
+            var allLastWeekAnomalies = new List<LastWeekAnomalyDTO>();
 
             foreach (var branchId in validBranchIds)
             {
@@ -544,8 +543,9 @@ namespace Timesheet.DomainServices
                     IsYesterday = true,
                     Branch = branch
                 };
+
                 var (yesterdayAnomalies, _) = await ProcessAnomalies(processAnomaliesInput);
-                result.YesterdayAnomalies.AddRange(yesterdayAnomalies);
+                allYesterdayAnomalies.AddRange(yesterdayAnomalies);
             }
 
             var lastWeekLoopStopwatch = Stopwatch.StartNew();
@@ -564,17 +564,111 @@ namespace Timesheet.DomainServices
                     IsYesterday = false,
                     Branch = branch
                 };
+
                 var (_, lastWeekAnomalies) = await ProcessAnomalies(processAnomaliesInput);
-                result.LastWeekAnomalies.AddRange(lastWeekAnomalies);
+                allLastWeekAnomalies.AddRange(lastWeekAnomalies);
             }
             lastWeekLoopStopwatch.Stop();
 
-            result.LastWeekAnomalies = result.LastWeekAnomalies
-                .OrderByDescending(a => a.Count)
-                .ThenBy(a => a.EmployeeName)
+            if (!string.IsNullOrEmpty(param.SearchText))
+            {
+                var searchText = param.SearchText.ToLower();
+                allYesterdayAnomalies = allYesterdayAnomalies.Where(u =>
+                    (u.EmployeeName != null && u.EmployeeName.ToLower().Contains(searchText)) ||
+                    (u.UserName != null && u.UserName.ToLower().Contains(searchText))
+                ).ToList();
+            }
+
+            IEnumerable<YesterdayAnomalyDTO> yesterdayQuery = allYesterdayAnomalies;
+            bool isDesc = input.SortDirection == ESortDirection.Desc;
+            
+            if (input.YesterdayAnomaliesSortColumn.HasValue)
+            {
+                switch (input.YesterdayAnomaliesSortColumn.Value)
+                {
+                    case EYesterdayAnomaliesSortColumn.EmployeeName:
+                        yesterdayQuery = isDesc
+                            ? yesterdayQuery.OrderByDescending(a => a.EmployeeName) 
+                            : yesterdayQuery.OrderBy(a => a.EmployeeName);
+                        break;
+
+                    case EYesterdayAnomaliesSortColumn.Branch:
+                        yesterdayQuery = isDesc
+                            ? yesterdayQuery.OrderByDescending(a => a.Branch.BranchName)
+                            : yesterdayQuery.OrderBy(a => a.Branch.BranchName);
+                        break;
+                }
+            }
+
+            if (input.YesterdayAnomaliesSortColumn.HasValue &&
+                input.YesterdayAnomaliesSortColumn != EYesterdayAnomaliesSortColumn.EmployeeName)
+            {
+                yesterdayQuery = ((IOrderedEnumerable<YesterdayAnomalyDTO>)yesterdayQuery)
+                                .ThenBy(a => a.EmployeeName);
+            }
+
+            var yesterdayAnomaliesTotalCount = allYesterdayAnomalies.Count;
+            var yesterdayAnomaliesPagedData = yesterdayQuery
+                .Skip(param.SkipCount)
+                .Take(param.MaxResultCount)
                 .ToList();
 
-            return result;
+            if (!string.IsNullOrEmpty(param.SearchText))
+            {
+                var searchText = param.SearchText.ToLower();
+                allLastWeekAnomalies = allLastWeekAnomalies.Where(u =>
+                    (u.EmployeeName != null && u.EmployeeName.ToLower().Contains(searchText)) ||
+                    (u.UserName != null && u.UserName.ToLower().Contains(searchText))
+                ).ToList();
+            }
+
+            IEnumerable<LastWeekAnomalyDTO> lastWeekQuery = allLastWeekAnomalies;
+            if (input.LastWeekAnomaliesSortColumn.HasValue)
+            {
+                switch (input.LastWeekAnomaliesSortColumn.Value)
+                {
+                    case ELastWeekAnomaliesSortColumn.EmployeeName:
+                        lastWeekQuery = isDesc
+                            ? lastWeekQuery.OrderByDescending(a => a.EmployeeName)
+                            : lastWeekQuery.OrderBy(a => a.EmployeeName);
+                        break;
+
+                    case ELastWeekAnomaliesSortColumn.Branch:
+                        lastWeekQuery = isDesc
+                            ? lastWeekQuery.OrderByDescending(a => a.Branch.BranchName)
+                            : lastWeekQuery.OrderBy(a => a.Branch.BranchName);
+                        break;
+
+                    case ELastWeekAnomaliesSortColumn.Count:
+                        lastWeekQuery = isDesc
+                            ? lastWeekQuery.OrderByDescending(a => a.Count)
+                            : lastWeekQuery.OrderBy(a => a.Count);
+                        break;
+                }
+            }
+            else
+            {
+                lastWeekQuery = lastWeekQuery.OrderByDescending(a => a.Count).ThenBy(a => a.EmployeeName);
+            }
+
+            if (input.LastWeekAnomaliesSortColumn.HasValue &&
+                input.LastWeekAnomaliesSortColumn != ELastWeekAnomaliesSortColumn.EmployeeName)
+            {
+                lastWeekQuery = ((IOrderedEnumerable<LastWeekAnomalyDTO>)lastWeekQuery)
+                                .ThenBy(a => a.EmployeeName);
+            }
+
+            var lastWeekAnomaliesTotalCount = allLastWeekAnomalies.Count;
+            var lastWeekAnomaliesPagedData = lastWeekQuery
+                .Skip(param.SkipCount)
+                .Take(param.MaxResultCount)
+                .ToList();
+
+            return new AnomaliesTimelogReportDto
+            {
+                YesterdayAnomalies = new PagedResultDto<YesterdayAnomalyDTO>(yesterdayAnomaliesTotalCount, yesterdayAnomaliesPagedData),
+                LastWeekAnomalies = new PagedResultDto<LastWeekAnomalyDTO>(lastWeekAnomaliesTotalCount, lastWeekAnomaliesPagedData)
+            };
         }
 
         private static (DateTime start, DateTime end) GetLastWeekRange(DateTime reportDate)

@@ -1,4 +1,5 @@
 ﻿using Abp.Application.Services;
+using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Configuration;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ using Timesheet.APIs.Reports;
 using Timesheet.APIs.Reports.Dto;
 using Timesheet.DomainServices;
 using Timesheet.DomainServices.Dto;
+using Timesheet.Paging;
 using Timesheet.Services.Mezon;
 
 namespace Timesheet.APIs.BotReportDaily
@@ -38,23 +40,23 @@ namespace Timesheet.APIs.BotReportDaily
 
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_Report, Ncc.Authorization.PermissionNames.BranchDirector_OfficeWorkingReport_View)]
-        public async Task<List<OfficeWorkingTopLWLMDto>> GetOfficeWorkingTimelogReport(GetOfficeWorkingTimelogReportInputDto input)
+        public async Task<PagedResultDto<OfficeWorkingTopLWLMDto>> GetOfficeWorkingTimelogReport(GridParam param, GetOfficeWorkingTimelogReportInputDto input)
         {
-            return await _officeWorkingReportAppService.GetOfficeWorkingTimelogReport(input);
+            return await _officeWorkingReportAppService.GetOfficeWorkingTimelogReport(param, input);
         }
 
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_Report, Ncc.Authorization.PermissionNames.BranchDirector_ProjectWorkingReport_View)]
-        public async Task<List<TotalTimelogProjectDto>> GetDailyProjectTimelogReport(GetDailyProjectTimelogReportInput input)
+        public async Task<PagedResultDto<TotalTimelogProjectDto>> GetDailyProjectTimelogReport(GridParam param, GetDailyProjectTimelogReportInput input)
         {
-            return await _botReportDailyService.GetDailyProjectTimelogReport(input);
+            return await _botReportDailyService.GetPagedDailyProjectTimelogReport(param, input);
         }
 
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_Report, Ncc.Authorization.PermissionNames.BranchDirector_AnomaliesReport_View)]
-        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportInput input)
+        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GridParam param, GetAnomaliesTimelogReportInput input)
         {
-            return await _absenceDayService.GetAnomaliesTimelogReport(input);
+            return await _absenceDayService.GetAnomaliesTimelogReport(param, input);
         }
     }
 }

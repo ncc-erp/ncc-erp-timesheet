@@ -1,12 +1,13 @@
+using Abp.Application.Services.Dto;
 using Abp.Configuration;
 using Abp.Dependency;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using Ncc.Authorization.Users;
 using Ncc.Configuration;
 using Ncc.Entities;
 using Ncc.IoC;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
+using Timesheet.Paging;
 using Timesheet.Services.Mezon;
 using static Ncc.Entities.Enum.StatusEnum;
 
@@ -133,17 +135,73 @@ namespace Timesheet.DomainServices
                         TotalTimelogLM = Math.Round(p.TotalMinutesLM / MinutesPerHour, 2)
                     })
                     .Where(p => p.TotalTimelogLW >= (input.MinHours ?? 0))
-                    .OrderByDescending(p => p.TotalTimelogLW)
-                    .ThenByDescending(p => p.TotalTimelogLM)
-                    .ThenBy(p => p.Name)
                     .ToList();
 
-            if (input.Limit.HasValue && input.Limit.Value > 0 && result.Count > input.Limit.Value)
+            return result;
+        }
+
+        public async Task<PagedResultDto<TotalTimelogProjectDto>> GetPagedDailyProjectTimelogReport(GridParam param, GetDailyProjectTimelogReportInput input)
+        {
+            var allData = await GetDailyProjectTimelogReport(input);
+            if (!string.IsNullOrEmpty(param.SearchText))
             {
-                result = result.Take(input.Limit.Value).ToList();
+                var searchText = param.SearchText.ToLower();
+                allData = allData.Where(u => u.Name != null && u.Name.ToLower().Contains(searchText)).ToList();
             }
 
-            return result;
+            IEnumerable<TotalTimelogProjectDto> orderedQuery = allData;
+            bool isDesc = input.SortDirection == ESortDirection.Desc;
+            var sortColumn = input.SortColumn;
+
+            switch (sortColumn)
+            {
+                case EProjectTimelogSortColumn.ProjectName:
+                    orderedQuery = isDesc
+                        ? allData.OrderByDescending(p => p.Name)
+                        : allData.OrderBy(p => p.Name);
+                    break;
+
+                case EProjectTimelogSortColumn.MemberCount:
+                    orderedQuery = isDesc
+                        ? allData.OrderByDescending(p => p.Members.Count)
+                        : allData.OrderBy(p => p.Members.Count);
+                    break;
+
+                case EProjectTimelogSortColumn.TotalTimelogLW:
+                    orderedQuery = isDesc
+                        ? allData.OrderByDescending(p => p.TotalTimelogLW)
+                        : allData.OrderBy(p => p.TotalTimelogLW);
+                    break;
+
+                case EProjectTimelogSortColumn.TotalTimelogLM:
+                    orderedQuery = isDesc
+                        ? allData.OrderByDescending(p => p.TotalTimelogLM)
+                        : allData.OrderBy(p => p.TotalTimelogLM);
+                    break;
+
+                default:
+                    orderedQuery = allData.OrderByDescending(p => p.TotalTimelogLW).ThenByDescending(p => p.TotalTimelogLM);
+                    break;
+            }
+
+            if (sortColumn.HasValue && sortColumn != EProjectTimelogSortColumn.ProjectName)
+            {
+                orderedQuery = ((IOrderedEnumerable<TotalTimelogProjectDto>)orderedQuery)
+                                .ThenBy(p => p.Name);
+            }
+
+            if (input.Limit.HasValue && input.Limit.Value > 0)
+            {
+                orderedQuery = orderedQuery.Take(input.Limit.Value);
+            }
+
+            var limitedData = orderedQuery.ToList();
+            var totalCount = limitedData.Count;
+            var pagedData = limitedData
+                .Skip(param.SkipCount)
+                .Take(param.MaxResultCount)
+                .ToList();
+            return new PagedResultDto<TotalTimelogProjectDto>(totalCount, pagedData);
         }
 
         public async Task<bool> SendDailyProjectTimelogToMezon()
