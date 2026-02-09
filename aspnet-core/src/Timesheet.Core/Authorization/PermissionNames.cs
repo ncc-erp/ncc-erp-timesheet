@@ -216,6 +216,14 @@ namespace Ncc.Authorization
         public const string Admin_AuditLog = "Admin.AuditLog";
         public const string Admin_AuditLog_View = "Admin.AuditLog.View";
 
+        public const string Admin_Remote_Blacklist = "Admin.Remote.Blacklist";
+        public const string Admin_Remote_Blacklist_View = "Admin.Remote.Blacklist.View";
+        public const string Admin_Remote_Blacklist_Add = "Admin.Remote.Blacklist.Add";
+        public const string Admin_Remote_Blacklist_Edit = "Admin.Remote.Blacklist.Edit";
+        public const string Admin_Remote_Blacklist_Delete = "Admin.Remote.Blacklist.Delete";
+        public const string Admin_Remote_Blacklist_Import = "Admin.Remote.Blacklist.Import";
+        public const string Admin_Remote_Blacklist_DownloadTemplate = "Admin.Remote.Blacklist.DownloadTemplate";
+
         public const string Project = "Project";
         public const string Project_View = "Project.View";
         public const string Project_View_All = "Project.ViewAll";
@@ -588,6 +596,14 @@ namespace Ncc.Authorization
 
                     PermissionNames.Admin_AuditLog,
                     PermissionNames.Admin_AuditLog_View,
+
+                    PermissionNames.Admin_Remote_Blacklist,
+                    PermissionNames.Admin_Remote_Blacklist_View,
+                    PermissionNames.Admin_Remote_Blacklist_Add,
+                    PermissionNames.Admin_Remote_Blacklist_Delete,
+                    PermissionNames.Admin_Remote_Blacklist_Edit,
+                    PermissionNames.Admin_Remote_Blacklist_Import,
+                    PermissionNames.Admin_Remote_Blacklist_DownloadTemplate,
 
                     PermissionNames.Project,
                     PermissionNames.Project_View,
@@ -1126,6 +1142,14 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_BackgroundJob_Delete ,MultiTenancySides = MultiTenancySides.Host, DisplayName = "Delete"},
             new SystemPermission{ Name =  PermissionNames.Admin_AuditLog, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Auditlogs" },
             new SystemPermission{ Name =  PermissionNames.Admin_AuditLog_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View AuditLogs" },
+
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Add, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add new record to remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Import, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Import a CSV file to remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_DownloadTemplate, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Download remote blacklist template" },
 
             new SystemPermission{ Name =  PermissionNames.Project, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Projects" },
             new SystemPermission{ Name =  PermissionNames.Project_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View my projects" },
@@ -1740,6 +1764,17 @@ namespace Ncc.Authorization
                         {
                             new SystemPermission{ Name =  PermissionNames.Admin_BackgroundJob_View ,MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "View"},
                             new SystemPermission{ Name =  PermissionNames.Admin_BackgroundJob_Delete ,MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "Delete"},
+                        }
+                     },
+                     new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Remote blacklist",
+                        Childrens = new List<SystemPermission>()
+                        {
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View remote blacklist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Add, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add new record to remote blacklist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit remote blacklist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete remote blacklist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Import, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Import a CSV file to remote blacklist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_DownloadTemplate, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Download remote blacklist template"}
                         }
                      },
                 }

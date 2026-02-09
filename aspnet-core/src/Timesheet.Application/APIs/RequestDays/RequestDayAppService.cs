@@ -552,9 +552,16 @@ namespace Timesheet.APIs.RequestDays
                 .Select(s => s.DayOff.Date)
                 .ToHashSet();
 
-            int MAX_ALLOW_REMOTE_DAY = 4;
+            int wfhSettingDays = 0;
+            int.TryParse(await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting), out wfhSettingDays);
 
-            int.TryParse(await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting), out MAX_ALLOW_REMOTE_DAY);
+            var remoteBlacklistInfo = await WorkScope.GetAll<RemoteBlacklist>()
+                .Where(b => b.UserId == userId && !b.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            int penaltyDays = remoteBlacklistInfo != null ? remoteBlacklistInfo.PenaltyDays : 0;
+
+            int MAX_ALLOW_REMOTE_DAY = Math.Max(0, wfhSettingDays - penaltyDays);
 
             var mapDateAtToRequestCount = new Dictionary<DateTime, int>();
 
