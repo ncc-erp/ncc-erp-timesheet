@@ -9,6 +9,7 @@ namespace Timesheet.DomainServices.Dto
         public long UserId { get; set; }
         public int PenaltyDays { get; set; }
     }
+
     public class GetRemoteBlacklistDto
     {
         public long Id { get; set; }
@@ -17,11 +18,13 @@ namespace Timesheet.DomainServices.Dto
         public string UserName { get; set; }
         public int PenaltyDays { get; set; }
     }
+
     public class UpdatePenaltyDaysDto
     {
         public long Id { get; set; }
         public int PenaltyDays { get; set; }
     }
+
     public class ImportRemoteBlacklistRowDto
     {
         public int Row { get; set; }
@@ -29,6 +32,7 @@ namespace Timesheet.DomainServices.Dto
         public string Email { get; set; }
         public string PenaltyDaysStr { get; set; }
     }
+
     public class ImportRemoteBlacklistResultDto
     {
         public int SuccessCount { get; set; }

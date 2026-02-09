@@ -27,9 +27,9 @@ namespace Timesheet.APIs.RemoteBlacklists
 
         [HttpPost]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Remote_Blacklist_Add)]
-        public async Task<GetRemoteBlacklistDto> AddNewUserToRemoteBlacklist(AddNewUserToRemoteBlacklistDto input)
+        public async Task<GetRemoteBlacklistDto> AddNewUser(AddNewUserToRemoteBlacklistDto input)
         {
-            return await _remoteBlacklistServices.AddNewUserToRemoteBlacklist(input);
+            return await _remoteBlacklistServices.AddNewUser(input);
         }
 
         [HttpGet]
@@ -43,14 +43,14 @@ namespace Timesheet.APIs.RemoteBlacklists
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Remote_Blacklist_View)]
         public async Task<PagedResultDto<GetRemoteBlacklistDto>> GetAll(GridParam param)
         {
-            return await _remoteBlacklistServices.GetAllRemoteBlacklist(param);
+            return await _remoteBlacklistServices.GetAll(param);
         }
 
         [HttpPut]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Remote_Blacklist_Edit)]
-        public async Task<GetRemoteBlacklistDto> UpdatePenaltyDays(UpdatePenaltyDaysDto input)
+        public async Task<GetRemoteBlacklistDto> Update(UpdatePenaltyDaysDto input)
         {
-            return await _remoteBlacklistServices.UpdatePenaltyDays(input);
+            return await _remoteBlacklistServices.Update(input);
         }
 
         [HttpDelete]
@@ -62,16 +62,16 @@ namespace Timesheet.APIs.RemoteBlacklists
 
         [HttpPost]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Remote_Blacklist_DownloadTemplate)]
-        public async Task<FileBase64Dto> DownloadTemplateImportRemoteBlacklist()
+        public async Task<FileBase64Dto> DownloadTemplate()
         {
-            return await _remoteBlacklistServices.DownloadTemplateImportRemoteBlacklist();
+            return await _remoteBlacklistServices.DownloadTemplate();
         }
 
         [HttpPost]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Remote_Blacklist_Import)]
-        public async Task<ImportRemoteBlacklistResultDto> ImportRemoteBlacklist([FromForm] IFormFile file)
+        public async Task<ImportRemoteBlacklistResultDto> ImportFromExcel([FromForm] IFormFile file)
         {
-            return await _remoteBlacklistServices.ImportRemoteBlacklist(file);
+            return await _remoteBlacklistServices.ImportFromExcel(file);
         }
     }
 }

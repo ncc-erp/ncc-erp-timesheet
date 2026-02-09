@@ -41,7 +41,7 @@ namespace Timesheet.DomainServices
             return int.Parse(settingValue);
         }
 
-        public async Task<GetRemoteBlacklistDto> AddNewUserToRemoteBlacklist(AddNewUserToRemoteBlacklistDto input)
+        public async Task<GetRemoteBlacklistDto> AddNewUser(AddNewUserToRemoteBlacklistDto input)
         {
             try
             {
@@ -51,17 +51,17 @@ namespace Timesheet.DomainServices
                     throw new UserFriendlyException($"Penalty days must be between 1 and {maxAllowedRemoteDays}!");
                 }
 
-                var userInfo = await _workScope.GetAsync<User>(input.UserId);
-                if (userInfo == null)
-                {
-                    throw new UserFriendlyException("User not found!");
-                }
-
                 var isAlreadyInBlacklist = await _workScope.GetAll<RemoteBlacklist>()
                     .AnyAsync(b => b.UserId == input.UserId && !b.IsDeleted);
                 if (isAlreadyInBlacklist)
                 {
                     throw new UserFriendlyException("User is already in remote blacklist.");
+                }
+
+                var userInfo = await _workScope.GetAsync<User>(input.UserId);
+                if (userInfo == null)
+                {
+                    throw new UserFriendlyException("User not found!");
                 }
 
                 var remoteBlacklistEntity = new RemoteBlacklist
@@ -80,20 +80,20 @@ namespace Timesheet.DomainServices
                     PenaltyDays = remoteBlacklistEntity.PenaltyDays
                 };
             }
+            catch (UserFriendlyException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 throw new UserFriendlyException("An error occurred while adding user to remote blacklist.", ex);
             }
         }
 
-        public async Task<PagedResultDto<GetRemoteBlacklistDto>> GetAllRemoteBlacklist(GridParam param)
+        public async Task<PagedResultDto<GetRemoteBlacklistDto>> GetAll(GridParam param)
         {
             try
             {
-                var searchText = param.SearchText?.Trim().ToLower();
-                var sortColumn = string.IsNullOrEmpty(param.Sort) ? "FullName" : param.Sort.Trim().ToLower();
-                bool isDesc = param.SortDirection == SortDirection.DESC;
-
                 var result = _workScope.GetAll<RemoteBlacklist>()
                     .Where(b => !b.IsDeleted)
                     .Join(_workScope.GetAll<User>(),
@@ -106,25 +106,7 @@ namespace Timesheet.DomainServices
                               FullName = u.FullName,
                               UserName = u.UserName,
                               PenaltyDays = b.PenaltyDays
-                          })
-                    .WhereIf(!string.IsNullOrEmpty(searchText), r =>
-                        r.FullName.ToLower().Contains(searchText) ||
-                        r.UserName.ToLower().Contains(searchText)
-                    );
-
-                switch (sortColumn)
-                {
-                    case "username":
-                        result = isDesc ? result.OrderByDescending(x => x.UserName) : result.OrderBy(x => x.UserName);
-                        break;
-                    case "penaltydays":
-                        result = isDesc ? result.OrderByDescending(x => x.PenaltyDays) : result.OrderBy(x => x.PenaltyDays);
-                        break;
-                    case "fullname":
-                    default:
-                        result = isDesc ? result.OrderByDescending(x => x.FullName) : result.OrderBy(x => x.FullName);
-                        break;
-                }
+                          });
 
                 var totalCount = await result.CountAsync();
                 var pagedResult = await result
@@ -144,7 +126,7 @@ namespace Timesheet.DomainServices
             }
         }
 
-        public async Task<GetRemoteBlacklistDto> UpdatePenaltyDays(UpdatePenaltyDaysDto input)
+        public async Task<GetRemoteBlacklistDto> Update(UpdatePenaltyDaysDto input)
         {
             try
             {
@@ -174,6 +156,10 @@ namespace Timesheet.DomainServices
                     PenaltyDays = entity.PenaltyDays
                 };
             }
+            catch (UserFriendlyException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 throw new UserFriendlyException("An error occurred while updating penalty days.", ex);
@@ -193,7 +179,7 @@ namespace Timesheet.DomainServices
             }
         }
 
-        public async Task<FileBase64Dto> DownloadTemplateImportRemoteBlacklist()
+        public async Task<FileBase64Dto> DownloadTemplate()
         {
             try
             {
@@ -216,22 +202,28 @@ namespace Timesheet.DomainServices
                     Base64 = fileBase64
                 };
             }
+            catch (UserFriendlyException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 throw new UserFriendlyException("An error occured when reading template file.", ex.Message);
             }
         }
 
-        public async Task<ImportRemoteBlacklistResultDto> ImportRemoteBlacklist(IFormFile file)
+        public async Task<ImportRemoteBlacklistResultDto> ImportFromExcel(IFormFile file)
         {
             try
             {
                 if (file == null || file.Length <= 0)
                     throw new UserFriendlyException("File not found or empty!");
 
-                var path = new[] { ".xlsx", ".xls" };
-                if (!path.Contains(Path.GetExtension(file.FileName).ToLower()))
-                    throw new UserFriendlyException("Invalid file format. Please use .xlsx or .xls");
+                var extension = Path.GetExtension(file.FileName).ToLower();
+                if (extension != ".xlsx")
+                {
+                    throw new UserFriendlyException("Invalid file format. Please use .xlsx");
+                }
 
                 var listRowInput = new List<ImportRemoteBlacklistRowDto>();
 
@@ -282,15 +274,12 @@ namespace Timesheet.DomainServices
                     .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork &&
                                 (excelMezonIds.Contains(u.MezonUserId) || excelEmails.Contains(u.EmailAddress.ToLower())))
                     .Select(u => new { 
-                        u.Id, 
-                        u.FullName, 
-                        u.UserName, 
+                        u.Id,
                         u.MezonUserId, 
                         EmailAddress = u.EmailAddress.ToLower().Trim() 
                     })
                     .ToListAsync();
 
-                var userDict = relevantUsers.ToDictionary(u => u.UserName, u => u);
                 var relevantUserIds = relevantUsers.Select(u => u.Id).ToList();
 
                 var currentRemoteBlacklistDict = await _workScope.GetAll<RemoteBlacklist>()
@@ -304,8 +293,7 @@ namespace Timesheet.DomainServices
 
                 foreach (var row in listRowInput)
                 {
-                    string userIdentifier = !string.IsNullOrEmpty(row.Email) ? row.Email :
-                                            (!string.IsNullOrEmpty(row.MezonUserId) ? row.MezonUserId : $"Row {row.Row}");
+                    string userIdentifier = !string.IsNullOrEmpty(row.Email) ? row.Email : "";
 
                     if (!int.TryParse(row.PenaltyDaysStr, out int appliedPenaltyDays) || appliedPenaltyDays < 1 || appliedPenaltyDays > maxAllowedRemoteDays)
                     {
@@ -369,6 +357,10 @@ namespace Timesheet.DomainServices
                     FailCount = failedList.Count,
                     FailedList = failedList
                 };
+            }
+            catch (UserFriendlyException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

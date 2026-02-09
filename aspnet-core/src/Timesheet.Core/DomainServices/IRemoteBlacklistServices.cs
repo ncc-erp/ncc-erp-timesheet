@@ -14,12 +14,12 @@ namespace Timesheet.DomainServices
 {
     public interface IRemoteBlacklistServices : IDomainService
     {
-        Task<GetRemoteBlacklistDto> AddNewUserToRemoteBlacklist(AddNewUserToRemoteBlacklistDto input);
-        Task<PagedResultDto<GetRemoteBlacklistDto>> GetAllRemoteBlacklist(GridParam param);
-        Task<GetRemoteBlacklistDto> UpdatePenaltyDays(UpdatePenaltyDaysDto input);
+        Task<GetRemoteBlacklistDto> AddNewUser(AddNewUserToRemoteBlacklistDto input);
+        Task<PagedResultDto<GetRemoteBlacklistDto>> GetAll(GridParam param);
+        Task<GetRemoteBlacklistDto> Update(UpdatePenaltyDaysDto input);
         Task<bool> Delete(long id);
-        Task<FileBase64Dto> DownloadTemplateImportRemoteBlacklist();
-        Task<ImportRemoteBlacklistResultDto> ImportRemoteBlacklist(IFormFile file);
+        Task<FileBase64Dto> DownloadTemplate();
+        Task<ImportRemoteBlacklistResultDto> ImportFromExcel(IFormFile file);
         Task<int> GetMaxRemoteDaysAsync();
     }
 }
