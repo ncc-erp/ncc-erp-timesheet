@@ -1,31 +1,29 @@
-import { Component, Input, Output, EventEmitter, ViewChild, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
 import { DataType, TableType } from '../anomalies-report.component';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { SelectAllText } from '../enum/anomalies-report.enum';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { YesterdayAnomaly, LastWeekAnomaly } from '@app/modules/branch-manager/Dto/anomalies-report-dto';
 
 @Component({
   selector: 'app-anomalies-tab',
   templateUrl: './anomalies-tab.component.html',
   styleUrls: ['../anomalies-report.component.css']
 })
-export class AnomaliesTabComponent implements OnChanges, AfterViewInit {
+export class AnomaliesTabComponent implements OnChanges, OnInit, OnDestroy {
   @Input() dataType: DataType;
   @Input() searchText: string;
   @Input() selectedBranchIds: number[];
-  @Input() filteredAbsences: any[] = [];
-  @Input() filteredShortHours: any[] = [];
+  @Input() filteredAbsences: (YesterdayAnomaly | LastWeekAnomaly)[] = [];
+  @Input() filteredShortHours: (YesterdayAnomaly | LastWeekAnomaly)[] = [];
   @Input() isLoading: boolean;
-  @Input() itemSize: number = 48;
-  @Input() maxHeight: number = 600;
   @Input() filteredBranches: BranchDto[] = [];
   @Input() isActive: boolean = false;
   @Input() selectedTabIndex: number = 0;
   @Input() listBranch: BranchDto[] = [];
   @Input() getSortIconFn: (column: string, dataType: DataType, tableType: TableType) => string;
-  @Input() isAllSelectedFn: () => boolean;
 
-  @Output() searchChange = new EventEmitter<void>();
   @Output() searchChangeEmit = new EventEmitter<{ dataType: DataType; searchText: string }>();
   @Output() branchChange = new EventEmitter<{ dataType: DataType; selectedBranchIds: number[] }>();
   @Output() sortEmit = new EventEmitter<{ column: string, dataType: DataType, tableType: TableType }>();
@@ -35,40 +33,44 @@ export class AnomaliesTabComponent implements OnChanges, AfterViewInit {
 
   branchSearchText: string = '';
   
+  pAbsence: number = 1;
+  pageSizeAbsence: number = 10;
+  
+  pShort: number = 1;
+  pageSizeShort: number = 10;
+
   public DataType = DataType;
   public TableType = TableType;
-  public Math = Math;
 
-  @ViewChild('absenceViewport') absenceViewport: CdkVirtualScrollViewport;
-  @ViewChild('shortViewport') shortViewport: CdkVirtualScrollViewport;
+  private searchSubject = new Subject<string>();
+  private searchSubscription: Subscription;
+
+  ngOnInit(): void {
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(searchText => {
+      this.searchChangeEmit.emit({ dataType: this.dataType, searchText: searchText });
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.isActive && changes.isActive.currentValue === true) {
-      setTimeout(() => this.checkViewports(), 0);
+    if (changes.filteredAbsences) {
+      this.pAbsence = 1;
     }
-    
-    if (changes.filteredAbsences || changes.filteredShortHours) {
-      if (this.isActive) {
-        setTimeout(() => this.checkViewports(), 0);
-      }
-    }
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => this.checkViewports(), 100);
-  }
-
-  checkViewports(): void {
-    if (this.absenceViewport) {
-      this.absenceViewport.checkViewportSize();
-    }
-    if (this.shortViewport) {
-      this.shortViewport.checkViewportSize();
+    if (changes.filteredShortHours) {
+      this.pShort = 1;
     }
   }
 
   onSearchChange(): void {
-    this.searchChangeEmit.emit({ dataType: this.dataType, searchText: this.searchText });
+    this.searchSubject.next(this.searchText);
   }
 
   clearSearch(): void {
@@ -95,12 +97,12 @@ export class AnomaliesTabComponent implements OnChanges, AfterViewInit {
     if (this.getSortIconFn) {
       return this.getSortIconFn(column, dataType, tableType);
     }
-    return 'unfold_more';
+    return 'pi-sort-alt';
   }
 
   isAllSelected(): boolean {
     return this.listBranch.length > 0 &&
-             this.selectedBranchIds.length === this.listBranch.length;
+           this.selectedBranchIds.length === this.listBranch.length;
   }
 
   getSelectAllText(): string {

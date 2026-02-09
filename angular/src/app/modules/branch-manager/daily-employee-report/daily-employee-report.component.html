@@ -109,130 +109,93 @@
         </div>
 
         <!-- Data Table -->
-        <div
-          *ngIf="!isLoading && filteredProjects.length > 0"
-          class="table-container"
-        >
-          <!-- Fixed Header -->
-          <div class="table-header-wrapper">
-            <table class="table table-bordered table-header-fixed">
-              <thead>
-                <tr>
-                  <th class="col-index" style="user-select: none;">No.</th>
-                  <th class="col-name sortable" (click)="onSort('fullName')" matTooltip="Employee full name">
-                    <div class="header-content">
-                      <span>{{ "Name" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('fullName') }}</mat-icon>
-                    </div>
-                  </th>
-                  <th class="col-branch sortable" (click)="onSort('branchName')" matTooltip="The branch where the employee is working">
-                    <div class="header-content">
-                      <span>{{ "Branch" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('branchName') }}</mat-icon>
-                    </div>
-                  </th>
-                  <th class="col-data sortable" (click)="onSort('wfhLW')" matTooltip="Total hours worked in last week from home">
-                    <div class="header-content">
-                      <span>{{ "WFH (LW)" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('wfhLW') }}</mat-icon>
-                    </div>
-                  </th>
-                  <th class="col-data sortable" (click)="onSort('officeLW')" matTooltip="Total hours worked in last week at office">
-                    <div class="header-content">
-                      <span>{{ "Office (LW)" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('officeLW') }}</mat-icon>
-                    </div>
-                  </th>
-                  <th class="col-data sortable" (click)="onSort('totalAllLW')" matTooltip="Total hours worked in last week (any location)">
-                    <div class="header-content">
-                      <span>{{ "All (LW)" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('totalAllLW') }}</mat-icon>
-                    </div>
-                  </th>
-                  <th class="col-data sortable" (click)="onSort('wfhLM')" matTooltip="Total hours worked in last month from home">
-                    <div class="header-content">
-                      <span>{{ "WFH (LM)" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('wfhLM') }}</mat-icon>
-                    </div>
-                  </th>
-                  <th class="col-data sortable" (click)="onSort('officeLM')" matTooltip="Total hours worked in last month at office">
-                    <div class="header-content">
-                      <span>{{ "Office (LM)" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('officeLM') }}</mat-icon>
-                    </div>
-                  </th>
-                  <th class="col-data sortable" (click)="onSort('totalAllLM')" matTooltip="Total hours worked in last month (any location)">
-                    <div class="header-content">
-                      <span>{{ "All (LM)" | localize }}</span>
-                      <mat-icon class="sort-icon">{{ getSortIcon('totalAllLM') }}</mat-icon>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-            </table>
-          </div>
+        <div class="table-responsive" [busy]="isTableLoading">
+          <table class="table customTable table-striped">
+            <thead>
+              <tr>
+                <th class="text-center col-lg-1">No</th>
+                <th class="text-center sortable" (click)="onSort(SortColumn.FullName)">
+                  <div class="header-content">
+                    <span>{{ "Name" | localize }}</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.FullName)"></i>
+                  </div>
+                </th>
+                <th class="text-center sortable" (click)="onSort(SortColumn.BranchName)">
+                  <div class="header-content">
+                    <span>{{ "Branch" | localize }}</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.BranchName)"></i>
+                  </div>
+                </th>
+                <th class="text-center sortable" (click)="onSort(SortColumn.WfhLW)">
+                  <div class="header-content">
+                    <span>{{ "WFH (LW)" | localize }}</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.WfhLW)"></i>
+                  </div>
+                </th>
+                <th class="text-center sortable" (click)="onSort(SortColumn.OfficeLW)">
+                  <div class="header-content">
+                    <span>{{ "Office (LW)" | localize }}</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.OfficeLW)"></i>
+                  </div>
+                </th>
+                <th class="text-center sortable" (click)="onSort(SortColumn.TotalAllLW)">
+                  <div class="header-content">
+                    <span>{{ "All (LW)" | localize }}</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.TotalAllLW)"></i>
+                  </div>
+                </th>
+                <th class="text-center sortable" (click)="onSort(SortColumn.WfhLM)">
+                  <div class="header-content">
+                    <span>{{ "WFH (LM)" | localize }}</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.WfhLM)"></i>
+                  </div>
+                </th>
+                <th class="text-center sortable" (click)="onSort(SortColumn.OfficeLM)">
+                  <div class="header-content">
+                    <span>{{ "Office (LM)" | localize }}</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.OfficeLM)"></i>
+                  </div>
+                </th>
+                <th class="text-center sortable" (click)="onSort(SortColumn.TotalAllLM)">
+                  <div class="header-content">
+                    <span>{{ "All (LM)" | localize }}</span>
+                    <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.TotalAllLM)"></i>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of users | paginate :{
+                id: 'Daily_Employee_Report',
+                itemsPerPage: pageSize,
+                currentPage: pageNumber,
+                totalItems: totalItems
+               }; let i = index">
+                <td class="text-center">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
+                <td class="text-center">{{ item.fullName }}</td>
+                <td class="text-center">
+                  <span class="label" [style.backgroundColor]="item.branchColor">
+                    {{item.branchName}}
+                  </span>
+                </td>
+                <td class="text-center">{{ round(item.wfhLW) }}</td>
+                <td class="text-center">{{ round(item.officeLW) }}</td>
+                <td class="text-center">{{ round(item.totalAllLW) }}</td>
+                <td class="text-center">{{ round(item.wfhLM) }}</td>
+                <td class="text-center">{{ round(item.officeLM) }}</td>
+                <td class="text-center">{{ round(item.totalAllLM) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-          <!-- Virtual Scroll Body -->
-          <cdk-virtual-scroll-viewport
-            [itemSize]="itemSize"
-            class="virtual-scroll-viewport"
-            [style.height.px]="
-              Math.min(filteredProjects.length * itemSize, maxHeight)
-            "
-          >
-            <table class="table table-bordered">
-              <tbody>
-                <tr
-                  *cdkVirtualFor="let item of filteredProjects; let i = index"
-                  class="virtual-scroll-row"
-                >
-                  <td class="col-index">{{ i + 1 }}</td>
-                  <td class="col-name">{{ item.fullName }}</td>
-                  <td class="col-branch">
-                    <div style="display: flex; flex-wrap: wrap; justify-content: center;">
-                      <span class="label" [style.backgroundColor]="item.branchColor">
-                        {{item.branchName}}
-                      </span>
-                    </div>
-                  </td>
-                  <td class="col-data">{{ round(item.wfhLW) }}</td>
-                  <td class="col-data">{{ round(item.officeLW) }}</td>
-                  <td class="col-data">{{ round(item.totalAllLW) }}</td>
-                  <td class="col-data">{{ round(item.wfhLM) }}</td>
-                  <td class="col-data">{{ round(item.officeLM) }}</td>
-                  <td class="col-data">{{ round(item.totalAllLM) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </cdk-virtual-scroll-viewport>
-
-          <!-- Footer with total count -->
-          <div class="table-footer">
-            <span class="total-count">
-              {{ "Total" | localize }}:
-              <strong>{{ filteredProjects.length }}</strong>
-              {{ filteredProjects.length === 1 ? "record" : "records" }}
-            </span>
-          </div>
+        <div class="abp-pagination-controls-wrapper">
+          <abp-pagination-controls [totalNumber]="totalItems" id="Daily_Employee_Report"
+            (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)"></abp-pagination-controls>
         </div>
 
         <!-- No Data Message -->
-        <div
-          *ngIf="
-            !isLoading && filteredProjects.length === 0 && projects.length > 0
-          "
-          class="text-center p-4"
-        >
-          <p>{{ "No matching records found" | localize }}</p>
-          <button mat-raised-button color="primary" (click)="clearAllFilters()">
-            {{ "Clear Filters" | localize }}
-          </button>
-        </div>
-
-        <div
-          *ngIf="!isLoading && projects.length === 0"
-          class="text-center p-4"
-        >
+        <div *ngIf="!isTableLoading && (users == null || users.length === 0)" class="text-center p-4">
           <p>{{ "No data available" | localize }}</p>
         </div>
       </div>

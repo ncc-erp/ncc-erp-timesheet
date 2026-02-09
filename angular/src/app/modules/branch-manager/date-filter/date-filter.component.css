@@ -1,0 +1,20 @@
+:host ::ng-deep .mat-form-field-flex {
+    align-items: center;
+}
+
+:host ::ng-deep .mat-form-field-infix {
+    display: flex;
+    align-items: center;
+    padding: 14px 0;
+}
+
+:host ::ng-deep .mat-form-field-suffix {
+    display: flex;
+    align-items: center;
+}
+
+:host ::ng-deep .mat-datepicker-toggle .mat-icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

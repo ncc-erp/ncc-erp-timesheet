@@ -64,3 +64,45 @@ export interface UserTypeDto {
     projectUserId: number;
     userType: number;
 }
+
+export interface OfficeWorkingItem {
+    userId: number;
+    fullName: string;
+    userName: string;
+    branchName: string;
+    branchCode: string;
+    branchColor: string;
+    totalAllLW: number;
+    officeLW: number;
+    wfhLW: number;
+    totalAllLM: number;
+    officeLM: number;
+    wfhLM: number;
+    totalAllLWHours: number;
+    officeLWHours: number;
+    wfhLWHours: number;
+    totalAllLMHours: number;
+    officeLMHours: number;
+    wfhLMHours: number;
+}
+
+export interface TotalTimelogProjectDto {
+    name: string;
+    members: string[];
+    totalTimelogLW: number;
+    totalTimelogLM: number;
+}
+
+export interface AbpResponse<T> {
+    result: T;
+    success: boolean;
+    error: any;
+    targetUrl: string;
+    unAuthorizedRequest: boolean;
+    __abp: boolean;
+}
+
+export interface PagedResultDto<T> {
+    items: T[];
+    totalCount: number;
+}

@@ -1,19 +1,17 @@
 export enum SortColumn {
-  None = "",
-  FullName = "fullName",
-  BranchName = "branchName",
-  WfhLW = "wfhLW",
-  OfficeLW = "officeLW",
-  TotalAllLW = "totalAllLW",
-  WfhLM = "wfhLM",
-  OfficeLM = "officeLM",
-  TotalAllLM = "totalAllLM",
+  TotalAllLW = 0,
+  OfficeLW = 1,
+  WfhLW = 2,
+  TotalAllLM = 3,
+  OfficeLM = 4,
+  WfhLM = 5,
+  FullName = 6,
+  BranchName = 7
 }
 
 export enum SortDirection {
-  None = "",
-  Asc = "asc",
-  Desc = "desc",
+  Desc = 0,
+  Asc = 1
 }
 
 export enum SelectAllText {
@@ -23,7 +21,7 @@ export enum SelectAllText {
 }
 
 export enum SortArrow {
-    UP = 'arrow_upward',
-    DOWN = 'arrow_downward',
-    NONE = 'unfold_more'
+    UP = 'pi-sort-amount-up',
+    DOWN = 'pi-sort-amount-down',
+    NONE = 'pi-sort-alt'
 }

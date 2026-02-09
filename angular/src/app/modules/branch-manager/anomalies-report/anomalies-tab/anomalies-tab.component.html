@@ -1,5 +1,4 @@
 <div class="tab-content-wrapper">
-    <div class="body" style="padding-left: 0;">
         <div class="group">
             <div class="row filter-row">
                 <div class="filter-item filter-search">
@@ -35,7 +34,6 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                </div>
             </div>
         </div>
     </div>
@@ -52,182 +50,174 @@
             {{ "Unplanned Absences" | localize }}
         </h3>
 
-        <div *ngIf="filteredAbsences.length > 0" class="table-container">
-            <div class="table-header-wrapper">
-                <table class="table table-bordered table-virtual table-header">
-                    <thead class="table-header-fixed">
-                        <tr>
-                            <th class="col-index" style="user-select: none;">No.</th>
-                            <th class="col-name sortable" (click)="sort('employeeName', dataType, TableType.ABSENCE)">
-                                <div class="header-content">
-                                    <span>{{ "Employee Name" | localize }}</span>
-                                    <mat-icon class="sort-icon">{{ getSortIcon('employeeName', dataType, TableType.ABSENCE) }}</mat-icon>
-                                </div>
-                            </th>
-                            <th class="col-branch sortable" (click)="sort('branch', dataType, TableType.ABSENCE)" matTooltip="The branch where the employee is working">
-                                <div class="header-content">
-                                    <span>{{ "Branch" | localize }}</span>
-                                    <mat-icon class="sort-icon">{{ getSortIcon('branch', dataType, TableType.ABSENCE) }}</mat-icon>
-                                </div>
-                            </th>
-                            <th [class]="dataType === DataType.YESTERDAY ? 'col-date' : 'col-dates'" [attr.matTooltip]="dataType === DataType.YESTERDAY ? 'The date when the employee has unplanned absence' : 'The dates when the employee has unplanned absence in last week'">
-                                {{ dataType === DataType.YESTERDAY ? 'Date' : 'Dates Missed' | localize }}
-                            </th>
-                            <th *ngIf="dataType === DataType.LAST_WEEK" class="col-count sortable" (click)="sort('count', dataType, TableType.ABSENCE)" matTooltip="The total number of unplanned absence days for the employee in last week">
-                                <div class="header-content">
+        <div *ngIf="filteredAbsences.length > 0" class="table-responsive">
+            <table class="table customTable table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th class="text-center col-index">No.</th>
+                        <th class="text-center sortable col-name"
+                            (click)="sort('employeeName', dataType, TableType.ABSENCE)">
+                            <div class="header-content">
+                                <span>{{ "Employee Name" | localize }}</span>
+                                <i class="pi p-l-5"
+                                    [ngClass]="getSortIcon('employeeName', dataType, TableType.ABSENCE)"></i>
+                            </div>
+                        </th>
+                        <th class="text-center sortable col-branch"
+                            (click)="sort('branch', dataType, TableType.ABSENCE)">
+                            <div class="header-content">
+                                <span>{{ "Branch" | localize }}</span>
+                                <i class="pi p-l-5" [ngClass]="getSortIcon('branch', dataType, TableType.ABSENCE)"></i>
+                            </div>
+                        </th>
+                        <th class="text-center col-dates">
+                            {{ dataType === DataType.YESTERDAY ? 'Date' : 'Dates Missed' | localize }}
+                        </th>
+                        <th *ngIf="dataType === DataType.LAST_WEEK" class="text-center sortable col-count"
+                            (click)="sort('count', dataType, TableType.ABSENCE)">
+                            <div class="header-content">
                                 <span>{{ "Count" | localize }}</span>
-                                <mat-icon class="sort-icon">{{ getSortIcon('count', dataType, TableType.ABSENCE) }}</mat-icon>
-                                </div>
-                            </th>
-                            <th class="col-notes" style="user-select: none;">{{ "Notes" | localize }}</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-        <cdk-virtual-scroll-viewport #absenceViewport [itemSize]="itemSize"
-            class="virtual-scroll-viewport"
-            [style.height.px]="Math.min(filteredAbsences.length * itemSize, maxHeight)">
-            <table class="table table-bordered table-virtual table-body">
+                                <i class="pi p-l-5" [ngClass]="getSortIcon('count', dataType, TableType.ABSENCE)"></i>
+                            </div>
+                        </th>
+                        <th class="text-center col-notes">{{ "Notes" | localize }}</th>
+                    </tr>
+                </thead>
                 <tbody>
-                    <tr *cdkVirtualFor="let item of filteredAbsences; let i = index" class="virtual-scroll-row">
-                        <td class="col-index">{{ i + 1 }}</td>
-                        <td class="col-name">{{ item.employeeName }}</td>
-                        <td class="col-branch">
+                    <tr *ngFor="let item of filteredAbsences | paginate :{
+                        id: dataType + '_absence',
+                        itemsPerPage: pageSizeAbsence,
+                        currentPage: pAbsence,
+                        totalItems: filteredAbsences.length
+                        }; let i = index">
+                        <td class="text-center">{{ (pAbsence - 1) * pageSizeAbsence + i + 1 }}</td>
+                        <td class="text-center">{{ item.employeeName }}</td>
+                        <td class="text-center">
                             <span class="label" [style.backgroundColor]="item.branch.branchColor">
                                 {{item.branch.branchName}}
                             </span>
                         </td>
-                        <td *ngIf="dataType === DataType.YESTERDAY" class="col-date">
-                            <div class="row d-flex date-list-wrapper">
-                                <span class="label bg-blue date-label-centered">
+                        <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">
+                            <span class="label bg-blue">
                                 {{ item.date | date:'dd/MM/yyyy' }}
+                            </span>
+                        </td>
+                        <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">
+                            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                <span class="label bg-blue" *ngFor="let date of item.datesMissed">
+                                    {{ date | date:'dd/MM/yyyy' }}
                                 </span>
                             </div>
                         </td>
-                        <td *ngIf="dataType === DataType.LAST_WEEK" class="col-dates">
-                            <div class="row d-flex date-list-wrapper">
-                                <span class="label bg-blue date-label" *ngFor="let date of item.datesMissed">
-                                {{ date | date:'dd/MM/yyyy' }}
-                                </span>
-                            </div>
-                        </td>
-                        <td *ngIf="dataType === DataType.LAST_WEEK" class="col-count">{{ item.count }}</td>
-                        <td *ngIf="dataType === DataType.YESTERDAY" class="col-notes">{{ item.notes }}</td>
-                        <td *ngIf="dataType === DataType.LAST_WEEK" class="col-notes">{{ "No leave/WFH record" | localize }}</td>
+                        <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">{{ item.count }}</td>
+                        <td class="text-center">{{ item.notes || (dataType === DataType.LAST_WEEK ? 'No leave/WFH
+                            record' : '') }}</td>
                     </tr>
                 </tbody>
             </table>
-        </cdk-virtual-scroll-viewport>
+        </div>
 
-        <div class="table-footer">
-            <span class="total-count">
-                {{ "Total" | localize }}:
-                <strong>{{ filteredAbsences.length }}</strong>
-                {{ filteredAbsences.length === 1 ? "record" : "records" }}
-            </span>
+        <div class="abp-pagination-controls-wrapper">
+            <abp-pagination-controls [totalNumber]="filteredAbsences.length" [id]="dataType + '_absence'"
+                (pageChange)="pAbsence = $event" (selectionChange)="pageSizeAbsence = $event">
+            </abp-pagination-controls>
+        </div>
+
+        <div *ngIf="filteredAbsences.length === 0" class="text-center p-4">
+            <p>{{ "No unplanned absences" | localize }}</p>
         </div>
     </div>
 
-    <div *ngIf="filteredAbsences.length === 0" class="text-center p-4">
-        <p>{{ "No unplanned absences" | localize }}</p>
-    </div>
-    </div>
-
     <!-- Unapproved Short Working Hours Table -->
-    <div *ngIf="!isLoading" class="table-section">
-        <h3 class="section-title" style="margin-top: 20px;">
+    <div *ngIf="!isLoading" class="table-section" style="margin-top: 30px;">
+        <h3 class="section-title">
             <mat-icon>access_time</mat-icon>
             {{ "Unapproved Short Working Hours" | localize }}
         </h3>
-        <p *ngIf="dataType === DataType.LAST_WEEK" class="filter-note">
-        <mat-icon>info</mat-icon>
-        {{ "Filter: No early leave/late arrival approval || No tracker time for approved WFH" | localize }}
-        </p>
 
-        <div *ngIf="filteredShortHours.length > 0" class="table-container">
-            <div class="table-header-wrapper">
-                <table class="table table-bordered table-virtual table-header">
-                    <thead class="table-header-fixed">
-                        <tr>
-                            <th class="col-index" style="user-select: none;">No.</th>
-                            <th class="col-name sortable" (click)="sort('employeeName', dataType, TableType.SHORT)">
-                                <div class="header-content">
-                                    <span>{{ "Employee Name" | localize }}</span>
-                                    <mat-icon class="sort-icon">{{ getSortIcon('employeeName', dataType, TableType.SHORT) }}</mat-icon>
-                                </div>
-                            </th>
-                            <th class="col-branch sortable" (click)="sort('branch', dataType, TableType.SHORT)" matTooltip="The branch where the employee is working">
-                                <div class="header-content">
-                                    <span>{{ "Branch" | localize }}</span>
-                                    <mat-icon class="sort-icon">{{ getSortIcon('branch', dataType, TableType.SHORT) }}</mat-icon>
-                                </div>
-                            </th>
-                            <th [class]="dataType === DataType.YESTERDAY ? 'col-date' : 'col-dates'" [attr.matTooltip]="dataType === DataType.YESTERDAY ? 'The date when the employee has unapproved short working hours' : 'The dates when the employee has unapproved short working hours in last week'">
-                                {{ dataType === DataType.YESTERDAY ? 'Date' : 'Dates Below Threshold' | localize }}
-                            </th>
-                            <th *ngIf="dataType === DataType.YESTERDAY" class="col-hours sortable" (click)="sort('actualHours', dataType, TableType.SHORT)" matTooltip="The actual working time logged by the employee on that date">
-                                <div class="header-content">
-                                    <span>{{ "Actual Hours" | localize }}</span>
-                                    <mat-icon class="sort-icon">{{ getSortIcon('actualHours', dataType, TableType.SHORT) }}</mat-icon>
-                                </div>
-                            </th>
-                            <th *ngIf="dataType === DataType.LAST_WEEK" class="col-count sortable" (click)="sort('count', dataType, TableType.SHORT)" matTooltip="The total number of days with unapproved short working hours for the employee in last week">
-                                <div class="header-content">
-                                    <span>{{ "Count" | localize }}</span>
-                                    <mat-icon class="sort-icon">{{ getSortIcon('count', dataType, TableType.SHORT) }}</mat-icon>
-                                </div>
-                            </th>
-                            <th class="col-notes" style="user-select: none;">{{ "Notes" | localize }}</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-            <cdk-virtual-scroll-viewport #shortViewport [itemSize]="itemSize"
-            class="virtual-scroll-viewport"
-            [style.height.px]="Math.min(filteredShortHours.length * itemSize, maxHeight)">
-                <table class="table table-bordered table-virtual table-body">
-                    <tbody>
-                        <tr *cdkVirtualFor="let item of filteredShortHours; let i = index" class="virtual-scroll-row">
-                            <td class="col-index">{{ i + 1 }}</td>
-                            <td class="col-name">{{ item.employeeName }}</td>
-                            <td class="col-branch">
-                                <span class="label" [style.backgroundColor]="item.branch.branchColor">
-                                    {{item.branch.branchName}}
+        <div *ngIf="filteredShortHours.length > 0" class="table-responsive">
+            <table class="table customTable table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th class="text-center col-index">No.</th>
+                        <th class="text-center sortable col-name"
+                            (click)="sort('employeeName', dataType, TableType.SHORT)">
+                            <div class="header-content">
+                                <span>{{ "Employee Name" | localize }}</span>
+                                <i class="pi p-l-5"
+                                    [ngClass]="getSortIcon('employeeName', dataType, TableType.SHORT)"></i>
+                            </div>
+                        </th>
+                        <th class="text-center sortable col-branch" (click)="sort('branch', dataType, TableType.SHORT)">
+                            <div class="header-content">
+                                <span>{{ "Branch" | localize }}</span>
+                                <i class="pi p-l-5" [ngClass]="getSortIcon('branch', dataType, TableType.SHORT)"></i>
+                            </div>
+                        </th>
+                        <th class="text-center col-dates">
+                            {{ dataType === DataType.YESTERDAY ? 'Date' : 'Dates Below Threshold' | localize }}
+                        </th>
+                        <th *ngIf="dataType === DataType.YESTERDAY" class="text-center sortable col-count"
+                            (click)="sort('actualHours', dataType, TableType.SHORT)">
+                            <div class="header-content">
+                                <span>{{ "Actual Hours" | localize }}</span>
+                                <i class="pi p-l-5"
+                                    [ngClass]="getSortIcon('actualHours', dataType, TableType.SHORT)"></i>
+                            </div>
+                        </th>
+                        <th *ngIf="dataType === DataType.LAST_WEEK" class="text-center sortable col-count"
+                            (click)="sort('count', dataType, TableType.SHORT)">
+                            <div class="header-content">
+                                <span>{{ "Count" | localize }}</span>
+                                <i class="pi p-l-5" [ngClass]="getSortIcon('count', dataType, TableType.SHORT)"></i>
+                            </div>
+                        </th>
+                        <th class="text-center col-notes">{{ "Notes" | localize }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of filteredShortHours | paginate :{
+                        id: dataType + '_short',
+                        itemsPerPage: pageSizeShort,
+                        currentPage: pShort,
+                        totalItems: filteredShortHours.length
+                        }; let i = index">
+                        <td class="text-center">{{ (pShort - 1) * pageSizeShort + i + 1 }}</td>
+                        <td class="text-center">{{ item.employeeName }}</td>
+                        <td class="text-center">
+                            <span class="label" [style.backgroundColor]="item.branch.branchColor">
+                                {{item.branch.branchName}}
+                            </span>
+                        </td>
+                        <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">
+                            <span class="label bg-blue">
+                                {{ item.date | date:'dd/MM/yyyy' }}
+                            </span>
+                        </td>
+                        <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">
+                            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                <span class="label bg-blue" *ngFor="let date of item.datesBelowThreshold">
+                                    {{ date | date:'dd/MM/yyyy' }}
                                 </span>
-                            </td>
-                            <td *ngIf="dataType === DataType.YESTERDAY" class="col-date">
-                                <div class="row d-flex date-list-wrapper">
-                                    <span class="label bg-blue date-label-centered">
-                                    {{ item.date | date:'dd/MM/yyyy' }}
-                                    </span>
-                                </div>
-                            </td>
-                            <td *ngIf="dataType === DataType.LAST_WEEK" class="col-dates">
-                                <div class="row d-flex date-list-wrapper">
-                                    <span class="label bg-blue date-label" *ngFor="let date of item.datesBelowThreshold">
+                                <span class="label bg-blue" *ngFor="let date of item.datesNoTrackerTime">
                                     {{ date | date:'dd/MM/yyyy' }}
-                                    </span>
-                                    <span class="label bg-blue date-label" *ngFor="let date of item.datesNoTrackerTime">
-                                    {{ date | date:'dd/MM/yyyy' }}
-                                    </span>
-                                </div>
-                            </td>
-                            <td *ngIf="dataType === DataType.YESTERDAY" class="col-hours">{{ item.actualHours.replace('h', '') }}</td>
-                            <td *ngIf="dataType === DataType.LAST_WEEK" class="col-count">{{ item.count }}</td>
-                            <td *ngIf="dataType === DataType.YESTERDAY" class="col-notes">{{ item.notes }}</td>
-                            <td *ngIf="dataType === DataType.LAST_WEEK" class="col-notes">{{ "No early leave/late arrival approval" | localize }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </cdk-virtual-scroll-viewport>
+                                </span>
+                            </div>
+                        </td>
+                        <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">{{ item.actualHours.replace('h',
+                            '') }}</td>
+                        <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">{{ item.count }}</td>
+                        <td class="text-center">{{ item.notes || (dataType === DataType.LAST_WEEK ? 'No early leave/late
+                            arrival approval' : '') }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-            <div class="table-footer">
-                <span class="total-count">
-                    {{ "Total" | localize }}:
-                    <strong>{{ filteredShortHours.length }}</strong>
-                    {{ filteredShortHours.length === 1 ? "record" : "records" }}
-                </span>
-            </div>
+        <div class="abp-pagination-controls-wrapper">
+            <abp-pagination-controls [totalNumber]="filteredShortHours.length" [id]="dataType + '_short'"
+                (pageChange)="pShort = $event" (selectionChange)="pageSizeShort = $event">
+            </abp-pagination-controls>
         </div>
 
         <div *ngIf="filteredShortHours.length === 0" class="text-center p-4">
