@@ -18,8 +18,8 @@ export class RemoteBlacklistService extends BaseApiService {
         return 'RemoteBlacklist';
     }
 
-    addNewUserToRemoteBlacklist(item: AddNewUserToRemoteBlacklistDto): Observable<any> {
-        return this.http.post<any>(this.rootUrl + '/AddNewUserToRemoteBlacklist', item);
+    addNewUser(item: AddNewUserToRemoteBlacklistDto): Observable<any> {
+        return this.http.post<any>(this.rootUrl + '/AddNewUser', item);
     }
 
     getMaxRemoteDays(): Observable<any> {
@@ -30,8 +30,8 @@ export class RemoteBlacklistService extends BaseApiService {
         return this.http.get(this.rootUrl + '/GetAll', { params: request });
     }
 
-    updatePenaltyDays(item: UpdatePenaltyDaysDto): Observable<any> {
-        return this.http.put<any>(this.rootUrl + '/UpdatePenaltyDays', item);
+    update(item: UpdatePenaltyDaysDto): Observable<any> {
+        return this.http.put<any>(this.rootUrl + '/Update', item);
     }
 
     delete(id: number): Observable<boolean> {
@@ -41,10 +41,10 @@ export class RemoteBlacklistService extends BaseApiService {
     }
 
     downloadTemplate(): Observable<any> {
-        return this.http.post(this.rootUrl + '/DownloadTemplateImportRemoteBlacklist', null);
+        return this.http.post(this.rootUrl + '/DownloadTemplate', null);
     }
 
-    importRemoteBlacklist(input: FormData): Observable<any> {
-        return this.http.post<any>(this.rootUrl + '/ImportRemoteBlacklist', input);
+    importFromExcel(input: FormData): Observable<any> {
+        return this.http.post<any>(this.rootUrl + '/ImportFromExcel', input);
     }
 }

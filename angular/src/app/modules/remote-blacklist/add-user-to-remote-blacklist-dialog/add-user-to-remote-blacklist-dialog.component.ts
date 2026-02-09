@@ -89,7 +89,7 @@ export class AddUserToRemoteBlacklistDialogComponent extends AppComponentBase im
       return;
     }
 
-    if (this.penaltyDays == null || this.penaltyDays < 0 || this.penaltyDays > this.maxAllowedRemoteDays) {
+    if (!this.penaltyDays || this.penaltyDays > this.maxAllowedRemoteDays) {
       abp.message.error(`Penalty days must be a valid number between 1 and ${this.maxAllowedRemoteDays}!`);
       return;
     }
@@ -98,7 +98,7 @@ export class AddUserToRemoteBlacklistDialogComponent extends AppComponentBase im
 
     const input = new AddNewUserToRemoteBlacklistDto(this.userId, this.penaltyDays);
 
-    this.remoteBlacklistService.addNewUserToRemoteBlacklist(input)
+    this.remoteBlacklistService.addNewUser(input)
       .pipe(finalize(() => { this.saving = false; }))
       .subscribe(
         (result: any) => {
@@ -107,8 +107,8 @@ export class AddUserToRemoteBlacklistDialogComponent extends AppComponentBase im
             this.dialogRef.close(result);
           }
         },
-        (error) => {
-          abp.message.error(error.message);
+        () => {
+          this.saving = false;
         },
       );
   }

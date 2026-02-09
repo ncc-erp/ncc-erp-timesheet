@@ -60,23 +60,23 @@
 
                                 <th class="text-center mobile-hidden" style="cursor: pointer;" (click)="onSortChange(RemoteBlacklistColumn.FullName)">
                                     {{ "Full Name" | localize }}
-                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.FullName && sortDirection == sortDirectionEnum.Ascending" class="sort-icon">arrow_upward</mat-icon>
-                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.FullName && sortDirection == sortDirectionEnum.Descending" class="sort-icon">arrow_downward</mat-icon>
-                                    <mat-icon *ngIf="sortProperty !== RemoteBlacklistColumn.FullName || sortDirection === null" class="sort-icon">unfold_more</mat-icon>
+                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.FullName && sortDirection == localSortDirectionEnum.Ascending" class="sort-icon">arrow_upward</mat-icon>
+                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.FullName && sortDirection == localSortDirectionEnum.Descending" class="sort-icon">arrow_downward</mat-icon>
+                                    <mat-icon *ngIf="sortProperty !== RemoteBlacklistColumn.FullName || sortDirection == localSortDirectionEnum.None" class="sort-icon">unfold_more</mat-icon>
                                 </th>
 
                                 <th class="text-center" style="cursor: pointer;" (click)="onSortChange(RemoteBlacklistColumn.UserName)">
                                     {{ "Username" | localize }}
-                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.UserName && sortDirection == sortDirectionEnum.Ascending" class="sort-icon">arrow_upward</mat-icon>
-                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.UserName && sortDirection == sortDirectionEnum.Descending" class="sort-icon">arrow_downward</mat-icon>
-                                    <mat-icon *ngIf="sortProperty !== RemoteBlacklistColumn.UserName || sortDirection === null" class="sort-icon">unfold_more</mat-icon>
+                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.UserName && sortDirection == localSortDirectionEnum.Ascending" class="sort-icon">arrow_upward</mat-icon>
+                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.UserName && sortDirection == localSortDirectionEnum.Descending" class="sort-icon">arrow_downward</mat-icon>
+                                    <mat-icon *ngIf="sortProperty !== RemoteBlacklistColumn.UserName || sortDirection == localSortDirectionEnum.None" class="sort-icon">unfold_more</mat-icon>
                                 </th>
 
                                 <th class="text-center" style="cursor: pointer;" (click)="onSortChange(RemoteBlacklistColumn.PenaltyDays)">
                                     {{ "Penalty Days" | localize }}
-                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.PenaltyDays && sortDirection == sortDirectionEnum.Ascending" class="sort-icon">arrow_upward</mat-icon>
-                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.PenaltyDays && sortDirection == sortDirectionEnum.Descending" class="sort-icon">arrow_downward</mat-icon>
-                                    <mat-icon *ngIf="sortProperty !== RemoteBlacklistColumn.PenaltyDays || sortDirection === null" class="sort-icon">unfold_more</mat-icon>
+                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.PenaltyDays && sortDirection == localSortDirectionEnum.Ascending" class="sort-icon">arrow_upward</mat-icon>
+                                    <mat-icon *ngIf="sortProperty == RemoteBlacklistColumn.PenaltyDays && sortDirection == localSortDirectionEnum.Descending" class="sort-icon">arrow_downward</mat-icon>
+                                    <mat-icon *ngIf="sortProperty !== RemoteBlacklistColumn.PenaltyDays || sortDirection == localSortDirectionEnum.None" class="sort-icon">unfold_more</mat-icon>
                                 </th>
                                 <th class="text-center" style="width: 150px;">{{ "Actions" | localize }}</th>
                             </tr>

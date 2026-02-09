@@ -1,11 +1,3 @@
-export enum RemoteBlacklistColumn {
-    UserId = 'userId',
-    FullName = 'fullName',
-    UserName = 'userName',
-    PenaltyDays = 'penaltyDays',
-    Actions = 'actions'
-}
-
 export class AddNewUserToRemoteBlacklistDto {
     userId: number;
     penaltyDays: number;

@@ -7,8 +7,9 @@ import { AddUserToRemoteBlacklistDialogComponent } from './add-user-to-remote-bl
 import { ImportCsvDialogComponent } from './import-csv-dialog/import-csv-dialog.component';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { RemoteBlacklistService } from '@app/service/api/remote-blacklist.service';
-import { RemoteBlacklistColumn, GetRemoteBlacklistDto, UpdatePenaltyDaysDto } from '@app/service/api/model/remote-blacklist.dto';
+import { GetRemoteBlacklistDto, UpdatePenaltyDaysDto } from '@app/service/api/model/remote-blacklist.dto';
 import * as FileSaver from 'file-saver';
+import { RemoteBlacklistColumn, SortDirection } from './enum/remote-blacklist.enum';
 
 @Component({
   selector: 'app-remote-blacklist',
@@ -38,9 +39,9 @@ export class RemoteBlacklistComponent extends PagedListingComponentBase<GetRemot
   DOWNLOAD_REMOTE_BLACKLIST_TEMPLATE = PERMISSIONS_CONSTANT.DownloadTemplateRemoteBlacklist;
   editingRowId: number | null = null;
   dataSource: GetRemoteBlacklistDto[] = [];
+  originalDataSource: GetRemoteBlacklistDto[] = [];
   tempPenaltyDays: number = 0;
   maxAllowedRemoteDays: number = 0;
-  RemoteBlacklistColumn = RemoteBlacklistColumn;
   displayedColumns: string[] = [
     RemoteBlacklistColumn.UserId,
     RemoteBlacklistColumn.FullName,
@@ -48,6 +49,10 @@ export class RemoteBlacklistComponent extends PagedListingComponentBase<GetRemot
     RemoteBlacklistColumn.PenaltyDays,
     RemoteBlacklistColumn.Actions
   ];
+  sortProperty: string = '';
+  sortDirection: SortDirection = SortDirection.None;
+  localSortDirectionEnum = SortDirection;
+  RemoteBlacklistColumn = RemoteBlacklistColumn;
 
   constructor(
     injector: Injector,
@@ -65,7 +70,8 @@ export class RemoteBlacklistComponent extends PagedListingComponentBase<GetRemot
   protected list(request: PagedRequestDto, pageNumber: number, finishedCallback: Function): void {
     this.remoteBlacklistService.getAll(request).subscribe(
       (res) => {
-        this.dataSource = res.result.items;
+        this.dataSource = [...res.result.items];
+        this.originalDataSource = [...res.result.items];
         this.showPaging(res.result, pageNumber);
         finishedCallback();
       },
@@ -80,14 +86,97 @@ export class RemoteBlacklistComponent extends PagedListingComponentBase<GetRemot
   }
 
   onSearchChange(): void {
-    this.pageNumber = 1;
-    this.refresh();
+    if (!this.originalDataSource) {
+      return;
+    }
+
+    let search = this.searchText;
+    if (!search) {
+      this.dataSource = this.originalDataSource;
+      return;
+    } else {
+      search = search.toLowerCase().trim();
+    }
+
+    this.dataSource = this.originalDataSource.filter(user =>
+      (user.userName && user.userName.toLowerCase().indexOf(search) > -1) ||
+      (user.fullName && user.fullName.toLowerCase().indexOf(search) > -1)
+    );
   }
 
   clearSearch(): void {
     this.searchText = '';
-    this.pageNumber = 1;
-    this.refresh();
+    this.dataSource = this.originalDataSource;
+    if (this.sortProperty && this.sortDirection !== SortDirection.None) {
+      this.sortData();
+    }
+  }
+
+  onSortChange(property: string): void {
+    if (this.sortProperty === property) {
+      if (this.sortDirection === SortDirection.Ascending) {
+        this.sortDirection = SortDirection.Descending;
+      } else if (this.sortDirection === SortDirection.Descending) {
+        this.sortDirection = SortDirection.None;
+      } else {
+        this.sortDirection = SortDirection.Ascending;
+      }
+    } else {
+      this.sortProperty = property;
+      this.sortDirection = SortDirection.Ascending;
+    }
+    this.sortData();
+  }
+
+  sortData(): void {
+    if (this.sortDirection === SortDirection.None) {
+      this.dataSource = [...this.originalDataSource];
+
+      if (this.searchText) {
+        const search = this.searchText.toLowerCase().trim();
+        this.dataSource = this.dataSource.filter(user =>
+          (user.userName && user.userName.toLowerCase().indexOf(search) > -1) ||
+          (user.fullName && user.fullName.toLowerCase().indexOf(search) > -1)
+        );
+      }
+      return;
+    }
+
+    if (!this.dataSource || this.dataSource.length === 0) {
+      return;
+    }
+
+    const isDesc = this.sortDirection === this.localSortDirectionEnum.Descending;
+
+    this.dataSource.sort((a, b) => {
+      let valueA: any;
+      let valueB: any;
+
+      switch (this.sortProperty) {
+        case RemoteBlacklistColumn.FullName:
+          valueA = a.fullName ? a.fullName.toLowerCase() : '';
+          valueB = b.fullName ? b.fullName.toLowerCase() : '';
+          break;
+        case RemoteBlacklistColumn.UserName:
+          valueA = a.userName ? a.userName.toLowerCase() : '';
+          valueB = b.userName ? b.userName.toLowerCase() : '';
+          break;
+        case RemoteBlacklistColumn.PenaltyDays:
+          valueA = a.penaltyDays;
+          valueB = b.penaltyDays;
+          break;
+        default:
+          return 0;
+      }
+
+      if (valueA < valueB) {
+        return isDesc ? 1 : -1;
+      } else if (valueA > valueB) {
+        return isDesc ? -1 : 1;
+      } else {
+        return 0;
+      }
+    });
   }
 
   addNew(): void {
@@ -172,7 +261,7 @@ export class RemoteBlacklistComponent extends PagedListingComponentBase<GetRemot
       return;
     }
     const input = new UpdatePenaltyDaysDto(item.id, this.tempPenaltyDays);
-    this.remoteBlacklistService.updatePenaltyDays(input).subscribe((result: any) => {
+    this.remoteBlacklistService.update(input).subscribe((result: any) => {
       if (result) {
         const data = result.result;
         this.notify.success('Update Successfully');

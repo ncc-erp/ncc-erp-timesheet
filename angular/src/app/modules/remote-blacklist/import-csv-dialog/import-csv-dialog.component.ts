@@ -31,17 +31,16 @@ export class ImportCsvDialogComponent extends AppComponentBase implements OnInit
 
   triggerFileInput(): void {
     if (this.fileInput && this.fileInput.nativeElement) {
-        this.fileInput.nativeElement.click();
+      this.fileInput.nativeElement.click();
     }
   }
 
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      const isCsv = file.type === 'text/csv' || file.name.endsWith('.csv');
       const isXlsx = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.name.endsWith('.xlsx');
-      if (!isCsv && !isXlsx) {
-        abp.message.error("Only CSV or XLSX files are allowed!");
+      if (!isXlsx) {
+        abp.message.error("Only XLSX files are allowed!");
         return;
       }
       this.selectedFile = file;
@@ -59,7 +58,7 @@ export class ImportCsvDialogComponent extends AppComponentBase implements OnInit
     const formData = new FormData();
     formData.append('file', this.selectedFile);
 
-    this.remoteBlacklistService.importRemoteBlacklist(formData).subscribe(
+    this.remoteBlacklistService.importFromExcel(formData).subscribe(
       (res: any) => {
         this.saving = false;
         const result = res.result ? res.result : res;
@@ -83,9 +82,8 @@ export class ImportCsvDialogComponent extends AppComponentBase implements OnInit
           this.dialogRef.close(true);
         }
       },
-      (err) => {
+      () => {
         this.saving = false;
-        abp.message.error(err.message || 'An error occurred during import.');
       }
     );
   }
