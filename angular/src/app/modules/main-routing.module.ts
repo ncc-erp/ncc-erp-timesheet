@@ -904,6 +904,19 @@ const routes: Routes = [
   }]
 },
 {
+  path: "remote-blacklist",
+  component: MainComponent,
+  canActivate: [AppRouteGuard],
+  children: [{
+    path: '',
+    loadChildren: '../modules/remote-blacklist/remote-blacklist.module#RemoteBlacklistModule',
+    data: {
+      permission: 'Admin.Remote.Blacklist',
+      preload: true
+  }
+  }]
+},
+{
   path: "team-building-hr",
   component: MainComponent,
   canActivate: [AppRouteGuard],
