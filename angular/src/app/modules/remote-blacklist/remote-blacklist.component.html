@@ -38,7 +38,7 @@
                                 <mat-icon class="function-icon">add</mat-icon> {{ "Add new user" | localize }}
                             </button>
 
-                            <button *ngIf="permission.isGranted(IMPORT_REMOTE_BLACKLIST)" mat-raised-button color="warn" (click)="importCsv()">
+                            <button *ngIf="permission.isGranted(IMPORT_REMOTE_BLACKLIST)" mat-raised-button color="primary" (click)="importCsv()">
                                 <mat-icon class="function-icon">cloud_upload</mat-icon> {{ "Import Excel" | localize }}
                             </button>
 
@@ -95,7 +95,7 @@
                                         {{item.penaltyDays}}
                                     </span>
                                     <div *ngIf="editingRowId === item.id" class="d-flex justify-content-center align-items-center">
-                                        <button mat-icon-button color="warn" (click)="decreaseDays()" [disabled]="tempPenaltyDays <= 1">
+                                        <button mat-icon-button color="primary" (click)="decreaseDays()" [disabled]="tempPenaltyDays <= 1">
                                             <mat-icon>remove_circle_outline</mat-icon>
                                         </button>
                                         
@@ -112,7 +112,7 @@
                                         <button *ngIf="permission.isGranted(EDIT_REMOTE_BLACKLIST)" mat-icon-button color="primary" (click)="editItem(item)" matTooltip="{{ 'Edit' | localize }}">
                                             <mat-icon>edit</mat-icon>
                                         </button>
-                                        <button *ngIf="permission.isGranted(DELETE_REMOTE_BLACKLIST)" mat-icon-button color="warn" (click)="deleteItem(item)" matTooltip="{{ 'Delete' | localize }}">
+                                        <button *ngIf="permission.isGranted(DELETE_REMOTE_BLACKLIST)" mat-icon-button color="primary" (click)="deleteItem(item)" matTooltip="{{ 'Delete' | localize }}">
                                             <mat-icon>delete</mat-icon>
                                         </button>
                                     </ng-container>
@@ -121,7 +121,7 @@
                                         <button mat-icon-button class="text-success" (click)="saveEdit(item)" matTooltip="{{ 'Save' | localize }}">
                                             <mat-icon>check_circle</mat-icon>
                                         </button>
-                                        <button mat-icon-button color="warn" (click)="cancelEdit()" matTooltip="{{ 'Cancel' | localize }}">
+                                        <button mat-icon-button color="primary" (click)="cancelEdit()" matTooltip="{{ 'Cancel' | localize }}">
                                             <mat-icon>cancel</mat-icon>
                                         </button>
                                     </ng-container>

@@ -15,7 +15,7 @@
                         {{ fileName }}
                     </div>
 
-                    <button mat-raised-button color="warn" class="btn-browse" (click)="triggerFileInput()">
+                    <button mat-raised-button color="primary" class="btn-browse" (click)="triggerFileInput()">
                         {{ "Browse" | localize }}
                     </button>
 
@@ -30,7 +30,7 @@
             {{ "Cancel" | localize }}
         </button>
         
-        <button mat-raised-button color="warn" class="m-l-10" (click)="save()" [disabled]="!selectedFile || saving">
+        <button mat-raised-button color="primary" class="m-l-10" (click)="save()" [disabled]="!selectedFile || saving">
             {{ "Save" | localize }}
         </button>
     </mat-dialog-actions>
