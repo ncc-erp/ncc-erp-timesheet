@@ -1,0 +1,47 @@
+<form autocomplete="off" #addUserForm="ngForm" (ngSubmit)="save()">
+    <div class="dialog-header">
+        <h1 style="cursor: default; margin: 0;" mat-dialog-title>
+            {{ "Add new user to remote blacklist" | localize }}
+        </h1>
+        <mat-icon (click)="close()" class="close-icon">close</mat-icon>
+    </div>
+    <hr />
+    
+    <mat-dialog-content>
+        <div class="row">
+            <div class="col-md-6">
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>{{ "Username" | localize }}</mat-label>
+                    <mat-select name="userId" [(ngModel)]="userId" required placeholder="Select user...">
+                        <mat-option>
+                            <ngx-mat-select-search [formControl]="userSearch" 
+                                placeholderLabel="Search by Email/Name"
+                                noEntriesFoundLabel="No matching found">
+                            </ngx-mat-select-search>
+                        </mat-option>
+                        <mat-option *ngFor="let item of listUserFiltered" [value]="item.id">
+                            {{ item.userName }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div class="col-md-6">
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>{{ "Penalty Days" | localize }}</mat-label>
+                    <input matInput type="number" name="penaltyDays" [(ngModel)]="penaltyDays" required min="0" (keydown)="preventNegative($event)" placeholder="Enter number of days...">
+                </mat-form-field>
+            </div>
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button class="btn btn-default" type="button" mat-raised-button (click)="close()" [disabled]="saving">
+            {{ "Cancel" | localize }}
+        </button>
+        
+        <button mat-raised-button color="warn" type="submit" [disabled]="!addUserForm.form.valid || saving" class="m-l-10">
+            {{ "Save" | localize }}
+        </button>
+    </mat-dialog-actions>
+</form>
