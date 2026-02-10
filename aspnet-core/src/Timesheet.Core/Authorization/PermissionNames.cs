@@ -216,6 +216,14 @@ namespace Ncc.Authorization
         public const string Admin_AuditLog = "Admin.AuditLog";
         public const string Admin_AuditLog_View = "Admin.AuditLog.View";
 
+        public const string Admin_Remote_Blacklist = "Admin.Remote.Blacklist";
+        public const string Admin_Remote_Blacklist_View = "Admin.Remote.Blacklist.View";
+        public const string Admin_Remote_Blacklist_Add = "Admin.Remote.Blacklist.Add";
+        public const string Admin_Remote_Blacklist_Edit = "Admin.Remote.Blacklist.Edit";
+        public const string Admin_Remote_Blacklist_Delete = "Admin.Remote.Blacklist.Delete";
+        public const string Admin_Remote_Blacklist_Import = "Admin.Remote.Blacklist.Import";
+        public const string Admin_Remote_Blacklist_DownloadTemplate = "Admin.Remote.Blacklist.DownloadTemplate";
+
         public const string Project = "Project";
         public const string Project_View = "Project.View";
         public const string Project_View_All = "Project.ViewAll";
@@ -392,7 +400,10 @@ namespace Ncc.Authorization
         public const string ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs = "ProjectManagementBranchDirectors.ManageUserForBranchs.ViewAllBranchs";
         public const string ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch = "ProjectManagementBranchDirectors.ManageUserForBranchs.ViewMyBranch";
         public const string ProjectManagementBranchDirectors_ManageUserProjectForBranchs = "ProjectManagementBranchDirectors.ManageUserProjectForBranchs";
-
+        public const string BranchDirector_Report = "BranchDirector_Report";
+        public const string BranchDirector_OfficeWorkingReport_View = "BranchDirector_OfficeWorkingReport_View";
+        public const string BranchDirector_ProjectWorkingReport_View = "BranchDirector_ProjectWorkingReport_View";
+        public const string BranchDirector_AnomaliesReport_View = "BranchDirector_AnomaliesReport_View";
     }
 
     public class GrantPermissionRoles
@@ -586,6 +597,14 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_AuditLog,
                     PermissionNames.Admin_AuditLog_View,
 
+                    PermissionNames.Admin_Remote_Blacklist,
+                    PermissionNames.Admin_Remote_Blacklist_View,
+                    PermissionNames.Admin_Remote_Blacklist_Add,
+                    PermissionNames.Admin_Remote_Blacklist_Delete,
+                    PermissionNames.Admin_Remote_Blacklist_Edit,
+                    PermissionNames.Admin_Remote_Blacklist_Import,
+                    PermissionNames.Admin_Remote_Blacklist_DownloadTemplate,
+
                     PermissionNames.Project,
                     PermissionNames.Project_View,
                     PermissionNames.Project_View_All,
@@ -758,6 +777,10 @@ namespace Ncc.Authorization
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs,
+                    PermissionNames.BranchDirector_Report,
+                    PermissionNames.BranchDirector_OfficeWorkingReport_View,
+                    PermissionNames.BranchDirector_ProjectWorkingReport_View,
+                    PermissionNames.BranchDirector_AnomaliesReport_View
                 }
             },
 
@@ -915,6 +938,10 @@ namespace Ncc.Authorization
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch,
                     PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs,
+                    PermissionNames.BranchDirector_Report,
+                    PermissionNames.BranchDirector_OfficeWorkingReport_View,
+                    PermissionNames.BranchDirector_ProjectWorkingReport_View,
+                    PermissionNames.BranchDirector_AnomaliesReport_View
                 }
             },
         };
@@ -1116,6 +1143,14 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_AuditLog, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Auditlogs" },
             new SystemPermission{ Name =  PermissionNames.Admin_AuditLog_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View AuditLogs" },
 
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Add, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add new record to remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Import, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Import a CSV file to remote blacklist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_DownloadTemplate, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Download remote blacklist template" },
+
             new SystemPermission{ Name =  PermissionNames.Project, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Projects" },
             new SystemPermission{ Name =  PermissionNames.Project_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View my projects" },
             new SystemPermission{ Name =  PermissionNames.Project_View_All, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View all projects" },
@@ -1288,6 +1323,10 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View User from all branchs"},
             new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View User from my branch"},
             new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage User Project For Branchs"},
+            new SystemPermission{ Name =  PermissionNames.BranchDirector_Report, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Report For Branch Director"},
+            new SystemPermission{ Name =  PermissionNames.BranchDirector_OfficeWorkingReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Office Working Report For Branch Director"},
+            new SystemPermission{ Name =  PermissionNames.BranchDirector_ProjectWorkingReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Project Working Report For Branch Director"},
+            new SystemPermission{ Name =  PermissionNames.BranchDirector_AnomaliesReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Anomalies Report For Branch Director"}
         };
 
         public static List<SystemPermission> TreePermissions = new List<SystemPermission>()
@@ -1727,6 +1766,17 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.Admin_BackgroundJob_Delete ,MultiTenancySides = MultiTenancySides.Host | MultiTenancySides.Tenant, DisplayName = "Delete"},
                         }
                      },
+                     new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Remote blacklist",
+                        Childrens = new List<SystemPermission>()
+                        {
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View remote blacklist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Add, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add new record to remote blacklist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit remote blacklist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete remote blacklist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Import, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Import a CSV file to remote blacklist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_DownloadTemplate, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Download remote blacklist template"}
+                        }
+                     },
                 }
             },
             new SystemPermission{ Name =  PermissionNames.Project, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Projects" ,
@@ -2000,6 +2050,14 @@ namespace Ncc.Authorization
                      },
                      new SystemPermission{ Name =  PermissionNames.ProjectManagementBranchDirectors_ManageUserProjectForBranchs, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage User Project For Branchs" },
                  }
+             },
+             new SystemPermission{ Name =  PermissionNames.BranchDirector_Report, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Report For Branch Director",
+                Childrens = new List<SystemPermission>()
+                {
+                    new SystemPermission{ Name =  PermissionNames.BranchDirector_OfficeWorkingReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Office Working Report For Branch Manager"},
+                    new SystemPermission{ Name =  PermissionNames.BranchDirector_ProjectWorkingReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Project Working Report For Branch Manager"},
+                    new SystemPermission{ Name =  PermissionNames.BranchDirector_AnomaliesReport_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View Anomalies Report For Branch Manager"},
+                }
              }
         };
     }

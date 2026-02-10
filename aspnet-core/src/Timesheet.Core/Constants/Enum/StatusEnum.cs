@@ -369,6 +369,40 @@ namespace Ncc.Entities.Enum
             NUMBER = 1,
             LEVEL = 2,
         }
+        public enum EOfficeWorkingSortColumn
+        {
+            TotalAllLW = 0,
+            OfficeLW = 1,
+            WfhLW = 2,
+            TotalAllLM = 3,
+            OfficeLM = 4,
+            WfhLM = 5,
+            FullName = 6,
+            BranchName = 7
+        }
+        public enum EProjectTimelogSortColumn
+        {
+            ProjectName = 0,
+            MemberCount = 1,
+            TotalTimelogLW = 2,
+            TotalTimelogLM = 3
+        }
+        public enum EYesterdayAnomaliesSortColumn
+        {
+            EmployeeName = 0,
+            Branch = 1
+        }
+        public enum ELastWeekAnomaliesSortColumn
+        {
+            EmployeeName = 0,
+            Branch = 1,
+            Count = 2
+        }
+        public enum ESortDirection
+        {
+            Desc = 0,
+            Asc = 1
+        }
         public enum PointType
         {
             IsClaim = 0,
@@ -391,6 +425,12 @@ namespace Ncc.Entities.Enum
         {
             TIMESHEET_LOCKED = 1,
             PUNISHMENT_UNPAID = 2
+        }
+        public enum ViolationStatus
+        {
+            DatesMissed = 0,
+            DatesBelowThreshold = 1,
+            DatesNoTrackerTime = 2
         }
 
         public enum ReviewDetailRejector

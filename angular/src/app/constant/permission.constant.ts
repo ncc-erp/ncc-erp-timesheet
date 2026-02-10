@@ -164,6 +164,14 @@ export const PERMISSIONS_CONSTANT = {
     DeletePunishments: "Admin.Punishments.Delete",
     PunishmentsChangeStatus: "Admin.Punishments.ChangeStatus",
 
+    // Remote Blacklist
+    ViewRemoteBlacklist: "Admin.Remote.Blacklist.View",
+    AddRemoteBlacklist: "Admin.Remote.Blacklist.Add",
+    EditRemoteBlacklist: "Admin.Remote.Blacklist.Edit",
+    DeleteRemoteBlacklist: "Admin.Remote.Blacklist.Delete",
+    ImportRemoteBlacklist: "Admin.Remote.Blacklist.Import",
+    DownloadTemplateRemoteBlacklist: "Admin.Remote.Blacklist.DownloadTemplate",
+
     //my timesheet
     AddMyTimesheet: "MyTimesheet.AddNew",
     EditMyTimesheet: "MyTimesheet.Edit",

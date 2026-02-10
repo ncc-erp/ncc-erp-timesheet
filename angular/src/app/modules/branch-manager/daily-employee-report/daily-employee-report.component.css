@@ -1,0 +1,126 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: nowrap;
+  margin: 0 -5px 15px -5px;
+  align-items: flex-start;
+}
+
+.filter-item {
+  flex: 1;
+  padding: 0 5px;
+  min-width: 0;
+}
+
+.filter-search {
+  flex: 3;
+}
+
+.filter-limit {
+  flex: 1;
+}
+
+.filter-branch {
+  flex: 1;
+}
+
+.filter-row .mat-form-field {
+  width: 100%;
+}
+
+::ng-deep .filter-row .mat-form-field-wrapper {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+@media screen and (max-width: 991px) {
+  .filter-row {
+    flex-wrap: wrap;
+  }
+
+  .filter-item {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+.pr-0 {
+  padding-right: 0px;
+}
+
+.customTable thead tr th {
+  border: 0.2px solid rgba(204, 204, 204, 0.35);
+  vertical-align: middle;
+  text-align: center;
+  background-color: #f8f9fa;
+  font-weight: 600;
+  padding: 12px 6px;
+}
+
+.customTable tbody tr td {
+  border: 0.2px solid rgba(204, 204, 204, 0.35);
+  padding: 12px 6px;
+  vertical-align: middle;
+}
+
+.customTable tbody tr:nth-child(odd) {
+  background: #EEEEEE;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.sortable:hover {
+  background-color: #e9ecef;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.header-content i {
+  color: #2196F3;
+  font-size: 14px;
+}
+
+.abp-pagination-controls-wrapper {
+  margin-top: 20px;
+  padding: 15px 0;
+  border-top: 1px solid #dee2e6;
+  width: 100%;
+}
+
+::ng-deep .abp-pagination-controls-wrapper .row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+}
+
+::ng-deep .abp-pagination-controls-wrapper .col-sm-12 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.label {
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}

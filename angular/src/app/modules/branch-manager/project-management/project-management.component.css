@@ -8,14 +8,40 @@
         padding: 0;
         margin-bottom: 0 !important;
     }
-}
-.title-sort{
-    border-bottom: 1px solid rgba(204, 204, 204, 0.35);
-    margin-bottom: 0px;
-    font-size: 14px;
-    font-weight: normal;
+
+    .filter-row {
+        flex-wrap: wrap;
+    }
+
+    .filter-item,
+    :host ::ng-deep .app-date-filter .date-filter {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
 }
 .mb-0{
     margin-bottom: 0px;
 }
 
+.filter-row {
+    display: flex;
+    flex-wrap: nowrap;
+    margin: 0 -5px 15px -5px;
+}
+
+.filter-item {
+    flex: 1;
+    padding: 0 5px;
+    min-width: 0;
+}
+
+:host ::ng-deep .app-date-filter {
+    display: contents;
+}
+
+:host ::ng-deep .app-date-filter .date-filter {
+    flex: 1;
+    max-width: none !important;
+    padding: 0 5px;
+    min-width: 0;
+}

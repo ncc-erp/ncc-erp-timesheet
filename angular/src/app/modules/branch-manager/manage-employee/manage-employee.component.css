@@ -150,10 +150,7 @@
   margin-bottom: 0 !important;
 }
 
-::ng-deep .search-field .mat-form-field-flex {
-  align-items: center;
-  height: 40px;
-}
+
 
 .button-group {
   display: flex;
@@ -169,17 +166,24 @@
 }
 
 .filter-row {
-  align-items: center;
-  gap: 8px;
+  display: flex;
+  flex-wrap: nowrap;
+  margin: 0 -5px 15px -5px;
+  align-items: flex-start;
 }
 
-.filter-row > div {
-  margin-bottom: 0 !important;
+.filter-item {
+  flex: 1;
+  padding: 0 5px;
+  min-width: 0;
+}
+
+.filter-search {
+  flex: 2;
 }
 
 .filter-row .mat-form-field {
-  margin-bottom: 0 !important;
-    width: 100%;
+  width: 100%;
 }
 
 ::ng-deep .filter-row .mat-form-field-wrapper {
@@ -188,26 +192,33 @@
 }
 
 ::ng-deep .app-date-filter {
-  display: block;
-  width: 100%;
+  display: contents;
 }
 
-@media (max-width: 991px) {
-  .search-row {
-    flex-direction: column;
-    gap: 10px;
+::ng-deep .app-date-filter .date-filter {
+  flex: 1;
+  max-width: none !important;
+  padding: 0 5px;
+  min-width: 0;
+}
+
+@media screen and (max-width: 991px) {
+  .filter-row {
+    flex-wrap: wrap;
   }
-  
-  .search-row > div {
-    width: 100%;
+
+  .filter-item,
+  ::ng-deep .app-date-filter .date-filter {
+    flex: 0 0 100%;
+    max-width: 100%;
   }
 }
 
+::ng-deep .custom-search-icon {
+  position: relative;
+  top: -5px;
+}
 
-.pr-0{
+.pr-0 {
   padding-right: 0px;
-}
-
-::ng-deep app-date-filter .col-lg-4{
-  padding-right: 0px !important;
 }

@@ -72,8 +72,8 @@
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button class="btn btn-default" mat-button mat-dialog-close>Cancel</button>
-    <button class="btn btn-primary" [disabled]="isLoading" (click)="Save()" mat-button>Save</button>
-    <button class="btn btn-primary" [disabled]="isLoading" *ngIf="myTimesheet.status===3" (click)="saveAndReset()"
+    <button class="btn btn-primary" [disabled]="isLoading || !selectedProject.id" (click)="Save()" mat-button>Save</button>
+    <button class="btn btn-primary" [disabled]="isLoading || !selectedProject.id" *ngIf="myTimesheet.status===3" (click)="saveAndReset()"
       mat-button>Save and Reset</button>
   </mat-dialog-actions>
 </form>

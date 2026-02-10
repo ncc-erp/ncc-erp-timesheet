@@ -17,19 +17,28 @@ import {
 } from '@app/modules/branch-manager/modal/project-management-modal/project-management-member-detail.component';
 import {MatDialogModule} from '@node_modules/@angular/material';
 import {ProjectTargetUserPipe} from '@shared/pipes/projectTargetUser.pipe';
+import { DailyEmployeeReportComponent } from './daily-employee-report/daily-employee-report.component';
+import { DailyProjectReportComponent } from './daily-project-report/daily-project-report.component';
+import { AnomaliesReportComponent } from './anomalies-report/anomalies-report.component';
+import { ScrollingModule } from '@node_modules/@angular/cdk/scrolling';
+import { AnomaliesTabComponent } from './anomalies-report/anomalies-tab/anomalies-tab.component';
 
 
 @NgModule({
   declarations: [
-      DateFilterComponent,
-      ProjectTargetUserPipe,
-      BranchManagerComponent,
-      ManageEmployeeComponent,
-      PopupCustomeTimeComponent,
-      ProjectManagementComponent,
-      PopupUpdateProjectComponent,
-      DetailParticipatingProjectsComponent,
-      ProjectManagementMemberDetailComponent,
+    DateFilterComponent,
+    ProjectTargetUserPipe,
+    BranchManagerComponent,
+    ManageEmployeeComponent,
+    PopupCustomeTimeComponent,
+    ProjectManagementComponent,
+    PopupUpdateProjectComponent,
+    DetailParticipatingProjectsComponent,
+    ProjectManagementMemberDetailComponent,
+    DailyEmployeeReportComponent,
+    DailyProjectReportComponent,
+    AnomaliesReportComponent,
+    AnomaliesTabComponent
   ],
   imports: [
     CommonModule,
@@ -39,6 +48,7 @@ import {ProjectTargetUserPipe} from '@shared/pipes/projectTargetUser.pipe';
     NgxPaginationModule,
     FormsModule,
     MatDialogModule,
+    ScrollingModule
   ],
   entryComponents: [
     DetailParticipatingProjectsComponent,
@@ -46,6 +56,6 @@ import {ProjectTargetUserPipe} from '@shared/pipes/projectTargetUser.pipe';
     PopupUpdateProjectComponent,
     DetailParticipatingProjectsComponent,
     ProjectManagementMemberDetailComponent,
-  ]
+  ],
 })
-export class BranchManagerModule { }
+export class BranchManagerModule {}
