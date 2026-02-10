@@ -330,13 +330,15 @@ namespace Timesheet.DomainServices
                     }
                     else
                     {
-                        if (existingBlacklist.PenaltyDays != appliedPenaltyDays)
+                        if (existingBlacklist.PenaltyDays + appliedPenaltyDays > maxAllowedRemoteDays)
                         {
-                            existingBlacklist.PenaltyDays = appliedPenaltyDays;
-                            if (!remoteBlacklistUpdates.Contains(existingBlacklist))
-                            {
-                                remoteBlacklistUpdates.Add(existingBlacklist);
-                            }
+                            failedList.Add($"Row {row.Row} ({userIdentifier}): Total penalty days exceed maximum allowed");
+                            continue;
+                        }
+                        existingBlacklist.PenaltyDays += appliedPenaltyDays;
+                        if (!remoteBlacklistUpdates.Contains(existingBlacklist))
+                        {
+                            remoteBlacklistUpdates.Add(existingBlacklist);
                         }
                     }
                 }
