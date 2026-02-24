@@ -1,3 +1,73 @@
+.card.main-content {
+    border-radius: 16px;
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06),
+        0 1px 3px rgba(15, 23, 42, 0.1);
+    background-color: var(--bg-surface);
+    overflow: hidden;
+}
+
+::ng-deep .card.main-content .header {
+    padding: 20px !important;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border-divider);
+}
+
+::ng-deep .card.main-content .header h2 {
+    padding-left: 0 !important;
+    margin: 0 !important;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+::ng-deep .card.main-content .body {
+    padding: 20px !important;
+}
+
+.btn-back {
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    z-index: 1;
+    color: var(--text-main);
+}
+
+::ng-deep .mat-tab-group {
+    font-family: inherit;
+}
+
+::ng-deep .mat-tab-header {
+    border-bottom: 1px solid var(--border-divider) !important;
+    background-color: transparent;
+}
+
+::ng-deep .mat-tab-label {
+    color: var(--text-secondary) !important;
+    opacity: 1 !important;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+::ng-deep .mat-tab-label.mat-tab-label-active {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}
+
+::ng-deep .mat-ink-bar {
+    background-color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-tab-body-wrapper {
+    background-color: var(--bg-surface);
+}
+
+::ng-deep .mat-tab-body-content {
+    overflow: inherit !important;
+    color: var(--text-main);
+}
+
 .example-tree-invisible {
     display: none;  
 }
@@ -9,74 +79,204 @@
     list-style-type: none;
 }
 
-.inline{
-    display: inline-block !important;
-}
-.tab-modal{
-    height: 70vh;
-}
-.mat-dialog-content{
-    max-height: 70vh;
-    width: 70vw;
-}
-.mat-tab {
-    width: 70vw;
+::ng-deep .mat-tree {
+    background: transparent !important;
 }
 
-.m-l-11i {
-    margin-left: 11px !important;
-}
-.mat-tab-body-content.ng-trigger.ng-trigger-translateTab{
-    overflow: inherit !important;
-}
-.mat-form-field-infix{
-    padding: 0.5em 0 1em 0;
-}
-.row-mar-0{
-    margin-right: 0px;
-    margin-left: 0px;
+::ng-deep .mat-tree-node,
+::ng-deep .mat-nested-tree-node {
+    color: var(--text-main) !important;
 }
 
-.avatar{
-    min-width: 60px;
-    max-width: 60px;
-    min-height: 60px;
-    max-height: 60px;
+::ng-deep .mat-tree-node .mat-icon-button {
+    color: var(--text-secondary);
 }
 
-.spinner{
+::ng-deep .mat-tree .mat-icon {
+    color: var(--text-secondary);
+}
+
+::ng-deep .mat-checkbox-label {
+    color: var(--text-main) !important;
+}
+
+::ng-deep .mat-checkbox-frame {
+    border-color: var(--border-strong) !important;
+}
+
+::ng-deep .mat-checkbox-checked .mat-checkbox-background {
+    background-color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-checkbox-indeterminate .mat-checkbox-background {
+    background-color: var(--primary-color) !important;
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+::ng-deep .mat-form-field-label {
+    color: var(--text-secondary) !important;
+}
+
+::ng-deep .mat-input-element {
+    color: var(--text-main) !important;
+    caret-color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-form-field-underline {
+    background-color: var(--border-subtle) !important;
+}
+
+::ng-deep .mat-form-field.mat-focused .mat-form-field-ripple {
+    background-color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-form-field.mat-focused .mat-form-field-label {
+    color: var(--primary-color) !important;
+}
+
+::ng-deep .mat-select-value {
+    color: var(--text-main) !important;
+}
+
+::ng-deep .mat-select-arrow {
+    color: var(--text-secondary) !important;
+}
+
+.user-table {
+    padding: 20px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 9px;
+    background: var(--bg-soft);
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 12px;
+}
+
+.content {
+    background: var(--bg-surface);
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    overflow: hidden;
+}
+
+.content .row-fluid {
+    margin: 0;
+    padding: 20px 16px 0px 16px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.table {
+    background-color: var(--bg-surface) !important;
+    margin-bottom: 0 !important;
+    border-top: 1px solid var(--border-divider) !important;
+}
+
+.table tbody tr td {
+    padding: 8px 12px !important;
+    vertical-align: middle;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-divider);
+    border-top: none !important;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover td {
+    background-color: var(--bg-soft) !important;
+}
+
+::ng-deep .table-striped>tbody>tr:nth-of-type(odd) {
+    background-color: transparent !important;
+}
+
+::ng-deep .table-hover>tbody>tr:hover {
+    background-color: var(--bg-soft) !important;
+}
+
+::ng-deep .label {
+    margin: 0 !important;
+}
+
+.label.status-label {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.mr-left {
+    margin-left: 10px;
+}
+
+.avatar {
+    min-width: 36px;
+    max-width: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.spinner {
     display: flex;
     font-size: 14px;
     font-weight: 700;
     height: 25px;
+    color: var(--text-main);
 }
 
-.i-check{
+.i-check {
     cursor: pointer;
     display: block;
     width: 100%;
     text-align: center;
 }
-.i-check input{
+
+.i-check input {
     display: none;
 }
-.i-check span{
+
+.i-check span {
     display: block;
     position: relative;
     padding: 10px;
-    border: solid 1px #c1c1c1;
+    border: solid 1px var(--border-subtle);
     width: 100%;
     border-radius: 5px;
+    background-color: var(--bg-surface);
+    color: var(--text-main);
+    transition: all 0.2s ease;
 }
-.i-check input:checked + span{
-    border-color: #f36c00;
-    background: #f36c00;
+
+.i-check input:checked+span {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
     color: white;
 }
 
-.table tbody tr td {
-    padding: 5px 0px 0 0px!important;
-    vertical-align: middle;
+.inline {
+    display: inline-block !important;
+}
+
+.mat-form-field-infix {
+    padding: 0.5em 0 1em 0;
+}
+
+.row-mar-0 {
+    margin-right: 0px;
+    margin-left: 0px;
 }
 
 .member-status-label {
@@ -84,33 +284,30 @@
     vertical-align: text-top;
     border-radius: 2px;
 }
-::ng-deep .label {
-    margin: 0 !important;
-}
+
 .w-40vw {
     width: 16vw !important;
 }
 
-.mr-left {
-    margin-left: 10px;
+::ng-deep .table .mat-icon-button {
+    color: var(--text-secondary);
 }
 
-.btn-back{
-    position: absolute; 
-    top: 10px; 
-    right: 50px; 
-    z-index: 1;
+::ng-deep .table .mat-icon-button:hover {
+    color: var(--text-main);
 }
 
-.user-table{
-    padding: 20px;
-    border: 1px solid rgba(0,0,0,.2)
+::ng-deep .table .material-icons {
+    color: var(--text-secondary);
 }
 
-.title{
-    font-size: 20px;
+::ng-deep .mat-flat-button.mat-primary {
+    background-color: var(--primary-color) !important;
 }
 
+::ng-deep .mat-form-field .mat-icon[matprefix] {
+    color: var(--text-secondary);
+}
 
 @media (max-width: 990px){
     .mat-dialog-content{

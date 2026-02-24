@@ -10,6 +10,7 @@ import { UserService } from '@app/service/api/user.service';
 @Component({
   selector: 'app-role-user',
   templateUrl: './role-user.component.html',
+  styleUrls: ['./role-user.component.css'],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
   ]
