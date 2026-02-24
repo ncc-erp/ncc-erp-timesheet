@@ -49,6 +49,87 @@ body.theme-dark {
     --border-subtle: #334155;
     --border-strong: #475569;
     --border-divider: #334155;
+
+    .card {
+        background-color: var(--bg-surface) !important;
+        color: var(--text-main) !important;
+        border: 1px solid var(--border-divider);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+        .header {
+            background-color: var(--bg-surface) !important;
+            border-bottom: 1px solid var(--border-divider) !important;
+
+            h2 {
+                color: var(--text-main) !important;
+            }
+
+            .text-muted {
+                color: var(--text-secondary) !important;
+            }
+        }
+
+        .body {
+            color: var(--text-main) !important;
+        }
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: var(--bg-soft) !important;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: var(--bg-soft) !important;
+    }
+
+    table thead tr th {
+        color: var(--text-secondary) !important;
+        background-color: var(--bg-soft) !important;
+        border-bottom: 1px solid var(--border-divider) !important;
+    }
+
+    .mat-dialog-container {
+        background-color: var(--bg-surface) !important;
+    }
+
+    // Badge patterns
+    .badge--type,
+    .badge--status-active,
+    .badge--sex-female {
+        background: rgba(22, 163, 74, 0.2) !important;
+        color: #4ade80 !important;
+        border-color: rgba(22, 163, 74, 0.3) !important;
+    }
+
+    .badge--level {
+        background: rgba(79, 70, 229, 0.2) !important;
+        color: #818cf8 !important;
+        border-color: rgba(79, 70, 229, 0.3) !important;
+    }
+
+    .badge--level-alt {
+        background: rgba(147, 51, 234, 0.2) !important;
+        color: #c084fc !important;
+        border-color: rgba(147, 51, 234, 0.3) !important;
+    }
+
+    .badge--sex-male,
+    .badge--status-inactive {
+        background: rgba(220, 38, 38, 0.2) !important;
+        color: #f87171 !important;
+        border-color: rgba(220, 38, 38, 0.3) !important;
+    }
+
+    .badge--project {
+        background: rgba(37, 99, 235, 0.2) !important;
+        color: #60a5fa !important;
+        border-color: rgba(37, 99, 235, 0.3) !important;
+    }
+
+    .bag-yellow {
+        background-color: rgba(253, 224, 71, 0.2) !important;
+        color: var(--text-main) !important;
+    }
 }
 
 .mat-dialog-container {
@@ -60,6 +141,7 @@ body.theme-dark {
 .mat-dialog-container .mat-dialog-content,
 .mat-dialog-container .mat-dialog-actions {
     color: var(--text-main);
+    background-color: var(--bg-surface);
 }
 
 .mat-form-field-appearance-outline .mat-form-field-flex {
@@ -83,6 +165,11 @@ body.theme-dark .mat-form-field-appearance-outline .mat-form-field-outline-thick
 
 .mat-input-element {
     color: var(--text-main);
+}
+
+body.theme-dark .mat-input-element:disabled,
+body.theme-dark .mat-input-element[readonly] {
+    color: var(--text-main) !important;
 }
 
 .mat-select-value,
@@ -110,6 +197,31 @@ body.theme-dark .mat-form-field-appearance-outline .mat-form-field-outline-thick
     border-color: var(--border-subtle);
 }
 
+.mat-menu-panel {
+    background-color: var(--bg-surface) !important;
+}
+
+.mat-menu-item {
+    color: var(--text-main) !important;
+}
+
+.mat-menu-item mat-icon {
+    color: var(--text-secondary) !important;
+}
+
+.mat-menu-item:hover {
+    background-color: var(--bg-soft) !important;
+}
+
+body.theme-dark .label.bg-red,
+body.theme-dark .label.bg-green,
+body.theme-dark .label.bg-blue,
+body.theme-dark .label.bg-orange,
+body.theme-dark .label.bg-purple,
+body.theme-dark .label.bg-grey {
+    color: white !important;
+}
+
 .mat-select-panel input::placeholder,
 .mat-select-panel .mat-input-element::placeholder {
     color: var(--text-secondary);
@@ -123,7 +235,15 @@ table td {
 label,
 .mat-form-field-label,
 .mat-hint {
-    color: var(--text-secondary);
+    color: var(--text-secondary) !important;
+}
+
+body.theme-dark .mat-form-field-label {
+    color: var(--text-secondary) !important;
+}
+
+body.theme-dark .mat-form-field.mat-focused .mat-form-field-label {
+    color: var(--text-main) !important;
 }
 
 .mat-paginator {
@@ -191,6 +311,18 @@ label,
     .mat-tab-nav-bar.mat-primary .mat-ink-bar {
         background-color: @color;
     }
+
+    .mat-tab-label,
+    .mat-tab-link {
+        color: var(--text-secondary) !important;
+        opacity: 1 !important;
+    }
+
+    .mat-tab-label.mat-tab-label-active,
+    .mat-tab-link.mat-tab-label-active {
+        color: var(--text-main) !important;
+    }
+
     .mat-fab.mat-primary:not([disabled]),
     .mat-flat-button.mat-primary:not([disabled]),
     .mat-mini-fab.mat-primary:not([disabled]),

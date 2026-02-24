@@ -1,6 +1,50 @@
-mat-form-field {
-  padding: 10px;
+.card.main-content {
+  border-radius: 16px;
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06),
+    0 1px 3px rgba(15, 23, 42, 0.1);
+  background-color: var(--bg-surface);
+  padding-bottom: 8px;
+  overflow: hidden;
 }
+
+::ng-deep .card.main-content .header {
+  padding: 20px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-divider);
+}
+
+.header__title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+::ng-deep .card.main-content .header h2 {
+  padding-left: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+::ng-deep .card.main-content .header .text-muted {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  display: block;
+}
+
+::ng-deep .card.main-content .body {
+  padding: 20px !important;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
 .clearfix form {
     display: flex;
     align-items: center;
@@ -18,11 +62,83 @@ mat-form-field {
     margin: 0 !important;
 }
 
+::ng-deep .clearfix .mat-form-field-appearance-outline .mat-form-field-wrapper {
+  padding-bottom: 0 !important;
+  margin: 0 !important;
+}
+
+::ng-deep .clearfix .mat-form-field-appearance-outline .mat-form-field-subscript-wrapper {
+  display: none;
+}
+
 .clearfix form button {
-    height: 48px; 
-    width: 100px;}
-    
-.pull-right{
+  height: 52px;
+  width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.table-roles-wrapper {
+  border-radius: 9px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-soft);
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.roles-table {
+  width: 100%;
+  border-collapse: collapse !important;
+  background-color: var(--bg-surface);
+  font-size: 13px;
+}
+
+.roles-table thead {
+  background: var(--bg-soft);
+}
+
+.roles-table th,
+.roles-table td {
+  border-bottom: 1px solid var(--border-divider);
+  white-space: nowrap;
+  text-align: left;
+}
+
+.roles-table th:last-child,
+.roles-table td:last-child {
+  border-right: none;
+}
+
+.roles-table>thead>tr>th {
+  padding: 10px 16px !important;
+  text-align: left;
+  vertical-align: middle !important;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background-color: var(--bg-soft);
+  border-bottom: 1px solid var(--border-divider);
+}
+
+.roles-table>tbody>tr>td {
+  padding: 12px 16px !important;
+  text-align: left !important;
+  vertical-align: middle !important;
+  font-size: 13px;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-divider);
+}
+
+.roles-table>tbody>tr:last-child>td {
+  border-bottom: none;
+}
+
+.roles-table>tbody>tr:hover>td {
+  background-color: var(--bg-soft);
+}
+
+.pull-right {
   position: fixed;
   bottom: 20px;
   right: 20px;

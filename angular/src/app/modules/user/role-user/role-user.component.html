@@ -1,21 +1,63 @@
-<form autocomplete="off" #createUserModal="ngForm" [busy]="isSaving">
-  <h1 style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle mat-dialog-title>{{l(title)}}
-  </h1>
-  <mat-dialog-content style="height:auto; max-height: 50vh;">
-    <div class="row row-fluid">
-      <ng-template ngFor let-role [ngForOf]="roles">
-        <div class="col-sm-12 col-md-12">
-          <div class="checkbox-wrapper">
-            <mat-checkbox [name]="'checkRole-' + role.id" [checked]="isRoleChecked(role.normalizedName)" (change)="onRoleChange(role, $event)">
+<form autocomplete="off" #createUserModal="ngForm" [busy]="isSaving" class="user-modal">
+  <div
+    class="user-modal__header"
+    cdkDrag
+    cdkDragRootElement=".cdk-overlay-pane"
+    cdkDragHandle
+    mat-dialog-title
+  >
+    <div>
+      <div class="user-modal__title">
+        {{ l(title) }}
+      </div>
+      <div class="user-modal__subtitle">
+        Assign roles and permissions to this user.
+      </div>
+    </div>
+  </div>
+
+  <mat-dialog-content class="user-modal__body" style="max-height: 50vh;">
+    <div class="user-modal__section">
+      <div class="user-modal__section-title">Available roles</div>
+      
+      <div class="user-modal__roles-grid">
+        <ng-template ngFor let-role [ngForOf]="roles">
+          <div class="user-modal__role-item">
+            <mat-checkbox
+              [name]="'checkRole-' + role.id"
+              [checked]="isRoleChecked(role.normalizedName)"
+              (change)="onRoleChange(role, $event)"
+            >
               {{ role.name }}
             </mat-checkbox>
           </div>
-        </div>
-      </ng-template>
+        </ng-template>
+      </div>
     </div>
   </mat-dialog-content>
-  <mat-dialog-actions align="end">
-    <button class="btn btn-default" name="cancelBtn" mat-raised-button mat-dialog-close [disabled]="saving">{{l('Cancel')}}</button>
-    <button mat-raised-button color="primary" name="saveBtn" (keyup.enter)="save()" (click)='save()'>{{l('Save')}}</button>
+
+  <mat-dialog-actions
+    align="end"
+    class="user-modal__footer"
+  >
+    <button
+      class="user-modal__btn user-modal__btn--ghost"
+      mat-raised-button
+      mat-dialog-close
+      name="cancelBtn"
+      [disabled]="saving"
+    >
+      {{ l('Cancel') }}
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      name="saveBtn"
+      class="user-modal__btn user-modal__btn--primary"
+      (keyup.enter)="save()"
+      (click)="save()"
+    >
+      {{ l('Save') }}
+    </button>
   </mat-dialog-actions>
 </form>
