@@ -678,18 +678,20 @@ namespace Timesheet.APIs.RequestDays
 
                     if (numberRemoteDayInWeek > MAX_ALLOW_REMOTE_DAY - 1)
                     {
+                        absencedayRequest.Status = RequestStatus.Rejected;
                         if (penaltyDays > 0)
                         {
-                            throw new UserFriendlyException($"You are currently in the remote blacklist with {penaltyDays} penalty day(s). Your maximum allowed remote days per week is reduced to {MAX_ALLOW_REMOTE_DAY}");
+                            abs.ErrorMessage = $"You are currently in the remote blacklist with {penaltyDays} penalty day(s). Your maximum allowed remote days per week is reduced to {MAX_ALLOW_REMOTE_DAY}";
                         }
                         else
                         {
-                            throw new UserFriendlyException($"You have exceeded the maximum allowed remote days ({MAX_ALLOW_REMOTE_DAY} days) per week according to the policy for the week starting {monday:dd/MM/yyyy}");
+                            abs.ErrorMessage = $"You have exceeded the maximum allowed remote days ({MAX_ALLOW_REMOTE_DAY} days) per week according to the policy for the week starting {monday:dd/MM/yyyy}";
                         }
                     }
                     else if (rejectRemoteDueToLowWorkingDays)
                     {
-                        throw new UserFriendlyException($"Cannot submit Remote request for {abs.DateAt:dd/MM/yyyy} due to insufficient working days in the previous week");
+                        absencedayRequest.Status = RequestStatus.Rejected;
+                        abs.ErrorMessage = $"Cannot submit Remote request for {abs.DateAt:dd/MM/yyyy} due to insufficient working days in the previous week";
                     }
                     else
                     {

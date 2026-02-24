@@ -18,6 +18,7 @@ namespace Timesheet.APIs.MyAbsenceDays.Dto
         public double Hour { get; set; }
         public OnDayType? AbsenceTime { get; set; }
         public RequestStatus Status { get; set; }
+        public string ErrorMessage { get; set; }
 
         public string ToKomuString()
         {
