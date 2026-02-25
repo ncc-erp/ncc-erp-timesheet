@@ -123,8 +123,9 @@ button[name="unlockPM"]:hover {
       .mobile {
         display: flex;
         align-items: center;
-        gap: 8px;
+        justify-content: space-between;
         margin-left: 12px;
+        margin-right: 12px;
         padding-bottom: 16px;
       }
   

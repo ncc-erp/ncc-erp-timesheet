@@ -185,23 +185,27 @@
 
 @media (max-width: 768px) {
   .punishment-container {
-    flex-wrap: wrap;
-    gap: 20px;
+    flex-direction: column;
+    gap: 12px;
     padding-right: 0;
   }
   
   .confirm-button-container {
     flex-shrink: 0;
-    margin-left: 24px;
-    min-width: 120px;
+    margin-left: 0;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: flex-end;
   }
   
   .btn-confirm-punishment {
-    margin-top: 8px;
+    margin-top: 0px;
+    margin-left: 0px;
     width: 100%;
+    height: 36px;
+    line-height: 36px;
+    padding: 0 16px;
     justify-content: center;
   }
 }
@@ -433,7 +437,8 @@
   overflow: visible;
 }
 
-.complaint-container, .reply-container {
+.complaint-container,
+.reply-container {
   position: relative;
 }
 
@@ -524,6 +529,8 @@
       display: flex;
       gap: 8px;
       align-items: center;
+      justify-content: space-between;
+      width: 100%;
     }
     .filter-date {
       flex-direction: column;

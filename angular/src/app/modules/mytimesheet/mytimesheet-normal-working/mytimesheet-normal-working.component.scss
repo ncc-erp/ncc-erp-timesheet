@@ -253,9 +253,13 @@ $name-col-width: 0;
       font-weight: 600 !important;
       line-height: 19.36px !important;
       color: black !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
 
     .header-normal-workingtime {
+      justify-content: space-between;
+      width: 100%;
       display: flex;
       gap: 8px;
       align-items: center;
