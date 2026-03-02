@@ -111,7 +111,7 @@
                   mat-flat-button color="primary" (click)="createTimesheetItem()">
                   <mat-icon>add</mat-icon>
                 </button>
-                <div>
+                <div style="display: flex; align-items: center;">
                   <button name="unlockStaff"
                     (click)="unlockTimesheet()" mat-flat-button color="warn" style="margin-right: 10px;">
                     <mat-icon>lock_open</mat-icon> Unlock Staff
@@ -267,11 +267,11 @@
           <button
             class="btn-refresh"
             name="refreshTimesheetsBtn"
-            mat-flat-button
+            mat-icon-button
             (click)="refreshData()"
             color="primary"
           >
-            Refresh
+            <mat-icon>refresh</mat-icon>
           </button>
         </div>
         <div
@@ -439,7 +439,7 @@
               </div>
             </ng-container>
 
-            <div style="display: flex; justify-content: space-between">
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
               <button
                 name="addByDay"
                 *ngIf="
@@ -453,15 +453,15 @@
               >
                 <mat-icon>add</mat-icon>
               </button>
-              <button
-                name="submit"
-                *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)"
-                (click)="submitTimesheet()"
-                mat-flat-button
-                color="primary"
-              >
-                Submit Week for Approval
-              </button>
+              <div style="display: flex; gap: 8px;">
+                <button name="unlockStaff" (click)="unlockTimesheet()" mat-flat-button color="warn">
+                  <mat-icon>lock_open</mat-icon> Unlock
+                </button>
+                <button name="submit" *ngIf="permission.isGranted(SUBMIT_MY_TIMESHEET)" (click)="submitTimesheet()"
+                  mat-flat-button class="submit-approve-btn">
+                  Submit Week
+                </button>
+              </div>
             </div>
           </div>
         </mat-tab>
