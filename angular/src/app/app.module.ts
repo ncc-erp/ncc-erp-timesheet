@@ -31,6 +31,7 @@ import { SideBarUserAreaComponent } from '@app/layout/sidebar/sidebar-user/sideb
 import { SideBarNavComponent } from '@app/layout/sidebar/sidebar-nav/sidebar-nav.component';
 import { SideBarFooterComponent } from '@app/layout/sidebar/sidebar-footer/sidebar-footer.component';
 // import { RightSideBarComponent } from '@app/layout/right-sidebar.component';
+import { RightSideBarComponent } from './layout/sidebar/sidebar-right/right-sidebar.component';
 import { ThemeSelectorComponent } from '@app/layout/topbar/theme-selector/theme-selector.component';
 // tenants
 import { TenantsComponent } from '@app/tenants/tenants.component';
@@ -82,8 +83,8 @@ export function provideConfig() {
     SideBarNavComponent,
     SideBarFooterComponent,
     // RightSideBarComponent,
+    RightSideBarComponent,
     ThemeSelectorComponent,
-    // tenants
     TenantsComponent,
     CreateTenantDialogComponent,
     EditTenantDialogComponent,
