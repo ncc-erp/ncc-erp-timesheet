@@ -52,7 +52,9 @@ export class RightSideBarComponent extends AppComponentBase implements OnInit {
 
     ngOnInit(): void {
         this.selectedThemeCssClass = this.setting.get('App.UiTheme');
-        $('body').addClass('theme-' + this.selectedThemeCssClass);
+        
+        const allThemes = this.themes.map(t => 'theme-' + t.cssClass).join(' ');
+        $('body').removeClass(allThemes).addClass('theme-' + this.selectedThemeCssClass);
     }
 
     setTheme(theme: UiThemeInfo): void {
@@ -60,13 +62,15 @@ export class RightSideBarComponent extends AppComponentBase implements OnInit {
         input.theme = theme.cssClass;
         this._configurationService.changeUiTheme(input).subscribe(() => {
             const $body = $('body');
+            const allThemes = this.themes.map(t => 'theme-' + t.cssClass).join(' ');
 
             $('.right-sidebar .demo-choose-skin li').removeClass('active');
-            $body.removeClass('theme-' + this.selectedThemeCssClass);
+            $body.removeClass(allThemes);
             $('.right-sidebar .demo-choose-skin li div.' + theme.cssClass).closest('li').addClass('active');
             $body.addClass('theme-' + theme.cssClass);
 
             this.selectedThemeCssClass = theme.cssClass;
+            abp.setting.values['App.UiTheme'] = theme.cssClass;
         });
     }
 }

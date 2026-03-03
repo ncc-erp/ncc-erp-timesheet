@@ -56,7 +56,9 @@ export class ThemeSelectorComponent extends AppComponentBase implements OnInit {
     ngOnInit(): void {
         const currentTheme = this.setting.get('App.UiTheme') || 'red';
         this.selectedTheme = this.themes.find(t => t.cssClass === currentTheme) || this.themes[0];
-        $('body').addClass('theme-' + this.selectedTheme.cssClass);
+        
+        const allThemes = this.themes.map(t => 'theme-' + t.cssClass).join(' ');
+        $('body').removeClass(allThemes).addClass('theme-' + this.selectedTheme.cssClass);
     }
 
     toggleThemeMenu(): void {
@@ -69,13 +71,13 @@ export class ThemeSelectorComponent extends AppComponentBase implements OnInit {
 
         this._configurationService.changeUiTheme(input).subscribe(() => {
             const $body = $('body');
+            const allThemes = this.themes.map(t => 'theme-' + t.cssClass).join(' ');
 
-            $body.removeClass('theme-' + this.selectedTheme.cssClass);
-
-            $body.addClass('theme-' + theme.cssClass);
+            $body.removeClass(allThemes).addClass('theme-' + theme.cssClass);
 
             this.selectedTheme = theme;
             this.isThemeMenuOpen = false;
+            abp.setting.values['App.UiTheme'] = theme.cssClass;
         });
     }
 
