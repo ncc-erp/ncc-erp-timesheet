@@ -1,9 +1,8 @@
-.header {
+.header{
     font-size: 15px;
     display: flex;
 }
 
-/* Outer layout matching roles and users */
 .configuration-wrapper>div>.card.main-content {
     border-radius: 16px;
     border: 1px solid var(--border-strong);

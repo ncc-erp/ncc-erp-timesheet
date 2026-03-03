@@ -82,7 +82,6 @@ export function provideConfig() {
     SideBarUserAreaComponent,
     SideBarNavComponent,
     SideBarFooterComponent,
-    // RightSideBarComponent,
     RightSideBarComponent,
     ThemeSelectorComponent,
     TenantsComponent,
