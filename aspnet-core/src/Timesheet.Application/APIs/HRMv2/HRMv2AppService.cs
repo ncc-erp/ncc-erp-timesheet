@@ -422,8 +422,27 @@ namespace Timesheet.APIs.HRMv2
         }
         //TODO: test GetUserInfoByEmail funtion
         [HttpGet]
+        [AbpAllowAnonymous]
+        [NccAuthentication]
         public async Task<GetUserInfoByEmailDto> GetUserInfoByEmail(string email)
         {
+            return await _hrmv2Service.GetUserInfoByEmail(email);
+        }
+
+        [HttpGet]
+        [AbpAuthorize]
+        public async Task<GetUserInfoByEmailDto> GetUserInfoByEmailProfile(string email)
+        {
+            var currentEmail = WorkScope.GetAll<User>()
+                .Where(x => x.Id == AbpSession.UserId)
+                .Select(x => x.EmailAddress)
+                .FirstOrDefault();
+
+            if (!string.Equals(currentEmail, email, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UserFriendlyException("You can only view your own information.");
+            }
+
             return await _hrmv2Service.GetUserInfoByEmail(email);
         }
         //TODO: test GetAllBanks funtion
