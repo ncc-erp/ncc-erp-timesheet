@@ -17,7 +17,7 @@ export class MyProfileService extends BaseApiService {
   }
 
   public getUserInfoByEmail(email: string) : Observable<any> {
-    return this.http.get(this.rootUrl + `/GetUserInfoByEmail?email=`+email);
+    return this.http.get(this.rootUrl + `/GetUserInfoByEmailProfile?email=`+email);
   }
   public getAllBanks(): Observable<any>{
     return this.http.get(this.rootUrl + "/GetAllBanks");
