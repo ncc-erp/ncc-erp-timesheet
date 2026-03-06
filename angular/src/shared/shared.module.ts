@@ -227,7 +227,7 @@ import { PaginationBarComponent } from './pagination-bar/pagination-bar.componen
     DayTypePipe,
     AddUserOtherProjectComponent,
     ShowProjectInActivePipe,
-    ViewRejectReasonDialogComponent
+    ViewRejectReasonDialogComponent,
     ButtonComponent,
     BadgeComponent,
     TableToolbarComponent,
