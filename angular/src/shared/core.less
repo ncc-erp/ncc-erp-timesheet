@@ -623,4 +623,61 @@ ngx-stars{
     gap: 6px !important;
 }
 
+ul.pagination {
+    background-color: transparent !important;
+    margin: 20px 0 !important;
+    border-radius: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
 
+ul.pagination>li {
+    margin: 0 4px;
+}
+
+ul.pagination>li>a,
+ul.pagination>li>span {
+    background-color: var(--bg-surface, #fff) !important;
+    color: var(--text-main, #333) !important;
+    border-color: var(--border-divider, #ddd) !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    min-width: 36px;
+    padding: 0 12px;
+    border-radius: 6px !important;
+}
+
+ul.pagination>li>a:hover,
+ul.pagination>li>span:hover,
+ul.pagination>li>a:focus,
+ul.pagination>li>span:focus {
+    background-color: var(--bg-soft, #eee) !important;
+    color: var(--text-main, #23527c) !important;
+    border-color: var(--border-divider, #ddd) !important;
+}
+
+ul.pagination>.active>a,
+ul.pagination>.active>span,
+ul.pagination>.active>a:hover,
+ul.pagination>.active>span:hover,
+ul.pagination>.active>a:focus,
+ul.pagination>.active>span:focus {
+    background-color: #2196F3 !important;
+    border-color: #2196F3 !important;
+    color: #fff !important;
+}
+
+ul.pagination>.disabled>a,
+ul.pagination>.disabled>a:hover,
+ul.pagination>.disabled>a:focus,
+ul.pagination>.disabled>span,
+ul.pagination>.disabled>span:hover,
+ul.pagination>.disabled>span:focus {
+    color: var(--text-secondary, #777) !important;
+    background-color: var(--bg-surface, #fff) !important;
+    border-color: var(--border-divider, #ddd) !important;
+}
