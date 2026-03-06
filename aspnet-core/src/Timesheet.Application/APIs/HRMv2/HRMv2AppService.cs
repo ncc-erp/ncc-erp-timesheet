@@ -422,8 +422,27 @@ namespace Timesheet.APIs.HRMv2
         }
         //TODO: test GetUserInfoByEmail funtion
         [HttpGet]
+        [AbpAllowAnonymous]
+        [NccAuthentication]
         public async Task<GetUserInfoByEmailDto> GetUserInfoByEmail(string email)
         {
+            return await _hrmv2Service.GetUserInfoByEmail(email);
+        }
+
+        [HttpGet]
+        [AbpAuthorize]
+        public async Task<GetUserInfoByEmailDto> GetUserInfoByEmailProfile(string email)
+        {
+            var currentEmail = WorkScope.GetAll<User>()
+                .Where(x => x.Id == AbpSession.UserId)
+                .Select(x => x.EmailAddress)
+                .FirstOrDefault();
+
+            if (!string.Equals(currentEmail, email, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UserFriendlyException("You can only view your own information.");
+            }
+
             return await _hrmv2Service.GetUserInfoByEmail(email);
         }
         //TODO: test GetAllBanks funtion
@@ -447,7 +466,7 @@ namespace Timesheet.APIs.HRMv2
 
         [System.Security.SuppressUnmanagedCodeSecurity]
         [NccAuthentication]
-        private async Task<UpdateUserStatusDto> UpdateTimesheetUserStatus(UpdateUserStatusDto input)
+        private async Task<long> UpdateTimesheetUserStatus(UpdateUserStatusDto input)
         {
             var userToUpdate = await WorkScope.GetAll<User>()
                 .Where(x => x.EmailAddress.ToLower().Trim() == input.EmailAddress.ToLower().Trim())
@@ -461,12 +480,10 @@ namespace Timesheet.APIs.HRMv2
             userToUpdate.IsActive = input.IsActive;
             userToUpdate.IsStopWork = input.IsStopWork;
             userToUpdate.EndDateAt = input.StopWorkingTime;
-            
+
             await WorkScope.UpdateAsync(userToUpdate);
 
-            return input;
-             
-
+            return userToUpdate.Id;
         }
 
         [HttpPost]
@@ -480,7 +497,9 @@ namespace Timesheet.APIs.HRMv2
                 EmailAddress = input.EmailAddress,
                 StopWorkingTime = input.DateAt
             };
-            await UpdateTimesheetUserStatus(inputToUpdate);
+
+            var updatedUserId = await UpdateTimesheetUserStatus(inputToUpdate);
+            await _userServices.DeactivateUserFromProjects(updatedUserId);
             return input;
         }
         [HttpPost]

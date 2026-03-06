@@ -81,6 +81,8 @@
               <span *ngSwitchCase="15">Ant</span>
               <span *ngSwitchCase="16">UnlockTS Gmail</span>
               <span *ngSwitchCase="17">UnlockTS IMS</span>
+              <span *ngSwitchCase="18">UnlockTS PM</span>
+              <span *ngSwitchCase="19">UnlockTS Staff</span>
               <span *ngSwitchDefault>
                 <span *ngIf="item.statusPunish === 1">Late</span>
                 <span *ngIf="item.statusPunish === 2">No Check In</span>
@@ -188,18 +190,19 @@
   </div>
 
   <div class="dialog-footer">
-    <button mat-raised-button color="primary" [disabled]="!contributeToFund" (click)="donate()" class="donate-button">
-      Donate on dong.mezon.ai
-    </button>
-    <button mat-raised-button color="accent" [disabled]="!contributeToFund" (click)="markAsPaid()" class="paid-button">
-      Mark as Paid
-    </button>
+      <!-- <button mat-raised-button color="primary" [disabled]="!contributeToFund" (click)="donate()" class="donate-button">
+        Donate on dong.mezon.ai
+      </button>
+      <button mat-raised-button color="accent" [disabled]="!contributeToFund" (click)="markAsPaid()" class="paid-button">
+        Mark as Paid
+      </button> -->
+      
     <button mat-raised-button color="accent" 
             [disabled]="!contributeToFund || !zkProofAvailable" 
             (click)="paidFinedFromTimesheet()" 
             class="paid-button"
             [matTooltip]="!zkProofAvailable ? 'Please re-login to transfer from timesheet or use Mark as Paid instead.' : ''">
-      Pay your fine
+      Donate
     </button>
   </div>
 </div>

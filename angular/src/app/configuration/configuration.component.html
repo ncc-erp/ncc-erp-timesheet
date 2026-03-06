@@ -362,9 +362,71 @@
                           </div>
                         </div>
 
-                      </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+
+          <!--Manual Lock Timesheet-->
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_UNLOCK_TIMESHEET_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowManualLockTimesheet">
+            <mat-expansion-panel-header (click)="isShowManualLockTimesheet =!isShowManualLockTimesheet"
+              class="panel-header">
+              <mat-panel-title>
+                <p class="title">{{"Manual Lock Timesheet Setting"}}</p>
+                <div *ngIf="isShowManualLockTimesheet">
+                  <div>
+                    <div class="edit-save">
+                      <button
+                        *ngIf="!isEditManualLockTimesheet && permission.isGranted(UPDATE_UNLOCK_TIMESHEET_SETTING)"
+                        large mat-raised-button color="primary"
+                        (click)="editManualLockTimesheetConfig();$event.stopPropagation()">
+                        <mat-icon>edit</mat-icon>
+                        <p>Edit</p>
+                      </button>
+                      <button *ngIf="isEditManualLockTimesheet" large mat-raised-button color="primary"
+                        (click)="saveManualLockTimesheetConfig();$event.stopPropagation()">
+                        <mat-icon>save</mat-icon>
+                        <p>Save</p>
+                      </button>
+                      <button *ngIf="isEditManualLockTimesheet" large mat-raised-button color="primary"
+                        (click)="refreshManualLockTimesheetConfig();$event.stopPropagation()">
+                        <mat-icon>cancel</mat-icon>
+                        <p>Cancel</p>
+                      </button>
                     </div>
                   </div>
+                </div>
+              </mat-panel-title>
+
+              <ul class="header-dropdown m-r--5" *ngIf="isShowManualLockTimesheet">
+                <li>
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenuManualLock" (click)="$event.stopPropagation()"
+                    class="header-dropdown-mat-icon-button">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #headerMenuManualLock="matMenu">
+                    <button mat-menu-item (click)="refreshManualLockTimesheetConfig();$event.stopPropagation()">
+                      <mat-icon>refresh</mat-icon>
+                      <span>{{ "Refresh" | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </li>
+              </ul>
+            </mat-expansion-panel-header>
+            <div class="body">
+              <form>
+                <div class="row">
+                  <div class="col-md-12">
+                    <mat-checkbox style="padding: 0;" class="autoSubmit mb-16"
+                      [checked]="manualLockTimesheetConfig.isLock" (change)="onManualLockTimesheetChange($event)"
+                      [disabled]="!isEditManualLockTimesheet">
+                      Lock Timesheet (Previous Month)
+                    </mat-checkbox>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </mat-expansion-panel>
 
                   <!--Unlock Setting-->
                   <div class="setting-card" *ngIf="permission.isGranted(VIEW_UNLOCK_TIMESHEET_SETTING)">
@@ -907,40 +969,135 @@
                             </mat-form-field>
                           </div>
 
-                          <div class="col-md-6 mb-3">
-                            <mat-form-field appearance="outline" class="w-100">
-                              <mat-label>Day Of Week *</mat-label>
-                              <mat-select [(ngModel)]="pmReportPunishSetting.dayofweek" name="dayofweek" required>
-                                <mat-option value="Monday">Monday</mat-option>
-                                <mat-option value="Tuesday">Tuesday</mat-option>
-                                <mat-option value="Wednesday">Wednesday</mat-option>
-                                <mat-option value="Thursday">Thursday</mat-option>
-                                <mat-option value="Friday">Friday</mat-option>
-                                <mat-option value="Saturday">Saturday</mat-option>
-                                <mat-option value="Sunday">Sunday</mat-option>
-                              </mat-select>
-                              <mat-icon matSuffix
-                                matTooltip="Day of the week when background worker runs to check PM report punishment, ex: Monday">help_outline</mat-icon>
-                            </mat-form-field>
-                          </div>
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <div class="special-title">
+                         <span class="special-label">Day Of Week *</span> 
+                         <mat-icon class="special-icon"matTooltip="Day of the week when background worker runs to check PM report punishment, ex: Monday">help</mat-icon>
+                      </div>
+                      <mat-select [(ngModel)]="pmReportPunishSetting.dayofweek" name="dayofweek" required
+                        [disabled]="!isEditPMReportPunishSetting">
+                        <mat-option value="Monday">Monday</mat-option>
+                        <mat-option value="Tuesday">Tuesday</mat-option>
+                        <mat-option value="Wednesday">Wednesday</mat-option>
+                        <mat-option value="Thursday">Thursday</mat-option>
+                        <mat-option value="Friday">Friday</mat-option>
+                        <mat-option value="Saturday">Saturday</mat-option>
+                        <mat-option value="Sunday">Sunday</mat-option>
+                      </mat-select>
+                    </mat-form-field>
 
-                          <div class="col-md-12 mt-2">
-                            <div
-                              style="display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.03); border: 1px dashed rgba(0,0,0,0.1); border-radius: 8px; padding: 15px; color: inherit;">
-                              <span>Manual trigger PM report punishment</span>
-                              <button mat-raised-button color="warn" [disabled]="false"
-                                (click)="onManualTriggerPMReportPunishment()">
-                                Trigger Now
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </form>
+                    <div class="row" style="margin-top: 10px; align-items: center;">
+                      <div class="col-md-12">
+                        <button mat-raised-button color="warn" [disabled]="false"
+                          (click)="onManualTriggerPMReportPunishment()" style="min-width: 80px;">
+                          Get
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </mat-expansion-panel>
+              </form>
             </div>
+          </mat-expansion-panel>
+
+          <!-- PM Other Punishment Setting -->
+          <mat-expansion-panel *ngIf="permission.isGranted(VIEW_PM_OTHER_PUNISH_SETTING)" style="margin-bottom: 10px;"
+            [expanded]="isShowPMOtherPunishSetting">
+            <mat-expansion-panel-header (click)="isShowPMOtherPunishSetting =!isShowPMOtherPunishSetting"
+              class="panel-header">
+              <mat-panel-title>
+                <p class="title">{{"PM Other Punishment Setting"}}</p>
+                <div *ngIf="isShowPMOtherPunishSetting" class="edit-save">
+                  <button *ngIf="!isEditPMOtherPunishSetting" large mat-raised-button
+                    color="primary" (click)="editPMOtherPunishSetting();$event.stopPropagation()">
+                    <mat-icon>edit</mat-icon><p>Edit</p>
+                  </button>
+                  <button *ngIf="isEditPMOtherPunishSetting" large mat-raised-button color="primary"
+                    (click)="savePMOtherPunishSetting();$event.stopPropagation()">
+                    <mat-icon>save</mat-icon><p>Save</p>
+                  </button>
+                  <button *ngIf="isEditPMOtherPunishSetting" large mat-raised-button color="primary"
+                    (click)="refreshPMOtherPunishSetting();$event.stopPropagation()">
+                    <mat-icon>cancel</mat-icon><p>Cancel</p>
+                  </button>
+                </div>
+              </mat-panel-title>
+
+              <ul class="header-dropdown m-r--5" *ngIf="isShowPMOtherPunishSetting">
+                <li>
+                  <button mat-icon-button [matMenuTriggerFor]="headerMenuPMOtherPunish"
+                    (click)="$event.stopPropagation()" class="header-dropdown-mat-icon-button">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #headerMenuPMOtherPunish="matMenu">
+                    <button mat-menu-item (click)="refreshPMOtherPunishSetting();$event.stopPropagation()">
+                      <mat-icon>refresh</mat-icon>
+                      <span>{{ "Refresh" | localize }}</span>
+                    </button>
+                  </mat-menu>
+                </li>
+              </ul>
+            </mat-expansion-panel-header>
+            <div class="body">
+              <form>
+                <div class="row">
+                  <div class="col-md-12" style="max-width: 880px;">
+                      <mat-checkbox [(ngModel)]="pmOtherPunishSetting.enable" name="enable" class="mb-16"
+                        [disabled]="!isEditPMOtherPunishSetting">
+                        <span class="special-content">
+                          <span class="special-label">Enable *</span> 
+                          <mat-icon class="special-icon" matTooltip="Enable PM other punishment notification">help</mat-icon>
+                        </span>
+                      </mat-checkbox>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <div class="special-title">
+                         <span class="special-label">Hour *</span> 
+                         <mat-icon class="special-icon" matTooltip="Hour to send PM Other Punishment records (0-23)">help</mat-icon>
+                      </div>
+                      <input type="number" matInput name="hour" [(ngModel)]="pmOtherPunishSetting.hour" required
+                        [disabled]="!isEditPMOtherPunishSetting" min="0" max="23" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <div class="special-title">
+                         <span class="special-label">Day of month *</span> 
+                         <mat-icon class="special-icon" matTooltip="Day of month to send PM Other Punishment records">help</mat-icon>
+                      </div>
+                      <input type="number" matInput name="day" [(ngModel)]="pmOtherPunishSetting.dayOfMonth" required
+                        [disabled]="!isEditPMOtherPunishSetting" min="1" max="31" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="max-width: 880px;">
+                    <mat-form-field>
+                      <div class="special-title">
+                        <span class="special-label">Admin clan name to send KOMU notification *</span>
+                        <mat-icon class="special-icon"
+                          matTooltip="Admin clan name to send KOMU notification after getting PM Other Punishment records successfully">help</mat-icon>
+                      </div>
+                      <input type="text" matInput name="adminClanName" [(ngModel)]="pmOtherPunishSetting.adminClanName" required
+                        [disabled]="!isEditPMOtherPunishSetting" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-12" style="margin-top: 15px;">
+                    <button mat-raised-button color="accent" color="warn" (click)="openManualGetDataDialog()">
+                      Get Data Manually
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </mat-expansion-panel>
+
+        </mat-expansion-panel>
+      </div>
 
             <!-- Bot Report Settings -->
             <div class="setting-group-wrapper">

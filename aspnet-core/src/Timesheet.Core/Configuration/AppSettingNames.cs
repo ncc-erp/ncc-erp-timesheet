@@ -58,6 +58,7 @@ namespace Ncc.Configuration
         public const string LockMinuteAfterUnlock = "App.LockMinuteAfterUnlock";
         public const string LogTimesheetInFuture = "App.LockTimesheetInFuture";
         public const string DayAllowLogTimesheetInFuture = "App.DayAllowLockTimesheetInFuture";
+        public const string LockTimesheet = "App.LockTimesheet";
         public const string MaxTimeSheetHourPerDay = "App.MaxTimeSheetHourPerDay";
         public const string AutoSubmitTimesheet = "App.AutoSubmitTimesheet";
         public const string AutoSubmitAt = "App.AutoSubmitAt";
@@ -133,6 +134,10 @@ namespace Ncc.Configuration
         public const string PMReportPunishEnable = "Abp.PMReportPunishEnable";
         public const string PMReportPunishAtHour = "Abp.PMReportPunishAtHour";
         public const string PMReportPunishAtDayOfWeek = "Abp.PMReportPunishAtDayOfWeek";
+        public const string PMOtherPunishEnable = "Abp.PMOtherPunishEnable";
+        public const string PMOtherPunishAtHour = "Abp.PMOtherPunishAtHour";
+        public const string PMOtherPunishAtDayOfMonth = "Abp.PMOtherPunishAtDayOfMonth";
+        public const string PMOtherPunishAdminClanName = "Abp.PMOtherPunishAdminClanName";
         public const string BotReportEnable = "Abp.BotReportEnable";
         public const string BotReportEveryday = "Abp.BotReportEveryday";
         public const string BotReportAtHour = "Abp.BotReportAtHour";

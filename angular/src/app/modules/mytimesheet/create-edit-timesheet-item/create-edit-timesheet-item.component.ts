@@ -108,6 +108,11 @@ export class CreateEditTimesheetItemComponent extends AppComponentBase implement
 
   private onEditTimesheet() {
     this.selectedProject = this.findSelectedProject();
+    if (!this.selectedProject) {
+      this.selectedProject = { id: null } as any;
+      abp.notify.error("You have been deactivated from this project. Please contact the PM.");
+      return;
+    }
     let task = this.selectedProject.tasks.find(s => s.projectTaskId == this.myTimesheet.projectTaskId);
     if (task){
       this.defaultTask = task.isDefault;
@@ -249,6 +254,12 @@ export class CreateEditTimesheetItemComponent extends AppComponentBase implement
     //   this.isLoading = false
     //   return false;
     // }
+
+    if (this.myTimesheet.workingTime <= 0) {
+      this.notify.error('WorkingTime must be greater than 0');
+      this.isLoading = false;
+      return false;
+    }
 
     return true;
   }

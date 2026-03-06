@@ -283,7 +283,8 @@ namespace Ncc.Entities.Enum
             UnlockTSGmail = 16,
             UnlockTSIMS = 17,
             UnlockPM = 18,
-            UnlockStaff = 19
+            UnlockStaff = 19,
+            PMOthers = 20
         }
         public enum PunishmentGroupType
         {
@@ -298,7 +299,8 @@ namespace Ncc.Entities.Enum
             UnlockTSGmail = 16, 
             UnlockTSIMS = 17,
             UnlockTS_PM = 18,
-            UnlockTS_Staff = 19   
+            UnlockTS_Staff = 19,
+            PMOthers = 20
         }
         public enum CheckInCheckOutPunishmentType
         {
@@ -336,7 +338,16 @@ namespace Ncc.Entities.Enum
             Pending = 0,
             Approved = 1,
             Reject = 2,
-        } 
+        }
+
+        public enum RequestOffW2RequestStatus
+        {
+            Pending = 0,
+            Approved = 1,
+            Reject = 2,
+            Cancelled = 3,
+            All = -1
+        }
 
         public enum ReviewInternNoteType
         {
@@ -357,6 +368,40 @@ namespace Ncc.Entities.Enum
             PROJECT = 0,
             NUMBER = 1,
             LEVEL = 2,
+        }
+        public enum EOfficeWorkingSortColumn
+        {
+            TotalAllLW = 0,
+            OfficeLW = 1,
+            WfhLW = 2,
+            TotalAllLM = 3,
+            OfficeLM = 4,
+            WfhLM = 5,
+            FullName = 6,
+            BranchName = 7
+        }
+        public enum EProjectTimelogSortColumn
+        {
+            ProjectName = 0,
+            MemberCount = 1,
+            TotalTimelogLW = 2,
+            TotalTimelogLM = 3
+        }
+        public enum EYesterdayAnomaliesSortColumn
+        {
+            EmployeeName = 0,
+            Branch = 1
+        }
+        public enum ELastWeekAnomaliesSortColumn
+        {
+            EmployeeName = 0,
+            Branch = 1,
+            Count = 2
+        }
+        public enum ESortDirection
+        {
+            Desc = 0,
+            Asc = 1
         }
         public enum PointType
         {
@@ -380,6 +425,18 @@ namespace Ncc.Entities.Enum
         {
             TIMESHEET_LOCKED = 1,
             PUNISHMENT_UNPAID = 2
+        }
+        public enum ViolationStatus
+        {
+            DatesMissed = 0,
+            DatesBelowThreshold = 1,
+            DatesNoTrackerTime = 2
+        }
+
+        public enum ReviewDetailRejector
+        {
+            HeadPM,
+            CEO
         }
     }
 }

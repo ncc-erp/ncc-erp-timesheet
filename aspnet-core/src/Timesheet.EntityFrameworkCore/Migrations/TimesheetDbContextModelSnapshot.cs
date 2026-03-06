@@ -1801,6 +1801,8 @@ namespace Timesheet.Migrations
 
                     b.Property<long>("ProjectTaskId");
 
+                    b.Property<string>("RejectReason");
+
                     b.Property<int>("Status");
 
                     b.Property<int>("TargetUserWorkingTime");
@@ -1959,6 +1961,37 @@ namespace Timesheet.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PunishmentSystems");
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.RemoteBlacklist", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<int>("PenaltyDays");
+
+                    b.Property<long>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RemoteBlacklists");
                 });
 
             modelBuilder.Entity("Timesheet.Entities.Retro", b =>
@@ -3032,6 +3065,14 @@ namespace Timesheet.Migrations
                     b.HasOne("Ncc.Entities.Project", "Project")
                         .WithMany()
                         .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.RemoteBlacklist", b =>
+                {
+                    b.HasOne("Ncc.Authorization.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

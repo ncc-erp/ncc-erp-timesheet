@@ -1,0 +1,20 @@
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
+    Rejection Details
+</h1>
+<div mat-dialog-content>
+    <div class="info-row">
+        <span class="label">Reason:</span>
+        <span class="value reason-text">{{data.rejectReason}}</span>
+    </div>
+    <div class="info-row">
+        <span class="label">Rejected By:</span>
+        <span class="value">{{rejectedBy}}</span>
+    </div>
+    <div class="info-row">
+        <span class="label">Rejected At:</span>
+        <span class="value">{{formattedTime}}</span>
+    </div>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-stroked-button mat-dialog-close>Close</button>
+</div>

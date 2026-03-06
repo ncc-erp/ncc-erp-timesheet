@@ -369,6 +369,42 @@ namespace Timesheet.DomainServices
             return user;
         }
 
+        public async System.Threading.Tasks.Task DeactivateUserFromProjects(long userId)
+        {
+            try
+            {
+                var activeProjectUsers = await WorkScope.GetAll<ProjectUser>()
+                    .Where(pu => pu.UserId == userId && pu.Project.Status == ProjectStatus.Active)
+                    .ToListAsync();
+
+                var pmProjectIds = activeProjectUsers
+                    .Where(pu => pu.Type == ProjectUserType.PM)
+                    .Select(pu => pu.ProjectId)
+                    .ToList();
+
+                var projectsWithOtherPMs = await WorkScope.GetAll<ProjectUser>()
+                    .Where(pu => pmProjectIds.Contains(pu.ProjectId)
+                                    && pu.UserId != userId
+                                    && pu.Type == ProjectUserType.PM
+                                    && pu.User.IsActive)
+                    .Select(pu => pu.ProjectId)
+                    .Distinct()
+                    .ToListAsync();
+
+                foreach (var pu in activeProjectUsers)
+                {
+                    if (pu.Type != ProjectUserType.PM || projectsWithOtherPMs.Contains(pu.ProjectId))
+                    {
+                        pu.Type = ProjectUserType.DeActive;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new UserFriendlyException($"Error: {ex.Message}");
+            }
+        }
+
         private byte MapHrmv2UserTypeToTimesheet(Usertype hrmv2UserType)
         {
             byte hrmv2Value = (byte)hrmv2UserType;

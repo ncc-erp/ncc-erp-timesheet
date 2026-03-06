@@ -248,7 +248,12 @@ export const APP_CONSTANT = {
     Remote: 2,
     Office: 3,
   },
-    PunishRules: [
+  OvertimeFilter: {
+    All: -1,
+    NonCharged: 0,
+    Charged: 1
+  },
+  PunishRules: [
     { "name": "No Punish", "value": 0 },
     { "name": "Late", "value": 1 },
     { "name": "No CheckIn", "value": 2 },
@@ -268,8 +273,8 @@ export const APP_CONSTANT = {
     { "name": "Unlock Timesheet Gmail", "value": 16 },
     { "name": "Unlock Timesheet IMS", "value": 17 },
     { "name": "Unlock Timesheet PM", "value": 18 },
-    { "name": "Unlock Timesheet Staff", "value": 19 }
-    
+    { "name": "Unlock Timesheet Staff", "value": 19 },
+    { "name": "PM Others", "value": 20 }
   ],  
   PunishRulesShortName: [
     { "name": "No Punish", "value": 0 },
@@ -291,7 +296,8 @@ export const APP_CONSTANT = {
     { "name": "UnlockTS Gmail", "value": 16 },
     { "name": "UnlockTS IMS", "value": 17 },
     { "name": "UnlockTS PM", "value": 18 },
-    { "name": "UnlockTS Staff", "value": 19 }
+    { "name": "UnlockTS Staff", "value": 19 },
+    { "name": "PM Others", "value": 20 }
   ],
   
   PunishmentGroups: {
@@ -306,7 +312,8 @@ export const APP_CONSTANT = {
     UNLOCK_TS_GMAIL: [16],
     UNLOCK_TS_IMS: [17],
     UNLOCK_TS_PM: [18],
-    UNLOCK_TS_STAFF: [19]
+    UNLOCK_TS_STAFF: [19],
+    PM_OTHERS: [20]
   },
   
   PUNISHMENT_TYPES: [
@@ -329,7 +336,8 @@ export const APP_CONSTANT = {
     { value: 16, name: 'UnlockTS Gmail' },
     { value: 17, name: 'UnlockTS IMS' },
     { value: 18, name: 'UnlockTS PM' },
-    { value: 19, name: 'UnlockTS Staff' }
+    { value: 19, name: 'UnlockTS Staff' },
+    { value: 20, name: 'PM Others'}
   ],
   
   PunishmentTypeMap: {
@@ -352,8 +360,8 @@ export const APP_CONSTANT = {
     16: ['NO_PUNISH', 'UNLOCK_TS_GMAIL'],
     17: ['NO_PUNISH', 'UNLOCK_TS_IMS'],
     18: ['NO_PUNISH', 'UNLOCK_TS_PM'],
-    19: ['NO_PUNISH', 'UNLOCK_TS_STAFF']    
-
+    19: ['NO_PUNISH', 'UNLOCK_TS_STAFF'],    
+    20: ['NO_PUNISH', 'PM_OTHERS']
   },
   GroupTypes: [
     { id: -1, name: 'All' },
@@ -368,7 +376,8 @@ export const APP_CONSTANT = {
     { id: 16, name: 'Unlock Timesheet Gmail' },
     { id: 17, name: 'Unlock Timesheet IMS' },
     { id: 18, name: 'Unlock Timesheet PM' },
-    { id: 19, name: 'Unlock Timesheet Staff' }
+    { id: 19, name: 'Unlock Timesheet Staff' },
+    { id: 20, name: 'PM Others' }
   ],
   ProjectMemberType: {
     Expose: 0,

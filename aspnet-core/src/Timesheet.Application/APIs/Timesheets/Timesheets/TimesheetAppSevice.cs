@@ -53,17 +53,17 @@ namespace Timesheet.Timesheets.Timesheets
         }
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_View)]
-        public async Task<List<MyTimeSheetDto>> GetAll(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, TimesheetStatus status, long? projectId, HaveCheckInFilter? checkInFilter, long? branchId = null, string searchText = "", RequestType? workLocation = null)
+        public async Task<List<MyTimeSheetDto>> GetAll(GetTimesheetsInputDto input)
         {
             var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
 
             var dayOffSettings = await WorkScope.GetAll<DayOffSetting>()
-                .Where(s => s.DayOff.Date >= startDate && s.DayOff.Date <= endDate)
+                .Where(s => s.DayOff.Date >= input.StartDate && s.DayOff.Date <= input.EndDate)
                 .Select(s => s.DayOff).ToListAsync();
 
             var projectIds = await WorkScope.GetAll<ProjectUser>()
                 .Where(s => s.UserId == AbpSession.UserId.Value && s.Type == ProjectUserType.PM)
-                .Where(s => !projectId.HasValue || s.ProjectId == projectId)
+                .Where(s => !input.ProjectId.HasValue || s.ProjectId == input.ProjectId)
                 .Select(s => s.ProjectId).ToListAsync();
 
             var userIds = await WorkScope.GetAll<ProjectUser>()
@@ -71,8 +71,8 @@ namespace Timesheet.Timesheets.Timesheets
                 .Select(s => s.UserId).Distinct().ToListAsync();
 
             var absencedays = await WorkScope.GetAll<AbsenceDayDetail>()
-                .Where(s => !startDate.HasValue || s.DateAt >= startDate.Value.Date)
-                .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
+                .Where(s => !input.StartDate.HasValue || s.DateAt >= input.StartDate.Value.Date)
+                .Where(s => !input.EndDate.HasValue || s.DateAt.Date <= input.EndDate)
                 .Where(s => userIds.Contains(s.Request.UserId))
                 .Where(s => s.Request.Status == RequestStatus.Approved)
                 .Where(s => s.Request.Type == RequestType.Off)
@@ -92,8 +92,8 @@ namespace Timesheet.Timesheets.Timesheets
                 );
 
             var userWorkLocations = await WorkScope.GetAll<AbsenceDayDetail>()
-                .Where(s => !startDate.HasValue || s.DateAt >= startDate.Value.Date)
-                .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
+                .Where(s => !input.StartDate.HasValue || s.DateAt >= input.StartDate.Value.Date)
+                .Where(s => !input.EndDate.HasValue || s.DateAt.Date <= input.EndDate)
                 .Where(s => userIds.Contains(s.Request.UserId))
                 .Where(s => s.Request.Status == RequestStatus.Approved)
                 .Where(s => s.Request.Type == RequestType.Onsite ||
@@ -108,8 +108,8 @@ namespace Timesheet.Timesheets.Timesheets
 
             var openTalks = await WorkScope.GetAll<OpenTalk>()
                 .Where(s => userIds.Contains(s.UserId))
-                .Where(s => !startDate.HasValue || s.DateAt.Date >= startDate.Value.Date)
-                .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate.Value.Date)
+                .Where(s => !input.StartDate.HasValue || s.DateAt.Date >= input.StartDate.Value.Date)
+                .Where(s => !input.EndDate.HasValue || s.DateAt.Date <= input.EndDate.Value.Date)
                 .Select(s => new { s.UserId, DateAt = s.DateAt.Date, s.totalTime })
                 .ToListAsync();
 
@@ -122,40 +122,53 @@ namespace Timesheet.Timesheets.Timesheets
 
             var queryable = WorkScope.GetAll<MyTimesheet>();
 
-            if (status != TimesheetStatus.All)
+            if (input.Status != TimesheetStatus.All)
             {
-                queryable = queryable.Where(a => a.Status == status);
+                queryable = queryable.Where(a => a.Status == input.Status);
             }
 
-            if (startDate.HasValue)
+            if (input.StartDate.HasValue)
             {
-                queryable = queryable.Where(a => a.DateAt >= startDate);
+                queryable = queryable.Where(a => a.DateAt >= input.StartDate);
             }
 
-            if (endDate.HasValue)
+            if (input.EndDate.HasValue)
             {
-                queryable = queryable.Where(a => a.DateAt.Date <= endDate);
+                queryable = queryable.Where(a => a.DateAt.Date <= input.EndDate);
             }    
 
-            if (opentalkTime.HasValue)
+            if (input.OpentalkTime.HasValue)
             {
                 queryable = queryable.Where(a => a.ProjectTaskId == OpenTalkID);
             }
 
-            if (branchId != null)
+            if (input.BranchId != null)
             {
-                queryable = queryable.Where(a => a.User.BranchId == branchId);
+                queryable = queryable.Where(a => a.User.BranchId == input.BranchId);
+            }
+
+            if (input.TypeOfWork.HasValue)
+            {
+                queryable = queryable.Where(ts => ts.TypeOfWork == input.TypeOfWork.Value);
+            }
+
+            if (input.IsCharged.HasValue)
+            {
+                queryable = queryable.Where(ts => ts.IsCharged == input.IsCharged.Value);
             }
 
             queryable = queryable.Where(a => userIds.Contains(a.UserId));
             queryable = queryable.Where(a => projectIds.Contains(a.ProjectTask.ProjectId));
 
-            if (!string.IsNullOrEmpty(searchText))
+            if (!string.IsNullOrEmpty(input.SearchText))
             {
-                queryable = queryable.Where(a => a.User.EmailAddress.Contains(searchText) || a.User.UserName.Contains(searchText) || a.User.FullName.Contains(searchText));
+                queryable = queryable.Where(a => a.User.EmailAddress.Contains(input.SearchText) || a.User.UserName.Contains(input.SearchText) || a.User.FullName.Contains(input.SearchText));
             }
 
-            var q = queryable.Select(a => new MyTimeSheetDto
+            var q = from a in queryable
+                    join u in WorkScope.GetAll<User>() on a.LastModifierUserId equals u.Id into uJoined
+                    from u in uJoined.DefaultIfEmpty()
+                    select new MyTimeSheetDto
                     {
                         Id = a.Id,
                         Status = a.Status,
@@ -183,8 +196,10 @@ namespace Timesheet.Timesheets.Timesheets
                         IsUnlockedByEmployee = a.IsUnlockedByEmployee,
                         projectTargetUser = a.ProjectTargetUser.User.FullName,
                         workingTimeTargetUser = a.TargetUserWorkingTime,
-                        ProjectTargetRoleName = a.ProjectTargetUser.RoleName
-                    });
+                        ProjectTargetRoleName = a.ProjectTargetUser.RoleName,
+                        RejectReason = a.RejectReason,
+                        LastModifierUser = u != null ? u.FullName : ""
+                    };
 
             var query = q.OrderBy(i => i.EmailAddress)
                          .ThenByDescending(s => s.DateAt)
@@ -204,17 +219,17 @@ namespace Timesheet.Timesheets.Timesheets
                 item.IsOffDay = DateTimeUtils.IsOffDay(dayOffSettings, item.DateAt);
             }
 
-            if (workLocation.HasValue)
+            if (input.WorkLocation.HasValue)
             {
-                query = query.Where(s => s.WorkLocation == workLocation.Value).ToList();
+                query = query.Where(s => s.WorkLocation == input.WorkLocation.Value).ToList();
             }
 
-            if (opentalkTime.HasValue)
+            if (input.OpentalkTime.HasValue)
             {
                 query = query.Where(s =>
-                    opentalkTimeType.Value
-                        ? s.openTalkTime >= opentalkTime
-                        : s.openTalkTime < opentalkTime
+                    input.OpentalkTimeType.Value
+                        ? s.openTalkTime >= input.OpentalkTime
+                        : s.openTalkTime < input.OpentalkTime
                 ).ToList();
             }
 
@@ -228,8 +243,8 @@ namespace Timesheet.Timesheets.Timesheets
                     CheckOut = s.CheckOut,
                     DateAt = s.DateAt.Date
                 })
-                .Where(s => !startDate.HasValue || s.DateAt >= startDate)
-                .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
+                .Where(s => !input.StartDate.HasValue || s.DateAt >= input.StartDate)
+                .Where(s => !input.EndDate.HasValue || s.DateAt.Date <= input.EndDate)
                 .Where(s => s.UserId.HasValue)
                 .ToList();
             
@@ -243,27 +258,27 @@ namespace Timesheet.Timesheets.Timesheets
                 item.CheckOut = timekeepingByUserAtDate?.CheckOut;
             }
 
-            if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.HaveCheckIn)
+            if (input.CheckInFilter.HasValue && input.CheckInFilter.Value == HaveCheckInFilter.HaveCheckIn)
             {
                 return query.Where(s => s.CheckIn != null && s.CheckIn != "").ToList();
             }
 
-            if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.HaveCheckOut)
+            if (input.CheckInFilter.HasValue && input.CheckInFilter.Value == HaveCheckInFilter.HaveCheckOut)
             {
                 return query.Where(s => s.CheckOut != null && s.CheckOut != "").ToList();
             }
 
-            if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.HaveCheckInAndHaveCheckOut)
+            if (input.CheckInFilter.HasValue && input.CheckInFilter.Value == HaveCheckInFilter.HaveCheckInAndHaveCheckOut)
             {
                 return query.Where(s => s.CheckIn != null && s.CheckIn != "" && s.CheckOut != null && s.CheckOut != "").ToList();
             }
 
-            if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.HaveCheckInOrHaveCheckOut)
+            if (input.CheckInFilter.HasValue && input.CheckInFilter.Value == HaveCheckInFilter.HaveCheckInOrHaveCheckOut)
             {
                 return query.Where(s => (s.CheckIn != null && s.CheckIn != "") || (s.CheckOut != null && s.CheckOut != "")).ToList();
             }
 
-            if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.NoCheckInAndNoCheckOut)
+            if (input.CheckInFilter.HasValue && input.CheckInFilter.Value == HaveCheckInFilter.NoCheckInAndNoCheckOut)
             {
                 return query.Where(s => (s.CheckIn == null || s.CheckIn == "") && (s.CheckOut == null || s.CheckOut == "")).ToList();
             }
@@ -454,6 +469,9 @@ namespace Timesheet.Timesheets.Timesheets
                 }
                 ).ToListAsync();
 
+            var allDates = timesheetByUserByProject.SelectMany(u => u.Project.SelectMany(p => p.Timesheets.Select(t => t.DateAt)));
+            await _commonService.checkIsMonthLocked(allDates);
+
             var approverName = (await WorkScope.GetAsync<User>(AbpSession.UserId.Value)).FullName;
             var isUnlockPM = await WorkScope.GetAll<UnlockTimesheet>().AnyAsync(s => s.UserId == AbpSession.UserId.Value && s.Type == LockUnlockTimesheetType.ApproveRejectTimesheet);
             var myApproveTimesheetIds = new List<long>();
@@ -556,7 +574,7 @@ namespace Timesheet.Timesheets.Timesheets
         }
 
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_Approval)]
-        public async System.Threading.Tasks.Task<object> RejectTimesheets(long[] myTimesheetIds)
+        public async System.Threading.Tasks.Task<object> RejectTimesheets(RejectTimesheetDto input)
         {
             int weeksCanUnlockBefor = int.Parse(SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.WeeksCanUnlockBefor).Result);
             int successTS = 0;
@@ -567,7 +585,7 @@ namespace Timesheet.Timesheets.Timesheets
               .Where(s => s.UserId == AbpSession.UserId && s.Type == ProjectUserType.PM)
               .Select(s => new { s.ProjectId });
 
-            var qMyTimeSheets = from mts in WorkScope.GetAll<MyTimesheet>().Where(s => myTimesheetIds.Contains(s.Id))
+            var qMyTimeSheets = from mts in WorkScope.GetAll<MyTimesheet>().Where(s => input.Ids.Contains(s.Id))
                                 join pt in WorkScope.GetAll<ProjectTask>() on mts.ProjectTaskId equals pt.Id
                                 select new { mts, pt.ProjectId };
 
@@ -575,13 +593,15 @@ namespace Timesheet.Timesheets.Timesheets
                               join pu in qprojectUsers on mts.ProjectId equals pu.ProjectId
                               select mts.mts).ToListAsync();
 
+            await _commonService.checkIsMonthLocked(mtss.Select(s => s.DateAt));
+
             //var hackMtsIds = myTimesheetIds.Except(mtss.Select(s => s.Id));
             //if (hackMtsIds != null && hackMtsIds.Count() > 0)
             //{
             //    throw new UserFriendlyException(String.Format("You are not Project Manager of these Timesheet Ids: {0}", String.Join(", ", hackMtsIds)));
             //}
 
-            myTimesheetIds = mtss.Select(s => s.Id).ToArray();
+            var myTimesheetIds = mtss.Select(s => s.Id).ToArray();
             var timesheetByUserByProject = await WorkScope.GetRepo<MyTimesheet>()
                .GetAllIncluding(s => s.ProjectTask.Task, s => s.ProjectTask.Project, s => s.User)
                .Where(s => myTimesheetIds.Contains(s.Id))
@@ -632,6 +652,7 @@ namespace Timesheet.Timesheets.Timesheets
                     var timesheetTable = new StringBuilder();
                     foreach (var timesheet in project.Timesheets)
                     {
+                        await _commonService.checkIsMonthLocked(project.Timesheets.Select(t => t.DateAt));
                         if (timesheet.DateAt > lockDate || (isUnlockPM && timesheet.DateAt > lockDate.AddDays(-(7*weeksCanUnlockBefor)).Date) || timesheet.IsUnlockedByEmployee)
                         {
                             myRejectTimesheetIds.Add(timesheet.Id);
@@ -651,6 +672,10 @@ namespace Timesheet.Timesheets.Timesheets
                         {
                             failTS++;
                         }
+                    }
+                    if (!string.IsNullOrEmpty(input.Reason))
+                    {
+                        mailBody.Append($@"<div><b>Reason:</b> {input.Reason}</div>");
                     }
                     mailBody.Append($@"<table border='1'>
                                     <thead>
@@ -683,6 +708,12 @@ namespace Timesheet.Timesheets.Timesheets
                 foreach (var item in listReject)
                 {
                     item.Status = TimesheetStatus.Reject;
+                    if (!string.IsNullOrEmpty(input.Reason))
+                    {
+                        item.RejectReason = input.Reason;
+                    }
+                    item.LastModifierUserId = AbpSession.UserId;
+                    item.LastModificationTime = DateTimeUtils.GetNow();
                 }
                 await WorkScope.UpdateRangeAsync(listReject);
 
@@ -690,6 +721,7 @@ namespace Timesheet.Timesheets.Timesheets
             }
             else if (failTS > 0)
             {
+                await _commonService.checkIsMonthLocked(mtss.Select(t => t.DateAt));
                 if (isUnlockPM) throw new UserFriendlyException(string.Format("Unlock timesheet chỉ có hiệu lực từ {0} đến {1}. Vui lòng liên hệ admin để được hỗ trợ.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy")));
                 throw new UserFriendlyException("PM hãy vào ims.nccsoft.vn để unlock timesheet");
             }
@@ -890,12 +922,12 @@ namespace Timesheet.Timesheets.Timesheets
 
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Timesheet_ViewStatus)]
-        public async Task<object> GetQuantiyTimesheetStatus(int? opentalkTime, bool? opentalkTimeType, DateTime? startDate, DateTime? endDate, long? projectId, HaveCheckInFilter? checkInFilter, string searchText, long? branchId = 0, RequestType? workLocation = null)
+        public async Task<object> GetQuantiyTimesheetStatus(GetTimesheetsInputDto input)
         {
             var OpenTalkID = Convert.ToInt64(await SettingManager.GetSettingValueAsync(AppSettingNames.ProjectTaskId));
             var projectIds = await WorkScope.GetAll<ProjectUser>()
                 .Where(s => s.UserId == AbpSession.UserId.Value && s.Type == ProjectUserType.PM)
-                .Where(s => !projectId.HasValue || s.ProjectId == projectId)
+                .Where(s => !input.ProjectId.HasValue || s.ProjectId == input.ProjectId)
                 .Select(s => s.ProjectId).ToListAsync();
 
             var userIds = await WorkScope.GetAll<ProjectUser>()
@@ -903,8 +935,8 @@ namespace Timesheet.Timesheets.Timesheets
                 .Select(s => s.UserId).Distinct().ToListAsync();
 
             var absencedays = await WorkScope.GetAll<AbsenceDayDetail>()
-               .Where(s => !startDate.HasValue || s.DateAt >= startDate.Value.Date)
-               .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
+               .Where(s => !input.StartDate.HasValue || s.DateAt >= input.StartDate.Value.Date)
+               .Where(s => !input.EndDate.HasValue || s.DateAt.Date <= input.EndDate)
                .Where(s => userIds.Contains(s.Request.UserId))
                .Where(s => s.Request.Status == RequestStatus.Approved)
                .Where(s => s.Request.Type == RequestType.Off)
@@ -916,8 +948,8 @@ namespace Timesheet.Timesheets.Timesheets
                }).ToListAsync();
 
             var userWorkLocations = await WorkScope.GetAll<AbsenceDayDetail>()
-                .Where(s => !startDate.HasValue || s.DateAt >= startDate.Value.Date)
-                .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
+                .Where(s => !input.StartDate.HasValue || s.DateAt >= input.StartDate.Value.Date)
+                .Where(s => !input.EndDate.HasValue || s.DateAt.Date <= input.EndDate)
                 .Where(s => userIds.Contains(s.Request.UserId))
                 .Where(s => s.Request.Status == RequestStatus.Approved)
                 .Where(s => s.Request.Type == RequestType.Onsite || s.Request.Type == RequestType.Remote)
@@ -930,21 +962,23 @@ namespace Timesheet.Timesheets.Timesheets
 
             var query = WorkScope.GetAll<MyTimesheet>()
                                  .Include(x => x.User)
-                                 .Where(x => !startDate.HasValue || x.DateAt >= startDate)
-                                 .Where(x => !endDate.HasValue || x.DateAt.Date <= endDate)
+                                 .Where(x => !input.StartDate.HasValue || x.DateAt >= input.StartDate)
+                                 .Where(x => !input.EndDate.HasValue || x.DateAt.Date <= input.EndDate)
                                  .Where(x => userIds.Contains(x.UserId))
                                  .Where(x => projectIds.Contains(x.ProjectTask.ProjectId))
-                                 .WhereIf(opentalkTime.HasValue, x => x.ProjectTaskId == OpenTalkID)
-                                 .Where(x => string.IsNullOrEmpty(searchText) || x.User.EmailAddress.Contains(searchText) || x.User.UserName.Contains(searchText) || x.User.FullName.Contains(searchText))
-                                 .Where(x => !branchId.HasValue || branchId == 0 || x.User.BranchId == branchId)
+                                 .WhereIf(input.OpentalkTime.HasValue, x => x.ProjectTaskId == OpenTalkID)
+                                 .Where(x => string.IsNullOrEmpty(input.SearchText) || x.User.EmailAddress.Contains(input.SearchText) || x.User.UserName.Contains(input.SearchText) || x.User.FullName.Contains(input.SearchText))
+                                 .Where(x => !input.BranchId.HasValue || input.BranchId == 0 || x.User.BranchId == input.BranchId)
                                  .Select(x => new
                                  {
                                      UserId = x.UserId,
                                      Status = x.Status,
                                      DateAt = x.DateAt.Date,
-                                     openTalkTime = !opentalkTime.HasValue ? 0 : WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == x.UserId && x.DateAt.Date == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
+                                     IsCharged = x.IsCharged,
+                                     TypeOfWork = x.TypeOfWork,
+                                     openTalkTime = !input.OpentalkTime.HasValue ? 0 : WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == x.UserId && x.DateAt.Date == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
                                  })
-                                 .WhereIf(opentalkTime.HasValue, x => opentalkTimeType.Value ? x.openTalkTime >= opentalkTime : x.openTalkTime < opentalkTime);
+                                 .WhereIf(input.OpentalkTime.HasValue, x => input.OpentalkTimeType.Value ? x.openTalkTime >= input.OpentalkTime : x.openTalkTime < input.OpentalkTime);
 
 
             var listMyTimesheet = new List<QuantiyTimesheetStatusDto>();
@@ -957,8 +991,8 @@ namespace Timesheet.Timesheets.Timesheets
                     CheckOut = s.CheckOut,
                     DateAt = s.DateAt.Date
                 })
-                .Where(s => !startDate.HasValue || s.DateAt >= startDate)
-                .Where(s => !endDate.HasValue || s.DateAt.Date <= endDate)
+                .Where(s => !input.StartDate.HasValue || s.DateAt >= input.StartDate)
+                .Where(s => !input.EndDate.HasValue || s.DateAt.Date <= input.EndDate)
                 .Where(s => s.UserId.HasValue)
                 .ToList();
 
@@ -992,33 +1026,43 @@ namespace Timesheet.Timesheets.Timesheets
                     DateAt = item.DateAt.Date,
                     CheckIn = timekeepingByUserAtDate?.CheckIn,
                     CheckOut = timekeepingByUserAtDate?.CheckOut,
-                    WorkLocation = itemWorkLocation
+                    WorkLocation = itemWorkLocation,
+                    IsCharged = item.IsCharged,
+                    TypeOfWork = item.TypeOfWork
                 });
             }
-            if (workLocation.HasValue)
+            if (input.WorkLocation.HasValue)
             {
-                listMyTimesheet = listMyTimesheet.Where(s => s.WorkLocation == workLocation.Value).ToList();
+                listMyTimesheet = listMyTimesheet.Where(s => s.WorkLocation == input.WorkLocation.Value).ToList();
+            }
+            if (input.TypeOfWork.HasValue)
+            {
+                listMyTimesheet = listMyTimesheet.Where(s => s.TypeOfWork == input.TypeOfWork.Value).ToList();
+            }
+            if (input.IsCharged.HasValue)
+            {
+                listMyTimesheet = listMyTimesheet.Where(s => s.IsCharged == input.IsCharged.Value).ToList();
             }
 
             listMyTimesheet = listMyTimesheet.Where(s => s.WorkLocation != null).ToList();
 
-            if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.HaveCheckIn)
+            if (input.CheckInFilter.HasValue && input.CheckInFilter.Value == HaveCheckInFilter.HaveCheckIn)
             {
                 listMyTimesheet = listMyTimesheet.Where(s => s.CheckIn != null && s.CheckIn != "").ToList();
             }
-            if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.HaveCheckOut)
+            if (input.CheckInFilter.HasValue && input.CheckInFilter.Value == HaveCheckInFilter.HaveCheckOut)
             {
                 listMyTimesheet = listMyTimesheet.Where(s => s.CheckOut != null && s.CheckOut != "").ToList();
             }
-            if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.HaveCheckInAndHaveCheckOut)
+            if (input.CheckInFilter.HasValue && input.CheckInFilter.Value == HaveCheckInFilter.HaveCheckInAndHaveCheckOut)
             {
                 listMyTimesheet = listMyTimesheet.Where(s => s.CheckIn != null && s.CheckIn != "" && s.CheckOut != null && s.CheckOut != "").ToList();
             }
-            if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.HaveCheckInOrHaveCheckOut)
+            if (input.CheckInFilter.HasValue && input.CheckInFilter.Value == HaveCheckInFilter.HaveCheckInOrHaveCheckOut)
             {
                 listMyTimesheet = listMyTimesheet.Where(s => (s.CheckIn != null && s.CheckIn != "") || (s.CheckOut != null && s.CheckOut != "")).ToList();
             }
-            if (checkInFilter.HasValue && checkInFilter.Value == HaveCheckInFilter.NoCheckInAndNoCheckOut)
+            if (input.CheckInFilter.HasValue && input.CheckInFilter.Value == HaveCheckInFilter.NoCheckInAndNoCheckOut)
             {
                 listMyTimesheet = listMyTimesheet.Where(s => (s.CheckIn == null || s.CheckIn == "") && (s.CheckOut == null || s.CheckOut == "")).ToList();
             }

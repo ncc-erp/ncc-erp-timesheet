@@ -183,4 +183,8 @@ export class DetailParticipatingProjectsComponent extends AppComponentBase imple
     }
     return result;
   }
+
+  convertMinuteToHour(minute: number): string {
+    return convertMinuteToHour(minute);
+  }
 }

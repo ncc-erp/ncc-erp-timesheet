@@ -1,0 +1,7 @@
+@media (min-width: 1025px) {
+
+    :host ::ng-deep .card .body,
+    :host ::ng-deep .mat-tab-body-content {
+        overflow-x: hidden;
+    }
+}

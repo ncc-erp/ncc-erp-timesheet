@@ -88,9 +88,15 @@ export class SubmitAbsenseDayComponent extends AppComponentBase implements OnIni
         this.isSaving = true
         if (this.data.length !== 0) {
             this.absenceDayService.submitAbsenceDays(this.absenceDayReq).subscribe(resp => {
-                if (resp) {
-                    this.data.selectedDays.clear();
-                    this.notify.success(this.l('Submit absence days successfully!'));
+                if (resp && resp.success) {
+                    const errorItem = resp.result.absences.find((item: any) => item.status == 3);
+                    if (errorItem) {
+                        const errorMsg = errorItem.errorMessage || 'Failed to submit absence request!';
+                        this.notify.error(this.l(errorMsg));
+                    } else {
+                        this.data.selectedDays.clear();
+                        this.notify.success(this.l('Submit absence days successfully!'));
+                    }
                 }
                 this.diaLogRef.close(true);
                 this.isSaving = false

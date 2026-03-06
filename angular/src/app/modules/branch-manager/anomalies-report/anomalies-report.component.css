@@ -1,0 +1,223 @@
+.filter-row {
+  display: flex;
+  flex-wrap: nowrap;
+  margin: 0 -5px 15px -5px;
+  align-items: flex-start;
+}
+
+.filter-item {
+  flex: 1;
+  padding: 0 5px;
+  min-width: 0;
+}
+
+.filter-search {
+  flex: 3;
+}
+
+.filter-branch {
+  flex: 1;
+}
+
+.filter-row .mat-form-field {
+  width: 100%;
+}
+
+::ng-deep .filter-row .mat-form-field-wrapper {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+@media screen and (max-width: 991px) {
+  .filter-row {
+    flex-wrap: wrap;
+  }
+
+  .filter-item {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+h2 {
+  color: #555;
+  font-size: 20px;
+}
+
+h3 {
+  color: #666;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.section-title mat-icon {
+  color: #2196F3;
+}
+
+.tab-content-wrapper {
+  padding: 10px 0;
+  overflow: visible !important;
+}
+
+.body {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+::ng-deep .mat-tab-body-wrapper,
+::ng-deep .mat-tab-body.mat-tab-body-active,
+::ng-deep .mat-tab-body-content,
+::ng-deep .mat-tab-group {
+  overflow: visible !important;
+  height: auto !important;
+}
+
+::ng-deep .slimScrollBar,
+::ng-deep .slimScrollRail {
+  display: none !important;
+}
+
+.customTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+  background: #fff;
+  table-layout: fixed;
+}
+
+.customTable thead tr th {
+  background-color: #f8f9fa;
+  color: #333;
+  font-weight: 600;
+  padding: 12px 8px;
+  border: 1px solid #dee2e6;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customTable tbody tr td {
+  padding: 12px 8px;
+  border: 1px solid #dee2e6;
+  vertical-align: middle;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.sortable {
+  cursor: pointer;
+}
+
+.sortable:hover {
+  background-color: #e9ecef !important;
+}
+
+.header-content i {
+  color: #2196F3;
+  font-size: 14px;
+}
+
+.col-index {
+  width: 5%;
+}
+
+.col-name {
+  width: 20%;
+}
+
+.col-branch {
+  width: 10%;
+}
+
+.col-dates {
+  width: 40%;
+}
+
+.col-count {
+  width: 8%;
+}
+
+.col-notes {
+  width: 17%;
+}
+
+.label {
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+  margin: 2px;
+}
+
+.bg-blue {
+  background-color: #2196F3;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.search-input-field {
+  flex-grow: 1;
+}
+
+.custom-search-icon {
+  cursor: pointer;
+  color: #757575;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 50px;
+}
+
+.abp-pagination-controls-wrapper {
+  margin-top: 20px;
+  padding: 15px 0;
+  border-top: 1px solid #dee2e6;
+  width: 100%;
+  text-align: center;
+}
+
+::ng-deep .abp-pagination-controls-wrapper .pagination {
+  margin: 0 !important;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: none;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .filter-row {
+    flex-direction: column;
+  }
+
+  .filter-item {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}

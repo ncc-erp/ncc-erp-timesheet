@@ -123,7 +123,8 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
 
   onChangeSelect(event?): void {
     this.listProjectSelected = event.value;
-    localStorage.setItem('listProjectIdsOfUser', this.listProjectSelected.toString());
+    let unselectedIds = this.listProject.map(p => p.id).filter(id => this.listProjectSelected.indexOf(id) === -1);
+    localStorage.setItem('listProjectIdsOfUserUnselected', unselectedIds.toString());
     this.refreshData();
   }
 
@@ -137,7 +138,7 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
     this.isLoading = true;
     this.projectService.getProjectUser().subscribe(res => { // get list project cua PM
       this.listProject = res.result;
-      let data = localStorage.getItem("listProjectIdsOfUser");
+      let data = localStorage.getItem("listProjectIdsOfUserUnselected");
       this.listProject.forEach(item => {
         if (data == null || data == "") {
           this.listProjectSelected.push(item.id);
@@ -148,9 +149,10 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
       });
 
       if (data !== null && data !== '') {
-        data.split(",").forEach((value: string) => {
-          if (this.listProject.some(project => project.id === Number.parseInt(value))) {
-            this.listProjectSelected.push(Number.parseInt(value));
+        let unselectedIds = data.split(",").map(v => Number.parseInt(v));
+        this.listProject.forEach(project => {
+          if (unselectedIds.indexOf(project.id) === -1) {
+            this.listProjectSelected.push(project.id);
           }
         });
       }
@@ -165,7 +167,8 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
 
   onChangeListProjectIdSelected(event) {
     this.listProjectSelected = event;
-    localStorage.setItem('listProjectIdsOfUser', event.toString());
+    let unselectedIds = this.listProject.map(p => p.id).filter(id => this.listProjectSelected.indexOf(id) === -1);
+    localStorage.setItem('listProjectIdsOfUserUnselected', unselectedIds.toString());
     this.refreshData();
   }
 

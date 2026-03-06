@@ -79,6 +79,7 @@ import { AddUserOtherProjectComponent } from './add-user-other-project/add-user-
 import { SentryService } from './sentry-service';
 import { ShowProjectInActivePipe } from './pipes/show-project-in-active.pipe';
 import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
+import { ViewRejectReasonDialogComponent } from './view-reject-reason-dialog/view-reject-reason-dialog.component';
 import { ButtonComponent } from './button/button.component';
 import { BadgeComponent } from './badge/badge.component';
 import { TableToolbarComponent } from './table-toolbar/table-toolbar.component';
@@ -155,6 +156,7 @@ import { PaginationBarComponent } from './pagination-bar/pagination-bar.componen
     DayTypePipe,
     AddUserOtherProjectComponent,
     ShowProjectInActivePipe,
+    ViewRejectReasonDialogComponent,
     ButtonComponent,
     BadgeComponent,
     TableToolbarComponent,
@@ -225,6 +227,7 @@ import { PaginationBarComponent } from './pagination-bar/pagination-bar.componen
     DayTypePipe,
     AddUserOtherProjectComponent,
     ShowProjectInActivePipe,
+    ViewRejectReasonDialogComponent
     ButtonComponent,
     BadgeComponent,
     TableToolbarComponent,
@@ -232,6 +235,7 @@ import { PaginationBarComponent } from './pagination-bar/pagination-bar.componen
   ],
   entryComponents: [
     PopupComponent,
+    ViewRejectReasonDialogComponent
   ],
 })
 export class SharedModule {

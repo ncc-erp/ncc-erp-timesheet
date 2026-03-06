@@ -107,6 +107,8 @@ export const PERMISSIONS_CONSTANT = {
     EditLateInternReviewSetting: "Admin.Configuration.LateInternReviewConfig.EditLateInternReviewConfig",
     ViewPMReportSetting: "Admin.Configuration.PMReportConfig.ViewPMReportConfig",
     EditPMReportSetting: "Admin.Configuration.PMReportConfig.EditPMReportConfig",
+    ViewPMOtherPunishSetting: "Admin.Configuration.PMOtherPunishConfig.ViewPMOtherPunishConfig",
+    EditPMOtherPunishSetting: "Admin.Configuration.PMOtherPunishConfig.EditPMOtherPunishConfig",
     ViewBotReportSetting: "Admin.Configuration.BotReportConfig.ViewBotReportConfig",
     EditBotReportSetting: "Admin.Configuration.BotReportConfig.EditBotReportConfig",
     ViewAnomaliesReportSetting: "Admin.Configuration.AnomaliesReportConfig.ViewAnomaliesReportConfig",
@@ -161,6 +163,14 @@ export const PERMISSIONS_CONSTANT = {
     EditPunishments: "Admin.Punishments.Edit",
     DeletePunishments: "Admin.Punishments.Delete",
     PunishmentsChangeStatus: "Admin.Punishments.ChangeStatus",
+
+    // Remote Blacklist
+    ViewRemoteBlacklist: "Admin.Remote.Blacklist.View",
+    AddRemoteBlacklist: "Admin.Remote.Blacklist.Add",
+    EditRemoteBlacklist: "Admin.Remote.Blacklist.Edit",
+    DeleteRemoteBlacklist: "Admin.Remote.Blacklist.Delete",
+    ImportRemoteBlacklist: "Admin.Remote.Blacklist.Import",
+    DownloadTemplateRemoteBlacklist: "Admin.Remote.Blacklist.DownloadTemplate",
 
     //my timesheet
     AddMyTimesheet: "MyTimesheet.AddNew",

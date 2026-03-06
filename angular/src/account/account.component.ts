@@ -78,7 +78,6 @@ export class AccountComponent extends AppComponentBase implements OnInit {
         }
       }
     
-    
       // Hàm logout
       logout() {
         this._authService.logout();

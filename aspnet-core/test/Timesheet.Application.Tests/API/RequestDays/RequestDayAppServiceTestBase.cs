@@ -138,13 +138,17 @@ namespace Timesheet.Application.Tests.API.RequestDays
             var w2Service = Substitute.For<W2Service>(loggerW2, workScope, w2ServiceConfiguration);
             this._w2service = w2Service;
 
+            var commonService = Substitute.For<CommonServices> (
+                settingManager);
+
             var requestDayAppService = new RequestDayAppService(
                 backgroundJobManager,
                 komuService,
                 timeKeepingService,
                 workScope,
                 approveRequestOffService,
-                w2Service, mezonService);
+                w2Service, mezonService,
+                commonService);
             requestDayAppService.AbpSession = Resolve<IAbpSession>();
             requestDayAppService.SettingManager = settingManager;
             requestDayAppService.UnitOfWorkManager = Resolve<IUnitOfWorkManager>();

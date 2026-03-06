@@ -34,6 +34,8 @@ export class TimeSheetDto {
     workingTimeTargetUser: number;
     openTalkTime : number;
     workLocation: number;
+    rejectReason: string;
+    lastModifierUser: string;
 }
 
 export class TimeSheetGroupDto {

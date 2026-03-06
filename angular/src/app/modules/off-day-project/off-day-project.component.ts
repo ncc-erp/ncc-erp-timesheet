@@ -128,7 +128,8 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
   }
   onChangeSelect(event?): void {
     this.listProjectSelected = event.value;
-    localStorage.setItem('manageRequest_Off_Remote_Onsite_ListProjectIdSelected', this.listProjectSelected.toString());
+    let unselectedIds = this.listProject.map(p => p.id).filter(id => this.listProjectSelected.indexOf(id) === -1);
+    localStorage.setItem('manageRequest_Off_Remote_Onsite_ListProjectIdUnselected', unselectedIds.toString());
     this.getDayOff();
   }
 
@@ -136,7 +137,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     this.isLoading = true;
     this.projectService.getProjectPM().subscribe(res => { // get list project cua PM
       this.listProject = res.result;
-      let data = localStorage.getItem("manageRequest_Off_Remote_Onsite_ListProjectIdSelected");
+      let data = localStorage.getItem("manageRequest_Off_Remote_Onsite_ListProjectIdUnselected");
       this.listProject.forEach(item => {
         if (data == null || data == "") {
           //if(!this._permissionChecker.isGranted('AbsenceDayByProject.ViewByBranch')) {
@@ -148,10 +149,11 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
         }
       });
       if (data !== null && data !== '') {
-        data.split(",").forEach((value: string) => {
-          if (this.listProject.some(project => project.id === Number.parseInt(value))) {
+        let unselectedIds = data.split(",").map(v => Number.parseInt(v));
+        this.listProject.forEach(project => {
+          if (unselectedIds.indexOf(project.id) === -1) {
             //if(!this._permissionChecker.isGranted('AbsenceDayByProject.ViewByBranch')) {
-              this.listProjectSelected.push(Number.parseInt(value));
+              this.listProjectSelected.push(project.id);
             //}
           }
         });
@@ -166,7 +168,8 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
 
   onChangeListProjectIdSelected(event) {
     this.listProjectSelected = event;
-    localStorage.setItem('manageRequest_Off_Remote_Onsite_ListProjectIdSelected', event.toString());
+    let unselectedIds = this.listProject.map(p => p.id).filter(id => this.listProjectSelected.indexOf(id) === -1);
+    localStorage.setItem('manageRequest_Off_Remote_Onsite_ListProjectIdUnselected', unselectedIds.toString());
     this.getDayOff();
   }
 

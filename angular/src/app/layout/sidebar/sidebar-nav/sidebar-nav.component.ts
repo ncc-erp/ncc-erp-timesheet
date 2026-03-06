@@ -124,6 +124,12 @@ export class SideBarNavComponent extends AppComponentBase {
                     "update",
                     "/app/main/background-jobs"
                 ),
+                new MenuItem(
+                    this.l("Remote Blacklist"),
+                    "Admin.Remote.Blacklist",
+                    "block",
+                    "/app/main/remote-blacklist"
+                )
             ]),
             new MenuItem(this.l("Personal timesheet"), "", "account_circle", "", [
                 new MenuItem(
@@ -149,7 +155,7 @@ export class SideBarNavComponent extends AppComponentBase {
                     "MyWorkingTime",
                     "today",
                     "/app/main/my-working-time"
-                ),
+                )
             ]),
             new MenuItem(this.l("Management"), "", "group_work", "", [
                 new MenuItem(
