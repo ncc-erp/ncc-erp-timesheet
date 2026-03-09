@@ -224,6 +224,12 @@ namespace Ncc.Authorization
         public const string Admin_Remote_Blacklist_Import = "Admin.Remote.Blacklist.Import";
         public const string Admin_Remote_Blacklist_DownloadTemplate = "Admin.Remote.Blacklist.DownloadTemplate";
 
+        public const string Admin_TrackerWhitelist = "Admin.TrackerWhitelist";
+        public const string Admin_TrackerWhitelist_View = "Admin.TrackerWhitelist.View";
+        public const string Admin_TrackerWhitelist_Add = "Admin.TrackerWhitelist.Add";
+        public const string Admin_TrackerWhitelist_Edit = "Admin.TrackerWhitelist.Edit";
+        public const string Admin_TrackerWhitelist_Delete = "Admin.TrackerWhitelist.Delete";
+
         public const string Project = "Project";
         public const string Project_View = "Project.View";
         public const string Project_View_All = "Project.ViewAll";
@@ -604,6 +610,12 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_Remote_Blacklist_Edit,
                     PermissionNames.Admin_Remote_Blacklist_Import,
                     PermissionNames.Admin_Remote_Blacklist_DownloadTemplate,
+
+                    PermissionNames.Admin_TrackerWhitelist,
+                    PermissionNames.Admin_TrackerWhitelist_View,
+                    PermissionNames.Admin_TrackerWhitelist_Add,
+                    PermissionNames.Admin_TrackerWhitelist_Edit,
+                    PermissionNames.Admin_TrackerWhitelist_Delete,
 
                     PermissionNames.Project,
                     PermissionNames.Project_View,
@@ -1150,6 +1162,12 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete remote blacklist" },
             new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Import, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Import a CSV file to remote blacklist" },
             new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_DownloadTemplate, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Download remote blacklist template" },
+
+            new SystemPermission{ Name =  PermissionNames.Admin_TrackerWhitelist, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Tracker whitelist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_TrackerWhitelist_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View tracker whitelist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_TrackerWhitelist_Add, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add new record to tracker whitelist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_TrackerWhitelist_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit tracker whitelist" },
+            new SystemPermission{ Name =  PermissionNames.Admin_TrackerWhitelist_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete tracker whitelist" },
 
             new SystemPermission{ Name =  PermissionNames.Project, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Projects" },
             new SystemPermission{ Name =  PermissionNames.Project_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View my projects" },
@@ -1775,6 +1793,15 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete remote blacklist" },
                             new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_Import, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Import a CSV file to remote blacklist" },
                             new SystemPermission{ Name =  PermissionNames.Admin_Remote_Blacklist_DownloadTemplate, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Download remote blacklist template"}
+                        }
+                     },
+                     new SystemPermission{ Name =  PermissionNames.Admin_TrackerWhitelist, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Tracker whitelist",
+                        Childrens = new List<SystemPermission>()
+                        {
+                            new SystemPermission{ Name =  PermissionNames.Admin_TrackerWhitelist_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View tracker whitelist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_TrackerWhitelist_Add, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Add new record to tracker whitelist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_TrackerWhitelist_Edit, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Edit tracker whitelist" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_TrackerWhitelist_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete tracker whitelist" }
                         }
                      },
                 }

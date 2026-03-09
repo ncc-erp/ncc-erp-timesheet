@@ -917,6 +917,19 @@ const routes: Routes = [
   }]
 },
 {
+  path: "tracker-whitelist",
+  component: MainComponent,
+  canActivate: [AppRouteGuard],
+  children: [{
+    path: '',
+    loadChildren: '../modules/tracker-whitelist/tracker-whitelist.module#TrackerWhitelistModule',
+    data: {
+      permission: 'Admin.TrackerWhitelist',
+      preload: true
+    }
+  }]
+},
+{
   path: "team-building-hr",
   component: MainComponent,
   canActivate: [AppRouteGuard],

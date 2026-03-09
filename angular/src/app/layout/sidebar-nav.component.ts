@@ -128,6 +128,12 @@ export class SideBarNavComponent extends AppComponentBase {
                     "Admin.Remote.Blacklist",
                     "block",
                     "/app/main/remote-blacklist"
+                ),
+                new MenuItem(
+                    this.l("Tracker Whitelist"),
+                    "Admin.TrackerWhitelist",
+                    "fact_check",
+                    "/app/main/tracker-whitelist"
                 )
             ]),
             new MenuItem(this.l("Personal timesheet"), "", "account_circle", "", [
