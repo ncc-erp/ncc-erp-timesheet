@@ -179,6 +179,20 @@ namespace Timesheet.Uitls
 
         }
 
+        public static Dictionary<ReviewInternStatus, string> ReviewInternStatusString ()
+        {
+            return new Dictionary<ReviewInternStatus, string>()
+            {
+                { ReviewInternStatus.Draft, "Draft" },
+                { ReviewInternStatus.Reviewed, "Reviewed" },
+                { ReviewInternStatus.Approved, "Approved" },
+                { ReviewInternStatus.SentEmail, "Sent Email" },
+                { ReviewInternStatus.Rejected, "Rejected" },
+                { ReviewInternStatus.PmReviewed, "PM Reviewed" },
+                { ReviewInternStatus.ReOpen, "ReOpen" }
+            };
+        }
+
         public static string TypeOfWorkName(TypeOfWork typeOfWork)
         {
            if (typeOfWork == TypeOfWork.NormalWorkingHours)
