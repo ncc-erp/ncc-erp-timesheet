@@ -1,4 +1,4 @@
-﻿using Abp.Application.Services.Dto;
+using Abp.Application.Services.Dto;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,21 +9,18 @@ namespace Timesheet.DomainServices.Dto
 {
     public class AnomaliesTimelogReportDto
     {
-        public PagedResultDto<YesterdayAnomalyDTO> YesterdayAnomalies { get; set; }
-        public PagedResultDto<LastWeekAnomalyDTO> LastWeekAnomalies { get; set; }
+        public List<YesterdayAnomalyDTO> YesterdayAnomalies { get; set; }
+        public List<LastWeekAnomalyDTO> LastWeekAnomalies { get; set; }
 
         public AnomaliesTimelogReportDto()
         {
-            YesterdayAnomalies = new PagedResultDto<YesterdayAnomalyDTO>();
-            LastWeekAnomalies = new PagedResultDto<LastWeekAnomalyDTO>();
+            YesterdayAnomalies = new List<YesterdayAnomalyDTO>();
+            LastWeekAnomalies = new List<LastWeekAnomalyDTO>();
         }
     }
 
     public class GetAnomaliesTimelogReportInput
     {
         public List<long> BranchIds { get; set; } = new List<long>();
-        public EYesterdayAnomaliesSortColumn? YesterdayAnomaliesSortColumn { get; set; }
-        public ELastWeekAnomaliesSortColumn? LastWeekAnomaliesSortColumn { get; set; }
-        public ESortDirection SortDirection { get; set; }
     }
 }

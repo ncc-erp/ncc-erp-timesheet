@@ -1,39 +1,39 @@
 <div class="tab-content-wrapper">
-        <div class="group">
-            <div class="row filter-row">
-                <div class="filter-item filter-search">
-                    <mat-form-field style="padding-bottom: 0;" class="w-100" appearance="outline">
-                        <mat-label>{{ "Search" | localize }}</mat-label>
-                        <div class="search-input-wrapper">
-                            <input class="search-input-field" matInput [(ngModel)]="searchText"
-                                (ngModelChange)="onSearchChange()" placeholder="Search by name or branch..." />
-                            <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="searchText" (click)="clearSearch()">clear</mat-icon>
-                            <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix>search</mat-icon>
-                        </div>
-                    </mat-form-field>
-                </div>
+    <div class="group">
+        <div class="row filter-row">
+            <div class="filter-item filter-search">
+                <mat-form-field style="padding-bottom: 0;" class="w-100" appearance="outline">
+                    <mat-label>{{ "Search" | localize }}</mat-label>
+                    <div class="search-input-wrapper">
+                        <input class="search-input-field" matInput [(ngModel)]="searchText"
+                            (ngModelChange)="onSearchChange()" placeholder="Search by name or branch..." />
+                        <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="searchText" (click)="clearSearch()">clear</mat-icon>
+                        <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix>search</mat-icon>
+                    </div>
+                </mat-form-field>
+            </div>
 
-                <!-- Branch Filter -->
-                <div class="filter-item filter-branch">
-                    <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
-                        <mat-label>{{ "Branch" | localize }}</mat-label>
-                        <mat-select name="branchIds" multiple [(ngModel)]="selectedBranchIds"
-                            (ngModelChange)="onBranchSelectionChange()">
-                            <input matInput placeholder="Search branch..." [(ngModel)]="branchSearchText"
-                                (keyup)="filterBranch()" (click)="$event.stopPropagation()"
-                                style="width: 100%; padding: 4px" />
-                            <mat-option [value]="'all'" (click)="toggleSelectAll($event)" [disabled]="true"
-                                style="cursor: pointer;">
-                                <strong>
-                                    {{ getSelectAllText() | localize }}
-                                </strong>
-                            </mat-option>
-                            <mat-divider></mat-divider>
-                            <mat-option *ngFor="let branch of filteredBranches" [value]="branch.id">
-                                {{ branch.name }}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
+            <!-- Branch Filter -->
+            <div class="filter-item filter-branch">
+                <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
+                    <mat-label>{{ "Branch" | localize }}</mat-label>
+                    <mat-select name="branchIds" multiple [(ngModel)]="selectedBranchIds"
+                        (ngModelChange)="onBranchSelectionChange()">
+                        <input matInput placeholder="Search branch..." [(ngModel)]="branchSearchText"
+                            (keyup)="filterBranch()" (click)="$event.stopPropagation()"
+                            style="width: 100%; padding: 4px" />
+                        <mat-option [value]="'all'" (click)="toggleSelectAll($event)" [disabled]="true"
+                            style="cursor: pointer;">
+                            <strong>
+                                {{ getSelectAllText() | localize }}
+                            </strong>
+                        </mat-option>
+                        <mat-divider></mat-divider>
+                        <mat-option *ngFor="let branch of filteredBranches" [value]="branch.id">
+                            {{ branch.name }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
             </div>
         </div>
     </div>
@@ -93,8 +93,8 @@
                         <td class="text-center">{{ (pAbsence - 1) * pageSizeAbsence + i + 1 }}</td>
                         <td class="text-center">{{ item.employeeName }}</td>
                         <td class="text-center">
-                            <span class="label" [style.backgroundColor]="item.branch.branchColor">
-                                {{item.branch.branchName}}
+                            <span class="label" [style.backgroundColor]="item.branch.color">
+                                {{item.branch.name}}
                             </span>
                         </td>
                         <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">
@@ -185,8 +185,8 @@
                         <td class="text-center">{{ (pShort - 1) * pageSizeShort + i + 1 }}</td>
                         <td class="text-center">{{ item.employeeName }}</td>
                         <td class="text-center">
-                            <span class="label" [style.backgroundColor]="item.branch.branchColor">
-                                {{item.branch.branchName}}
+                            <span class="label" [style.backgroundColor]="item.branch.color">
+                                {{item.branch.name}}
                             </span>
                         </td>
                         <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">

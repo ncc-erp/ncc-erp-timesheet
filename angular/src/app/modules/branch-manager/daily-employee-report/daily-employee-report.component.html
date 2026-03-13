@@ -174,8 +174,8 @@
                 <td class="text-center">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
                 <td class="text-center">{{ item.fullName }}</td>
                 <td class="text-center">
-                  <span class="label" [style.backgroundColor]="item.branchColor">
-                    {{item.branchName}}
+                  <span class="label" [style.backgroundColor]="item.branch.color">
+                    {{item.branch.name}}
                   </span>
                 </td>
                 <td class="text-center">{{ round(item.wfhLW) }}</td>

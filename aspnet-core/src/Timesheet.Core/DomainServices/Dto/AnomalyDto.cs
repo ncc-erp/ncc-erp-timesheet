@@ -59,13 +59,35 @@ namespace Timesheet.DomainServices.Dto
     {
         public List<UserDto> Users { get; set; } = new List<UserDto>();
         public List<TimekeepingDto> Timekeepings { get; set; } = new List<TimekeepingDto>();
-        public List<AbsenceRequestDto> AbsenceRequests { get; set; } = new List<AbsenceRequestDto>();
         public List<AbsenceDetailDto> AbsenceDetails { get; set; } = new List<AbsenceDetailDto>();
     }
-    public class BranchToDisplayDto
+    public class UserWithAnomalyDto
     {
-        public string BranchName { get; set; }
-        public string BranchColor { get; set; }
+        public long UserId { get; set; }
+        public string EmployeeName { get; set; }
+        public string UserName { get; set; }
+        public DateTime DateAt { get; set; }
+        public BranchToDisplayDto Branch { get; set; }
+        public bool IsYesterday { get; set; }
+    }
+    public class CalculateOfficeWorkingTimeDto
+    {
+        public TimeSpan CheckInTime { get; set; }
+        public TimeSpan CheckOutTime { get; set; }
+        public TimeSpan? MorningStartAt { get; set; }
+        public TimeSpan? AfternoonStartAt { get; set; }
+        public bool IsMorningAbsence { get; set; }
+        public bool IsAfternoonAbsence { get; set; }
+        public double GracePeriodMinutes { get; set; }
+        public double BreakTime { get; set; }
+    }
+    public class TrackerTimeInputDto
+    {
+        public string TrackerTimeStr { get; set; }
+        public TimeSpan? CheckInTime { get; set; }
+        public TimeSpan? MorningStartAt { get; set; }
+        public TimeSpan? AfternoonStartAt { get; set; }
+        public double GracePeriodMinutes { get; set; }
     }
     public class AnomalyInputDto
     {
@@ -85,10 +107,8 @@ namespace Timesheet.DomainServices.Dto
         public List<TimekeepingDto> AllTimekeepings { get; set; }
         public List<AbsenceRequestDto> AllAbsenceRequests { get; set; }
         public List<AbsenceDetailDto> AllAbsenceDetails { get; set; }
-        public long BranchId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public bool IsYesterday { get; set; }
-        public BranchToDisplayDto Branch { get; set; }
     }
 }

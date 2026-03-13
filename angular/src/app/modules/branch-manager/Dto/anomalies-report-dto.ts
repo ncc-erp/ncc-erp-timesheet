@@ -1,7 +1,4 @@
-export interface AnomalyBranch {
-    branchName: string;
-    branchColor: string;
-}
+import { BranchToDisplayDto } from "./branch-manage-dto";
 
 export interface YesterdayAnomaly {
     userId: number;
@@ -10,7 +7,7 @@ export interface YesterdayAnomaly {
     date: string | Date;
     actualHours: string;
     notes: string;
-    branch: AnomalyBranch;
+    branch: BranchToDisplayDto;
 }
 
 export interface LastWeekAnomaly {
@@ -22,7 +19,7 @@ export interface LastWeekAnomaly {
     datesBelowThreshold: (string | Date)[];
     count: number;
     notes: string;
-    branch: AnomalyBranch;
+    branch: BranchToDisplayDto;
 }
 
 export interface AnomaliesTimelogReportResponse {

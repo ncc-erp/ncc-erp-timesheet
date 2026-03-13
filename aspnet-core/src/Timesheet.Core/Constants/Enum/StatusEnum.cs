@@ -88,6 +88,18 @@ namespace Ncc.Entities.Enum
             //ProbationaryStaff = 3
         }
 
+        public enum OfficeBranch : long
+        {
+            HN1 = 1,
+            HN2 = 2,
+            SG1 = 3,
+            SG2 = 4,
+            DN = 5,
+            VINH = 6,
+            QN = 7,
+            HN3 = 8
+        }
+
         public enum UserLevel : byte
         {
             Intern_0 = 0,

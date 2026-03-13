@@ -1,12 +1,12 @@
 export enum SortColumn {
-  TotalAllLW = 0,
-  OfficeLW = 1,
-  WfhLW = 2,
-  TotalAllLM = 3,
-  OfficeLM = 4,
-  WfhLM = 5,
-  FullName = 6,
-  BranchName = 7
+  TotalAllLW = 'TotalAllLW',
+  OfficeLW = 'OfficeLW',
+  WfhLW = 'WfhLW',
+  TotalAllLM = 'TotalAllLM',
+  OfficeLM = 'OfficeLM',
+  WfhLM = 'WfhLM',
+  FullName = 'FullName',
+  BranchName = 'BranchName'
 }
 
 export enum SortDirection {

@@ -62,15 +62,15 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   
   ngOnInit(): void {
     if (this.listBranchFilter && this.listBranchFilter.length > 0) {
-      this.selectedBranchIdsYesterday = this.listBranchFilter.map(b => b.id);
-      this.selectedBranchIdsLastWeek = this.listBranchFilter.map(b => b.id);
+      this.selectedBranchIdsYesterday = [];
+      this.selectedBranchIdsLastWeek = [];
     } else if (this.listBranch && this.listBranch.length > 0) {
-      this.selectedBranchIdsYesterday = this.listBranch.map(b => b.id);
-      this.selectedBranchIdsLastWeek = this.listBranch.map(b => b.id);
+      this.selectedBranchIdsYesterday = [];
+      this.selectedBranchIdsLastWeek = [];
       this.listBranchFilter = [...this.listBranch];
     }
     
-    this.selectedBranchIds = [...this.selectedBranchIdsYesterday];
+    this.selectedBranchIds = [];
     this.loadYesterdayReport();
     this.loadLastWeekReport();
   }
@@ -100,8 +100,10 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     return this.listBranchFilter.filter(b => b.id && b.id !== 0);
   }
 
-  toggleSelectAll(event: MouseEvent): void {
-    event.stopPropagation();
+  toggleSelectAll(event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
+    }
     const selectedIds = this.selectedTabIndex === 0 ? this.selectedBranchIdsYesterday : this.selectedBranchIdsLastWeek;
     
     if (this.isAllSelected() || (selectedIds && selectedIds.length > 0)) {
@@ -122,11 +124,17 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
 
   isAllSelected(): boolean {
     if (this.selectedTabIndex === 0) {
-      return this.listBranch.length > 0 &&
-             this.selectedBranchIdsYesterday.length === this.listBranch.length;
+      return (
+        this.selectedBranchIdsYesterday && 
+        this.listBranch && 
+        this.selectedBranchIdsYesterday.length === this.listBranch.length
+      );
     } else {
-      return this.listBranch.length > 0 &&
-             this.selectedBranchIdsLastWeek.length === this.listBranch.length;
+      return (
+        this.selectedBranchIdsLastWeek && 
+        this.listBranch && 
+        this.selectedBranchIdsLastWeek.length === this.listBranch.length
+      );
     }
   }
 
@@ -197,21 +205,21 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   }
 
   loadLastWeekReport(): void {
-    this.isLoading = true;
+    // this.isLoading = true;
     
-    this.anomaliesReportService.getAnomaliesTimelogReport(this.selectedBranchIdsLastWeek)
-      .subscribe({
-        next: (data) => {
-          this.lastWeekReportData = data;
-          this.processLastWeekData(data);
-          this.applyLastWeekSearchFilter();
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading last week report:', error);
-          this.isLoading = false;
-        }
-      });
+    // this.anomaliesReportService.getAnomaliesTimelogReport(this.selectedBranchIdsLastWeek)
+    //   .subscribe({
+    //     next: (data) => {
+    //       this.lastWeekReportData = data;
+    //       this.processLastWeekData(data);
+    //       this.applyLastWeekSearchFilter();
+    //       this.isLoading = false;
+    //     },
+    //     error: (error) => {
+    //       console.error('Error loading last week report:', error);
+    //       this.isLoading = false;
+    //     }
+    //   });
   }
   
   clearYesterdayData(): void {
@@ -312,7 +320,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       if (!lowerSearch) return [...items];
       return items.filter(item =>
         item.employeeName.toLowerCase().includes(lowerSearch) ||
-        item.branch.branchName.toLowerCase().includes(lowerSearch) ||
+        item.branch.name.toLowerCase().includes(lowerSearch) ||
         item.userName.toLowerCase().includes(lowerSearch)
       );
     };
@@ -377,8 +385,8 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       let valB: any;
 
       if (column === SortColumn.BRANCH) {
-        valA = a.branch.branchName || '';
-        valB = b.branch.branchName || '';
+        valA = a.branch.name || '';
+        valB = b.branch.name || '';
       } else if (column === SortColumn.ACTUAL_HOURS || column === SortColumn.COUNT) {
         valA = parseFloat(a[column]) || 0;
         valB = parseFloat(b[column]) || 0;

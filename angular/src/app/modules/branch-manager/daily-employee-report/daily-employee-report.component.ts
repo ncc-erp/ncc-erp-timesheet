@@ -115,7 +115,7 @@ export class DailyEmployeeReportComponent extends PagedListingComponentBase<Offi
       !this.branchIds ||
       this.branchIds.length === 0
     ) {
-      return this.listBranch ? this.listBranch.map((branch) => branch.id) : [];
+      return [];
     }
     return this.branchIds;
   }

@@ -101,8 +101,11 @@ export class AnomaliesTabComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   isAllSelected(): boolean {
-    return this.listBranch.length > 0 &&
-           this.selectedBranchIds.length === this.listBranch.length;
+    return (
+      this.selectedBranchIds &&
+      this.listBranch &&
+      this.selectedBranchIds.length === this.listBranch.length
+    );
   }
 
   getSelectAllText(): string {
