@@ -15,12 +15,3 @@ export class AddUserWhitelistDto {
         this.whitelistSystemId = whitelistSystemId;
     }
 }
-
-export class UpdateUserWhitelistDto {
-    id: number;
-    whitelistSystemId: number;
-    constructor(id: number, whitelistSystemId: number) {
-        this.id = id;
-        this.whitelistSystemId = whitelistSystemId;
-    }
-}

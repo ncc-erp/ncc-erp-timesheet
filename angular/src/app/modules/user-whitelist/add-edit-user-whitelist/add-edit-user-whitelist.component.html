@@ -1,7 +1,7 @@
 <form autocomplete="off" #addUserForm="ngForm" (ngSubmit)="save()" class="custom-dialog-form">
     <div class="dialog-header">
         <h1 class="dialog-title" mat-dialog-title>
-            {{ isEdit ? ('Edit Whitelist' | localize) : ('Add New User to Whitelist' | localize) }}
+            {{ 'Add New User to Whitelist' | localize }}
         </h1>
         <mat-icon (click)="close()" class="close-icon">close</mat-icon>
     </div>
@@ -11,7 +11,7 @@
             <div class="col-md-6">
                 <mat-form-field appearance="outline" class="w-100 form-field-spacing">
                     <mat-label>{{ "User" | localize }}</mat-label>
-                    <mat-select name="userId" [(ngModel)]="userId" required placeholder="Select user..." [disabled]="isEdit">
+                    <mat-select name="userId" [(ngModel)]="userId" required placeholder="Select user...">
                         <mat-option>
                             <ngx-mat-select-search [formControl]="userSearch" 
                                 placeholderLabel="Search by Email/Name"

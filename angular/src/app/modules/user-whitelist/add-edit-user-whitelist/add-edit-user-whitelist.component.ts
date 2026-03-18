@@ -2,8 +2,7 @@ import { AppComponentBase } from "@shared/app-component-base";
 import { UserWhitelistService } from "@app/service/api/user-whitelist.service";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
 import { Component, Injector, Inject, OnInit } from "@angular/core";
-import { AddUserWhitelistDto, UpdateUserWhitelistDto } from "@app/service/api/model/user-whitelist.dto";
-import { Observable } from "rxjs";
+import { AddUserWhitelistDto } from "@app/service/api/model/user-whitelist.dto";
 import { finalize } from "rxjs/operators";
 import { userDTO } from "@app/modules/user/user.component";
 import { UserService } from "@app/service/api/user.service";
@@ -26,7 +25,6 @@ export class AddEditUserWhitelistComponent extends AppComponentBase implements O
     listUserBase: userDTO[] = [];
     listUserFiltered: userDTO[] = [];
 
-    isEdit: boolean = false;
     whitelistTypesList: WhitelistType[] = [];
     saving: boolean = false;
 
@@ -42,18 +40,7 @@ export class AddEditUserWhitelistComponent extends AppComponentBase implements O
     }
     
     ngOnInit(): void {
-        this.isEdit = this.data.isEdit;
         this.whitelistTypesList = this.data.whitelistTypesList || [];
-
-        if (this.isEdit && this.data.item) {
-            this.userId = this.data.item.userId;
-            this.whitelistName = this.data.item.whitelistName;
-            const matchedType = this.whitelistTypesList.find(
-                type => type.name === this.data.item.whitelistName
-            );
-            this.selectedWhitelistTypeId = matchedType ? matchedType.value : null;
-        }
-
         this.getAllUsers();
         this.getAllWhitelistSystems();
         this.userSearch.valueChanges.subscribe(() => {
@@ -99,28 +86,17 @@ export class AddEditUserWhitelistComponent extends AppComponentBase implements O
         );
 
         this.saving = true;
-        let requestObservable: Observable<any>;
+        const input = new AddUserWhitelistDto(
+            this.userId,
+            matchedSystem.id
+        );
 
-        if (this.isEdit) {
-            const input = new UpdateUserWhitelistDto(
-                this.data.item.id,
-                matchedSystem.id
-            );
-            requestObservable = this.userWhitelistService.update(input);
-        } else {
-            const input = new AddUserWhitelistDto(
-                this.userId,
-                matchedSystem.id
-            );
-            requestObservable = this.userWhitelistService.add(input);
-        }
-
-        requestObservable.pipe(
+        this.userWhitelistService.add(input).pipe(
             finalize(() => {
                 this.saving = false;
             })
         ).subscribe(() => {
-            abp.notify.success(this.l(this.isEdit ? 'Updated successfully' : 'Saved successfully'));
+            abp.notify.success(this.l('Saved successfully'));
             this.dialogRef.close(true);
         });
     }
