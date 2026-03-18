@@ -1,0 +1,25 @@
+.dialog-title {
+    cursor: default;
+    margin: 0;
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.close-icon {
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.custom-dialog-form ::ng-deep .mat-form-field-wrapper {
+    padding-bottom: 0 !important;
+}
+
+.form-field-spacing {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}

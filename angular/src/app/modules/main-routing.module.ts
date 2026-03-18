@@ -917,14 +917,27 @@ const routes: Routes = [
   }]
 },
 {
-  path: "tracker-whitelist",
+  path: "whitelist-system",
   component: MainComponent,
   canActivate: [AppRouteGuard],
   children: [{
     path: '',
-    loadChildren: '../modules/tracker-whitelist/tracker-whitelist.module#TrackerWhitelistModule',
+    loadChildren: '../modules/whitelist-system/whitelist-system.module#WhitelistSystemModule',
     data: {
-      permission: 'Admin.TrackerWhitelist',
+      permission: 'Admin.WhitelistSystem',
+      preload: true
+    }
+  }]
+},
+{
+  path: "user-whitelist",
+  component: MainComponent,
+  canActivate: [AppRouteGuard],
+  children: [{
+    path: '',
+    loadChildren: '../modules/user-whitelist/user-whitelist.module#UserWhitelistModule',
+    data: {
+      permission: 'Admin.UserWhitelist',
       preload: true
     }
   }]

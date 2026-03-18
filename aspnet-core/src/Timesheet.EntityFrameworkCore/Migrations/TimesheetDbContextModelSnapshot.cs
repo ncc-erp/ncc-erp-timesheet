@@ -2729,6 +2729,39 @@ namespace Timesheet.Migrations
                     b.ToTable("UserUnlockIms");
                 });
 
+            modelBuilder.Entity("Timesheet.Entities.UserWhitelist", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<long>("UserId");
+
+                    b.Property<long>("WhitelistSystemId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WhitelistSystemId");
+
+                    b.ToTable("UserWhitelists");
+                });
+
             modelBuilder.Entity("Timesheet.Entities.ValueOfUserInProject", b =>
                 {
                     b.Property<long>("Id")
@@ -2764,6 +2797,46 @@ namespace Timesheet.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ValueOfUserInProjects");
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.WhitelistSystem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000);
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.Property<int>("Type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WhitelistSystems");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>
@@ -3271,6 +3344,19 @@ namespace Timesheet.Migrations
                     b.HasOne("Ncc.Authorization.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserWhitelist", b =>
+                {
+                    b.HasOne("Ncc.Authorization.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Timesheet.Entities.WhitelistSystem", "WhitelistSystem")
+                        .WithMany()
+                        .HasForeignKey("WhitelistSystemId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

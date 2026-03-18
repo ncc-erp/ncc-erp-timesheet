@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { TrackerWhitelistComponent } from './tracker-whitelist.component';
+import { UserWhitelistComponent } from './user-whitelist.component';
 
 const routes: Routes = [
     {
         path: '',
-        component: TrackerWhitelistComponent
+        component: UserWhitelistComponent
     }
 ];
 
@@ -13,4 +13,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class TrackerWhitelistRoutingModule { }
+export class UserWhitelistRoutingModule { }

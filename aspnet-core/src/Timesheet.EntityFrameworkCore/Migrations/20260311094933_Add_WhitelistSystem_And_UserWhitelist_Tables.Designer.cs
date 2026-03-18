@@ -10,8 +10,8 @@ using Ncc.EntityFrameworkCore;
 namespace Timesheet.Migrations
 {
     [DbContext(typeof(TimesheetDbContext))]
-    [Migration("20250804063651_Add_UserPunishment_And_PunishmentSystem_And_IsPunishmentProcessedCollumn")]
-    partial class Add_UserPunishment_And_PunishmentSystem_And_IsPunishmentProcessedCollumn
+    [Migration("20260311094933_Add_WhitelistSystem_And_UserWhitelist_Tables")]
+    partial class Add_WhitelistSystem_And_UserWhitelist_Tables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1803,6 +1803,8 @@ namespace Timesheet.Migrations
 
                     b.Property<long>("ProjectTaskId");
 
+                    b.Property<string>("RejectReason");
+
                     b.Property<int>("Status");
 
                     b.Property<int>("TargetUserWorkingTime");
@@ -1961,6 +1963,37 @@ namespace Timesheet.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PunishmentSystems");
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.RemoteBlacklist", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<int>("PenaltyDays");
+
+                    b.Property<long>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RemoteBlacklists");
                 });
 
             modelBuilder.Entity("Timesheet.Entities.Retro", b =>
@@ -2462,6 +2495,8 @@ namespace Timesheet.Migrations
 
                     b.Property<bool>("IsDeleted");
 
+                    b.Property<bool>("IsPaid");
+
                     b.Property<DateTime?>("LastModificationTime");
 
                     b.Property<long?>("LastModifierUserId");
@@ -2480,13 +2515,183 @@ namespace Timesheet.Migrations
                     b.Property<string>("UserNote")
                         .HasMaxLength(1000);
 
+                    b.Property<long?>("UserPunishmentPaidId");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PunishmentSystemId");
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("UserPunishmentPaidId");
+
                     b.ToTable("UserPunishments");
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserPunishmentBalance", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<int>("RemainPoints");
+
+                    b.Property<int>("TotalPunishmentMoney");
+
+                    b.Property<long>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserPunishmentBalances");
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserPunishmentHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Count");
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<DateTime>("DateAt");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<bool>("IsPaid");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<string>("NoteReply")
+                        .HasMaxLength(1000);
+
+                    b.Property<long>("PunishmentSystemId");
+
+                    b.Property<int>("TotalMoney");
+
+                    b.Property<int>("Type");
+
+                    b.Property<long>("UserId");
+
+                    b.Property<string>("UserNote")
+                        .HasMaxLength(1000);
+
+                    b.Property<long>("UserPunishmentId");
+
+                    b.Property<long?>("UserPunishmentPaidId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PunishmentSystemId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserPunishmentId");
+
+                    b.HasIndex("UserPunishmentPaidId");
+
+                    b.ToTable("UserPunishmentHistories");
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserPunishmentPaid", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Amount");
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<DateTime>("DateAt");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<DateTime>("TargetMonth");
+
+                    b.Property<string>("TxHash")
+                        .HasMaxLength(255);
+
+                    b.Property<long>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserPunishmentPaids");
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserPunishmentRefund", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<int>("Points");
+
+                    b.Property<int>("Type");
+
+                    b.Property<long>("UserId");
+
+                    b.Property<long?>("UserPunishmentId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserPunishmentId");
+
+                    b.ToTable("UserPunishmentRefunds");
                 });
 
             modelBuilder.Entity("Timesheet.Entities.UserUnlockIms", b =>
@@ -2526,6 +2731,39 @@ namespace Timesheet.Migrations
                     b.ToTable("UserUnlockIms");
                 });
 
+            modelBuilder.Entity("Timesheet.Entities.UserWhitelist", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<long>("UserId");
+
+                    b.Property<long>("WhitelistSystemId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WhitelistSystemId");
+
+                    b.ToTable("UserWhitelists");
+                });
+
             modelBuilder.Entity("Timesheet.Entities.ValueOfUserInProject", b =>
                 {
                     b.Property<long>("Id")
@@ -2561,6 +2799,46 @@ namespace Timesheet.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ValueOfUserInProjects");
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.WhitelistSystem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<long?>("CreatorUserId");
+
+                    b.Property<long?>("DeleterUserId");
+
+                    b.Property<DateTime?>("DeletionTime");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000);
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime");
+
+                    b.Property<long?>("LastModifierUserId");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.Property<int>("Type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WhitelistSystems");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>
@@ -2865,6 +3143,14 @@ namespace Timesheet.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("Timesheet.Entities.RemoteBlacklist", b =>
+                {
+                    b.HasOne("Ncc.Authorization.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Timesheet.Entities.RetroResult", b =>
                 {
                     b.HasOne("Timesheet.Entities.Branch", "Branch")
@@ -2998,6 +3284,61 @@ namespace Timesheet.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Timesheet.Entities.UserPunishmentPaid", "UserPunishmentPaid")
+                        .WithMany()
+                        .HasForeignKey("UserPunishmentPaidId");
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserPunishmentBalance", b =>
+                {
+                    b.HasOne("Ncc.Authorization.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserPunishmentHistory", b =>
+                {
+                    b.HasOne("Timesheet.Entities.PunishmentSystem", "PunishmentSystem")
+                        .WithMany()
+                        .HasForeignKey("PunishmentSystemId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Ncc.Authorization.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Timesheet.Entities.UserPunishment", "UserPunishment")
+                        .WithMany()
+                        .HasForeignKey("UserPunishmentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Timesheet.Entities.UserPunishmentPaid", "UserPunishmentPaid")
+                        .WithMany()
+                        .HasForeignKey("UserPunishmentPaidId");
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserPunishmentPaid", b =>
+                {
+                    b.HasOne("Ncc.Authorization.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserPunishmentRefund", b =>
+                {
+                    b.HasOne("Ncc.Authorization.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Timesheet.Entities.UserPunishment", "UserPunishment")
+                        .WithMany()
+                        .HasForeignKey("UserPunishmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Timesheet.Entities.UserUnlockIms", b =>
@@ -3005,6 +3346,19 @@ namespace Timesheet.Migrations
                     b.HasOne("Ncc.Authorization.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Timesheet.Entities.UserWhitelist", b =>
+                {
+                    b.HasOne("Ncc.Authorization.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Timesheet.Entities.WhitelistSystem", "WhitelistSystem")
+                        .WithMany()
+                        .HasForeignKey("WhitelistSystemId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

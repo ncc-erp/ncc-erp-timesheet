@@ -552,8 +552,14 @@ namespace Timesheet.APIs.RequestDays
                 .Select(s => s.DayOff.Date)
                 .ToHashSet();
 
-            int wfhSettingDays = 0;
-            int.TryParse(await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting), out wfhSettingDays);
+            bool isFullyRemote = await WorkScope.GetAll<UserWhitelist>()
+                .AnyAsync(uw => uw.UserId == userId
+                             && !uw.IsDeleted
+                             && uw.WhitelistSystem.Type == WhitelistType.FullyRemote
+                             && uw.WhitelistSystem.IsActive
+                             && !uw.WhitelistSystem.IsDeleted);
+
+            int wfhSettingDays = isFullyRemote ? 5 : int.TryParse(await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting), out var days) ? days : 0;
 
             var remoteBlacklistInfo = await WorkScope.GetAll<RemoteBlacklist>()
                 .Where(b => b.UserId == userId && !b.IsDeleted)

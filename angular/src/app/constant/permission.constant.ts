@@ -172,11 +172,19 @@ export const PERMISSIONS_CONSTANT = {
     ImportRemoteBlacklist: "Admin.Remote.Blacklist.Import",
     DownloadTemplateRemoteBlacklist: "Admin.Remote.Blacklist.DownloadTemplate",
 
-    // Tracker Whitelist
-    ViewTrackerWhitelist: "Admin.TrackerWhitelist.View",
-    AddTrackerWhitelist: "Admin.TrackerWhitelist.Add",
-    EditTrackerWhitelist: "Admin.TrackerWhitelist.Edit",
-    DeleteTrackerWhitelist: "Admin.TrackerWhitelist.Delete",
+    // Whitelist
+    ViewWhitelistSystem: "Admin.WhitelistSystem.View",
+    AddWhitelistSystem: "Admin.WhitelistSystem.Add",
+    EditWhitelistSystem: "Admin.WhitelistSystem.Edit",
+    DeleteWhitelistSystem: "Admin.WhitelistSystem.Delete",
+
+    // User Whitelist
+    ViewUserWhitelist: "Admin.UserWhitelist.View",
+    AddUserWhitelist: "Admin.UserWhitelist.Add",
+    EditUserWhitelist: "Admin.UserWhitelist.Edit",
+    DeleteUserWhitelist: "Admin.UserWhitelist.Delete",
+    ImportUserWhitelist: "Admin.UserWhitelist.Import",
+    DownloadTemplateUserWhitelist: "Admin.UserWhitelist.DownloadTemplate",
 
     //my timesheet
     AddMyTimesheet: "MyTimesheet.AddNew",
