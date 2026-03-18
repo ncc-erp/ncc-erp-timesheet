@@ -1,0 +1,53 @@
+.import-dialog-container {
+    padding-top: 10px;
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.close-icon {
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.file-input-group {
+    display: flex;
+    align-items: stretch;
+    border: 2px solid #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.file-name-display {
+    flex-grow: 1;
+    padding: 8px 12px;
+    background-color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    border-right: 2px solid #000;
+}
+
+.btn-browse {
+    border-radius: 0 !important;
+    margin: 0 !important;
+    height: auto;
+    box-shadow: none !important;
+}
+
+.m-l-10 {
+    margin-left: 10px;
+}
+
+mat-dialog-actions {
+    margin-bottom: 0;
+    padding-right: 0;
+}

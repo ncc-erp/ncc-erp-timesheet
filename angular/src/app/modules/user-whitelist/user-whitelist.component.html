@@ -1,0 +1,126 @@
+<div class="row clearfix" [@routerTransition]>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card main-content">
+            <div class="header">
+                <h2>{{ 'User Whitelist' | localize }}</h2>
+                <ul class="header-dropdown m-r--5">
+                    <li>
+                        <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #headerMenu="matMenu">
+                            <button name="refreshBtn" mat-menu-item (click)="refresh()">
+                                <mat-icon>refresh</mat-icon>
+                                <span>{{ "Refresh" | localize }}</span>
+                            </button>
+                        </mat-menu>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="body">
+                <div class="action-container">
+                    <mat-form-field appearance="outline" class="search-input-field">
+                        <mat-label>{{ "Search" | localize }}</mat-label>
+                        <div class="search-wrapper">
+                            <input class="search-input" matInput [(ngModel)]="searchText"
+                                (ngModelChange)="onSearchChange()" placeholder="Search by Username or Fullname..." />
+                            <mat-icon class="custom-search-icon" matSuffix *ngIf="searchText" (click)="clearSearch()">close</mat-icon>
+                            <mat-icon class="custom-search-icon" matSuffix>search</mat-icon>
+                        </div>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="type-select-field">
+                        <mat-label> {{ "Type" | localize }} </mat-label>
+                        <mat-select name="type" [(ngModel)]="selectedType" (selectionChange)="onTypeChange()">
+                            <mat-option [value]="-1">{{ "All" | localize }}</mat-option>
+                            <mat-option *ngFor="let item of whitelistTypesList" [value]="item.value">
+                                {{ item.name | localize }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <div class="button-row">
+                        <button *ngIf="permission.isGranted(ADD_USERWHITELIST)" mat-raised-button color="primary" class="btn-new-whitelist" (click)="addNewUser()">
+                            <mat-icon>add</mat-icon> {{ 'Add New User' | localize }}
+                        </button>
+
+                        <button *ngIf="permission.isGranted(IMPORT_USERWHITELIST)" mat-raised-button color="primary" class="btn-import-whitelist" (click)="importUsers()">
+                            <mat-icon>file_upload</mat-icon> {{ 'Import From Excel' | localize }}
+                        </button>
+
+                        <button *ngIf="permission.isGranted(DOWNLOAD_USERWHITELIST_TEMPLATE)" mat-raised-button class="btn-download-template" (click)="downloadTemplate()">
+                            <mat-icon>file_download</mat-icon> {{ 'Download Template' | localize }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th class="col-user-id no-select" (click)="onSort(UserWhitelistColumn.UserId)">
+                                    <div class="sortable-header-content">
+                                        {{ 'User ID' | localize }}
+                                        <mat-icon class="sort-icon">{{ getSortIcon(UserWhitelistColumn.UserId) }}</mat-icon>  
+                                    </div>
+                                </th>
+                                <th class="col-full-name no-select" (click)="onSort(UserWhitelistColumn.FullName)">
+                                    <div class="sortable-header-content">
+                                        {{ 'Full Name' | localize }}
+                                        <mat-icon class="sort-icon">{{ getSortIcon(UserWhitelistColumn.FullName) }}</mat-icon>
+                                    </div>
+                                </th>
+                                <th class="col-user-name no-select" (click)="onSort(UserWhitelistColumn.UserName)">
+                                    <div class="sortable-header-content">
+                                        {{ 'Username' | localize }}
+                                        <mat-icon class="sort-icon">{{ getSortIcon(UserWhitelistColumn.UserName) }}</mat-icon>
+                                    </div>
+                                </th>
+                                <th class="col-whitelist-name no-select" (click)="onSort(UserWhitelistColumn.WhitelistName)">
+                                    <div class="sortable-header-content">
+                                        {{ 'Type' | localize }}
+                                        <mat-icon class="sort-icon">{{ getSortIcon(UserWhitelistColumn.WhitelistName) }}</mat-icon>
+                                    </div>
+                                </th>
+                                <th class="col-actions">{{ 'Actions' | localize }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of allData | paginate: { id: 'server', 
+                                            itemsPerPage: pageSize, 
+                                            currentPage: pageNumber, 
+                                            totalItems: totalItems 
+                                        }">
+                                <td class="text-center">{{ item.userId }}</td>
+                                <td class="text-center">{{ item.fullName }}</td>
+                                <td class="text-center">{{ item.userName }}</td>
+                                <td class="text-center">{{ item.whitelistName }}</td>
+                                <td class="text-center">
+                                    <button *ngIf="permission.isGranted(EDIT_USERWHITELIST)" mat-icon-button color="primary" (click)="editItem(item)" matTooltip="{{ 'Edit' | localize }}">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    <button *ngIf="permission.isGranted(DELETE_USERWHITELIST)" mat-icon-button color="primary" (click)="deleteItem(item)" matTooltip="{{ 'Delete' | localize }}">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="allData.length === 0">
+                                <td colspan="5" class="text-center">{{ "No data available" | localize }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="abp-pagination-controls-wrapper">
+                    <abp-pagination-controls 
+                        [totalNumber]="totalItems" 
+                        id="server"
+                        (pageChange)="getDataPage($event)" 
+                        (selectionChange)="pageSize = $event; getDataPage(1)">
+                    </abp-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

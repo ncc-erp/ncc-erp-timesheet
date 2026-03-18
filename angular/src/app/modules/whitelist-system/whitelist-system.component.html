@@ -1,0 +1,115 @@
+<div class="row clearfix" [@routerTransition]>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card main-content">
+            <div class="header">
+                <h2>{{ 'Manage Whitelist' | localize }}</h2>
+                <ul class="header-dropdown m-r--5">
+                    <li>
+                        <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #headerMenu="matMenu">
+                            <button name="refreshBtn" mat-menu-item (click)="refresh()">
+                                <mat-icon>refresh</mat-icon>
+                                <span>{{ "Refresh" | localize }}</span>
+                            </button>
+                        </mat-menu>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="body">
+                <div class="action-container">
+                    <mat-form-field appearance="outline" class="search-input-field">
+                        <mat-label>{{ "Search" | localize }}</mat-label>
+                        <div class="search-wrapper">
+                            <input class="search-input" matInput [(ngModel)]="searchText"
+                                (ngModelChange)="onSearchChange()" placeholder="Search by Name or Description..." />
+                            <mat-icon class="custom-search-icon" matSuffix *ngIf="searchText" (click)="clearSearch()">close</mat-icon>
+                            <mat-icon class="custom-search-icon" matSuffix>search</mat-icon>
+                        </div>
+                    </mat-form-field>
+
+                    <button *ngIf="permission.isGranted(ADD_WHITELISTSYSTEM)" mat-raised-button color="primary" class="btn-new-whitelist" (click)="addNew()">
+                        <mat-icon>add</mat-icon> {{ 'New Whitelist Type' | localize }}
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th class="col-name no-select" (click)="onSort(WhitelistSystemColumn.Name)">
+                                    <div class="sortable-header-content">
+                                        {{ 'Name' | localize }}
+                                        <mat-icon class="sort-icon">{{ getSortIcon(WhitelistSystemColumn.Name) }}</mat-icon>
+                                    </div>
+                                </th>
+                                <th class="col-code no-select" (click)="onSort(WhitelistSystemColumn.Code)">
+                                    <div class="sortable-header-content">
+                                        {{ 'Code' | localize }}
+                                        <mat-icon class="sort-icon">{{ getSortIcon(WhitelistSystemColumn.Code) }}</mat-icon>
+                                    </div>
+                                </th>
+                                <th class="col-desc">{{ 'Description' | localize }}</th>
+                                <th class="col-actions">{{ 'Actions' | localize }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of whitelistTypesList | paginate: { id: 'server', 
+                                            itemsPerPage: pageSize, 
+                                            currentPage: pageNumber, 
+                                            totalItems: totalItems 
+                                        }">
+                                <td class="text-center">{{ item.name }}</td>
+                                <td class="text-center">{{ item.code }}</td>
+                                <td>{{ item.description }}</td>
+                                <td class="text-center">
+                                    
+                                    <button *ngIf="permission.isGranted(EDIT_WHITELISTSYSTEM)
+                                                || permission.isGranted(DELETE_WHITELISTSYSTEM)"
+                                            mat-raised-button
+                                            class="action-menu-button" 
+                                            [matMenuTriggerFor]="actionsMenu">
+                                        {{ 'Actions' | localize }}
+                                        <mat-icon>arrow_drop_down</mat-icon>
+                                    </button>
+                                    
+                                    <mat-menu #actionsMenu="matMenu" xPosition="before" class="action-menu">
+                                        <button *ngIf="permission.isGranted(EDIT_WHITELISTSYSTEM)"
+                                                mat-menu-item (click)="editItem(item)">
+                                            <mat-icon>edit</mat-icon>
+                                            <span>{{ 'Edit' | localize }}</span>
+                                        </button>
+                                        
+                                        <button *ngIf="permission.isGranted(DELETE_WHITELISTSYSTEM)" 
+                                                mat-menu-item (click)="deleteItem(item)">
+                                            <mat-icon>delete</mat-icon>
+                                            <span>{{ 'Delete' | localize }}</span>
+                                        </button>
+                                    </mat-menu>
+
+                                </td>
+                            </tr>
+
+                            <tr *ngIf="whitelistTypesList.length === 0">
+                                <td colspan="4" class="text-center" style="padding: 20px;">
+                                    {{ 'No data available' | localize }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="abp-pagination-controls-wrapper">
+                    <abp-pagination-controls 
+                        [totalNumber]="totalItems" 
+                        id="server"
+                        (pageChange)="getDataPage($event)" 
+                        (selectionChange)="pageSize = $event; getDataPage(1)">
+                    </abp-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

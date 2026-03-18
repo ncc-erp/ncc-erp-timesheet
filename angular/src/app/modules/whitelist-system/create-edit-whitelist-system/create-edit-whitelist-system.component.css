@@ -1,0 +1,21 @@
+.dialog-title {
+    cursor: default;
+    margin: 0;
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.close-icon {
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.form-field-spacing {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}

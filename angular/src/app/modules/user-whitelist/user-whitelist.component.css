@@ -1,0 +1,172 @@
+.action-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    margin-bottom: 20px;
+    gap: 15px;
+}
+
+.search-input-field {
+    font-size: 14px;
+    width: 25%;
+}
+
+.type-select-field {
+    font-size: 14px;
+    width: 15%;
+}
+
+.search-wrapper {
+    display: flex; 
+    align-items: center; 
+    justify-content: flex-start;
+}
+
+.search-input {
+    flex-grow: 1;
+}
+
+mat-icon.custom-search-icon {
+    position: relative;
+    top: -5px;
+    height: 16px;
+}
+
+.custom-search-icon {
+    cursor: pointer;
+}
+
+.button-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: -20px;
+    margin-left: auto;
+    margin-right: 20px;
+}
+
+th {
+    text-align: center;
+}
+
+.col-user-id {
+    width: 10%;
+}
+
+.col-full-name {
+    width: 25%;
+}
+
+.col-user-name {
+    width: 25%;
+}
+
+.col-whitelist-name {
+    width: 25%;
+}
+
+.no-select {
+    user-select: none;
+}
+
+.sortable-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sort-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-left: 4px;
+    cursor: pointer;
+}
+
+@media screen and (max-width: 1150px) {
+    .action-container {
+        flex-direction: column; 
+        align-items: center;
+        gap: 15px; 
+    }
+
+    .search-input-field, .type-select-field {
+        margin-bottom: 0;
+    }
+
+    ::ng-deep .search-input-field .mat-form-field-wrapper {
+        padding-bottom: 0 !important;
+    }
+
+    .search-input-field {
+        width: 50%;
+        display: inline-block;
+    }
+
+    .type-select-field {
+        width: 50%;
+        display: inline-block;
+    }
+
+    .action-container {
+        text-align: center; 
+    }
+
+    .button-row {
+        width: 100%;
+        justify-content: center;
+        flex: none;
+    }
+
+    ::ng-deep .user-whitelist-dialog-container {
+        width: 70% !important;
+        max-width: 70vw !important;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .search-input-field {
+        width: 100%;
+        display: block;
+    }
+
+    ::ng-deep .search-input-field .mat-form-field-wrapper {
+        padding-bottom: 0 !important;
+    }
+
+    .type-select-field {
+        width: 100%;
+        display: block;
+        margin-left: 0;
+    }
+    
+    .button-row {
+        justify-content: center;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .button-row button {
+        width: 55%;
+        margin: 0;
+    }
+
+    ::ng-deep .user-whitelist-dialog-container {
+        width: 95% !important;
+        max-width: 95vw !important;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .button-row button {
+        width: 60%;
+        margin: 0;
+    }
+}
+
+::ng-deep .swal-text {
+    text-align: center !important;
+}
