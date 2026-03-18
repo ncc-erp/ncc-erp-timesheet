@@ -55,6 +55,8 @@ namespace Ncc.EntityFrameworkCore
         public DbSet<UserPunishmentRefund> UserPunishmentRefunds { get; set; }
         public DbSet<UserPunishmentHistory> UserPunishmentHistories { get; set; }
         public DbSet<RemoteBlacklist> RemoteBlacklists { get; set; }
+        public DbSet<WhitelistSystem> WhitelistSystems { get; set; }
+        public DbSet<UserWhitelist> UserWhitelists { get; set; }
         public TimesheetDbContext(DbContextOptions<TimesheetDbContext> options)
             : base(options)
         {

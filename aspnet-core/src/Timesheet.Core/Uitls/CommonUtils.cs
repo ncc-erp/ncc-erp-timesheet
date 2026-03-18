@@ -299,6 +299,14 @@ namespace Timesheet.Uitls
             }
             throw new ArgumentOutOfRangeException(nameof(typeFromHrmV2), $"Invalid user type value from HRM V2: {typeFromHrmV2}");
         }
+        public static Dictionary<WhitelistType, string> WhitelistTypeName()
+        {
+            return new Dictionary<WhitelistType, string>
+            {
+                { WhitelistType.TrackerTime, "TRACKER_TIME" },
+                { WhitelistType.FullyRemote, "FULLY_REMOTE" }
+            };
+        }
         public static Sex GetSexBySexFromHrmV2(Sex sexFromHrmV2)
         {
             var sexMapers = new Sex[] { Sex.Male, Sex.Male, Sex.Female };
