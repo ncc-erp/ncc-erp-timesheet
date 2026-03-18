@@ -498,21 +498,31 @@ namespace Timesheet.DomainServices
 
                 if (isRemoteWork && user.Type != Usertype.Vendor)
                 {
-                    var registerWorkingMinutes = CommonUtils.GetEmployeeWorkingHours(t.RegisterCheckOut, t.RegisterCheckIn);
-                    var dayOffType = registerCheckInOut.AbsenceDayType;
-                    var trackerPunishment = await CreateTrackerTimePunishment(
-                        selectedDate,
-                        user.UserId,
-                        trackerTime,
-                        registerWorkingMinutes,
-                        t.UserNote,
-                        t.NoteReply,
-                        dayOffType,
-                        punishmentSystems);
-                    if (trackerPunishment != null)
+                    bool isTrackerWhitelisted = await WorkScope.GetAll<UserWhitelist>()
+                        .AnyAsync(uw => uw.UserId == user.UserId
+                                    && !uw.IsDeleted
+                                    && uw.WhitelistSystem.Type == WhitelistType.TrackerTime
+                                    && uw.WhitelistSystem.IsActive
+                                    && !uw.WhitelistSystem.IsDeleted);
+
+                    if (!isTrackerWhitelisted)
                     {
-                        ApplySnapshotIfAny(snapshotByUserAndType, trackerPunishment);
-                        userPunishmentsToInsert.Add(trackerPunishment);
+                        var registerWorkingMinutes = CommonUtils.GetEmployeeWorkingHours(t.RegisterCheckOut, t.RegisterCheckIn);
+                        var dayOffType = registerCheckInOut.AbsenceDayType;
+                        var trackerPunishment = await CreateTrackerTimePunishment(
+                            selectedDate,
+                            user.UserId,
+                            trackerTime,
+                            registerWorkingMinutes,
+                            t.UserNote,
+                            t.NoteReply,
+                            dayOffType,
+                            punishmentSystems);
+                        if (trackerPunishment != null)
+                        {
+                            ApplySnapshotIfAny(snapshotByUserAndType, trackerPunishment);
+                            userPunishmentsToInsert.Add(trackerPunishment);
+                        }
                     }
                 }
             }

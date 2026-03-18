@@ -192,7 +192,7 @@ namespace Timesheet.Uitls
                 { ReviewInternStatus.ReOpen, "ReOpen" }
             };
         }
-
+        
         public static string TypeOfWorkName(TypeOfWork typeOfWork)
         {
            if (typeOfWork == TypeOfWork.NormalWorkingHours)
@@ -298,6 +298,14 @@ namespace Timesheet.Uitls
                 return userTypeMap[typeFromHrmV2];
             }
             throw new ArgumentOutOfRangeException(nameof(typeFromHrmV2), $"Invalid user type value from HRM V2: {typeFromHrmV2}");
+        }
+        public static Dictionary<WhitelistType, string> WhitelistTypeName()
+        {
+            return new Dictionary<WhitelistType, string>
+            {
+                { WhitelistType.TrackerTime, "TRACKER_TIME" },
+                { WhitelistType.FullyRemote, "FULLY_REMOTE" }
+            };
         }
         public static Sex GetSexBySexFromHrmV2(Sex sexFromHrmV2)
         {
