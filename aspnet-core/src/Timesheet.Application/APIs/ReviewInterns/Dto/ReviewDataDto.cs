@@ -29,6 +29,7 @@ namespace Timesheet.APIs.ReviewInterns.Dto
         public string InternFullName { get; set; }
         public UserLevel? InternCurrentLevel { get; set; }
         public UserLevel? InternNewLevel { get; set; }
+        public ReviewInternStatus ReviewStatus { get; set; }
     }
 
     public class ReviewDetailForHRDto
@@ -39,5 +40,6 @@ namespace Timesheet.APIs.ReviewInterns.Dto
         public string InternUserName { get; set; }
         public UserLevel? InternCurrentLevel { get; set; }
         public UserLevel? InternNewLevel { get; set; }
+        public ReviewInternStatus ReviewStatus { get; set; }
     }
 }

@@ -1355,6 +1355,8 @@ namespace Timesheet.APIs.ReviewDetails
                 throw new UserFriendlyException("Review này chưa được PM review hoặc đã review xong");
             }
 
+            detail.Status = input.Status;
+
             if (input.Status == ReviewInternStatus.Rejected)
             {
                 await SendMailWhenRejected(new List<long> { input.ReviewDetailId }, ReviewDetailRejector.HeadPM);
@@ -1362,7 +1364,6 @@ namespace Timesheet.APIs.ReviewDetails
                 detail.NewLevel = detail.CurrentLevel;
             }
 
-            detail.Status = input.Status;
             await WorkScope.UpdateAsync(detail);
             if (input.Status == ReviewInternStatus.Reviewed)
             {
@@ -1376,6 +1377,7 @@ namespace Timesheet.APIs.ReviewDetails
             var data = await GetReviewDataByDetailIdsAsync(reviewDetailIds);
             int date = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMReviewInternOnDate));
             var dateNow = DateTimeUtils.GetNow();
+            Dictionary<ReviewInternStatus, string> statusDictionary = CommonUtils.ReviewInternStatusString();
             var deadlineDate = dateNow.AddDays(1);
             if (data == null)
             {
@@ -1384,6 +1386,7 @@ namespace Timesheet.APIs.ReviewDetails
 
             var hrEmails = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(email => email.Trim())
                 .ToList();
 
             string rejectorDisplay = rejector == ReviewDetailRejector.HeadPM ? "Head PM" : "CEO";
@@ -1393,15 +1396,15 @@ namespace Timesheet.APIs.ReviewDetails
                 StringBuilder content = new StringBuilder();
                 try
                 {
-                    content.Append($"<span style='font-weight: 600'> Kính gửi anh/chị {reviewer.ReviewerFullName}, </span><br> ");
-                    content.Append($"<span style='font-weight: 600'>{rejectorDisplay}</span> đã từ chối đánh giá cho thực tập sinh trong đợt đánh giá tháng {data.MonthReviewIntern}/{data.YearReviewIntern}. ");
-                    content.Append($"Thông tin bao gồm: <br>");
-                    var tableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
+                    content.Append($"<span style='font-weight: 600'>{rejectorDisplay}</span> đã chuyển trạng thái <span style='font-weight: 600'> {statusDictionary[ReviewInternStatus.Rejected]} </span> cho bản ghi đánh giá thực tập sinh trong đợt đánh giá tháng <span style='font-weight: 600'> {data.MonthReviewIntern}/{data.YearReviewIntern}. </span> ");
+                    content.Append($"<br>Thông tin thực tập sinh bao gồm: <br>");
+                    var tableHtml = $@"<table border-collapse='collapse' border='1' width='80%' style='margin-top: 15px'>
                                             <thead> 
                                                 <tr>
                                                     <th width='20%'><span style='font-weight: 600'>Intern name</span></th>
                                                     <th width='20%'><span style='font-weight: 600'>Current level</span></th> 
                                                     <th width='20%'><span style='font-weight: 600'>Level after PM reviewed</span></th>
+                                                    <th width='20%'><span style='font-weight: 600'>Status</span></th>
                                                 </tr>
                                             </thead> 
                                             <tbody>";
@@ -1412,6 +1415,7 @@ namespace Timesheet.APIs.ReviewDetails
                                         <td style='padding-left: 5px; text-align: center'>{intern.InternFullName}</td> 
                                         <td style='padding-left: 5px; text-align: center'>{intern.InternCurrentLevel}</td>
                                         <td style='padding-left: 5px; text-align: center'>{intern.InternNewLevel}</td> 
+                                        <td style='padding-left: 5px; text-align: center'>{intern.ReviewStatus}</td>
                                     </tr>";
                     }
                     tableHtml += @"
@@ -1419,11 +1423,10 @@ namespace Timesheet.APIs.ReviewDetails
                     </table>";
                     content.Append(tableHtml);
                     content.Append("<br>");
-                    content.Append($"Anh/chị vui lòng trao đổi với<span style='font-weight: 600'> Head PM </span>về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày <span style='font-weight: 600'>{deadlineDate:dd/MM/yyyy}. </span>");
+                    content.Append($"Vui lòng trao đổi với <span style='font-weight: 600'> Head PM </span>về thực tập sinh trên và thực hiện đánh giá lại trên <span style='font-weight: 600'> Timesheet </span> trước ngày <span style='font-weight: 600'>{deadlineDate:dd/MM/yyyy}. </span>");
                     content.Append("<br>");
-                    content.Append("Trân trọng cảm ơn anh/chị!");
 
-                    var emailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] {rejectorDisplay} từ chối đánh giá cho thực tập sinh";
+                    var emailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo cập nhật đánh giá thực tập sinh theo phản hồi từ {rejectorDisplay}";
                     var targetEmails = new List<string> { reviewer.ReviewerEmail };
 
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
@@ -1452,7 +1455,8 @@ namespace Timesheet.APIs.ReviewDetails
                             ReviewerFullName = reviewer.ReviewerFullName,
                             InternFullName = intern.InternFullName,
                             InternCurrentLevel = intern.InternCurrentLevel,
-                            InternNewLevel = intern.InternNewLevel
+                            InternNewLevel = intern.InternNewLevel,
+                            ReviewStatus = intern.ReviewStatus
                         });
                     }
                 }
@@ -1460,16 +1464,16 @@ namespace Timesheet.APIs.ReviewDetails
                 StringBuilder hrContent = new StringBuilder();
                 try
                 {
-                    hrContent.Append($"<span style='font-weight: 600'> Kính gửi chị HR, </span><br> ");
-                    hrContent.Append($"<span style='font-weight: 600'>{rejectorDisplay}</span> đã từ chối đánh giá cho thực tập sinh trong đợt đánh giá tháng {data.MonthReviewIntern}/{data.YearReviewIntern}. ");
-                    hrContent.Append($"Thông tin bao gồm: <br>");
-                    var hrTableHtml = $@"<table border-collapse='collapse' border='1' width='60%' style='margin-top: 15px'>
+                    hrContent.Append($"<span style='font-weight: 600'>{rejectorDisplay}</span> đã chuyển trạng thái <span style='font-weight: 600'> {statusDictionary[ReviewInternStatus.Rejected]} </span> cho bản ghi đánh giá thực tập sinh trong đợt đánh giá tháng <span style='font-weight: 600'> {data.MonthReviewIntern}/{data.YearReviewIntern}. </span> ");
+                    hrContent.Append($"<br>Thông tin thực tập sinh bao gồm: <br>");
+                    var hrTableHtml = $@"<table border-collapse='collapse' border='1' width='80%' style='margin-top: 15px'>
                                             <thead>
                                                 <tr>
                                                     <th width='20%'><span style='font-weight: 600'>Intern name</span></th>
                                                     <th width='20%'><span style='font-weight: 600'>Reviewer name</span></th>
                                                     <th width='20%'><span style='font-weight: 600'>Current level</span></th>
                                                     <th width='20%'><span style='font-weight: 600'>Level after PM reviewed</span></th>
+                                                    <th width='20%'><span style='font-weight: 600'>Status</span></th>
                                                 </tr>
                                             </thead>
                                             <tbody>";
@@ -1481,6 +1485,7 @@ namespace Timesheet.APIs.ReviewDetails
                                 <td style='padding-left: 5px; text-align: center'>{item.ReviewerFullName}</td>
                                 <td style='padding-left: 5px; text-align: center'>{item.InternCurrentLevel}</td>
                                 <td style='padding-left: 5px; text-align: center'>{item.InternNewLevel}</td>
+                                <td style='padding-left: 5px; text-align: center'>{item.ReviewStatus}</td>
                             </tr>";
                     }
                     hrTableHtml += @"
@@ -1488,8 +1493,7 @@ namespace Timesheet.APIs.ReviewDetails
                     </table>";
                     hrContent.Append(hrTableHtml);
                     hrContent.Append("<br>");
-                    hrContent.Append("Trân trọng cảm ơn chị!");
-                    var hrEmailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] {rejectorDisplay} từ chối đánh giá cho thực tập sinh";
+                    var hrEmailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo cập nhật đánh giá thực tập sinh theo phản hồi từ {rejectorDisplay}";
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
                         TargetEmails = hrEmails,
@@ -1509,6 +1513,7 @@ namespace Timesheet.APIs.ReviewDetails
             var data = await GetReviewDataByDetailIdsAsync(reviewDetailIds);
             int date = Convert.ToInt16(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPMReviewInternOnDate));
             var dateNow = DateTimeUtils.GetNow();
+            Dictionary<ReviewInternStatus, string> statusDictionary = CommonUtils.ReviewInternStatusString();
             var deadlineDate = dateNow.AddDays(1);
             if (data == null)
             {
@@ -1525,8 +1530,10 @@ namespace Timesheet.APIs.ReviewDetails
                 try
                 {
                     StringBuilder reviewerHeaderMessage = new StringBuilder();
-                    reviewerHeaderMessage.AppendLine($"Kính gửi anh/chị**{reviewer.ReviewerUserName}**");
-                    reviewerHeaderMessage.AppendLine($"{rejectorDisplay} đã từ chối đánh giá cho thực tập sinh trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
+                    reviewerHeaderMessage.AppendLine($"**[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo đánh giá thực tập sinh**");
+                    reviewerHeaderMessage.AppendLine();
+                    reviewerHeaderMessage.AppendLine($"**{rejectorDisplay}**đã chuyển trạng thái**{statusDictionary[ReviewInternStatus.Rejected]}**cho bản ghi đánh giá thực tập sinh trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
+                    reviewerHeaderMessage.AppendLine("Thông tin thực tập sinh bao gồm:");
                     reviewerHeaderMessage.AppendLine("");
                     _komuService.SendSimpleNotificationToUser(reviewerHeaderMessage.ToString(), reviewer.ReviewerUserName);
                     await Task.Delay(MESSAGE_DELAY_MS);
@@ -1543,13 +1550,13 @@ namespace Timesheet.APIs.ReviewDetails
                             reviewerChunkMessage.AppendLine($"{idx}. Intern name:**{item.InternUserName}**");
                             reviewerChunkMessage.AppendLine($"- Current level:**{item.InternCurrentLevel}**");
                             reviewerChunkMessage.AppendLine($"- Level after PM reviewed:**{item.InternNewLevel}**");
+                            reviewerChunkMessage.AppendLine($"- Status:**{item.ReviewStatus}**");
                             reviewerChunkMessage.AppendLine("");
                             idx++;
                         }
                         if (isLastChunk)
                         {
-                            reviewerChunkMessage.AppendLine($"Anh/chị vui lòng trao đổi với Head PM về thực tập sinh trên và thực hiện đánh giá lại trên Timesheet trước ngày**{deadlineDate:dd/MM/yyyy}**");
-                            reviewerChunkMessage.AppendLine("Trân trọng cảm ơn anh/chị!");
+                            reviewerChunkMessage.AppendLine($"Vui lòng trao đổi với**Head PM**về thực tập sinh trên và thực hiện đánh giá lại trên**Timesheet**trước ngày**{deadlineDate:dd/MM/yyyy}**");
                         }
                         _komuService.SendSimpleNotificationToUser(reviewerChunkMessage.ToString(), reviewer.ReviewerUserName);
                         await Task.Delay(MESSAGE_DELAY_MS);
@@ -1609,7 +1616,8 @@ namespace Timesheet.APIs.ReviewDetails
                         InternFullName = userDict[rd.InternshipId].FullName,
                         InternUserName = userDict[rd.InternshipId].UserName,
                         InternCurrentLevel = rd.CurrentLevel,
-                        InternNewLevel = rd.NewLevel
+                        InternNewLevel = rd.NewLevel,
+                        ReviewStatus = rd.Status
                     }).ToList()
                 })
                 .ToList();
@@ -1807,30 +1815,33 @@ namespace Timesheet.APIs.ReviewDetails
             var dateNow = DateTimeUtils.GetNow();
             var deadlineDate = dateNow.AddDays(2);
             StringBuilder content = new StringBuilder("");
-            string statusExpected;
+            Dictionary<ReviewInternStatus, string> statusDictionary = CommonUtils.ReviewInternStatusString();
+            string statusAchieved, statusExpected;
             try
             {
-                content.Append($"<span style='font-weight: 600'> Kính gửi anh {name} </span>, <br> ");
+                string reviewer = status == ReviewInternStatus.Reviewed ? "Head PM" : "PM";
                 if (status == ReviewInternStatus.Reviewed)
                 {
-                    string headPmMail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
-                    string nameHeadPm = _userServices.GetUserByEmail(headPmMail).Name;
-                    content.Append($"Anh {nameHeadPm} đã hoàn tất giai đoạn review và chuyển trạng thái  <span style='font-weight: 600'> {status} </span> trên Timesheet cho đợt đánh giá intern tháng {monthReviewIntern}/{yearReviewIntern}.");
-                    statusExpected = "Approved";
+                    statusAchieved = statusDictionary[ReviewInternStatus.Reviewed];
+                    statusExpected = statusDictionary[ReviewInternStatus.Approved];
                 }
                 else
                 {
-                    content.Append($"Hiện tại, tất cả các PM đã hoàn tất việc đánh giá intern tháng {reviewIntern.Month}/{reviewIntern.Year} trên Timesheet.");
-                    statusExpected = "Reviewed";
+                    statusAchieved = statusDictionary[ReviewInternStatus.PmReviewed];
+                    statusExpected = statusDictionary[ReviewInternStatus.Reviewed];
                 }
+                content.Append($"Giai đoạn <span style='font-weight: 600'> {reviewer} review </span> cho đợt đánh giá intern tháng <span style='font-weight: 600'> {reviewIntern.Month}/{reviewIntern.Year} </span> đã hoàn tất.");
                 content.Append("<br>");
-                content.Append($"Kính mong anh xem xét và thực hiện chuyển trạng thái sang <span style='font-weight: 600'> {statusExpected} </span> trước ngày <span style='font-weight: 600'> {deadlineDate:dd/MM/yyyy}. </span>");
+                content.Append($"Các bản ghi đã được chuyển sang trạng thái <span style='font-weight: 600'> {statusAchieved} </span> trên hệ thống <span style='font-weight: 600'> Timesheet. </span>");
                 content.Append("<br>");
-                content.Append("Trân trọng cảm ơn anh!");
-                var emailSubject = $"[NCC-Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo giai đoạn review và chuyển trạng thái {statusExpected} trên timesheet";
+                content.Append($"Vui lòng kiểm tra và hoàn tất việc đánh giá trước ngày <span style='font-weight: 600'> {deadlineDate:dd/MM/yyyy}. </span>");
+                content.Append("<br>");
+                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo yêu cầu đánh giá thực tập sinh";
                 var targetEmails = new List<string> { email };
                 targetEmails.AddRange(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
-                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(mail => mail.Trim())
+                    .ToList());
 
                 await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                 {
@@ -1854,27 +1865,31 @@ namespace Timesheet.APIs.ReviewDetails
             int yearReviewIntern = reviewIntern.Year;
             var dateNow = DateTimeUtils.GetNow();
             var deadlineDate = dateNow.AddDays(2);
-            string statusExpected;
+            Dictionary<ReviewInternStatus, string> statusDictionary = CommonUtils.ReviewInternStatusString();
+            string statusAchieved, statusExpected;
             try
             {
                 string headPmMail = SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHeadPmMail);
                 var headPM = _userServices.GetUserByEmail(headPmMail);
                 string nameHeadPm = headPM.UserName;
+                string reviewer = status == ReviewInternStatus.Reviewed ? "Head PM" : "PM";
 
                 StringBuilder content = new StringBuilder("");
-                content.AppendLine($"Kính gửi anh**{user.UserName}**");
+                content.AppendLine($"**[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo đánh giá thực tập sinh**");
+                content.AppendLine();
                 if (status == ReviewInternStatus.Reviewed)
                 {
-                    content.AppendLine($"Anh**{nameHeadPm}**đã hoàn tất giai đoạn review và chuyển trạng thái**{status}**trên Timesheet cho đợt đánh giá intern tháng**{monthReviewIntern}/{yearReviewIntern}**");
-                    statusExpected = "Approved";
+                    statusAchieved = statusDictionary[ReviewInternStatus.Reviewed];
+                    statusExpected = statusDictionary[ReviewInternStatus.Approved];
                 }
                 else
                 {
-                    content.AppendLine($"Hiện tại, tất cả các PM đã hoàn tất việc đánh giá tháng**{reviewIntern.Month}/{reviewIntern.Year}**trên Timesheet.");
-                    statusExpected = "Reviewed";
+                    statusAchieved = statusDictionary[ReviewInternStatus.PmReviewed];
+                    statusExpected = statusDictionary[ReviewInternStatus.Reviewed];
                 }
-                content.AppendLine($"Kính mong anh xem xét và thực hiện chuyển trạng thái sang**{statusExpected}**trước ngày**{deadlineDate:dd/MM/yyyy}**");
-                content.AppendLine($"Trân trọng cảm ơn anh!");
+                content.AppendLine($"Giai đoạn**{reviewer} review**cho đợt đánh giá intern tháng**{monthReviewIntern}/{yearReviewIntern}**đã hoàn tất");
+                content.AppendLine($"Các bản ghi đã được chuyển sang trạng thái**{statusAchieved}**trên hệ thống**Timesheet**");
+                content.AppendLine($"Vui lòng kiểm tra và hoàn tất việc đánh giá trước ngày**{deadlineDate:dd/MM/yyyy}**");
 
                 _komuService.SendSimpleNotificationToUser(content.ToString(), user.UserName);
             }
