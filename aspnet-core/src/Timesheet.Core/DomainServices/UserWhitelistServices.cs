@@ -82,17 +82,13 @@ namespace Timesheet.DomainServices
             try
             {
                 var userWhitelist = await _workScope.GetAsync<UserWhitelist>(input.Id);
+                var isExist = await _workScope.GetAll<UserWhitelist>()
+                    .Where(x => x.Id != input.Id && x.UserId == userWhitelist.UserId && x.WhitelistSystemId == input.WhitelistSystemId)
+                    .AnyAsync();
 
-                if (userWhitelist.WhitelistSystemId != input.WhitelistSystemId)
+                if (isExist)
                 {
-                    var isExist = await _workScope.GetAll<UserWhitelist>()
-                        .Where(x => x.Id != input.Id && x.UserId == userWhitelist.UserId && x.WhitelistSystemId == input.WhitelistSystemId)
-                        .AnyAsync();
-
-                    if (isExist)
-                    {
-                        throw new UserFriendlyException($"This user is already in the selected whitelist type");
-                    }
+                    throw new UserFriendlyException($"This user is already in the selected whitelist type");
                 }
 
                 userWhitelist.WhitelistSystemId = input.WhitelistSystemId;
@@ -141,6 +137,7 @@ namespace Timesheet.DomainServices
                         WhitelistName = whitelistTypeDictionary[x.WhitelistSystem.Type],
                         WhitelistType = x.WhitelistSystem.Type
                     })
+                    .OrderBy(x => x.UserId)
                     .ToListAsync();
 
                 return result;
