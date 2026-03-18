@@ -12,7 +12,6 @@ namespace Timesheet.DomainServices
     public interface IUserWhitelistServices : IDomainService
     {
         Task<GetUserWhitelistDto> Add(AddUserWhitelistDto input);
-        Task<GetUserWhitelistDto> Update(UpdateUserWhitelistDto input);
         Task<List<GetUserWhitelistDto>> GetAll();
         Task<bool> Delete(long id);
         Task<FileBase64Dto> DownloadTemplate();

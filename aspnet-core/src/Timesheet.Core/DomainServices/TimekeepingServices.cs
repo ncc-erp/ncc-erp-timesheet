@@ -281,7 +281,8 @@ namespace Timesheet.DomainServices
             Dictionary<long, List<(string NoteReply, string UserNote)>> oldTimekeepingNotes,
             Dictionary<long, List<MapAbsenceUserDto>> mapAbsenceUsers,
             Dictionary<long, List<MapAbsenceUserDto>> mapRemoteUsers,
-            Dictionary<(long UserId, UserPunishmentType Type), UserPunishmentSnapshotDto> snapshotByUserAndType)
+            Dictionary<(long UserId, UserPunishmentType Type), UserPunishmentSnapshotDto> snapshotByUserAndType,
+            Dictionary<long, UserWhitelist> mapWhitelistUsers)
         {
             var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
             var rs = new List<Timekeeping>();
@@ -498,14 +499,8 @@ namespace Timesheet.DomainServices
 
                 if (isRemoteWork && user.Type != Usertype.Vendor)
                 {
-                    bool isTrackerWhitelisted = await WorkScope.GetAll<UserWhitelist>()
-                        .AnyAsync(uw => uw.UserId == user.UserId
-                                    && !uw.IsDeleted
-                                    && uw.WhitelistSystem.Type == WhitelistType.TrackerTime
-                                    && uw.WhitelistSystem.IsActive
-                                    && !uw.WhitelistSystem.IsDeleted);
-
-                    if (!isTrackerWhitelisted)
+                    bool isTrackerTimeWhitelisted = mapWhitelistUsers.ContainsKey(user.UserId);
+                    if (!isTrackerTimeWhitelisted)
                     {
                         var registerWorkingMinutes = CommonUtils.GetEmployeeWorkingHours(t.RegisterCheckOut, t.RegisterCheckIn);
                         var dayOffType = registerCheckInOut.AbsenceDayType;
@@ -611,6 +606,10 @@ namespace Timesheet.DomainServices
                 var (mapAbsenceUsers, mapRemoteUsers) = await GetAbsenceAndRemoteUsers(selectedDate);
                 var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, mapWFHUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
 
+                var mapWhitelistUsers = await WorkScope.GetAll<UserWhitelist>()
+                    .Where(uw => !uw.IsDeleted && uw.WhitelistSystem.Type == WhitelistType.TrackerTime && uw.WhitelistSystem.IsActive)
+                    .ToDictionaryAsync(uw => uw.UserId, uw => uw);
+
                 int batchSize = 100;
                 for (int i = 0; i < users.Count; i += batchSize)
                 {
@@ -633,7 +632,8 @@ namespace Timesheet.DomainServices
                                 oldTimekeepingNotes,
                                 mapAbsenceUsers,
                                 mapRemoteUsers,
-                                snapshotByUserAndType
+                                snapshotByUserAndType,
+                                mapWhitelistUsers
                             )
                         );
 

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BaseApiService } from './base-api.service';
-import { AddUserWhitelistDto, UpdateUserWhitelistDto } from './model/user-whitelist.dto';
+import { AddUserWhitelistDto } from './model/user-whitelist.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -25,10 +25,6 @@ export class UserWhitelistService extends BaseApiService {
 
     add(body: AddUserWhitelistDto): Observable<any> {
         return this.http.post<any>(this.rootUrl + '/Add', body);
-    }
-
-    update(body: UpdateUserWhitelistDto): Observable<any> {
-        return this.http.put<any>(this.rootUrl + '/Update', body); // Method PUT
     }
 
     delete(id: number): Observable<any> {

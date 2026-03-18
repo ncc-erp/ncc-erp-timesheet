@@ -97,9 +97,6 @@
                                 <td class="text-center">{{ item.userName }}</td>
                                 <td class="text-center">{{ item.whitelistName }}</td>
                                 <td class="text-center">
-                                    <button *ngIf="permission.isGranted(EDIT_USERWHITELIST)" mat-icon-button color="primary" (click)="editItem(item)" matTooltip="{{ 'Edit' | localize }}">
-                                        <mat-icon>edit</mat-icon>
-                                    </button>
                                     <button *ngIf="permission.isGranted(DELETE_USERWHITELIST)" mat-icon-button color="primary" (click)="deleteItem(item)" matTooltip="{{ 'Delete' | localize }}">
                                         <mat-icon>delete</mat-icon>
                                     </button>

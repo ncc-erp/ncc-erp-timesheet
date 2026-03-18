@@ -27,20 +27,13 @@ namespace Timesheet.DomainServices.Dto
         public long WhitelistSystemId { get; set; }
     }
 
-    public class UpdateUserWhitelistDto
-    {
-        [Range(1, long.MaxValue, ErrorMessage = "Id is required")]
-        public long Id { get; set; }
-        [Range(1, long.MaxValue, ErrorMessage = "WhitelistSystemId is required")]
-        public long WhitelistSystemId { get; set; }
-    }
-
     public class ImportUserWhitelistRowDto
     {
         public int Row { get; set; }
         public string MezonUserId { get; set; }
         public string Email { get; set; }
         public string WhitelistType { get; set; }
+        public long? UserId { get; set; }
     }
 
     public class ImportUserWhitelistResultDto

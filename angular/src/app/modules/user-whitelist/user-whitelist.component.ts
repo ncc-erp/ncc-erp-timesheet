@@ -22,7 +22,6 @@ export class UserWhitelistComponent extends PagedListingComponentBase<GetUserWhi
   
     VIEW_USERWHITELIST = PERMISSIONS_CONSTANT.ViewUserWhitelist;
     ADD_USERWHITELIST = PERMISSIONS_CONSTANT.AddUserWhitelist;
-    EDIT_USERWHITELIST = PERMISSIONS_CONSTANT.EditUserWhitelist;
     DELETE_USERWHITELIST = PERMISSIONS_CONSTANT.DeleteUserWhitelist;
     IMPORT_USERWHITELIST = PERMISSIONS_CONSTANT.ImportUserWhitelist;
     DOWNLOAD_USERWHITELIST_TEMPLATE = PERMISSIONS_CONSTANT.DownloadTemplateUserWhitelist;
@@ -137,10 +136,6 @@ export class UserWhitelistComponent extends PagedListingComponentBase<GetUserWhi
         this.showDialog();
     }
 
-    editItem(item: GetUserWhitelistDto): void {
-        this.showDialog(item);
-    }
-
     deleteItem(item: GetUserWhitelistDto): void {
         this.delete(item);
     }
@@ -160,25 +155,19 @@ export class UserWhitelistComponent extends PagedListingComponentBase<GetUserWhi
         )
     }
 
-    private showDialog(item?: GetUserWhitelistDto): void {
+    private showDialog(): void {
         const dialogRef = this.dialog.open(AddEditUserWhitelistComponent, {
             width: '40%',
             maxWidth: '800px',
             panelClass: 'user-whitelist-dialog-container',
             restoreFocus: false,
             data: {
-                isEdit: !!item,
-                whitelistTypesList: this.whitelistTypesList,
-                item: item
+                whitelistTypesList: this.whitelistTypesList
             }
         });
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
-                if (!item || !item.id) {
-                    this.getDataPage(1);
-                } else {
-                    this.getDataPage(this.pageNumber);
-                }
+                this.getDataPage(1);
             }
         });
     }
