@@ -141,6 +141,7 @@ namespace Timesheet.DomainServices
                         WhitelistName = whitelistTypeDictionary[x.WhitelistSystem.Type],
                         WhitelistType = x.WhitelistSystem.Type
                     })
+                    .OrderBy(x => x.UserId)
                     .ToListAsync();
 
                 return result;
