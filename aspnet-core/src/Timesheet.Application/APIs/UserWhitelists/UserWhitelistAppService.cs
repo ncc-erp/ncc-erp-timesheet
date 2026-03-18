@@ -28,13 +28,6 @@ namespace Timesheet.APIs.UserWhitelists
             return await _userWhitelistServices.Add(input);
         }
 
-        [HttpPut]
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_UserWhitelist_Edit)]
-        public async Task<GetUserWhitelistDto> Update(UpdateUserWhitelistDto input)
-        {
-            return await _userWhitelistServices.Update(input);
-        }
-
         [HttpGet]
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_UserWhitelist_View)]
         public async Task<List<GetUserWhitelistDto>> GetAll()

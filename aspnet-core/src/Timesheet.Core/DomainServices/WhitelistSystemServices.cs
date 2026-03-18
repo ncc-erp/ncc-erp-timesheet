@@ -27,17 +27,12 @@ namespace Timesheet.DomainServices
         {
             try
             {
-                if (!input.Type.HasValue)
-                {
-                    throw new UserFriendlyException("Whitelist type is required.");
-                }
-
                 var isDuplicatedType = await _workScope.GetAll<WhitelistSystem>()
-                    .Where(x => x.Type == input.Type.Value)
+                    .Where(x => x.Type == input.Type)
                     .AnyAsync();
                 if (isDuplicatedType)
                 {
-                    throw new UserFriendlyException($"Whitelist type '{input.Type.Value}' already exists.");
+                    throw new UserFriendlyException($"Whitelist type '{input.Type}' already exists.");
                 }
 
                 var whitelistSystem = new WhitelistSystem
@@ -45,7 +40,7 @@ namespace Timesheet.DomainServices
                     Name = input.Name,
                     Code = input.Code,
                     Description = input.Description,
-                    Type = input.Type.Value,
+                    Type = input.Type,
                     IsActive = input.IsActive
                 };
 
@@ -67,7 +62,9 @@ namespace Timesheet.DomainServices
         {
             try
             {
-                var whitelistSystem = await _workScope.GetAsync<WhitelistSystem>(input.Id);
+                var whitelistSystem = await _workScope.GetAll<WhitelistSystem>()
+                    .FirstOrDefaultAsync(ws => ws.Id == input.Id)
+                    ?? throw new UserFriendlyException($"Cannot find whitelist type with id = {input.Id}");
 
                 if (!string.IsNullOrEmpty(input.Name))
                 {
@@ -79,11 +76,7 @@ namespace Timesheet.DomainServices
                     whitelistSystem.Code = input.Code;
                 }
 
-                if (input.Type.HasValue)
-                {
-                    whitelistSystem.Type = input.Type.Value;
-                }
-
+                whitelistSystem.Type = input.Type;
                 whitelistSystem.Description = input.Description;
 
                 if (input.IsActive != whitelistSystem.IsActive)
@@ -129,6 +122,7 @@ namespace Timesheet.DomainServices
                         Type = x.Type,
                         IsActive = x.IsActive
                     })
+                    .OrderBy(x => x.Code)
                     .ToListAsync();
 
                 return result;

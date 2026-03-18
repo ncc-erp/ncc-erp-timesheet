@@ -31,7 +31,7 @@ namespace Timesheet.DomainServices.Dto
         [MaxLength(1000)]
         public string Description { get; set; }
         [Required]
-        public WhitelistType? Type { get; set; }
+        public WhitelistType Type { get; set; }
         public bool IsActive { get; set; } = true;
     }
 

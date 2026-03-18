@@ -41,14 +41,18 @@ namespace Timesheet.DomainServices
                     throw new UserFriendlyException($"This user is already in the selected whitelist type");
                 }
 
-                var whitelistSystem = await _workScope.GetAsync<WhitelistSystem>(input.WhitelistSystemId);
+                var whitelistSystem = await _workScope.GetAll<WhitelistSystem>()
+                    .FirstOrDefaultAsync(ws => ws.Id == input.WhitelistSystemId)
+                    ?? throw new UserFriendlyException($"Cannot find whitelist system with id = {input.WhitelistSystemId}");
                 if (!whitelistSystem.IsActive)
                 {
                     throw new UserFriendlyException($"The selected whitelist system is not active");
                 }
 
-                var user = await _workScope.GetAsync<User>(input.UserId);
-                
+                var user = await _workScope.GetAll<User>()
+                    .FirstOrDefaultAsync(u => u.Id == input.UserId)
+                    ?? throw new UserFriendlyException($"Cannot find user with id = {input.UserId}");
+
                 var userWhitelist = new UserWhitelist
                 {
                     UserId = input.UserId,
@@ -77,51 +81,6 @@ namespace Timesheet.DomainServices
             }
         }
 
-        public async Task<GetUserWhitelistDto> Update(UpdateUserWhitelistDto input)
-        {
-            try
-            {
-                var userWhitelist = await _workScope.GetAsync<UserWhitelist>(input.Id);
-                var isExist = await _workScope.GetAll<UserWhitelist>()
-                    .Where(x => x.Id != input.Id && x.UserId == userWhitelist.UserId && x.WhitelistSystemId == input.WhitelistSystemId)
-                    .AnyAsync();
-
-                if (isExist)
-                {
-                    throw new UserFriendlyException($"This user is already in the selected whitelist type");
-                }
-
-                userWhitelist.WhitelistSystemId = input.WhitelistSystemId;
-                await _workScope.UpdateAsync(userWhitelist);
-
-                var whitelistSystem = await _workScope.GetAsync<WhitelistSystem>(input.WhitelistSystemId);
-                if (!whitelistSystem.IsActive)
-                {
-                    throw new UserFriendlyException($"The selected whitelist system is not active");
-                }
-
-                var user = await _workScope.GetAsync<User>(userWhitelist.UserId);
-
-                return new GetUserWhitelistDto
-                {
-                    Id = userWhitelist.Id,
-                    UserId = user.Id,
-                    FullName = user.FullName,
-                    UserName = user.UserName,
-                    WhitelistName = whitelistTypeDictionary[whitelistSystem.Type],
-                    WhitelistType = whitelistSystem.Type
-                };
-            }
-            catch (Exception ex)
-            {
-                if (ex is UserFriendlyException)
-                {
-                    throw;
-                }
-                throw new UserFriendlyException("An error occured while updating user whitelist", ex);
-            }
-        }
-
         public async Task<List<GetUserWhitelistDto>> GetAll()
         {
             try
@@ -137,7 +96,7 @@ namespace Timesheet.DomainServices
                         WhitelistName = whitelistTypeDictionary[x.WhitelistSystem.Type],
                         WhitelistType = x.WhitelistSystem.Type
                     })
-                    .OrderBy(x => x.UserId)
+                    .OrderBy(x => x.UserName)
                     .ToListAsync();
 
                 return result;
@@ -252,37 +211,32 @@ namespace Timesheet.DomainServices
                     })
                     .ToListAsync();
 
-                var userDictByMezon = matchedUsers
-                    .Where(u => !string.IsNullOrEmpty(u.MezonUserId))
-                    .GroupBy(u => u.MezonUserId)
-                    .ToDictionary(g => g.Key, g => g.First().Id);
-
-                var userDictByEmail = matchedUsers
-                    .Where(u => !string.IsNullOrEmpty(u.Email))
-                    .GroupBy(u => u.Email)
-                    .ToDictionary(g => g.Key, g => g.First().Id);
-
                 var failedList = new List<string>();
 
-                var invalidRows = listRowInput.Where(row =>
-                    (string.IsNullOrEmpty(row.MezonUserId) || !userDictByMezon.ContainsKey(row.MezonUserId)) &&
-                    (string.IsNullOrEmpty(row.Email) || !userDictByEmail.ContainsKey(row.Email))
-                ).ToList();
-
-                failedList.AddRange(invalidRows.Select(row =>
+                foreach (var row in listRowInput)
                 {
-                    string userIdentifier = !string.IsNullOrEmpty(row.MezonUserId) ? row.MezonUserId : (row.Email ?? "");
-                    return $"Row {row.Row} ({userIdentifier}): User not found or inactive";
-                }));
+                    var matchedUser = matchedUsers.FirstOrDefault(u =>
+                        (!string.IsNullOrEmpty(row.MezonUserId) && u.MezonUserId == row.MezonUserId) ||
+                        (!string.IsNullOrEmpty(row.Email) && u.Email == row.Email));
 
-                var validRows = listRowInput.Except(invalidRows).ToList();
-                if (!validRows.Any())
+                    row.UserId = matchedUser?.Id;
+                }
+
+                var invalidRows = listRowInput.Where(row => row.UserId == null).ToList();
+
+                if (invalidRows.Any())
                 {
-                    return new ImportUserWhitelistResultDto 
-                    { 
-                        SuccessCount = 0, 
-                        FailCount = failedList.Count, 
-                        FailedList = failedList 
+                    failedList.AddRange(invalidRows.Select(row =>
+                    {
+                        string userIdentifier = !string.IsNullOrEmpty(row.MezonUserId) ? row.MezonUserId : (row.Email ?? "");
+                        return $"Row {row.Row} ({userIdentifier}): User not found or inactive";
+                    }));
+
+                    return new ImportUserWhitelistResultDto
+                    {
+                        SuccessCount = 0,
+                        FailCount = failedList.Count,
+                        FailedList = failedList
                     };
                 }
 
@@ -298,21 +252,17 @@ namespace Timesheet.DomainServices
 
                 var currentUserWhitelist = (await _workScope.GetAll<UserWhitelist>()
                     .Where(x => !x.IsDeleted && matchedUsers.Select(u => u.Id).Contains(x.UserId))
-                    .Select(x => new { x.UserId, x.WhitelistSystemId })
+                    .Select(x => new ValueTuple<long, long>(x.UserId, x.WhitelistSystemId))
                     .ToListAsync())
-                    .Select(x => (x.UserId, x.WhitelistSystemId))
                     .ToHashSet();
 
                 var userWhitelistInserts = new List<UserWhitelist>();
-                foreach (var row in validRows)
+                foreach (var row in listRowInput)
                 {
                     string userIdentifier = !string.IsNullOrEmpty(row.MezonUserId) ? row.MezonUserId : (row.Email ?? "");
                     var inputType = row.WhitelistType ?? "";
 
-                    long userId = (!string.IsNullOrEmpty(row.MezonUserId) && userDictByMezon.TryGetValue(row.MezonUserId, out var idMezon)) ? idMezon
-                                : (!string.IsNullOrEmpty(row.Email) && userDictByEmail.TryGetValue(row.Email, out var idEmail)) ? idEmail
-                                : 0;
-
+                    long userId = row.UserId.Value;
                     var whitelistTypeEnum = whitelistTypeMap[inputType];
                     if (!whitelistSystemDictionary.TryGetValue(whitelistTypeEnum, out long matchedWhitelistSystemId))
                     {

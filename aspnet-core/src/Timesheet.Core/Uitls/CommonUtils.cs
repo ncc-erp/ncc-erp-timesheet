@@ -192,7 +192,7 @@ namespace Timesheet.Uitls
                 { ReviewInternStatus.ReOpen, "ReOpen" }
             };
         }
-        
+
         public static string TypeOfWorkName(TypeOfWork typeOfWork)
         {
            if (typeOfWork == TypeOfWork.NormalWorkingHours)
