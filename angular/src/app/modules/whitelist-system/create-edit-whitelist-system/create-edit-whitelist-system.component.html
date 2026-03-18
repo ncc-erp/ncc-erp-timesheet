@@ -1,0 +1,56 @@
+<form #createForm="ngForm" autocomplete="off" (ngSubmit)="save()">
+    <div class="dialog-header">
+        <h1 class="dialog-title" mat-dialog-title>
+            {{ isEdit ? ('Edit Whitelist Type' | localize) : ('New Whitelist Type' | localize) }}
+        </h1>
+        <mat-icon (click)="close()" class="close-icon">close</mat-icon>
+    </div>
+    <hr />
+    <div mat-dialog-content>
+        <mat-form-field appearance="outline" class="w-100 form-field-spacing">
+            <mat-label>{{ 'Name' | localize }}</mat-label>
+            <input matInput name="name" [(ngModel)]="whitelistItem.name" required maxlength="256">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100 form-field-spacing">
+            <mat-label>{{ 'Code' | localize }}</mat-label>
+            <input matInput name="code" 
+                   [(ngModel)]="whitelistItem.code" 
+                   required maxlength="256"
+                   pattern="^[A-Z0-9_]+$" 
+                   (input)="onCodeInput($event)">
+            <mat-error *ngIf="createForm.controls['code']?.hasError('pattern')">
+                {{ 'Code must be uppercase letters, numbers and underscores only.' | localize }}
+            </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100 form-field-spacing">
+            <mat-label>{{ 'Description' | localize }}</mat-label>
+            <textarea matInput name="description" [(ngModel)]="whitelistItem.description" rows="3" maxlength="1000"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100 form-field-spacing">
+            <mat-label>{{ 'Type' | localize }}</mat-label>
+            <mat-select name="type" [(ngModel)]="whitelistItem.type" required>
+                <mat-option *ngFor="let type of whitelistTypesList" [value]="type.value">
+                    {{ type.name | localize }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <div *ngIf="isEdit" class="w-100 form-field-spacing">
+            <mat-checkbox name="isActive" color="primary" [(ngModel)]="whitelistItem.isActive">
+                {{ 'Is Active' | localize }}
+            </mat-checkbox>
+        </div>
+    </div>
+
+    <div mat-dialog-actions align="end">
+        <button class="btn btn-default" mat-raised-button type="button" [disabled]="saving" (click)="close()">
+            {{ 'Cancel' | localize }}
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!createForm.valid || saving">
+            {{ 'Save' | localize }}
+        </button>
+    </div>
+</form>
