@@ -61,15 +61,22 @@ export class UserWhitelistComponent extends PagedListingComponentBase<GetUserWhi
             if (this.searchText) {
                 const searchLower = this.searchText.toLowerCase().trim();
                 items = items.filter(x => 
-                    (x.fullName || '').toLowerCase().includes(searchLower) || 
                     (x.userName || '').toLowerCase().includes(searchLower)
                 );
             }
 
             if (this.sortColumn && this.sortDirection !== SortDirection.None) {
                 items.sort((a: any, b: any) => {
-                    let valA = a[this.sortColumn] || '';
-                    let valB = b[this.sortColumn] || '';
+                    let valA: any;
+                    let valB: any;
+
+                    if (this.sortColumn === UserWhitelistColumn.Branch) {
+                        valA = a.branch ? a.branch.branchName : '';
+                        valB = b.branch ? b.branch.branchName : '';
+                    } else {
+                        valA = a[this.sortColumn] || '';
+                        valB = b[this.sortColumn] || '';
+                    }
                     
                     if (typeof valA === 'string') valA = valA.toLowerCase();
                     if (typeof valB === 'string') valB = valB.toLowerCase();
@@ -82,7 +89,11 @@ export class UserWhitelistComponent extends PagedListingComponentBase<GetUserWhi
 
             this.totalItems = items.length;
             this.pageNumber = pageNumber;
-            this.allData = items.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize);
+            const pagedItems = items.slice((this.pageNumber - 1) * this.pageSize, this.pageNumber * this.pageSize);
+            this.allData = pagedItems.map(item => ({
+                ...item,
+                isExpanded: false 
+            }));
             finishedCallback();
         }, () => {
             finishedCallback();
@@ -130,6 +141,12 @@ export class UserWhitelistComponent extends PagedListingComponentBase<GetUserWhi
         this.whitelistSystemService.getWhitelistTypes().subscribe((res: any) => {
             this.whitelistTypesList = res.result ? res.result : res;
         });
+    }
+
+    toggleProjects(item: any): void {
+        if (item.projectNames && item.projectNames.length > 2) {
+            item.isExpanded = !item.isExpanded;
+        }
     }
 
     addNewUser(): void {

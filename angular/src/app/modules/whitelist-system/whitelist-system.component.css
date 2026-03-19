@@ -24,15 +24,23 @@ th {
 }
 
 .col-name {
-    width: 20%;
+    width: 15%;
 }
 
 .col-code {
-    width: 20%;
+    width: 15%;
 }
 
 .col-desc {
-    width: 40%;
+    width: 35%;
+}
+
+.col-type {
+    width: 15%;
+}
+
+.col-is-active {
+    width: 10%;
 }
 
 .no-select {

@@ -1,10 +1,16 @@
 export class GetUserWhitelistDto {
     id: number;
     userId: number;
-    fullName: string;
     userName: string;
+    branch: BranchToDisplayDto;
+    projectNames: string[];
     whitelistName: string;
     whitelistType: number;
+}
+
+export class BranchToDisplayDto {
+    branchName: string;
+    branchColor: string;
 }
 
 export class AddUserWhitelistDto {

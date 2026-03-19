@@ -13,8 +13,9 @@ namespace Timesheet.DomainServices.Dto
     {
         public long Id { get; set; }
         public long UserId { get; set; }
-        public string FullName { get; set; }
         public string UserName { get; set; }
+        public BranchToDisplayDto Branch { get; set; }
+        public List<string> ProjectNames { get; set; }
         public string WhitelistName { get; set; }
         public WhitelistType WhitelistType { get; set; }
     }

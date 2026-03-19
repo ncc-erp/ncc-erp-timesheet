@@ -1,7 +1,7 @@
 export enum UserWhitelistColumn {
     UserId = 'userId',
-    FullName = 'fullName',
     UserName = 'userName',
+    Branch = 'branch',
     WhitelistName = 'whitelistName'
 }
 

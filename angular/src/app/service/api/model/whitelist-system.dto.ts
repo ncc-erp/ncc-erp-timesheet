@@ -4,6 +4,7 @@ export class GetWhitelistSystemDto {
     code: string;
     description: string;
     type: number;
+    typeName: string;
     isActive: boolean;
 }
 

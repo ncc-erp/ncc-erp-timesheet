@@ -18,6 +18,7 @@ namespace Timesheet.DomainServices
     public class WhitelistSystemServices : BaseDomainService, IWhitelistSystemServices, ITransientDependency
     {
         private readonly IWorkScope _workScope;
+        private readonly Dictionary<WhitelistType, string> whitelistTypeDictionary = CommonUtils.WhitelistTypeName();
         public WhitelistSystemServices(IWorkScope workScope) : base(workScope)
         {
             _workScope = workScope;
@@ -120,6 +121,7 @@ namespace Timesheet.DomainServices
                         Code = x.Code,
                         Description = x.Description,
                         Type = x.Type,
+                        TypeName = whitelistTypeDictionary.ContainsKey(x.Type) ? whitelistTypeDictionary[x.Type] : "",
                         IsActive = x.IsActive
                     })
                     .OrderBy(x => x.Code)
