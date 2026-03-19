@@ -3,6 +3,7 @@ using Abp.UI;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Ncc.Authorization.Users;
+using Ncc.Entities;
 using Ncc.IoC;
 using OfficeOpenXml;
 using System;
@@ -65,7 +66,6 @@ namespace Timesheet.DomainServices
                 {
                     Id = id,
                     UserId = user.Id,
-                    FullName = user.FullName,
                     UserName = user.UserName,
                     WhitelistName = whitelistTypeDictionary[whitelistSystem.Type],
                     WhitelistType = whitelistSystem.Type
@@ -85,19 +85,52 @@ namespace Timesheet.DomainServices
         {
             try
             {
-                var result = await _workScope.GetAll<UserWhitelist>()
+                var whitelistData = await _workScope.GetAll<UserWhitelist>()
                     .Where(x => x.WhitelistSystem.IsActive)
-                    .Select(x => new GetUserWhitelistDto
+                    .Select(x => new
+                    {
+                        x.Id,
+                        x.UserId,
+                        x.User.UserName,
+                        BranchName = x.User.Branch.Name,
+                        BranchColor = x.User.Branch.Color,
+                        WhitelistType = x.WhitelistSystem.Type
+                    })
+                    .ToListAsync();
+
+                var projectUsers = await _workScope.GetAll<ProjectUser>()
+                    .Where(pu => pu.Type != ProjectUserType.DeActive && whitelistData.Select(wd => wd.UserId).Contains(pu.UserId))
+                    .Join(_workScope.GetAll<Project>()
+                        .Where(p => p.Status == ProjectStatus.Active),
+                        pu => pu.ProjectId,
+                        p => p.Id,
+                        (pu, p) => new
+                        {
+                            pu.UserId,
+                            p.Name
+                        })
+                    .ToListAsync();
+
+                var projectUserDict = projectUsers
+                    .GroupBy(pu => pu.UserId)
+                    .ToDictionary(g => g.Key, g => g.Select(pu => pu.Name).ToList());
+
+                var result = whitelistData.Select(x => new GetUserWhitelistDto
                     {
                         Id = x.Id,
                         UserId = x.UserId,
-                        FullName = x.User.FullName,
-                        UserName = x.User.UserName,
-                        WhitelistName = whitelistTypeDictionary[x.WhitelistSystem.Type],
-                        WhitelistType = x.WhitelistSystem.Type
+                        UserName = x.UserName,
+                        Branch = new BranchToDisplayDto
+                        {
+                            BranchName = x.BranchName,
+                            BranchColor = x.BranchColor
+                        },
+                        ProjectNames = projectUserDict.ContainsKey(x.UserId) ? projectUserDict[x.UserId] : new List<string>(),
+                        WhitelistName = whitelistTypeDictionary[x.WhitelistType],
+                        WhitelistType = x.WhitelistType
                     })
                     .OrderBy(x => x.UserName)
-                    .ToListAsync();
+                    .ToList();
 
                 return result;
             }
@@ -250,11 +283,14 @@ namespace Timesheet.DomainServices
                     .Where(ws => ws.IsActive)
                     .ToDictionaryAsync(ws => ws.Type, ws => ws.Id);
 
-                var currentUserWhitelist = (await _workScope.GetAll<UserWhitelist>()
+                var currentUserWhitelist = await _workScope.GetAll<UserWhitelist>()
                     .Where(x => !x.IsDeleted && matchedUsers.Select(u => u.Id).Contains(x.UserId))
-                    .Select(x => new ValueTuple<long, long>(x.UserId, x.WhitelistSystemId))
-                    .ToListAsync())
-                    .ToHashSet();
+                    .Select(x => new
+                    {
+                        x.UserId,
+                        x.WhitelistSystemId
+                    })
+                    .ToListAsync();
 
                 var userWhitelistInserts = new List<UserWhitelist>();
                 foreach (var row in listRowInput)
@@ -270,14 +306,17 @@ namespace Timesheet.DomainServices
                         continue;
                     }
 
-                    var whitelistTypeKey = (userId, matchedWhitelistSystemId);
-                    if (currentUserWhitelist.Contains(whitelistTypeKey))
+                    if (currentUserWhitelist.Any(s => s.UserId == userId && s.WhitelistSystemId == matchedWhitelistSystemId))
                     {
                         failedList.Add($"Row {row.Row} ({userIdentifier}): User already exists or processed in whitelist type '{inputType}'");
                         continue;
                     }
 
-                    currentUserWhitelist.Add(whitelistTypeKey);
+                    currentUserWhitelist.Add(new 
+                    {
+                        UserId = userId,
+                        WhitelistSystemId = matchedWhitelistSystemId
+                    });
 
                     userWhitelistInserts.Add(new UserWhitelist
                     {
