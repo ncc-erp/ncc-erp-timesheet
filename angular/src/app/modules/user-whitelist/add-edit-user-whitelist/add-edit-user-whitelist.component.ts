@@ -85,6 +85,11 @@ export class AddEditUserWhitelistComponent extends AppComponentBase implements O
             system => system.type === this.selectedWhitelistTypeId
         );
 
+        if (!matchedSystem) {
+            abp.notify.error(this.l('Please add this whitelist type to the system')); 
+            return; 
+        }
+
         this.saving = true;
         const input = new AddUserWhitelistDto(
             this.userId,

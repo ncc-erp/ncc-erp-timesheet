@@ -52,6 +52,8 @@
                                     </div>
                                 </th>
                                 <th class="col-desc">{{ 'Description' | localize }}</th>
+                                <th class="col-type">{{ 'Type' | localize }}</th>
+                                <th class="col-is-active">{{ 'Is Active' | localize }}</th>
                                 <th class="col-actions">{{ 'Actions' | localize }}</th>
                             </tr>
                         </thead>
@@ -64,6 +66,15 @@
                                 <td class="text-center">{{ item.name }}</td>
                                 <td class="text-center">{{ item.code }}</td>
                                 <td>{{ item.description }}</td>
+                                <td class="text-center">{{ item.typeName }}</td>
+                                <td class="text-center">
+                                    <i class="material-icons" *ngIf="item.isActive" style="color:green;">
+                                        check_circle
+                                    </i>
+                                    <i class="material-icons" *ngIf="!item.isActive" style="color:red;">
+                                        error
+                                    </i>
+                                </td>
                                 <td class="text-center">
                                     
                                     <button *ngIf="permission.isGranted(EDIT_WHITELISTSYSTEM)
@@ -93,7 +104,7 @@
                             </tr>
 
                             <tr *ngIf="whitelistTypesList.length === 0">
-                                <td colspan="4" class="text-center" style="padding: 20px;">
+                                <td colspan="6" class="text-center" style="padding: 20px;">
                                     {{ 'No data available' | localize }}
                                 </td>
                             </tr>
