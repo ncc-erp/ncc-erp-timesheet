@@ -179,6 +179,20 @@ namespace Timesheet.Uitls
 
         }
 
+        public static Dictionary<ReviewInternStatus, string> ReviewInternStatusString ()
+        {
+            return new Dictionary<ReviewInternStatus, string>()
+            {
+                { ReviewInternStatus.Draft, "Draft" },
+                { ReviewInternStatus.Reviewed, "Reviewed" },
+                { ReviewInternStatus.Approved, "Approved" },
+                { ReviewInternStatus.SentEmail, "Sent Email" },
+                { ReviewInternStatus.Rejected, "Rejected" },
+                { ReviewInternStatus.PmReviewed, "PM Reviewed" },
+                { ReviewInternStatus.ReOpen, "ReOpen" }
+            };
+        }
+
         public static string TypeOfWorkName(TypeOfWork typeOfWork)
         {
            if (typeOfWork == TypeOfWork.NormalWorkingHours)
@@ -284,6 +298,14 @@ namespace Timesheet.Uitls
                 return userTypeMap[typeFromHrmV2];
             }
             throw new ArgumentOutOfRangeException(nameof(typeFromHrmV2), $"Invalid user type value from HRM V2: {typeFromHrmV2}");
+        }
+        public static Dictionary<WhitelistType, string> WhitelistTypeName()
+        {
+            return new Dictionary<WhitelistType, string>
+            {
+                { WhitelistType.TrackerTime, "TRACKER_TIME" },
+                { WhitelistType.FullyRemote, "FULLY_REMOTE" }
+            };
         }
         public static Sex GetSexBySexFromHrmV2(Sex sexFromHrmV2)
         {

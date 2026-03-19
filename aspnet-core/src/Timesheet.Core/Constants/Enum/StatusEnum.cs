@@ -311,6 +311,11 @@ namespace Ncc.Entities.Enum
             LateAndNoCheckOut = 4,
             NoCheckInAndNoCheckOut = 5
         }
+        public enum WhitelistType
+        {
+            TrackerTime = 0,
+            FullyRemote = 1
+        }
         public enum TeamBuildingStatus
         {
             Open = 0,

@@ -104,19 +104,71 @@
   gap: 5px;
 } */
 
-@media (min-width: 992px) {
-  .project-width {
-    width: 20%;
-  }
+/* ===== Filter Row — Responsive Flexbox ===== */
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 4px 0;
+}
 
-  .branch-selection-width {
-    width: 135px;
-  }
+.filter-item {
+  flex: 1 1 160px;
+  min-width: 140px;
+}
 
-  .mat-option-custom-width {
-    width: 100px;
+.filter-item--wide {
+  flex: 2 1 220px;
+}
+
+.filter-item--narrow {
+  flex: 0 1 150px;
+  min-width: 130px;
+}
+
+.filter-item--search {
+  flex: 3 1 260px;
+}
+
+::ng-deep .filter-item .mat-form-field,
+::ng-deep .filter-item .mat-form-field-appearance-outline {
+  width: 100%;
+}
+
+::ng-deep .filter-item .mat-form-field-appearance-outline .mat-form-field-wrapper {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+/* Legacy: keep mat-option-custom-width for branch dropdown width */
+.mat-option-custom-width {
+  width: 150px;
+}
+
+/* Tablet: tighten gaps */
+@media screen and (max-width: 991px) {
+  .filter-item {
+    flex: 1 1 140px;
   }
 }
+
+/* Mobile: each filter takes full width */
+@media screen and (max-width: 575px) {
+  .filter-row {
+    gap: 6px;
+  }
+
+  .filter-item,
+  .filter-item--wide,
+  .filter-item--narrow,
+  .filter-item--search {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+}
+
 .pr-0 {
   padding-right: 0px;
 }

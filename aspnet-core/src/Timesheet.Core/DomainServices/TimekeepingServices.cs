@@ -281,7 +281,8 @@ namespace Timesheet.DomainServices
             Dictionary<long, List<(string NoteReply, string UserNote)>> oldTimekeepingNotes,
             Dictionary<long, List<MapAbsenceUserDto>> mapAbsenceUsers,
             Dictionary<long, List<MapAbsenceUserDto>> mapRemoteUsers,
-            Dictionary<(long UserId, UserPunishmentType Type), UserPunishmentSnapshotDto> snapshotByUserAndType)
+            Dictionary<(long UserId, UserPunishmentType Type), UserPunishmentSnapshotDto> snapshotByUserAndType,
+            Dictionary<long, UserWhitelist> mapWhitelistUsers)
         {
             var LimitedMinute = Int32.Parse(SettingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
             var rs = new List<Timekeeping>();
@@ -498,21 +499,25 @@ namespace Timesheet.DomainServices
 
                 if (isRemoteWork && user.Type != Usertype.Vendor)
                 {
-                    var registerWorkingMinutes = CommonUtils.GetEmployeeWorkingHours(t.RegisterCheckOut, t.RegisterCheckIn);
-                    var dayOffType = registerCheckInOut.AbsenceDayType;
-                    var trackerPunishment = await CreateTrackerTimePunishment(
-                        selectedDate,
-                        user.UserId,
-                        trackerTime,
-                        registerWorkingMinutes,
-                        t.UserNote,
-                        t.NoteReply,
-                        dayOffType,
-                        punishmentSystems);
-                    if (trackerPunishment != null)
+                    bool isTrackerTimeWhitelisted = mapWhitelistUsers.ContainsKey(user.UserId);
+                    if (!isTrackerTimeWhitelisted)
                     {
-                        ApplySnapshotIfAny(snapshotByUserAndType, trackerPunishment);
-                        userPunishmentsToInsert.Add(trackerPunishment);
+                        var registerWorkingMinutes = CommonUtils.GetEmployeeWorkingHours(t.RegisterCheckOut, t.RegisterCheckIn);
+                        var dayOffType = registerCheckInOut.AbsenceDayType;
+                        var trackerPunishment = await CreateTrackerTimePunishment(
+                            selectedDate,
+                            user.UserId,
+                            trackerTime,
+                            registerWorkingMinutes,
+                            t.UserNote,
+                            t.NoteReply,
+                            dayOffType,
+                            punishmentSystems);
+                        if (trackerPunishment != null)
+                        {
+                            ApplySnapshotIfAny(snapshotByUserAndType, trackerPunishment);
+                            userPunishmentsToInsert.Add(trackerPunishment);
+                        }
                     }
                 }
             }
@@ -601,6 +606,10 @@ namespace Timesheet.DomainServices
                 var (mapAbsenceUsers, mapRemoteUsers) = await GetAbsenceAndRemoteUsers(selectedDate);
                 var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, mapWFHUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
 
+                var mapWhitelistUsers = await WorkScope.GetAll<UserWhitelist>()
+                    .Where(uw => !uw.IsDeleted && uw.WhitelistSystem.Type == WhitelistType.TrackerTime && uw.WhitelistSystem.IsActive)
+                    .ToDictionaryAsync(uw => uw.UserId, uw => uw);
+
                 int batchSize = 100;
                 for (int i = 0; i < users.Count; i += batchSize)
                 {
@@ -623,7 +632,8 @@ namespace Timesheet.DomainServices
                                 oldTimekeepingNotes,
                                 mapAbsenceUsers,
                                 mapRemoteUsers,
-                                snapshotByUserAndType
+                                snapshotByUserAndType,
+                                mapWhitelistUsers
                             )
                         );
 

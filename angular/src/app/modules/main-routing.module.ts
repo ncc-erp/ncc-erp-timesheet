@@ -917,6 +917,32 @@ const routes: Routes = [
   }]
 },
 {
+  path: "whitelist-system",
+  component: MainComponent,
+  canActivate: [AppRouteGuard],
+  children: [{
+    path: '',
+    loadChildren: '../modules/whitelist-system/whitelist-system.module#WhitelistSystemModule',
+    data: {
+      permission: 'Admin.WhitelistSystem',
+      preload: true
+    }
+  }]
+},
+{
+  path: "user-whitelist",
+  component: MainComponent,
+  canActivate: [AppRouteGuard],
+  children: [{
+    path: '',
+    loadChildren: '../modules/user-whitelist/user-whitelist.module#UserWhitelistModule',
+    data: {
+      permission: 'Admin.UserWhitelist',
+      preload: true
+    }
+  }]
+},
+{
   path: "team-building-hr",
   component: MainComponent,
   canActivate: [AppRouteGuard],

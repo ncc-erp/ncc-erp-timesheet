@@ -1,0 +1,191 @@
+.action-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    margin-bottom: 20px;
+}
+
+.btn-new-whitelist {
+    align-self: center;
+    margin-bottom: 20px;
+}
+
+.btn-search-custom {
+    background-color: #ffeb3b !important; 
+    color: black !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+th {
+    text-align: center;
+}
+
+.col-name {
+    width: 15%;
+}
+
+.col-code {
+    width: 15%;
+}
+
+.col-desc {
+    width: 35%;
+}
+
+.col-type {
+    width: 15%;
+}
+
+.col-is-active {
+    width: 10%;
+}
+
+.no-select {
+    user-select: none;
+}
+
+.sortable-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sort-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-left: 4px;
+    cursor: pointer;
+}
+
+.search-input-field {
+    font-size: 14px;
+    width: 30%;
+}
+
+.search-wrapper {
+    display: flex; 
+    align-items: center; 
+    justify-content: flex-start;
+}
+
+.search-input {
+    flex-grow: 1;
+}
+
+mat-icon.custom-search-icon {
+    position: relative;
+    top: -5px;
+    height: 16px;
+}
+
+.custom-search-icon {
+    cursor: pointer;
+}
+
+::ng-deep .whitelist-system-dialog-container .mat-dialog-container {
+    padding-bottom: 40px;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .action-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .search-input-field {
+    width: 80%;
+  }
+
+  .btn-new-whitelist {
+    align-self: center;
+    margin-bottom: 0;
+  }
+
+  ::ng-deep .whitelist-system-dialog-container {
+    width: 95% !important;
+    max-width: 95vw !important;
+  }
+}
+
+.text-center {
+    text-align: center;
+}
+
+.action-menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 100px;
+    padding: 0 12px;
+    margin: 0 auto;
+    height: 36px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 
+                0 3px 1px -2px rgba(0, 0, 0, 0.12), 
+                0 1px 5px 0 rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.action-menu-button:hover {
+    box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 
+                0 1px 10px 0 rgba(0, 0, 0, 0.12), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+.action-menu-button mat-icon {
+    margin-left: 4px;
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+}
+
+.action-menu {
+    min-width: 120px;
+    padding: 8px 0;
+    border-radius: 4px;
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 
+                0 8px 10px 1px rgba(0, 0, 0, 0.14), 
+                0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.action-menu .mat-menu-item {
+    height: 40px;
+    line-height: 40px;
+    padding: 0 16px;
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.87);
+    display: flex;
+    align-items: center;
+}
+
+.action-menu .mat-icon {
+    margin-right: 8px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+}
+
+.action-menu .mat-menu-item .mat-icon[matprefix] {
+    margin-right: 8px;
+}
+
+.action-menu .mat-menu-item:hover:not([disabled]),
+.action-menu .mat-menu-item.cdk-program-focused:not([disabled]),
+.action-menu .mat-menu-item.cdk-keyboard-focused:not([disabled]),
+.action-menu .mat-menu-item-highlighted:not([disabled]) {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+::ng-deep .swal-text {
+    text-align: center !important;
+}
