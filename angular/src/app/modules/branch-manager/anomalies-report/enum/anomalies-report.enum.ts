@@ -6,7 +6,7 @@ export enum SelectAllText {
 
 export enum AnomaliesNotes {
   NO_LEAVE_WFH = 'No leave/WFH record',
-  NO_EARLY_LEAVE_APPROVAL = 'No early leave/late arrival approval'
+  SHORT_WORKING_HOURS = 'Unapproved short working hours'
 }
 
 export enum DataType {

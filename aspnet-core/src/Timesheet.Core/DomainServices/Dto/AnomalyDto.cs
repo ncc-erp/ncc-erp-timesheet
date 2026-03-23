@@ -15,16 +15,21 @@ namespace Timesheet.DomainServices.Dto
         public BranchToDisplayDto Branch { get; set; }
     }
 
+    public class DateWithNoteDto
+    {
+        public string Date { get; set; }
+        public string Note { get; set; }
+    }
+
     public class LastWeekAnomalyDTO
     {
         public long UserId { get; set; }
         public string EmployeeName { get; set; }
         public string UserName { get; set; }
-        public List<string> DatesMissed { get; set; } = new List<string>();
-        public List<string> DatesNoTrackerTime { get; set; } = new List<string>();
-        public List<string> DatesBelowThreshold { get; set; } = new List<string>();
+        public List<DateWithNoteDto> DatesMissed { get; set; } = new List<DateWithNoteDto>();
+        public List<DateWithNoteDto> DatesNoTrackerTime { get; set; } = new List<DateWithNoteDto>();
+        public List<DateWithNoteDto> DatesBelowThreshold { get; set; } = new List<DateWithNoteDto>();
         public int Count { get; set; }
-        public string Notes { get; set; }
         public BranchToDisplayDto Branch { get; set; }
     }
 

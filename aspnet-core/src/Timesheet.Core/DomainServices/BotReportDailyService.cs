@@ -171,11 +171,6 @@ namespace Timesheet.DomainServices
                                     .ThenBy(p => p.Name);
                 }
 
-                if (input.Limit.HasValue && input.Limit.Value > 0)
-                {
-                    orderedQuery = orderedQuery.Take(input.Limit.Value);
-                }
-
                 var limitedData = orderedQuery.ToList();
                 var totalCount = limitedData.Count;
                 var pagedData = limitedData
@@ -305,7 +300,6 @@ namespace Timesheet.DomainServices
             {
                 BranchIds = branchIds,
                 MinHours = input.MinHours,
-                Limit = input.TopN,
                 ProjectIds = input.ProjectIds ?? new List<long>()
             };
 

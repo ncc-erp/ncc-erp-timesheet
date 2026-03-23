@@ -61,16 +61,15 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   }
   
   ngOnInit(): void {
-    if (this.listBranchFilter && this.listBranchFilter.length > 0) {
-      this.selectedBranchIdsYesterday = [];
-      this.selectedBranchIdsLastWeek = [];
-    } else if (this.listBranch && this.listBranch.length > 0) {
-      this.selectedBranchIdsYesterday = [];
-      this.selectedBranchIdsLastWeek = [];
-      this.listBranchFilter = [...this.listBranch];
+    if (!this.listBranchFilter || this.listBranchFilter.length === 0) {
+      this.listBranchFilter = this.listBranch ? [...this.listBranch] : [];
     }
+
+    const defaultBranchIds = this.appSession.user.branchId ? [this.appSession.user.branchId] : [];
+    this.selectedBranchIdsYesterday = [...defaultBranchIds];
+    this.selectedBranchIdsLastWeek = [...defaultBranchIds];
+    this.selectedBranchIds = [...defaultBranchIds];
     
-    this.selectedBranchIds = [];
     this.loadYesterdayReport();
     this.loadLastWeekReport();
   }
@@ -205,21 +204,21 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   }
 
   loadLastWeekReport(): void {
-    // this.isLoading = true;
+    this.isLoading = true;
     
-    // this.anomaliesReportService.getAnomaliesTimelogReport(this.selectedBranchIdsLastWeek)
-    //   .subscribe({
-    //     next: (data) => {
-    //       this.lastWeekReportData = data;
-    //       this.processLastWeekData(data);
-    //       this.applyLastWeekSearchFilter();
-    //       this.isLoading = false;
-    //     },
-    //     error: (error) => {
-    //       console.error('Error loading last week report:', error);
-    //       this.isLoading = false;
-    //     }
-    //   });
+    this.anomaliesReportService.getAnomaliesTimelogReport(this.selectedBranchIdsLastWeek)
+      .subscribe({
+        next: (data) => {
+          this.lastWeekReportData = data;
+          this.processLastWeekData(data);
+          this.applyLastWeekSearchFilter();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading last week report:', error);
+          this.isLoading = false;
+        }
+      });
   }
   
   clearYesterdayData(): void {
@@ -240,11 +239,11 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     const yesterdayData = data.yesterdayAnomalies;
     const items = Array.isArray(yesterdayData) ? yesterdayData : ((yesterdayData && (yesterdayData as any).items) || []);
     this.yesterdayUnplannedAbsences = items
-      .filter(a => a.notes === AnomaliesNotes.NO_LEAVE_WFH)
+      .filter(a => a.notes && a.notes.startsWith(AnomaliesNotes.NO_LEAVE_WFH))
       .map(a => ({ ...a, date: this.parseDateFromString(a.date) || a.date }));
 
     this.yesterdayShortWorkingHours = items
-      .filter(a => a.notes === AnomaliesNotes.NO_EARLY_LEAVE_APPROVAL)
+      .filter(a => a.notes === AnomaliesNotes.SHORT_WORKING_HOURS)
       .map(a => ({ ...a, date: this.parseDateFromString(a.date) || a.date }));
 
     this.filteredYesterdayAbsences = [...this.yesterdayUnplannedAbsences];
@@ -259,18 +258,38 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       .filter(a => a.datesMissed && Array.isArray(a.datesMissed) && a.datesMissed.length > 0)
       .map(a => ({
         ...a,
-        datesMissed: (a.datesMissed || []).map((d: any) => this.parseDateFromString(d) || d),
+        isExpanded: false,
+        datesMissed: (a.datesMissed || []).map((d: any) => ({
+          ...d,
+          date: this.parseDateFromString(d.date) || d.date
+        })),
         count: (a.datesMissed || []).length
       }));
 
     this.lastWeekShortWorkingHours = items
       .filter(a => (a.datesBelowThreshold && Array.isArray(a.datesBelowThreshold) && a.datesBelowThreshold.length > 0) || (a.datesNoTrackerTime && Array.isArray(a.datesNoTrackerTime) && a.datesNoTrackerTime.length > 0))
-      .map(a => ({
-        ...a,
-        datesBelowThreshold: (a.datesBelowThreshold || []).map((d: any) => this.parseDateFromString(d) || d),
-        datesNoTrackerTime: (a.datesNoTrackerTime || []).map((d: any) => this.parseDateFromString(d) || d),
-        count: (a.datesBelowThreshold.length || 0) + (a.datesNoTrackerTime.length || 0)
-      }));
+      .map(a => {
+        const belowThreshold = (a.datesBelowThreshold || []).map((d: any) => ({
+          ...d,
+          date: this.parseDateFromString(d.date) || d.date,
+          defaultNote: 'Unapproved short working hours'
+        }));
+        
+        const noTrackerTime = (a.datesNoTrackerTime || []).map((d: any) => ({
+          ...d,
+          date: this.parseDateFromString(d.date) || d.date,
+          defaultNote: 'No tracker time recorded'
+        }));
+
+        return {
+          ...a,
+          isExpanded: false,
+          datesBelowThreshold: belowThreshold,
+          datesNoTrackerTime: noTrackerTime,
+          combinedDates: [...belowThreshold, ...noTrackerTime],
+          count: belowThreshold.length + noTrackerTime.length
+        };
+      });
 
     this.filteredLastWeekAbsences = [...this.lastWeekUnplannedAbsences];
     this.filteredLastWeekShortHours = [...this.lastWeekShortWorkingHours];
@@ -320,7 +339,6 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       if (!lowerSearch) return [...items];
       return items.filter(item =>
         item.employeeName.toLowerCase().includes(lowerSearch) ||
-        item.branch.name.toLowerCase().includes(lowerSearch) ||
         item.userName.toLowerCase().includes(lowerSearch)
       );
     };

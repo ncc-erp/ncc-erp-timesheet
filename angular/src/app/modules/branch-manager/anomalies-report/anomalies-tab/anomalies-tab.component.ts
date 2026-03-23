@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnInit, OnDestroy, ViewChild, AfterViewChecked } from '@angular/core';
 import { DataType, TableType } from '../anomalies-report.component';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { SelectAllText } from '../enum/anomalies-report.enum';
@@ -11,7 +11,7 @@ import { YesterdayAnomaly, LastWeekAnomaly } from '@app/modules/branch-manager/D
   templateUrl: './anomalies-tab.component.html',
   styleUrls: ['../anomalies-report.component.css']
 })
-export class AnomaliesTabComponent implements OnChanges, OnInit, OnDestroy {
+export class AnomaliesTabComponent implements OnChanges, OnInit, OnDestroy, AfterViewChecked {
   @Input() dataType: DataType;
   @Input() searchText: string;
   @Input() selectedBranchIds: number[];
@@ -34,16 +34,22 @@ export class AnomaliesTabComponent implements OnChanges, OnInit, OnDestroy {
   branchSearchText: string = '';
   
   pAbsence: number = 1;
-  pageSizeAbsence: number = 10;
+  pageSizeAbsence: number = 100;
   
   pShort: number = 1;
-  pageSizeShort: number = 10;
+  pageSizeShortHours: number = 100;
 
   public DataType = DataType;
   public TableType = TableType;
 
   private searchSubject = new Subject<string>();
   private searchSubscription: Subscription;
+
+  @ViewChild('paginationAbsence') paginationAbsenceControl: any;
+  @ViewChild('paginationShortHours') paginationShortHoursControl: any;
+
+  private isAbsenceSelectionInitialized = false;
+  private isShortHoursSelectionInitialized = false;
 
   ngOnInit(): void {
     this.searchSubscription = this.searchSubject.pipe(
@@ -54,10 +60,28 @@ export class AnomaliesTabComponent implements OnChanges, OnInit, OnDestroy {
     });
   }
 
+  ngAfterViewChecked(): void {
+    if (this.paginationAbsenceControl && !this.isAbsenceSelectionInitialized) {
+      setTimeout(() => {
+        this.paginationAbsenceControl.selection = 100;
+        this.isAbsenceSelectionInitialized = true;
+      });
+    }
+
+    if (this.paginationShortHoursControl && !this.isShortHoursSelectionInitialized) {
+      setTimeout(() => {
+        this.paginationShortHoursControl.selection = 100;
+        this.isShortHoursSelectionInitialized = true;
+      });
+    }
+  }
+
   ngOnDestroy(): void {
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
     }
+    this.isAbsenceSelectionInitialized = false;
+    this.isShortHoursSelectionInitialized = false;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -66,6 +90,10 @@ export class AnomaliesTabComponent implements OnChanges, OnInit, OnDestroy {
     }
     if (changes.filteredShortHours) {
       this.pShort = 1;
+    }
+    if (changes.isLoading && changes.isLoading.currentValue === true) {
+      this.isAbsenceSelectionInitialized = false;
+      this.isShortHoursSelectionInitialized = false;
     }
   }
 
@@ -115,6 +143,19 @@ export class AnomaliesTabComponent implements OnChanges, OnInit, OnDestroy {
       return SelectAllText.DESELECT;
     } else {
       return SelectAllText.SELECT_ALL;
+    }
+  }
+
+  toggleExpand(item: any): void {
+    if (this.dataType !== DataType.LAST_WEEK) return;
+
+    const missedLength = item.datesMissed ? item.datesMissed.length : 0;
+    const combinedLength = item.combinedDates ? item.combinedDates.length : 0;
+    
+    const totalLength = missedLength + combinedLength;
+    
+    if (totalLength > 2) {
+      item.isExpanded = !item.isExpanded;
     }
   }
 }

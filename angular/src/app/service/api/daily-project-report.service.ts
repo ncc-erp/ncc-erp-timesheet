@@ -22,7 +22,6 @@ export class DailyProjectTimelogReportService extends BaseApiService{
     request: PagedRequestDto,
     branchIds: number[],
     minHours?: number,
-    limit?: number,
     projectIds?: number[],
     isAllBranch?: boolean,
     sortColumn?: string,
@@ -48,10 +47,6 @@ export class DailyProjectTimelogReportService extends BaseApiService{
 
     if (minHours !== undefined && minHours !== null && minHours.toString().trim() !== '') {
       params = params.set("MinHours", minHours.toString());
-    }
-
-    if (limit !== undefined && limit !== null && limit.toString().trim() !== '') {
-      params = params.set("Limit", limit.toString());
     }
 
     if (sortColumn !== undefined) {

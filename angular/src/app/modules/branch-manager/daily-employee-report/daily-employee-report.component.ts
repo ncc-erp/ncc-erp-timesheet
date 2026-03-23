@@ -6,6 +6,8 @@ import {
   OnChanges,
   SimpleChanges,
   OnDestroy,
+  ViewChild,
+  AfterViewInit
 } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { DailyEmployeeReportService } from "@app/service/api/daily-employee-report.service";
@@ -21,7 +23,7 @@ import { Subject } from "rxjs";
   templateUrl: "./daily-employee-report.component.html",
   styleUrls: ["./daily-employee-report.component.css"],
 })
-export class DailyEmployeeReportComponent extends PagedListingComponentBase<OfficeWorkingItem> implements OnInit, OnChanges, OnDestroy {
+export class DailyEmployeeReportComponent extends PagedListingComponentBase<OfficeWorkingItem> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() listBranch: BranchDto[];
   @Input() listBranchFilter: BranchDto[];
 
@@ -29,18 +31,19 @@ export class DailyEmployeeReportComponent extends PagedListingComponentBase<Offi
   branchSearch = new FormControl();
   branchSearchText: string = "";
   searchText: string = "";
-  limit: number;
 
   users: OfficeWorkingItem[] = [];
   isLoading: boolean = false;
 
-  sortColumn: SortColumn = SortColumn.FullName;
-  sortDirection: SortDirection = SortDirection.Asc;
+  sortColumn: SortColumn | string = "";
+  sortDirection: SortDirection | undefined = undefined;
   SortColumn = SortColumn;
   SortArrow = SortArrow;
 
   Math = Math;
   private searchSubject = new Subject<string>();
+
+  @ViewChild("pagination") paginationControl: any;
 
   constructor(
     private dailyEmployeeReportService: DailyEmployeeReportService,
@@ -54,6 +57,9 @@ export class DailyEmployeeReportComponent extends PagedListingComponentBase<Offi
       this.listBranchFilter = this.listBranch || [];
     }
 
+    this.branchIds = this.appSession.user.branchId ? [this.appSession.user.branchId] : [];
+    this.pageSize = 100;
+
     this.subscriptions.push(
       this.searchSubject
         .pipe(debounceTime(500), distinctUntilChanged())
@@ -63,6 +69,14 @@ export class DailyEmployeeReportComponent extends PagedListingComponentBase<Offi
     );
 
     this.refresh();
+  }
+
+  ngAfterViewInit(): void {
+    if (this.paginationControl) {
+      setTimeout(() => {
+        this.paginationControl.selection = 100;
+      });
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -86,8 +100,7 @@ export class DailyEmployeeReportComponent extends PagedListingComponentBase<Offi
         request,
         branchCodes,
         this.sortColumn,
-        this.sortDirection,
-        this.limit
+        this.sortDirection
       )
       .pipe(finalize(() => finishedCallback()))
       .subscribe({
@@ -157,10 +170,6 @@ export class DailyEmployeeReportComponent extends PagedListingComponentBase<Offi
     this.searchSubject.next("");
   }
 
-  onLimitEnter(): void {
-    this.refresh();
-  }
-
   toggleSelectAll(event?: MouseEvent): void {
     if (event) {
       event.stopPropagation();
@@ -171,7 +180,7 @@ export class DailyEmployeeReportComponent extends PagedListingComponentBase<Offi
     } else {
       this.branchIds = this.listBranch.map(b => b.id);
     }
-
+    
     this.refresh();
   }
 
@@ -197,9 +206,8 @@ export class DailyEmployeeReportComponent extends PagedListingComponentBase<Offi
     this.searchText = "";
     this.branchSearchText = "";
     this.branchIds = [];
-    this.limit = undefined;
-    this.sortColumn = SortColumn.TotalAllLW;
-    this.sortDirection = SortDirection.Desc;
+    this.sortColumn = "";
+    this.sortDirection = undefined;
     this.refresh();
   }
 

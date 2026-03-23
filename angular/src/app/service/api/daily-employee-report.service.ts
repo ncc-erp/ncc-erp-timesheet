@@ -20,16 +20,12 @@ export class DailyEmployeeReportService extends BaseApiService {
     request: PagedRequestDto,
     branchIds: number[],
     sortColumn?: string,
-    sortDirection?: number,
-    limit?: number
+    sortDirection?: number
   ): Observable<any> {
     let params = new HttpParams();
     branchIds.forEach(id  => {
       params = params.append("BranchIds", id.toString());
     });
-    if (limit !== undefined && limit !== null && limit.toString().trim() !== '') {
-      params = params.set("Limit", limit.toString());
-    }
     if (sortColumn !== undefined) {
       params = params.set("Sort", sortColumn.toString());
     }

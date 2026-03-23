@@ -43,7 +43,6 @@ namespace Timesheet.DomainServices.Dto
     public class GetOfficeWorkingTimelogReportInputDto
     {
         public List<long> BranchIds { get; set; } = new List<long>();
-        public int Limit { get; set; } = int.MaxValue;
     }
     public class ComputeWorkingHoursInputDto
     {

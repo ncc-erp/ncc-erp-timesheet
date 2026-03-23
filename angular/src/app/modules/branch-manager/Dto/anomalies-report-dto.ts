@@ -10,15 +10,19 @@ export interface YesterdayAnomaly {
     branch: BranchToDisplayDto;
 }
 
+export interface DateWithNote {
+    date: string | Date;
+    note: string;
+}
+
 export interface LastWeekAnomaly {
     userId: number;
     employeeName: string;
     userName: string;
-    datesMissed: (string | Date)[];
-    datesNoTrackerTime: (string | Date)[];
-    datesBelowThreshold: (string | Date)[];
+    datesMissed: DateWithNote[];
+    datesNoTrackerTime: DateWithNote[];
+    datesBelowThreshold: DateWithNote[];
     count: number;
-    notes: string;
     branch: BranchToDisplayDto;
 }
 

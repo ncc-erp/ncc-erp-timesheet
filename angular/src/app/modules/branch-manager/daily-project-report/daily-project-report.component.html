@@ -59,27 +59,6 @@
               </mat-form-field>
             </div>
 
-            <!-- Limit Filter -->
-            <div class="filter-item filter-limit">
-              <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
-                <mat-label>{{ "Limit" | localize }}</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  [(ngModel)]="limit"
-                  (keyup.enter)="onLimitEnter()"
-                  min="1"
-                />
-                <mat-icon
-                  class="special-icon"
-                  matSuffix
-                  matTooltip="Number of top records to include in project report"
-                >
-                  info
-                </mat-icon>
-              </mat-form-field>
-            </div>
-
             <!-- Branch Filter -->
             <div class="filter-item filter-branch">
               <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
@@ -185,13 +164,13 @@
           </table>
         </div>
 
-        <div class="abp-pagination-controls-wrapper">
-          <abp-pagination-controls [totalNumber]="totalItems" id="daily_project_report_paging"
-            (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)"></abp-pagination-controls>
-        </div>
-
         <div *ngIf="!isTableLoading && users.length === 0" class="text-center p-4">
           <p>{{ "No records found" | localize }}</p>
+        </div>
+        
+        <div class="abp-pagination-controls-wrapper">
+          <abp-pagination-controls #pagination [totalNumber]="totalItems" id="daily_project_report_paging"
+            (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)"></abp-pagination-controls>
         </div>
       </div>
     </div>

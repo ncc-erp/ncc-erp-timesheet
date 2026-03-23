@@ -394,26 +394,15 @@ namespace Timesheet.DomainServices
 
                     var (officeHours, wfhHours) = ComputeWorkingHours(computeInput);
 
-                    double totalHours = 0;
                     double wfhThreshold = double.Parse(_settingManager.GetSettingValue(AppSettingNames.PercentOfTrackerOnWorking)) / 100;
                     double officeStandardHours = 8.0;
                     double targetWfhHours = officeStandardHours * wfhThreshold;
 
-                    if (wfhHours > targetWfhHours)
-                    {
-                        totalHours = wfhHours;
-                    }
-                    else
-                    {
-                        if (officeHours + wfhHours <= officeStandardHours)
-                        {
-                            totalHours = officeHours + wfhHours;
-                        }
-                        else
-                        {
-                            totalHours = Math.Max(officeHours, wfhHours);
-                        }
-                    }
+                    double totalHours = wfhHours > targetWfhHours
+                                        ? wfhHours
+                                        : (officeHours + wfhHours <= officeStandardHours
+                                            ? (officeHours + wfhHours)
+                                            : Math.Max(officeHours, wfhHours));
 
                     var isInLastWeek = tk.DateAt.Date >= lastWeekStart && tk.DateAt.Date <= lastWeekEnd;
                     var isInLastMonth = tk.DateAt.Date >= lastMonthStart && tk.DateAt.Date <= lastMonthEnd;
@@ -519,9 +508,7 @@ namespace Timesheet.DomainServices
                                     .ThenBy(u => u.UserName);
                 }
 
-                var result = orderedQuery
-                    .Take(input.Limit)
-                    .ToList();
+                var result = orderedQuery.ToList();
 
                 var totalCount = result.Count;
 

@@ -38,27 +38,6 @@
               </mat-form-field>
             </div>
 
-            <!-- Limit Filter -->
-            <div class="filter-item filter-limit">
-              <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
-                <mat-label>{{ "Limit" | localize }}</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  [(ngModel)]="limit"
-                  (keyup.enter)="onLimitEnter()"
-                  min="1"
-                />
-                <mat-icon
-                  class="special-icon"
-                  matSuffix
-                  matTooltip="Number of top employees to include in office working report"
-                >
-                  info
-                </mat-icon>
-              </mat-form-field>
-            </div>
-
             <!-- Branch Filter -->
             <div class="filter-item filter-branch">
               <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
@@ -190,7 +169,7 @@
         </div>
 
         <div class="abp-pagination-controls-wrapper">
-          <abp-pagination-controls [totalNumber]="totalItems" id="Daily_Employee_Report"
+          <abp-pagination-controls #pagination [totalNumber]="totalItems" id="Daily_Employee_Report"
             (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)"></abp-pagination-controls>
         </div>
 

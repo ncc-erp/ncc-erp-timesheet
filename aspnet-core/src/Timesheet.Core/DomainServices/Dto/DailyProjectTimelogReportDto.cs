@@ -20,7 +20,6 @@ namespace Timesheet.DomainServices.Dto
     {
         public List<long> BranchIds { get; set; } = new List<long>();
         public double? MinHours { get; set; } = 0;
-        public int? Limit { get; set; }
         public List<long> ProjectIds { get; set; } = new List<long>();
         public bool IsAllBranch { get; set; }
     }
