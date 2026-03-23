@@ -19,6 +19,12 @@
 ::ng-deep #frm_update_user_info .mat-form-field-infix{
     padding: 8px 0px;
 }
+
+::ng-deep #frm_update_user_info .mat-form-field input.mat-input-element {
+    line-height: 1.5; 
+    height: auto;
+}
+
 label{
     padding: 0px;
     display:flex;
