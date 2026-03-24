@@ -43,8 +43,8 @@ export class UpdateUserProfileComponent extends AppComponentBase implements OnIn
   public inputToUpdate = {} as UpdateUserInfoDto;
   public listBanks: ItemInfoDto[] = [];
   public listIssuedBys = [
-    "CỤC CẢNH SÁT QUẢN LÝ HÀNH CHÍNH VỀ TRẬT TỰ XÃ HỘI",
-    "BỘ CÔNG AN"
+    "Cục Cảnh sát quản lí hành chính về trật tự xã hội",
+    "Bộ Công an"
   ]
   public listInsuranceStatus:string[] = [];
   public isLoading:boolean = false;
