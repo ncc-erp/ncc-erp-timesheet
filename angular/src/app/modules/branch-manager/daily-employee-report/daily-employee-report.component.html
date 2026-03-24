@@ -5,11 +5,7 @@
         <h2>{{ "Office Working Report" | localize }}</h2>
         <ul class="header-dropdown m-r--5">
           <li>
-            <button
-              mat-icon-button
-              [matMenuTriggerFor]="headerMenu"
-              class="header-dropdown-mat-icon-button"
-            >
+            <button mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #headerMenu="matMenu">
@@ -30,9 +26,10 @@
               <mat-form-field style="padding-bottom: 0;" class="w-100" appearance="outline">
                 <mat-label>{{ "Search" | localize }}</mat-label>
                 <div style="display: flex; align-items: center; justify-content: flex-start;">
-                  <input style="flex-grow: 1;" matInput [(ngModel)]="searchText"
-                    (ngModelChange)="onSearchChange()" placeholder="Search by name or branch..." />
-                  <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="searchText" (click)="clearSearch()">clear</mat-icon>
+                  <input style="flex-grow: 1;" matInput [(ngModel)]="searchText" (ngModelChange)="onSearchChange()"
+                    placeholder="Search by name or branch..." />
+                  <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="searchText"
+                    (click)="clearSearch()">clear</mat-icon>
                   <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix>search</mat-icon>
                 </div>
               </mat-form-field>
@@ -42,38 +39,20 @@
             <div class="filter-item filter-branch">
               <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
                 <mat-label>{{ "Branch" | localize }}</mat-label>
-                <mat-select
-                  name="branchIds"
-                  multiple
-                  [(ngModel)]="branchIds"
-                  (ngModelChange)="searchOrFilter()"
-                >
-                    <input
-                      matInput
-                      placeholder="Search branch..."
-                      [(ngModel)]="branchSearchText"
-                      (keyup)="filterBranch()"
-                      (click)="$event.stopPropagation()"
-                      style="width: 100%; padding: 4px"
-                    />
+                <mat-select name="branchIds" multiple [(ngModel)]="branchIds" (ngModelChange)="searchOrFilter()">
+                  <input matInput placeholder="Search branch..." [(ngModel)]="branchSearchText" (keyup)="filterBranch()"
+                    (click)="$event.stopPropagation()" style="width: 100%; padding: 4px" />
 
                   <!-- Select All Option -->
-                    <mat-option 
-                      [value]="'all'" 
-                      (click)="toggleSelectAll($event)"
-                      [disabled]="true"
-                      style="cursor: pointer;"
-                    >
-                      <strong>
-                        {{ getSelectAllText() | localize }}
-                      </strong>
-                    </mat-option>
+                  <mat-option [value]="'all'" (click)="toggleSelectAll($event)" [disabled]="true"
+                    style="cursor: pointer;">
+                    <strong>
+                      {{ getSelectAllText() | localize }}
+                    </strong>
+                  </mat-option>
                   <mat-divider></mat-divider>
 
-                  <mat-option
-                    *ngFor="let branch of filteredBranches"
-                    [value]="branch.id"
-                  >
+                  <mat-option *ngFor="let branch of filteredBranches" [value]="branch.id">
                     {{ branch.name }}
                   </mat-option>
                 </mat-select>
@@ -107,37 +86,43 @@
                 </th>
                 <th class="text-center sortable" (click)="onSort(SortColumn.WfhLW)">
                   <div class="header-content">
-                    <span>{{ "WFH (LW)" | localize }}</span>
+                    <span matTooltip="Work from home hours (Last week)" matTooltipPosition="above">{{ "WFH (LW)" |
+                      localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.WfhLW)"></i>
                   </div>
                 </th>
                 <th class="text-center sortable" (click)="onSort(SortColumn.OfficeLW)">
                   <div class="header-content">
-                    <span>{{ "Office (LW)" | localize }}</span>
+                    <span matTooltip="Working at office hours (Last week)" matTooltipPosition="above">{{ "Office (LW)" |
+                      localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.OfficeLW)"></i>
                   </div>
                 </th>
                 <th class="text-center sortable" (click)="onSort(SortColumn.TotalAllLW)">
                   <div class="header-content">
-                    <span>{{ "All (LW)" | localize }}</span>
+                    <span matTooltip="Total working hours (Last week)" matTooltipPosition="above">{{ "Total (LW)" |
+                      localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.TotalAllLW)"></i>
                   </div>
                 </th>
                 <th class="text-center sortable" (click)="onSort(SortColumn.WfhLM)">
                   <div class="header-content">
-                    <span>{{ "WFH (LM)" | localize }}</span>
+                    <span matTooltip="Work from home hours (Last month)" matTooltipPosition="above">{{ "WFH (LM)" |
+                      localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.WfhLM)"></i>
                   </div>
                 </th>
                 <th class="text-center sortable" (click)="onSort(SortColumn.OfficeLM)">
                   <div class="header-content">
-                    <span>{{ "Office (LM)" | localize }}</span>
+                    <span matTooltip="Working at office hours (Last month)" matTooltipPosition="above">{{ "Office (LM)"
+                      | localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.OfficeLM)"></i>
                   </div>
                 </th>
                 <th class="text-center sortable" (click)="onSort(SortColumn.TotalAllLM)">
                   <div class="header-content">
-                    <span>{{ "All (LM)" | localize }}</span>
+                    <span matTooltip="Total working hours (Last month)" matTooltipPosition="above">{{ "Total (LM)" |
+                      localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.TotalAllLM)"></i>
                   </div>
                 </th>

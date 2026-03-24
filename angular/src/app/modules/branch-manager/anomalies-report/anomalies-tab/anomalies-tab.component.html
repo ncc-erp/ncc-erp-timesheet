@@ -7,7 +7,8 @@
                     <div class="search-input-wrapper">
                         <input class="search-input-field" matInput [(ngModel)]="searchText"
                             (ngModelChange)="onSearchChange()" placeholder="Search by employee name..." />
-                        <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="searchText" (click)="clearSearch()">clear</mat-icon>
+                        <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="searchText"
+                            (click)="clearSearch()">clear</mat-icon>
                         <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix>search</mat-icon>
                     </div>
                 </mat-form-field>
@@ -78,7 +79,12 @@
                             </div>
                         </th>
                         <th class="text-center col-dates">
-                            {{ dataType === DataType.YESTERDAY ? 'Date & Notes' : 'Dates Missed & Notes' | localize }}
+                            <span [matTooltip]="dataType === DataType.YESTERDAY ? 'Date of absence and associated note' : 
+                                            'Specific dates of unplanned absences and associated notes'"
+                                matTooltipPosition="above">
+                                {{ dataType === DataType.YESTERDAY ? 'Date & Note' : 'Dates Missed & Notes' | localize
+                                }}
+                            </span>
                         </th>
                     </tr>
                 </thead>
@@ -97,7 +103,9 @@
                             </span>
                         </td>
                         <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">{{ item.count }}</td>
-                        <td class="text-center" [class.cursor-pointer]="dataType === DataType.LAST_WEEK && item.datesMissed?.length > 2" (click)="toggleExpand(item)">
+                        <td class="text-center"
+                            [class.cursor-pointer]="dataType === DataType.LAST_WEEK && item.datesMissed?.length > 2"
+                            (click)="toggleExpand(item)">
                             <div *ngIf="dataType === DataType.YESTERDAY" class="date-note-item">
                                 <span class="label bg-blue date-label">
                                     {{ item.date | date:'dd/MM/yyyy' }}
@@ -121,7 +129,8 @@
                                         </span>
                                         <span class="note-text">{{ d.note || 'No leave/WFH record' }}</span>
                                     </div>
-                                    <div *ngIf="item.datesMissed && item.datesMissed.length > 2" class="date-note-item mt-1">
+                                    <div *ngIf="item.datesMissed && item.datesMissed.length > 2"
+                                        class="mt-1 flex-center">
                                         <span class="label bg-gray more-badge">
                                             +{{ item.datesMissed.length - 2 }} more
                                         </span>
@@ -139,8 +148,9 @@
         </div>
 
         <div class="abp-pagination-controls-wrapper">
-            <abp-pagination-controls #paginationAbsence [totalNumber]="filteredAbsences.length" [id]="dataType + '_absence'"
-                (pageChange)="pAbsence = $event" (selectionChange)="pageSizeAbsence = $event">
+            <abp-pagination-controls #paginationAbsence [totalNumber]="filteredAbsences.length"
+                [id]="dataType + '_absence'" (pageChange)="pAbsence = $event"
+                (selectionChange)="pageSizeAbsence = $event">
             </abp-pagination-controls>
         </div>
     </div>
@@ -174,7 +184,8 @@
                         <th *ngIf="dataType === DataType.YESTERDAY" class="text-center sortable col-actual-hours"
                             (click)="sort('actualHours', dataType, TableType.SHORT)">
                             <div class="header-content">
-                                <span>{{ "Actual Hours" | localize }}</span>
+                                <span matTooltip="Actual working hours recorded" matTooltipPosition="above">{{ "Actual
+                                    Hours" | localize }}</span>
                                 <i class="pi p-l-5"
                                     [ngClass]="getSortIcon('actualHours', dataType, TableType.SHORT)"></i>
                             </div>
@@ -187,7 +198,13 @@
                             </div>
                         </th>
                         <th class="text-center col-dates">
-                            {{ dataType === DataType.YESTERDAY ? 'Date & Notes' : 'Dates Below Threshold & Notes' | localize }}
+                            <span
+                                [matTooltip]="dataType === DataType.YESTERDAY ? 'Date and associated note for short working hours' : 
+                                'Specific dates where working hours were below the approved threshold, along with notes'"
+                                matTooltipPosition="above">
+                                {{ dataType === DataType.YESTERDAY ? 'Date & Note' : 'Dates Below Threshold & Notes' ||
+                                localize }}
+                            </span>
                         </th>
                     </tr>
                 </thead>
@@ -208,7 +225,9 @@
                         <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">{{ item.actualHours.replace('h',
                             '') }}</td>
                         <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">{{ item.count }}</td>
-                        <td class="text-center" [class.cursor-pointer]="dataType === DataType.LAST_WEEK && (item.datesBelowThreshold?.length + item.datesNoTrackerTime?.length) > 2" (click)="toggleExpand(item)">
+                        <td class="text-center"
+                            [class.cursor-pointer]="dataType === DataType.LAST_WEEK && (item.datesBelowThreshold?.length + item.datesNoTrackerTime?.length) > 2"
+                            (click)="toggleExpand(item)">
                             <div *ngIf="dataType === DataType.YESTERDAY" class="date-note-item">
                                 <span class="label bg-blue date-label">
                                     {{ item.date | date:'dd/MM/yyyy' }}
@@ -238,7 +257,8 @@
                                         </span>
                                         <span class="note-text">{{ d.note || d.defaultNote }}</span>
                                     </div>
-                                    <div *ngIf="item.combinedDates && item.combinedDates.length > 2" class="date-note-item mt-1">
+                                    <div *ngIf="item.combinedDates && item.combinedDates.length > 2"
+                                        class="mt-1 flex-center">
                                         <span class="label bg-gray more-badge">
                                             +{{ item.combinedDates.length - 2 }} more
                                         </span>
@@ -256,8 +276,9 @@
         </div>
 
         <div class="abp-pagination-controls-wrapper">
-            <abp-pagination-controls #paginationShortHours [totalNumber]="filteredShortHours.length" [id]="dataType + '_short'"
-                (pageChange)="pShort = $event" (selectionChange)="pageSizeShortHours = $event">
+            <abp-pagination-controls #paginationShortHours [totalNumber]="filteredShortHours.length"
+                [id]="dataType + '_short'" (pageChange)="pShort = $event"
+                (selectionChange)="pageSizeShortHours = $event">
             </abp-pagination-controls>
         </div>
     </div>

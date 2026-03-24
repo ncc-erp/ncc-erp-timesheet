@@ -196,9 +196,7 @@ namespace Timesheet.DomainServices
             var branchUsers = input.AllUsers.ToList();
             if (!branchUsers.Any()) return (new List<YesterdayAnomalyDTO>(), new List<LastWeekAnomalyDTO>());
             var userDict = branchUsers.ToDictionary(u => u.Id);
-
             var timekeepings = input.AllTimekeepings.ToList();
-
             var absenceDetailDict = input.AllAbsenceDetails.GroupBy(d => ((long)d.UserId, d.DateAt)).ToDictionary(g => g.Key, g => g.ToList());
 
             var yesterdayAnomalies = new List<YesterdayAnomalyDTO>();
@@ -240,12 +238,15 @@ namespace Timesheet.DomainServices
                 var absenceKey = ((long)tk.UserId, tk.DateAt);
                 var hasAbsenceData = absenceDetailDict.TryGetValue(absenceKey, out var absenceData);
 
-                bool isWFH = hasAbsenceData && absenceData.Any(d => d.RequestType == RequestType.Remote && d.RequestStatus == RequestStatus.Approved);
+                var approvedWfhRequests = hasAbsenceData
+                    ? absenceData.Where(d => d.RequestType == RequestType.Remote && d.RequestStatus == RequestStatus.Approved).ToList()
+                    : new List<AbsenceDetailDto>();
 
-                bool isWFHFullday = isWFH && absenceData.Any(d => d.DateType == DayType.Fullday);
-                bool isWFHMorning = isWFH && absenceData.Any(d => d.DateType == DayType.Morning);
-                bool isWFHAfternoon = isWFH && absenceData.Any(d => d.DateType == DayType.Afternoon);
-                bool isWFHAny = isWFHFullday || isWFHMorning || isWFHAfternoon;
+                bool isWFH = approvedWfhRequests.Any();
+
+                bool isWFHFullday = approvedWfhRequests.Any(d => d.DateType == DayType.Fullday);
+                bool isWFHMorning = approvedWfhRequests.Any(d => d.DateType == DayType.Morning);
+                bool isWFHAfternoon = approvedWfhRequests.Any(d => d.DateType == DayType.Afternoon);
 
                 bool isFullDayAbsence = tk.CheckIn == null && tk.CheckOut == null;
                 bool isMorningAbsence = checkInTime.HasValue && morningEndAt.HasValue && checkInTime > morningEndAt;
@@ -269,7 +270,7 @@ namespace Timesheet.DomainServices
                     calculatedWorkingHours = Math.Round(workingTime, 2);
                 }
 
-                if (isWFHAny)
+                if (isWFH)
                 {
                     trackerTimeHours = (parsedTrackerHours > 0) ? parsedTrackerHours : calculatedWorkingHours;
                     trackerActualHours = trackerTimeHours > 0 ? trackerTimeHours : 0;
@@ -279,28 +280,27 @@ namespace Timesheet.DomainServices
                 {
                     officeActualHours = calculatedWorkingHours;
                 }
-                else if (!isWFHAny && checkInTime.HasValue && !checkOutTime.HasValue)
+                else if (!isWFH && checkInTime.HasValue && !checkOutTime.HasValue)
                 {
                     officeActualHours = parsedTrackerHours;
                 }
 
-                double tardinessHour = 0, leaveEarlyHour = 0;
-                if (hasAbsenceData)
-                {
-                    foreach (var d in absenceData)
-                    {
-                        if (d.AbsenceTime == OnDayType.DiMuon && d.Hour > 0)
-                            tardinessHour += d.Hour;
-                        if (d.AbsenceTime == OnDayType.VeSom && d.Hour > 0)
-                            leaveEarlyHour += d.Hour;
-                    }
-                }
+                //double tardinessHour = 0, leaveEarlyHour = 0;
+                //if (hasAbsenceData)
+                //{
+                //    foreach (var d in absenceData)
+                //    {
+                //        if (d.AbsenceTime == OnDayType.DiMuon && d.Hour > 0)
+                //            tardinessHour += d.Hour;
+                //        if (d.AbsenceTime == OnDayType.VeSom && d.Hour > 0)
+                //            leaveEarlyHour += d.Hour;
+                //    }
+                //}
 
                 if ((checkInTime.HasValue && checkOutTime.HasValue) ||
-                    (checkInTime == null && checkOutTime == null && isWFHAny) ||
-                    (checkInTime.HasValue && checkOutTime == null && isWFHAny))
+                    (checkInTime == null && checkOutTime == null && isWFH) ||
+                    (checkInTime.HasValue && checkOutTime == null && isWFH))
                 {
-                    double? totalWorkingTime = (officeActualHours ?? 0) + (trackerActualHours ?? 0);
                     double standardWorkHours = 8.0;
                     if (isAfternoonAbsence)
                         standardWorkHours = user.MorningWorking;
@@ -308,7 +308,7 @@ namespace Timesheet.DomainServices
                         standardWorkHours = user.AfternoonWorking;
 
                     double requiredHours = 0.0;
-                    bool useWfhThreshold = isWFHAny || (!isWFHAny && officeActualHours.HasValue && !checkOutTime.HasValue);
+                    bool useWfhThreshold = isWFH || (!isWFH && officeActualHours.HasValue && !checkOutTime.HasValue);
 
                     if (isWFHFullday)
                         requiredHours = standardWorkHours * wfhThreshold;
@@ -318,37 +318,54 @@ namespace Timesheet.DomainServices
                         requiredHours = user.AfternoonWorking * wfhThreshold;
                     else
                         requiredHours = useWfhThreshold ? standardWorkHours * wfhThreshold : standardWorkHours;
-                    if (tardinessHour > 0 || leaveEarlyHour > 0)
-                        requiredHours -= (tardinessHour + leaveEarlyHour);
+                    //if (tardinessHour > 0 || leaveEarlyHour > 0)
+                    //    requiredHours -= (tardinessHour + leaveEarlyHour);
 
-                    bool isTimeViolation = (isWFHAny && trackerActualHours.HasValue && trackerActualHours.Value < requiredHours) ||
-                        (!isWFHAny && officeActualHours.HasValue && officeActualHours.Value < requiredHours);
+                    double officeHours = officeActualHours ?? 0;
+                    double trackerHours = trackerActualHours ?? 0;
+                    double combinedHours = officeHours + trackerHours;
 
-                    bool isZeroTimeViolation = (isWFHAny && trackerActualHours == 0.0) || (!isWFHAny && officeActualHours == 0.0);
+                    double? totalWorkingTime = trackerHours > requiredHours
+                                                ? trackerHours
+                                                : combinedHours <= standardWorkHours
+                                                    ? combinedHours
+                                                    : Math.Max(officeHours, trackerHours);
 
-                    string notes = isZeroTimeViolation ? "No tracker time for approved WFH requests" : "Unapproved short working hours";
+                    bool isTimeViolation = (isWFH && trackerActualHours.HasValue && trackerActualHours.Value < requiredHours) ||
+                        (!isWFH && officeActualHours.HasValue && officeActualHours.Value < requiredHours);
+
+                    bool isZeroTimeViolation = (isWFH && trackerActualHours == 0.0) || (!isWFH && officeActualHours == 0.0);
+
+                    string notes = isZeroTimeViolation ? "No tracker time for approved WFH requests" : "Unapproved short working hours for full day shift";
                     ViolationStatus violationType = isZeroTimeViolation ? ViolationStatus.DatesNoTrackerTime : ViolationStatus.DatesBelowThreshold;
+
+                    bool hasLoggedAnomaly = false;
 
                     if (isTimeViolation || isZeroTimeViolation)
                     {
                         CreateAndLogAnomaly(userWithAnomaly, totalWorkingTime, notes, violationType, yesterdayAnomalies, lastWeekAnomalies);
+                        hasLoggedAnomaly = true;
                     }
 
-                    if (isWFHMorning && isMorningAbsence)
+                    if (!hasLoggedAnomaly)
                     {
-                        double afternoonRequiredHours = user.AfternoonWorking - tardinessHour - leaveEarlyHour;
-                        if ((officeActualHours ?? 0) < afternoonRequiredHours)
+                        if (isWFHMorning && isMorningAbsence)
                         {
-                            CreateAndLogAnomaly(userWithAnomaly, officeActualHours, notes, violationType, yesterdayAnomalies, lastWeekAnomalies);
+                            //double afternoonRequiredHours = user.AfternoonWorking - tardinessHour - leaveEarlyHour;
+                            if ((officeActualHours ?? 0) < user.AfternoonWorking)
+                            {
+                                string afterNoonNote = "Unapproved short working hours for afternoon shift";
+                                CreateAndLogAnomaly(userWithAnomaly, officeActualHours, afterNoonNote, violationType, yesterdayAnomalies, lastWeekAnomalies);
+                            }
                         }
-                    }
-
-                    if (isWFHAfternoon && isAfternoonAbsence)
-                    {
-                        double morningRequiredHours = user.MorningWorking - tardinessHour - leaveEarlyHour;
-                        if ((officeActualHours ?? 0) < morningRequiredHours)
+                        else if (isWFHAfternoon && isAfternoonAbsence)
                         {
-                            CreateAndLogAnomaly(userWithAnomaly, officeActualHours, notes, violationType, yesterdayAnomalies, lastWeekAnomalies);
+                            //double morningRequiredHours = user.MorningWorking - tardinessHour - leaveEarlyHour;
+                            if ((officeActualHours ?? 0) < user.MorningWorking)
+                            {
+                                string morningNote = "Unapproved short working hours for morning shift";
+                                CreateAndLogAnomaly(userWithAnomaly, officeActualHours, morningNote, violationType, yesterdayAnomalies, lastWeekAnomalies);
+                            }
                         }
                     }
                 }
@@ -452,7 +469,6 @@ namespace Timesheet.DomainServices
 
                 var data = await LoadAnomalyDataAsync(input.BranchIds, lastWeekStart, yesterday);
 
-                // Nếu gộp truy vấn trong hàm LoadAnomalyDataAsync thì sẽ chỉ cần một lần filter các bản ghi trong ngày hôm qua
                 var yesterdayTimekeepings = data.Timekeepings.Where(t => t.DateAt == yesterday).ToList();
                 var yesterdayAbsences = data.AbsenceDetails.Where(d => d.DateAt == yesterday).ToList();
 
@@ -619,7 +635,7 @@ namespace Timesheet.DomainServices
             var allAnomalies = await GetYesterdayAnomalies(branchName, reportDate);
 
             var unplannedAbsences = allAnomalies.Where(a => a.Notes.StartsWith("No leave/WFH record")).ToList();
-            var unapprovedShortHours = allAnomalies.Where(a => a.Notes == "Unapproved short working hours").ToList();
+            var unapprovedShortHours = allAnomalies.Where(a => a.Notes == "Unapproved short working hours for full day shift").ToList();
             var noTrackerTime = allAnomalies.Where(a => a.Notes == "No tracker time for approved WFH requests").ToList();
 
             SendDailyHeaderMessage(botUri, branchName, reportDate);
@@ -630,7 +646,7 @@ namespace Timesheet.DomainServices
             await Task.Delay(MESSAGE_DELAY_MS);
 
             await SendAnomalyMessages(botUri, "Yesterday – Unapproved Short Working Hours",
-                unapprovedShortHours, "Unapproved short working hours", true, BATCH_SIZE);
+                unapprovedShortHours, "Unapproved short working hours for full day shift", true, BATCH_SIZE);
             await Task.Delay(MESSAGE_DELAY_MS);
 
             await SendAnomalyMessages(botUri, "Yesterday – Missing Tracker Time For Approved WFH",
@@ -656,7 +672,7 @@ namespace Timesheet.DomainServices
             await Task.Delay(MESSAGE_DELAY_MS);
 
             await SendAnomalyMessages(botUri, "Last Week – Unapproved Short Working Hours",
-                unapprovedShortHours, "Unapproved short working hours", false, BATCH_SIZE);
+                unapprovedShortHours, "Unapproved short working hours for full day shift", false, BATCH_SIZE);
             await Task.Delay(MESSAGE_DELAY_MS);
 
             await SendAnomalyMessages(botUri, "Last Week – Missing Tracker Time For Approved WFH",
@@ -773,7 +789,7 @@ namespace Timesheet.DomainServices
             pos += dateLine.Length + Environment.NewLine.Length;
             mkList.Add(new { type = "b", s = datePos, e = datePos + "Date:".Length });
 
-            if (notes == "Unapproved short working hours")
+            if (notes == "Unapproved short working hours for full day shift")
             {
                 string hoursLine = $"Actual Hours: {anomaly.ActualHours}";
                 int hoursPos = pos;
@@ -809,7 +825,7 @@ namespace Timesheet.DomainServices
                     }).ToList();
                     datesKey = "Dates Missed";
                     break;
-                case "Unapproved short working hours":
+                case "Unapproved short working hours for full day shift":
                     dates = anomaly.DatesBelowThreshold.Select(d => d.Date).ToList();
                     datesKey = "Dates Below Threshold";
                     break;

@@ -13,21 +13,21 @@ import { AnomaliesNotes, DataType, SelectAllText, TableType, SortColumn, SortDir
 })
 export class AnomaliesReportComponent extends AppComponentBase implements OnInit {
   selectedTabIndex: number = 0;
-  
+
   @Input() listBranch: BranchDto[] = [];
   @Input() listBranchFilter: BranchDto[] = [];
-  
+
   selectedBranchIds: number[] = [];
   selectedBranchIdsYesterday: number[] = [];
   selectedBranchIdsLastWeek: number[] = [];
   branchSearchText: string = '';
   searchTextYesterday: string = '';
   searchTextLastWeek: string = '';
-  
+
   reportData: AnomaliesTimelogReportResponse | null = null;
   yesterdayReportData: AnomaliesTimelogReportResponse | null = null;
   lastWeekReportData: AnomaliesTimelogReportResponse | null = null;
-  
+
   yesterdayUnplannedAbsences: YesterdayAnomaly[] = [];
   yesterdayShortWorkingHours: YesterdayAnomaly[] = [];
   lastWeekUnplannedAbsences: LastWeekAnomaly[] = [];
@@ -45,21 +45,21 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
 
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
-  
+
   isLoading: boolean = false;
-  
+
   Math = Math;
 
   public DataType = DataType;
   public TableType = TableType;
-  
+
   constructor(
     injector: Injector,
     private anomaliesReportService: AnomaliesReportService
   ) {
     super(injector);
   }
-  
+
   ngOnInit(): void {
     if (!this.listBranchFilter || this.listBranchFilter.length === 0) {
       this.listBranchFilter = this.listBranch ? [...this.listBranch] : [];
@@ -69,7 +69,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     this.selectedBranchIdsYesterday = [...defaultBranchIds];
     this.selectedBranchIdsLastWeek = [...defaultBranchIds];
     this.selectedBranchIds = [...defaultBranchIds];
-    
+
     this.loadYesterdayReport();
     this.loadLastWeekReport();
   }
@@ -80,7 +80,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       this.listBranchFilter = [...this.listBranch];
     }
   }
-  
+
   filterBranch(searchText?: string): void {
     if (searchText !== undefined) {
       this.branchSearchText = searchText;
@@ -104,7 +104,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       event.stopPropagation();
     }
     const selectedIds = this.selectedTabIndex === 0 ? this.selectedBranchIdsYesterday : this.selectedBranchIdsLastWeek;
-    
+
     if (this.isAllSelected() || (selectedIds && selectedIds.length > 0)) {
       if (this.selectedTabIndex === 0) {
         this.selectedBranchIdsYesterday = [];
@@ -124,14 +124,14 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   isAllSelected(): boolean {
     if (this.selectedTabIndex === 0) {
       return (
-        this.selectedBranchIdsYesterday && 
-        this.listBranch && 
+        this.selectedBranchIdsYesterday &&
+        this.listBranch &&
         this.selectedBranchIdsYesterday.length === this.listBranch.length
       );
     } else {
       return (
-        this.selectedBranchIdsLastWeek && 
-        this.listBranch && 
+        this.selectedBranchIdsLastWeek &&
+        this.listBranch &&
         this.selectedBranchIdsLastWeek.length === this.listBranch.length
       );
     }
@@ -139,7 +139,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
 
   getSelectAllText(): string {
     const selectedIds = this.selectedTabIndex === 0 ? this.selectedBranchIdsYesterday : this.selectedBranchIdsLastWeek;
-    
+
     if (this.isAllSelected()) {
       return SelectAllText.DESELECT_ALL;
     } else if (selectedIds && selectedIds.length > 0) {
@@ -157,12 +157,12 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       this.selectedBranchIds = [...this.selectedBranchIdsLastWeek];
     }
   }
-  
+
   refresh(): void {
     this.loadYesterdayReport();
     this.loadLastWeekReport();
   }
-  
+
   onBranchSelectionChange(event?: { dataType: DataType; selectedBranchIds: number[] }): void {
     if (event) {
       if (event.dataType === DataType.YESTERDAY) {
@@ -184,10 +184,10 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       }
     }
   }
-  
+
   loadYesterdayReport(): void {
     this.isLoading = true;
-    
+
     this.anomaliesReportService.getAnomaliesTimelogReport(this.selectedBranchIdsYesterday)
       .subscribe({
         next: (data) => {
@@ -205,7 +205,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
 
   loadLastWeekReport(): void {
     this.isLoading = true;
-    
+
     this.anomaliesReportService.getAnomaliesTimelogReport(this.selectedBranchIdsLastWeek)
       .subscribe({
         next: (data) => {
@@ -220,7 +220,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
         }
       });
   }
-  
+
   clearYesterdayData(): void {
     this.yesterdayUnplannedAbsences = [];
     this.yesterdayShortWorkingHours = [];
@@ -243,7 +243,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       .map(a => ({ ...a, date: this.parseDateFromString(a.date) || a.date }));
 
     this.yesterdayShortWorkingHours = items
-      .filter(a => a.notes === AnomaliesNotes.SHORT_WORKING_HOURS)
+      .filter(a => a.notes && a.notes.startsWith(AnomaliesNotes.SHORT_WORKING_HOURS))
       .map(a => ({ ...a, date: this.parseDateFromString(a.date) || a.date }));
 
     this.filteredYesterdayAbsences = [...this.yesterdayUnplannedAbsences];
@@ -274,7 +274,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
           date: this.parseDateFromString(d.date) || d.date,
           defaultNote: 'Unapproved short working hours'
         }));
-        
+
         const noTrackerTime = (a.datesNoTrackerTime || []).map((d: any) => ({
           ...d,
           date: this.parseDateFromString(d.date) || d.date,
@@ -312,7 +312,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     const parsed = Date.parse(dateStr);
     return isNaN(parsed) ? null : new Date(parsed);
   }
-  
+
   onSearchChange(event: { dataType: DataType; searchText: string }): void {
     if (event.dataType === DataType.YESTERDAY) {
       this.searchTextYesterday = event.searchText;
@@ -358,7 +358,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
 
   sort(column: SortColumn, dataType: DataType, tableType: TableType): void {
     const sortState = this.getSortState(dataType, tableType);
-    
+
     if (sortState.column === column) {
       if (sortState.direction === SortDirection.ASC) {
         sortState.direction = SortDirection.DESC;
@@ -384,7 +384,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
   applySort(dataType: DataType, tableType: TableType): void {
     const sortState = this.getSortState(dataType, tableType);
     const filtered = this.getFilteredArray(dataType, tableType);
-    
+
     if (!sortState.column || !sortState.direction) {
       const original = this.getDataArray(dataType, tableType);
       this.updateFilteredArray(dataType, tableType, [...original]);
@@ -414,7 +414,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
         valB = (b[column] !== null && b[column] !== undefined) ? b[column] : '';
       }
 
-      return direction === 'asc' 
+      return direction === 'asc'
         ? valA.toString().localeCompare(valB.toString())
         : valB.toString().localeCompare(valA.toString());
     });
@@ -451,7 +451,7 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
       else this.filteredLastWeekShortHours = data as LastWeekAnomaly[];
     }
   }
-  
+
   getSortIcon(column: SortColumn, dataType: DataType, tableType: TableType): string {
     const sortState = this.getSortState(dataType, tableType);
     if (sortState.column !== column) {
@@ -460,4 +460,4 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     return sortState.direction === SortDirection.ASC ? SortIcon.ASCENDING : SortIcon.DESCENDING;
   }
 }
-export {DataType, TableType};
+export { DataType, TableType };

@@ -109,15 +109,15 @@
             <thead>
               <tr>
                 <th class="text-center col-lg-1">No.</th>
-                <th class="sortable" (click)="onSort(SortColumn.ProjectName)">
-                  <div class="header-content justify-left">
+                <th class="text-center sortable" (click)="onSort(SortColumn.ProjectName)">
+                  <div class="header-content">
                     <span>{{ "Project Name" | localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.ProjectName)"></i>
                   </div>
                 </th>
                 <th class="text-center">
                   <div class="header-content">
-                    <span>{{ "Members" | localize }}</span>
+                    <span matTooltip="List of team members involved in the project (filtered by selected branches)" matTooltipPosition="above">{{ "Members" | localize }}</span>
                   </div>
                 </th>
                 <th class="text-center sortable" (click)="onSort(SortColumn.MemberCount)">
@@ -128,13 +128,13 @@
                 </th>
                 <th class="text-center sortable" (click)="onSort(SortColumn.TotalTimelogLW)">
                   <div class="header-content">
-                    <span>{{ "Hours (LW)" | localize }} (h)</span>
+                    <span matTooltip="Total working hours logged for this project (Last week)" matTooltipPosition="above">{{ "Hours (LW)" | localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.TotalTimelogLW)"></i>
                   </div>
                 </th>
                 <th class="text-center sortable" (click)="onSort(SortColumn.TotalTimelogLM)">
                   <div class="header-content">
-                    <span>{{ "Hours (LM)" | localize }} (h)</span>
+                    <span matTooltip="Total working hours logged for this project (Last month)" matTooltipPosition="above">{{ "Hours (LM)" | localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.TotalTimelogLM)"></i>
                   </div>
                 </th>
@@ -148,7 +148,7 @@
                 totalItems: totalItems
                }; let i = index">
                 <td class="text-center">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
-                <td class="text-left" style="font-weight: 600;">{{ item.name }}</td>
+                <td class="text-center" style="font-weight: 600;">{{ item.name }}</td>
                 <td class="text-left">
                   <div class="member-badges">
                     <span *ngFor="let member of item.members" class="member-badge">

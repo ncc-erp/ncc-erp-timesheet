@@ -30,21 +30,21 @@ namespace Timesheet.APIs.Reports
         }
 
         [HttpGet]
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_Report, Ncc.Authorization.PermissionNames.BranchDirector_OfficeWorkingReport_View)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_OfficeWorkingReport_View)]
         public async Task<PagedResultDto<OfficeWorkingTopLWLMDto>> GetOfficeWorkingTimelogReport(GridParam param, GetOfficeWorkingTimelogReportInputDto input)
         {
             return await _officeWorkingReportService.GetOfficeWorkingTimelogReport(param, input);
         }
 
         [HttpGet]
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_Report, Ncc.Authorization.PermissionNames.BranchDirector_ProjectWorkingReport_View)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_ProjectWorkingReport_View)]
         public async Task<PagedResultDto<TotalTimelogProjectDto>> GetDailyProjectTimelogReport(GridParam param, GetDailyProjectTimelogReportInput input)
         {
             return await _botReportDailyService.GetPagedDailyProjectTimelogReport(param, input);
         }
 
         [HttpGet]
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_Report, Ncc.Authorization.PermissionNames.BranchDirector_AnomaliesReport_View)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.BranchDirector_AnomaliesReport_View)]
         public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportInput input)
         {
             return await _absenceDayService.GetAnomaliesTimelogReport(input);

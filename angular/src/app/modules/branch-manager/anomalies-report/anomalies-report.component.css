@@ -179,27 +179,43 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: center;
 }
 
 .date-note-item {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: #fff4e5;
+  border: 1px solid #ffe0b2;
+  border-radius: 6px;
+  padding: 6px 12px;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 .date-label {
   margin-right: 8px;
   white-space: nowrap;
   flex-shrink: 0;
+  font-size: 12px;
+  padding: 4px 8px;
   min-width: max-content;
-  margin-top: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .note-text {
-  flex-grow: 1;
   word-break: break-word;
   line-height: 1.5;
+  font-weight: 600;
+  color: #d32f2f;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .bg-gray {
