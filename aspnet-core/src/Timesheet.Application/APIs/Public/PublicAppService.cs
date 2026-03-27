@@ -97,6 +97,7 @@ namespace Timesheet.APIs.Public
             else if (rangeType == RangeType.month)
             {
                 startDate = DateTimeUtils.FirstDayOfMonth(date);
+                endDate = DateTimeUtils.LastDayOfMonth(date);
             }
             else
             {
