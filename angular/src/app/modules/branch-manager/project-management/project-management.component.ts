@@ -1,4 +1,4 @@
-import { Component, Injector, Input, OnInit } from '@angular/core';
+import { Component, Injector, Input, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { FilterDto, PagedListingComponentBase, PagedRequestDto } from '@shared/paged-listing-component-base';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
@@ -20,7 +20,7 @@ import { SortOrder, ProjectMemberType, UserTypeCount } from '../modal/project-ma
   templateUrl: './project-management.component.html',
   styleUrls: ['./project-management.component.css']
 })
-export class ProjectManagementComponent extends PagedListingComponentBase<any> implements OnInit {
+export class ProjectManagementComponent extends PagedListingComponentBase<any> implements OnInit, AfterViewInit {
   ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs = PERMISSIONS_CONSTANT.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs
   @Input() listBranch: BranchDto[];
   @Input() listBranchFilter: BranchDto[];
@@ -42,6 +42,7 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
   private shadowCount: number[] = [];
   private filterBranchId: any;
   private chart: Chart;
+  @ViewChild("pagination") paginationControl: any;
   constructor(
     injector: Injector,
     private dialog: MatDialog,
@@ -56,6 +57,16 @@ export class ProjectManagementComponent extends PagedListingComponentBase<any> i
   }
 
   ngOnInit() {
+  }
+
+  ngAfterViewInit(): void {
+    if (this.paginationControl) {
+      setTimeout(() => {
+        this.pageSize = 100;
+        this.paginationControl.selection = 100;
+        this.refresh();
+      });
+    }
   }
 
   filterBranch(): void{

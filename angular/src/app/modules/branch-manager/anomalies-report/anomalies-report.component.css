@@ -138,11 +138,11 @@ h3 {
 }
 
 .col-name {
-  width: 20%;
+  width: 15%;
 }
 
 .col-branch {
-  width: 10%;
+  width: 6%;
 }
 
 .col-dates {
@@ -150,11 +150,11 @@ h3 {
 }
 
 .col-actual-hours {
-  width: 12%;
+  width: 10%;
 }
 
 .col-count {
-  width: 8%;
+  width: 6%;
 }
 
 .label {
@@ -179,20 +179,20 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .date-note-item {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
+  text-align: left;
   background-color: #fff4e5;
   border: 1px solid #ffe0b2;
   border-radius: 6px;
   padding: 6px 12px;
   width: fit-content;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .date-label {
@@ -203,6 +203,10 @@ h3 {
   padding: 4px 8px;
   min-width: max-content;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.text-left {
+  text-align: left !important;
 }
 
 .note-text {

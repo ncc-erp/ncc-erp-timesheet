@@ -108,9 +108,8 @@
                 </th>
                 <th class="text-center col-lg-4">
                   <div class="project_sort">
-                    <span matTooltip="Working time percentage of logged timesheet projects"
+                    <span matTooltip="Percentage of logged working hours per project within the selected time range"
                       matTooltipPosition="above">Projects</span>
-                    <!-- Phần trăm log timesheet của user vào mỗi dự án trong khoảng thời gian nhất định -->
                     <span (click)="toggleSortOrder(false)">
                       <i class="pi pi-sort-amount-up text-primary p-l-5" role="button"
                         *ngIf="sortProject === sortProjectUserNumber.UP_PROJECT"></i>
@@ -192,7 +191,7 @@
           </table>
         </div>
         <div class="abp-pagination-controls-wrapper">
-          <abp-pagination-controls [totalNumber]="totalItems" id="Branch_Manager"
+          <abp-pagination-controls #pagination [totalNumber]="totalItems" id="Branch_Manager"
             (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)"></abp-pagination-controls>
         </div>
       </div>

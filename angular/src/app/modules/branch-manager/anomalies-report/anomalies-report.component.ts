@@ -4,7 +4,7 @@ import { AnomaliesReportService } from '@app/service/api/anomalies-report.servic
 import { AnomaliesTimelogReportResponse, YesterdayAnomaly, LastWeekAnomaly } from '@app/modules/branch-manager/Dto/anomalies-report-dto';
 import { BranchDto } from '@shared/service-proxies/service-proxies';
 import { AppComponentBase } from '@shared/app-component-base';
-import { AnomaliesNotes, DataType, SelectAllText, TableType, SortColumn, SortDirection, SortIcon } from './enum/anomalies-report.enum';
+import { DataType, SelectAllText, TableType, SortColumn, SortDirection, SortIcon } from './enum/anomalies-report.enum';
 
 @Component({
   selector: 'app-anomalies-report',
@@ -239,11 +239,11 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
     const yesterdayData = data.yesterdayAnomalies;
     const items = Array.isArray(yesterdayData) ? yesterdayData : ((yesterdayData && (yesterdayData as any).items) || []);
     this.yesterdayUnplannedAbsences = items
-      .filter(a => a.notes && a.notes.startsWith(AnomaliesNotes.NO_LEAVE_WFH))
+      .filter(a => a.isUnplannedAbsence === true)
       .map(a => ({ ...a, date: this.parseDateFromString(a.date) || a.date }));
 
     this.yesterdayShortWorkingHours = items
-      .filter(a => a.notes && a.notes.startsWith(AnomaliesNotes.SHORT_WORKING_HOURS))
+      .filter(a => a.isUnplannedAbsence === false)
       .map(a => ({ ...a, date: this.parseDateFromString(a.date) || a.date }));
 
     this.filteredYesterdayAbsences = [...this.yesterdayUnplannedAbsences];
@@ -285,9 +285,8 @@ export class AnomaliesReportComponent extends AppComponentBase implements OnInit
           ...a,
           isExpanded: false,
           datesBelowThreshold: belowThreshold,
-          datesNoTrackerTime: noTrackerTime,
-          combinedDates: [...belowThreshold, ...noTrackerTime],
-          count: belowThreshold.length + noTrackerTime.length
+          combinedDates: [...belowThreshold],
+          count: belowThreshold.length
         };
       });
 

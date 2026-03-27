@@ -84,42 +84,42 @@
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.BranchName)"></i>
                   </div>
                 </th>
-                <th class="text-center sortable" (click)="onSort(SortColumn.WfhLW)">
+                <th class="text-center sortable bg-lw" (click)="onSort(SortColumn.WfhLW)">
                   <div class="header-content">
                     <span matTooltip="Work from home hours (Last week)" matTooltipPosition="above">{{ "WFH (LW)" |
                       localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.WfhLW)"></i>
                   </div>
                 </th>
-                <th class="text-center sortable" (click)="onSort(SortColumn.OfficeLW)">
+                <th class="text-center sortable bg-lw" (click)="onSort(SortColumn.OfficeLW)">
                   <div class="header-content">
                     <span matTooltip="Working at office hours (Last week)" matTooltipPosition="above">{{ "Office (LW)" |
                       localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.OfficeLW)"></i>
                   </div>
                 </th>
-                <th class="text-center sortable" (click)="onSort(SortColumn.TotalAllLW)">
+                <th class="text-center sortable bg-lw" (click)="onSort(SortColumn.TotalAllLW)">
                   <div class="header-content">
                     <span matTooltip="Total working hours (Last week)" matTooltipPosition="above">{{ "Total (LW)" |
                       localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.TotalAllLW)"></i>
                   </div>
                 </th>
-                <th class="text-center sortable" (click)="onSort(SortColumn.WfhLM)">
+                <th class="text-center sortable bg-lm" (click)="onSort(SortColumn.WfhLM)">
                   <div class="header-content">
                     <span matTooltip="Work from home hours (Last month)" matTooltipPosition="above">{{ "WFH (LM)" |
                       localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.WfhLM)"></i>
                   </div>
                 </th>
-                <th class="text-center sortable" (click)="onSort(SortColumn.OfficeLM)">
+                <th class="text-center sortable bg-lm" (click)="onSort(SortColumn.OfficeLM)">
                   <div class="header-content">
                     <span matTooltip="Working at office hours (Last month)" matTooltipPosition="above">{{ "Office (LM)"
                       | localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.OfficeLM)"></i>
                   </div>
                 </th>
-                <th class="text-center sortable" (click)="onSort(SortColumn.TotalAllLM)">
+                <th class="text-center sortable bg-lm" (click)="onSort(SortColumn.TotalAllLM)">
                   <div class="header-content">
                     <span matTooltip="Total working hours (Last month)" matTooltipPosition="above">{{ "Total (LM)" |
                       localize }}</span>
@@ -142,12 +142,12 @@
                     {{item.branch.name}}
                   </span>
                 </td>
-                <td class="text-center">{{ round(item.wfhLW) }}</td>
-                <td class="text-center">{{ round(item.officeLW) }}</td>
-                <td class="text-center">{{ round(item.totalAllLW) }}</td>
-                <td class="text-center">{{ round(item.wfhLM) }}</td>
-                <td class="text-center">{{ round(item.officeLM) }}</td>
-                <td class="text-center">{{ round(item.totalAllLM) }}</td>
+                <td class="text-center text-lw">{{ round(item.wfhLW) }}</td>
+                <td class="text-center text-lw">{{ round(item.officeLW) }}</td>
+                <td class="text-center text-lw fw-bold">{{ round(item.totalAllLW) }}</td>
+                <td class="text-center text-lm">{{ round(item.wfhLM) }}</td>
+                <td class="text-center text-lm">{{ round(item.officeLM) }}</td>
+                <td class="text-center text-lm fw-bold">{{ round(item.totalAllLM) }}</td>
               </tr>
             </tbody>
           </table>

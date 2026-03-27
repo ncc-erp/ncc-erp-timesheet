@@ -4,11 +4,6 @@ export enum SelectAllText {
   DESELECT_ALL = 'Deselect All'
 }
 
-export enum AnomaliesNotes {
-  NO_LEAVE_WFH = 'No leave/WFH record',
-  SHORT_WORKING_HOURS = 'Unapproved short working hours'
-}
-
 export enum DataType {
   YESTERDAY = 'yesterday',
   LAST_WEEK = 'lastWeek'

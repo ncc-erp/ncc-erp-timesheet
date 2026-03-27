@@ -112,7 +112,10 @@ export class DailyProjectReportComponent
       .subscribe({
         next: (response) => {
           const rs = response.result;
-          this.users = rs.items || [];
+          this.users = (rs.items || []).map(item => ({
+            ...item,
+            isExpanded: false
+          }));
           this.showPaging(rs, pageNumber);
         },
         error: (error) => {
@@ -205,6 +208,12 @@ export class DailyProjectReportComponent
     }
 
     this.refresh();
+  }
+
+  toggleMembers(item: any): void {
+    if (item.members && item.members.length > 2) {
+      item.isExpanded = !item.isExpanded;
+    }
   }
 
   get filteredBranches() {

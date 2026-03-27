@@ -103,7 +103,7 @@
                             </span>
                         </td>
                         <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">{{ item.count }}</td>
-                        <td class="text-center"
+                        <td class="text-left"
                             [class.cursor-pointer]="dataType === DataType.LAST_WEEK && item.datesMissed?.length > 2"
                             (click)="toggleExpand(item)">
                             <div *ngIf="dataType === DataType.YESTERDAY" class="date-note-item">
@@ -222,10 +222,9 @@
                                 {{item.branch.name}}
                             </span>
                         </td>
-                        <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">{{ item.actualHours.replace('h',
-                            '') }}</td>
+                        <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">{{ item.actualHours }}</td>
                         <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">{{ item.count }}</td>
-                        <td class="text-center"
+                        <td class="text-left"
                             [class.cursor-pointer]="dataType === DataType.LAST_WEEK && (item.datesBelowThreshold?.length + item.datesNoTrackerTime?.length) > 2"
                             (click)="toggleExpand(item)">
                             <div *ngIf="dataType === DataType.YESTERDAY" class="date-note-item">

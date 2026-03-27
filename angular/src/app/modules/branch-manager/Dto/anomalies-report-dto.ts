@@ -5,9 +5,10 @@ export interface YesterdayAnomaly {
     employeeName: string;
     userName: string;
     date: string | Date;
-    actualHours: string;
+    actualHours: number;
     notes: string;
     branch: BranchToDisplayDto;
+    isUnplannedAbsence: boolean;
 }
 
 export interface DateWithNote {
@@ -20,7 +21,6 @@ export interface LastWeekAnomaly {
     employeeName: string;
     userName: string;
     datesMissed: DateWithNote[];
-    datesNoTrackerTime: DateWithNote[];
     datesBelowThreshold: DateWithNote[];
     count: number;
     branch: BranchToDisplayDto;
