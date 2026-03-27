@@ -36,4 +36,20 @@ namespace Timesheet.APIs.Public.Dto
             }
         }
     }
+
+    public class UserLeaveDayOffDto
+    {
+        public string MezonId { get; set; }
+        public string EmailAddress { get; set; }
+        public string UserName { get; set; }
+        public DateTime DateAt { get; set; }
+        public string Type { get; set; }
+    }
+
+    public enum RangeType
+    {
+        day,
+        week,
+        month
+    }
 }

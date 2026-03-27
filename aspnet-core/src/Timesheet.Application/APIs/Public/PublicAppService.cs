@@ -24,11 +24,9 @@ using Timesheet.APIs.Public.Dto;
 using Timesheet.APIs.ReviewInterns.Dto;
 using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
+using Timesheet.NCCAuthen;
 using Timesheet.Uitls;
 using Timesheet.Users.Dto;
-using Ncc.Entities.Enum;
-using Timesheet.APIs.Public.Dto;
-using Timesheet.Entities;
 using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.Public
@@ -73,6 +71,60 @@ namespace Timesheet.APIs.Public
             return await queryAbsenceDay(dateAt)
                 .Where(s => s.RequestType == RequestType.Off)
                 .ToListAsync();
+        }
+
+        [HttpGet]
+        [AbpAllowAnonymous]
+        [NccAuthentication]
+        public async Task<List<UserLeaveDayOffDto>> GetAllUserLeaveDayOffByProjectCode(string projectCode, DateTime date, string type)
+        {
+            DateTime startDate;
+            var endDate = date.Date;
+
+            if (!Enum.TryParse<RangeType>(type, true, out var rangeType))
+            {
+                throw new UserFriendlyException("RangeType is invalid. Valid values are: day, week, month");
+            }
+
+            if (rangeType == RangeType.day)
+            {
+                startDate = date.Date;
+            }
+            else if (rangeType == RangeType.week)
+            {
+                startDate = date.AddDays(-6).Date;
+            }
+            else if (rangeType == RangeType.month)
+            {
+                startDate = DateTimeUtils.FirstDayOfMonth(date);
+            }
+            else
+            {
+                throw new UserFriendlyException("RangeType is invalid");
+            }
+
+            var projectUserIds = await WorkScope.GetAll<ProjectUser>()
+                .Include(s => s.Project)
+                .Where(s => s.Project.Code.ToLower().Trim() == projectCode.ToLower().Trim())
+                .Where(s => s.Type != ProjectUserType.DeActive)
+                .Select(s => s.UserId)
+                .ToListAsync();
+
+            return await WorkScope.GetAll<AbsenceDayDetail>()
+                .Include(s => s.Request)
+                .Include(s => s.Request.User)
+                .Where(s => s.Request.Status == RequestStatus.Approved)
+                .Where(s => s.DateAt.Date >= startDate && s.DateAt.Date <= endDate)
+                .Where(s => s.Request.Type == RequestType.Off)
+                .Where(s => projectUserIds.Contains(s.Request.UserId))
+                .Select(s => new UserLeaveDayOffDto
+                {
+                    MezonId = s.Request.User.MezonUserId,
+                    EmailAddress = s.Request.User.EmailAddress,
+                    UserName = s.Request.User.UserName,
+                    DateAt = s.DateAt,
+                    Type = Enum.GetName(typeof(DayType), s.DateType),
+                }).ToListAsync();
         }
 
         [HttpPost]
