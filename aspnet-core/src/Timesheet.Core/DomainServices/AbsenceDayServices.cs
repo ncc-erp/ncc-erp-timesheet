@@ -57,7 +57,6 @@ namespace Timesheet.DomainServices
         private double CalculateLateMinutes(TimeSpan? checkInTime, TimeSpan? morningStartAt, TimeSpan? afternoonStartAt)
         {
             double allowedLateMinutes = double.Parse(_settingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
-
             double lateMinutes = 0.0;
             if (checkInTime.HasValue)
             {
@@ -193,16 +192,15 @@ namespace Timesheet.DomainServices
             }
         }
 
-        private (double max200kPercentage, double max100kPercentage, double max50kPercentage, double max20kPercentage, double breakTime) GetCommonCofig()
+        private (double max200kPercentage, double max100kPercentage, double max50kPercentage, double max20kPercentage) GetCommonCofig()
         {
             // Penalty thresholds for tracker time percentage (e.g. < 85% = 20k, < 75% = 50k, < 50% = 100k, < 25% = 200k)
             double max200kPercentage = double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker200kPunishment).Split('-')[1]);
             double max100kPercentage = double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker100kPunishment).Split('-')[1]);
             double max50kPercentage = double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker50kPunishment).Split('-')[1]);
             double max20kPercentage = double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker20kPunishment).Split('-')[1]);
-            double breakTime = 1.0;
 
-            return (max200kPercentage, max100kPercentage, max50kPercentage, max20kPercentage, breakTime);
+            return (max200kPercentage, max100kPercentage, max50kPercentage, max20kPercentage);
         }
 
         private (TimeSpan? morningStartAt, TimeSpan? morningEndAt, TimeSpan? afternoonStartAt, TimeSpan? afternoonEndAt, TimeSpan? checkInTime, TimeSpan? checkOutTime)
@@ -218,6 +216,35 @@ namespace Timesheet.DomainServices
             return (morningStartAt, morningEndAt, afternoonStartAt, afternoonEndAt, checkInTime, checkOutTime);
         }
 
+        private (double? faceIdHours, double trackerHours) CalculateWorkingHours(
+            TimeSpan? checkInTime, 
+            TimeSpan? checkOutTime, 
+            TimeSpan? morningStartAt, 
+            TimeSpan? afternoonStartAt, 
+            AbsenceDetailDto offOrOnsiteRequest,
+            string trackerTimeString)
+        {
+            double? faceIdHours = null;
+            double breakTime = 1.0;
+
+            if (checkInTime.HasValue && checkOutTime.HasValue)
+            {
+                double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt);
+                var officeWorkingTime = (checkOutTime.Value.TotalMinutes - checkInTime.Value.TotalMinutes + lateMinutes) / 60.0;
+                if (offOrOnsiteRequest == null)
+                {
+                    officeWorkingTime -= breakTime;
+                }
+                faceIdHours = Math.Round(officeWorkingTime, 2);
+            }
+
+            double trackerHours = TimeSpan.TryParse(trackerTimeString, out var ts)
+                ? Math.Round(ts.TotalMinutes / 60.0, 2)
+                : 0;
+
+            return (faceIdHours, trackerHours);
+        }
+
         private (List<YesterdayAnomalyDTO> yesterdayAnomalies, List<LastWeekAnomalyDTO> lastWeekAnomalies) ProcessAnomalies(ProcessAnomaliesInputDto input)
         {
             var yesterdayAnomalies = new List<YesterdayAnomalyDTO>();
@@ -226,7 +253,7 @@ namespace Timesheet.DomainServices
             var timekeepings = input.AllTimekeepings;
             var absenceDetailDict = input.AllAbsenceDetails.GroupBy(d => ((long)d.UserId, d.DateAt)).ToDictionary(g => g.Key, g => g.ToList());
 
-            var ( max200kPercentage, max100kPercentage, max50kPercentage, max20kPercentage, breakTime) = GetCommonCofig();
+            var ( max200kPercentage, max100kPercentage, max50kPercentage, max20kPercentage) = GetCommonCofig();
 
             foreach (var tk in timekeepings)
             {
@@ -243,40 +270,22 @@ namespace Timesheet.DomainServices
                 var (morningStartAt, morningEndAt, afternoonStartAt, afternoonEndAt, checkInTime, checkOutTime) = ParseTimeSpanString(
                     tk.User.MorningStartAt, tk.User.MorningEndAt, tk.User.AfternoonStartAt, tk.User.AfternoonEndAt, tk.CheckIn, tk.CheckOut);
 
-                double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt);
-
-                var hasAbsenceData = absenceDetailDict.TryGetValue(((long)tk.UserId, tk.DateAt), out var absenceData);
-
-                var wfhRequest = hasAbsenceData
-                    ? absenceData.FirstOrDefault(d => d.RequestType == RequestType.Remote)
-                    : new AbsenceDetailDto();
-
-                var offOrOnsiteRequest = hasAbsenceData
-                    ? absenceData.FirstOrDefault(d => d.RequestType == RequestType.Off || d.RequestType == RequestType.Onsite)
-                    : new AbsenceDetailDto();
+                var absenceData = absenceDetailDict.GetValueOrDefault(((long)tk.UserId, tk.DateAt));
+                var wfhRequest = absenceData?.FirstOrDefault(d => d.RequestType == RequestType.Remote);
+                var offOrOnsiteRequest = absenceData?.FirstOrDefault(d => d.RequestType == RequestType.Off || d.RequestType == RequestType.Onsite);
 
                 //bool isWFHFullday = wfhRequest.Any(d => d.DateType == DayType.Fullday);
                 //bool isWFHMorning = wfhRequest.Any(d => d.DateType == DayType.Morning);
                 //bool isWFHAfternoon = wfhRequest.Any(d => d.DateType == DayType.Afternoon);
 
-                bool isNoCheckInAndNoCheckOut = checkInTime == null && checkOutTime == null && offOrOnsiteRequest.DateType != DayType.Fullday;
-                bool isMissingMorningRecord = checkInTime > morningEndAt && offOrOnsiteRequest.DateType != DayType.Morning;
+                bool isNoCheckInAndNoCheckOut = checkInTime == null && checkOutTime == null && offOrOnsiteRequest?.DateType != DayType.Fullday;
+                bool isMissingMorningRecord = checkInTime > morningEndAt && offOrOnsiteRequest?.DateType != DayType.Morning;
                 bool isNoCheckOut = checkInTime.HasValue && checkOutTime == null;
-                bool isMissingAfternoonRecord = checkInTime < morningEndAt && checkOutTime < afternoonStartAt && offOrOnsiteRequest.DateType != DayType.Afternoon;
+                bool isMissingAfternoonRecord = checkInTime < morningEndAt && checkOutTime < afternoonStartAt && offOrOnsiteRequest?.DateType != DayType.Afternoon;
 
-                double? faceIdHours = null;
-                if (checkInTime.HasValue && checkOutTime.HasValue)
-                {
-                    var officeWorkingTime = (checkOutTime.Value.TotalMinutes - checkInTime.Value.TotalMinutes + lateMinutes) / 60.0;
-                    if (offOrOnsiteRequest == null)
-                    {
-                        officeWorkingTime -= breakTime;
-                    }
-
-                    faceIdHours = Math.Round(officeWorkingTime, 2);
-                }
-
-                double parsedTrackerHours = TimeSpan.TryParse(tk.TrackerTime, out var ts) ? Math.Round(ts.TotalMinutes / 60.0, 2) : 0;
+                var (faceIdHours, parsedTrackerHours) = CalculateWorkingHours(
+                        checkInTime, checkOutTime, morningStartAt, afternoonStartAt,
+                        offOrOnsiteRequest, tk.TrackerTime);
 
                 //double registeredMorningHours = tk.User.MorningWorking, registeredAfternoonHours = tk.User.AfternoonWorking;
                 double registeredMorningHours = isMissingMorningRecord ? 0 : tk.User.MorningWorking;
@@ -288,16 +297,16 @@ namespace Timesheet.DomainServices
                     double requiredTrackerHours = 0.0;
                     double requiredOfficeHours = 0.0;
 
-                    if (wfhRequest.DateType == DayType.Fullday)
+                    if (wfhRequest?.DateType == DayType.Fullday)
                     {
                         requiredTrackerHours = totalRegisteredHours;
                     }
-                    else if (wfhRequest.DateType == DayType.Morning)
+                    else if (wfhRequest?.DateType == DayType.Morning)
                     {
                         requiredTrackerHours = registeredMorningHours;
                         requiredOfficeHours = registeredAfternoonHours;
                     }
-                    else if (wfhRequest.DateType == DayType.Afternoon)
+                    else if (wfhRequest?.DateType == DayType.Afternoon)
                     {
                         requiredOfficeHours = registeredMorningHours;
                         requiredTrackerHours = registeredAfternoonHours;
