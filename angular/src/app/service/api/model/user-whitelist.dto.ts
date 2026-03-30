@@ -9,8 +9,8 @@ export class GetUserWhitelistDto {
 }
 
 export class BranchToDisplayDto {
-    branchName: string;
-    branchColor: string;
+    name: string;
+    color: string;
 }
 
 export class AddUserWhitelistDto {
