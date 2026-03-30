@@ -122,8 +122,8 @@ namespace Timesheet.DomainServices
                         UserName = x.UserName,
                         Branch = new BranchToDisplayDto
                         {
-                            BranchName = x.BranchName,
-                            BranchColor = x.BranchColor
+                            Name = x.BranchName,
+                            Color = x.BranchColor
                         },
                         ProjectNames = projectUserDict.ContainsKey(x.UserId) ? projectUserDict[x.UserId] : new List<string>(),
                         WhitelistName = whitelistTypeDictionary[x.WhitelistType],
