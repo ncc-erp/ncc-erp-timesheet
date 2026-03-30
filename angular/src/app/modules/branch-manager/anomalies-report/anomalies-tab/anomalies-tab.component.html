@@ -1,39 +1,40 @@
 <div class="tab-content-wrapper">
-        <div class="group">
-            <div class="row filter-row">
-                <div class="filter-item filter-search">
-                    <mat-form-field style="padding-bottom: 0;" class="w-100" appearance="outline">
-                        <mat-label>{{ "Search" | localize }}</mat-label>
-                        <div class="search-input-wrapper">
-                            <input class="search-input-field" matInput [(ngModel)]="searchText"
-                                (ngModelChange)="onSearchChange()" placeholder="Search by name or branch..." />
-                            <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="searchText" (click)="clearSearch()">clear</mat-icon>
-                            <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix>search</mat-icon>
-                        </div>
-                    </mat-form-field>
-                </div>
+    <div class="group">
+        <div class="row filter-row">
+            <div class="filter-item filter-search">
+                <mat-form-field style="padding-bottom: 0;" class="w-100" appearance="outline">
+                    <mat-label>{{ "Search" | localize }}</mat-label>
+                    <div class="search-input-wrapper">
+                        <input class="search-input-field" matInput [(ngModel)]="searchText"
+                            (ngModelChange)="onSearchChange()" placeholder="Search by employee name..." />
+                        <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix *ngIf="searchText"
+                            (click)="clearSearch()">clear</mat-icon>
+                        <mat-icon class="custom-search-icon" style="height: 16px;" matSuffix>search</mat-icon>
+                    </div>
+                </mat-form-field>
+            </div>
 
-                <!-- Branch Filter -->
-                <div class="filter-item filter-branch">
-                    <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
-                        <mat-label>{{ "Branch" | localize }}</mat-label>
-                        <mat-select name="branchIds" multiple [(ngModel)]="selectedBranchIds"
-                            (ngModelChange)="onBranchSelectionChange()">
-                            <input matInput placeholder="Search branch..." [(ngModel)]="branchSearchText"
-                                (keyup)="filterBranch()" (click)="$event.stopPropagation()"
-                                style="width: 100%; padding: 4px" />
-                            <mat-option [value]="'all'" (click)="toggleSelectAll($event)" [disabled]="true"
-                                style="cursor: pointer;">
-                                <strong>
-                                    {{ getSelectAllText() | localize }}
-                                </strong>
-                            </mat-option>
-                            <mat-divider></mat-divider>
-                            <mat-option *ngFor="let branch of filteredBranches" [value]="branch.id">
-                                {{ branch.name }}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
+            <!-- Branch Filter -->
+            <div class="filter-item filter-branch">
+                <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
+                    <mat-label>{{ "Branch" | localize }}</mat-label>
+                    <mat-select name="branchIds" multiple [(ngModel)]="selectedBranchIds"
+                        (ngModelChange)="onBranchSelectionChange()">
+                        <input matInput placeholder="Search branch..." [(ngModel)]="branchSearchText"
+                            (keyup)="filterBranch()" (click)="$event.stopPropagation()"
+                            style="width: 100%; padding: 4px" />
+                        <mat-option [value]="'all'" (click)="toggleSelectAll($event)" [disabled]="true"
+                            style="cursor: pointer;">
+                            <strong>
+                                {{ getSelectAllText() | localize }}
+                            </strong>
+                        </mat-option>
+                        <mat-divider></mat-divider>
+                        <mat-option *ngFor="let branch of filteredBranches" [value]="branch.id">
+                            {{ branch.name }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
             </div>
         </div>
     </div>
@@ -70,9 +71,6 @@
                                 <i class="pi p-l-5" [ngClass]="getSortIcon('branch', dataType, TableType.ABSENCE)"></i>
                             </div>
                         </th>
-                        <th class="text-center col-dates">
-                            {{ dataType === DataType.YESTERDAY ? 'Date' : 'Dates Missed' | localize }}
-                        </th>
                         <th *ngIf="dataType === DataType.LAST_WEEK" class="text-center sortable col-count"
                             (click)="sort('count', dataType, TableType.ABSENCE)">
                             <div class="header-content">
@@ -80,7 +78,14 @@
                                 <i class="pi p-l-5" [ngClass]="getSortIcon('count', dataType, TableType.ABSENCE)"></i>
                             </div>
                         </th>
-                        <th class="text-center col-notes">{{ "Notes" | localize }}</th>
+                        <th class="text-center col-dates">
+                            <span [matTooltip]="dataType === DataType.YESTERDAY ? 'Date of absence and associated note' : 
+                                            'Specific dates of unplanned absences and associated notes'"
+                                matTooltipPosition="above">
+                                {{ dataType === DataType.YESTERDAY ? 'Date & Note' : 'Dates Missed & Notes' | localize
+                                }}
+                            </span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -93,43 +98,65 @@
                         <td class="text-center">{{ (pAbsence - 1) * pageSizeAbsence + i + 1 }}</td>
                         <td class="text-center">{{ item.employeeName }}</td>
                         <td class="text-center">
-                            <span class="label" [style.backgroundColor]="item.branch.branchColor">
-                                {{item.branch.branchName}}
+                            <span class="label" [style.backgroundColor]="item.branch.color">
+                                {{item.branch.name}}
                             </span>
-                        </td>
-                        <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">
-                            <span class="label bg-blue">
-                                {{ item.date | date:'dd/MM/yyyy' }}
-                            </span>
-                        </td>
-                        <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">
-                            <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                <span class="label bg-blue" *ngFor="let date of item.datesMissed">
-                                    {{ date | date:'dd/MM/yyyy' }}
-                                </span>
-                            </div>
                         </td>
                         <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">{{ item.count }}</td>
-                        <td class="text-center">{{ item.notes || (dataType === DataType.LAST_WEEK ? 'No leave/WFH
-                            record' : '') }}</td>
+                        <td class="text-left"
+                            [class.cursor-pointer]="dataType === DataType.LAST_WEEK && item.datesMissed?.length > 2"
+                            (click)="toggleExpand(item)">
+                            <div *ngIf="dataType === DataType.YESTERDAY" class="date-note-item">
+                                <span class="label bg-blue date-label">
+                                    {{ item.date | date:'dd/MM/yyyy' }}
+                                </span>
+                                <span class="note-text">{{ item.notes }}</span>
+                            </div>
+                            <div *ngIf="dataType === DataType.LAST_WEEK" class="date-note-container">
+                                <ng-container *ngIf="item.isExpanded">
+                                    <div *ngFor="let d of item.datesMissed" class="date-note-item">
+                                        <span class="label bg-blue date-label">
+                                            {{ d.date | date:'dd/MM/yyyy' }}
+                                        </span>
+                                        <span class="note-text">{{ d.note || 'No leave/WFH record' }}</span>
+                                    </div>
+                                </ng-container>
+
+                                <ng-container *ngIf="!item.isExpanded">
+                                    <div *ngFor="let d of item.datesMissed | slice:0:2" class="date-note-item">
+                                        <span class="label bg-blue date-label">
+                                            {{ d.date | date:'dd/MM/yyyy' }}
+                                        </span>
+                                        <span class="note-text">{{ d.note || 'No leave/WFH record' }}</span>
+                                    </div>
+                                    <div *ngIf="item.datesMissed && item.datesMissed.length > 2"
+                                        class="mt-1 flex-center">
+                                        <span class="label bg-gray more-badge">
+                                            +{{ item.datesMissed.length - 2 }} more
+                                        </span>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="abp-pagination-controls-wrapper">
-            <abp-pagination-controls [totalNumber]="filteredAbsences.length" [id]="dataType + '_absence'"
-                (pageChange)="pAbsence = $event" (selectionChange)="pageSizeAbsence = $event">
-            </abp-pagination-controls>
-        </div>
-
         <div *ngIf="filteredAbsences.length === 0" class="text-center p-4">
             <p>{{ "No unplanned absences" | localize }}</p>
+        </div>
+
+        <div class="abp-pagination-controls-wrapper">
+            <abp-pagination-controls #paginationAbsence [totalNumber]="filteredAbsences.length"
+                [id]="dataType + '_absence'" (pageChange)="pAbsence = $event"
+                (selectionChange)="pageSizeAbsence = $event">
+            </abp-pagination-controls>
         </div>
     </div>
 
     <!-- Unapproved Short Working Hours Table -->
-    <div *ngIf="!isLoading" class="table-section" style="margin-top: 30px;">
+    <div *ngIf="!isLoading" class="table-section table-section-spaced">
         <h3 class="section-title">
             <mat-icon>access_time</mat-icon>
             {{ "Unapproved Short Working Hours" | localize }}
@@ -154,13 +181,11 @@
                                 <i class="pi p-l-5" [ngClass]="getSortIcon('branch', dataType, TableType.SHORT)"></i>
                             </div>
                         </th>
-                        <th class="text-center col-dates">
-                            {{ dataType === DataType.YESTERDAY ? 'Date' : 'Dates Below Threshold' | localize }}
-                        </th>
-                        <th *ngIf="dataType === DataType.YESTERDAY" class="text-center sortable col-count"
+                        <th *ngIf="dataType === DataType.YESTERDAY" class="text-center sortable col-actual-hours"
                             (click)="sort('actualHours', dataType, TableType.SHORT)">
                             <div class="header-content">
-                                <span>{{ "Actual Hours" | localize }}</span>
+                                <span matTooltip="Actual working hours recorded" matTooltipPosition="above">{{ "Actual
+                                    Hours" | localize }}</span>
                                 <i class="pi p-l-5"
                                     [ngClass]="getSortIcon('actualHours', dataType, TableType.SHORT)"></i>
                             </div>
@@ -172,56 +197,88 @@
                                 <i class="pi p-l-5" [ngClass]="getSortIcon('count', dataType, TableType.SHORT)"></i>
                             </div>
                         </th>
-                        <th class="text-center col-notes">{{ "Notes" | localize }}</th>
+                        <th class="text-center col-dates">
+                            <span
+                                [matTooltip]="dataType === DataType.YESTERDAY ? 'Date and associated note for short working hours' : 
+                                'Specific dates where working hours were below the approved threshold, along with notes'"
+                                matTooltipPosition="above">
+                                {{ dataType === DataType.YESTERDAY ? 'Date & Note' : 'Dates Below Threshold & Notes' ||
+                                localize }}
+                            </span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr *ngFor="let item of filteredShortHours | paginate :{
                         id: dataType + '_short',
-                        itemsPerPage: pageSizeShort,
+                        itemsPerPage: pageSizeShortHours,
                         currentPage: pShort,
                         totalItems: filteredShortHours.length
                         }; let i = index">
-                        <td class="text-center">{{ (pShort - 1) * pageSizeShort + i + 1 }}</td>
+                        <td class="text-center">{{ (pShort - 1) * pageSizeShortHours + i + 1 }}</td>
                         <td class="text-center">{{ item.employeeName }}</td>
                         <td class="text-center">
-                            <span class="label" [style.backgroundColor]="item.branch.branchColor">
-                                {{item.branch.branchName}}
+                            <span class="label" [style.backgroundColor]="item.branch.color">
+                                {{item.branch.name}}
                             </span>
                         </td>
-                        <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">
-                            <span class="label bg-blue">
-                                {{ item.date | date:'dd/MM/yyyy' }}
-                            </span>
-                        </td>
-                        <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">
-                            <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                <span class="label bg-blue" *ngFor="let date of item.datesBelowThreshold">
-                                    {{ date | date:'dd/MM/yyyy' }}
+                        <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">{{ item.actualHours }}</td>
+                        <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">{{ item.count }}</td>
+                        <td class="text-left"
+                            [class.cursor-pointer]="dataType === DataType.LAST_WEEK && (item.datesBelowThreshold?.length + item.datesNoTrackerTime?.length) > 2"
+                            (click)="toggleExpand(item)">
+                            <div *ngIf="dataType === DataType.YESTERDAY" class="date-note-item">
+                                <span class="label bg-blue date-label">
+                                    {{ item.date | date:'dd/MM/yyyy' }}
                                 </span>
-                                <span class="label bg-blue" *ngFor="let date of item.datesNoTrackerTime">
-                                    {{ date | date:'dd/MM/yyyy' }}
-                                </span>
+                                <span class="note-text">{{ item.notes }}</span>
+                            </div>
+                            <div *ngIf="dataType === DataType.LAST_WEEK" class="date-note-container">
+                                <ng-container *ngIf="item.isExpanded">
+                                    <div *ngFor="let d of item.datesBelowThreshold" class="date-note-item">
+                                        <span class="label bg-blue date-label">
+                                            {{ d.date | date:'dd/MM/yyyy' }}
+                                        </span>
+                                        <span class="note-text">{{ d.note || 'Unapproved short working hours' }}</span>
+                                    </div>
+                                    <div *ngFor="let d of item.datesNoTrackerTime" class="date-note-item">
+                                        <span class="label bg-blue date-label">
+                                            {{ d.date | date:'dd/MM/yyyy' }}
+                                        </span>
+                                        <span class="note-text">{{ d.note || 'No tracker time recorded' }}</span>
+                                    </div>
+                                </ng-container>
+
+                                <ng-container *ngIf="!item.isExpanded">
+                                    <div *ngFor="let d of item.combinedDates | slice:0:2" class="date-note-item">
+                                        <span class="label bg-blue date-label">
+                                            {{ d.date | date:'dd/MM/yyyy' }}
+                                        </span>
+                                        <span class="note-text">{{ d.note || d.defaultNote }}</span>
+                                    </div>
+                                    <div *ngIf="item.combinedDates && item.combinedDates.length > 2"
+                                        class="mt-1 flex-center">
+                                        <span class="label bg-gray more-badge">
+                                            +{{ item.combinedDates.length - 2 }} more
+                                        </span>
+                                    </div>
+                                </ng-container>
                             </div>
                         </td>
-                        <td *ngIf="dataType === DataType.YESTERDAY" class="text-center">{{ item.actualHours.replace('h',
-                            '') }}</td>
-                        <td *ngIf="dataType === DataType.LAST_WEEK" class="text-center">{{ item.count }}</td>
-                        <td class="text-center">{{ item.notes || (dataType === DataType.LAST_WEEK ? 'No early leave/late
-                            arrival approval' : '') }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="abp-pagination-controls-wrapper">
-            <abp-pagination-controls [totalNumber]="filteredShortHours.length" [id]="dataType + '_short'"
-                (pageChange)="pShort = $event" (selectionChange)="pageSizeShort = $event">
-            </abp-pagination-controls>
+        <div *ngIf="filteredShortHours.length === 0" class="text-center p-4">
+            <p>{{ "No records found" | localize }}</p>
         </div>
 
-        <div *ngIf="filteredShortHours.length === 0" class="text-center p-4">
-            <p>{{ "No short working hours" | localize }}</p>
+        <div class="abp-pagination-controls-wrapper">
+            <abp-pagination-controls #paginationShortHours [totalNumber]="filteredShortHours.length"
+                [id]="dataType + '_short'" (pageChange)="pShort = $event"
+                (selectionChange)="pageSizeShortHours = $event">
+            </abp-pagination-controls>
         </div>
     </div>
 </div>

@@ -46,7 +46,7 @@ namespace Timesheet.DomainServices.Dto
         public UserLevel? Level { get; set; }
         public string RegisterWorkDay { get; set; }
         public long? ManagerId { get; set; }
-        public Branch? Branch { get; set; }
+        public BranchToDisplayDto Branch { get; set; }
         public Sex? Sex { get; set; }
         public string AvatarPath { get; set; }
         public double MorningWorking { get; set; }

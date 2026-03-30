@@ -1,4 +1,4 @@
-import { Component, Injector, Input, OnInit, Output } from '@angular/core';
+import { Component, Injector, Input, OnInit, Output, ViewChild, AfterViewInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { PERMISSIONS_CONSTANT } from '@app/constant/permission.constant';
 import { BranchService } from '@app/service/api/branch.service';
@@ -19,7 +19,7 @@ import {ESortProjectUserNumber, ESortType} from '@app/modules/branch-manager/man
   templateUrl: './manage-employee.component.html',
   styleUrls: ['./manage-employee.component.css']
 })
-export class ManageEmployeeComponent extends PagedListingComponentBase<any> implements OnInit {
+export class ManageEmployeeComponent extends PagedListingComponentBase<any> implements OnInit, AfterViewInit {
   ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs = PERMISSIONS_CONSTANT.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs
   @Input() listBranch: BranchDto[];
   @Input() listBranchFilter: BranchDto[];
@@ -41,6 +41,8 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   public positionId = -1;
   public filterItems: FilterDto[] = [];
   public users: ManageUserDto[];
+
+  @ViewChild('pagination') paginationControl: any;
   keyword;
   constructor(
     injector: Injector,
@@ -69,6 +71,17 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
  
   ngOnInit() {
   }
+
+  ngAfterViewInit(): void {
+    if (this.paginationControl) {
+      setTimeout(() => {
+        this.pageSize = 100;
+        this.paginationControl.selection = 100;
+        this.refresh();
+      });
+    }
+  }
+
   filterPosition(): void{
     if(this.positionSearch.value){
       this.listPosition = this.listPositionFilter.filter(data => data.name.toLowerCase().includes(this.positionSearch.value.toLowerCase().trim()));

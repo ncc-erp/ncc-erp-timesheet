@@ -88,6 +88,18 @@ namespace Ncc.Entities.Enum
             //ProbationaryStaff = 3
         }
 
+        public enum OfficeBranch : long
+        {
+            HN1 = 1,
+            HN2 = 2,
+            SG1 = 3,
+            SG2 = 4,
+            DN = 5,
+            VINH = 6,
+            QN = 7,
+            HN3 = 8
+        }
+
         public enum UserLevel : byte
         {
             Intern_0 = 0,
@@ -431,11 +443,18 @@ namespace Ncc.Entities.Enum
             TIMESHEET_LOCKED = 1,
             PUNISHMENT_UNPAID = 2
         }
-        public enum ViolationStatus
+
+        public enum AnomalyType
         {
-            DatesMissed = 0,
-            DatesBelowThreshold = 1,
-            DatesNoTrackerTime = 2
+            NoCheckInOut,
+            NoMorningCheckIn,
+            EarlyCheckOut,
+            OfficeShortFullday,
+            OfficeShortMorning,
+            OfficeShortAfternoon,
+            RemoteShortFullday,
+            RemoteShortMorning,
+            RemoteShortAfternoon
         }
 
         public enum ReviewDetailRejector
