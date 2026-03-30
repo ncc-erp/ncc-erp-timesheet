@@ -443,7 +443,6 @@ namespace Ncc.Entities.Enum
         {
             NoCheckInOut,
             NoMorningCheckIn,
-            NoCheckOut,
             EarlyCheckOut,
             OfficeShortFullday,
             OfficeShortMorning,

@@ -39,14 +39,13 @@ namespace Timesheet.DomainServices
         {
             { AnomalyType.NoCheckInOut, "No check in & No check out & No off/onsite/remote request" },
             { AnomalyType.NoMorningCheckIn, "No morning check in & No off/onsite request for the morning" },
-            { AnomalyType.NoCheckOut, "No check out" },
             { AnomalyType.EarlyCheckOut, "Early check out & No off/onsite request for the afternoon" },
-            { AnomalyType.OfficeShortFullday, "Office Fullday: Working Time < Standard Hours" },
-            { AnomalyType.OfficeShortMorning, "Office Morning: Working Time < Registered Morning Hours" },
-            { AnomalyType.OfficeShortAfternoon, "Office Afternoon: Working Time < Registered Afternoon Hours" },
-            { AnomalyType.RemoteShortFullday, "Remote Fullday: Tracker Time < {0}%" },
-            { AnomalyType.RemoteShortMorning, "Remote Morning: Tracker Time < {0}%" },
-            { AnomalyType.RemoteShortAfternoon, "Remote Afternoon: Tracker Time < {0}%" }
+            { AnomalyType.OfficeShortFullday, "Office Fullday: Working hours < Standard hours" },
+            { AnomalyType.OfficeShortMorning, "Office Morning: Working hours < Registered morning hours" },
+            { AnomalyType.OfficeShortAfternoon, "Office Afternoon: Working hours < Registered afternoon hours" },
+            { AnomalyType.RemoteShortFullday, "Remote Fullday: No check out & Tracker time < {0}%" },
+            { AnomalyType.RemoteShortMorning, "Remote Morning: No check out & Tracker time < {0}%" },
+            { AnomalyType.RemoteShortAfternoon, "Remote Afternoon: No check out & Tracker time < {0}%" }
         };
 
         private TimeSpan? ParseTimeSpan(string input)
@@ -138,11 +137,7 @@ namespace Timesheet.DomainServices
         private AnomalyType? GetInvalidAbsenceNote(List<AbsenceDetailDto> absenceDetails,
             bool isNoCheckInAndNoCheckOut,
             bool isMissingMorningRecord,
-            bool isNoCheckOut,
-            bool isMissingAfternoonRecord,
-            double trackerHours,
-            double totalRegisteredHours,
-            double thresholdPercentage)
+            bool isMissingAfternoonRecord)
         {
             if (isNoCheckInAndNoCheckOut)
             {
@@ -158,14 +153,6 @@ namespace Timesheet.DomainServices
                                         && (d.RequestType == RequestType.Off || d.RequestType == RequestType.Onsite));
                 if (!hasMorningRequest)
                     return AnomalyType.NoMorningCheckIn;
-            }
-
-            if (isNoCheckOut)
-            {
-                if (trackerHours < thresholdPercentage / 100.0 * totalRegisteredHours)
-                {
-                    return AnomalyType.NoCheckOut;
-                }
             }
 
             if (isMissingAfternoonRecord)
@@ -274,22 +261,16 @@ namespace Timesheet.DomainServices
                 var wfhRequest = absenceData?.FirstOrDefault(d => d.RequestType == RequestType.Remote);
                 var offOrOnsiteRequest = absenceData?.FirstOrDefault(d => d.RequestType == RequestType.Off || d.RequestType == RequestType.Onsite);
 
-                //bool isWFHFullday = wfhRequest.Any(d => d.DateType == DayType.Fullday);
-                //bool isWFHMorning = wfhRequest.Any(d => d.DateType == DayType.Morning);
-                //bool isWFHAfternoon = wfhRequest.Any(d => d.DateType == DayType.Afternoon);
-
                 bool isNoCheckInAndNoCheckOut = checkInTime == null && checkOutTime == null && offOrOnsiteRequest?.DateType != DayType.Fullday;
                 bool isMissingMorningRecord = checkInTime > morningEndAt && offOrOnsiteRequest?.DateType != DayType.Morning;
-                bool isNoCheckOut = checkInTime.HasValue && checkOutTime == null;
                 bool isMissingAfternoonRecord = checkInTime < morningEndAt && checkOutTime < afternoonStartAt && offOrOnsiteRequest?.DateType != DayType.Afternoon;
 
                 var (faceIdHours, parsedTrackerHours) = CalculateWorkingHours(
                         checkInTime, checkOutTime, morningStartAt, afternoonStartAt,
                         offOrOnsiteRequest, tk.TrackerTime);
 
-                //double registeredMorningHours = tk.User.MorningWorking, registeredAfternoonHours = tk.User.AfternoonWorking;
-                double registeredMorningHours = isMissingMorningRecord ? 0 : tk.User.MorningWorking;
-                double registeredAfternoonHours = isMissingAfternoonRecord ? 0 : tk.User.AfternoonWorking;
+                double registeredMorningHours = offOrOnsiteRequest?.DateType == DayType.Morning ? 0 : tk.User.MorningWorking;
+                double registeredAfternoonHours = offOrOnsiteRequest?.DateType == DayType.Afternoon ? 0 : tk.User.AfternoonWorking;
                 double totalRegisteredHours = registeredMorningHours + registeredAfternoonHours;
 
                 if ((checkInTime.HasValue && checkOutTime.HasValue) || (checkInTime.HasValue && checkOutTime == null))
@@ -318,12 +299,11 @@ namespace Timesheet.DomainServices
 
                     double officeHours = faceIdHours ?? 0;
                     double trackerHours = (parsedTrackerHours > 0) ? parsedTrackerHours : officeHours;
-                    //double totalWorkingTime = Math.Max(trackerHours, officeHours);
 
                     if (faceIdHours.HasValue && faceIdHours.Value < requiredOfficeHours)
                     {
-                        var anomalyType = isMissingMorningRecord ? AnomalyType.OfficeShortAfternoon :
-                                            isMissingAfternoonRecord ? AnomalyType.OfficeShortMorning :
+                        var anomalyType = offOrOnsiteRequest?.DateType == DayType.Morning ? AnomalyType.OfficeShortAfternoon :
+                                          offOrOnsiteRequest?.DateType == DayType.Afternoon ? AnomalyType.OfficeShortMorning :
                                             AnomalyType.OfficeShortFullday;
                         string note = AnomalyNotes[anomalyType];
                         AddOrUpdateAnomaly(userWithAnomaly, officeHours, note, false, yesterdayAnomalies, lastWeekAnomalies);
@@ -346,17 +326,13 @@ namespace Timesheet.DomainServices
                     }
                 }
 
-                if (isNoCheckInAndNoCheckOut || isMissingMorningRecord || isNoCheckOut || isMissingAfternoonRecord)
+                if (isNoCheckInAndNoCheckOut || isMissingMorningRecord || isMissingAfternoonRecord)
                 {
                     AnomalyType? absenceType = GetInvalidAbsenceNote(
                         absenceData ?? new List<AbsenceDetailDto>(),
                         isNoCheckInAndNoCheckOut,
                         isMissingMorningRecord,
-                        isNoCheckOut,
-                        isMissingAfternoonRecord,
-                        parsedTrackerHours,
-                        totalRegisteredHours,
-                        max20kPercentage);
+                        isMissingAfternoonRecord);
                     if (absenceType.HasValue)
                     {
                         string absenceNote = AnomalyNotes[absenceType.Value];
