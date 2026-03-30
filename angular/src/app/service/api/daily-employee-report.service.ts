@@ -19,19 +19,15 @@ export class DailyEmployeeReportService extends BaseApiService {
   getDailyProjectTimelogReport(
     request: PagedRequestDto,
     branchIds: number[],
-    sortColumn?: number,
-    sortDirection?: number,
-    limit?: number
+    sortColumn?: string,
+    sortDirection?: number
   ): Observable<any> {
     let params = new HttpParams();
     branchIds.forEach(id  => {
-      params = params.append("BranchId", id.toString());
+      params = params.append("BranchIds", id.toString());
     });
-    if (limit !== undefined) {
-      params = params.set("Limit", limit.toString());
-    }
     if (sortColumn !== undefined) {
-      params = params.set("SortColumn", sortColumn.toString());
+      params = params.set("Sort", sortColumn.toString());
     }
     if (sortDirection !== undefined) {
       params = params.set("SortDirection", sortDirection.toString());

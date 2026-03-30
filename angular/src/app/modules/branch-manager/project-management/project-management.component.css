@@ -45,3 +45,15 @@
     padding: 0 5px;
     min-width: 0;
 }
+
+@media screen and (max-width: 991px) {
+  .filter-row {
+    flex-wrap: wrap;
+  }
+
+  .filter-item,
+  ::ng-deep .app-date-filter .date-filter {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}

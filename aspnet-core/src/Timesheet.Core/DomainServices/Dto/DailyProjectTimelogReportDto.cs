@@ -10,7 +10,6 @@ namespace Timesheet.DomainServices.Dto
         public List<string> Members { get; set; }
         public double TotalTimelogLW { get; set; }
         public double TotalTimelogLM { get; set; }
-
         public TotalTimelogProjectDto()
         {
             Members = new List<string>();
@@ -19,13 +18,10 @@ namespace Timesheet.DomainServices.Dto
 
     public class GetDailyProjectTimelogReportInput
     {
-        public List<long> BranchId { get; set; } = new List<long>();
+        public List<long> BranchIds { get; set; } = new List<long>();
         public double? MinHours { get; set; } = 0;
-        public int? Limit { get; set; }
         public List<long> ProjectIds { get; set; } = new List<long>();
         public bool IsAllBranch { get; set; }
-        public EProjectTimelogSortColumn? SortColumn { get; set; }
-        public ESortDirection SortDirection { get; set; }
     }
 
     public class GetDailyProjectTimelogReportByBranchCodesInput

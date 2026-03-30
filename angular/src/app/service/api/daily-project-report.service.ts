@@ -22,10 +22,9 @@ export class DailyProjectTimelogReportService extends BaseApiService{
     request: PagedRequestDto,
     branchIds: number[],
     minHours?: number,
-    limit?: number,
     projectIds?: number[],
     isAllBranch?: boolean,
-    sortColumn?: number,
+    sortColumn?: string,
     sortDirection?: number
   ): Observable<AbpResponse<PagedResultDto<TotalTimelogProjectDto>>> {
     let params = new HttpParams();
@@ -36,7 +35,7 @@ export class DailyProjectTimelogReportService extends BaseApiService{
 
     if (!isAllBranch && branchIds.length) {
       branchIds.forEach((id) => {
-        params = params.append("BranchId", id.toString());
+        params = params.append("BranchIds", id.toString());
       });
     }
 
@@ -46,19 +45,15 @@ export class DailyProjectTimelogReportService extends BaseApiService{
       });
     }
 
-    if (minHours !== undefined) {
+    if (minHours !== undefined && minHours !== null && minHours.toString().trim() !== '') {
       params = params.set("MinHours", minHours.toString());
     }
 
-    if (limit !== undefined) {
-      params = params.set("Limit", limit.toString());
+    if (sortColumn !== undefined) {
+        params = params.set("Sort", sortColumn.toString());
     }
 
-    if (sortColumn !== undefined && sortColumn !== null) {
-        params = params.set("SortColumn", sortColumn.toString());
-    }
-
-    if (sortDirection !== undefined && sortDirection !== null) {
+    if (sortDirection !== undefined) {
         params = params.set("SortDirection", sortDirection.toString());
     }
 

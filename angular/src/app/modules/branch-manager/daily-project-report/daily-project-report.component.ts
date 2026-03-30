@@ -6,6 +6,8 @@ import {
   OnChanges,
   SimpleChanges,
   OnDestroy,
+  ViewChild,
+  AfterViewInit
 } from "@angular/core";
 import { DailyProjectTimelogReportService } from "@app/service/api/daily-project-report.service";
 import { BranchDto } from "@shared/service-proxies/service-proxies";
@@ -22,7 +24,7 @@ import { Subject } from "rxjs";
 })
 export class DailyProjectReportComponent
   extends PagedListingComponentBase<TotalTimelogProjectDto>
-  implements OnInit, OnChanges, OnDestroy
+  implements OnInit, OnChanges, OnDestroy, AfterViewInit
 {
   @Input() listBranch: BranchDto[];
   @Input() listBranchFilter: BranchDto[];
@@ -30,17 +32,18 @@ export class DailyProjectReportComponent
   branchIds: number[] = [];
   branchSearchText: string = "";
   minHours: number;
-  limit: number;
 
   users: TotalTimelogProjectDto[] = [];
   
-  sortColumn: SortColumn = SortColumn.ProjectName;
-  sortDirection: SortDirection = SortDirection.Asc;
+  sortColumn: SortColumn | string = "";
+  sortDirection: SortDirection | undefined = undefined;
   SortColumn = SortColumn;
   SortArrow = SortArrow;
 
   Math = Math;
   private searchSubject = new Subject<string>();
+
+  @ViewChild("pagination") paginationControl: any;
 
   constructor(
     private dailyProjectReportService: DailyProjectTimelogReportService,
@@ -54,6 +57,9 @@ export class DailyProjectReportComponent
       this.listBranchFilter = this.listBranch || [];
     }
 
+    this.branchIds = this.appSession.user.branchId ? [this.appSession.user.branchId] : [];
+    this.pageSize = 100;
+
     this.subscriptions.push(
       this.searchSubject
         .pipe(debounceTime(500), distinctUntilChanged())
@@ -63,6 +69,14 @@ export class DailyProjectReportComponent
     );
 
     this.refresh();
+  }
+
+  ngAfterViewInit(): void {
+    if (this.paginationControl) {
+      setTimeout(() => {
+        this.paginationControl.selection = 100;
+      });
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -89,7 +103,6 @@ export class DailyProjectReportComponent
         request,
         branchIdsToSend,
         this.minHours,
-        this.limit,
         undefined,
         isAllBranch,
         this.sortColumn,
@@ -99,7 +112,10 @@ export class DailyProjectReportComponent
       .subscribe({
         next: (response) => {
           const rs = response.result;
-          this.users = rs.items || [];
+          this.users = (rs.items || []).map(item => ({
+            ...item,
+            isExpanded: false
+          }));
           this.showPaging(rs, pageNumber);
         },
         error: (error) => {
@@ -163,10 +179,6 @@ export class DailyProjectReportComponent
     this.refresh();
   }
 
-  onLimitEnter(): void {
-    this.refresh();
-  }
-
   isAllSelected(): boolean {
     return (
       this.branchIds &&
@@ -196,6 +208,12 @@ export class DailyProjectReportComponent
     }
 
     this.refresh();
+  }
+
+  toggleMembers(item: any): void {
+    if (item.members && item.members.length > 2) {
+      item.isExpanded = !item.isExpanded;
+    }
   }
 
   get filteredBranches() {

@@ -10,27 +10,28 @@ using System;
 using System.Collections.Generic;  
 using System.Linq;
 using System.Threading.Tasks;
-using Timesheet.APIs.Reports;
-using Timesheet.APIs.Reports.Dto;
+using Timesheet.DomainServices;
+using Timesheet.DomainServices.Dto;
 using Timesheet.Uitls;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.BackgroundWorker
 {
     public class OfficeWorkingReportWorker : PeriodicBackgroundWorkerBase, ISingletonDependency
     {
-        private readonly OfficeWorkingReportAppService _reportAppService;
+        private readonly IOfficeWorkingReportServices _officeWorkingReportService;
         private readonly ILogger<OfficeWorkingReportWorker> _logger;
         private readonly IWorkScope _workScope;
 
         public OfficeWorkingReportWorker(
             AbpTimer timer,
-            OfficeWorkingReportAppService reportAppService,
+            IOfficeWorkingReportServices officeWorkingReportService,
             ILogger<OfficeWorkingReportWorker> logger,
             IWorkScope workScope
         ) : base(timer)
         
         {
-            _reportAppService = reportAppService;
+            _officeWorkingReportService = officeWorkingReportService;
             _logger = logger;
             _workScope = workScope;
             Timer.Period = 1000 * 60 * 60;
@@ -48,14 +49,14 @@ namespace Timesheet.BackgroundWorker
 
             var codeToIdMap = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase)
             {
-                { "HN1", 1 },
-                { "HN2", 2 },
-                { "SG1", 3 },
-                { "SG2", 4 },
-                { "ĐN", 5 },
-                { "VINH", 6 },
-                { "QN", 7 },
-                { "HN3", 8 }
+                { "HN1", (long)OfficeBranch.HN1 },
+                { "HN2", (long)OfficeBranch.HN2 },
+                { "SG1", (long)OfficeBranch.SG1 },
+                { "SG2", (long)OfficeBranch.SG2 },
+                { "ĐN", (long)OfficeBranch.DN },
+                { "VINH", (long)OfficeBranch.VINH },
+                { "QN", (long)OfficeBranch.QN },
+                { "HN3", (long)OfficeBranch.HN3 }
             };
 
             return codes
@@ -83,7 +84,7 @@ namespace Timesheet.BackgroundWorker
 
                 if (!int.TryParse(hourStr, out int configuredHour))
                 {
-                    throw new Exception(" Vui lòng thiết lập giờ chạy (0-23) và phút (0-59).");
+                    throw new Exception("Please configure the run hour (0-23) and minute (0-59)");
                 }
 
                 bool isEveryday = string.Equals(everydayStr, "True", StringComparison.OrdinalIgnoreCase);
@@ -108,85 +109,27 @@ namespace Timesheet.BackgroundWorker
                     limit = parsedLimit;
                 }
 
-                bool allSuccessful = true;
-
-                if (string.Equals(officeIdsStr?.Trim(), "ALL", StringComparison.OrdinalIgnoreCase))
+                var ids = ConvertBranchCodesToOfficeIds(officeIdsStr);
+                if (ids.Count == 0)
                 {
-                    try
-                    {
-                        Task.Run(async () =>
-                        {
-                            var input = new SendTopOfficeWorkingTimeNotificationDto
-                            {
-                                OfficeId = null,
-                                Limit = limit,
-                                ReportDate = now.Date,
-                                MezonUrl = mezonUrl,
-                                UserId = null,
-                                StartDate = null,
-                                EndDate = null,
-                                ShowAll = false
-                            };
-                            await _reportAppService.SendTopOfficeUsersNotification(input);
-                        }).GetAwaiter().GetResult();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Lỗi khi gửi báo cáo tổng hợp");
-                        allSuccessful = false;
-                    }
+                    return;
                 }
-                else
+
+                foreach (var officeId in ids)
                 {
-                    var ids = (officeIdsStr ?? string.Empty)
-                        .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => s.Trim())
-                        .Select(part => long.TryParse(part, out long numId) ? numId : (long?)null)
-                        .Where(id => id.HasValue)
-                        .Select(id => id.Value)
-                        .ToList();
-
-                    if (ids.Count == 0)
+                    var input = new SendTopOfficeWorkingTimeNotificationDto
                     {
-                        ids = ConvertBranchCodesToOfficeIds(officeIdsStr);
-                    }
-
-                    if (ids.Count == 0)
-                    {
-                        return;
-                    }
-
-                    foreach (var officeId in ids)
-                    {
-                        try
-                        {
-                            Task.Run(async () =>
-                            {
-                                var input = new SendTopOfficeWorkingTimeNotificationDto
-                                {
-                                    OfficeId = officeId,
-                                    Limit = limit,
-                                    ReportDate = now.Date,
-                                    MezonUrl = mezonUrl,
-                                    UserId = null,
-                                    StartDate = null,
-                                    EndDate = null
-                                };
-                                await _reportAppService.SendTopOfficeUsersNotification(input);
-                            }).GetAwaiter().GetResult();
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, $"Lỗi khi gửi báo cáo cho văn phòng {officeId}");
-                            allSuccessful = false;
-                        }
-                    }
+                        OfficeId = officeId,
+                        Limit = limit,
+                        MezonUrl = mezonUrl
+                    };
+                    _officeWorkingReportService.SendTopOfficeUsersNotification(input).GetAwaiter().GetResult();
                 }
                 Logger.Info("RunOfficeBotReportJob() finished.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Lỗi trong quá trình xử lý: {now}");
+                _logger.LogError(ex, $"Error during processing at: {now}");
             }
         }
     }

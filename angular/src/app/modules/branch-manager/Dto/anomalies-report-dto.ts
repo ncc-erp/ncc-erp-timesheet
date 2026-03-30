@@ -1,28 +1,29 @@
-export interface AnomalyBranch {
-    branchName: string;
-    branchColor: string;
-}
+import { BranchToDisplayDto } from "./branch-manage-dto";
 
 export interface YesterdayAnomaly {
     userId: number;
     employeeName: string;
     userName: string;
     date: string | Date;
-    actualHours: string;
+    actualHours: number;
     notes: string;
-    branch: AnomalyBranch;
+    branch: BranchToDisplayDto;
+    isUnplannedAbsence: boolean;
+}
+
+export interface DateWithNote {
+    date: string | Date;
+    note: string;
 }
 
 export interface LastWeekAnomaly {
     userId: number;
     employeeName: string;
     userName: string;
-    datesMissed: (string | Date)[];
-    datesNoTrackerTime: (string | Date)[];
-    datesBelowThreshold: (string | Date)[];
+    datesMissed: DateWithNote[];
+    datesBelowThreshold: DateWithNote[];
     count: number;
-    notes: string;
-    branch: AnomalyBranch;
+    branch: BranchToDisplayDto;
 }
 
 export interface AnomaliesTimelogReportResponse {
