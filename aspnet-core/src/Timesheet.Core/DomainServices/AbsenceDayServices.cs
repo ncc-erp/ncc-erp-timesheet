@@ -354,7 +354,7 @@ namespace Timesheet.DomainServices
         {
             var allTimekeepings = await _workScope.GetAll<Timekeeping>()
                 .WhereIf(branchIds != null && branchIds.Any(), t => t.User.BranchId.HasValue && branchIds.Contains(t.User.BranchId.Value))
-                .Where(t => t.DateAt >= startDate && t.DateAt <= endDate)
+                .Where(t => t.DateAt >= startDate && t.DateAt <= endDate && t.DateAt.DayOfWeek != DayOfWeek.Saturday)
                 .Where(t => t.UserId.HasValue)
                 .Where(t => t.User.IsActive && !t.User.IsDeleted && !t.User.IsStopWork)
                 .Select(t => new TimekeepingDto
@@ -409,6 +409,12 @@ namespace Timesheet.DomainServices
             {
                 var now = DateTimeUtils.GetNow().Date;
                 var yesterday = now.AddDays(-1);
+
+                if (yesterday.DayOfWeek == DayOfWeek.Sunday)
+                    yesterday = yesterday.AddDays(-2);
+                else if (yesterday.DayOfWeek == DayOfWeek.Saturday)
+                    yesterday = yesterday.AddDays(-1);
+
                 var (lastWeekStart, lastWeekEnd) = GetLastWeekRange(now);
 
                 var data = await LoadAnomalyDataAsync(input.BranchIds, lastWeekStart, yesterday);
@@ -457,7 +463,7 @@ namespace Timesheet.DomainServices
         {
             var firstDayOfWeek = DateTimeUtils.FirstDayOfWeek(now);
             var lastWeekStart = firstDayOfWeek.AddDays(-7).Date;
-            var lastWeekEnd = firstDayOfWeek.AddDays(-1).Date;
+            var lastWeekEnd = firstDayOfWeek.AddDays(-3).Date;
             return (lastWeekStart, lastWeekEnd);
         }
 
