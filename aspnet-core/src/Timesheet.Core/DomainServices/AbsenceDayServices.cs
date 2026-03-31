@@ -409,10 +409,11 @@ namespace Timesheet.DomainServices
             {
                 var now = DateTimeUtils.GetNow().Date;
                 var yesterday = now.AddDays(-1);
-                while (yesterday.DayOfWeek == DayOfWeek.Saturday || yesterday.DayOfWeek == DayOfWeek.Sunday)
-                {
+
+                if (yesterday.DayOfWeek == DayOfWeek.Sunday)
+                    yesterday = yesterday.AddDays(-2);
+                else if (yesterday.DayOfWeek == DayOfWeek.Saturday)
                     yesterday = yesterday.AddDays(-1);
-                }
 
                 var (lastWeekStart, lastWeekEnd) = GetLastWeekRange(now);
 
