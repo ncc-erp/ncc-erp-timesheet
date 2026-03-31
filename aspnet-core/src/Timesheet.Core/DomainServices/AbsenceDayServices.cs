@@ -1,5 +1,6 @@
-﻿using Abp.Application.Services.Dto;
+﻿using Abp.Linq.Extensions;
 using Abp.Dependency;
+using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using Ncc.Authorization.Users;
 using Ncc.IoC;
@@ -16,6 +17,8 @@ using Timesheet.Paging;
 using Timesheet.Services.Mezon;
 using Timesheet.Uitls;
 using static Ncc.Entities.Enum.StatusEnum;
+using Abp.Configuration;
+using Ncc.Configuration;
 
 namespace Timesheet.DomainServices
 {
@@ -23,141 +26,144 @@ namespace Timesheet.DomainServices
     {
         private readonly IWorkScope _workScope;
         private readonly MezonService _mezonService;
+        private readonly ISettingManager _settingManager;
         private const int MESSAGE_DELAY_MS = 1000;
-        public AbsenceDayServices(IWorkScope workScope, MezonService mezonService)
+        public AbsenceDayServices(IWorkScope workScope, MezonService mezonService, ISettingManager settingManager)
         {
             _workScope = workScope;
             _mezonService = mezonService;
+            _settingManager = settingManager;
         }
+
+        private static readonly Dictionary<AnomalyType, string> AnomalyNotes = new Dictionary<AnomalyType, string>()
+        {
+            { AnomalyType.NoCheckInOut, "No check in & No check out & No off/onsite/remote request" },
+            { AnomalyType.NoMorningCheckIn, "No morning check in & No off/onsite request for the morning" },
+            { AnomalyType.EarlyCheckOut, "Early check out & No off/onsite request for the afternoon" },
+            { AnomalyType.OfficeShortFullday, "Office Fullday: Working hours < Standard hours" },
+            { AnomalyType.OfficeShortMorning, "Office Morning: Working hours < Registered morning hours" },
+            { AnomalyType.OfficeShortAfternoon, "Office Afternoon: Working hours < Registered afternoon hours" },
+            { AnomalyType.RemoteShortFullday, "Remote Fullday: No check out & Tracker time < {0}%" },
+            { AnomalyType.RemoteShortMorning, "Remote Morning: No check out & Tracker time < {0}%" },
+            { AnomalyType.RemoteShortAfternoon, "Remote Afternoon: No check out & Tracker time < {0}%" }
+        };
 
         private TimeSpan? ParseTimeSpan(string input)
         {
             return TimeSpan.TryParse(input, out var result) ? result : (TimeSpan?)null;
         }
 
-        private double CalculateLateMinutes(TimeSpan? checkInTime, TimeSpan? morningStartAt, TimeSpan? afternoonStartAt, double minutes)
+        private double CalculateLateMinutes(TimeSpan? checkInTime, TimeSpan? morningStartAt, TimeSpan? afternoonStartAt)
         {
+            double allowedLateMinutes = double.Parse(_settingManager.GetSettingValue(AppSettingNames.LimitedMinutes));
             double lateMinutes = 0.0;
             if (checkInTime.HasValue)
             {
-                if (morningStartAt.HasValue && checkInTime > morningStartAt)
-                {
-                    var delay = checkInTime.Value - morningStartAt.Value;
-                    if (delay.TotalMinutes <= minutes)
-                    {
-                        lateMinutes = Math.Min(delay.TotalMinutes, minutes);
-                    }
-                }
-                else if (afternoonStartAt.HasValue && checkInTime > afternoonStartAt)
+                if (afternoonStartAt.HasValue && checkInTime >= afternoonStartAt)
                 {
                     var delay = checkInTime.Value - afternoonStartAt.Value;
-                    if (delay.TotalMinutes <= minutes)
+                    if (delay.TotalMinutes <= allowedLateMinutes)
                     {
-                        lateMinutes = Math.Min(delay.TotalMinutes, minutes);
+                        lateMinutes = delay.TotalMinutes;
+                    }
+                }
+                else if (morningStartAt.HasValue && checkInTime >= morningStartAt)
+                {
+                    var delay = checkInTime.Value - morningStartAt.Value;
+                    if (delay.TotalMinutes <= allowedLateMinutes)
+                    {
+                        lateMinutes = delay.TotalMinutes;
                     }
                 }
             }
             return lateMinutes;
         }
 
-        private void AddOrUpdateAnomaly(AnomalyInputDto input, List<YesterdayAnomalyDTO> yesterday, List<LastWeekAnomalyDTO> lastWeek)
+        private void AddOrUpdateAnomaly(UserWithAnomalyDto user, double? totalWorkingTime, string note, bool isUnplannedAbsence,
+            List<YesterdayAnomalyDTO> yesterday, List<LastWeekAnomalyDTO> lastWeek)
         {
-            if (input.IsYesterdayInFunction)
+            if (user.IsYesterday)
             {
                 var yesterdayDto = new YesterdayAnomalyDTO
                 {
-                    UserId = input.UserId,
-                    EmployeeName = input.EmployeeName,
-                    UserName = input.UserName,
-                    Date = input.Date,
-                    ActualHours = input.TotalWorkingTime.HasValue ? $"{input.TotalWorkingTime.Value:F2}h" : "0h",
-                    Notes = input.Notes,
-                    Branch = input.Branch
+                    UserId = user.UserId,
+                    EmployeeName = user.EmployeeName,
+                    UserName = user.UserName,
+                    Date = user.DateAt.ToString("dd/MM/yyyy"),
+                    ActualHours = Math.Round(totalWorkingTime ?? 0, 2),
+                    Notes = note,
+                    Branch = user.Branch,
+                    IsUnplannedAbsence = isUnplannedAbsence
                 };
                 yesterday.Add(yesterdayDto);
             }
             else
             {
-                var lastWeekDto = lastWeek.FirstOrDefault(a => a.UserId == input.UserId) ?? new LastWeekAnomalyDTO { UserId = input.UserId, EmployeeName = input.EmployeeName, UserName = input.UserName, Branch = input.Branch };
-                if (input.ViolationType == ViolationStatus.DatesMissed)
-                    lastWeekDto.DatesMissed.Add(input.Date);
-                else if (input.ViolationType == ViolationStatus.DatesNoTrackerTime)
-                    lastWeekDto.DatesNoTrackerTime.Add(input.Date);
+                var lastWeekDto = lastWeek.FirstOrDefault(a => a.UserId == user.UserId);
+                bool isNewUser = false;
+
+                if (lastWeekDto == null)
+                {
+                    lastWeekDto = new LastWeekAnomalyDTO
+                    {
+                        UserId = user.UserId,
+                        EmployeeName = user.EmployeeName,
+                        UserName = user.UserName,
+                        Branch = user.Branch
+                    };
+                    isNewUser = true;
+                }
+
+                var dateNote = new DateWithNoteDto { Date = user.DateAt.ToString("dd/MM/yyyy"), Note = note };
+
+                if (isUnplannedAbsence)
+                {
+                    lastWeekDto.DatesMissed.Add(dateNote);
+                }
                 else
-                    lastWeekDto.DatesBelowThreshold.Add(input.Date);
+                {
+                    lastWeekDto.DatesBelowThreshold.Add(dateNote);
+                }
+
                 lastWeekDto.Count++;
-                lastWeekDto.Notes = input.Notes;
-                if (!lastWeek.Any(a => a.UserId == input.UserId))
+
+                if (isNewUser)
+                {
                     lastWeek.Add(lastWeekDto);
+                }
             }
         }
 
-        private bool IsValidAbsenceForCase(IEnumerable<AbsenceRequestDto> userAbsenceRequests, DateTime dateAt,
-            bool isFullDayAbsence, bool isMorningAbsence, bool isAfternoonAbsence,
-            Dictionary<(long, DateTime), List<AbsenceDetailDto>> absenceDetailDict)
+        private AnomalyType? GetInvalidAbsenceNote(List<AbsenceDetailDto> absenceDetails,
+            bool isNoCheckInAndNoCheckOut,
+            bool isMissingMorningRecord,
+            bool isMissingAfternoonRecord)
         {
-            var relevantRequests = userAbsenceRequests
-                .Where(r => absenceDetailDict.ContainsKey((r.Id, dateAt)))
-                .ToList();
-
-            bool hasMorningRequest = false, hasAfternoonRequest = false;
-            bool hasMorningApproved = false, hasAfternoonApproved = false;
-            bool hasMorningRemote = false, hasAfternoonRemote = false;
-            bool hasMorningOffOnsite = false, hasAfternoonOffOnsite = false;
-
-            foreach (var request in relevantRequests)
+            if (isNoCheckInAndNoCheckOut)
             {
-                if (!absenceDetailDict.TryGetValue((request.Id, dateAt), out var details))
-                    continue;
-
-                foreach (var detail in details)
-                {
-                    if (request.Status == RequestStatus.Approved)
-                    {
-                        if (isFullDayAbsence && detail.DateType == DayType.Fullday)
-                            return true;
-                        if (isMorningAbsence && detail.DateType == DayType.Morning)
-                            return true;
-                        if (isAfternoonAbsence && detail.DateType == DayType.Afternoon)
-                            return true;
-                        if ((isMorningAbsence || isAfternoonAbsence) && detail.DateType == DayType.Fullday && request.Type == RequestType.Remote)
-                            return true;
-                        if (isFullDayAbsence && request.Type == RequestType.Remote)
-                            return true;
-
-                        if (detail.DateType == DayType.Morning)
-                        {
-                            hasMorningRequest = true;
-                            if (request.Type == RequestType.Off || request.Type == RequestType.Onsite)
-                                hasMorningOffOnsite = true;
-                            if (request.Type == RequestType.Remote)
-                                hasMorningRemote = true;
-                            if (request.Type == RequestType.Off || request.Type == RequestType.Onsite || request.Type == RequestType.Remote)
-                                hasMorningApproved = true;
-                        }
-                        else if (detail.DateType == DayType.Afternoon)
-                        {
-                            hasAfternoonRequest = true;
-                            if (request.Type == RequestType.Off || request.Type == RequestType.Onsite)
-                                hasAfternoonOffOnsite = true;
-                            if (request.Type == RequestType.Remote)
-                                hasAfternoonRemote = true;
-                            if (request.Type == RequestType.Off || request.Type == RequestType.Onsite || request.Type == RequestType.Remote)
-                                hasAfternoonApproved = true;
-                        }
-                    }
-                }
+                bool hasFullDayRequest = absenceDetails.Any(d => d.DateType == DayType.Fullday) ||
+                                        (absenceDetails.Any(d => d.DateType == DayType.Morning) && absenceDetails.Any(d => d.DateType == DayType.Afternoon));
+                if (!hasFullDayRequest)
+                    return AnomalyType.NoCheckInOut;
             }
 
-            if (hasMorningRequest && hasAfternoonRequest &&
-                ((hasMorningOffOnsite && hasAfternoonRemote) || (hasAfternoonOffOnsite && hasMorningRemote) ||
-                (hasMorningOffOnsite && hasAfternoonOffOnsite)) &&
-                hasMorningApproved && hasAfternoonApproved)
+            if (isMissingMorningRecord)
             {
-                return true;
+                bool hasMorningRequest = absenceDetails.Any(d => d.DateType == DayType.Morning
+                                        && (d.RequestType == RequestType.Off || d.RequestType == RequestType.Onsite));
+                if (!hasMorningRequest)
+                    return AnomalyType.NoMorningCheckIn;
             }
 
-            return false;
+            if (isMissingAfternoonRecord)
+            {
+                bool hasAfternoonRequest = absenceDetails.Any(d => d.DateType == DayType.Afternoon
+                                        && (d.RequestType == RequestType.Off || d.RequestType == RequestType.Onsite));
+                if (!hasAfternoonRequest)
+                    return AnomalyType.EarlyCheckOut;
+            }
+
+            return null;
         }
 
         private void SortAnomalyDates(List<LastWeekAnomalyDTO> lastWeek)
@@ -165,253 +171,172 @@ namespace Timesheet.DomainServices
             foreach (var anomaly in lastWeek)
             {
                 anomaly.DatesMissed = anomaly.DatesMissed
-                    .OrderBy(date => DateTime.ParseExact(date, "dd/MM/yyyy", CultureInfo.InvariantCulture))
-                    .ToList();
-                anomaly.DatesNoTrackerTime = anomaly.DatesNoTrackerTime
-                    .OrderBy(date => DateTime.ParseExact(date, "dd/MM/yyyy", CultureInfo.InvariantCulture))
+                    .OrderBy(date => DateTime.ParseExact(date.Date, "dd/MM/yyyy", CultureInfo.InvariantCulture))
                     .ToList();
                 anomaly.DatesBelowThreshold = anomaly.DatesBelowThreshold
-                    .OrderBy(date => DateTime.ParseExact(date, "dd/MM/yyyy", CultureInfo.InvariantCulture))
+                    .OrderBy(date => DateTime.ParseExact(date.Date, "dd/MM/yyyy", CultureInfo.InvariantCulture))
                     .ToList();
             }
         }
 
-        private async Task<(List<YesterdayAnomalyDTO> yesterdayAnomalies, List<LastWeekAnomalyDTO> lastWeekAnomalies)> ProcessAnomalies(ProcessAnomaliesInputDto input)
+        private (double max200kPercentage, double max100kPercentage, double max50kPercentage, double max20kPercentage) GetCommonCofig()
         {
-            var branchUsers = input.AllUsers.Where(u => u.BranchId == input.BranchId).ToList();
-            if (!branchUsers.Any()) return (new List<YesterdayAnomalyDTO>(), new List<LastWeekAnomalyDTO>());
+            // Penalty thresholds for tracker time percentage (e.g. < 85% = 20k, < 75% = 50k, < 50% = 100k, < 25% = 200k)
+            double max200kPercentage = double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker200kPunishment).Split('-')[1]);
+            double max100kPercentage = double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker100kPunishment).Split('-')[1]);
+            double max50kPercentage = double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker50kPunishment).Split('-')[1]);
+            double max20kPercentage = double.Parse(_settingManager.GetSettingValueForApplication(AppSettingNames.Tracker20kPunishment).Split('-')[1]);
 
-            var userDict = branchUsers.ToDictionary(u => u.Id);
+            return (max200kPercentage, max100kPercentage, max50kPercentage, max20kPercentage);
+        }
 
-            var userIds = branchUsers.Select(u => u.Id).ToList();
+        private (TimeSpan? morningStartAt, TimeSpan? morningEndAt, TimeSpan? afternoonStartAt, TimeSpan? afternoonEndAt, TimeSpan? checkInTime, TimeSpan? checkOutTime)
+            ParseTimeSpanString(string morningStart, string morningEnd, string afternoonStart, string afternoonEnd, string checkIn, string checkOut)
+        {
+            TimeSpan? morningStartAt = ParseTimeSpan(morningStart);
+            TimeSpan? morningEndAt = ParseTimeSpan(morningEnd);
+            TimeSpan? afternoonStartAt = ParseTimeSpan(afternoonStart);
+            TimeSpan? afternoonEndAt = ParseTimeSpan(afternoonEnd);
+            TimeSpan? checkInTime = ParseTimeSpan(checkIn);
+            TimeSpan? checkOutTime = checkOut != null ? ParseTimeSpan(checkOut) : null;
 
-            var timekeepings = input.AllTimekeepings
-                .Where(t => userIds.Contains((long) t.UserId) && t.DateAt >= input.StartDate && t.DateAt <= input.EndDate)
-                .ToList();
+            return (morningStartAt, morningEndAt, afternoonStartAt, afternoonEndAt, checkInTime, checkOutTime);
+        }
 
-            var timekeepingDict = timekeepings
-                .GroupBy(t => t.UserId)
-                .ToDictionary(g => g.Key, g => g.ToList());
+        private (double? faceIdHours, double trackerHours) CalculateWorkingHours(
+            TimeSpan? checkInTime, 
+            TimeSpan? checkOutTime, 
+            TimeSpan? morningStartAt, 
+            TimeSpan? afternoonStartAt, 
+            AbsenceDetailDto offOrOnsiteRequest,
+            string trackerTimeString)
+        {
+            double? faceIdHours = null;
+            double breakTime = 1.0;
 
-            var absenceRequests = input.AllAbsenceRequests.Where(r => userIds.Contains(r.UserId)).ToList();
-            var absenceRequestDict = absenceRequests.GroupBy(r => r.UserId).ToDictionary(g => g.Key, g => g.ToList());
+            if (checkInTime.HasValue && checkOutTime.HasValue)
+            {
+                double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt);
+                var officeWorkingTime = (checkOutTime.Value.TotalMinutes - checkInTime.Value.TotalMinutes + lateMinutes) / 60.0;
+                if (offOrOnsiteRequest == null)
+                {
+                    officeWorkingTime -= breakTime;
+                }
+                faceIdHours = Math.Round(officeWorkingTime, 2);
+            }
 
-            var absenceRequestIds = absenceRequests.Select(r => r.Id).ToList();
-            var absenceDetails = input.AllAbsenceDetails.Where(d => absenceRequestIds.Contains(d.RequestId)).ToList();
-            var absenceDetailDict = absenceDetails.GroupBy(d => ((long)d.RequestId, d.DateAt)).ToDictionary(g => g.Key, g => g.ToList());
+            double trackerHours = TimeSpan.TryParse(trackerTimeString, out var ts)
+                ? Math.Round(ts.TotalMinutes / 60.0, 2)
+                : 0;
 
+            return (faceIdHours, trackerHours);
+        }
+
+        private (List<YesterdayAnomalyDTO> yesterdayAnomalies, List<LastWeekAnomalyDTO> lastWeekAnomalies) ProcessAnomalies(ProcessAnomaliesInputDto input)
+        {
             var yesterdayAnomalies = new List<YesterdayAnomalyDTO>();
             var lastWeekAnomalies = new List<LastWeekAnomalyDTO>();
-            const double breakTime = 1.0;
-            const double wfhThreshold = 0.85;
-            const double gracePeriodMinutes = 15.0;
+
+            var timekeepings = input.AllTimekeepings;
+            var absenceDetailDict = input.AllAbsenceDetails.GroupBy(d => ((long)d.UserId, d.DateAt)).ToDictionary(g => g.Key, g => g.ToList());
+
+            var ( max200kPercentage, max100kPercentage, max50kPercentage, max20kPercentage) = GetCommonCofig();
 
             foreach (var tk in timekeepings)
             {
-                if (!userDict.TryGetValue((long)tk.UserId, out var user)) continue;
-
-                bool isValidAbsence = false;
-                double? officeActualHours = null;
-                double? trackerActualHours = null;
-                double? trackerTimeHours = null;
-
-                TimeSpan? morningStartAt = ParseTimeSpan(user.MorningStartAt);
-                TimeSpan? morningEndAt = ParseTimeSpan(user.MorningEndAt);
-                TimeSpan? afternoonStartAt = ParseTimeSpan(user.AfternoonStartAt);
-                TimeSpan? afternoonEndAt = ParseTimeSpan(user.AfternoonEndAt);
-                TimeSpan? checkInTime = ParseTimeSpan(tk.CheckIn);
-                TimeSpan? checkOutTime = tk.CheckOut != null ? ParseTimeSpan(tk.CheckOut) : null;
-
-                var absenceKey = ((long)tk.UserId, (DateTime)tk.DateAt);
-                var hasAbsenceData = absenceDetailDict.TryGetValue(absenceKey, out var absenceData);
-                if (!absenceRequestDict.TryGetValue((long)tk.UserId, out var userAbsenceRequests))
+                var userWithAnomaly = new UserWithAnomalyDto
                 {
-                    userAbsenceRequests = new List<AbsenceRequestDto>();
-                }
+                    UserId = tk.UserId.Value,
+                    EmployeeName = tk.User.FullName,
+                    UserName = tk.User.UserName,
+                    DateAt = tk.DateAt,
+                    Branch = tk.User.Branch,
+                    IsYesterday = input.IsYesterday
+                };
 
-                bool isWFH = hasAbsenceData && absenceData.Any(d => d.RequestType == RequestType.Remote && d.RequestStatus == RequestStatus.Approved);
+                var (morningStartAt, morningEndAt, afternoonStartAt, afternoonEndAt, checkInTime, checkOutTime) = ParseTimeSpanString(
+                    tk.User.MorningStartAt, tk.User.MorningEndAt, tk.User.AfternoonStartAt, tk.User.AfternoonEndAt, tk.CheckIn, tk.CheckOut);
 
-                bool isWFHFullday = isWFH && absenceData.Any(d => d.DateType == DayType.Fullday);
-                bool isWFHMorning = isWFH && absenceData.Any(d => d.DateType == DayType.Morning);
-                bool isWFHAfternoon = isWFH && absenceData.Any(d => d.DateType == DayType.Afternoon);
+                var absenceData = absenceDetailDict.GetValueOrDefault(((long)tk.UserId, tk.DateAt));
+                var wfhRequest = absenceData?.FirstOrDefault(d => d.RequestType == RequestType.Remote);
+                var offOrOnsiteRequest = absenceData?.FirstOrDefault(d => d.RequestType == RequestType.Off || d.RequestType == RequestType.Onsite);
 
-                bool isFullDayAbsence = tk.CheckIn == null && tk.CheckOut == null;
-                bool isMorningAbsence = checkInTime.HasValue && morningEndAt.HasValue && checkInTime > morningEndAt;
-                bool isAfternoonAbsence = checkInTime.HasValue && !isWFHFullday && !isWFHAfternoon &&
-                    (!checkOutTime.HasValue || (afternoonStartAt.HasValue && checkOutTime.HasValue && checkOutTime < afternoonStartAt));
+                bool isNoCheckInAndNoCheckOut = checkInTime == null && checkOutTime == null && offOrOnsiteRequest?.DateType != DayType.Fullday;
+                bool isMissingMorningRecord = checkInTime > morningEndAt && offOrOnsiteRequest?.DateType != DayType.Morning;
+                bool isMissingAfternoonRecord = checkInTime < morningEndAt && checkOutTime < afternoonStartAt && offOrOnsiteRequest?.DateType != DayType.Afternoon;
 
-                if (!string.IsNullOrEmpty(tk.TrackerTime) && (isWFHFullday || isWFHMorning || isWFHAfternoon))
+                var (faceIdHours, parsedTrackerHours) = CalculateWorkingHours(
+                        checkInTime, checkOutTime, morningStartAt, afternoonStartAt,
+                        offOrOnsiteRequest, tk.TrackerTime);
+
+                double registeredMorningHours = offOrOnsiteRequest?.DateType == DayType.Morning ? 0 : tk.User.MorningWorking;
+                double registeredAfternoonHours = offOrOnsiteRequest?.DateType == DayType.Afternoon ? 0 : tk.User.AfternoonWorking;
+                double totalRegisteredHours = registeredMorningHours + registeredAfternoonHours;
+
+                if ((checkInTime.HasValue && checkOutTime.HasValue) || (checkInTime.HasValue && checkOutTime == null))
                 {
-                    if (TimeSpan.TryParse(tk.TrackerTime, out var trackerTimeSpan))
+                    double requiredTrackerHours = 0.0;
+                    double requiredOfficeHours = 0.0;
+
+                    if (wfhRequest?.DateType == DayType.Fullday)
                     {
-                        trackerTimeHours = Math.Round(trackerTimeSpan.TotalHours, 2);
-                        double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt, gracePeriodMinutes);
-                        trackerTimeHours += lateMinutes / 60.0;
+                        requiredTrackerHours = totalRegisteredHours;
                     }
-                }
-
-                if ((isWFHFullday || isWFHMorning || isWFHAfternoon) && trackerTimeHours.GetValueOrDefault(0) == 0 && checkInTime.HasValue && checkOutTime.HasValue)
-                {
-                    var workingTime = (checkOutTime.Value - checkInTime.Value).TotalHours;
-                    double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt, gracePeriodMinutes);
-                    workingTime += lateMinutes / 60.0;
-                    if (!(isMorningAbsence || isAfternoonAbsence))
+                    else if (wfhRequest?.DateType == DayType.Morning)
                     {
-                        workingTime -= breakTime;
+                        requiredTrackerHours = registeredMorningHours;
+                        requiredOfficeHours = registeredAfternoonHours;
                     }
-                    trackerTimeHours = Math.Round(workingTime, 2);
-                }
-
-                trackerActualHours = trackerTimeHours > 0 ? trackerTimeHours : 0;
-
-                if (checkInTime.HasValue && checkOutTime.HasValue)
-                {
-                    var workingTime = (checkOutTime.Value - checkInTime.Value).TotalHours;
-                    double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt, gracePeriodMinutes);
-                    workingTime += lateMinutes / 60.0;
-                    if (!(isMorningAbsence|| isAfternoonAbsence))
+                    else if (wfhRequest?.DateType == DayType.Afternoon)
                     {
-                        workingTime -= breakTime;
+                        requiredOfficeHours = registeredMorningHours;
+                        requiredTrackerHours = registeredAfternoonHours;
                     }
-                    officeActualHours = Math.Round(workingTime, 2);
-                }
-                else if (!(isWFHFullday || isWFHMorning || isWFHAfternoon) && checkInTime.HasValue && !checkOutTime.HasValue && !string.IsNullOrEmpty(tk.TrackerTime))
-                {
-                    if (TimeSpan.TryParse(tk.TrackerTime, out var trackerTimeSpan))
-                    {
-                        officeActualHours = Math.Round(trackerTimeSpan.TotalHours, 2);
-                        double lateMinutes = CalculateLateMinutes(checkInTime, morningStartAt, afternoonStartAt, gracePeriodMinutes);
-                        officeActualHours += lateMinutes / 60.0;
-                    }
-                }
-
-                double tardinessHour = 0, leaveEarlyHour = 0;
-                if (hasAbsenceData)
-                {
-                    foreach (var d in absenceData)
-                    {
-                        if (d.AbsenceTime == OnDayType.DiMuon && d.Hour > 0)
-                            tardinessHour += d.Hour;
-                        if (d.AbsenceTime == OnDayType.VeSom && d.Hour > 0)
-                            leaveEarlyHour += d.Hour;
-                    }
-                }
-
-                if ((checkInTime.HasValue && checkOutTime.HasValue && !isFullDayAbsence) ||
-                    (checkInTime == null && checkOutTime == null && (isWFHFullday || isWFHMorning || isWFHAfternoon)) ||
-                    (checkInTime.HasValue && checkOutTime == null && (isWFHFullday || isWFHMorning || isWFHAfternoon)))
-                {
-                    double? totalWorkingTime = (officeActualHours ?? 0) + (trackerActualHours ?? 0);
-                    double standardWorkHours = 8.0;
-                    if (isAfternoonAbsence && user.MorningWorking > 0)
-                        standardWorkHours = user.MorningWorking;
-                    else if (isMorningAbsence && user.AfternoonWorking > 0)
-                        standardWorkHours = user.AfternoonWorking;
-
-                    double requiredHours = 0.0;
-                    bool useWfhThreshold = (isWFHFullday || isWFHMorning || isWFHAfternoon) ||
-                       (!(isWFHFullday || isWFHMorning || isWFHAfternoon) && officeActualHours.HasValue && !checkOutTime.HasValue);
-                    if (isWFHFullday)
-                        requiredHours = standardWorkHours * wfhThreshold;
-                    else if (isWFHMorning && user.MorningWorking > 0)
-                        requiredHours = user.MorningWorking * wfhThreshold;
-                    else if (isWFHAfternoon && user.AfternoonWorking > 0)
-                        requiredHours = user.AfternoonWorking * wfhThreshold;
                     else
-                        requiredHours = useWfhThreshold ? standardWorkHours * wfhThreshold : standardWorkHours;
-                    if (tardinessHour > 0 || leaveEarlyHour > 0)
-                        requiredHours -= (tardinessHour + leaveEarlyHour);
-
-                    bool isTimeViolation = ((isWFHFullday || isWFHMorning || isWFHAfternoon) && trackerActualHours.HasValue && trackerActualHours.Value < requiredHours) ||
-                      (!(isWFHFullday || isWFHMorning || isWFHAfternoon) && officeActualHours.HasValue && officeActualHours.Value < requiredHours);
-
-                    bool isZeroTimeViolation = ((isWFHFullday || isWFHMorning || isWFHAfternoon) && trackerActualHours == 0.0) ||
-                                               (!(isWFHFullday || isWFHMorning || isWFHAfternoon) && officeActualHours == 0.0);
-
-                    if (isTimeViolation || isZeroTimeViolation)
                     {
-                        string notes = isZeroTimeViolation ? "No tracker time for approved WFH" : "No early leave/late arrival approval";
-                        ViolationStatus violationType = isZeroTimeViolation ? ViolationStatus.DatesNoTrackerTime : ViolationStatus.DatesBelowThreshold;
-                        var anomalyInput = new AnomalyInputDto
-                        {
-                            UserId = tk.UserId.Value,
-                            EmployeeName = user.FullName,
-                            UserName = user.UserName,
-                            Date = tk.DateAt.ToString("dd/MM/yyyy"),
-                            TotalWorkingTime = totalWorkingTime,
-                            Notes = notes,
-                            IsYesterdayInFunction = input.IsYesterday,
-                            ViolationType = violationType,
-                            Branch = input.Branch
-                        };
-                        AddOrUpdateAnomaly(anomalyInput, yesterdayAnomalies, lastWeekAnomalies);
+                        requiredOfficeHours = totalRegisteredHours;
                     }
 
-                    if (isWFHMorning && isMorningAbsence)
+                    double officeHours = faceIdHours ?? 0;
+                    double trackerHours = (parsedTrackerHours > 0) ? parsedTrackerHours : officeHours;
+
+                    if (faceIdHours.HasValue && faceIdHours.Value < requiredOfficeHours)
                     {
-                        double afternoonRequiredHours = user.AfternoonWorking - tardinessHour - leaveEarlyHour;
-                        bool isAfternoonWorkingTimeViolation = (officeActualHours ?? 0) < afternoonRequiredHours;
-                        if (isAfternoonWorkingTimeViolation)
-                        {
-                            var anomalyInput = new AnomalyInputDto
-                            {
-                                UserId = tk.UserId.Value,
-                                EmployeeName = user.FullName,
-                                UserName = user.UserName,
-                                Date = tk.DateAt.ToString("dd/MM/yyyy"),
-                                TotalWorkingTime = officeActualHours,
-                                Notes = "No early leave/late arrival approval",
-                                IsYesterdayInFunction = input.IsYesterday,
-                                ViolationType = ViolationStatus.DatesBelowThreshold,
-                                Branch = input.Branch
-                            };
-                            AddOrUpdateAnomaly(anomalyInput, yesterdayAnomalies, lastWeekAnomalies);
-                        }
+                        var anomalyType = offOrOnsiteRequest?.DateType == DayType.Morning ? AnomalyType.OfficeShortAfternoon :
+                                          offOrOnsiteRequest?.DateType == DayType.Afternoon ? AnomalyType.OfficeShortMorning :
+                                            AnomalyType.OfficeShortFullday;
+                        string note = AnomalyNotes[anomalyType];
+                        AddOrUpdateAnomaly(userWithAnomaly, officeHours, note, false, yesterdayAnomalies, lastWeekAnomalies);
                     }
 
-                    if (isWFHAfternoon && isAfternoonAbsence)
+                    if (requiredTrackerHours > 0)
                     {
-                        double morningRequiredHours = user.MorningWorking - tardinessHour - leaveEarlyHour;
-                        bool isMorningWorkingTimeViolation = (officeActualHours ?? 0) < morningRequiredHours;
-                        if (isMorningWorkingTimeViolation)
+                        double trackerPercentage = trackerHours / requiredTrackerHours * 100;
+                        double penaltyThreshold = new double[] { max200kPercentage, max100kPercentage, max50kPercentage, max20kPercentage }
+                                                    .FirstOrDefault(max => trackerPercentage < max);
+                        if (penaltyThreshold > 0)
                         {
-                            var anomalyInput = new AnomalyInputDto
-                            {
-                                UserId = tk.UserId.Value,
-                                EmployeeName = user.FullName,
-                                UserName = user.UserName,
-                                Date = tk.DateAt.ToString("dd/MM/yyyy"),
-                                TotalWorkingTime = officeActualHours,
-                                Notes = "No early leave/late arrival approval",
-                                IsYesterdayInFunction = input.IsYesterday,
-                                ViolationType = ViolationStatus.DatesBelowThreshold,
-                                Branch = input.Branch
-                            };
-                            AddOrUpdateAnomaly(anomalyInput, yesterdayAnomalies, lastWeekAnomalies);
+                            var remoteAnomalyType = wfhRequest.DateType == DayType.Fullday ? AnomalyType.RemoteShortFullday :
+                                                    wfhRequest.DateType == DayType.Morning ? AnomalyType.RemoteShortMorning :
+                                                    AnomalyType.RemoteShortAfternoon;
+
+                            string note = string.Format(AnomalyNotes[remoteAnomalyType], penaltyThreshold);
+                            AddOrUpdateAnomaly(userWithAnomaly, trackerHours, note, false, yesterdayAnomalies, lastWeekAnomalies);
                         }
                     }
                 }
 
-                if (isFullDayAbsence || isMorningAbsence || isAfternoonAbsence)
+                if (isNoCheckInAndNoCheckOut || isMissingMorningRecord || isMissingAfternoonRecord)
                 {
-                    isValidAbsence = IsValidAbsenceForCase(userAbsenceRequests, tk.DateAt, isFullDayAbsence, isMorningAbsence, isAfternoonAbsence,
-                        absenceDetailDict);
-
-                    if (!isValidAbsence)
+                    AnomalyType? absenceType = GetInvalidAbsenceNote(
+                        absenceData ?? new List<AbsenceDetailDto>(),
+                        isNoCheckInAndNoCheckOut,
+                        isMissingMorningRecord,
+                        isMissingAfternoonRecord);
+                    if (absenceType.HasValue)
                     {
-                        var anomalyInput = new AnomalyInputDto
-                        {
-                            UserId = tk.UserId.Value,
-                            EmployeeName = user.FullName,
-                            UserName = user.UserName,
-                            Date = tk.DateAt.ToString("dd/MM/yyyy"),
-                            TotalWorkingTime = officeActualHours,
-                            Notes = "No leave/WFH record",
-                            IsYesterdayInFunction = input.IsYesterday,
-                            ViolationType = ViolationStatus.DatesMissed,
-                            Branch = input.Branch
-                        };
-                        AddOrUpdateAnomaly(anomalyInput, yesterdayAnomalies, lastWeekAnomalies);
+                        string absenceNote = AnomalyNotes[absenceType.Value];
+                        AddOrUpdateAnomaly(userWithAnomaly, faceIdHours, absenceNote, true, yesterdayAnomalies, lastWeekAnomalies);
                     }
                 }
             }
@@ -427,325 +352,163 @@ namespace Timesheet.DomainServices
             DateTime startDate,
             DateTime endDate)
         {
-            var allUsers = await _workScope.GetAll<User>()
-                .Where(u => u.IsActive && !u.IsDeleted && !u.IsStopWork &&
-                            u.BranchId.HasValue && branchIds.Contains(u.BranchId.Value))
-                .Select(u => new UserDto
-                {
-                    Id = u.Id,
-                    FullName = u.FullName,
-                    UserName = u.UserName,
-                    BranchId = u.BranchId.Value,
-                    MorningStartAt = u.MorningStartAt,
-                    MorningEndAt = u.MorningEndAt,
-                    AfternoonStartAt = u.AfternoonStartAt,
-                    AfternoonEndAt = u.AfternoonEndAt,
-                    MorningWorking = (double)u.MorningWorking,
-                    AfternoonWorking = (double)u.AfternoonWorking
-                })
-                .ToListAsync();
-
             var allTimekeepings = await _workScope.GetAll<Timekeeping>()
-                .Where(t => t.User.BranchId.HasValue && branchIds.Contains(t.User.BranchId.Value) &&
-                            t.DateAt >= startDate && t.DateAt <= endDate &&
-                            t.DateAt.DayOfWeek != DayOfWeek.Saturday)
+                .WhereIf(branchIds != null && branchIds.Any(), t => t.User.BranchId.HasValue && branchIds.Contains(t.User.BranchId.Value))
+                .Where(t => t.DateAt >= startDate && t.DateAt <= endDate)
+                .Where(t => t.UserId.HasValue)
+                .Where(t => t.User.IsActive && !t.User.IsDeleted && !t.User.IsStopWork)
                 .Select(t => new TimekeepingDto
                 {
                     UserId = t.UserId,
                     DateAt = t.DateAt,
                     CheckIn = t.CheckIn,
                     CheckOut = t.CheckOut,
-                    TrackerTime = t.TrackerTime
-                })
-                .ToListAsync();
-
-            var absenceData = await _workScope.GetAll<AbsenceDayDetail>()
-                .Where(d => branchIds.Contains(d.Request.User.BranchId.Value) &&
-                            !d.Request.IsDeleted &&
-                            d.DateAt >= startDate && d.DateAt <= endDate)
-                .Select(d => new
-                {
-                    Detail = new AbsenceDetailDto
+                    TrackerTime = t.TrackerTime,
+                    User = new UserDto
                     {
-                        RequestId = d.RequestId,
-                        DateAt = d.DateAt.Date,
-                        DateType = d.DateType,
-                        AbsenceTime = d.AbsenceTime,
-                        Hour = d.Hour,
-                        RequestStatus = d.Request.Status,
-                        RequestType = d.Request.Type,
-                        UserId = d.Request.UserId
-                    },
-                    Request = new AbsenceRequestDto
-                    {
-                        Id = d.Request.Id,
-                        UserId = d.Request.UserId,
-                        Status = d.Request.Status,
-                        Type = d.Request.Type
+                        FullName = t.User.FullName,
+                        UserName = t.User.UserName,
+                        MorningStartAt = t.User.MorningStartAt,
+                        MorningEndAt = t.User.MorningEndAt,
+                        AfternoonStartAt = t.User.AfternoonStartAt,
+                        AfternoonEndAt = t.User.AfternoonEndAt,
+                        MorningWorking = t.User.MorningWorking.Value,
+                        AfternoonWorking = t.User.AfternoonWorking.Value,
+                        Branch = new BranchToDisplayDto
+                        {
+                            Name = t.User.Branch.Name,
+                            Code = t.User.Branch.Code,
+                            Color = t.User.Branch.Color
+                        }
                     }
                 })
                 .ToListAsync();
 
-            var allAbsenceDetails = absenceData.Select(x => x.Detail).ToList();
-            var allAbsenceRequests = absenceData
-                .GroupBy(x => x.Request.Id)
-                .Select(g => new AbsenceRequestDto
+            var allAbsenceDetails = await _workScope.GetAll<AbsenceDayDetail>()
+                .Where(d => !d.Request.IsDeleted && d.DateAt >= startDate && d.DateAt <= endDate)
+                .Where(d => allTimekeepings.Select(t => t.UserId.Value).Distinct().Contains(d.Request.UserId))
+                .Where(d => d.Request.Status == RequestStatus.Approved)
+                .Select(d => new AbsenceDetailDto
                 {
-                    Id = g.Key,
-                    UserId = g.First().Request.UserId,
-                    Status = g.First().Request.Status,
-                    Type = g.First().Request.Type
+                    DateAt = d.DateAt.Date,
+                    DateType = d.DateType,
+                    RequestType = d.Request.Type,
+                    UserId = d.Request.UserId
                 })
-                .ToList();
+                .ToListAsync();
 
             return new AnomalyData
             {
-                Users = allUsers,
                 Timekeepings = allTimekeepings,
-                AbsenceRequests = allAbsenceRequests,
                 AbsenceDetails = allAbsenceDetails
             };
         }
-        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GridParam param, GetAnomaliesTimelogReportInput input)
+        public async Task<AnomaliesTimelogReportDto> GetAnomaliesTimelogReport(GetAnomaliesTimelogReportInput input)
         {
-            var now = DateTimeUtils.GetNow().Date;
-            var yesterday = now.AddDays(-1);
-            var (lastWeekStart, lastWeekEnd) = GetLastWeekRange(now);
-
-            var selectedBranches = await _workScope.GetAll<Timesheet.Entities.Branch>()
-                .Where(b => input.BranchIds == null ||
-                        input.BranchIds.Count == 0 ||
-                        input.BranchIds.Contains(b.Id))
-                .Select(b => new { b.Id, b.Code, b.Color })
-                .AsNoTracking()
-                .ToListAsync();
-
-            var branchDict = selectedBranches.ToDictionary(b => b.Id, b => new BranchToDisplayDto { BranchName = b.Code, BranchColor = b.Color });
-            var validBranchIds = selectedBranches.Select(b => b.Id).ToList();
-
-            var data = await LoadAnomalyDataAsync(validBranchIds, lastWeekStart, yesterday.AddDays(1).AddTicks(-1));
-
-            var allYesterdayAnomalies = new List<YesterdayAnomalyDTO>();
-            var allLastWeekAnomalies = new List<LastWeekAnomalyDTO>();
-
-            foreach (var branchId in validBranchIds)
+            try
             {
-                var branch = branchDict[branchId];
-                var processAnomaliesInput = new ProcessAnomaliesInputDto
+                var now = DateTimeUtils.GetNow().Date;
+                var yesterday = now.AddDays(-1);
+                var (lastWeekStart, lastWeekEnd) = GetLastWeekRange(now);
+
+                var data = await LoadAnomalyDataAsync(input.BranchIds, lastWeekStart, yesterday);
+
+                var yesterdayTimekeepings = data.Timekeepings.Where(t => t.DateAt == yesterday).ToList();
+                var yesterdayAbsences = data.AbsenceDetails.Where(d => d.DateAt == yesterday).ToList();
+
+                var yesterdayProcessAnomaliesInput = new ProcessAnomaliesInputDto
                 {
-                    AllUsers = data.Users,
-                    AllTimekeepings = data.Timekeepings,
-                    AllAbsenceRequests = data.AbsenceRequests,
-                    AllAbsenceDetails = data.AbsenceDetails,
-                    BranchId = branchId,
+                    AllTimekeepings = yesterdayTimekeepings,
+                    AllAbsenceDetails = yesterdayAbsences,
                     StartDate = yesterday,
-                    EndDate = yesterday.AddDays(1).AddSeconds(-1),
-                    IsYesterday = true,
-                    Branch = branch
+                    EndDate = yesterday,
+                    IsYesterday = true
                 };
 
-                var (yesterdayAnomalies, _) = await ProcessAnomalies(processAnomaliesInput);
-                allYesterdayAnomalies.AddRange(yesterdayAnomalies);
-            }
+                var (yesterdayAnomalies, _) = ProcessAnomalies(yesterdayProcessAnomaliesInput);
 
-            var lastWeekLoopStopwatch = Stopwatch.StartNew();
-            foreach (var branchId in validBranchIds)
-            {
-                var branch = branchDict[branchId];
-                var processAnomaliesInput = new ProcessAnomaliesInputDto
+                var lastWeekTimekeepings = data.Timekeepings.Where(t => t.DateAt >= lastWeekStart && t.DateAt <= lastWeekEnd).ToList();
+                var lastWeekAbsences = data.AbsenceDetails.Where(d => d.DateAt >= lastWeekStart && d.DateAt <= lastWeekEnd).ToList();
+
+                var lastWeekProcessAnomaliesInput = new ProcessAnomaliesInputDto
                 {
-                    AllUsers = data.Users,
-                    AllTimekeepings = data.Timekeepings,
-                    AllAbsenceRequests = data.AbsenceRequests,
-                    AllAbsenceDetails = data.AbsenceDetails,
-                    BranchId = branchId,
+                    AllTimekeepings = lastWeekTimekeepings,
+                    AllAbsenceDetails = lastWeekAbsences,
                     StartDate = lastWeekStart,
                     EndDate = lastWeekEnd,
-                    IsYesterday = false,
-                    Branch = branch
+                    IsYesterday = false
                 };
 
-                var (_, lastWeekAnomalies) = await ProcessAnomalies(processAnomaliesInput);
-                allLastWeekAnomalies.AddRange(lastWeekAnomalies);
-            }
-            lastWeekLoopStopwatch.Stop();
+                var (_, lastWeekAnomalies) = ProcessAnomalies(lastWeekProcessAnomaliesInput);
 
-            if (!string.IsNullOrEmpty(param.SearchText))
-            {
-                var searchText = param.SearchText.ToLower();
-                allYesterdayAnomalies = allYesterdayAnomalies.Where(u =>
-                    (u.EmployeeName != null && u.EmployeeName.ToLower().Contains(searchText)) ||
-                    (u.UserName != null && u.UserName.ToLower().Contains(searchText))
-                ).ToList();
-            }
-
-            IEnumerable<YesterdayAnomalyDTO> yesterdayQuery = allYesterdayAnomalies;
-            bool isDesc = input.SortDirection == ESortDirection.Desc;
-            
-            if (input.YesterdayAnomaliesSortColumn.HasValue)
-            {
-                switch (input.YesterdayAnomaliesSortColumn.Value)
+                return new AnomaliesTimelogReportDto
                 {
-                    case EYesterdayAnomaliesSortColumn.EmployeeName:
-                        yesterdayQuery = isDesc
-                            ? yesterdayQuery.OrderByDescending(a => a.EmployeeName) 
-                            : yesterdayQuery.OrderBy(a => a.EmployeeName);
-                        break;
-
-                    case EYesterdayAnomaliesSortColumn.Branch:
-                        yesterdayQuery = isDesc
-                            ? yesterdayQuery.OrderByDescending(a => a.Branch.BranchName)
-                            : yesterdayQuery.OrderBy(a => a.Branch.BranchName);
-                        break;
-                }
+                    YesterdayAnomalies = yesterdayAnomalies,
+                    LastWeekAnomalies = lastWeekAnomalies
+                };
             }
-
-            if (input.YesterdayAnomaliesSortColumn.HasValue &&
-                input.YesterdayAnomaliesSortColumn != EYesterdayAnomaliesSortColumn.EmployeeName)
+            catch (Exception ex)
             {
-                yesterdayQuery = ((IOrderedEnumerable<YesterdayAnomalyDTO>)yesterdayQuery)
-                                .ThenBy(a => a.EmployeeName);
+                throw new UserFriendlyException("An error occurred while generating the anomalies timelog report: ", ex);
             }
-
-            var yesterdayAnomaliesTotalCount = allYesterdayAnomalies.Count;
-            var yesterdayAnomaliesPagedData = yesterdayQuery
-                .Skip(param.SkipCount)
-                .Take(param.MaxResultCount)
-                .ToList();
-
-            if (!string.IsNullOrEmpty(param.SearchText))
-            {
-                var searchText = param.SearchText.ToLower();
-                allLastWeekAnomalies = allLastWeekAnomalies.Where(u =>
-                    (u.EmployeeName != null && u.EmployeeName.ToLower().Contains(searchText)) ||
-                    (u.UserName != null && u.UserName.ToLower().Contains(searchText))
-                ).ToList();
-            }
-
-            IEnumerable<LastWeekAnomalyDTO> lastWeekQuery = allLastWeekAnomalies;
-            if (input.LastWeekAnomaliesSortColumn.HasValue)
-            {
-                switch (input.LastWeekAnomaliesSortColumn.Value)
-                {
-                    case ELastWeekAnomaliesSortColumn.EmployeeName:
-                        lastWeekQuery = isDesc
-                            ? lastWeekQuery.OrderByDescending(a => a.EmployeeName)
-                            : lastWeekQuery.OrderBy(a => a.EmployeeName);
-                        break;
-
-                    case ELastWeekAnomaliesSortColumn.Branch:
-                        lastWeekQuery = isDesc
-                            ? lastWeekQuery.OrderByDescending(a => a.Branch.BranchName)
-                            : lastWeekQuery.OrderBy(a => a.Branch.BranchName);
-                        break;
-
-                    case ELastWeekAnomaliesSortColumn.Count:
-                        lastWeekQuery = isDesc
-                            ? lastWeekQuery.OrderByDescending(a => a.Count)
-                            : lastWeekQuery.OrderBy(a => a.Count);
-                        break;
-                }
-            }
-            else
-            {
-                lastWeekQuery = lastWeekQuery.OrderByDescending(a => a.Count).ThenBy(a => a.EmployeeName);
-            }
-
-            if (input.LastWeekAnomaliesSortColumn.HasValue &&
-                input.LastWeekAnomaliesSortColumn != ELastWeekAnomaliesSortColumn.EmployeeName)
-            {
-                lastWeekQuery = ((IOrderedEnumerable<LastWeekAnomalyDTO>)lastWeekQuery)
-                                .ThenBy(a => a.EmployeeName);
-            }
-
-            var lastWeekAnomaliesTotalCount = allLastWeekAnomalies.Count;
-            var lastWeekAnomaliesPagedData = lastWeekQuery
-                .Skip(param.SkipCount)
-                .Take(param.MaxResultCount)
-                .ToList();
-
-            return new AnomaliesTimelogReportDto
-            {
-                YesterdayAnomalies = new PagedResultDto<YesterdayAnomalyDTO>(yesterdayAnomaliesTotalCount, yesterdayAnomaliesPagedData),
-                LastWeekAnomalies = new PagedResultDto<LastWeekAnomalyDTO>(lastWeekAnomaliesTotalCount, lastWeekAnomaliesPagedData)
-            };
         }
 
-        private static (DateTime start, DateTime end) GetLastWeekRange(DateTime reportDate)
+        private static (DateTime start, DateTime end) GetLastWeekRange(DateTime now)
         {
-            var thisWeekStart = DateTimeUtils.FirstDayOfWeek(reportDate);   
-            var lwStart = thisWeekStart.AddDays(-7).Date;
-            var lwEnd = thisWeekStart.AddDays(-1).Date.AddDays(1).AddTicks(-1);
-            return (lwStart, lwEnd);
+            var firstDayOfWeek = DateTimeUtils.FirstDayOfWeek(now);
+            var lastWeekStart = firstDayOfWeek.AddDays(-7).Date;
+            var lastWeekEnd = firstDayOfWeek.AddDays(-1).Date;
+            return (lastWeekStart, lastWeekEnd);
         }
 
-        private async Task<object> GetBranchDataAsync(string branchName, DateTime? startDate = null, DateTime? endDate = null, string mode = "Branch")
+        private async Task<(List<YesterdayAnomalyDTO> yesterdayAnomalies, List<LastWeekAnomalyDTO> lastWeekAnomalies)> GetBranchDataAsync(
+            string branchName, DateTime startDate, DateTime endDate, bool isYesterday)
         {
-            var branch = await _workScope.GetAll<Timesheet.Entities.Branch>()
+            var branchId = await _workScope.GetAll<Timesheet.Entities.Branch>()
                 .Where(b => b.Name == branchName)
+                .Select(b => b.Id)
                 .FirstOrDefaultAsync();
 
-            if (branch == null)
-            {
-                throw new ArgumentException($"Branch with name '{branchName}' not found.");
-            }
+            var data = await LoadAnomalyDataAsync(new List<long> { branchId }, startDate, endDate);
 
-            BranchToDisplayDto branchDto = new BranchToDisplayDto { BranchName = branch.Name, BranchColor = branch.Color };
+            var processAnomaliesInput = new ProcessAnomaliesInputDto
+            {
+                AllTimekeepings = data.Timekeepings,
+                AllAbsenceDetails = data.AbsenceDetails,
+                StartDate = startDate,
+                EndDate = endDate,
+                IsYesterday = isYesterday
+            };
 
-            var data = await LoadAnomalyDataAsync(new List<long> { branch.Id }, (DateTime) startDate, (DateTime) endDate);
-
-            if (mode == "Yesterday")
-            {
-                var processAnomaliesInput = new ProcessAnomaliesInputDto
-                {
-                    AllUsers = data.Users,
-                    AllTimekeepings = data.Timekeepings,
-                    AllAbsenceRequests = data.AbsenceRequests,
-                    AllAbsenceDetails = data.AbsenceDetails,
-                    BranchId = branch.Id,
-                    StartDate = (DateTime)startDate,
-                    EndDate = (DateTime)endDate,
-                    IsYesterday = true,
-                    Branch = branchDto
-                };
-                var resultTuple = await ProcessAnomalies(processAnomaliesInput);
-                return resultTuple.yesterdayAnomalies;
-            }
-            else if (mode == "LastWeek")
-            {
-                var processAnomaliesInput = new ProcessAnomaliesInputDto
-                {
-                    AllUsers = data.Users,
-                    AllTimekeepings = data.Timekeepings,
-                    AllAbsenceRequests = data.AbsenceRequests,
-                    AllAbsenceDetails = data.AbsenceDetails,
-                    BranchId = branch.Id,
-                    StartDate = (DateTime)startDate,
-                    EndDate = (DateTime)endDate,
-                    IsYesterday = false,
-                    Branch = branchDto
-                };
-                var resultTuple = await ProcessAnomalies(processAnomaliesInput);
-                return resultTuple.lastWeekAnomalies;
-            }
-            else
-            {
-                return new { branch.Id, branch.Code, branch.Name };
-            }
+            return ProcessAnomalies(processAnomaliesInput);
         }
 
         public async Task<List<YesterdayAnomalyDTO>> GetYesterdayAnomalies(string branchName, DateTime date)
         {
-            var startDate = date.Date;
-            var endDate = startDate.AddDays(1).AddSeconds(-1);
-            var result = await GetBranchDataAsync(branchName, startDate, endDate, "Yesterday");
-            return (List<YesterdayAnomalyDTO>)result;
+            try
+            {
+                var startDate = date.Date;
+                var endDate = startDate;
+                var (yesterdayAnomalies, _) = await GetBranchDataAsync(branchName, startDate, endDate, isYesterday: true);
+                return yesterdayAnomalies;
+            }
+            catch (Exception ex)
+            {
+                throw new UserFriendlyException($"An error occurred while retrieving yesterday anomalies for branch '{branchName}': ", ex);
+            }
         }
 
         public async Task<List<LastWeekAnomalyDTO>> GetLastWeekAnomalies(string branchName, DateTime startDate, DateTime endDate)
         {
-            var result = await GetBranchDataAsync(branchName, startDate, endDate, "LastWeek");
-            return (List<LastWeekAnomalyDTO>)result;
+            try
+            {
+                var (_, lastWeekAnomalies) = await GetBranchDataAsync(branchName, startDate, endDate, isYesterday: false);
+                return lastWeekAnomalies;
+            }
+            catch (Exception ex)
+            {
+                throw new UserFriendlyException($"An error occurred while retrieving last week anomalies for branch '{branchName}': ", ex);
+            }
         }
 
         private void AddBoldMarkup(StringBuilder messageBuilder, List<object> mkList, ref int currentPos, string title)
@@ -789,51 +552,45 @@ namespace Timesheet.DomainServices
                 {
                     if (!isWeekly)
                     {
-                        await SendSmartDailyReport(input.botUri, branchName, now.AddDays(-1).Date);
+                        await SendDailyReport(input.botUri, branchName, now.AddDays(-1).Date);
                     }
                     else
                     {
-                        DateTime lastMonday = now.AddDays(-(int)now.DayOfWeek - 6).Date;
-                        DateTime lastWeekEnd = lastMonday.AddDays(5).Date.AddSeconds(-1);
-                        await SendSmartWeeklyReport(input.botUri, branchName, lastMonday, lastWeekEnd);
+                        var (lastWeekStart, lastWeekEnd) = GetLastWeekRange(now);
+                        await SendWeeklyReport(input.botUri, branchName, lastWeekStart, lastWeekEnd);
                     }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Error processing branch {branchName}: {ex.Message}");
+                    throw new UserFriendlyException($"Error processing branch {branchName}: {ex.Message}");
                 }
             }
 
             return true;
         }
 
-        private async Task SendSmartDailyReport(string botUri, string branchName, DateTime reportDate)
+        private async Task SendDailyReport(string botUri, string branchName, DateTime reportDate)
         {
             const int BATCH_SIZE = 5;
 
             var allAnomalies = await GetYesterdayAnomalies(branchName, reportDate);
 
-            var unplannedAbsences = allAnomalies.Where(a => a.Notes == "No leave/WFH record").ToList();
-            var unapprovedShortHours = allAnomalies.Where(a => a.Notes == "No early leave/late arrival approval").ToList();
-            var noTrackerTime = allAnomalies.Where(a => a.Notes == "No tracker time for approved WFH").ToList();
+            var unplannedAbsences = allAnomalies.Where(a => a.IsUnplannedAbsence).ToList();
+            var unapprovedShortHours = allAnomalies.Where(a => !a.IsUnplannedAbsence).ToList();
 
-            await SendDailyHeaderMessage(botUri, branchName, reportDate);
+            SendDailyHeaderMessage(botUri, branchName, reportDate);
             await Task.Delay(MESSAGE_DELAY_MS);
 
-            await SendAnomalyMessages(botUri, branchName, "Yesterday – Unplanned Absences",
-                unplannedAbsences, "No leave/WFH record", true, 2, BATCH_SIZE);
+            await SendAnomalyMessages(botUri, "Yesterday – Unplanned Absences",
+                unplannedAbsences, true, true, BATCH_SIZE);
             await Task.Delay(MESSAGE_DELAY_MS);
 
-            await SendAnomalyMessages(botUri, branchName, "Yesterday – Unapproved Short Working Hours",
-                unapprovedShortHours, "No early leave/late arrival approval", true, 3, BATCH_SIZE);
-            await Task.Delay(MESSAGE_DELAY_MS);
-
-            await SendAnomalyMessages(botUri, branchName, "Yesterday – Missing Tracker Time For Approved WFH",
-                noTrackerTime, "No tracker time for approved WFH", true, 4, BATCH_SIZE);
+            await SendAnomalyMessages(botUri, "Yesterday – Unapproved Short Working Hours",
+                unapprovedShortHours, false, true, BATCH_SIZE);
             await Task.Delay(MESSAGE_DELAY_MS);
         }
 
-        private async Task SendSmartWeeklyReport(string botUri, string branchName, DateTime startDate, DateTime endDate)
+        private async Task SendWeeklyReport(string botUri, string branchName, DateTime startDate, DateTime endDate)
         {
             const int BATCH_SIZE = 5;
 
@@ -841,93 +598,46 @@ namespace Timesheet.DomainServices
 
             var unplannedAbsences = allAnomalies.Where(a => a.DatesMissed.Any()).ToList();
             var unapprovedShortHours = allAnomalies.Where(a => a.DatesBelowThreshold.Any()).ToList();
-            var noTrackerTime = allAnomalies.Where(a => a.DatesNoTrackerTime.Any()).ToList();
 
-            await SendWeeklyHeaderMessage(botUri, branchName, startDate, endDate);
+            SendWeeklyHeaderMessage(botUri, branchName, startDate, endDate);
             await Task.Delay(MESSAGE_DELAY_MS);
 
-            await SendAnomalyMessages(botUri, branchName, "Last Week – Unplanned Absences",
-                unplannedAbsences, "No leave/WFH record", false, 2, BATCH_SIZE);
+            await SendAnomalyMessages(botUri, "Last Week – Unplanned Absences",
+                unplannedAbsences, true, false, BATCH_SIZE);
             await Task.Delay(MESSAGE_DELAY_MS);
 
-            await SendAnomalyMessages(botUri, branchName, "Last Week – Unapproved Short Working Hours",
-                unapprovedShortHours, "No early leave/late arrival approval", false, 3, BATCH_SIZE);
-            await Task.Delay(MESSAGE_DELAY_MS);
-
-            await SendAnomalyMessages(botUri, branchName, "Last Week – Missing Tracker Time For Approved WFH",
-                noTrackerTime, "No tracker time for approved WFH", false, 4, BATCH_SIZE);
+            await SendAnomalyMessages(botUri, "Last Week – Unapproved Short Working Hours",
+                unapprovedShortHours, false, false, BATCH_SIZE);
             await Task.Delay(MESSAGE_DELAY_MS);
         }
 
-        private async Task SendAnomalyMessages<T>(string botUri, string branchName, string sectionTitle,
-            List<T> anomalies, string notes, bool isYesterday, int basePartNumber, int batchSize)
+        private async Task SendAnomalyMessages<T>(string botUri, string sectionTitle,
+            List<T> anomalies, bool isUnplannedAbsence, bool isYesterday, int batchSize)
         {
             if (!anomalies.Any())
             {
-                await SendEmptySectionMessage(botUri, branchName, sectionTitle, isYesterday, basePartNumber);
+                SendEmptySectionMessage(botUri, sectionTitle);
                 return;
             }
 
-            var chunks = SplitAnomaliesIntoChunks(anomalies, batchSize, isYesterday, notes);
+            var dynamicAnomalies = anomalies.Cast<dynamic>().ToList();
+            var chunks = CommonUtils.SplitIntoChunks(dynamicAnomalies, batchSize);
             int globalIndex = 1;
 
             for (int i = 0; i < chunks.Count; i++)
             {
-                var chunk = chunks[i];
-                int partNumber = basePartNumber + i;
+                var chunk = chunks[i].Cast<T>().ToList();
                 bool isFirstChunk = i == 0;
                 bool isLastChunk = i == chunks.Count - 1;
 
                 string chunkSectionTitle = isFirstChunk ? sectionTitle : null;
-                SendAnomalyChunkMessage(botUri, branchName, chunkSectionTitle, chunk.anomalies,
-                    notes, isYesterday, partNumber, isFirstChunk, isLastChunk, ref globalIndex);
+                SendAnomalyChunkMessage(botUri, chunkSectionTitle, chunk,
+                    isUnplannedAbsence, isYesterday, isFirstChunk, isLastChunk, ref globalIndex);
                 await Task.Delay(MESSAGE_DELAY_MS);
             }
         }
 
-        private List<(List<T> anomalies, int estimatedLength)> SplitAnomaliesIntoChunks<T>(
-            List<T> anomalies, int batchSize, bool isYesterday, string notes)
-        {
-            var chunks = new List<(List<T>, int)>();
-
-            for (int i = 0; i < anomalies.Count; i += batchSize)
-            {
-                var chunk = anomalies.Skip(i).Take(batchSize).ToList();
-                int estimatedLength = chunk.Sum(a => EstimateAnomalyLength(a, isYesterday, notes));
-                chunks.Add((chunk, estimatedLength));
-            }
-
-            return chunks;
-        }
-
-        private int EstimateAnomalyLength<T>(T anomaly, bool isYesterday, string notes)
-        {
-            if (isYesterday)
-            {
-                var yesterdayAnomaly = (YesterdayAnomalyDTO)(object)anomaly;
-                return 200 + yesterdayAnomaly.EmployeeName.Length + notes.Length + 50;
-            }
-            else
-            {
-                var weekAnomaly = (LastWeekAnomalyDTO)(object)anomaly;
-                int datesLength;
-                switch (notes)
-                {
-                    case "No leave/WFH record":
-                        datesLength = string.Join(", ", weekAnomaly.DatesMissed).Length;
-                        break;
-                    case "No early leave/late arrival approval":
-                        datesLength = string.Join(", ", weekAnomaly.DatesBelowThreshold).Length;
-                        break;
-                    default:
-                        datesLength = string.Join(", ", weekAnomaly.DatesNoTrackerTime).Length;
-                        break;
-                }
-                return 250 + weekAnomaly.EmployeeName.Length + datesLength + notes.Length;
-            }
-        }
-
-        private async Task SendDailyHeaderMessage(string botUri, string branchName, DateTime reportDate)
+        private void SendDailyHeaderMessage(string botUri, string branchName, DateTime reportDate)
         {
             var sb = new StringBuilder();
             var mkList = new List<object>();
@@ -941,7 +651,7 @@ namespace Timesheet.DomainServices
             SendMezonMessage(botUri, sb, mkList);
         }
 
-        private async Task SendWeeklyHeaderMessage(string botUri, string branchName, DateTime startDate, DateTime endDate)
+        private void SendWeeklyHeaderMessage(string botUri, string branchName, DateTime startDate, DateTime endDate)
         {
             var sb = new StringBuilder();
             var mkList = new List<object>();
@@ -955,8 +665,8 @@ namespace Timesheet.DomainServices
             SendMezonMessage(botUri, sb, mkList);
         }
 
-        private void SendAnomalyChunkMessage<T>(string botUri, string branchName, string sectionTitle,
-            List<T> chunkAnomalies, string notes, bool isYesterday, int partNumber,
+        private void SendAnomalyChunkMessage<T>(string botUri, string sectionTitle,
+            List<T> chunkAnomalies, bool isUnplannedAbsence, bool isYesterday,
             bool isFirstChunk, bool isLastChunk, ref int globalIndex)
         {
             var sb = new StringBuilder();
@@ -975,12 +685,12 @@ namespace Timesheet.DomainServices
                 if (isYesterday)
                 {
                     var yesterdayAnomaly = (YesterdayAnomalyDTO)(object)anomaly;
-                    AppendYesterdayAnomaly(sb, mkList, ref pos, globalIndex++, yesterdayAnomaly, notes);
+                    AppendYesterdayAnomaly(sb, mkList, ref pos, globalIndex++, yesterdayAnomaly);
                 }
                 else
                 {
                     var weekAnomaly = (LastWeekAnomalyDTO)(object)anomaly;
-                    AppendWeekAnomaly(sb, mkList, ref pos, globalIndex++, weekAnomaly, notes);
+                    AppendWeekAnomaly(sb, mkList, ref pos, globalIndex++, weekAnomaly, isUnplannedAbsence);
                 }
                 pos += Environment.NewLine.Length;
                 sb.AppendLine();
@@ -996,7 +706,7 @@ namespace Timesheet.DomainServices
         }
 
         private void AppendYesterdayAnomaly(StringBuilder sb, List<object> mkList, ref int pos,
-            int index, YesterdayAnomalyDTO anomaly, string notes)
+            int index, YesterdayAnomalyDTO anomaly)
         {
             string empLine = $"{index}. Employee Name: {anomaly.EmployeeName}";
             int empPos = pos;
@@ -1010,7 +720,7 @@ namespace Timesheet.DomainServices
             pos += dateLine.Length + Environment.NewLine.Length;
             mkList.Add(new { type = "b", s = datePos, e = datePos + "Date:".Length });
 
-            if (notes == "No early leave/late arrival approval")
+            if (!anomaly.IsUnplannedAbsence)
             {
                 string hoursLine = $"Actual Hours: {anomaly.ActualHours}";
                 int hoursPos = pos;
@@ -1019,7 +729,7 @@ namespace Timesheet.DomainServices
                 mkList.Add(new { type = "b", s = hoursPos, e = hoursPos + "Actual Hours:".Length });
             }
 
-            string notesLine = $"Notes: {notes}";
+            string notesLine = $"Notes: {anomaly.Notes}";
             int notesPos = pos;
             sb.AppendLine(notesLine);
             pos += notesLine.Length + Environment.NewLine.Length;
@@ -1027,7 +737,7 @@ namespace Timesheet.DomainServices
         }
 
         private void AppendWeekAnomaly(StringBuilder sb, List<object> mkList, ref int pos,
-            int index, LastWeekAnomalyDTO anomaly, string notes)
+            int index, LastWeekAnomalyDTO anomaly, bool isUnplannedAbsence)
         {
             string empLine = $"{index}. Employee Name: {anomaly.EmployeeName}";
             int empPos = pos;
@@ -1037,27 +747,17 @@ namespace Timesheet.DomainServices
 
             List<string> dates;
             string datesKey;
-            switch (notes)
-            {
-                case "No leave/WFH record":
-                    dates = anomaly.DatesMissed;
-                    datesKey = "Dates Missed";
-                    break;
-                case "No early leave/late arrival approval":
-                    dates = anomaly.DatesBelowThreshold;
-                    datesKey = "Dates Below Threshold";
-                    break;
-                default:
-                    dates = anomaly.DatesNoTrackerTime;
-                    datesKey = "Dates With No Tracker Time";
-                    break;
-            }
 
-            string datesLine = $"{datesKey}: {string.Join(", ", dates)}";
-            int datesPos = pos;
-            sb.AppendLine(datesLine);
-            pos += datesLine.Length + Environment.NewLine.Length;
-            mkList.Add(new { type = "b", s = datesPos, e = datesPos + $"{datesKey}:".Length });
+            if (isUnplannedAbsence)
+            {
+                dates = anomaly.DatesMissed.Select(d => $"{d.Date} [{d.Note}]").ToList();
+                datesKey = "Dates Missed";
+            }
+            else
+            {
+                dates = anomaly.DatesBelowThreshold.Select(d => $"{d.Date} [{d.Note}]").ToList();
+                datesKey = "Dates Below Threshold";
+            }
 
             string countLine = $"Count: {dates.Count}";
             int countPos = pos;
@@ -1065,15 +765,21 @@ namespace Timesheet.DomainServices
             pos += countLine.Length + Environment.NewLine.Length;
             mkList.Add(new { type = "b", s = countPos, e = countPos + "Count:".Length });
 
-            string notesLine = $"Notes: {notes}";
-            int notesPos = pos;
-            sb.AppendLine(notesLine);
-            pos += notesLine.Length + Environment.NewLine.Length;
-            mkList.Add(new { type = "b", s = notesPos, e = notesPos + "Notes:".Length });
+            string datesHeader = $"{datesKey}:";
+            int datesPos = pos;
+            sb.AppendLine(datesHeader);
+            pos += datesHeader.Length + Environment.NewLine.Length;
+            mkList.Add(new { type = "b", s = datesPos, e = datesPos + datesHeader.Length });
+
+            foreach (var dateItem in dates)
+            {
+                string line = $"  - {dateItem}";
+                sb.AppendLine(line);
+                pos += line.Length + Environment.NewLine.Length;
+            }
         }
 
-        private async Task SendEmptySectionMessage(string botUri, string branchName, string sectionTitle,
-            bool isYesterday, int partNumber)
+        private void SendEmptySectionMessage(string botUri, string sectionTitle)
         {
             var sb = new StringBuilder();
             var mkList = new List<object>();

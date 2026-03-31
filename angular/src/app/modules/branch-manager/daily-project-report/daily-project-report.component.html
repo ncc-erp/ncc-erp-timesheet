@@ -59,27 +59,6 @@
               </mat-form-field>
             </div>
 
-            <!-- Limit Filter -->
-            <div class="filter-item filter-limit">
-              <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
-                <mat-label>{{ "Limit" | localize }}</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  [(ngModel)]="limit"
-                  (keyup.enter)="onLimitEnter()"
-                  min="1"
-                />
-                <mat-icon
-                  class="special-icon"
-                  matSuffix
-                  matTooltip="Number of top records to include in project report"
-                >
-                  info
-                </mat-icon>
-              </mat-form-field>
-            </div>
-
             <!-- Branch Filter -->
             <div class="filter-item filter-branch">
               <mat-form-field style="padding-bottom: 0" class="w-100" appearance="outline">
@@ -129,33 +108,33 @@
           <table class="table customTable table-striped">
             <thead>
               <tr>
-                <th class="text-center col-lg-1">No.</th>
-                <th class="sortable" (click)="onSort(SortColumn.ProjectName)">
-                  <div class="header-content justify-left">
+                <th class="text-center col-lg-1 col-index">No.</th>
+                <th class="text-center sortable col-project-name" (click)="onSort(SortColumn.ProjectName)">
+                  <div class="header-content">
                     <span>{{ "Project Name" | localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.ProjectName)"></i>
                   </div>
                 </th>
-                <th class="text-center">
+                <th class="text-center col-members">
                   <div class="header-content">
-                    <span>{{ "Members" | localize }}</span>
+                    <span matTooltip="List of team members involved in the project (filtered by selected branches)" matTooltipPosition="above">{{ "Members" | localize }}</span>
                   </div>
                 </th>
-                <th class="text-center sortable" (click)="onSort(SortColumn.MemberCount)">
+                <th class="text-center sortable col-member-count" (click)="onSort(SortColumn.MemberCount)">
                   <div class="header-content">
                     <span>{{ "Member Count" | localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.MemberCount)"></i>
                   </div>
                 </th>
-                <th class="text-center sortable" (click)="onSort(SortColumn.TotalTimelogLW)">
+                <th class="text-center sortable bg-lw" (click)="onSort(SortColumn.TotalTimelogLW)">
                   <div class="header-content">
-                    <span>{{ "Hours (LW)" | localize }} (h)</span>
+                    <span matTooltip="Total working hours logged for this project (Last week)" matTooltipPosition="above">{{ "Hours (LW)" | localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.TotalTimelogLW)"></i>
                   </div>
                 </th>
-                <th class="text-center sortable" (click)="onSort(SortColumn.TotalTimelogLM)">
+                <th class="text-center sortable bg-lm" (click)="onSort(SortColumn.TotalTimelogLM)">
                   <div class="header-content">
-                    <span>{{ "Hours (LM)" | localize }} (h)</span>
+                    <span matTooltip="Total working hours logged for this project (Last month)" matTooltipPosition="above">{{ "Hours (LM)" | localize }}</span>
                     <i class="p-l-5 pi" [ngClass]="getSortIcon(SortColumn.TotalTimelogLM)"></i>
                   </div>
                 </th>
@@ -169,29 +148,42 @@
                 totalItems: totalItems
                }; let i = index">
                 <td class="text-center">{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
-                <td class="text-left" style="font-weight: 600;">{{ item.name }}</td>
-                <td class="text-left">
+                <td class="text-center text-project fw-bold">
+                  <span class="project-badge">{{ item.name }}</span>
+                </td>
+                <td class="text-left" (click)="toggleMembers(item)">
                   <div class="member-badges">
-                    <span *ngFor="let member of item.members" class="member-badge">
-                      {{ member }}
-                    </span>
+                    <ng-container *ngIf="item.isExpanded">
+                      <span *ngFor="let member of item.members" class="member-badge">
+                        {{ member }}
+                      </span>
+                    </ng-container>
+
+                    <ng-container *ngIf="!item.isExpanded">
+                      <span *ngFor="let member of item.members | slice:0:2" class="member-badge">
+                        {{ member }}
+                      </span>
+                      <span *ngIf="item.members && item.members.length > 2" class="member-badge more-badge">
+                        +{{ item.members.length - 2 }}
+                      </span>
+                    </ng-container>
                   </div>
                 </td>
                 <td class="text-center">{{ item.members?.length || 0 }}</td>
-                <td class="text-center">{{ round(item.totalTimelogLW) }}</td>
-                <td class="text-center">{{ round(item.totalTimelogLM) }}</td>
+                <td class="text-center bg-lw fw-bold">{{ round(item.totalTimelogLW) }}</td>
+                <td class="text-center bg-lm fw-bold">{{ round(item.totalTimelogLM) }}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div class="abp-pagination-controls-wrapper">
-          <abp-pagination-controls [totalNumber]="totalItems" id="daily_project_report_paging"
-            (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)"></abp-pagination-controls>
-        </div>
-
         <div *ngIf="!isTableLoading && users.length === 0" class="text-center p-4">
           <p>{{ "No records found" | localize }}</p>
+        </div>
+        
+        <div class="abp-pagination-controls-wrapper">
+          <abp-pagination-controls #pagination [totalNumber]="totalItems" id="daily_project_report_paging"
+            (selectionChange)="getPageSize($event)" (pageChange)="getDataPage($event)"></abp-pagination-controls>
         </div>
       </div>
     </div>

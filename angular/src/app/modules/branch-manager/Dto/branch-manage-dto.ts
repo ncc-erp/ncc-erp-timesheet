@@ -65,25 +65,23 @@ export interface UserTypeDto {
     userType: number;
 }
 
+export interface BranchToDisplayDto {
+    name: string;
+    code: string;
+    color: string;
+}
+
 export interface OfficeWorkingItem {
     userId: number;
     fullName: string;
     userName: string;
-    branchName: string;
-    branchCode: string;
-    branchColor: string;
     totalAllLW: number;
     officeLW: number;
     wfhLW: number;
     totalAllLM: number;
     officeLM: number;
     wfhLM: number;
-    totalAllLWHours: number;
-    officeLWHours: number;
-    wfhLWHours: number;
-    totalAllLMHours: number;
-    officeLMHours: number;
-    wfhLMHours: number;
+    branch: BranchToDisplayDto;
 }
 
 export interface TotalTimelogProjectDto {

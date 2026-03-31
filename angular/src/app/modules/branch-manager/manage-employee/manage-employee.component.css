@@ -45,7 +45,7 @@
 }
 
 .preReview{
-    padding: 10px;
+    padding: 5px;
     width: 100%;
     min-width: 250px;
     border: none;
@@ -62,7 +62,7 @@
 }
 
 .review{
-    padding: 10px;
+    padding: 5px;
     width: 100%;
     min-width: 250px;
     border: none;
@@ -78,13 +78,24 @@
     color: #2196F3;
 }
 
+.level_sort,
 .project_sort {
-    position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
 }
 
+.level_sort span,
+.project_sort span {
+    display: flex;
+    align-items: center;
+}
+
+.level_sort span i,
 .project_sort span i {
-   position: absolute;
-   right: 0;
+    position: static; 
 }
 
 @media screen and (max-width: 600px) {
@@ -179,7 +190,7 @@
 }
 
 .filter-search {
-  flex: 2;
+  flex: 1.5;
 }
 
 .filter-row .mat-form-field {

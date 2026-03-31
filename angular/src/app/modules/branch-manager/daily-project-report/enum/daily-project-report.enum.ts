@@ -1,8 +1,8 @@
 export enum SortColumn {
-    ProjectName = 0,
-    MemberCount = 1,
-    TotalTimelogLW = 2,
-    TotalTimelogLM = 3
+    ProjectName = 'ProjectName',
+    MemberCount = 'MemberCount',
+    TotalTimelogLW = 'TotalTimelogLW',
+    TotalTimelogLM = 'TotalTimelogLM'
 }
 
 export enum SortDirection {

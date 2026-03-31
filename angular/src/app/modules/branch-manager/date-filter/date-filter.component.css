@@ -18,3 +18,13 @@
     align-items: center;
     justify-content: center;
 }
+
+.time-range-filter span {
+    white-space: nowrap;
+}
+
+@media screen and (min-width: 992px) {
+  .time-range-filter {
+    flex: 1.8 !important;
+  }
+}
