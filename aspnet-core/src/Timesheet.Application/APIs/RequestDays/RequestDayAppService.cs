@@ -1038,15 +1038,11 @@ namespace Timesheet.APIs.RequestDays
         }
 
         private string GenerateSubmitRequestEmailTemplateHtml(
-            string requestName,
             string requesterFullName,
             string reason,
-            bool isOffType,
             string offTypeName,
             string timeHtml)
         {
-            string offTypeHtml = isOffType ? $"<p><strong>Off type:</strong> {offTypeName}</p>" : "";
-
             return $@"
                     <!DOCTYPE html>
                     <html lang='vi'>
@@ -1072,7 +1068,7 @@ namespace Timesheet.APIs.RequestDays
                                                     <div style='margin:0; color:#111827; font-size:14px; line-height:22px;'>
                                                         <p style='margin-top:0;'><strong>Name:</strong> {requesterFullName}</p>
                                                         <p><strong>Reason:</strong> {reason}</p>
-                                                        {offTypeHtml}
+                                                        <p><strong>Off type:</strong> {offTypeName}</p>
                                                         <p style='margin: 0 0 8px 0;'><strong>Requested Date(s):</strong></p>
                                                         <div style='background:#ffffff; border:1px solid #d1d5db; border-radius:6px; padding:12px 16px;'>
                                                             <ul style='margin:0; padding-left:20px; color:#374151; font-size:14px;'>
@@ -1107,10 +1103,8 @@ namespace Timesheet.APIs.RequestDays
                 .Select(time => $"<li style='margin-bottom: 4px;'>{time.Trim()}</li>"));
 
             var emailBody = GenerateSubmitRequestEmailTemplateHtml(
-                requestName: input.GetRequestName(offTypeName),
                 requesterFullName: requester.FullName,
                 reason: input.Reason,
-                isOffType: input.Type == RequestType.Off,
                 offTypeName: offTypeName,
                 timeHtml: timeHtml
             );

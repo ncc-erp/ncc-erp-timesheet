@@ -429,7 +429,7 @@ namespace Timesheet.APIs.ReviewDetails
                     reviewerName: detail.ReviewerName,
                     currentLevelStr: detail.CurrentLevel?.ToString() ?? "",
                     newLevelStr: detail.NewLevel?.ToString() ?? "",
-                    rateStar: detail.RateStar ?? 0f,
+                    rateStar: detail.RateStar,
                     applyDate: applyDate,
                     supportInfoHtml: detail.NewLevelDetail,
                     capabilities: capabilities
@@ -741,11 +741,11 @@ namespace Timesheet.APIs.ReviewDetails
                     isReject: true,
                     month: detail.Month,
                     year: detail.Year,
-                    internName: detail.InternName, // Ở hàm này biến name lưu ở detail.InternName
+                    internName: detail.InternName,
                     reviewerName: detail.ReviewerName,
                     currentLevelStr: detail.CurrentLevel?.ToString() ?? "",
                     newLevelStr: detail.NewLevel?.ToString() ?? "",
-                    rateStar: detail.RateStar ?? 0f,
+                    rateStar: detail.RateStar,
                     applyDate: applyDate,
                     supportInfoHtml: detail.NewLevelDetail,
                     capabilities: capabilities
@@ -1352,7 +1352,7 @@ namespace Timesheet.APIs.ReviewDetails
             string rejectorDisplay,
             int month,
             int year,
-            string tableHeadersHtml,
+            string tableHeaderHtml,
             string tableRowsHtml,
             string actionNoteHtml = ""
         )
@@ -1407,7 +1407,7 @@ namespace Timesheet.APIs.ReviewDetails
                                                 <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' style='border-collapse:separate; border-spacing:0; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;'>
                                                     <thead>
                                                         <tr style='background-color:#f9fafb;'>
-                                                            {tableHeadersHtml}
+                                                            {tableHeaderHtml}
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -1452,7 +1452,7 @@ namespace Timesheet.APIs.ReviewDetails
             {
                 try
                 {
-                    var pmTableHeaders = @"
+                    var pmTableHeader = @"
                         <th align='center' style='padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Intern Name</th>
                         <th align='center' style='padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Current Level</th>
                         <th align='center' style='padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Level After PM Reviewed</th>
@@ -1479,7 +1479,7 @@ namespace Timesheet.APIs.ReviewDetails
                         rejectorDisplay: rejectorDisplay,
                         month: data.MonthReviewIntern,
                         year: data.YearReviewIntern,
-                        tableHeadersHtml: pmTableHeaders,
+                        tableHeaderHtml: pmTableHeader,
                         tableRowsHtml: pmTableRows.ToString(),
                         actionNoteHtml: pmActionNote
                     );
@@ -1521,7 +1521,7 @@ namespace Timesheet.APIs.ReviewDetails
 
                 try
                 {
-                    var hrTableHeaders = @"
+                    var hrTableHeader = @"
                         <th align='center' style='padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Intern Name</th>
                         <th align='center' style='padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Reviewer Name</th>
                         <th align='center' style='padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Current Level</th>
@@ -1547,12 +1547,12 @@ namespace Timesheet.APIs.ReviewDetails
                         rejectorDisplay: rejectorDisplay,
                         month: data.MonthReviewIntern,
                         year: data.YearReviewIntern,
-                        tableHeadersHtml: hrTableHeaders,
+                        tableHeaderHtml: hrTableHeader,
                         tableRowsHtml: hrTableRows.ToString(),
                         actionNoteHtml: ""
                     );
 
-                    var hrEmailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo cập nhật đánh giá thực tập sinh theo phản hồi từ {rejectorDisplay}";
+                    var hrEmailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo cập nhật đánh giá thực tập sinh từ {rejectorDisplay}";
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
                         TargetEmails = hrEmails,
@@ -1589,7 +1589,7 @@ namespace Timesheet.APIs.ReviewDetails
                 try
                 {
                     StringBuilder reviewerHeaderMessage = new StringBuilder();
-                    reviewerHeaderMessage.AppendLine($"**[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo đánh giá thực tập sinh**");
+                    reviewerHeaderMessage.AppendLine($"**[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo cập nhật đánh giá thực tập sinh từ {rejectorDisplay}**");
                     reviewerHeaderMessage.AppendLine();
                     reviewerHeaderMessage.AppendLine($"**{rejectorDisplay}**đã chuyển trạng thái**{statusDictionary[ReviewInternStatus.Rejected]}**cho bản ghi đánh giá thực tập sinh trong đợt đánh giá tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**");
                     reviewerHeaderMessage.AppendLine("Thông tin thực tập sinh bao gồm:");
@@ -1947,7 +1947,7 @@ namespace Timesheet.APIs.ReviewDetails
                     deadlineDateStr: deadlineDate.ToString("dd/MM/yyyy")
                 );
 
-                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo yêu cầu đánh giá thực tập sinh";
+                var emailSubject = $"[NCC] [Review Intern {monthReviewIntern}/{yearReviewIntern}] Thông báo đánh giá thực tập sinh";
                 var targetEmails = new List<string> { email };
                 targetEmails.AddRange(SettingManager.GetSettingValueForApplication(AppSettingNames.NotifyHrEmail)
                     .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
