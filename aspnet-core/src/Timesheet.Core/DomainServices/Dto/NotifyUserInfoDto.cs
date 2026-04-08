@@ -54,7 +54,7 @@ namespace Timesheet.DomainServices.Dto
 
         public string ToEmailString()
         {
-            return $"{FullName} [{CommonUtils.BranchName(Branch)} - {CommonUtils.UserTypeName(Type)}]";
+            return $"{FullName} [{BranchDisplayName} - {CommonUtils.UserTypeName(Type)}]";
         }
     }
 }

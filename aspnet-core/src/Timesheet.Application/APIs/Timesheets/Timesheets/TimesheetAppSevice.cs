@@ -480,32 +480,28 @@ namespace Timesheet.Timesheets.Timesheets
             {
                 //var isUnlockUser = await WorkScope.GetAll<UnlockTimesheet>().AnyAsync(s => s.UserId == user.UserId && s.Type == LockUnlockTimesheetType.MyTimesheet);
                 var emails = new List<string>() { user.UserEmail };
-                var mailBody = new StringBuilder();
+                var bodyContent = new StringBuilder();
                 int successTSUser = 0;
                 foreach (var project in user.Project)
                 {
-                    mailBody.Append($@"<div>
-                                        <b>Project:</b>
-                                        [{project.ProjectCode}]{project.ProjectName}
-                                    </div>
-                                    <div>
-                                        <b>Timesheets:</b>
-                                    </div> ");
-                    var timesheetTable = new StringBuilder();
+                    bodyContent.Append($@"
+                        <div style='margin-bottom: 12px;'><strong>Project: </strong>[{project.ProjectCode}] {project.ProjectName}</div>
+                        <div style='margin-bottom: 12px;'><strong>Timesheets:</strong></div>
+                    ");
+
+                    var rows = new List<string>();
                     foreach (var timesheet in project.Timesheets)
                     {
                         if (timesheet.DateAt > lockDate || (isUnlockPM && timesheet.DateAt > lockDate.AddDays(-(7 * weeksCanUnlockBefor)).Date) || timesheet.IsUnlockedByEmployee)
                         {
                             myApproveTimesheetIds.Add(timesheet.Id);
-                            timesheetTable.Append($@"
-                                <tr>
-                                <td>{timesheet.TaskName}</td>
-                                <td>{timesheet.Note}</td>
-                                <td>{timesheet.DateAt.ToString("yyyy'-'MM'-'dd")}</td>
-                                <td>{(timesheet.TypeOfWork == TypeOfWork.NormalWorkingHours ? "NormalWorking" : "OverTime")}</td>
-                                <td>{(timesheet.Charged ? "Charged" : "")}</td>
-                                <td>{TimeSpan.FromMinutes(timesheet.WorkingTime).ToString(@"hh\:mm")}</td>
-                                </tr>");
+                            rows.Add($@"
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{timesheet.DateAt.ToString("dd'/'MM'/'yyyy")}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{timesheet.TaskName}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{timesheet.Note}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{TimeSpan.FromMinutes(timesheet.WorkingTime).ToString(@"hh\:mm")}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{(timesheet.TypeOfWork == TypeOfWork.NormalWorkingHours ? "Normal Working Hours" : "Over Time")}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{(timesheet.Charged ? "Charged" : "")}</td>");
                             successTS++;
                             successTSUser++;
                         }
@@ -514,33 +510,32 @@ namespace Timesheet.Timesheets.Timesheets
                             failTS++;
                         }
                     }
+
+                    var timesheetTable = new StringBuilder();
+                    for (int i = 0; i < rows.Count; i++)
+                    {
+                        string borderStyle = i == rows.Count - 1 ? "" : "border-bottom:1px solid #e5e7eb;";
+                        timesheetTable.Append("<tr>" + rows[i].Replace("{borderStyle}", borderStyle) + "</tr>");
+                    }
+
+                    bodyContent.Append(CommonUtils.GenerateTimesheetTableHtml(timesheetTable.ToString()));
+
                     if (successTS == 0 && failTS > 0)
                     {
                         if (isUnlockPM) throw new UserFriendlyException(string.Format("Unlock timesheet chỉ có hiệu lực từ {0} đến {1}. Vui lòng liên hệ admin để được hỗ trợ.", lockDate.AddDays(-6).ToString("dd'-'MM'-'yyyy"), lockDate.ToString("dd'-'MM'-'yyyy")));
                         throw new UserFriendlyException("PM hãy unlock timesheet!");
                     }
-                    mailBody.Append($@"<table border='1'>
-                                    <thead>
-                                        <tr>
-                                            <td>Task name</td>
-                                            <td>Note</td>
-                                            <td>Date at</td>
-                                            <td>Type of work </td>
-                                            <td>Charged</td>
-                                            <td>Working time</td>
-                                        </tr>
-                                    </thead>
-                                <tbody>{timesheetTable}</tbody>
-                                </table>
-                                <hr>");
                 }
                 if (successTSUser > 0 && enableNotify == "true")
                 {
+                    var emailSubject = $"{approverName} has approved your timesheets";
+                    var emailBody = CommonUtils.GenerateTimesheetEmailTemplateHtml(emailSubject, bodyContent.ToString());
+
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
                         TargetEmails = emails,
-                        Body = mailBody.ToString(),
-                        Subject = $"{approverName} has approved your timesheets"
+                        Body = emailBody,
+                        Subject = emailSubject
                     }, BackgroundJobPriority.High, new TimeSpan(TimeSpan.TicksPerMinute)
                     );
                 }
@@ -637,34 +632,29 @@ namespace Timesheet.Timesheets.Timesheets
             {
                 //var isUnlockUser = await WorkScope.GetAll<UnlockTimesheet>().AnyAsync(s => s.UserId == user.UserId && s.Type == LockUnlockTimesheetType.MyTimesheet);
                 var emails = new List<string>() { user.UserEmail };
-                var mailBody = new StringBuilder();
+                var bodyContent = new StringBuilder();
                 int successTSUser = 0;
                 foreach (var project in user.Project)
                 {
-                    mailBody.Append($@"<div>
-                                        <b>Project:</b>
-                                        [{project.ProjectCode}]{project.ProjectName}
-                                    </div>
-                                    <div>
-                                        <b>Timesheets:</b>
-                                    </div> "
-                                    );
-                    var timesheetTable = new StringBuilder();
+                    bodyContent.Append($@"
+                        <div style='margin-bottom: 12px;'><strong>Project: </strong>[{project.ProjectCode}] {project.ProjectName}</div>
+                        <div style='margin-bottom: 8px;'><strong>Timesheets:</strong></div>
+                    ");
+
+                    var rows = new List<string>();
                     foreach (var timesheet in project.Timesheets)
                     {
                         await _commonService.checkIsMonthLocked(project.Timesheets.Select(t => t.DateAt));
                         if (timesheet.DateAt > lockDate || (isUnlockPM && timesheet.DateAt > lockDate.AddDays(-(7*weeksCanUnlockBefor)).Date) || timesheet.IsUnlockedByEmployee)
                         {
                             myRejectTimesheetIds.Add(timesheet.Id);
-                            timesheetTable.Append($@"
-                                <tr>
-                                <td>{timesheet.TaskName}</td>
-                                <td>{timesheet.Note}</td>
-                                <td>{timesheet.DateAt.ToString("yyyy'-'MM'-'dd")}</td>
-                                <td>{(timesheet.TypeOfWork == TypeOfWork.NormalWorkingHours ? "NormalWorking" : "OverTime")}</td>
-                                <td>{(timesheet.Charged ? "Charged" : "")}</td>
-                                <td>{TimeSpan.FromMinutes(timesheet.WorkingTime).ToString(@"hh\:mm")}</td>
-                                </tr>");
+                            rows.Add($@"
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{timesheet.DateAt.ToString("dd'/'MM'/'yyyy")}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{timesheet.TaskName}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{timesheet.Note}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{TimeSpan.FromMinutes(timesheet.WorkingTime).ToString(@"hh\:mm")}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{(timesheet.TypeOfWork == TypeOfWork.NormalWorkingHours ? "Normal Working Hours" : "Over Time")}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {{borderStyle}}'>{(timesheet.Charged ? "Charged" : "")}</td>");
                             successTS++;
                             successTSUser++;
                         }
@@ -673,32 +663,31 @@ namespace Timesheet.Timesheets.Timesheets
                             failTS++;
                         }
                     }
+
+                    var timesheetTable = new StringBuilder();
+                    for (int i = 0; i < rows.Count; i++)
+                    {
+                        string borderStyle = i == rows.Count - 1 ? "" : "border-bottom:1px solid #e5e7eb;";
+                        timesheetTable.Append("<tr>" + rows[i].Replace("{borderStyle}", borderStyle) + "</tr>");
+                    }
+
+                    bodyContent.Append(CommonUtils.GenerateTimesheetTableHtml(timesheetTable.ToString()));
+
                     if (!string.IsNullOrEmpty(input.Reason))
                     {
-                        mailBody.Append($@"<div><b>Reason:</b> {input.Reason}</div>");
+                        bodyContent.Append($@"<div style='margin-bottom: 12px; color: #dc2626;'><strong>Reason:</strong> {input.Reason}</div>");
                     }
-                    mailBody.Append($@"<table border='1'>
-                                    <thead>
-                                        <tr>
-                                            <td>Task name</td>
-                                            <td>Note</td>
-                                            <td>Date at</td>
-                                            <td>Type of work </td>
-                                            <td>Charged</td>
-                                            <td>Working time</td>
-                                        </tr>
-                                    </thead>
-                                <tbody>{timesheetTable}</tbody>
-                                </table>
-                                <hr>");
                 }
                 if (successTSUser > 0 && enableNotify == "true")
                 {
+                    var emailSubject = $"{rejecterName} has rejected your timesheets";
+                    var emailBody = CommonUtils.GenerateTimesheetEmailTemplateHtml(emailSubject, bodyContent.ToString());
+
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
                         TargetEmails = emails,
-                        Body = mailBody.ToString(),
-                        Subject = $"{ rejecterName } has rejected your timesheets"
+                        Body = emailBody,
+                        Subject = emailSubject
                     }, BackgroundJobPriority.High, new TimeSpan(TimeSpan.TicksPerMinute));
                 }
             }

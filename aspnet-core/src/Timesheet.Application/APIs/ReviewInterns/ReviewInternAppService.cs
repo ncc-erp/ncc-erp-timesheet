@@ -237,6 +237,7 @@ namespace Timesheet.APIs.ReviewInterns
                                      NewLevel = rv.NewLevel,
                                      SubLevel = rv.SubLevel,
                                      IsFullSalary = rv.IsFullSalary,
+                                     RateStar = rv.RateStar,
                                      InternshipName = rv.InterShip.FullName,
                                      Type = rv.Type,
                                      Month = rv.Review.Month,
@@ -269,6 +270,15 @@ namespace Timesheet.APIs.ReviewInterns
             //var emailHRHCM = await SettingManager.GetSettingValueAsync(AppSettingNames.EmailHRHCM);
             //emailHRHCM = Convert.ToString(emailHRHCM);
 
+            var allCapabilities = await WorkScope.GetAll<ReviewInternCapability>()
+                .Include(x => x.Capability)
+                .Where(x => details.Select(d => d.Id).Contains(x.ReviewDetailId))
+                .ToListAsync();
+
+            var capabilitiesMap = allCapabilities
+                .GroupBy(x => x.ReviewDetailId)
+                .ToDictionary(g => g.Key, g => g.OrderBy(x => x.Capability.Type).ToList());
+
             foreach (var detail in details)
             {
                 try
@@ -277,38 +287,25 @@ namespace Timesheet.APIs.ReviewInterns
                     {
                         throw new Exception(CommonUtils.GetErrorMessageReviewIntern(detail.CurrentLevel, detail.InterShip.Level));
                     }
-                    StringBuilder content = new StringBuilder();
-                    string currentMonth = detail.Month < 10 ? "0" + detail.Month.ToString() : detail.Month.ToString();
+
+                    var capabilities = capabilitiesMap.ContainsKey(detail.Id) ? capabilitiesMap[detail.Id] : new List<ReviewInternCapability>();
                     var applyDate = new DateTime(detail.Year, detail.Month, 1).AddMonths(1).ToString("dd/MM/yyyy");
-                    content.Append($"Thân gửi <span style='font-weight: 600'>{detail.InternshipName}</span>, <br> Dưới đây là phần đánh giá thực tập trong tháng <span style='font-weight: 600'> {currentMonth}/{detail.Year} </span> của bạn.");
 
-                    var mailBody = $@"<table border-collapse='collapse' border='1' width='100%' style='margin-top: 15px'>
-                                <thead>
-                                    <tr>
-                                        <th width='15%'>Reviewer Name</th>
-                                        <th width='15%'>Intern Name</th>
-                                        <th width='20%'>Old Level</th>
-                                        <th width='20%'>New Level</th>
-                                        <th width='10%'>Apply Date</th>
-                                        <th width='20%'>Note</th>
-                                    </tr>
-                                </thead>
-                            <tbody>
-                                <tr>
-                                <td style='padding-left: 5px'>{detail.ReviewerName}</td>
-                                <td style='padding-left: 5px'>{detail.InternshipName}</td>
-                                <td style='padding-left: 5px'>{detail.CurrentLevel} <br/> {detail.CurrentLevelInfo}</td>
-                                <td style='padding-left: 5px'>{detail.NewLevel}<br/> {((detail.NewLevel < UserLevel.FresherMinus) ? "" : typeDetail[detail.Type])}{detail.NewLevelInfo}</td>
-                                <td style='padding-left: 5px'>{applyDate}</td>
-                                <td style='padding-left: 5px; white-space: pre;'>{detail.Note}</td>
-                                </tr>
-                            </tbody>
-                            </table>
-                            <hr>";
-                    content.Append(mailBody);
-                    content.Append("Mọi thông tin thắc mắc về nội dung đánh giá vui lòng liên hệ trực tiếp với PM để được giải đáp.");
+                    string mailBody = CommonUtils.GenerateReviewInternEmailTemplateHtml(
+                        isReject: false,
+                        month: detail.Month,
+                        year: detail.Year,
+                        internName: detail.InternshipName,
+                        reviewerName: detail.ReviewerName,
+                        currentLevelStr: detail.CurrentLevel?.ToString() ?? "",
+                        newLevelStr: detail.NewLevel?.ToString() ?? "",
+                        rateStar: detail.RateStar,
+                        applyDate: applyDate,
+                        supportInfoHtml: detail.NewLevelInfo,
+                        capabilities: capabilities
+                    );
 
-                    var emailSubject = $"[NCC] Thông báo kết quả review mức hỗ trợ đối với TTS {detail.InternshipName} {detail.Month}/{detail.Year}";
+                    var emailSubject = $"[NCC] Thông báo kết quả đánh giá thực tập sinh {detail.InternshipName} - {detail.Month}/{detail.Year}";
 
                     var targetEmails = new List<string>() { detail.InternEmail, emailHR, detail.ReviewerEmail };
 
@@ -324,7 +321,7 @@ namespace Timesheet.APIs.ReviewInterns
                     string result = await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
                         TargetEmails = targetEmails,
-                        Body = content.ToString(),
+                        Body = mailBody,
                         Subject = emailSubject
                     }, BackgroundJobPriority.High, new TimeSpan(TimeSpan.TicksPerMinute));
 
@@ -1148,6 +1145,82 @@ namespace Timesheet.APIs.ReviewInterns
             return fails;
         }
 
+        private string GenerateNewReviewEmailTemplateHtml(
+            int month,
+            int year,
+            string statusName,
+            string tableRowsHtml,
+            string deadlineHtml
+        )
+        {
+            string currentMonth = month < 10 ? "0" + month.ToString() : month.ToString();
+
+            string deadlineBoxHtml = $@"
+                    <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' style='background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; margin-top:24px;'>
+                        <tr>
+                            <td style='padding:16px;'>
+                                <div style='margin:0; color:#111827; font-size:14px; line-height:22px;'>
+                                    {deadlineHtml}
+                                </div>
+                            </td>
+                        </tr>
+                    </table>";
+
+            var mailBody = $@"
+                    <!DOCTYPE html>
+                    <html lang='vi'>
+                    <head>
+                        <meta charset='UTF-8' />
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+                    </head>
+                    <body style='margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#1f2937;'>
+                        <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' style='background-color:#f4f6f8; margin:0; padding:24px 0;'>
+                            <tr>
+                                <td align='center'>
+                                    <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='800' style='width:800px; max-width:800px; background-color:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb;'>
+                                        <tr>
+                                            <td style='background-color:#111827; padding:24px 32px;'>
+                                                <div style='font-size:22px; line-height:30px; font-weight:bold; color:#ffffff;'>
+                                                    Yêu cầu đánh giá thực tập sinh
+                                                </div>
+                                                <div style='font-size:14px; line-height:22px; color:#d1d5db; margin-top:6px;'>
+                                                    Đợt đánh giá tháng {currentMonth}/{year}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding:16px 32px 8px 32px;'>
+                                                <div style='font-size:14px; line-height:22px; color:#4b5563; margin-top:8px;'>
+                                                    Các bản ghi đánh giá thực tập sinh tháng <strong>{currentMonth}/{year}</strong> đang ở trạng thái <strong>{statusName}</strong> trên hệ thống <strong>Timesheet</strong>.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding:8px 32px 20px 32px;'>
+                                                <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' style='border-collapse:separate; border-spacing:0; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;'>
+                                                    <thead>
+                                                        <tr style='background-color:#f9fafb;'>
+                                                            <th align='center' style='padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Intern Name</th>
+                                                            <th align='center' style='padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Current Level</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {tableRowsHtml}
+                                                    </tbody>
+                                                </table>
+                                                {deadlineBoxHtml}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </body>
+                    </html>";
+
+            return mailBody;
+        }
+
         public async System.Threading.Tasks.Task SendMailToNotifyNewReviewIntern(long reviewId)
         {
             var data = await GetReviewDataAsync(reviewId);
@@ -1160,39 +1233,36 @@ namespace Timesheet.APIs.ReviewInterns
             }
             foreach (var reviewer in data.Reviewers)
             {
-                StringBuilder content = new StringBuilder("");
                 try
                 {
-                    content.Append($"Các bản ghi đánh giá thực tập sinh tháng <span style='font-weight: 600'> {data.MonthReviewIntern}/{data.YearReviewIntern} </span> đang ở trạng thái <span style='font-weight: 600'> {statusDictionary[ReviewInternStatus.Draft]} </span> trên hệ thống <span style='font-weight: 600'> Timesheet. </span>");
-                    content.Append("<br>");
-                    var tableHtml = $@"<table border-collapse='collapse' border='1' width='30%' style='margin-top: 15px'>
-                        <thead>
-                            <tr>
-                                <th width='20%'><span style='font-weight: 600'>Intern name</span></th>
-                                <th width='10%'><span style='font-weight: 600'>Current level</span></th>
-                            </tr>
-                        </thead>
-                        <tbody>";
-                    foreach (var intern in reviewer.Interns)
+                    var tableRowsHtml = new StringBuilder();
+                    var internsList = reviewer.Interns.ToList();
+                    for (int i = 0; i < internsList.Count; i++)
                     {
-                        tableHtml += $@"
+                        var intern = internsList[i];
+                        var borderStyle = i == internsList.Count - 1 ? "" : "border-bottom:1px solid #e5e7eb;";
+                        tableRowsHtml.Append($@"
                             <tr>
-                                <td style='padding-left: 5px; text-align: center'>{intern.InternFullName}</td>
-                                <td style='padding-left: 5px; text-align: center'>{intern.InternCurrentLevel}</td>
-                            </tr>";
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {borderStyle}'>{intern.InternFullName}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#4b5563; {borderStyle}'><strong>{intern.InternCurrentLevel}</strong></td>
+                            </tr>");
                     }
-                    tableHtml += @"
-                        </tbody>
-                    </table>";
-                    content.Append(tableHtml);
-                    content.Append("<br>");
-                    content.Append($"Vui lòng thực hiện đánh giá và chuyển trạng thái sang <span style='font-weight: 600'> PM Reviewed </span> trước ngày <span style='font-weight: 600'> {reviewDeadline:00}/{dateNow.Month:00}/{dateNow.Year} </span> để hoàn tất quy trình đánh giá.");
-                    content.Append("<br>");
+
+                    string deadlineText = $"Vui lòng thực hiện đánh giá và chuyển trạng thái sang <strong>PM Reviewed</strong> trước ngày <strong>{reviewDeadline:00}/{dateNow.Month:00}/{dateNow.Year}</strong> để hoàn tất quy trình đánh giá.";
+
+                    string mailBody = GenerateNewReviewEmailTemplateHtml(
+                        month: data.MonthReviewIntern,
+                        year: data.YearReviewIntern,
+                        statusName: statusDictionary[ReviewInternStatus.Draft],
+                        tableRowsHtml: tableRowsHtml.ToString(),
+                        deadlineHtml: deadlineText
+                    );
+
                     var emailSubject = $"[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo yêu cầu đánh giá thực tập sinh";
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
                         TargetEmails = new List<string> { reviewer.ReviewerEmail },
-                        Body = content.ToString(),
+                        Body = mailBody,
                         Subject = emailSubject
                     }, BackgroundJobPriority.High);
                 }

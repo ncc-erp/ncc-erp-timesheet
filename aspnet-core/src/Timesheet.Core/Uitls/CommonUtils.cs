@@ -168,13 +168,13 @@ namespace Timesheet.Uitls
         {
             return new Dictionary<UserLevel, string>()
             {
-              { UserLevel.Intern_0,"- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.Intern_1, "- Hỗ trợ 1.000.000 VNĐ <br>- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.Intern_2, "- Hỗ trợ 2.000.000 VNĐ <br>- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.Intern_3, "- Hỗ trợ 4.000.000 VNĐ <br>- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.FresherMinus, "- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.Fresher, "- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
-              { UserLevel.FresherPlus, "- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br> Tất cả hỗ trợ tính trên giờ làm việc thực tế" }
+              { UserLevel.Intern_0,"- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br>Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.Intern_1, "- Hỗ trợ 1.000.000 VNĐ <br>- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br>Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.Intern_2, "- Hỗ trợ 2.000.000 VNĐ <br>- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br>Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.Intern_3, "- Hỗ trợ 4.000.000 VNĐ <br>- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br>Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.FresherMinus, "- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br>Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.Fresher, "- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br>Tất cả hỗ trợ tính trên giờ làm việc thực tế" },
+              { UserLevel.FresherPlus, "- Hỗ trợ ăn trưa 1.000.000 VNĐ (500.000 VNĐ được thanh toán bằng token - Số còn lại được thanh toán qua chuyển khoản) <br>- Hỗ trợ gửi xe 100.000 VNĐ <br>Tất cả hỗ trợ tính trên giờ làm việc thực tế" }
             };
 
         }
@@ -428,6 +428,295 @@ namespace Timesheet.Uitls
                 chunks.Add(chunk);
             }
             return chunks;
+        }
+
+        private static string FormatWithBullet(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return "<div>Không có</div>";
+
+            var lines = text.Replace("<br>", "\n")
+                            .Replace("<br/>", "\n")
+                            .Replace("<br />", "\n")
+                            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            var builder = new StringBuilder();
+
+            foreach (var line in lines)
+            {
+                var trimmedLine = line.Trim();
+                if (string.IsNullOrEmpty(trimmedLine)) continue;
+
+                if (trimmedLine.StartsWith("-"))
+                {
+                    trimmedLine = trimmedLine.Substring(1).Trim();
+                }
+                builder.Append($"<div style='margin-bottom: 4px;'><span style='margin-right: 6px;'>&bull;</span>{trimmedLine}</div>");
+            }
+
+            return builder.ToString();
+        }
+
+        public static string GenerateReviewInternEmailTemplateHtml(
+            bool isReject,
+            int month,
+            int year,
+            string internName,
+            string reviewerName,
+            string currentLevelStr,
+            string newLevelStr,
+            float? rateStar,
+            string applyDate,
+            string supportInfoHtml,
+            List<Entities.ReviewInternCapability> capabilities)
+        {
+            var pointRowsHtml = new StringBuilder();
+            foreach (var item in capabilities.Where(x => x.Capability.Type == CapabilityType.Point))
+            {
+                pointRowsHtml.Append($@"
+                <tr>
+                    <td style='padding:12px 16px; font-size:14px; color:#111827; border-bottom:1px solid #e5e7eb;'>{item.Capability.Name} (x{item.Coefficient})</td>
+                    <td align='right' style='padding:12px 16px; font-size:14px; color:#111827; border-bottom:1px solid #e5e7eb;'>{item.Point}/5</td>
+                </tr>");
+            }
+
+            var noteBoxesHtml = new StringBuilder();
+            var noteCapabilities = capabilities.Where(x => x.Capability.Type == CapabilityType.Note).ToList();
+
+            if (noteCapabilities.Any())
+            {
+                noteBoxesHtml.Append(@"<table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%'><tr>");
+                bool isSingleNote = noteCapabilities.Count == 1;
+
+                for (int i = 0; i < noteCapabilities.Count; i++)
+                {
+                    var item = noteCapabilities[i];
+                    string bgColor = i % 2 == 0 ? "#f0fdf4" : "#fff7ed";
+                    string borderColor = i % 2 == 0 ? "#bbf7d0" : "#fed7aa";
+                    string textColor = i % 2 == 0 ? "#166534" : "#9a3412";
+                    string width = isSingleNote ? "100%" : "49%";
+
+                    var formattedNoteHtml = FormatWithBullet(item.Note);
+
+                    noteBoxesHtml.Append($@"
+                        <td valign='top' width='{width}' style='background:{bgColor}; border:1px solid {borderColor}; border-radius:10px; padding:16px;'>
+                            <div style='font-size:15px; font-weight:bold; color:{textColor}; margin-bottom:10px;'>
+                                {item.Capability.Name}
+                            </div>
+                            <div style='margin:0; color:{textColor}; font-size:14px; line-height:22px;'>
+                                {formattedNoteHtml}
+                            </div>
+                        </td>
+                    ");
+
+                    if (!isSingleNote && i % 2 == 0 && i < noteCapabilities.Count - 1)
+                    {
+                        noteBoxesHtml.Append(@"<td width='2%' style='font-size:1px; line-height:1px; padding:0;'>&nbsp;</td>");
+                    }
+
+                    if (!isSingleNote && i % 2 == 1 && i < noteCapabilities.Count - 1)
+                    {
+                        noteBoxesHtml.Append("</tr><tr><td colspan='3' height='16'></td></tr><tr>");
+                    }
+                }
+
+                if (!isSingleNote && noteCapabilities.Count % 2 != 0)
+                {
+                    noteBoxesHtml.Append(@"<td width='2%' style='font-size:1px; line-height:1px; padding:0;'>&nbsp;</td><td valign='top' width='49%'></td>");
+                }
+                noteBoxesHtml.Append("</tr></table>");
+            }
+
+            string currentMonth = month < 10 ? "0" + month.ToString() : month.ToString();
+            string headerTitle = isReject ? "Hủy kết quả đánh giá" : "Kết quả đánh giá thực tập sinh";
+
+            string greetingHtml = isReject
+                ? $"<div style='font-size:14px; line-height:22px; color:#4b5563; margin-top:8px;'>Bảng thông tin kết quả review trước đó do {reviewerName} thực hiện dưới đây đã bị hủy.</div>"
+                : $"<div style='font-size:14px; line-height:22px; color:#4b5563; margin-top:8px;'>Dưới đây là kết quả đánh giá thực tập trong tháng <strong>{currentMonth}/{year}</strong> của bạn.</div>";
+
+            string formattedSupportInfoHtml = FormatWithBullet(supportInfoHtml);
+
+            var mailBody = $@"
+                            <!DOCTYPE html>
+                            <html lang='vi'>
+                            <head>
+                              <meta charset='UTF-8' />
+                              <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+                              <title>Monthly Internship Review</title>
+                            </head>
+                            <body style='margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#1f2937;'>
+                              <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' style='background-color:#f4f6f8; margin:0; padding:24px 0;'>
+                                <tr>
+                                  <td align='center'>
+                                    <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='750' style='width:750px; max-width:750px; background-color:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb;'>
+                                      <tr>
+                                        <td style='background-color:#111827; padding:24px 32px;'>
+                                          <div style='font-size:22px; line-height:30px; font-weight:bold; color:#ffffff;'>
+                                            {headerTitle}
+                                          </div>
+                                          <div style='font-size:14px; line-height:22px; color:#d1d5db; margin-top:6px;'>
+                                            Đợt đánh giá tháng {currentMonth}/{year}
+                                          </div>
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td style='padding:28px 32px 8px 32px;'>
+                                          <div style='font-size:16px; line-height:24px; color:#111827;'>
+                                            Thân gửi <strong>{internName}</strong>,
+                                          </div>
+                                          {greetingHtml}
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td style='padding:16px 32px 8px 32px;'>
+                                          <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%'>
+                                            <tr>
+                                              <td width='40%' valign='top' style='padding-right:8px;'>
+                                                <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' height='100%' style='background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; height: 100%;'>
+                                                  <tr>
+                                                    <td style='padding:16px;' valign='top'>
+                                                      <div style='font-size:12px; color:#6b7280; text-transform:uppercase; letter-spacing:0.5px;'>Reviewer</div>
+                                                      <div style='font-size:16px; font-weight:bold; color:#111827; margin-top:6px;'>{reviewerName}</div>
+                                                    </td>
+                                                  </tr>
+                                                </table>
+                                              </td>
+                                              <td width='35%' valign='top' style='padding-left:4px; padding-right:4px;'>
+                                                <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' height='100%' style='background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; height: 100%;'>
+                                                  <tr>
+                                                    <td style='padding:16px;' valign='top'>
+                                                      <div style='font-size:12px; color:#6b7280; text-transform:uppercase; letter-spacing:0.5px;'>Level</div>
+                                                      <div style='font-size:16px; font-weight:bold; color:#111827; margin-top:6px;'>{currentLevelStr} &rarr; {newLevelStr}</div>
+                                                    </td>
+                                                  </tr>
+                                                </table>
+                                              </td>
+                                              <td width='25%' valign='top' style='padding-left:8px;'>
+                                                <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' height='100%' style='background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; height: 100%;'>
+                                                  <tr>
+                                                    <td style='padding:16px;' valign='top'>
+                                                      <div style='font-size:12px; color:#047857; text-transform:uppercase; letter-spacing:0.5px;'>Điểm đánh giá</div>
+                                                      <div style='font-size:16px; font-weight:bold; color:#065f46; margin-top:6px;'>{(rateStar ?? 0).ToString("0.00")} / 5</div>
+                                                    </td>
+                                                  </tr>
+                                                </table>
+                                              </td>
+                                            </tr>
+                                          </table>
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td style='padding:20px 32px 8px 32px;'>
+                                          <div style='font-size:16px; font-weight:bold; color:#111827; margin-bottom:12px;'>
+                                            Chi tiết đánh giá
+                                          </div>
+                                          <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' style='border-collapse:collapse; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;'>
+                                            <tr style='background-color:#f9fafb;'>
+                                              <td style='padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Tiêu chí</td>
+                                              <td align='right' style='padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Điểm</td>
+                                            </tr>
+                                            {pointRowsHtml}
+                                          </table>
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td style='padding:20px 32px 8px 32px;'>
+                                            {noteBoxesHtml}
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td style='padding:20px 32px 8px 32px;'>
+                                          <div style='font-size:16px; font-weight:bold; color:#111827; margin-bottom:12px;'>
+                                            Thông tin hỗ trợ
+                                          </div>
+                                          <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' style='background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px;'>
+                                            <tr>
+                                              <td style='padding:16px;'>
+                                                <div style='font-size:14px; line-height:24px; color:#111827;'>
+                                                    {formattedSupportInfoHtml}
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          </table>
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td style='padding:20px 32px 8px 32px;'>
+                                          <div style='font-size:14px; line-height:22px; color:#4b5563;'>
+                                            <strong>Ngày áp dụng:</strong> {applyDate}
+                                          </div>
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td style='padding:20px 32px 32px 32px;'>
+                                          <div style='font-size:13px; line-height:22px; color:#6b7280; border-top:1px solid #e5e7eb; padding-top:16px;'>
+                                            Mọi thắc mắc liên quan đến nội dung đánh giá, vui lòng liên hệ trực tiếp với PM để được giải đáp.
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    </table>
+                                  </td>
+                                </tr>
+                              </table>
+                            </body>
+                            </html>";
+
+            return mailBody;
+        }
+
+        public static string GenerateTimesheetEmailTemplateHtml(string headerTitle, string bodyContent)
+        {
+            return $@"
+                <!DOCTYPE html>
+                <html lang='vi'>
+                <head>
+                    <meta charset='UTF-8' />
+                    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+                </head>
+                <body style='margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#1f2937;'>
+                    <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' style='background-color:#f4f6f8; margin:0; padding:24px 0;'>
+                        <tr>
+                            <td align='center'>
+                                <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='1200' style='width:1200px; max-width:1200px; background-color:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb;'>
+                                    <tr>
+                                        <td style='background-color:#111827; padding:24px 32px;'>
+                                            <div style='font-size:22px; line-height:30px; font-weight:bold; color:#ffffff;'>
+                                                {headerTitle}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style='padding:8px 32px 32px 32px;'>
+                                            <div style='margin-top:20px;'>
+                                                <div style='margin:0; color:#111827; font-size:14px; line-height:22px;'>
+                                                    {bodyContent}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>";
+        }
+
+        public static string GenerateTimesheetTableHtml(string tbodyContent)
+        {
+            return $@"
+                <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' style='background-color:#ffffff; border-collapse:separate; border-spacing:0; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; margin-bottom: 20px; table-layout: fixed;'>
+                    <thead>
+                        <tr style='background-color:#f9fafb;'>
+                            <th align='center' width='10%' style='width: 10%; padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Date At</th>
+                            <th align='center' width='10%' style='width: 10%; padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Task Name</th>
+                            <th align='center' width='45%' style='width: 45%; padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Note</th>
+                            <th align='center' width='10%' style='width: 10%; padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Working Time</th>
+                            <th align='center' width='15%' style='width: 15%; padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Type Of Work</th>
+                            <th align='center' width='10%' style='width: 10%; padding:12px 16px; font-size:13px; font-weight:bold; color:#374151; border-bottom:1px solid #e5e7eb;'>Charged</th>
+                        </tr>
+                    </thead>
+                    <tbody>{tbodyContent}</tbody>
+                </table>";
         }
     }
 }
