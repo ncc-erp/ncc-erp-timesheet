@@ -698,38 +698,29 @@ namespace Timesheet.Timesheets.MyTimesheets
                 {
                     // Noi dung email
                     StringBuilder timesheetList = new StringBuilder();
-                    foreach (var timesheet in project.Timesheets)
+                    var timesheets = project.Timesheets.ToList();
+                    for (int i = 0; i < timesheets.Count; i++)
                     {
+                        var timesheet = timesheets[i];
+                        string borderStyle = i == timesheets.Count - 1 ? "" : "border-bottom:1px solid #e5e7eb;";
                         timesheetList.Append($@"
-                                    <tr>
-                                    <td>{timesheet.DateAt.ToString("yyyy'-'MM'-'dd")}</td>
-                                    <td>{timesheet.TaskName}</td>
-                                    <td>{timesheet.Note}</td>
-                                    <td>{TimeSpan.FromMinutes(timesheet.WorkingTime).ToString(@"hh\:mm")}</td>
-                                    <td>{(timesheet.TypeOfWork == TypeOfWork.NormalWorkingHours ? "NormalWorking" : "OverTime")}</td>
-                                    <td>{(timesheet.IsCharged ? "Charged" : "")}</td>
-                                    </tr>");
+                            <tr>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {borderStyle}'>{timesheet.DateAt.ToString("dd'/'MM'/'yyyy")}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {borderStyle}'>{timesheet.TaskName}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {borderStyle}'>{timesheet.Note}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {borderStyle}'>{TimeSpan.FromMinutes(timesheet.WorkingTime).ToString(@"hh\:mm")}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {borderStyle}'>{(timesheet.TypeOfWork == TypeOfWork.NormalWorkingHours ? "Normal Working Hours" : "Over Time")}</td>
+                                <td align='center' style='padding:12px 16px; font-size:14px; color:#111827; {borderStyle}'>{(timesheet.IsCharged ? "Charged" : "")}</td>
+                            </tr>");
                     }
-                    var emailBody = $@"
-                                <hr>
-                                <div>
-                                  <div><strong>Project:</strong>[{project.ProjectCode}]{project.ProjectName}</div><hr>
-                                    <table border='1'>
-                                        <thead>
-                                            <tr>
-                                                <td>Date at</td>
-                                                <td>Task Name</td>
-                                                <td>Note</td>
-                                                <td>Working time</td>
-                                                <td>Type</td>
-                                                <td>Charged</td>
-                                            </tr>
-                                        </thead>
-                                    <tbody>{timesheetList}</tbody>
-                                    </table>
-                                    </div>";
 
-                    var emailSubject = $"{requester.ToEmailString()} has submited timesheets for [{project.ProjectName}]";
+                    var bodyContent = $@"
+                        <div style='margin-bottom: 12px;'><strong>Project: </strong>[{project.ProjectCode}] {project.ProjectName}</div>
+                        <div style='margin-bottom: 8px;'><strong>Timesheets:</strong></div>
+                        {CommonUtils.GenerateTimesheetTableHtml(timesheetList.ToString())}";
+
+                    var emailSubject = $"{requester.ToEmailString()} has submitted timesheets for project [{project.ProjectName}]";
+                    var emailBody = CommonUtils.GenerateTimesheetEmailTemplateHtml(emailSubject, bodyContent);
 
                     await _backgroundJobManager.EnqueueAsync<EmailBackgroundJob, EmailBackgroundJobArgs>(new EmailBackgroundJobArgs
                     {
