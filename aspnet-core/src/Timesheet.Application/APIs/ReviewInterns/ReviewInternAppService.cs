@@ -305,7 +305,7 @@ namespace Timesheet.APIs.ReviewInterns
                         capabilities: capabilities
                     );
 
-                    var emailSubject = $"[NCC] Thông báo kết quả review mức hỗ trợ đối với TTS {detail.InternshipName} {detail.Month}/{detail.Year}";
+                    var emailSubject = $"[NCC] Thông báo kết quả đánh giá thực tập sinh {detail.InternshipName} - {detail.Month}/{detail.Year}";
 
                     var targetEmails = new List<string>() { detail.InternEmail, emailHR, detail.ReviewerEmail };
 
