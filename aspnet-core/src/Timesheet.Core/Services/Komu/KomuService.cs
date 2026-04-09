@@ -43,6 +43,7 @@ namespace Timesheet.Services.Komu
 
             httpClient.BaseAddress = new Uri(baseAddress);
             httpClient.DefaultRequestHeaders.Add("X-Secret-Key", secretCode);
+            httpClient.Timeout = TimeSpan.FromMinutes(15);
         }
         public async Task<ulong?> GetKomuUserId(string userName)
         {
