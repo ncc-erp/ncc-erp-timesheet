@@ -22,6 +22,7 @@ import { DailyProjectReportComponent } from './daily-project-report/daily-projec
 import { AnomaliesReportComponent } from './anomalies-report/anomalies-report.component';
 import { ScrollingModule } from '@node_modules/@angular/cdk/scrolling';
 import { AnomaliesTabComponent } from './anomalies-report/anomalies-tab/anomalies-tab.component';
+import { ProjectHistoryComponent } from './manage-employee/project-history/project-history.component';
 
 
 @NgModule({
@@ -34,6 +35,7 @@ import { AnomaliesTabComponent } from './anomalies-report/anomalies-tab/anomalie
     ProjectManagementComponent,
     PopupUpdateProjectComponent,
     DetailParticipatingProjectsComponent,
+    ProjectHistoryComponent,
     ProjectManagementMemberDetailComponent,
     DailyEmployeeReportComponent,
     DailyProjectReportComponent,
@@ -55,6 +57,7 @@ import { AnomaliesTabComponent } from './anomalies-report/anomalies-tab/anomalie
     PopupCustomeTimeComponent,
     PopupUpdateProjectComponent,
     DetailParticipatingProjectsComponent,
+    ProjectHistoryComponent,
     ProjectManagementMemberDetailComponent,
   ],
 })

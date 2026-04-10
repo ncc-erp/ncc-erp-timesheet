@@ -8,53 +8,108 @@
     padding: 0 24px 10px;
 }
 
-.mat-button-mobile {
-    display: none;
+.head {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
 }
 
-@media screen and (max-width: 600px) {
-    .detailParticipatingProject .row div{
-        flex-wrap: wrap;
-        padding-left: 15px;
-        padding-right: 15px;
-    }
+h3 {
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
 
+p {
+    margin-bottom: 0 !important;
+}
+
+.header-filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.filter-date-group {
+    display: flex;
+    align-items: center;
+}
+
+.title-date {
+    margin-top: 5px;
+    margin-left: 15px;
+}
+
+.title-date b {
+    font-size: 18px;
+}
+
+.filter-select {
+    margin-bottom: -20px;
+    width: 150px;
+}
+
+.detailParticipatingProject ::ng-deep .head .mat-button-toggle-label-content {
+    line-height: 28px !important;
+    padding: 0 4px !important;
+}
+
+.detailParticipatingProject ::ng-deep .head .mat-icon {
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+}
+
+.detailParticipatingProject ::ng-deep .head .mat-button-toggle-button {
+    height: 28px;
+}
+
+.customTable {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.customTable th,
+.customTable td {
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #e4e7eb;
+    padding: 10px;
+}
+
+.customTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #f8f9fa;
+    border: 1px solid #e4e7eb !important;
+}
+
+
+@media screen and (max-width: 600px) {
     ::ng-deep .cdk-overlay-container .cdk-global-overlay-wrapper .detail-participating-projects {
         padding: 0px 15px;
     }
 
-    .mat-button-desktop {
-        display: none;
+    .detailParticipatingProject ::ng-deep .filter-date-group mat-button-toggle-group {
+        flex-shrink: 0;
     }
 
-    .mat-button-mobile {
-        display: inline-flex;
-        height: fit-content;
+    .filter-select {
+        width: 40%;
     }
 
-    .select-week-container {
-        display: flex;
-        align-items: baseline;
+    .title-date {
+        margin-left: 8px;
     }
-
-    .select-week-container .select-week {
-        max-width: 55%;
-        margin-left: auto;
+    .title-date b {
+        font-size: 14px;
     }
 
     .table-responsive {
         overflow-y: auto;
-    }
-
-    .title-date {
-        margin-left: 0 !important;
-    }
-
-    :host ::ng-deep .mat-button-mobile .mat-button-toggle-label-content {
-        line-height: 43px;
-    }
-
-    .table-responsive {
         height: 300px !important;
     }
 }

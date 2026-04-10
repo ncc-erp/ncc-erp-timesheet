@@ -28,3 +28,9 @@
     flex: 1.8 !important;
   }
 }
+
+@media screen and (max-width: 600px) {
+  .date-filter:first-child {
+    margin-bottom: 14px !important;
+  }
+}

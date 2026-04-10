@@ -1,4 +1,5 @@
-﻿using Abp.Linq.Extensions;
+﻿using Abp.Authorization;
+using Abp.Linq.Extensions;
 using Abp.UI;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,8 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBranchs.Dto;
+using Timesheet.DomainServices;
+using Timesheet.DomainServices.Dto;
 using Timesheet.Entities;
 using static Ncc.Entities.Enum.StatusEnum;
 
@@ -18,7 +21,12 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
 {
     public class ManageUserProjectForBranchAppService : AppServiceBase
     {
-        public ManageUserProjectForBranchAppService(IWorkScope workScope) : base(workScope) { }
+        private readonly IManageUserProjectForBranchServices _manageUserProjectForBranchServices;
+
+        public ManageUserProjectForBranchAppService(IWorkScope workScope, IManageUserProjectForBranchServices manageUserProjectForBranchServices) : base(workScope) 
+        {
+            _manageUserProjectForBranchServices = manageUserProjectForBranchServices;
+        }
 
         [HttpGet]
         public async Task<WorkTimeByProjectDto> GetAllValueOfUserInProjectByUserId(long userId, DateTime? startDate, DateTime? endDate)
@@ -74,6 +82,14 @@ namespace Timesheet.APIs.ProjectManagementBranchDirectors.ManageUserProjectForBr
             projectUser.Effort = input.Effort;
             projectUser.Type = input.Type;
             await WorkScope.UpdateAsync(projectUser);
+        }
+
+        [HttpGet]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewAllBranchs,
+                    Ncc.Authorization.PermissionNames.ProjectManagementBranchDirectors_ManageUserForBranchs_ViewMyBranch)]
+        public async Task<List<ProjectHistoryDto>> GetUserProjectHistory(long userId, DateTime? startDate, DateTime? endDate)
+        {
+            return await _manageUserProjectForBranchServices.GetUserProjectHistory(userId, startDate, endDate);
         }
     }
 }

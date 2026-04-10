@@ -1,0 +1,92 @@
+<div class="project-history-wrapper">
+  <div class="dialog-header">
+  <div class="header-title-row">
+    <h2>Project History - {{ data.user.fullName }}</h2>
+    <button mat-icon-button (click)="closeDialog()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="header-filter-row">
+    <div class="filter-date-group">
+      <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+        <mat-button-toggle (click)="nextOrPre('pre')">
+          <mat-icon>chevron_left</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle (click)="nextOrPre('next')">
+          <mat-icon>chevron_right</mat-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+      <span class="title-date">
+        <b>{{ distanceFromAndToDate }}</b>
+      </span>
+    </div>
+
+    <mat-form-field appearance="outline" class="filter-select">
+      <mat-select [formControl]="viewChange" (selectionChange)="onSelectionChange($event)">
+        <mat-option *ngFor="let item of viewOptions" [value]="item.value">
+          <span class="custom-option-text">{{ item.name }}</span>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
+
+<div style="margin-bottom: 10px;">
+  <mat-checkbox class="example-margin" [(ngModel)]="showInactiveProject">Show Inactive Projects</mat-checkbox>
+</div>
+
+<div class="dialog-content">
+  <table class="table customTable">
+    <thead>
+      <tr>
+        <th>Project</th>
+        <th>Type</th>
+        <th>Time Period</th>
+        <th>Monthly Effort</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let project of projectList | showProjectInActive: showInactiveProject">
+        <td>{{ project.projectName }}</td>
+        <td>{{ getProjectUserType(project.projectUserType) }}</td>
+        <td>
+          <div class="time-period-container">
+            <div *ngFor="let interval of project.intervals" class="time-period-badge">
+              <span>{{ interval.startDate | date:'dd/MM/yyyy' }}</span>
+              <span class="separator">→</span>
+              <span>{{ interval.endDate ? (interval.endDate | date:'dd/MM/yyyy') : 'Present' }}</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="monthly-effort-container" *ngIf="project.monthlyEfforts && project.monthlyEfforts.length > 0">
+            <ul class="list-unstyled mb-0 effort-list">
+              <ng-container *ngIf="project.monthlyEfforts.length <= 3 || project.showDetail">
+                <li *ngFor="let m of project.monthlyEfforts" class="effort-item">
+                  <span class="effort-month">{{ m.monthYear }}</span>
+                  <span class="effort-percent">{{ m.effort }}%</span>
+                </li>
+              </ng-container>
+              
+              <ng-container *ngIf="project.monthlyEfforts.length > 3 && !project.showDetail">
+                <li *ngFor="let m of project.monthlyEfforts | slice:0:3" class="effort-item">
+                  <span class="effort-month">{{ m.monthYear }}</span>
+                  <span class="effort-percent">{{ m.effort }}%</span>
+                </li>
+              </ng-container>
+            </ul>
+            
+            <button *ngIf="project.monthlyEfforts.length > 3" 
+                    class="btn-expand-effort"
+                    (click)="project.showDetail = !project.showDetail">
+              {{ project.showDetail ? 'Collapse' : '+ ' + (project.monthlyEfforts.length - 3) + ' more' }}
+            </button>
+          </div>
+          <span *ngIf="!project.monthlyEfforts || project.monthlyEfforts.length === 0" class="no-effort">N/A</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
