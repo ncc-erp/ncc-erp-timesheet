@@ -1037,6 +1037,56 @@ namespace Timesheet.APIs.RequestDays
             }
         }
 
+        private string GenerateSubmitRequestEmailTemplateHtml(
+            string requesterFullName,
+            string reason,
+            string offTypeName,
+            string timeHtml)
+        {
+            return $@"
+                    <!DOCTYPE html>
+                    <html lang='vi'>
+                    <head>
+                        <meta charset='UTF-8' />
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+                    </head>
+                    <body style='margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#1f2937;'>
+                        <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' style='background-color:#f4f6f8; margin:0; padding:24px 0;'>
+                            <tr>
+                                <td align='center'>
+                                    <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='850' style='width:850px; max-width:850px; background-color:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb;'>
+                                        <tr>
+                                            <td style='background-color:#111827; padding:24px 32px;'>
+                                                <div style='font-size:22px; line-height:30px; font-weight:bold; color:#ffffff;'>
+                                                    Off request is waiting to be approved or rejected
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style='padding:8px 32px 32px 32px;'>
+                                                <div style='background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; margin-top:20px; padding:20px;'>
+                                                    <div style='margin:0; color:#111827; font-size:14px; line-height:22px;'>
+                                                        <p style='margin-top:0;'><strong>Name:</strong> {requesterFullName}</p>
+                                                        <p><strong>Reason:</strong> {reason}</p>
+                                                        <p><strong>Off type:</strong> {offTypeName}</p>
+                                                        <p style='margin: 0 0 8px 0;'><strong>Requested Date(s):</strong></p>
+                                                        <div style='background:#ffffff; border:1px solid #d1d5db; border-radius:6px; padding:12px 16px;'>
+                                                            <ul style='margin:0; padding-left:20px; color:#374151; font-size:14px;'>
+                                                                {timeHtml}
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </body>
+                    </html>";
+        }
+
         private async System.Threading.Tasks.Task notifyEmailWhenSubmitRequest(NotifyUserInfoDto requester, MyRequestDto input, List<ProjectPMDto> receivers, string offTypeName)
         {
             var enableNotify = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendEmailRequest);
@@ -1046,21 +1096,18 @@ namespace Timesheet.APIs.RequestDays
                 return;
             }
 
-            var emailSubject = $"{requester.ToEmailString()} sent a {input.GetRequestName(offTypeName)} request {input.ListDay()}";
+            var emailSubject = $"{requester.ToEmailString()} sent off request";
 
-            var emailBody = $@"<h3>{input.GetRequestName(offTypeName)} request is waiting to be approved or rejected!</h3>
-                                <hr>
-                                   <p>Name: {requester.FullName}</p>
-                                   <p>Reason: {input.Reason}</p>
-                                   {(input.Type == RequestType.Off ? $"<p>Off type: {offTypeName}</p>" : "")}
-                                <div>
-                                    <table> 
-                                            <tr style='font-size: 13px'>
-                                                <td>Time: </td>
-                                                <td>{input.ToEmailString()}</td>
-                                            </tr>
-                                    </table>
-                                 </div>";
+            var timeHtml = string.Join("", input.ToEmailString()
+                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(time => $"<li style='margin-bottom: 4px;'>{time.Trim()}</li>"));
+
+            var emailBody = GenerateSubmitRequestEmailTemplateHtml(
+                requesterFullName: requester.FullName,
+                reason: input.Reason,
+                offTypeName: offTypeName,
+                timeHtml: timeHtml
+            );
 
             var targetEmails = getPMEmails(receivers);
             var hrEmails = await getHREmails();
