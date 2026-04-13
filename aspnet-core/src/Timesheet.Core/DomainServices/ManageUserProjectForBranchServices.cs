@@ -65,7 +65,10 @@ namespace Timesheet.DomainServices
                         g => g.Sum(ts => ts.WorkingTime)
                     );
 
-                var history = timesheets.GroupBy(ts => ts.ProjectId).Select(group => {
+                var history = new List<ProjectHistoryDto>();
+
+                foreach (var group in timesheets.GroupBy(ts => ts.ProjectId))
+                {
                     var projectId = group.Key;
                     var projectName = group.First().Name;
                     var workingDates = group.Select(x => x.DateAt.Date).Distinct().OrderBy(d => d).ToList();
@@ -75,6 +78,7 @@ namespace Timesheet.DomainServices
                                                : ProjectUserType.DeActive;
 
                     var intervals = new List<ProjectIntervalDto>();
+
                     if (workingDates.Any())
                     {
                         DateTime periodStartDate = workingDates[0];
@@ -87,9 +91,14 @@ namespace Timesheet.DomainServices
 
                             if (monthDifference > 1)
                             {
-                                intervals.Add(new ProjectIntervalDto { StartDate = periodStartDate, EndDate = periodEndDate });
+                                intervals.Add(new ProjectIntervalDto 
+                                { 
+                                    StartDate = periodStartDate, 
+                                    EndDate = periodEndDate 
+                                });
                                 periodStartDate = processedDate;
                             }
+
                             periodEndDate = processedDate;
                         }
 
@@ -101,27 +110,29 @@ namespace Timesheet.DomainServices
                         });
                     }
 
-                    var monthlyEfforts = group.GroupBy(ts => new { ts.DateAt.Month, ts.DateAt.Year })
-                        .Select(m => {
-                            string monthYearKey = $"{m.Key.Month:D2}/{m.Key.Year}";
+                    var monthlyEfforts = new List<MonthlyEffortDto>();
 
-                            double projectWorkingTimeInMonth = m.Sum(x => x.WorkingTime);
-                            double totalWorkingTimeInMonth = totalTimePerMonth.ContainsKey(monthYearKey)
-                                                             ? totalTimePerMonth[monthYearKey]
-                                                             : 0;
+                    foreach (var monthGroup in group.GroupBy(ts => new { ts.DateAt.Month, ts.DateAt.Year }))
+                    {
+                        string monthYearKey = $"{monthGroup.Key.Month:D2}/{monthGroup.Key.Year}";
 
-                            double effortPercent = totalWorkingTimeInMonth > 0
-                                                   ? Math.Round(projectWorkingTimeInMonth / totalWorkingTimeInMonth * 100, 1)
-                                                   : 0;
+                        double projectWorkingTimeInMonth = monthGroup.Sum(x => x.WorkingTime);
+                        double totalWorkingTimeInMonth = totalTimePerMonth.ContainsKey(monthYearKey)
+                                                         ? totalTimePerMonth[monthYearKey]
+                                                         : 0;
 
-                            return new MonthlyEffortDto
-                            {
-                                MonthYear = monthYearKey,
-                                Effort = effortPercent
-                            };
-                        }).ToList();
+                        double effortPercent = totalWorkingTimeInMonth > 0
+                                               ? Math.Round(projectWorkingTimeInMonth / totalWorkingTimeInMonth * 100, 1)
+                                               : 0;
 
-                    return new ProjectHistoryDto
+                        monthlyEfforts.Add(new MonthlyEffortDto
+                        {
+                            MonthYear = monthYearKey,
+                            Effort = effortPercent
+                        });
+                    }
+
+                    history.Add(new ProjectHistoryDto
                     {
                         ProjectId = projectId,
                         ProjectName = projectName,
@@ -129,8 +140,8 @@ namespace Timesheet.DomainServices
                         Intervals = intervals,
                         MonthlyEfforts = monthlyEfforts,
                         Status = group.First().Status
-                    };
-                }).ToList();
+                    });
+                }
 
                 return history;
             }
