@@ -2,6 +2,10 @@ h3 {
     margin: 0 0 10px;
 }
 
+h2 {
+    padding-left: 8px !important;
+}
+
 pre {
     background-color: #f5f5f5;
     padding: 15px;
@@ -91,27 +95,7 @@ pre {
 .search-text{
     padding-left: 0px;
 }
-@media screen and (max-width: 768px) {
-    .flex div {
-        margin-top: 15px;
-    }
-    .filter{
-        margin-left: 0px;
-        padding-right: 15px;
-    }
-    .date{
-        margin-right: 0px;
-        padding-right: 15px;
 
-    }
-    .search-text{
-        padding-left: 15px;
-    }
-    .search-text .clearfix{
-        padding: 0px 10px;
-    }
-
-}
 
 .day-chip-full-day {
     background-color:#db0000  !important;
@@ -221,77 +205,155 @@ pre {
 .row1-child{
     width: 150px;
 }
-@media (max-width: 992px) {
-    .row1{
-        display: flex;
-        height: auto;
-    }
-    .row1-child{
-        width: 35%;
-    }
+
+.icon-refresh-mobile {
+    display: none;
 }
 
 @media (min-width: 850px) and (max-width: 1097px) {
-    .header .title{
-        width: 30%;
+    .header .title {
+        width: 33%;
     }
-    .header .filter-date .item3{
+    .header .filter-date .item3 {
         margin-left: 20px;
     }
 }
 
-@media screen and (max-width:767px){
+@media (max-width: 1280px) {
+    .row1 {
+        display: flex;
+        height: auto;
+    }
+    .row1-child {
+        width: 35%;
+    }
+    ::ng-deep app-multiple-select mat-form-field {
+        width: 95% !important;
+    }
+    .search-email {
+        width: 95%;
+    }
+
+    .header {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center;
+        justify-content: flex-start;
+        position: relative;
+        padding-right: 40px; 
+    }
+    .header .filter-date {
+        display: contents;
+    }
+    .header .title {
+        width: 50% !important;
+        flex: 0 0 50% !important;
+        margin: 0 !important;
+        box-sizing: border-box;
+    }
+    .header .filter-date .item {
+        width: 50% !important;
+        flex: 0 0 50% !important;
+        margin: 0 !important;
+        display: flex;
+        justify-content: flex-end;
+        box-sizing: border-box;
+        padding-right: 20px;
+    }
+    .header .filter-date .item2 {
+        width: 50% !important;
+        flex: 0 0 50% !important;
+        margin: 15px 0 0 0 !important;
+        display: flex;
+        justify-content: flex-start;
+        box-sizing: border-box;
+        padding-left: 7px;
+    }
+    .header .filter-date .item3 {
+        width: 50% !important;
+        flex: 0 0 50% !important;
+        margin: 15px 0 0 0 !important;
+        padding-right: 20px !important;
+        display: flex;
+        justify-content: flex-end;
+        box-sizing: border-box;
+    }
+    .icon-refresh-desktop {
+        display: none !important;
+    }
+    .icon-refresh-mobile {
+        display: block;
+        position: absolute;
+        right: 12px;
+        top: 15px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .flex div {
+        margin-top: 15px;
+    }
+    .filter {
+        margin-left: 0px;
+        padding-right: 15px;
+    }
+    .date {
+        margin-right: 0px;
+        padding-right: 15px;
+    }
+    .search-text {
+        padding-left: 15px;
+    }
+    .search-text .clearfix {
+        padding: 0px 10px;
+    }
+}
+
+@media screen and (max-width: 767px) {
     .header {
         justify-content: start;
         flex-wrap: wrap;
     }
-    .header .title{
-        width: 100%;
+
+    .header .title {
+        width: 100% !important;
+        flex: 0 0 100% !important;
     }
-    .header .filter-date {
-        width: 100%;
-        flex-wrap: nowrap;
-    }
-    .header .filter-date .item {
-        margin-left: 0;
-    }
-    .header .filter-date .item2 {
-        width: 100%;
-        margin-left: 0;
-    }
+    .header .filter-date .item,
+    .header .filter-date .item2,
     .header .filter-date .item3 {
-        margin-left: 0;
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        justify-content: center !important; 
+        padding-right: 0 !important;
+        padding-left: 0 !important;
+        margin-top: 20px !important;
     }
     .pd-rest-mobile {
         padding-left: 0 !important;
     }
+    .item-filter {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+    ::ng-deep app-multiple-select mat-form-field {
+        width: 95% !important;
+    }
+    .search-email {
+        width: 95%;
+    }
 }
 
 @media screen and (max-width: 650px) {
-    .header .filter-date {
-        width: 100%;
-        gap: 10px;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-    }
-    .header .filter-date .item2 {
-        width: 150px;
-        flex: none;
-    }
-
     .row1 {
         display: flex;
         gap: 15px;
         padding: 0 15px;
     }
-
     .row1-child {
         padding: 0;
     }
-}
-
-.icon-refresh-mobile {
-    display: none;
 }
 
 @media screen and (max-width: 600px) {
@@ -301,55 +363,44 @@ pre {
         right: 0;
         top: 20px;
     }
-
     .icon-refresh-desktop, .avatar-user-request, .badge-time-request {
         display: none;
     }
-
     .item2 {
         order: 1;
-        margin-top: 10px;
-        width: 100% !important;
+    }
+
+    .header {
+        padding-right: 20px;
     }
 
     .header .title { 
-        margin-bottom: 25px;
+        margin-top: 15px !important;
     }
-
     .filter-work-calendar {
         display: flex;
         gap: 10px;
     }
-
     .option-off-type {
         padding-left: 8px;
         padding-right: 8px;
     }
-
     .item-first {
         width: 27%;
     }
-
     .item-second {
         width: 68%;
     }
-
     .item-filter {
         width: 100%;
         text-align: left;
         margin-top: 0 !important;
     }
-
     .row1 {
         flex-wrap: wrap;
         row-gap: 0;
     }
-
     .cal-cell-top {
         min-width: 135px;
     }
 }
-
-
-
-

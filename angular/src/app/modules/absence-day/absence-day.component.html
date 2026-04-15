@@ -2,25 +2,27 @@
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="card main-content">
       <div class="header">
-        <h2>{{ "My requests" | localize }}</h2>
-        <ul class="header-dropdown m-r--5">
-          <li>
-            <button
-              name="menuBtn"
-              mat-icon-button
-              [matMenuTriggerFor]="headerMenu123"
-              class="header-dropdown-mat-icon-button"
-            >
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #headerMenu123="matMenu">
-              <button name="refreshBtn" mat-menu-item (click)="refreshData()">
-                <mat-icon>refresh</mat-icon>
-                <span>{{ "Refresh" | localize }}</span>
+        <div class="header-group">
+          <h2>{{ "My requests" | localize }}</h2>
+          <ul class="header-dropdown m-r--5">
+            <li>
+              <button
+                name="menuBtn"
+                mat-icon-button
+                [matMenuTriggerFor]="headerMenu123"
+                class="header-dropdown-mat-icon-button"
+              >
+                <mat-icon>more_vert</mat-icon>
               </button>
-            </mat-menu>
-          </li>
-        </ul>
+              <mat-menu #headerMenu123="matMenu">
+                <button name="refreshBtn" mat-menu-item (click)="refreshData()">
+                  <mat-icon>refresh</mat-icon>
+                  <span>{{ "Refresh" | localize }}</span>
+                </button>
+              </mat-menu>
+            </li>
+          </ul>
+        </div>
       </div>
       <div class="text-center" style="padding: 17px">
         <div class="group">
