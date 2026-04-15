@@ -7,6 +7,7 @@ import * as moment from 'moment';
 import { PopupCustomeTimeComponent } from '../detail-participating-projects/popup-custome-time/popup-custome-time.component';
 import { ProjectHistoryDto } from '../../Dto/project-history-dto';
 import { MatSelectChange } from '@angular/material/select';
+import { DateRangeType, ViewDirection, ProjectUserType } from '../enum/project-history.enum';
 
 @Component({
     selector: 'app-project-history',
@@ -14,6 +15,7 @@ import { MatSelectChange } from '@angular/material/select';
     styleUrls: ['./project-history.component.css']
 })
 export class ProjectHistoryComponent extends AppComponentBase implements OnInit {
+    public readonly ViewDirection = ViewDirection;
     public viewChange = new FormControl(this.APP_CONSTANT.TypeViewHomePage.Year);
     private activeView: number = 0;
     public projectList: ProjectHistoryDto[] = [];
@@ -73,22 +75,22 @@ export class ProjectHistoryComponent extends AppComponentBase implements OnInit 
         if (this.viewChange.value === this.APP_CONSTANT.TypeViewHomePage.Month) {
             fromDate = moment().startOf('M').add(this.activeView, 'M');
             toDate = moment(fromDate).endOf('M');
-            this.typeDate = 'Month';
+            this.typeDate = DateRangeType.Month;
         }
         if (this.viewChange.value === this.APP_CONSTANT.TypeViewHomePage.Quater) {
             fromDate = moment().startOf('Q').add(this.activeView, 'Q');
             toDate = moment(fromDate).endOf('Q');
-            this.typeDate = 'Quarter';
+            this.typeDate = DateRangeType.Quarter;
         }
         if (this.viewChange.value === this.APP_CONSTANT.TypeViewHomePage.Year) {
             fromDate = moment().startOf('y').add(this.activeView, 'y');
             toDate = moment(fromDate).endOf('y');
-            this.typeDate = 'Year';
+            this.typeDate = DateRangeType.Year;
         }
         if (this.viewChange.value == this.APP_CONSTANT.TypeViewHomePage.AllTime) {
             fromDate = '';
             toDate = '';
-            this.distanceFromAndToDate = 'All Time';
+            this.distanceFromAndToDate = DateRangeType.AllTime;
         }
         if (this.viewChange.value == this.APP_CONSTANT.TypeViewHomePage.CustomTime) {
             fromDate = '';
@@ -102,7 +104,7 @@ export class ProjectHistoryComponent extends AppComponentBase implements OnInit 
                 this.getData(this.userId, fromDate, toDate);
                 this.distanceFromAndToDate = fromDate + '  -  ' + toDate;
             } else {
-                this.distanceFromAndToDate = 'Custom Time';
+                this.distanceFromAndToDate = DateRangeType.CustomTime;
             }
         }
 
@@ -131,14 +133,14 @@ export class ProjectHistoryComponent extends AppComponentBase implements OnInit 
         }
     }
 
-    nextOrPre(title: any): void {
+    nextOrPre(direction: ViewDirection): void {
         if (this.viewChange.value == this.APP_CONSTANT.TypeViewHomePage.CustomTime) {
             return;
         }
-        if (title == 'pre') {
+        if (direction === ViewDirection.Pre) {
             this.activeView--;
         }
-        if (title == 'next') {
+        if (direction === ViewDirection.Next) {
             this.activeView++;
         }
         this.changeView();
@@ -163,15 +165,7 @@ export class ProjectHistoryComponent extends AppComponentBase implements OnInit 
         });
     }
 
-    getProjectUserType(userType: number) {
-        let type = this.APP_CONSTANT.EnumUserType;
-        let result = 'Unknown';
-        for (let key in type) {
-            if (type[key] == userType) {
-                result = key;
-                break;
-        }
+    getProjectUserType(userType: number): string {
+        return ProjectUserType[userType] || 'Unknown';
     }
-    return result;
-  }
 }

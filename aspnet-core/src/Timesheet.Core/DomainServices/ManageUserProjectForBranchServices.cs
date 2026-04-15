@@ -26,18 +26,18 @@ namespace Timesheet.DomainServices
 
         public async Task<List<ProjectHistoryDto>> GetUserProjectHistory(long userId, DateTime? startDate, DateTime? endDate)
         {
-            if (userId <= 0)
-            {
-                throw new UserFriendlyException("UserId is invalid");
-            }
-
-            if (startDate.HasValue && endDate.HasValue && startDate.Value > endDate.Value)
-            {
-                throw new UserFriendlyException("Start date cannot be later than end date");
-            }
-
             try
             {
+                if (userId <= 0)
+                {
+                    throw new UserFriendlyException("UserId is invalid");
+                }
+
+                if (startDate.HasValue && endDate.HasValue && startDate.Value > endDate.Value)
+                {
+                    throw new UserFriendlyException("Start date cannot be later than end date");
+                }
+
                 var timesheets = await _workScope.GetAll<MyTimesheet>()
                     .Where(ts => ts.UserId == userId && ts.Status == TimesheetStatus.Approve)
                     .WhereIf(startDate.HasValue, ts => ts.DateAt >= startDate)
@@ -71,7 +71,7 @@ namespace Timesheet.DomainServices
                 {
                     var projectId = group.Key;
                     var projectName = group.First().Name;
-                    var workingDates = group.Select(x => x.DateAt.Date).Distinct().OrderBy(d => d).ToList();
+                    var workingDates = group.Select(x => x.DateAt.Date).Distinct().ToList();
 
                     ProjectUserType userType = projectUserType.ContainsKey(projectId)
                                                ? projectUserType[projectId]
@@ -87,9 +87,9 @@ namespace Timesheet.DomainServices
                         for (int i = 1; i < workingDates.Count; i++)
                         {
                             DateTime processedDate = workingDates[i];
-                            int monthDifference = (processedDate.Year - periodEndDate.Year) * 12 + processedDate.Month - periodEndDate.Month;
+                            double daysDifference = (processedDate - periodEndDate).TotalDays;
 
-                            if (monthDifference > 1)
+                            if (daysDifference > 30)
                             {
                                 intervals.Add(new ProjectIntervalDto 
                                 { 

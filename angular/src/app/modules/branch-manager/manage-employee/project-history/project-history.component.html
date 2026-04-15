@@ -10,10 +10,10 @@
   <div class="header-filter-row">
     <div class="filter-date-group">
       <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
-        <mat-button-toggle (click)="nextOrPre('pre')">
+        <mat-button-toggle (click)="nextOrPre(ViewDirection.Pre)">
           <mat-icon>chevron_left</mat-icon>
         </mat-button-toggle>
-        <mat-button-toggle (click)="nextOrPre('next')">
+        <mat-button-toggle (click)="nextOrPre(ViewDirection.Next)">
           <mat-icon>chevron_right</mat-icon>
         </mat-button-toggle>
       </mat-button-toggle-group>
