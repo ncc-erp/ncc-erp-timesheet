@@ -152,6 +152,10 @@ export class DetailParticipatingProjectsComponent extends AppComponentBase imple
     });
   }
 
+  closeDialog(): void {
+    this._dialogRef.close();
+  }
+
   updateProjectUser(project){
     let item = Object.assign(JSON.parse(JSON.stringify(project)))
     let data = {

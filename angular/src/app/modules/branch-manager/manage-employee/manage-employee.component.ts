@@ -13,6 +13,7 @@ import { DetailParticipatingProjectsComponent } from './detail-participating-pro
 import { MatDialog } from '@angular/material';
 import { DateInfo } from '../date-filter/date-filter.component';
 import {ESortProjectUserNumber, ESortType} from '@app/modules/branch-manager/manage-employee/enum/sort-project-user-number.enum';
+import { ProjectHistoryComponent } from './project-history/project-history.component';
 
 @Component({
   selector: 'app-manage-employee',
@@ -190,6 +191,7 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
   showProjectDetailDialog(user): void{
     let dialogRef = this._dialog.open(DetailParticipatingProjectsComponent, {
       panelClass: 'manager-employee',
+      autoFocus: false,
       data: {
         user: user,
         startDate: this.startDate,
@@ -199,6 +201,19 @@ export class ManageEmployeeComponent extends PagedListingComponentBase<any> impl
     dialogRef.afterClosed().subscribe(() => {
 
     })
+  }
+
+  viewProjectHistory(user): void {
+    this._dialog.open(ProjectHistoryComponent, {
+      panelClass: 'project-history-dialog',
+      width: '1000px',
+      autoFocus: false,
+      data: { 
+        user: user,
+        startDate: this.startDate,
+        endDate: this.endDate
+      }
+    });
   }
 
   onDateSelected(dateInfo: DateInfo) {
