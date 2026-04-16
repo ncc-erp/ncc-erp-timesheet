@@ -100,6 +100,134 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     this.isRadiocheckfilterbyBranch = true;
   }
 
+  isAdvancedFilterOpen = false;
+  APPROVAL_ABSENCE_DAY_PROJECT = PERMISSIONS_CONSTANT.ApprovalAbsenceDayByProject;
+  public groupedRequests: { date: string, requests: AbsenceRequestDto[] }[] = [];
+
+  private groupRequests() {
+    let map = new Map<string, AbsenceRequestDto[]>();
+    this.absenceRequestList.forEach(item => {
+      let dateStr = moment(item.dateAt, 'YYYY-MM-DD').format('DD/MM/YYYY');
+      if (!map.has(dateStr)) {
+        map.set(dateStr, []);
+      }
+      map.get(dateStr).push(item);
+    });
+    let result = [];
+    map.forEach((value, key) => {
+      result.push({ date: key, requests: value });
+    });
+    result.sort((a, b) => moment(b.date, 'DD/MM/YYYY').toDate().getTime() - moment(a.date, 'DD/MM/YYYY').toDate().getTime());
+    this.groupedRequests = result;
+  }
+
+  getLeaveTypeText(member: AbsenceRequestDto) {
+    if (member.leavedayType == 0) {
+      if (member.absenceTime == this.APP_CONSTANT.OnDayType.BeginOfDay) {
+        return "Đi muộn";
+      }
+      if (member.absenceTime == this.APP_CONSTANT.OnDayType.EndOfDay) {
+        return "Về sớm";
+      }
+      return "Off";
+    } else if(member.leavedayType == 1) {
+      return "Onsite";
+    } else if(member.leavedayType == 2) {
+      return "Remote";
+    }
+  }
+
+  getLeaveText(member: AbsenceRequestDto) {
+    if (member.dateType == 1) {
+      return "Full Day";
+    }
+    if (member.dateType == 2) {
+      return "Morning";
+    }
+    if (member.dateType == 3) {
+      return "Afternoon";
+    }
+    return member.hour + "h";
+  }
+
+  getLabel(userType: number): string {
+    const userTypes = [
+      { value: 0, label: 'Staff' },
+      { value: 1, label: 'Intern' },
+      { value: 2, label: 'CTV' },
+      { value: 3, label: 'Probation' },
+      { value: 5, label: 'Vendor' }
+    ];
+    const found = userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
+  }
+
+  getListTypeClasses(member: AbsenceRequestDto) {
+    if (member.leavedayType == 0) {
+      if (member.absenceTime == this.APP_CONSTANT.OnDayType.BeginOfDay
+        || member.absenceTime == this.APP_CONSTANT.OnDayType.EndOfDay) {
+        return ['text-primary', 'day-chip-tardiness-leave-early'];
+      }
+      return ['text-primary', 'day-chip-full-day'];
+    }  else if (member.leavedayType == 1) {
+      return ['text-danger', 'onsite'];
+    }
+    return ['text-primary', 'day-chip-morning'];
+  }
+
+  getListClasses(member: AbsenceRequestDto) {
+    if (member.dateType == 1) {
+      return ['text-primary', 'day-chip-full-day'];
+    }
+    if (member.dateType == 2) {
+      return ['text-primary', 'day-chip-morning'];
+    }
+    if (member.dateType == 3) {
+      return ['text-primary', 'day-chip-afternoon'];
+    }
+    return ['text-primary', 'day-chip-custom'];
+  }
+
+  onApproveAbsence(item: AbsenceRequestDto) {
+    let data = [];
+    data.push(item.id);
+    this.isLoading = true;
+    this.absenceService.approveAbsenceRequest(data).subscribe((res) => {
+      if (res) {
+        for (let i = 0; i < this.absenceRequestList.length; i++) {
+          if (this.absenceRequestList[i].id === item.id) {
+            this.absenceRequestList[i].status = 2;
+          }
+        }
+        this.notify.success(this.l("Approve Successfully!"));
+      }
+      this.isLoading = false;
+      this.refreshData();
+    }, (error) => {
+      this.isLoading = false;
+    });
+  }
+
+  onRejectAbsence(item: AbsenceRequestDto) {
+    let data = [];
+    data.push(item.id);
+    this.isLoading = true;
+    this.absenceService.rejectAbsenceRequest(data).subscribe((res) => {
+      if (res) {
+        for (let i = 0; i < this.absenceRequestList.length; i++) {
+          if (this.absenceRequestList[i].id === item.id) {
+            this.absenceRequestList[i].status = 3; // Rejected
+          }
+        }
+        this.notify.success(this.l("Reject Successfully!"));
+      }
+      this.isLoading = false;
+      this.refreshData();
+    }, (error) => {
+      this.isLoading = false;
+    });
+  }
+
   ngOnInit() {
     this.getAllAbsenceType();
     this.dayTypeList = Object.keys(this.APP_CONSTANT.AbsenceType).filter(key => this.APP_CONSTANT.AbsenceType[key] !== 4);
@@ -249,6 +377,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     this.absenceService.getAllRequestAbsence(startDate, endDate, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType).subscribe(res => {
       this.isLoading = false;
       this.absenceRequestList = res.result;
+      this.groupRequests();
       this.absenceRequestList.forEach(item => {
         if (!(this.absentDayType === 0 && item.dateType === 4)) {
           this.events.push({
@@ -256,7 +385,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
             end: moment(item.dateAt, 'YYYY-MM-DD').toDate(),
             avatarFullPath: item.avatarFullPath,
             color: { primary: item.dateType.toString() + ' | ' + item.hour, secondary: item.name },
-            meta: item.leavedayType,
+            meta: item,
             absenceTime: item.absenceTime,
           });
         }
@@ -286,32 +415,6 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
   }
 
 
-  getAbsenceText(type, hour, meta) {
-
-    if (type == this.APP_CONSTANT.AbsenceType.FullDay) {
-      return 'Full day';
-    }
-    if (type == this.APP_CONSTANT.AbsenceType.Morning) {
-      return 'Morning';
-    }
-    if (type == this.APP_CONSTANT.AbsenceType.Afternoon) {
-      return 'Afternoon';
-    }
-    return `${hour}h`;
-  }
-
-  getAbsenceClasses(type) {
-    if (type == this.APP_CONSTANT.AbsenceType.FullDay) {
-      return ['day-chip-full-day', 'pin-wrap'];
-    }
-    if (type == this.APP_CONSTANT.AbsenceType.Morning) {
-      return ['day-chip-morning', 'pin-wrap'];
-    }
-    if (type == this.APP_CONSTANT.AbsenceType.Custom) {
-      return ['day-chip-custom', 'pin-wrap'];
-    }
-    return ['day-chip-afternoon', 'pin-wrap'];
-  }
 
   onChangeShowRejected(event: any) {
     this.isShowRejected = event.checked;
