@@ -107,11 +107,14 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
   private groupRequests() {
     let map = new Map<string, AbsenceRequestDto[]>();
     this.absenceRequestList.forEach(item => {
-      let dateStr = moment(item.dateAt, 'YYYY-MM-DD').format('DD/MM/YYYY');
-      if (!map.has(dateStr)) {
-        map.set(dateStr, []);
+      const itemDate = moment(item.dateAt, 'YYYY-MM-DD');
+      if (itemDate.month() === this.month && itemDate.year() === this.year) {
+        let dateStr = itemDate.format('DD/MM/YYYY');
+        if (!map.has(dateStr)) {
+          map.set(dateStr, []);
+        }
+        map.get(dateStr).push(item);
       }
-      map.get(dateStr).push(item);
     });
     let result = [];
     map.forEach((value, key) => {
@@ -119,6 +122,14 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     });
     result.sort((a, b) => moment(b.date, 'DD/MM/YYYY').toDate().getTime() - moment(a.date, 'DD/MM/YYYY').toDate().getTime());
     this.groupedRequests = result;
+  }
+
+  trackByDate(index: number, group: any) {
+    return group.date;
+  }
+
+  trackByRequestId(index: number, item: AbsenceRequestDto) {
+    return item.id;
   }
 
   getLeaveTypeText(member: AbsenceRequestDto) {
@@ -194,15 +205,21 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     this.isLoading = true;
     this.absenceService.approveAbsenceRequest(data).subscribe((res) => {
       if (res) {
-        for (let i = 0; i < this.absenceRequestList.length; i++) {
-          if (this.absenceRequestList[i].id === item.id) {
-            this.absenceRequestList[i].status = 2;
+        this.absenceRequestList.forEach(abs => {
+          if (abs.id === item.id) {
+            abs.status = 2;
           }
-        }
+        });
+        this.events.forEach(ev => {
+          if (ev.meta && ev.meta.id === item.id) {
+            ev.meta.status = 2;
+          }
+        });
+        this.groupRequests();
         this.notify.success(this.l("Approve Successfully!"));
       }
       this.isLoading = false;
-      this.refreshData();
+      this.refresh.next();
     }, (error) => {
       this.isLoading = false;
     });
@@ -214,15 +231,21 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     this.isLoading = true;
     this.absenceService.rejectAbsenceRequest(data).subscribe((res) => {
       if (res) {
-        for (let i = 0; i < this.absenceRequestList.length; i++) {
-          if (this.absenceRequestList[i].id === item.id) {
-            this.absenceRequestList[i].status = 3; // Rejected
+        this.absenceRequestList.forEach(abs => {
+          if (abs.id === item.id) {
+            abs.status = 3;
           }
-        }
+        });
+        this.events.forEach(ev => {
+          if (ev.meta && ev.meta.id === item.id) {
+            ev.meta.status = 3;
+          }
+        });
+        this.groupRequests();
         this.notify.success(this.l("Reject Successfully!"));
       }
       this.isLoading = false;
-      this.refreshData();
+      this.refresh.next();
     }, (error) => {
       this.isLoading = false;
     });
@@ -238,30 +261,38 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     });
   }
 
-  onDayOffTypeChange(envent?) {
+  onDayOffTypeChange(event?, isRefresh = true) {
     let date = new Date(this.year, this.month);
     this.viewDate = moment(date, 'YYYY-MM-DD').toDate()
-    this.getDayOff();
+    if (isRefresh) {
+      this.getDayOff();
+    }
   }
 
-  onLeaveDayTypeChange(): void {
+  onLeaveDayTypeChange(isRefresh = true): void {
     let date = new Date(this.year, this.month, this.day);
     this.viewDate = moment(date, 'YYYY-MM-DD').toDate()
-    this.getDayOff();
+    if (isRefresh) {
+      this.getDayOff();
+    }
   }
-  onDayTypeChange() {
+  onDayTypeChange(isRefresh = true) {
     let date = new Date(this.year, this.month, this.day);
     this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
-    this.getDayOff();
+    if (isRefresh) {
+      this.getDayOff();
+    }
   }
-  onChangeSelect(event?): void {
+  onChangeSelect(event?, isRefresh = true): void {
     this.listProjectSelected = event.value;
     let unselectedIds = this.listProject.map(p => p.id).filter(id => this.listProjectSelected.indexOf(id) === -1);
     localStorage.setItem('manageRequest_Off_Remote_Onsite_ListProjectIdUnselected', unselectedIds.toString());
-    this.getDayOff();
+    if (isRefresh) {
+      this.getDayOff();
+    }
   }
 
-  getListProject() {
+  getListProject(isRefresh = true) {
     this.isLoading = true;
     this.projectService.getProjectPM().subscribe(res => { // get list project cua PM
       this.listProject = res.result;
@@ -286,7 +317,11 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
           }
         });
       }
-      this.getDayOff();
+      if (isRefresh) {
+        this.getDayOff();
+      } else {
+        this.isLoading = false;
+      }
 
     }, () => {
       this.isLoading = false;
@@ -294,11 +329,13 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     });
   }
 
-  onChangeListProjectIdSelected(event) {
+  onChangeListProjectIdSelected(event, isRefresh = true) {
     this.listProjectSelected = event;
     let unselectedIds = this.listProject.map(p => p.id).filter(id => this.listProjectSelected.indexOf(id) === -1);
     localStorage.setItem('manageRequest_Off_Remote_Onsite_ListProjectIdUnselected', unselectedIds.toString());
-    this.getDayOff();
+    if (isRefresh) {
+      this.getDayOff();
+    }
   }
 
 
@@ -308,9 +345,11 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     this.getDayOff();
   }
 
-  onFilterBranchDirector() {
+  onFilterBranchDirector(isRefresh = true) {
     this.listProjectSelected = [];
-    this.getDayOff();
+    if (isRefresh) {
+      this.getDayOff();
+    }
   }
 
   updateDay(): void {
@@ -421,11 +460,12 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     this.refreshData();
   }
 
-  onChangeShowFilterByBranch() {
+  onChangeShowFilterByBranch(isRefresh = true) {
     this.isRadiocheckfilterbyBranch = this.isRadiocheckfilterbyBranch == true ? false : true;
     if(this.isRadiocheckfilterbyBranch == true) {
-      this.getListProject();
+      this.getListProject(isRefresh);
+    } else if (isRefresh) {
+      this.getDayOff();
     }
   }
-
 }

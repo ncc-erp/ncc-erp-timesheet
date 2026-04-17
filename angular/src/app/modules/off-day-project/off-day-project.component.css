@@ -393,10 +393,10 @@ pre {
 }
 .mobile-advanced-dialog .dialog-content {
     background-color: white;
-    border-radius: 30px;
-    padding: 25px;
+    border-radius: 12px;
+    padding: 20px 25px;
     width: 90%;
-    max-width: 400px;
+    max-width: 420px;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -411,17 +411,21 @@ pre {
     .flex div {
         margin-top: 15px;
     }
+
     .filter {
         margin-left: 0px;
         padding-right: 15px;
     }
+
     .date {
         margin-right: 0px;
         padding-right: 15px;
     }
+
     .search-text {
         padding-left: 15px;
     }
+
     .search-text .clearfix {
         padding: 0px 10px;
     }
@@ -435,27 +439,32 @@ pre {
         width: 100% !important;
         flex: 0 0 100% !important;
     }
+
     .header .filter-date .item,
     .header .filter-date .item2,
     .header .filter-date .item3 {
         width: 100% !important;
         flex: 0 0 100% !important;
-        justify-content: center !important; 
+        justify-content: center !important;
         padding-right: 0 !important;
         padding-left: 0 !important;
         margin-top: 20px !important;
     }
+
     .pd-rest-mobile {
         padding-left: 0 !important;
     }
+
     .item-filter {
         display: flex;
         justify-content: center;
         width: 100%;
     }
+
     ::ng-deep app-multiple-select mat-form-field {
         width: 95% !important;
     }
+
     .search-email {
         width: 95%;
     }
@@ -463,12 +472,14 @@ pre {
     .desktop-view-container {
         display: none !important;
     }
+
     .mobile-view {
         display: block;
         background-color: #fcfcfc;
         min-height: 100vh;
         overflow: hidden;
     }
+
     .mobile-advanced-dialog {
         display: block;
     }
@@ -479,28 +490,35 @@ pre {
         align-items: center;
         padding: 15px 15px 5px 15px;
     }
+
     .mobile-header-title {
         font-size: 18px;
         font-weight: 500;
         padding-left: 0 !important;
+        margin-bottom: 10px;
+        flex: 1;
     }
+
     .refresh-btn-mb {
-        position: relative;
-        left: 20px;
+        left: 15px;
     }
+
     .mobile-search-filter {
-        padding: 0 15px 15px 15px;
+        padding: 0 15px 50px 15px;
         display: flex;
         gap: 10px;
+        align-items: center;
     }
+
     .search-container {
         flex: 1;
         border: 2px solid #757575;
-        border-radius: 20px;
+        border-radius: 10px;
         display: flex;
         overflow: hidden;
         height: 35px;
     }
+
     .search-input {
         border: none;
         padding: 0 10px;
@@ -510,58 +528,72 @@ pre {
         background: transparent;
         min-width: 0;
     }
+
     .search-button {
         border-left: 2px solid #757575;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 0 15px;
-        border-radius: 20px;
+        border-radius: 10px;
         margin: -1px;
         cursor: pointer;
     }
+
     .search-icon-mb {
         font-size: 18px;
         margin-right: 4px;
     }
+
     .search-text-mb {
         font-size: 13px;
     }
+
     .advanced-filter-button {
-        border: 2px solid #757575;
-        border-radius: 20px;
+        border-radius: 10px;
         padding: 0 15px;
         font-size: 13px;
         cursor: pointer;
         white-space: nowrap;
+        height: 35px;
+        line-height: normal;
     }
+
     .mobile-list-requests {
         padding: 0 15px 15px 15px;
     }
+
     .mobile-date-group {
         margin-bottom: 15px;
     }
+
     .date-group-header {
         cursor: pointer;
     }
+
     .mobile-requests {
         background-color: #fff;
     }
+
     .request-item-card {
         border: 2px solid #b71c1c;
         border-radius: 4px;
         background-color: #fff;
+        overflow: hidden;
     }
+
     .request-item-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         padding: 10px;
     }
+
     .user-info-mb {
         display: flex;
         align-items: center;
     }
+
     .avatar-wrapper-mb {
         width: 50px;
         height: 50px;
@@ -573,39 +605,47 @@ pre {
         flex-shrink: 0;
         overflow: hidden;
     }
+
     .avatar-img-mb {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
+
     .avatar-placeholder-mb {
         font-size: 12px;
     }
+
     .user-details-mb {
         display: flex;
         flex-direction: column;
     }
+
     .user-full-name-mb {
         color: #001fff;
         font-weight: bold;
         font-size: 14px;
         text-decoration: none;
     }
+
     .user-badges-mb {
         display: flex;
         gap: 5px;
         margin-top: 4px;
     }
+
     .badge-mb {
         color: white;
         padding: 2px 8px;
         border-radius: 12px;
         font-size: 10px;
     }
+
     .leave-badges-container {
         display: flex;
         margin-top: 2px;
     }
+
     .leave-badge-item {
         padding: 4px 10px;
         border-radius: 12px;
@@ -616,14 +656,14 @@ pre {
         border-top: 1px solid #b71c1c;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1px; 
+        gap: 1px;
         background-color: #b71c1c;
     }
 
-    .grid-cell-label, 
-    .grid-cell-value, 
-    .grid-cell-status, 
-    .grid-cell-label-last, 
+    .grid-cell-label,
+    .grid-cell-value,
+    .grid-cell-status,
+    .grid-cell-label-last,
     .grid-cell-value-last {
         background-color: #fff;
         border: none !important;
@@ -635,7 +675,8 @@ pre {
         justify-content: center;
     }
 
-    .grid-cell-label, .grid-cell-label-last {
+    .grid-cell-label,
+    .grid-cell-label-last {
         font-weight: bold;
     }
 
@@ -647,10 +688,12 @@ pre {
     .grid-cell-value p {
         margin: 0;
     }
+
     .request-footer-actions {
         display: flex;
         border-top: 1px solid #b71c1c;
     }
+
     .approve-action-btn {
         flex: 1;
         padding: 10px;
@@ -661,6 +704,7 @@ pre {
         align-items: center;
         justify-content: center;
     }
+
     .reject-action-btn {
         flex: 1;
         padding: 10px;
@@ -671,6 +715,7 @@ pre {
         align-items: center;
         justify-content: center;
     }
+
     .action-separator {
         width: 1px;
         background-color: #b71c1c;
@@ -680,50 +725,69 @@ pre {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
     }
+
     .dialog-title-mb {
-        margin: 0;
+        margin-top: 8px !important;
         font-size: 18px;
         font-weight: 400;
+        padding-left: 0 !important;
     }
+
     .dialog-close-icon {
         font-size: 24px;
         cursor: pointer;
     }
+
     .filter-row-mb {
         display: flex;
-        gap: 15px;
-        margin-bottom: 15px;
+        gap: 10px;
+        margin-bottom: 10px;
     }
-    .filter-group-mb {
+
+    ::ng-deep .filter-row-mb .mat-select-trigger {
         display: flex;
         align-items: center;
-        gap: 10px;
-        flex: 1;
+        justify-content: space-between;
+        width: 100%;
     }
-    .filter-group-center-mb {
+
+    ::ng-deep .filter-row-mb .mat-select-value {
+        max-width: calc(100% - 16px) !important;
+        padding-right: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    ::ng-deep .filter-row-mb .mat-form-field-infix {
+        width: auto !important;
+        min-width: 0 !important;
+    }
+
+    ::ng-deep .filter-row-mb .mat-form-field-wrapper {
+        padding-bottom: 10px;
+    }
+
+    ::ng-deep .filter-row-mb .mat-select-arrow-wrapper {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 10px;
-        margin-bottom: 20px;
     }
-    .filter-label-mb {
-        font-size: 14px;
-    }
-    .filter-select-wrapper {
-        border: 1px solid #757575;
-        border-radius: 20px;
-        padding: 0 10px;
+
+    .filter-group-mb {
+        display: flex;
+        align-items: center;
         flex: 1;
+        min-width: 0;
     }
-    .filter-select-wrapper-fixed {
-        border: 1px solid #757575;
-        border-radius: 20px;
-        padding: 0 10px;
-        width: 150px;
+
+    .filter-group-mb mat-form-field {
+        width: 100%;
+        min-width: 0;
     }
+
     .filter-select-mb {
         border: none;
         outline: none;
@@ -732,72 +796,145 @@ pre {
         background: transparent;
         font-size: 14px;
     }
-    .radio-options-row-mb {
-        display: flex;
-        justify-content: space-around;
-        margin-bottom: 20px;
-    }
-    .radio-option-mb {
+
+    .filter-work-calendar-mb {
         display: flex;
         align-items: center;
-        gap: 5px;
+        justify-content: center;
+        gap: 20px;
+        width: 100%;
+        margin-bottom: 20px;
     }
+
+    .filter-work-calendar-mb .filter-label-mb {
+        margin-bottom: 0;
+        line-height: normal;
+    }
+
+    ::ng-deep .filter-work-calendar-mb .mat-radio-label {
+        align-items: center !important;
+    }
+
+    ::ng-deep .filter-work-calendar-mb .mat-radio-label-content {
+        display: flex;
+        align-items: center;
+    }
+
     .radio-input-mb {
         width: 20px;
         height: 20px;
     }
+
     .project-filter-row-mb {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 10px;
-        margin-bottom: 20px;
     }
-    .project-select-wrapper-mb {
-        flex: 1;
-        border: 1px solid #757575;
-        border-radius: 20px;
-        overflow: hidden;
-        padding: 0 10px;
+
+    .project-filter-row-mb .filter-group-mb:nth-child(1) {
+        flex: 0 0 calc(55% - 5px);
+        width: calc(55% - 5px);
+        min-width: 0;
     }
-    .request-type-row-mb {
+
+    .project-filter-row-mb .filter-group-mb:nth-child(2) {
+        flex: 0 0 calc(45% - 5px);
+        width: calc(45% - 5px);
+        min-width: 0;
+    }
+
+    .project-filter-row-mb app-multiple-select {
+        width: 100%;
+        display: block;
+    }
+
+    ::ng-deep .project-filter-row-mb app-multiple-select mat-form-field {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    ::ng-deep .project-filter-row-mb .mat-select-trigger {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
+        justify-content: space-between;
+        width: 100%;
     }
+
+    ::ng-deep .project-filter-row-mb .mat-select-value {
+        max-width: calc(100% - 16px) !important;
+        padding-right: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    ::ng-deep .project-filter-row-mb .mat-form-field-infix {
+        width: auto !important;
+        min-width: 0 !important;
+    }
+
+    ::ng-deep .project-filter-row-mb .mat-select-arrow-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     .request-type-column-row-mb {
         display: flex;
         gap: 10px;
-        margin-bottom: 20px;
     }
+
+    ::ng-deep .request-type-column-row-mb .mat-select-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    ::ng-deep .request-type-column-row-mb .mat-select-value {
+        max-width: calc(100% - 16px) !important;
+        padding-right: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    ::ng-deep .request-type-column-row-mb .mat-form-field-infix {
+        width: auto !important;
+        min-width: 0 !important;
+    }
+
     .request-type-sub-group-mb {
-        flex: 1;
+        flex: 0 0 calc(50% - 5px);
+        width: calc(50% - 5px);
         display: flex;
         flex-direction: column;
-        gap: 5px;
+        min-width: 0;
     }
+
+    .request-type-sub-group-mb mat-form-field {
+        width: 100%;
+        min-width: 0;
+    }
+
     .sub-group-label-mb {
         font-size: 12px;
         height: 36px;
         display: flex;
         align-items: center;
     }
-    .sub-group-select-wrapper-mb {
-        border: 1px solid #757575;
-        border-radius: 20px;
-        padding: 0 10px;
-    }
+
     .dialog-footer-mb {
         display: flex;
         justify-content: center;
-        margin-top: 10px;
     }
+
     .filter-apply-btn-mb {
-        border: none;
-        padding: 10px 40px;
-        border-radius: 20px;
-        font-weight: bold;
-        cursor: pointer;
-        font-size: 15px;
+        min-width: 100px;
+        height: 36px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 14px;
     }
 }
