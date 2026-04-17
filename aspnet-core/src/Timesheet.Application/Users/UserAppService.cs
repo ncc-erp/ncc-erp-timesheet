@@ -51,6 +51,7 @@ using System.Net.Mail;
 using Timesheet.APIs.Public;
 using Ncc.Net.MimeTypes;
 using Timesheet.DataExport;
+using Timesheet.Entities;
 
 namespace Ncc.Users
 {
@@ -496,6 +497,71 @@ namespace Ncc.Users
                                     user.UserName = user.EmailAddress.Split("@")[0];
                                     user.IsActive = true;
                                     await _userManager.CreateAsync(user, RandomPasswordHelper.CreateRandomPassword(8));
+                                    CheckErrors(await _userManager.SetRoles(user, new string[] { StaticRoleNames.Host.BasicUser }));
+                                    successList.Add(user.EmailAddress);
+                                }
+                                catch (Exception e)
+                                {
+                                    failedList.Add(user.EmailAddress + " error =>" + e.Message);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    throw new UserFriendlyException(String.Format("No file upload!"));
+                }
+            }
+            return new { successList, failedList };
+        }
+
+        [HttpPost]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_AddNew)]
+        public async Task<Object> ImportUsersWithMezonIdFromFile([FromForm] FileInputDto input)
+        {
+            var successList = new List<string>();
+            var failedList = new List<string>();
+            var branchs = await _ws.GetAll<Timesheet.Entities.Branch>().ToListAsync();
+            var dicBranch = branchs.ToDictionary(s => s.DisplayName, s => s.Id);
+
+            if (input != null)
+            {
+                if (Path.GetExtension(input.File.FileName).Equals(".xlsx"))
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        await input.File.CopyToAsync(stream);
+
+                        using (var package = new ExcelPackage(stream))
+                        {
+                            ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                            var rowCount = worksheet.Dimension.Rows;
+                            User user = null;
+
+
+                            for (int row = 2; row <= rowCount; row++)
+                            {
+                                try
+                                {
+                                    user = new User
+                                    {
+                                        EmailAddress = worksheet.Cells[row, 2].Value.ToString().Trim(),
+                                        UserName = worksheet.Cells[row, 3].Value.ToString().Trim(),
+                                        Name = worksheet.Cells[row, 4].Value.ToString().Trim(),
+                                        Surname = worksheet.Cells[row, 5].Value.ToString().Trim(),
+                                        BranchId = dicBranch.ContainsKey(worksheet.Cells[row, 6].Value.ToString().Trim()) ? dicBranch[worksheet.Cells[row, 6].Value.ToString().Trim()] : (long?)null,
+                                        MezonUserId = worksheet.Cells[row, 8].Value.ToString().Trim(),
+                                        IsActive = true
+                                    };
+
+                                    //if (worksheet.Cells[row, 7] != null && worksheet.Cells[row, 7].Value != null)
+                                    //    user.PhoneNumber = worksheet.Cells[row, 7].Value.ToString().Trim();
+
+                                    //if (worksheet.Cells[row, 8] != null && worksheet.Cells[row, 8].Value != null)
+                                    //    user.Address = worksheet.Cells[row, 8].Value.ToString().Trim();
+
+                                    //await _userManager.CreateAsync(user, RandomPasswordHelper.CreateRandomPassword(8));
                                     CheckErrors(await _userManager.SetRoles(user, new string[] { StaticRoleNames.Host.BasicUser }));
                                     successList.Add(user.EmailAddress);
                                 }
