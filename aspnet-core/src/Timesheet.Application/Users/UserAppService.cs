@@ -517,7 +517,7 @@ namespace Ncc.Users
         }
 
         [HttpPost]
-        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_AddNew)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_ImportUser)]
         public async Task<Object> ImportUsersWithMezonIdFromFile([FromForm] FileInputDto input)
         {
             try
@@ -582,6 +582,41 @@ namespace Ncc.Users
                     throw;
                 }
                 throw new UserFriendlyException("An error occurred while processing the file: " + ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_DownloadTemplateUser)]
+        public async Task<FileBase64Dto> DownloadTemplate()
+        {
+            try
+            {
+                string fileName = "TemplateImportNewUsers.xlsx";
+                string folderPath = Path.Combine("wwwroot", "template");
+                string filePath = Path.Combine(folderPath, fileName);
+
+                if (!File.Exists(filePath))
+                {
+                    throw new UserFriendlyException($"Cannot find importing user template at path: {filePath}");
+                }
+
+                byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+                string fileBase64 = Convert.ToBase64String(fileBytes);  
+
+                return new FileBase64Dto
+                {
+                    FileName = fileName,
+                    FileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    Base64 = fileBase64
+                };
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserFriendlyException)
+                {
+                    throw;
+                }
+                throw new UserFriendlyException("An error occured when reading template file", ex.Message);
             }
         }
 
