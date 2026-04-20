@@ -597,11 +597,11 @@ namespace Ncc.Users
 
                 if (!File.Exists(filePath))
                 {
-                    throw new UserFriendlyException($"Cannot find whitelist template at path: {filePath}");
+                    throw new UserFriendlyException($"Cannot find importing user template at path: {filePath}");
                 }
 
                 byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
-                string fileBase64 = Convert.ToBase64String(fileBytes);
+                string fileBase64 = Convert.ToBase64String(fileBytes);  
 
                 return new FileBase64Dto
                 {
