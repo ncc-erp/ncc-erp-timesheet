@@ -555,12 +555,6 @@ namespace Ncc.Users
                                         IsActive = true
                                     };
 
-                                    //if (worksheet.Cells[row, 7] != null && worksheet.Cells[row, 7].Value != null)
-                                    //    user.PhoneNumber = worksheet.Cells[row, 7].Value.ToString().Trim();
-
-                                    //if (worksheet.Cells[row, 8] != null && worksheet.Cells[row, 8].Value != null)
-                                    //    user.Address = worksheet.Cells[row, 8].Value.ToString().Trim();
-
                                     CheckErrors(await _userManager.CreateAsync(user, User.CreateRandomPassword()));
                                     CheckErrors(await _userManager.SetRoles(user, new string[] { StaticRoleNames.Host.BasicUser }));
                                     successList.Add(user.EmailAddress);
