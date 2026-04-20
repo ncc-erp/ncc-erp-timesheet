@@ -13,7 +13,8 @@ namespace Ncc.Authorization.Users
 
         public static string CreateRandomPassword()
         {
-            return Guid.NewGuid().ToString("N").Truncate(16);
+            string baseGuid = Guid.NewGuid().ToString("N").Truncate(16);
+            return baseGuid + "A@";
         }
 
         public static User CreateTenantAdminUser(int tenantId, string emailAddress)
