@@ -22,6 +22,8 @@ namespace Ncc.Authorization
         public const string Admin_Users_UpdateUserWorkingTime = "Admin.Users.UpdateUserWorkingTime";
         public const string Admin_Users_ViewLevelUser = "Admin.Users.ViewLevelUser";
         public const string Admin_Users_ExportDataCheckpoint = "Admin.Users.ExportDataCheckpoint";
+        public const string Admin_Users_ImportUser = "Admin.Users.ImportUser";
+        public const string Admin_Users_DownloadTemplateUser = "Admin.Users.DownloadTemplateUser";
         public const string Admin_Roles = "Admin.Roles";
         public const string Admin_Roles_View = "Admin.Roles.View";
         public const string Admin_Roles_ViewDetail = "Admin.Roles.ViewDetail";
@@ -443,6 +445,8 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_Users_UpdateUserWorkingTime,
                     PermissionNames.Admin_Users_ViewLevelUser,
                     PermissionNames.Admin_Users_ExportDataCheckpoint,
+                    PermissionNames.Admin_Users_ImportUser,
+                    PermissionNames.Admin_Users_DownloadTemplateUser,
                     PermissionNames.Admin_Roles,
                     PermissionNames.Admin_Roles_View,
                     PermissionNames.Admin_Roles_ViewDetail,
@@ -1000,6 +1004,8 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_Users_UpdateUserWorkingTime, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update user's working time" },
             new SystemPermission{ Name =  PermissionNames.Admin_Users_ViewLevelUser, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View level user" },
             new SystemPermission{ Name =  PermissionNames.Admin_Users_ExportDataCheckpoint, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Export Data For Checkpoint"},
+            new SystemPermission{ Name =  PermissionNames.Admin_Users_ImportUser, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Import user from Excel file" },
+            new SystemPermission{ Name =  PermissionNames.Admin_Users_DownloadTemplateUser, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Download template import user" },
             new SystemPermission{ Name =  PermissionNames.Admin_Roles, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Roles" },
             new SystemPermission{ Name =  PermissionNames.Admin_Roles_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View roles" },
             new SystemPermission{ Name =  PermissionNames.Admin_Roles_ViewDetail, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View detail role" },
@@ -1391,6 +1397,8 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.Admin_Users_UpdateUserWorkingTime, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Update user's working time" },
                             new SystemPermission{ Name =  PermissionNames.Admin_Users_ViewLevelUser, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View level user" },
                             new SystemPermission{ Name =  PermissionNames.Admin_Users_ExportDataCheckpoint, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Export Data For Checkpoint"},
+                            new SystemPermission{ Name =  PermissionNames.Admin_Users_ImportUser, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Import user from Excel file" },
+                            new SystemPermission{ Name =  PermissionNames.Admin_Users_DownloadTemplateUser, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Download template import user" },
 
                         }
                     },
