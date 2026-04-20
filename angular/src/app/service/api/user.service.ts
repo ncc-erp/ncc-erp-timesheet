@@ -147,4 +147,12 @@ export class UserService extends BaseApiService {
     ExportDataCheckpoint(startDate: string, endDate: string): Observable<any>{
         return this.http.get(this.rootUrl + `/ExportDataCheckpoint?startDate=${startDate}&endDate=${endDate}`)
     }
+
+    import(input: FormData): Observable<any> {
+        return this.http.post<any>(this.rootUrl + '/ImportUsersWithMezonIdFromFile', input);
+    } 
+
+    downloadTemplate(): Observable<any> {
+        return this.http.post(this.rootUrl + '/DownloadTemplate', null);
+    }
 }

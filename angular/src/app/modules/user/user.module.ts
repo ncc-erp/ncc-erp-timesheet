@@ -18,10 +18,11 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import { MAT_DATE_LOCALE } from '@angular/material';
 import { ImportUserWorkingTimeComponent } from './import-user-working-time/import-user-working-time.component';
 import { ExportDataCheckPointComponent } from './export-data-check-point/export-data-check-point/export-data-check-point.component';
+import { ImportUsersComponent } from './import-users/import-users.component';
 
 
 @NgModule({
-  declarations: [UserSecondComponent, CreateUserComponent,UpdateUserComponent,RoleUserComponent, ImportUserWorkingTimeComponent, ExportDataCheckPointComponent],
+  declarations: [UserSecondComponent, CreateUserComponent,UpdateUserComponent,RoleUserComponent, ImportUserWorkingTimeComponent, ExportDataCheckPointComponent, ImportUsersComponent],
   imports: [
     CommonModule,
     UserRoutingModule,
@@ -41,7 +42,8 @@ import { ExportDataCheckPointComponent } from './export-data-check-point/export-
     UpdateUserComponent,
     UploadComponent,
     ImportUserWorkingTimeComponent,
-    ExportDataCheckPointComponent
+    ExportDataCheckPointComponent,
+    ImportUsersComponent
   ],
   exports: [
     ExportDataCheckPointComponent
