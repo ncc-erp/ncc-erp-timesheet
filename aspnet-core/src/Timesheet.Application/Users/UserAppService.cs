@@ -520,59 +520,69 @@ namespace Ncc.Users
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_AddNew)]
         public async Task<Object> ImportUsersWithMezonIdFromFile([FromForm] FileInputDto input)
         {
-            var successList = new List<string>();
-            var failedList = new List<string>();
-            var branchs = await _ws.GetAll<Timesheet.Entities.Branch>().ToListAsync();
-            var dicBranch = branchs.ToDictionary(s => s.DisplayName, s => s.Id);
-
-            if (input != null)
+            try
             {
-                if (Path.GetExtension(input.File.FileName).Equals(".xlsx"))
+                if (input == null || input.File == null || input.File.Length == 0)
                 {
-                    using (var stream = new MemoryStream())
+                    throw new UserFriendlyException("No file upload!");
+                }
+
+                if (!Path.GetExtension(input.File.FileName).Equals(".xlsx"))
+                {
+                    throw new UserFriendlyException("Invalid file format! Please upload an .xlsx file.");
+                }
+
+                var successList = new List<string>();
+                var failedList = new List<string>();
+                var branchs = await _ws.GetAll<Timesheet.Entities.Branch>().ToListAsync();
+                var dicBranch = branchs.ToDictionary(s => s.DisplayName, s => s.Id);
+
+                using (var stream = new MemoryStream())
+                {
+                    await input.File.CopyToAsync(stream);
+
+                    using (var package = new ExcelPackage(stream))
                     {
-                        await input.File.CopyToAsync(stream);
+                        ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                        var rowCount = worksheet.Dimension.Rows;
+                        User user = null;
 
-                        using (var package = new ExcelPackage(stream))
+                        for (int row = 2; row <= rowCount; row++)
                         {
-                            ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
-                            var rowCount = worksheet.Dimension.Rows;
-                            User user = null;
-
-
-                            for (int row = 2; row <= rowCount; row++)
+                            try
                             {
-                                try
+                                user = new User
                                 {
-                                    user = new User
-                                    {
-                                        EmailAddress = worksheet.Cells[row, 2].Value.ToString().Trim(),
-                                        UserName = worksheet.Cells[row, 3].Value.ToString().Trim(),
-                                        Name = worksheet.Cells[row, 4].Value.ToString().Trim(),
-                                        Surname = worksheet.Cells[row, 5].Value.ToString().Trim(),
-                                        BranchId = dicBranch.ContainsKey(worksheet.Cells[row, 6].Value.ToString().Trim()) ? dicBranch[worksheet.Cells[row, 6].Value.ToString().Trim()] : (long?)null,
-                                        MezonUserId = worksheet.Cells[row, 8].Value.ToString().Trim(),
-                                        IsActive = true
-                                    };
+                                    EmailAddress = worksheet.Cells[row, 2].Value.ToString().Trim(),
+                                    UserName = worksheet.Cells[row, 3].Value.ToString().Trim(),
+                                    Name = worksheet.Cells[row, 4].Value.ToString().Trim(),
+                                    Surname = worksheet.Cells[row, 5].Value.ToString().Trim(),
+                                    BranchId = dicBranch.ContainsKey(worksheet.Cells[row, 6].Value.ToString().Trim()) ? dicBranch[worksheet.Cells[row, 6].Value.ToString().Trim()] : (long?)null,
+                                    MezonUserId = worksheet.Cells[row, 8].Value.ToString().Trim(),
+                                    IsActive = true
+                                };
 
-                                    CheckErrors(await _userManager.CreateAsync(user, User.CreateRandomPassword()));
-                                    CheckErrors(await _userManager.SetRoles(user, new string[] { StaticRoleNames.Host.BasicUser }));
-                                    successList.Add(user.EmailAddress);
-                                }
-                                catch (Exception e)
-                                {
-                                    failedList.Add(user.EmailAddress + " error =>" + e.Message);
-                                }
+                                CheckErrors(await _userManager.CreateAsync(user, User.CreateRandomPassword()));
+                                CheckErrors(await _userManager.SetRoles(user, new string[] { StaticRoleNames.Host.BasicUser }));
+                                successList.Add(user.EmailAddress);
+                            }
+                            catch (Exception e)
+                            {
+                                failedList.Add(user.EmailAddress + " error =>" + e.Message);
                             }
                         }
                     }
                 }
-                else
-                {
-                    throw new UserFriendlyException(String.Format("No file upload!"));
-                }
+                return new { successList, failedList };
             }
-            return new { successList, failedList };
+            catch (Exception ex)
+            {
+                if (ex is UserFriendlyException)
+                {
+                    throw;
+                }
+                throw new UserFriendlyException("An error occurred while processing the file: " + ex.Message);
+            }
         }
 
         public async Task<List<ProjectManagerDto>> GetProjectManagerOfUser(EntityDto<long> input)
