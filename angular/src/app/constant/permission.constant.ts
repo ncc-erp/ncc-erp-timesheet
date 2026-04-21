@@ -13,6 +13,8 @@ export const PERMISSIONS_CONSTANT = {
     UpdateUserWorkingTime: "Admin.Users.UpdateUserWorkingTime",
     ViewLevelUser: "Admin.Users.ViewLevelUser",
     ExportDataCheckpoint: "Admin.Users.ExportDataCheckpoint",
+    ImportUser: "Admin.Users.ImportUser",
+    DownloadTemplateUser: "Admin.Users.DownloadTemplateUser",
 
     //role
     ViewRoles: "Admin.Roles.View",

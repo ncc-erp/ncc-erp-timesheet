@@ -21,6 +21,8 @@ import { PositionDto } from '@app/service/api/model/position-dto';
 import { PositionService } from '@app/service/api/position.service';
 import { TimeGetDataCheckpointDialog, TimeGetDataCheckpointDto } from '@app/service/api/model/time-checkpoint-dto';
 import { ExportDataCheckPointComponent } from './export-data-check-point/export-data-check-point/export-data-check-point.component';
+import * as FileSaver from 'file-saver';
+import { ImportUsersComponent } from './import-users/import-users.component';
 
 @Component({
   selector: 'app-user',
@@ -39,6 +41,8 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
   UploadWorkingTime = PERMISSIONS_CONSTANT.UploadWorkingTime;
   VIEW_LEVEL_USER = PERMISSIONS_CONSTANT.ViewLevelUser;
   ExportDataCheckpoint = PERMISSIONS_CONSTANT.ExportDataCheckpoint;
+  IMPORT_USER = PERMISSIONS_CONSTANT.ImportUser;
+  DOWNLOAD_TEMPLATE = PERMISSIONS_CONSTANT.DownloadTemplateUser;
   enableExpandName = true;
   isLoadingFileUpload: boolean;
   isActive;
@@ -557,6 +561,38 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     dialogRef.afterClosed().subscribe((res) => {
       this.refresh();
     });
+  }
+
+  importUsers(): void {
+    const dialogRef = this.dialog.open(ImportUsersComponent, {
+      disableClose: true,
+      width: '30%',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {}
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.refresh();
+      }
+    })
+  }
+
+  private convertFile(fileData) {
+    var buf = new ArrayBuffer(fileData.length);
+    var view = new Uint8Array(buf);
+    for (var i = 0; i != fileData.length; ++i)
+    view[i] = fileData.charCodeAt(i) & 0xff;
+    return buf;
+  }
+
+  downloadTemplate(): void {
+    this.userService.downloadTemplate().subscribe((rs) => {
+      const file = new Blob([this.convertFile(atob(rs.result.base64))], {
+        type: "application/vnd.ms-excel;charset=utf-8",
+      });
+      FileSaver.saveAs(file, "TemplateImportNewUsers.xlsx");
+    })
   }
 }
 

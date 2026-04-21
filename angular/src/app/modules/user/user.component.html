@@ -26,14 +26,24 @@
                             <mat-icon>add</mat-icon> New User
                         </button>
                     </div>
-                    <div *ngIf="permission.isGranted(UploadWorkingTime)">
+                    <!-- <div *ngIf="permission.isGranted(UploadWorkingTime)">
                         <button large mat-raised-button color="primary" (click)='importExcel()' name="importBtn">
                             <mat-icon>local_printshop</mat-icon> Import
                         </button>
-                    </div>
+                    </div> -->
                     <div *ngIf="permission.isGranted(ExportDataCheckpoint)">
                         <button large mat-raised-button color="primary" (click)='exportExcel()'>
                             <mat-icon>local_printshop</mat-icon> Export
+                        </button>
+                    </div>
+                    <div *ngIf="permission.isGranted(IMPORT_USER)">
+                        <button large mat-raised-button color="primary" (click)="importUsers()">
+                            <mat-icon>file_upload</mat-icon> Import Users
+                        </button>
+                    </div>
+                    <div *ngIf="permission.isGranted(DOWNLOAD_TEMPLATE)">
+                        <button large mat-raised-button (click)="downloadTemplate()">
+                            <mat-icon>file_download</mat-icon> Download Template
                         </button>
                     </div>
                 </div>
