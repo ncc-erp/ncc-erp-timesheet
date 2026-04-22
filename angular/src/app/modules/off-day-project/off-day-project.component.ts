@@ -17,6 +17,7 @@ import { Subject } from 'rxjs';
 import { dayOffDTO } from '../day-off/day-off.component';
 import { OffDayProjectDetailComponent } from './off-day-project-detail/off-day-project-detail.component';
 import { PermissionCheckerService } from 'abp-ng2-module/dist/src/auth/permission-checker.service';
+import { AdvancedFilterComponent } from './advanced-filter/advanced-filter.component';
 
 @Component({
   selector: 'app-off-day-project',
@@ -100,8 +101,8 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     this.isRadiocheckfilterbyBranch = true;
   }
 
-  isAdvancedFilterOpen = false;
   APPROVAL_ABSENCE_DAY_PROJECT = PERMISSIONS_CONSTANT.ApprovalAbsenceDayByProject;
+
   public groupedRequests: { date: string, requests: AbsenceRequestDto[] }[] = [];
 
   private groupRequests() {
@@ -467,5 +468,15 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     } else if (isRefresh) {
       this.getDayOff();
     }
+  }
+
+  openAdvancedFilter() {
+    this.diaLog.open(AdvancedFilterComponent, {
+      data: this,
+      width: '100%',
+      maxWidth: '100vw',
+      panelClass: 'manage-team-filter-dialog',
+      restoreFocus: false
+    });
   }
 }

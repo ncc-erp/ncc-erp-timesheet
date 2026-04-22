@@ -374,38 +374,6 @@ pre {
 .mobile-view {
     display: none;
 }
-.mobile-advanced-dialog {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-.mobile-advanced-dialog.show {
-    opacity: 1;
-    visibility: visible;
-}
-.mobile-advanced-dialog .dialog-content {
-    background-color: white;
-    border-radius: 12px;
-    padding: 20px 25px;
-    width: 90%;
-    max-width: 420px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) translateY(-20px);
-    transition: transform 0.3s ease;
-}
-.mobile-advanced-dialog.show .dialog-content {
-    transform: translate(-50%, -50%) translateY(0);
-}
 
 @media screen and (max-width: 767px) {
     .flex div {
@@ -480,10 +448,6 @@ pre {
         overflow: hidden;
     }
 
-    .mobile-advanced-dialog {
-        display: block;
-    }
-
     .mobile-header {
         display: flex;
         justify-content: space-between;
@@ -508,6 +472,10 @@ pre {
         display: flex;
         gap: 10px;
         align-items: center;
+    }
+
+    hr {
+        margin-top: 0;
     }
 
     .search-container {
@@ -719,222 +687,5 @@ pre {
     .action-separator {
         width: 1px;
         background-color: #b71c1c;
-    }
-
-    .dialog-header-mb {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-    }
-
-    .dialog-title-mb {
-        margin-top: 8px !important;
-        font-size: 18px;
-        font-weight: 400;
-        padding-left: 0 !important;
-    }
-
-    .dialog-close-icon {
-        font-size: 24px;
-        cursor: pointer;
-    }
-
-    .filter-row-mb {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
-    }
-
-    ::ng-deep .filter-row-mb .mat-select-trigger {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    ::ng-deep .filter-row-mb .mat-select-value {
-        max-width: calc(100% - 16px) !important;
-        padding-right: 4px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    ::ng-deep .filter-row-mb .mat-form-field-infix {
-        width: auto !important;
-        min-width: 0 !important;
-    }
-
-    ::ng-deep .filter-row-mb .mat-form-field-wrapper {
-        padding-bottom: 10px;
-    }
-
-    ::ng-deep .filter-row-mb .mat-select-arrow-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .filter-group-mb {
-        display: flex;
-        align-items: center;
-        flex: 1;
-        min-width: 0;
-    }
-
-    .filter-group-mb mat-form-field {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .filter-select-mb {
-        border: none;
-        outline: none;
-        width: 100%;
-        height: 35px;
-        background: transparent;
-        font-size: 14px;
-    }
-
-    .filter-work-calendar-mb {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        width: 100%;
-        margin-bottom: 20px;
-    }
-
-    .filter-work-calendar-mb .filter-label-mb {
-        margin-bottom: 0;
-        line-height: normal;
-    }
-
-    ::ng-deep .filter-work-calendar-mb .mat-radio-label {
-        align-items: center !important;
-    }
-
-    ::ng-deep .filter-work-calendar-mb .mat-radio-label-content {
-        display: flex;
-        align-items: center;
-    }
-
-    .radio-input-mb {
-        width: 20px;
-        height: 20px;
-    }
-
-    .project-filter-row-mb {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-
-    .project-filter-row-mb .filter-group-mb:nth-child(1) {
-        flex: 0 0 calc(55% - 5px);
-        width: calc(55% - 5px);
-        min-width: 0;
-    }
-
-    .project-filter-row-mb .filter-group-mb:nth-child(2) {
-        flex: 0 0 calc(45% - 5px);
-        width: calc(45% - 5px);
-        min-width: 0;
-    }
-
-    .project-filter-row-mb app-multiple-select {
-        width: 100%;
-        display: block;
-    }
-
-    ::ng-deep .project-filter-row-mb app-multiple-select mat-form-field {
-        width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    ::ng-deep .project-filter-row-mb .mat-select-trigger {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    ::ng-deep .project-filter-row-mb .mat-select-value {
-        max-width: calc(100% - 16px) !important;
-        padding-right: 4px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    ::ng-deep .project-filter-row-mb .mat-form-field-infix {
-        width: auto !important;
-        min-width: 0 !important;
-    }
-
-    ::ng-deep .project-filter-row-mb .mat-select-arrow-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .request-type-column-row-mb {
-        display: flex;
-        gap: 10px;
-    }
-
-    ::ng-deep .request-type-column-row-mb .mat-select-trigger {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    ::ng-deep .request-type-column-row-mb .mat-select-value {
-        max-width: calc(100% - 16px) !important;
-        padding-right: 4px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    ::ng-deep .request-type-column-row-mb .mat-form-field-infix {
-        width: auto !important;
-        min-width: 0 !important;
-    }
-
-    .request-type-sub-group-mb {
-        flex: 0 0 calc(50% - 5px);
-        width: calc(50% - 5px);
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-    }
-
-    .request-type-sub-group-mb mat-form-field {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .sub-group-label-mb {
-        font-size: 12px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-    }
-
-    .dialog-footer-mb {
-        display: flex;
-        justify-content: center;
-    }
-
-    .filter-apply-btn-mb {
-        min-width: 100px;
-        height: 36px;
-        border-radius: 10px;
-        font-weight: 500;
-        font-size: 14px;
     }
 }

@@ -260,3 +260,213 @@ pre {
         align-self: center;
     }
 }
+
+.mobile-view {
+    display: none;
+}
+
+@media screen and (max-width: 767px) {
+    .desktop-view-container {
+        display: none !important;
+    }
+
+    .mobile-view {
+        display: block;
+        background-color: #fcfcfc;
+        min-height: 100vh;
+        overflow: hidden;
+    }
+
+    .mobile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 15px 5px 15px;
+    }
+
+    .mobile-header-title {
+        font-size: 18px;
+        font-weight: 500;
+        padding-left: 0 !important;
+        margin-bottom: 10px;
+        flex: 1;
+    }
+
+    .refresh-btn-mb {
+        left: 15px;
+    }
+
+    .mobile-search-filter {
+        padding: 0 15px 50px 15px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    hr {
+        margin-top: 0;
+    }
+
+    .search-container {
+        flex: 1;
+        border: 2px solid #757575;
+        border-radius: 10px;
+        display: flex;
+        overflow: hidden;
+        height: 35px;
+    }
+
+    .search-input {
+        border: none;
+        padding: 0 10px;
+        flex: 1;
+        outline: none;
+        font-size: 13px;
+        background: transparent;
+        min-width: 0;
+    }
+
+    .search-button {
+        border-left: 2px solid #757575;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 15px;
+        border-radius: 10px;
+        margin: -1px;
+        cursor: pointer;
+    }
+
+    .search-icon-mb {
+        font-size: 18px;
+        margin-right: 4px;
+    }
+
+    .search-text-mb {
+        font-size: 13px;
+    }
+
+    .advanced-filter-button {
+        border-radius: 10px;
+        padding: 0 15px;
+        font-size: 13px;
+        cursor: pointer;
+        white-space: nowrap;
+        height: 35px;
+        line-height: normal;
+    }
+
+    .mobile-list-requests {
+        padding: 0 15px 15px 15px;
+    }
+
+    .mobile-date-group {
+        margin-bottom: 15px;
+    }
+
+    .date-group-header {
+        cursor: pointer;
+    }
+
+    .mobile-requests {
+        background-color: #fff;
+    }
+
+    .request-item-card {
+        border: 2px solid #b71c1c;
+        border-radius: 4px;
+        background-color: #fff;
+        overflow: hidden;
+    }
+
+    .request-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .user-info-mb {
+        display: flex;
+        align-items: center;
+    }
+
+    .user-details-mb {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-full-name-mb {
+        color: #001fff;
+        font-weight: bold;
+        font-size: 14px;
+        text-decoration: none;
+    }
+
+    .user-badges-mb {
+        display: flex;
+        gap: 5px;
+        margin-top: 4px;
+    }
+
+    .leave-badges-container {
+        display: flex;
+        margin-top: 2px;
+    }
+
+    .request-details-grid-mb {
+        border-top: 1px solid #b71c1c;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1px;
+        background-color: #b71c1c;
+    }
+
+    .status-label {
+        background-color: transparent !important;
+        padding: 0px;
+        font-size: 14px;
+    }
+
+    .day-off-state-pending {
+        color: darkgoldenrod !important;
+    }
+
+    .day-off-state-approved {
+        color: green !important;
+    }
+
+    .day-off-state-reject {
+        color: #474747e0 !important;
+    }
+
+    .grid-cell-label,
+    .grid-cell-value,
+    .grid-cell-status,
+    .grid-cell-label-last,
+    .grid-cell-value-last {
+        background-color: #fff;
+        border: none !important;
+        padding: 8px;
+        text-align: center;
+        font-size: 13px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .grid-cell-label,
+    .grid-cell-label-last {
+        font-weight: bold;
+    }
+
+    .grid-cell-status {
+        font-weight: 500;
+    }
+
+    .grid-cell-value-last p,
+    .grid-cell-value p {
+        margin: 0;
+    }
+}

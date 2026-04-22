@@ -1,5 +1,6 @@
-<div class="row clearfix">
-  <div class="card main-content" [busy]="isLoading">
+<div class="row clearfix desktop-view-container" id="off-day-project-for-user">
+  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="card main-content" [busy]="isLoading">
     <div class="header">
       <h2 class="title">{{ "Team working calendar" | localize }}</h2>
       <div class="extra-action-group">
@@ -246,6 +247,7 @@
     </div>
   </div>
 </div>
+</div>
 
 <ng-template #customCellTemplate let-day="day" let-locale="locale">
   <div
@@ -329,3 +331,130 @@
     </div>
   </div>
 </ng-template>
+
+<div class="mobile-view" [busy]="isLoading">
+  <div class="mobile-header">
+    <h2 class="mobile-header-title">Team Working Calendar</h2>
+    <button name="menuBtnMb" mat-icon-button [matMenuTriggerFor]="moreMb" class="refresh-btn-mb">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #moreMb="matMenu">
+      <button name="refreshBtnMb" mat-menu-item (click)="refreshData()">
+        <mat-icon>refresh</mat-icon>
+        <span>{{ "Refresh" | localize }}</span>
+      </button>
+      <button mat-menu-item *ngIf="shouldShowNotifyPmButton()" (click)="notifyApproveRequestOffToPM()">
+        <mat-icon>notifications_active</mat-icon>
+        <span>{{ "Notify PM" | localize }}</span>
+      </button>
+      <button mat-menu-item *ngIf="permission.isGranted(Export_Team_Working_Calender)" (click)="onExport()" [disabled]="isDisabled">
+        <mat-icon>ios_share</mat-icon>
+        <span>{{ "Export" | localize }}</span>
+      </button>
+    </mat-menu>
+  </div>
+
+  <hr />
+
+  <div class="mobile-search-filter">
+    <div class="search-container">
+      <input [(ngModel)]="searchText" (keyup.enter)="refreshData()" placeholder="Search by email"
+        class="search-input" />
+      <button (click)="refreshData()" mat-flat-button color="primary" class="search-button">
+        <i class="material-icons search-icon-mb">search</i>
+        <span class="search-text-mb">Search</span>
+      </button>
+    </div>
+    <button (click)="openAdvancedFilter()" mat-flat-button color="primary" class="advanced-filter-button">
+      Advanced Filter
+    </button>
+  </div>
+
+  <div class="mobile-list-requests">
+    <div class="panel-group" role="tablist" aria-multiselectable="true">
+      <div *ngFor="let group of groupedRequests; let i = index; trackBy: trackByDate" class="panel panel-col-primary mobile-date-group">
+        <div class="panel-heading date-group-header" role="tab" [attr.id]="'headingGroup-' + i">
+          <h4 class="panel-title">
+            <a role="button" data-toggle="collapse" [attr.href]="'#collapseGroup-' + i" aria-expanded="false"
+              [attr.aria-controls]="'collapseGroup-' + i" class="collapsed" (click)="loadGroupRequests(group)">
+              <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">date_range</i>
+              <span style="font-weight: bold;">{{group.date}}</span>
+            </a>
+          </h4>
+        </div>
+        <div [attr.id]="'collapseGroup-' + i" class="panel-collapse collapse mobile-requests" role="tabpanel"
+          [attr.aria-labelledby]="'headingGroup-' + i">
+          <div class="panel-body">
+            <div *ngIf="group.isLoading" class="text-center" style="padding: 10px;">
+              Loading...
+            </div>
+            <div *ngFor="let item of group.requests; let last = last; trackBy: trackByRequestId" [style.margin-bottom]="last ? '0' : '10px'"
+              class="request-item-card">
+
+              <div class="request-item-header">
+                <div class="user-info-mb">
+                  <img [src]="getAvatar(item)" width="40" height="40" alt="Member"
+                    style="border-radius: 50%; margin-right: 10px" />
+                  <div class="user-details-mb">
+                    <a [routerLink]="['app/main/view-leave-day-of-user/', item.userId]"
+                      class="user-full-name-mb">{{item.fullName}}</a>
+                    <div class="user-badges-mb">
+                      <ng-container *ngIf="item.type || item.type == 0">
+                        <span *ngIf="item.type == 0" class="label bg-red">{{getLabel(item.type)}}</span>
+                        <span *ngIf="item.type == 1" class="label bg-green">{{getLabel(item.type)}}</span>
+                        <span *ngIf="item.type == 2" class="label bg-blue">{{getLabel(item.type)}}</span>
+                        <span *ngIf="item.type == 3" class="label bg-orange">{{getLabel(item.type)}}</span>
+                        <span *ngIf="item.type == 5" class="label bg-purple">{{getLabel(item.type)}}</span>
+                      </ng-container>
+
+                      <span class="label" [style.backgroundColor]="item.branchColor">
+                        {{item.branchDisplayName}}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="leave-badges-container">
+                  <span class="pin-wrap" [ngClass]="getListTypeClasses(item)">{{getLeaveTypeText(item)}}</span>
+                  <span class="pin-wrap" [ngClass]="getListClasses(item)" style="margin-left: 3px;">{{getLeaveText(item)}}</span>
+                </div>
+              </div>
+
+              <div class="request-details-grid-mb">
+                <div class="grid-cell-label">Status</div>
+                <div class="grid-cell-status">
+                  <span class="label status-label day-off-state-pending" *ngIf="item.status === 1">
+                    Pending
+                  </span>
+                  <span class="label status-label day-off-state-approved" *ngIf="item.status === 2">
+                    Approved
+                  </span>
+                  <span class="label status-label day-off-state-reject" *ngIf="item.status === 3">
+                    Rejected
+                  </span>
+                </div>
+
+                <div class="grid-cell-label">Off Type</div>
+                <div class="grid-cell-value">
+                  <span *ngIf="item.leavedayType == 0  && !item.absenceTime">{{item.dayOffName}}</span>
+                </div>
+
+                <div class="grid-cell-label">Created At</div>
+                <div class="grid-cell-value">
+                  <p *ngIf="item.createTime" style="margin-bottom: 2px;">{{item.createTime | date : "dd/MM/yyyy HH:mm:ss"}}</p>
+                  <p *ngIf="item.createBy">by {{item.createBy}}</p>
+                </div>
+
+                <div class="grid-cell-label-last">Last Modified At</div>
+                <div class="grid-cell-value-last">
+                  <p *ngIf="item.lastModificationTime" style="margin-bottom: 2px;">{{item.lastModificationTime | date : "dd/MM/yyyy HH:mm:ss"}}</p>
+                  <p *ngIf="item.lastModifierUserName">by {{item.lastModifierUserName}}</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
