@@ -1,39 +1,105 @@
 <form #createForm="ngForm" autocomplete="off" id="frm_create_group" novalidate>
-  <h1 mat-dialog-title style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>{{title}}</h1>
-  <mat-dialog-content style="width: 400px; max-width: 80vw;">
-    <mat-form-field appearance="outline" *ngIf="data.type == 0 && data.absenceTime == 0">
-      <mat-label>Absence Type</mat-label>
-      <mat-select name="absenceType" [(value)]="absenceDayReq.dayOffTypeId">
-        <mat-option *ngFor="let type of dayOffTypes" [value]="type.id">{{type.name}}</mat-option>
-      </mat-select>
-    </mat-form-field>
-    <div *ngIf="reason.errors && (reason.dirty || reason.touched) && data.type != APP_CONSTANT.DayAbsenceType.Remote"
-      class="text-danger">
-      <div [hidden]="!reason.errors.required">
-        <ng-container *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Off"> Reason is required!</ng-container>
-        <ng-container *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Onsite"> Note is required!</ng-container>
+  <div class="desktop-view">
+    <h1 mat-dialog-title style="cursor: grab;" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>{{title}}</h1>
+    <mat-dialog-content style="width: 400px; max-width: 80vw;">
+      <mat-form-field appearance="outline" *ngIf="data.type == 0 && data.absenceTime == 0">
+        <mat-label>Absence Type</mat-label>
+        <mat-select name="absenceType" [(value)]="absenceDayReq.dayOffTypeId">
+          <mat-option *ngFor="let type of dayOffTypes" [value]="type.id">{{type.name}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div *ngIf="reason.errors && (reason.dirty || reason.touched) && data.type != APP_CONSTANT.DayAbsenceType.Remote"
+        class="text-danger">
+        <div [hidden]="!reason.errors.required">
+          <ng-container *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Off"> Reason is required!</ng-container>
+          <ng-container *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Onsite"> Note is required!</ng-container>
+        </div>
       </div>
-    </div>
-    <mat-form-field appearance="outline">
-      <mat-label *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Off">Reason</mat-label>
-      <mat-label *ngIf="data.type!=APP_CONSTANT.DayAbsenceType.Off">Note</mat-label>
-      <textarea name="reason" matInput [(ngModel)]="absenceDayReq.reason"
-        [required]="data.type != APP_CONSTANT.DayAbsenceType.Remote ? true:false" #reason="ngModel"
-        cdkFocusInitial></textarea>
-    </mat-form-field>
-    <div class="text-center">
-      <div *ngFor="let entry of data.selectedDays | keyvalue">
-        <button class="btn" [ngClass]="getLissClass(entry)" style="min-width: 200px;margin-bottom: 5px;">
-          {{entry.key | date: "dd-MM-yyyy" }}({{getNameByValue(entry)}}<span *ngIf="entry.value.hour">:
-            {{entry.value.hour}}h</span>)
-        </button>
+      <mat-form-field appearance="outline">
+        <mat-label *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Off">Reason</mat-label>
+        <mat-label *ngIf="data.type!=APP_CONSTANT.DayAbsenceType.Off">Note</mat-label>
+        <textarea name="reason" matInput [(ngModel)]="absenceDayReq.reason"
+          [required]="data.type != APP_CONSTANT.DayAbsenceType.Remote ? true:false" #reason="ngModel"
+          cdkFocusInitial></textarea>
+      </mat-form-field>
+      <div class="text-center">
+        <div *ngFor="let entry of data.selectedDays | keyvalue">
+          <button class="btn" [ngClass]="getLissClass(entry)" style="min-width: 200px;margin-bottom: 5px;">
+            {{entry.key | date: "dd-MM-yyyy" }}({{getNameByValue(entry)}}<span *ngIf="entry.value.hour">:
+              {{entry.value.hour}}h</span>)
+          </button>
+        </div>
       </div>
-    </div>
-  </mat-dialog-content>
-  <mat-dialog-actions align="end">
-    <button name="cancelBtn" mat-raised-button mat-dialog-close>Cancel</button>
-    <button name="saveBtn" mat-raised-button color="primary" [disabled]="!createForm.form.valid || isSaving" (click)="submitReq()">
-      Save
-    </button>
-  </mat-dialog-actions>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button name="cancelBtn" mat-raised-button mat-dialog-close>Cancel</button>
+      <button name="saveBtn" mat-raised-button color="primary" [disabled]="!createForm.form.valid || isSaving" (click)="submitReq()">
+        Save
+      </button>
+    </mat-dialog-actions>
+  </div>
+
+  <div class="mobile-advanced-dialog">
+    <h1 mat-dialog-title class="m-dialog-title">{{title}}</h1>
+    <mat-dialog-content>
+      <mat-form-field appearance="outline" class="w-100" *ngIf="data.type == 0 && data.absenceTime == 0">
+        <mat-label>Absence Type</mat-label>
+        <mat-select name="mAbsenceType" [(value)]="absenceDayReq.dayOffTypeId">
+          <mat-option *ngFor="let type of dayOffTypes" [value]="type.id">{{type.name}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <div *ngIf="mReason.errors && (mReason.dirty || mReason.touched) && data.type != APP_CONSTANT.DayAbsenceType.Remote"
+        class="text-danger mb-2">
+        <div [hidden]="!mReason.errors.required">
+          <ng-container *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Off"> Reason is required!</ng-container>
+          <ng-container *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Onsite"> Note is required!</ng-container>
+        </div>
+      </div>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Off">Reason</mat-label>
+        <mat-label *ngIf="data.type!=APP_CONSTANT.DayAbsenceType.Off">Note</mat-label>
+        <textarea name="mReason" matInput [(ngModel)]="absenceDayReq.reason"
+          [required]="data.type != APP_CONSTANT.DayAbsenceType.Remote ? true:false" #mReason="ngModel"></textarea>
+      </mat-form-field>
+
+      <div class="m-date-list">
+        <div class="m-date-item" *ngFor="let item of absenceDayReq.absences; let i = index">
+          <div class="m-date-badge">{{ item.dateAt | date: "dd/MM/yyyy" }}</div>
+          <mat-form-field appearance="outline" class="m-date-select" *ngIf="item.absenceTime !== APP_CONSTANT.OnDayType.BeginOfDay && item.absenceTime !== APP_CONSTANT.OnDayType.EndOfDay">
+            <mat-select name="mDateType{{i}}" [(ngModel)]="item.dateType">
+              <mat-option [value]="1">Full Day</mat-option>
+              <mat-option [value]="2">Morning</mat-option>
+              <mat-option [value]="3">Afternoon</mat-option>
+              <mat-option [value]="4" *ngIf="item.hour">Custom ({{item.hour}}h)</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="m-date-select text-right" *ngIf="item.absenceTime === APP_CONSTANT.OnDayType.BeginOfDay || item.absenceTime === APP_CONSTANT.OnDayType.EndOfDay">
+             <span class="m-tardi-badge">{{ item.absenceTime === APP_CONSTANT.OnDayType.BeginOfDay ? 'Đi muộn' : 'Về sớm' }}</span>
+          </div>
+          <button type="button" mat-icon-button class="btn-remove-date" (click)="removeDate(i)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="text-center mt-3">
+         <button type="button" name="addDateBtn" mat-flat-button class="btn-add-date" (click)="pickerMobile.open()">
+           <mat-icon>add</mat-icon> Add another date
+         </button>
+         <input #dateInput matInput [matDatepicker]="pickerMobile" class="hidden-datepicker" 
+           [(ngModel)]="tempSelectedDate" name="tempDateBinding" 
+           (dateChange)="addAnotherDate($event)">
+         <mat-datepicker #pickerMobile></mat-datepicker>
+      </div>
+    </mat-dialog-content>
+    
+     <mat-dialog-actions class="m-dialog-actions">
+      <button type="button" name="mCancelBtn" mat-raised-button class="btn-m-cancel" (click)="onCancel()">Cancel</button>
+      <button type="button" name="mSaveBtn" mat-raised-button color="primary" class="btn-m-save bg-danger" [disabled]="!createForm.form.valid || isSaving || absenceDayReq.absences.length === 0" (click)="submitReq()">
+        Save
+      </button>
+    </mat-dialog-actions>
+  </div>
 </form>
