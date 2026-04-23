@@ -7,6 +7,7 @@ import { DayOffService } from '@app/service/api/day-off.service';
 import { AbsenceRequestDto } from '@app/service/api/model/absence-day-dto';
 import { CalendarEvent, CalendarMonthViewBeforeRenderEvent, CalendarView } from 'angular-calendar';
 import * as moment from 'moment';
+import * as _ from 'lodash';
 import { Subject } from 'rxjs';
 import { MonthViewDay } from '@node_modules/calendar-utils';
 import { AppComponentBase } from '@shared/app-component-base';
@@ -192,4 +193,61 @@ export class ViewLeaveDayOfUserComponent extends AppComponentBase implements OnI
     history.back();
   }
 
+  get absenceReqsGroupedByDate() {
+    return _.chain(this.absenceReqs)
+      .filter(x => {
+        const reqDate = moment(x.detail.dateAt);
+        return reqDate.year() === this.year && reqDate.month() === this.month;
+      })
+      .groupBy(x => moment(x.detail.dateAt).format('YYYY-MM-DD')).map((value, key) => ({
+      dateAt: key,
+      requests: value
+    })).orderBy(x => x.dateAt, 'desc').value();
+  }
+
+  trackByGroupDate(index: number, group: any) {
+    return group.dateAt;
+  }
+
+  trackByRequestId(index: number, req: any) {
+    return req.id || (req.detail && req.detail.id) || index;
+  }
+
+  getLeaveTypeText(type: number, absenceTime: number) {
+    if (type === 0) {
+      if (absenceTime === this.APP_CONSTANT.OnDayType.BeginOfDay) return "Đi muộn";
+      if (absenceTime === this.APP_CONSTANT.OnDayType.EndOfDay) return "Về sớm";
+      return "Off";
+    }
+    if (type === 1) return "Onsite";
+    if (type === 2) return "Remote";
+    return "";
+  }
+
+  getLeaveText(dateType: number, hour: number) {
+    if (dateType === 1) return "Full Day";
+    if (dateType === 2) return "Morning";
+    if (dateType === 3) return "Afternoon";
+    return hour + "h";
+  }
+
+  getListTypeClasses(type: number, absenceTime: number) {
+    if (type === 0) {
+      if (absenceTime === this.APP_CONSTANT.OnDayType.BeginOfDay 
+        || absenceTime === this.APP_CONSTANT.OnDayType.EndOfDay) {
+        return ['text-primary', 'day-chip-tardiness-leave-early'];
+      }
+      return ['text-primary', 'day-chip-full-day'];
+    } else if (type === 1) {
+      return ['text-danger', 'onsite'];
+    }
+    return ['text-primary', 'day-chip-morning', 'remote'];
+  }
+
+  getListClasses(dateType: number) {
+    if (dateType === 1) return ['text-primary', 'day-chip-full-day'];
+    if (dateType === 2) return ['text-primary', 'day-chip-morning'];
+    if (dateType === 3) return ['text-primary', 'day-chip-afternoon'];
+    return ['text-primary', 'day-chip-custom'];
+  }
 }

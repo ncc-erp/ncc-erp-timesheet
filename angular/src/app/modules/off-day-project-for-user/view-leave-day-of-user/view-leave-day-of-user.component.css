@@ -2,6 +2,11 @@ h3 {
     margin: 0 0 10px;
 }
 
+.card .header h2 {
+    padding-left: 4px !important;
+    margin-top: 6px !important;
+}
+
 pre {
     background-color: #f5f5f5;
     padding: 15px;
@@ -88,7 +93,7 @@ pre {
     color: green !important;
 }
 .day-off-state-reject {
-    color: #9e9e9e !important;
+    color: #474747e0 !important;
 }
 .cal-day-out {
     opacity: 0.5;
@@ -103,4 +108,209 @@ pre {
 .d-flex-justify-content-end {
     display: flex;
     justify-content: end;
+}
+
+.col-md-3 {
+    white-space: nowrap;
+    padding-left: 0;
+    padding-right: 0;
+    margin-bottom: 18px;
+}
+
+.col-md-9.d-flex {
+    padding-left: 10px;
+}
+
+.mobile-view {
+    display: none;
+}
+
+@media screen and (max-width: 767px) {
+    .desktop-view-container {
+        display: none !important;
+    }
+
+    .mobile-view {
+        display: block;
+        padding: 0 15px 20px;
+    }
+
+    .mobile-advanced-dialog {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 10px;
+    }
+
+    .mobile-filter-item {
+        width: 100%;
+        margin-bottom: -10px;
+    }
+
+    .mobile-filter-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .mobile-filter-half {
+        flex: 1;
+        width: 48% !important;
+        margin-bottom: 20px;
+    }
+
+    .mobile-type-request-type {
+        margin-bottom: 20px;
+        width: 50%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .row.text-center.flex {
+        display: none;
+    }
+
+    .card .header {
+        padding-bottom: 30px;
+    }
+
+    .card .header h2 {
+        padding-left: 0 !important;
+        margin-top: 0 !important;
+        width: 75% !important;
+    }
+
+    .btn-group {
+        margin-bottom: 10px;
+    }
+
+    .mobile-request-panel .panel-heading {
+        position: relative;
+        padding: 0 !important;
+    }
+
+    .mobile-request-panel .panel-title {
+        margin: 0;
+    }
+
+    .mobile-request-panel .panel-title a {
+        display: block;
+        padding: 12px 15px 12px 15px !important;
+        color: white !important;
+        text-decoration: none;
+    }
+
+    .status-label {
+        font-size: 14px;
+    }
+
+    .mobile-request-type-label {
+        font-size: 0.8em;
+        color: #eee;
+        margin-left: 5px;
+    }
+
+    .request-item-card {
+        border: 2px solid #b71c1c;
+        border-radius: 4px;
+        background-color: #fff;
+        overflow: hidden;
+    }
+    
+    .leave-badges-container {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+
+    .request-details-grid-mb {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1px;
+        background-color: #b71c1c;
+    }
+
+    .grid-cell-label,
+    .grid-cell-value,
+    .grid-cell-status,
+    .grid-cell-label-last,
+    .grid-cell-value-last {
+        background-color: #fff;
+        border: none !important;
+        padding: 8px;
+        text-align: center;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .grid-cell-label,
+    .grid-cell-label-last {
+        font-weight: bold;
+    }
+
+    .grid-cell-status {
+        font-weight: 500;
+    }
+
+    .grid-cell-value-last p,
+    .grid-cell-value p {
+        margin: 0;
+    }
+
+    .pin-wrap {
+        display: inline-block;
+        min-width: 10px;
+        padding: 3px 7px;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        border-radius: 10px;
+        color: white;
+    }
+
+    :host ::ng-deep .mobile-advanced-dialog .mat-form-field-appearance-outline .mat-form-field-flex {
+        padding: 0 10px !important;
+        margin-top: -5px;
+    }
+
+    :host ::ng-deep .mobile-advanced-dialog .mat-form-field-wrapper {
+        margin: 0 !important;
+        padding-bottom: 0 !important;
+    }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    .col-md-9.d-flex {
+        flex-wrap: nowrap; 
+        justify-content: flex-end !important;
+        gap: 12px;
+    }
+
+    .col-md-9.d-flex .col-md-2 {
+        flex: 1;
+        max-width: 120px;
+        width: auto; 
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    ::ng-deep .col-md-9.d-flex .col-md-2 mat-form-field {
+        width: 100% !important; 
+    }
+
+    .mat-select-value-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+@media screen and (min-width: 992px) and (max-width: 1200px) {
+    .col-md-9 {
+        width: 81%;
+    }
 }

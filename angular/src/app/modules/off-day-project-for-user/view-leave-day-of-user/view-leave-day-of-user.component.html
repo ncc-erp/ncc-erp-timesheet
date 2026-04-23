@@ -20,7 +20,7 @@
           </li>
         </ul>
       </div>
-      <div class="row text-center flex" style="padding: 15px;">
+      <div class="row text-center flex desktop-view-container" style="padding: 15px 15px 0;">
         <div class="col-md-3">
           <div class="btn-group">
             <div class="btn btn-primary" name="previousBtn" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate"
@@ -45,7 +45,7 @@
         <div class="col-md-3" style="margin-bottom: 20px;">
           <h3>{{ title }}</h3>
         </div> -->
-        <div class="col-md-9 d-flex-justify-content-end">
+        <div class="col-md-9 d-flex justify-content-end">
           <div class="col-md-2">
             <mat-form-field appearance="outline">
               <mat-label>Request Type</mat-label>
@@ -121,13 +121,115 @@
           </div>
         </div>
       </div>
-      <br />
-      <div style="padding:0 20px 20px; overflow-x: scroll;" [busy]="isLoading">
+      <br class="desktop-view-container" />
+      <div class="desktop-view-container" style="padding:0 20px 20px; overflow-x: scroll;" [busy]="isLoading">
         <div [ngSwitch]="view" style="user-select: none;">
           <mwl-calendar-month-view *ngSwitchCase="calendarView.Month" [cellTemplate]="customCellTemplate"
             [viewDate]="viewDate" [events]="events" [refresh]="refresh" [activeDayIsOpen]="activeDayIsOpen"
             (beforeViewRender)="getData($event)">
           </mwl-calendar-month-view>
+        </div>
+      </div>
+
+      <div class="mobile-view" [busy]="isLoading">
+        <div class="mobile-advanced-dialog">
+          <div class="mobile-filter-row">
+            <mat-form-field appearance="outline" class="mobile-filter-item mobile-filter-half">
+              <mat-label>Request Type</mat-label>
+              <mat-select name="mb-absentDayType" [(value)]="absentDayType" (selectionChange)="selectionChange(true)">
+                <mat-option [value]="-1">All</mat-option>
+                <mat-option *ngFor="let item of dayAbsentTypeList" [value]="APP_CONSTANT.DayAbsenceType[item]">
+                  {{ item }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="mobile-filter-item mobile-filter-half">
+              <mat-label>Status</mat-label>
+              <mat-select name="mb-dayAbsentStatus" [(value)]="dayAbsentStatus" (selectionChange)="selectionChange(true)">
+                <mat-option *ngFor="let item of dayAbsentStatusList" [value]="APP_CONSTANT.AbsenceStatusFilter[item]">
+                  {{ item }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="mobile-filter-item mobile-type-request-type" *ngIf="absentDayType === 0">
+            <mat-label>Type Of Request Type</mat-label>
+            <mat-select name="mb-dayType" [(value)]="dayType" (selectionChange)="selectionChange()">
+              <mat-option [value]="-1">All</mat-option>
+              <mat-option *ngFor="let item of dayTypeList" [value]="APP_CONSTANT.AbsenceType[item]">
+                {{ item | dayType }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="mobile-filter-row">
+            <mat-form-field appearance="outline" class="mobile-filter-item mobile-filter-half">
+              <mat-label>Year</mat-label>
+              <mat-select name="mb-yearSelect" [(value)]="year" (selectionChange)="selectionChange($event)">
+                <mat-option *ngFor="let item of years" [value]='item'>
+                  {{item}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="mobile-filter-item mobile-filter-half">
+              <mat-label>Month</mat-label>
+              <mat-select name="mb-monthSelect" [(value)]="month" (selectionChange)="selectionChange($event)">
+                <mat-option *ngFor="let item of months" [value]='item'>
+                  {{item + 1}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div *ngFor="let group of absenceReqsGroupedByDate; let i = index; trackBy: trackByGroupDate" class="mb-2 mobile-request-panel">
+          <div class="panel-group" id="accordion{{i}}" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-col-red">
+              <div class="panel-heading" role="tab" id="heading{{i}}"> 
+                <h4 class="panel-title">
+                  <a role="button" data-toggle="collapse" [attr.href]="'#collapse' + i" aria-expanded="false" 
+                    [attr.aria-controls]="'collapse' + i">
+                    <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">date_range</i>
+                    <span style="font-weight: bold;">{{ group.dateAt | date: "dd/MM/yyyy" }}</span>
+                  </a>
+                </h4>
+              </div>
+              <div [id]="'collapse'+i" class="panel-collapse collapse" role="tabpanel"
+                [attr.aria-labelledby]="'heading'+i">
+                <div class="panel-body">
+                  <div *ngFor="let req of group.requests; let last = last; trackBy: trackByRequestId" class="request-item-card" [style.margin-bottom]="last ? '0' : '10px'">
+                    <div class="request-details-grid-mb">
+                      <div class="grid-cell-label">Request Type</div>
+                      <div class="grid-cell-status">
+                        <div class="leave-badges-container">
+                          <span class="pin-wrap" [ngClass]="getListTypeClasses(req.type, req.detail.absenceTime)">{{ getLeaveTypeText(req.type, req.detail.absenceTime) }}</span>
+                          <span class="pin-wrap" [ngClass]="getListClasses(req.detail.dateType)">{{ getLeaveText(req.detail.dateType, req.detail.hour) }}</span>
+                        </div>
+                      </div>
+
+                      <div class="grid-cell-label">Off Type</div>
+                      <div class="grid-cell-value">
+                        <span>{{ req.dayOffName }}</span>
+                      </div>
+
+                      <div class="grid-cell-label">Status</div>
+                      <div class="grid-cell-status">
+                        <span [class]="'label status-label ' + getClassByStatus(req.status)">
+                          {{req.status === 1 ? 'Pending' : (req.status === 2 ? 'Approved' : 'Rejected')}}
+                        </span>
+                      </div>
+
+                      <div class="grid-cell-label">Note</div>
+                      <div class="grid-cell-value">
+                        <span>{{ req.reason }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
