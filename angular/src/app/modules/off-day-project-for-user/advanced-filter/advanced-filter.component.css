@@ -1,0 +1,177 @@
+.mobile-advanced-dialog {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.dialog-header-mb {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dialog-title-mb {
+  margin: 0 !important;
+  padding-left: 0 !important;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.dialog-close-icon {
+  cursor: pointer;
+  color: #757575;
+}
+
+.filter-row-mb,
+.project-filter-row-mb {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.request-type-column-row-mb {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-bottom: 10px;
+  justify-content: center;
+}
+
+::ng-deep .mat-select-panel {
+  min-width: fit-content !important;
+  max-width: 90vw !important;
+}
+
+::ng-deep .mat-option-text {
+  white-space: normal !important;
+  text-overflow: unset !important;
+  line-height: 1.2 !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  display: block !important;
+}
+
+::ng-deep .mat-option {
+  height: auto !important;
+  min-height: 48px;
+}
+
+.filter-group-mb,
+.request-type-sub-group-mb {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.request-type-sub-group-mb {
+  flex-direction: column;
+  align-items: stretch;
+  max-width: calc(40% - 5px);
+}
+
+.filter-group-mb mat-form-field,
+.request-type-sub-group-mb mat-form-field {
+  width: 100%;
+  min-width: 0;
+}
+
+.project-col-mb {
+  flex: 1.5;
+  width: 0;
+}
+
+.request-col-mb {
+  flex: 1;
+  width: 0;
+}
+
+::ng-deep app-multiple-select {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+::ng-deep .mobile-advanced-dialog .mat-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+::ng-deep .mobile-advanced-dialog .mat-select-value {
+  max-width: calc(100% - 16px) !important;
+  padding-right: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+::ng-deep .mobile-advanced-dialog .mat-form-field-infix {
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+::ng-deep .mobile-advanced-dialog .mat-form-field-wrapper {
+  padding-bottom: 10px;
+}
+
+::ng-deep .mobile-advanced-dialog .mat-select-arrow-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radio-options-row-mb {
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+.filter-work-calendar-mb {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.filter-work-calendar-mb .filter-label-mb {
+  margin-bottom: 0;
+  line-height: normal;
+  font-size: 14px;
+}
+
+.filter-radio-active {
+  color: red;
+}
+
+.filter-radio-inactive {
+  color: gray;
+}
+
+::ng-deep .filter-work-calendar-mb .mat-radio-label {
+  align-items: center !important;
+}
+
+::ng-deep .filter-work-calendar-mb .mat-radio-label-content {
+  display: flex;
+  align-items: center;
+}
+
+.dialog-footer-mb {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 0;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.filter-apply-btn-mb {
+  min-width: 100px;
+  height: 36px;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 14px;
+}

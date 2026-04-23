@@ -17,6 +17,7 @@
   import { dayOffDTO } from '../day-off/day-off.component';
   import { PopupComponent } from './popup/popup.component';
   import { ExportDataComponent } from './export-data/export-data.component';
+  import { AdvancedFilterComponent } from './advanced-filter/advanced-filter.component';
 
   @Component({
     selector: 'app-off-day-project-for-user',
@@ -37,6 +38,7 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
   viewDate: Date = new Date();
   isEdit = true;
   isLoading = false;
+  isDisabled = false;
   isShowRejected = false;
   dayOffs: dayOffDTO[] = [];
   isClicked = false;
@@ -97,28 +99,164 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
     });
   }
 
-  onDayOffTypeChange() {
-    let date = new Date(this.year, this.month, this.day);
-    this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
-    this.getDayOff();
+  public groupedRequests: { date: string, rawDate: Date, requests: AbsenceRequestDto[], isLoading: boolean }[] = [];
+
+  private buildGroupedRequests() {
+    let map = new Map<string, Date>();
+    this.countRequestList.forEach(item => {
+      if (item.count > 0) {
+        const itemDate = moment(item.date, 'YYYY-MM-DD');
+        if (itemDate.month() === this.month && itemDate.year() === this.year) {
+          let dateStr = itemDate.format('DD/MM/YYYY');
+          if (!map.has(dateStr)) {
+            map.set(dateStr, itemDate.toDate());
+          }
+        }
+      }
+    });
+    let result = [];
+    map.forEach((value, key) => {
+      result.push({ date: key, rawDate: value, requests: [], isLoading: false });
+    });
+    result.sort((a, b) => b.rawDate.getTime() - a.rawDate.getTime());
+    this.groupedRequests = result;
   }
 
-  onDayTypeChange() {
-    let date = new Date(this.year, this.month, this.day);
-    this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
-    this.getDayOff();
+  loadGroupRequests(group: any) {
+    if (group.requests.length === 0 && !group.isLoading) {
+      group.isLoading = true;
+      let typeAbsenceDay = this.absentDayType;
+      if(this.absentDayType === 3){
+        typeAbsenceDay = 0;
+      }
+      this.absenceService.getAllRequestForUserByDay(group.rawDate, this.listProjectSelected, this.searchText, typeAbsenceDay, this.dayOffType, this.dayAbsentStatus, this.dayType, this.remoteOfWeek).subscribe(res => {
+        let eventOfDay = res.result;
+        if (this.absentDayType === 0) {
+          eventOfDay = eventOfDay.filter(event => event.absenceTime !== 1 && event.absenceTime !== 2 && event.absenceTime !== 3);
+        }
+        group.requests = eventOfDay;
+        group.isLoading = false;
+      }, () => {
+        group.isLoading = false;
+      });
+    }
   }
 
-  onRemoteOfWeekChange() {
-    let date = new Date(this.year, this.month, this.day);
-    this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
-    this.getDayOff();
+  trackByDate(index: number, group: any) {
+    return group.date;
   }
 
-  selectionChange(event?): void {
+  trackByRequestId(index: number, item: AbsenceRequestDto) {
+    return item.id;
+  }
+
+  getLeaveTypeText(member: AbsenceRequestDto) {
+    if (member.leavedayType == 0) {
+      if (member.absenceTime == this.APP_CONSTANT.OnDayType.BeginOfDay) {
+        return "Đi muộn";
+      }
+      if (member.absenceTime == this.APP_CONSTANT.OnDayType.EndOfDay) {
+        return "Về sớm";
+      }
+      return "Off";
+    } else if(member.leavedayType == 1) {
+      return "Onsite";
+    } else if(member.leavedayType == 2) {
+      return "Remote";
+    }
+  }
+
+  getLeaveText(member: AbsenceRequestDto) {
+    if (member.dateType == 1) {
+      return "Full Day";
+    }
+    if (member.dateType == 2) {
+      return "Morning";
+    }
+    if (member.dateType == 3) {
+      return "Afternoon";
+    }
+    return member.hour + "h";
+  }
+
+  getLabel(userType: number): string {
+    const userTypes = [
+      { value: 0, label: 'Staff' },
+      { value: 1, label: 'Intern' },
+      { value: 2, label: 'CTV' },
+      { value: 3, label: 'Probation' },
+      { value: 5, label: 'Vendor' }
+    ];
+    const found = userTypes.find(u => u.value === userType);
+    return found ? found.label : 'Unknown';
+  }
+
+  getListTypeClasses(member: AbsenceRequestDto) {
+    if (member.leavedayType == 0) {
+      if (member.absenceTime == this.APP_CONSTANT.OnDayType.BeginOfDay
+        || member.absenceTime == this.APP_CONSTANT.OnDayType.EndOfDay) {
+        return ['text-primary', 'day-chip-tardiness-leave-early'];
+      }
+      return ['text-primary', 'day-chip-full-day'];
+    }  else if (member.leavedayType == 1) {
+      return ['text-danger', 'onsite'];
+    }
+    return ['text-primary', 'day-chip-morning'];
+  }
+
+  getListClasses(member: AbsenceRequestDto) {
+    if (member.dateType == 1) {
+      return ['text-primary', 'day-chip-full-day'];
+    }
+    if (member.dateType == 2) {
+      return ['text-primary', 'day-chip-morning'];
+    }
+    if (member.dateType == 3) {
+      return ['text-primary', 'day-chip-afternoon'];
+    }
+    return ['text-primary', 'day-chip-custom'];
+  }
+
+  openAdvancedFilter() {
+    this.diaLog.open(AdvancedFilterComponent, {
+      data: this,
+      width: '100%',
+      maxWidth: '100vw',
+      panelClass: 'user-team-filter-dialog',
+      restoreFocus: false
+    });
+  }
+
+  onDayOffTypeChange(event?, isRefresh = true) {
+    let date = new Date(this.year, this.month, this.day);
+    this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
+    if (isRefresh) {
+      this.getDayOff();
+    }
+  }
+
+  onDayTypeChange(isRefresh = true) {
+    let date = new Date(this.year, this.month, this.day);
+    this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
+    if (isRefresh) {
+      this.getDayOff();
+    }
+  }
+
+  onRemoteOfWeekChange(isRefresh = true) {
+    let date = new Date(this.year, this.month, this.day);
+    this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
+    if (isRefresh) {
+      this.getDayOff();
+    }
+  }
+
+  selectionChange(event?, isRefresh = true): void {
     let date = new Date(this.year, this.month);
     this.viewDate = moment(date, 'YYYY-MM-DD').toDate();
-    this.getDayOff();
+    if (isRefresh) {
+      this.getDayOff();
+    }
   }
 
   onChangeSelect(event?): void {
@@ -165,11 +303,13 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
     });
   }
 
-  onChangeListProjectIdSelected(event) {
+  onChangeListProjectIdSelected(event, isRefresh = true) {
     this.listProjectSelected = event;
     let unselectedIds = this.listProject.map(p => p.id).filter(id => this.listProjectSelected.indexOf(id) === -1);
     localStorage.setItem('listProjectIdsOfUserUnselected', unselectedIds.toString());
-    this.refreshData();
+    if (isRefresh) {
+      this.refreshData();
+    }
   }
 
   updateDay(): void {
@@ -259,6 +399,7 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
             });
           });
           this.sortEvents();
+          this.buildGroupedRequests();
           this.refresh.next();
         },
         () => {
