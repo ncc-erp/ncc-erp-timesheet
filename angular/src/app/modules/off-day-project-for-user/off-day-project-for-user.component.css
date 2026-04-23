@@ -233,10 +233,6 @@ pre {
     font-size: 15px !important;
 }
 
-.clearfix {
-    padding: 0 15px;
-}
-
 @media screen and (max-width: 600px) {
     .header {
         display: block;
@@ -297,7 +293,7 @@ pre {
     }
 
     .mobile-search-filter {
-        padding: 0 15px 50px 15px;
+        padding: 0 15px 15px 15px;
         display: flex;
         gap: 10px;
         align-items: center;
@@ -468,5 +464,23 @@ pre {
     .grid-cell-value-last p,
     .grid-cell-value p {
         margin: 0;
+    }
+
+    .mobile-actions {
+        padding: 0 15px 30px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-action-mb {
+        height: 35px;
+        line-height: normal !important;
+        border-radius: 10px !important;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }

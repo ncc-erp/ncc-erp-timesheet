@@ -263,19 +263,101 @@ export class LeaveDayOfUserComponent extends AppComponentBase implements OnInit 
   }
 
   ApproveOrReject(status : boolean) {
+    if (this.selectedDays.size === 0) {
+      this.notify.error("Please select at least one request!");
+      return;
+    }
     const keysArray = new Set(this.selectedDays.keys());
     const filteredData = this.absenceReqs.filter(item => keysArray.has(item.detail.dateAt));
     const dialogRef = this.diaLog.open(ConfirmAllRequestComponent, {
       disableClose: true,
       width: "auto",
-      data: { events: this.selectedDays, status, data: filteredData }
+      data: { events: this.selectedDays, status, data: filteredData },
+      restoreFocus: false
     });
-    dialogRef.afterClosed().subscribe(status => {
-      if(status) this.refreshData();
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.refreshData();
+      }
     })
   }
 
   isSelected(day : any){
     return this.selectedDays.has(moment(day).format("YYYY-MM-DD"));
+  }
+
+  get filteredAbsenceReqs() {
+    if (!this.absenceReqs) return [];
+    return this.absenceReqs
+      .filter(req => {
+        const reqDate = moment(req.detail.dateAt, 'YYYY-MM-DD');
+        return reqDate.year() === this.year && reqDate.month() === this.month;
+      })
+      .sort((a, b) => new Date(b.detail.dateAt).getTime() - new Date(a.detail.dateAt).getTime());
+  }
+
+  getLeaveTypeText(type: number, absenceTime: number) {
+    if (type === 0) {
+      if (absenceTime === this.APP_CONSTANT.OnDayType.BeginOfDay) return "Đi muộn";
+      if (absenceTime === this.APP_CONSTANT.OnDayType.EndOfDay) return "Về sớm";
+      return "Off";
+    }
+    if (type === 1) return "Onsite";
+    if (type === 2) return "Remote";
+    return "";
+  }
+
+  getLeaveText(dateType: number, hour: number) {
+    if (dateType === 1) return "Full Day";
+    if (dateType === 2) return "Morning";
+    if (dateType === 3) return "Afternoon";
+    return hour + "h";
+  }
+
+  getListTypeClasses(type: number, absenceTime: number) {
+    if (type === 0) {
+      if (absenceTime === this.APP_CONSTANT.OnDayType.BeginOfDay 
+        || absenceTime === this.APP_CONSTANT.OnDayType.EndOfDay) {
+        return ['text-primary', 'day-chip-tardiness-leave-early'];
+      }
+      return ['text-primary', 'day-chip-full-day'];
+    } else if (type === 1) {
+      return ['text-danger', 'onsite'];
+    }
+    return ['text-primary', 'day-chip-morning', 'remote'];
+  }
+
+  getListClasses(dateType: number) {
+    if (dateType === 1) return ['text-primary', 'day-chip-full-day'];
+    if (dateType === 2) return ['text-primary', 'day-chip-morning'];
+    if (dateType === 3) return ['text-primary', 'day-chip-afternoon'];
+    return ['text-primary', 'day-chip-custom'];
+  }
+
+  toggleRequestSelection(req: AbsenceRequestDto, isChecked: boolean) {
+    const dateStr = req.detail.dateAt;
+    if (isChecked) {
+      if (!this.selectedDays.has(dateStr)) {
+        this.selectedDays.set(dateStr, []);
+      }
+      const arr = this.selectedDays.get(dateStr);
+      if (!arr.includes(req.id)) {
+        arr.push(req.id);
+      }
+    } else {
+      if (this.selectedDays.has(dateStr)) {
+        const arr = this.selectedDays.get(dateStr).filter(id => id !== req.id);
+        if (arr.length === 0) {
+          this.selectedDays.delete(dateStr);
+        } else {
+          this.selectedDays.set(dateStr, arr);
+        }
+      }
+    }
+  }
+
+  isRequestSelected(req: AbsenceRequestDto) {
+    if (!this.selectedDays.has(req.detail.dateAt)) return false;
+    return this.selectedDays.get(req.detail.dateAt).includes(req.id);
   }
 }

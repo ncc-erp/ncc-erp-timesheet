@@ -288,7 +288,7 @@
                   <img [src]="getAvatar(item)" width="40" height="40" alt="Member"
                     style="border-radius: 50%; margin-right: 10px" />
                   <div class="user-details-mb">
-                    <a [routerLink]="['app/main/leave-day-of-user/', item.userId]"
+                    <a [routerLink]="['/app/main/leave-day-of-user/', item.userId]"
                       class="user-full-name-mb">{{item.fullName}}</a>
                     <div class="user-badges-mb">
                       <ng-container *ngIf="item.type || item.type == 0">

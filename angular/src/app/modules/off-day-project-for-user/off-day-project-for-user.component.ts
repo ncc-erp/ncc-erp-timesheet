@@ -38,6 +38,7 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
   viewDate: Date = new Date();
   isEdit = true;
   isLoading = false;
+  isDisabled = false;
   isShowRejected = false;
   dayOffs: dayOffDTO[] = [];
   isClicked = false;

@@ -209,6 +209,12 @@
                           <span class="pin-wrap" [ngClass]="getListClasses(req.detail.dateType)">{{ getLeaveText(req.detail.dateType, req.detail.hour) }}</span>
                        </div>
                     </div>
+
+                    <div class="grid-cell-label">Off Type</div>
+                    <div class="grid-cell-value">
+                      <span>{{ req.dayOffName }}</span>
+                    </div>
+
                     <div class="grid-cell-label">Status</div>
                     <div class="grid-cell-status">
                       <span class="label status-label day-off-state-pending" *ngIf="req.status === 1">Pending</span>
@@ -219,11 +225,6 @@
                     <div class="grid-cell-label">Note</div>
                     <div class="grid-cell-value">
                       <span>{{ req.detail.reason || req.detail.note || req.reason || '' }}</span>
-                    </div>
-
-                    <div class="grid-cell-label-last" *ngIf="req.dateCreated || req.createAt || req.creationTime || req.detail.createdAt">Submitted At</div>
-                    <div class="grid-cell-value-last" *ngIf="req.dateCreated || req.createAt || req.creationTime || req.detail.createdAt">
-                      <p>{{ (req.dateCreated || req.createAt || req.creationTime || req.detail.createdAt) | date:"dd/MM/yyyy HH:mm:ss" }}</p>
                     </div>
                   </div>
                 </div>

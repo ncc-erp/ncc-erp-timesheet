@@ -93,7 +93,7 @@ pre {
     color: green !important;
 }
 .day-off-state-reject {
-    color: #9e9e9e !important;
+    color: #474747e0 !important;
 }
 .cal-day-out {
     opacity: 0.5;

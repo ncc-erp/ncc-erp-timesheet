@@ -5,6 +5,17 @@ td {
 
 .table th {
   text-align: center;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.table td {
+  text-align: center;
+}
+
+.table th:last-child,
+.table td:last-child {
+  border-right: none;
 }
 
 .pin span {
@@ -23,7 +34,7 @@ td {
 .header {
   display: flex;
   align-items: center;
-  position: relative;
+  justify-content: space-between;
   cursor: grab;
 }
 
@@ -31,8 +42,7 @@ td {
   height: 35px;
   background-color: transparent;
   border: none;
-  position: absolute;
-  right: 10px;
+  transform: translateX(10px);
 }
 
 td.note {
@@ -48,5 +58,36 @@ td.note {
 .confirm {
   display: flex;
   align-items: center;
-  justify-content: end;
+  justify-content: center;
+}
+
+@media screen and (max-width: 767px) {
+  .table th:nth-child(2) {
+    width: auto !important;
+    min-width: auto !important;
+  }
+
+  .table td:nth-child(3) {
+    width: auto !important;
+  }
+
+  .table th,
+  .table td {
+    white-space: normal !important;
+    word-break: break-word;
+    padding: 8px 4px !important;
+    font-size: 13px;
+  }
+
+  .table th {
+    vertical-align: top !important; 
+  }
+
+  .table th:nth-child(1),
+  .table td:nth-child(1) {
+    width: 30px !important;
+    min-width: 30px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
 }

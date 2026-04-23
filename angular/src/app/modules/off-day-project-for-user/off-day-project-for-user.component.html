@@ -343,14 +343,6 @@
         <mat-icon>refresh</mat-icon>
         <span>{{ "Refresh" | localize }}</span>
       </button>
-      <button mat-menu-item *ngIf="shouldShowNotifyPmButton()" (click)="notifyApproveRequestOffToPM()">
-        <mat-icon>notifications_active</mat-icon>
-        <span>{{ "Notify PM" | localize }}</span>
-      </button>
-      <button mat-menu-item *ngIf="permission.isGranted(Export_Team_Working_Calender)" (click)="onExport()" [disabled]="isDisabled">
-        <mat-icon>ios_share</mat-icon>
-        <span>{{ "Export" | localize }}</span>
-      </button>
     </mat-menu>
   </div>
 
@@ -367,6 +359,17 @@
     </div>
     <button (click)="openAdvancedFilter()" mat-flat-button color="primary" class="advanced-filter-button">
       Advanced Filter
+    </button>
+  </div>
+
+  <div class="mobile-actions">
+    <button *ngIf="shouldShowNotifyPmButton()" (click)="notifyApproveRequestOffToPM()" mat-flat-button color="primary"
+      class="btn-action-mb">
+      <span>{{ "Notify PM" | localize }}</span>
+    </button>
+    <button *ngIf="permission.isGranted(Export_Team_Working_Calender)" (click)="onExport()" mat-flat-button color="primary"
+      class="btn-action-mb" [disabled]="isDisabled">
+      <span>{{ "Export" | localize }}</span>
     </button>
   </div>
 
@@ -396,7 +399,7 @@
                   <img [src]="getAvatar(item)" width="40" height="40" alt="Member"
                     style="border-radius: 50%; margin-right: 10px" />
                   <div class="user-details-mb">
-                    <a [routerLink]="['app/main/view-leave-day-of-user/', item.userId]"
+                    <a [routerLink]="['/app/main/view-leave-day-of-user/', item.userId]"
                       class="user-full-name-mb">{{item.fullName}}</a>
                     <div class="user-badges-mb">
                       <ng-container *ngIf="item.type || item.type == 0">
