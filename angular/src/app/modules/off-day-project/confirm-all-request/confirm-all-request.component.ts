@@ -35,28 +35,17 @@ export class ConfirmAllRequestComponent extends AppComponentBase implements OnIn
 
   confirmClick() {
     const arrays = Array.from(this.events.values());
-    if (this.status) {
-      this.isLoading = true;
-      this.absenceRequestService.approveAbsenceRequest([].concat(...arrays)).subscribe((res) => {
-        if (res) {
-          this.notify.success(this.l("Approve Successfully!"));
-        }
-        this.isLoading = false;
-      }, (error) => {
-        this.isLoading = false;
-      });
-    } else {
-      this.isLoading = true;
-      this.absenceRequestService.rejectAbsenceRequest([].concat(...arrays)).subscribe((res) => {
-        if (res) {
-          this.notify.success(this.l("Reject Successfully!"));
-        }
-        this.isLoading = false;
-      }, (error) => {
-        this.isLoading = false;
-      });
-    }
-    this.dialogRef.close(true);
+    this.isLoading = true;
+    const obs = this.status 
+      ? this.absenceRequestService.approveAbsenceRequest([].concat(...arrays))
+      : this.absenceRequestService.rejectAbsenceRequest([].concat(...arrays));
+    obs.subscribe((res) => {
+      if (res) {
+        this.notify.success(this.l(this.status ? "Approve Successfully!" : "Reject Successfully!"));
+        this.dialogRef.close(true);
+      }
+      this.isLoading = false;
+    }, () => this.isLoading = false);
   }
 
   ngOnInit() {
