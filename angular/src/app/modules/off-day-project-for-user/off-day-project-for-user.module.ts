@@ -13,9 +13,10 @@ import { OffDayProjectForUserComponent } from './off-day-project-for-user.compon
 import { PopupComponent } from './popup/popup.component';
 import { PopupModule } from './popup/popup.module';
 import { ExportDataComponent } from './export-data/export-data.component';
+import { AdvancedFilterComponent } from './advanced-filter/advanced-filter.component';
 
 @NgModule({
-    declarations: [OffDayProjectForUserComponent, ExportDataComponent],
+    declarations: [OffDayProjectForUserComponent, ExportDataComponent, AdvancedFilterComponent],
     imports: [
         CommonModule,
         SharedModule,
@@ -32,7 +33,7 @@ import { ExportDataComponent } from './export-data/export-data.component';
         }),
     ],
     entryComponents: [PopupComponent,
-    ExportDataComponent],
+    ExportDataComponent, AdvancedFilterComponent],
     providers: [
         { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
     ]
