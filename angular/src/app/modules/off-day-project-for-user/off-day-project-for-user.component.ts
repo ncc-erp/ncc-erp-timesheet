@@ -390,6 +390,9 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
         (res) => {
           this.isLoading = false;
           this.countRequestList = res.result;
+          if ($) {
+            $(".mobile-requests.collapse").collapse("hide");
+          }
           this.countRequestList.forEach((item) => {
             this.events.push({
               count: item.count,

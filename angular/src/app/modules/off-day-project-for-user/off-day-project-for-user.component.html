@@ -332,7 +332,9 @@
   </div>
 </ng-template>
 
-<div class="mobile-view" [busy]="isLoading">
+<div class="loading-overlay-fixed" *ngIf="isLoading" [busy]="isLoading"></div>
+
+<div class="mobile-view">
   <div class="mobile-header">
     <h2 class="mobile-header-title">Team Working Calendar</h2>
     <button name="menuBtnMb" mat-icon-button [matMenuTriggerFor]="moreMb" class="refresh-btn-mb">
