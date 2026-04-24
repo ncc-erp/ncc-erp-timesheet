@@ -141,6 +141,9 @@ export class ViewLeaveDayOfUserComponent extends AppComponentBase implements OnI
           });
         });
         this.isLoading = false
+        if ($) {
+          $(".panel-collapse.collapse").collapse("hide");
+        }
       });
     });
   }
