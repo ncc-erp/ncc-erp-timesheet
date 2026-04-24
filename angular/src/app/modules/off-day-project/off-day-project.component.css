@@ -688,4 +688,18 @@ pre {
         width: 1px;
         background-color: #b71c1c;
     }
+
+    .loading-overlay-fixed {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 10000;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: all;
+    }
 }
