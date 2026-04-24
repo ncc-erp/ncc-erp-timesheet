@@ -170,6 +170,9 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
         });
 
         this.isLoading = false
+        if ($) {
+          $(".panel-collapse.collapse").collapse("hide");
+        }
       });
     });
   }
