@@ -1,0 +1,213 @@
+.dialog-header {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.header-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h2 {
+    margin-top: 10px !important;
+    font-weight: bold;
+    padding-left: 0 !important;
+}
+
+.header-filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.filter-date-group {
+    display: flex;
+    align-items: center;
+}
+
+.project-history-wrapper ::ng-deep .filter-date-group .mat-button-toggle-label-content {
+    line-height: 28px !important;
+    padding: 0 4px !important;
+}
+
+.project-history-wrapper ::ng-deep .filter-date-group .mat-tooltip {
+    font-size: 12px;
+}
+
+.project-history-wrapper ::ng-deep .filter-date-group .mat-icon {
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+}
+
+.project-history-wrapper ::ng-deep .filter-date-group .mat-button-toggle-button {
+    height: 28px;
+}
+
+.title-date {
+    margin-top: 5px;
+    margin-left: 15px;
+}
+
+.title-date b {
+    font-size: 18px;
+}
+
+.filter-select {
+    margin-bottom: -20px;
+    width: 150px;
+}
+
+.custom-option-text {
+    margin: 0;
+}
+
+.dialog-content {
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.customTable {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.customTable th,
+.customTable td {
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #e4e7eb;
+    padding: 10px;
+}
+
+.customTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #f8f9fa;
+    border: 1px solid #e4e7eb !important;
+}
+
+.list-unstyled {
+    padding-left: 0;
+    list-style: none;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.time-period-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+}
+
+.time-period-badge {
+    background-color: #fff4e5;
+  border: 1px solid #ffe0b2;
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    color: #424242;
+    white-space: nowrap;
+}
+
+.time-period-badge .separator {
+    color: #9e9e9e;
+    margin: 0 6px;
+    font-size: 15px;
+}
+
+.monthly-effort-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.effort-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.effort-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f1f8ff;
+    border: 1px solid #cce5ff;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    width: 140px;
+    margin: 0 auto;
+}
+
+.effort-month {
+    color: #0056b3;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.effort-percent {
+    background: #0056b3;
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: center;
+}
+
+.btn-expand-effort {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    color: #0056b3;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 4px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    transition: all 0.2s;
+}
+
+.btn-expand-effort:hover {
+    background: #bbdefb;
+    border-color: #90caf9;
+    text-decoration: none;
+}
+
+.no-effort {
+    color: #9e9e9e;
+    font-style: italic;
+    font-size: 12px;
+}
+
+@media screen and (max-width: 600px) {
+    .project-history-wrapper ::ng-deep .filter-date-group mat-button-toggle-group {
+        flex-shrink: 0; 
+    }
+
+    .filter-select {
+        width: 40%;
+    }
+
+    .title-date {
+        margin-left: 8px;
+    }
+    .title-date b {
+        font-size: 14px;
+    }
+}

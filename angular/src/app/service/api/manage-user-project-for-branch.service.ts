@@ -18,6 +18,10 @@ export class ManageUserProjectForBranchService extends BaseApiService {
     return this.http.get(this.rootUrl + `/GetAllValueOfUserInProjectByUserId?userId=${userId}&startDate=${fromDate}&endDate=${toDate}`);
   }
 
+  getUserProjectHistory(userId: number, fromDate, toDate): Observable<any> {
+    return this.http.get(this.rootUrl + `/GetUserProjectHistory?userId=${userId}&startDate=${fromDate}&endDate=${toDate}`);
+  }
+
   updateProjectUserEffort(data: any): Observable<any>{
     return this.http.post(this.rootUrl + '/UpdateProjectUserEffort', data);
   }

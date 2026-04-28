@@ -51,6 +51,7 @@ using System.Net.Mail;
 using Timesheet.APIs.Public;
 using Ncc.Net.MimeTypes;
 using Timesheet.DataExport;
+using Timesheet.Entities;
 
 namespace Ncc.Users
 {
@@ -513,6 +514,110 @@ namespace Ncc.Users
                 }
             }
             return new { successList, failedList };
+        }
+
+        [HttpPost]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_ImportUser)]
+        public async Task<Object> ImportUsersWithMezonIdFromFile([FromForm] FileInputDto input)
+        {
+            try
+            {
+                if (input == null || input.File == null || input.File.Length == 0)
+                {
+                    throw new UserFriendlyException("No file upload!");
+                }
+
+                if (!Path.GetExtension(input.File.FileName).Equals(".xlsx"))
+                {
+                    throw new UserFriendlyException("Invalid file format! Please upload an .xlsx file.");
+                }
+
+                var successList = new List<string>();
+                var failedList = new List<string>();
+                var branchs = await _ws.GetAll<Timesheet.Entities.Branch>().ToListAsync();
+                var dicBranch = branchs.ToDictionary(s => s.DisplayName, s => s.Id);
+
+                using (var stream = new MemoryStream())
+                {
+                    await input.File.CopyToAsync(stream);
+
+                    using (var package = new ExcelPackage(stream))
+                    {
+                        ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                        var rowCount = worksheet.Dimension.Rows;
+                        User user = null;
+
+                        for (int row = 2; row <= rowCount; row++)
+                        {
+                            try
+                            {
+                                user = new User
+                                {
+                                    EmailAddress = worksheet.Cells[row, 2].Value.ToString().Trim(),
+                                    UserName = worksheet.Cells[row, 3].Value.ToString().Trim(),
+                                    Name = worksheet.Cells[row, 4].Value.ToString().Trim(),
+                                    Surname = worksheet.Cells[row, 5].Value.ToString().Trim(),
+                                    BranchId = dicBranch.ContainsKey(worksheet.Cells[row, 6].Value.ToString().Trim()) ? dicBranch[worksheet.Cells[row, 6].Value.ToString().Trim()] : (long?)null,
+                                    MezonUserId = worksheet.Cells[row, 8].Value.ToString().Trim(),
+                                    IsActive = true
+                                };
+
+                                CheckErrors(await _userManager.CreateAsync(user, User.CreateRandomPassword()));
+                                CheckErrors(await _userManager.SetRoles(user, new string[] { StaticRoleNames.Host.BasicUser }));
+                                successList.Add(user.EmailAddress);
+                            }
+                            catch (Exception e)
+                            {
+                                failedList.Add(user.EmailAddress + " error =>" + e.Message);
+                            }
+                        }
+                    }
+                }
+                return new { successList, failedList };
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserFriendlyException)
+                {
+                    throw;
+                }
+                throw new UserFriendlyException("An error occurred while processing the file: " + ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin_Users_DownloadTemplateUser)]
+        public async Task<FileBase64Dto> DownloadTemplate()
+        {
+            try
+            {
+                string fileName = "TemplateImportNewUsers.xlsx";
+                string folderPath = Path.Combine("wwwroot", "template");
+                string filePath = Path.Combine(folderPath, fileName);
+
+                if (!File.Exists(filePath))
+                {
+                    throw new UserFriendlyException($"Cannot find importing user template at path: {filePath}");
+                }
+
+                byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+                string fileBase64 = Convert.ToBase64String(fileBytes);  
+
+                return new FileBase64Dto
+                {
+                    FileName = fileName,
+                    FileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    Base64 = fileBase64
+                };
+            }
+            catch (Exception ex)
+            {
+                if (ex is UserFriendlyException)
+                {
+                    throw;
+                }
+                throw new UserFriendlyException("An error occured when reading template file", ex.Message);
+            }
         }
 
         public async Task<List<ProjectManagerDto>> GetProjectManagerOfUser(EntityDto<long> input)
