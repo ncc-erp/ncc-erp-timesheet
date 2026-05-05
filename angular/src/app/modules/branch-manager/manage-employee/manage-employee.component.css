@@ -27,15 +27,15 @@
 .projects-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   align-items: flex-start;
   width: 100%;
 }
 
-.project-block {
+.project-item {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  align-items: center;
   width: 100%;
   padding: 10px 12px;
   background-color: #fff4e5;
@@ -49,23 +49,32 @@
   font-weight: 600;
   font-size: 13px;
   color: #202124;
+  flex: 0.8;
+  min-width: 0;
+  padding-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.project-details {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.detail-row {
+.project-pms {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  flex: 1.5;
+  padding-right: 8px;
 }
 
-.project-details .label {
+.project-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.project-pms .label, .project-time .label {
   border-radius: 6px !important;
   padding: 3px 8px !important;
   font-size: 11px !important;
@@ -75,6 +84,31 @@
   justify-content: center;
   margin: 0 !important;
   line-height: normal !important;
+}
+
+.project-pms i, .project-time i {
+  font-size: 15px;
+  margin-right: 2px;
+  margin-top: 2px;
+}
+
+.expand-btn-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+}
+
+.btn-expand-projects {
+  background-color: #9e9e9e; 
+  border: 1px solid #ffffff; 
+  color: #ffffff; 
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 3px 10px;
+  border-radius: 12px;
+  transition: all 0.2s;
 }
 
 .detail-row i {
@@ -105,6 +139,23 @@
   color: #9aa0a6;
   font-size: 12px;
   font-style: italic;
+}
+
+.btn-expand-pms {
+  background-color: #9e9e9e; 
+  border: 1px solid #ffffff; 
+  color: #ffffff; 
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 12px;
+  transition: all 0.2s;
+  align-self: center;
+}
+
+.btn-expand-pms:hover {
+  background-color: #acb5bc;
 }
 
 .user-header-action {
