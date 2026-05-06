@@ -166,42 +166,61 @@
                 <td class="col-projects" style="vertical-align: top; padding: 12px;">
                   <div class="projects-wrapper">
                     <ng-container *ngIf="user.isExpandedProjects">
-                      <div class="project-block" *ngFor="let project of user.projectUsers">
-                        <div class="project-title">{{project.projectName}}</div>
-                        <div class="project-details">
-                          <div class="detail-row" *ngIf="project.pms && project.pms.length > 0">
+                      <div class="project-item" *ngFor="let project of user.projectUsers">
+                        <div class="project-title" [matTooltip]="project.projectName">{{project.projectName}}</div>
+                        <div class="project-pms">
+                          <ng-container *ngIf="project.pms && project.pms.length > 0">
                             <i class="pi pi-user"></i>
-                            <span class="label bg-blue" *ngFor="let pms of project.pms">{{pms}}</span>
-                          </div>
-                          <div class="detail-row">
-                            <i class="pi pi-clock"></i>
-                            <span class="label bg-green">{{project.workingTimePercent}}%</span>
-                          </div>
+                            <ng-container *ngIf="project.isExpandedPms">
+                              <span class="label bg-blue" *ngFor="let pms of project.pms">{{pms}}</span>
+                            </ng-container>
+                            <ng-container *ngIf="!project.isExpandedPms">
+                              <span class="label bg-blue" *ngFor="let pms of project.pms | slice:0:2">{{pms}}</span>
+                            </ng-container>
+                            <button *ngIf="project.pms.length > 2" class="btn-expand-pms" 
+                                    (click)="project.isExpandedPms = !project.isExpandedPms; $event.stopPropagation()">
+                              {{ project.isExpandedPms ? 'Collapse' : '+ ' + (project.pms.length - 2) + ' more' }}
+                            </button>
+                          </ng-container>
+                        </div>
+                        <div class="project-time">
+                          <i class="pi pi-clock"></i>
+                          <span class="label bg-green">{{project.workingTimePercent}}%</span>
                         </div>
                       </div>
                     </ng-container>
                     
                     <ng-container *ngIf="!user.isExpandedProjects">
-                      <div class="project-block" *ngFor="let project of user.projectUsers | slice:0:2">
-                        <div class="project-title">{{project.projectName}}</div>
-                        <div class="project-details">
-                          <div class="detail-row" *ngIf="project.pms && project.pms.length > 0">
+                      <div class="project-item" *ngFor="let project of user.projectUsers | slice:0:2">
+                        <div class="project-title" [matTooltip]="project.projectName">{{project.projectName}}</div>
+                        <div class="project-pms">
+                          <ng-container *ngIf="project.pms && project.pms.length > 0">
                             <i class="pi pi-user"></i>
-                            <span class="label bg-blue" *ngFor="let pms of project.pms">{{pms}}</span>
-                          </div>
-                          <div class="detail-row">
-                            <i class="pi pi-clock"></i>
-                            <span class="label bg-green">{{project.workingTimePercent}}%</span>
-                          </div>
+                            <ng-container *ngIf="project.isExpandedPms">
+                              <span class="label bg-blue" *ngFor="let pms of project.pms">{{pms}}</span>
+                            </ng-container>
+                            <ng-container *ngIf="!project.isExpandedPms">
+                              <span class="label bg-blue" *ngFor="let pms of project.pms | slice:0:2">{{pms}}</span>
+                            </ng-container>
+                            <button *ngIf="project.pms.length > 2" class="btn-expand-pms" 
+                                    (click)="project.isExpandedPms = !project.isExpandedPms; $event.stopPropagation()">
+                              {{ project.isExpandedPms ? 'Collapse' : '+ ' + (project.pms.length - 2) + ' more' }}
+                            </button>
+                          </ng-container>
+                        </div>
+                        <div class="project-time">
+                          <i class="pi pi-clock"></i>
+                          <span class="label bg-green">{{project.workingTimePercent}}%</span>
                         </div>
                       </div>
                     </ng-container>
 
-                    <button *ngIf="user.projectUsers?.length > 2" 
-                            class="btn-expand-projects" 
-                            (click)="user.isExpandedProjects = !user.isExpandedProjects; $event.stopPropagation()">
-                      {{ user.isExpandedProjects ? 'Collapse' : '+ ' + (user.projectUsers.length - 2) + ' more' }}
-                    </button>
+                    <div *ngIf="user.projectUsers?.length > 2" class="expand-btn-wrapper">
+                      <button class="btn-expand-projects" 
+                              (click)="user.isExpandedProjects = !user.isExpandedProjects; $event.stopPropagation()">
+                        {{ user.isExpandedProjects ? 'Collapse' : '+ ' + (user.projectUsers.length - 2) + ' more' }}
+                      </button>
+                    </div>
                     
                     <div *ngIf="!user.projectUsers || user.projectUsers.length === 0" class="no-projects">
                       N/A
