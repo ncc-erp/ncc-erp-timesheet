@@ -1,87 +1,10 @@
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="card main-content">
-      <div class="header">
-        <h2 class="title">{{ "Timesheets" | localize }}</h2>
-
-        <div class="filter-row">
-          <div class="filter-item filter-item--wide">
-            <mat-form-field appearance="outline">
-              <mat-label>Project</mat-label>
-              <mat-select name="projectId" [(value)]="projectId" (selectionChange)="getTimesheets()">
-                <mat-option>
-                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="projectSearch"
-                    noEntriesFoundLabel="No matching found">
-                  </ngx-mat-select-search>
-                </mat-option>
-                <mat-option *ngFor="let project of projects" [value]='project.id'>
-                  {{project.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div class="filter-item filter-item--narrow">
-            <mat-form-field appearance="outline">
-              <mat-label>Branch</mat-label>
-              <mat-select name="branchId" [(value)]="branchId" (selectionChange)="getTimesheets()">
-                <mat-option class="mat-option-custom-width">
-                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
-                    noEntriesFoundLabel="No matching found">
-                  </ngx-mat-select-search>
-                </mat-option>
-                <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
-                  {{branch.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div class="filter-item">
-            <mat-form-field appearance="outline">
-              <mat-label>Check In</mat-label>
-              <mat-select name="checkIn" [(value)]='checkInFilter' (selectionChange)='getTimesheets()'>
-                <mat-option *ngFor="let item of checkInFilterList" [value]='APP_CONSTANT.HaveCheckInFilter[item]'>
-                  {{item}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div class="filter-item">
-            <mat-form-field appearance="outline">
-              <mat-label>Work Location</mat-label>
-              <mat-select name="workLocation" [(value)]="workLocationFilter" (selectionChange)="getTimesheets()">
-                <mat-option *ngFor="let item of workLocationFilterList" [value]="APP_CONSTANT.WorkLocation[item]">
-                  {{ item }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div class="filter-item">
-            <mat-form-field appearance="outline">
-              <mat-label>Working Type</mat-label>
-              <mat-select [(ngModel)]="selectedTypeOfWork" name="selectedTypeOfWork" (selectionChange)="getTimesheets()">
-                <mat-option *ngFor="let item of Timesheet_TypeOfWorks" [value]="item.value">
-                  {{ item.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div class="filter-item" *ngIf="selectedTypeOfWork === APP_CONSTANT.EnumTypeOfWork.Overtime">
-            <mat-form-field appearance="outline">
-              <mat-label>Overtime Filter</mat-label>
-              <mat-select [(ngModel)]="isCharged" name="isCharged" (selectionChange)="getTimesheets()">
-                <mat-option *ngFor="let item of Timesheet_OvertimeFilters" [value]="item.value">
-                  {{ item.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div class="filter-item filter-item--wide filter-item--search">
+      <div class="header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <div class="header-title-search" style="display: flex; align-items: center; flex: 1;">
+          <h2 class="title" style="margin-right: 20px;">{{ "Timesheets" | localize }}</h2>
+          <div class="filter-item filter-item--search desktop-search">
             <mat-form-field appearance="outline">
               <mat-label>Search by UserName</mat-label>
               <input type="search" [(ngModel)]="searchText" name="searchText" (keyup.enter)="refresh()" matInput>
@@ -89,7 +12,7 @@
             </mat-form-field>
           </div>
         </div>
-        <!-- </div> -->
+
         <ul class="header-dropdown m-r--5">
           <li>
             <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu" class="header-dropdown-mat-icon-button">
@@ -104,146 +27,201 @@
           </li>
         </ul>
       </div>
-      <div class="body table-responsive" style="border: 0;" [busy]="isLoading">
-        <date-selector name="customTimeSelect" [type]="APP_CONSTANT.TypeViewHomePage.CustomTime"
-          [defaultFromDate] = "defaultFromDate"
-          [defaultToDate] = "defaultToDate"
-          (onDateSelectorChange)="handleDateSelectorChange($event)">
-        </date-selector>
-        <div class="row">
-          <!-- view by selectbox -->
-          <div class="col-sm-5">
-            <div class="row">
-              <div class="col-sm-6">
-                <div class="form-group form-float">
-                  <div class="example-form">
-                    <mat-form-field>
-                      <mat-select placeholder="Group by" [(ngModel)]="viewBy" name="groupby"
-                        (selectionChange)="onGroupByChange()">
-                        <mat-option *ngFor="let item of APP_CONFIG.TimesheetViewBys" [value]="item.value">
-                          {{ item.name }}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-                </div>
-              </div>
+      <div class="body" style="border: 0;" [busy]="isLoading">
+        <div class="row mb-3 filter-row-first">
+          <div class="col-md-3 col-sm-6 filter-item-select mobile-search">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Search by UserName</mat-label>
+              <input type="search" [(ngModel)]="searchText" name="searchText" (keyup.enter)="refresh()" matInput>
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
 
-              <!-- status filter -->
-              <div class="col-sm-6">
-                <div class="form-group form-float">
-                  <div class="example-form">
-                    <mat-form-field>
-                      <mat-select placeholder="Status" [(ngModel)]="filterStatus" name="Status"
-                        (selectionChange)="getTimesheets()">
-                        <mat-option *ngFor="let item of Timesheet_Statuses" [value]="item.value">
-                          {{ item.name }} ({{ item.count }})
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
+          <div class="col-md-3 col-sm-6 filter-item-select">
+            <date-range-picker 
+              [defaultFromDate]="defaultFromDate"
+              [defaultToDate]="defaultToDate"
+              (onDateRangeChange)="handleDateRangeChange($event)">
+            </date-range-picker>
+          </div>
+          <div class="col-md-3 col-sm-6 filter-item-select">
+            <mat-form-field appearance="outline">
+              <mat-label>Project</mat-label>
+              <mat-select name="projectId" [(value)]="projectId" (selectionChange)="getTimesheets()">
+                <mat-option>
+                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="projectSearch"
+                    noEntriesFoundLabel="No matching found">
+                  </ngx-mat-select-search>
+                </mat-option>
+                <mat-option *ngFor="let project of projects" [value]='project.id'>
+                  {{project.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-2 col-sm-6 filter-item-select">
+            <mat-form-field appearance="outline">
+              <mat-label>Branch</mat-label>
+              <mat-select name="branchId" [(value)]="branchId" (selectionChange)="getTimesheets()">
+                <mat-option class="mat-option-custom-width">
+                  <ngx-mat-select-search placeholderLabel="Search" [formControl]="branchSearch"
+                    noEntriesFoundLabel="No matching found">
+                  </ngx-mat-select-search>
+                </mat-option>
+                <mat-option *ngFor="let branch of listBranch" [value]='branch.id'>
+                  {{branch.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-2 col-sm-6 filter-item-select">
+            <mat-form-field appearance="outline">
+              <mat-label>Status</mat-label>
+              <mat-select [(ngModel)]="filterStatus" name="Status" (selectionChange)="getTimesheets()">
+                <mat-option *ngFor="let item of Timesheet_Statuses" [value]="item.value">
+                  {{ item.name }} ({{ item.count }})
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-2 col-sm-6 filter-item-select">
+            <mat-form-field appearance="outline">
+              <mat-label>Group by</mat-label>
+              <mat-select [(ngModel)]="viewBy" name="groupby" (selectionChange)="onGroupByChange()">
+                <mat-option *ngFor="let item of APP_CONFIG.TimesheetViewBys" [value]="item.value">
+                  {{ item.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row mb-3 filter-row-second">
+          <div class="col-md-11 col-sm-12">
+            <div class="action-buttons d-flex align-items-center flex-wrap">
+              <button mat-raised-button color="primary" class="more-filters-btn btn-action m-0" [matMenuTriggerFor]="moreFiltersMenu" #moreFiltersTrigger="matMenuTrigger">
+                <mat-icon>filter_alt</mat-icon> More Filters (6)
+              </button>
+              <mat-menu #moreFiltersMenu="matMenu" class="more-filters-panel" yPosition="below" xPosition="after" [overlapTrigger]="false">
+                <div (click)="$event.stopPropagation()" class="p-3">
+                  <div class="row">
+                    <div class="col-md-6 col-xs-6">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Check In</mat-label>
+                        <mat-select name="checkIn" [(value)]='checkInFilter' (selectionChange)='getTimesheets()'>
+                          <mat-option *ngFor="let item of checkInFilterList" [value]='APP_CONSTANT.HaveCheckInFilter[item]'>
+                            {{item}}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-md-6 col-xs-6">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Work Location</mat-label>
+                        <mat-select name="workLocation" [(value)]="workLocationFilter" (selectionChange)="getTimesheets()">
+                          <mat-option *ngFor="let item of workLocationFilterList" [value]="APP_CONSTANT.WorkLocation[item]">
+                            {{ item }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row mt-2">
+                    <div class="col-md-6 col-xs-6">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Working Type</mat-label>
+                        <mat-select [(ngModel)]="selectedTypeOfWork" name="selectedTypeOfWork" (selectionChange)="getTimesheets()">
+                          <mat-option *ngFor="let item of Timesheet_TypeOfWorks" [value]="item.value">
+                            {{ item.name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-md-6 col-xs-6">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Overtime Filter</mat-label>
+                        <mat-select [(ngModel)]="isCharged" name="isCharged" (selectionChange)="getTimesheets()" [disabled]="selectedTypeOfWork !== APP_CONSTANT.EnumTypeOfWork.Overtime">
+                          <mat-option *ngFor="let item of Timesheet_OvertimeFilters" [value]="item.value">
+                            {{ item.name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row mt-2">
+                    <div class="col-md-6 col-xs-6">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>OpenTalk JoinTime Filter</mat-label>
+                        <div [class]="!OpenTalkJoinTime ? 'ms-off' : 'ms-on'">
+                          <input type="number" class="opentalkFiler" [(ngModel)]="OpenTalkJoinTime" name="OpenTalkJoinTime" min="0" matInput (input)="resetFilterOpenTalk($event.target.value)">
+                        </div>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-md-6 col-xs-6">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Type</mat-label>
+                        <!-- Using the string format to properly bind value as it was previously -->
+                        <mat-select name="FilterOpenTalk" [value]="OpenTalkJoinTimeType ? 'true' : 'false'" (selectionChange)="filterOpenTalk($event.value === 'true')" [disabled]="OpenTalkJoinTime == null || OpenTalkJoinTime === undefined || OpenTalkJoinTime.toString() === ''">
+                          <mat-option value="true">Higher</mat-option>
+                          <mat-option value="false">Lower</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="row mt-3">
+                    <div class="col-md-12 text-center">
+                      <button mat-raised-button (click)="moreFiltersTrigger.closeMenu()">Cancel</button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-sm-6">
-                <div class="form-group form-float">
-                  <div class="example-form">
-                    <mat-form-field appearance="outline" style="width: 100%;">
-                      <mat-label>OpenTalk JoinTime Filter</mat-label>
-                      <div [class]="!OpenTalkJoinTime ? 'ms-off' : 'ms-on'">
-                        <input type="number" class="opentalkFiler" [(ngModel)]="OpenTalkJoinTime" name="OpenTalkJoinTime" min="0" matInput (input)="resetFilterOpenTalk($event.target.value)">
-                      </div>
-                    </mat-form-field>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm-3" *ngIf="OpenTalkJoinTime">
-                <div class="form-group form-float">
-                  <div class="example-form">
-                    <mat-form-field *ngIf="OpenTalkJoinTime" appearance="outline" style="width: 100%;">
-                      <mat-label>Type</mat-label>
-                      <mat-select name="FilterOpenTalk" (selectionChange)="filterOpenTalk($event.value)">
-                        <mat-option value=true>Higher</mat-option>
-                        <mat-option value=false>Lower</mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-                </div>
-              </div>
+              </mat-menu>
+
+              <button name="approveBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" 
+                class="btn btn-success waves-effect btn-action m-0" 
+                (click)="btnApprove()">
+                Approve
+              </button>
+              
+              <button name="rejectBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" 
+                class="btn bg-grey waves-effect btn-action m-0" 
+                (click)="btnReject()">
+                Reject
+              </button>
+              
+              <button name="exportMenuBtn" *ngIf="permission.isGranted(EXPORT_EXCEL_TIMESHEET)" 
+                class="btn bg-red waves-effect btn-action m-0" 
+                [matMenuTriggerFor]="actionsMenu"
+                [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
+                Export
+              </button>
+              
+              <button name="unlockPM" *ngIf="!isBasicUser"
+                class="btn bg-blue waves-effect btn-unlock m-0" 
+                (click)="unlockTimesheet('PM')" 
+                [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
+                <i class="material-icons">lock_open</i> <span>Unlock PM</span>
+              </button>
+              <mat-menu #actionsMenu="matMenu">
+                <button mat-menu-item (click)="btnExport('timesheet')">Export by timesheet</button>
+                <button mat-menu-item (click)="btnExport('day')">Export by day</button>
+                <button mat-menu-item (click)="dialogSelectDay(1)">Export TimeSheet</button>
+                <button mat-menu-item (click)="dialogSelectDay(2)">Export Remote Request</button>
+              </mat-menu>
             </div>
           </div>
 
-      <div class="action-timesheet-overview" style="display: flex; flex-wrap: nowrap; gap: 8px; align-items: flex-start;">
-            <div class="action-buttons" style="display: flex; flex-wrap: nowrap; gap: 8px; width: 100%;">
-              <div class="status-timesheet" style="flex: 1 1 auto; min-width: 0;">
-                <div class="form-group form-float" style="margin-bottom: 0;">
-                  <button name="approveBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" 
-                    class="btn btn-success waves-effect" 
-                    style="width: 100%; white-space: nowrap; padding: 8px 8px; height: 35px;" 
-                    (click)="btnApprove()">
-                    Approve
-                  </button>
-                </div>
-              </div>
-              <div class="status-timesheet" style="flex: 1 1 auto; min-width: 0;">
-                <div class="form-group form-float" style="margin-bottom: 0;">
-                  <button name="rejectBtn" *ngIf="permission.isGranted(APPROVAL_TIMESHEET)" 
-                    class="btn bg-grey waves-effect" 
-                    style="width: 100%; white-space: nowrap; padding: 8px 8px; height: 35px;" 
-                    (click)="btnReject()">
-                    Reject
-                  </button>
-                </div>
-              </div>
-              <div class="status-timesheet" style="flex: 1 1 auto; min-width: 0;">
-                <div class="form-group form-float" style="margin-bottom: 0;">
-                  <button name="exportMenuBtn" *ngIf="permission.isGranted(EXPORT_EXCEL_TIMESHEET)" 
-                    class="btn bg-red waves-effect" 
-                    style="width: 100%; white-space: nowrap; padding: 8px 8px; height: 35px;"
-                    [matMenuTriggerFor]="actionsMenu"
-                    [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
-                    Export
-                  </button>
-                </div>
-              </div>
-              <div class="status-timesheet" style="flex: 1 1 auto; min-width: 0; width: 50px;">
-                <div class="form-group form-float" style="margin-bottom: 0;">
-                  <button name="unlockPM" *ngIf="!isBasicUser"
-                    class="btn bg-blue waves-effect" 
-                    style="width: 100%; white-space: nowrap; padding: 8px 8px; height: 35px;"
-                    (click)="unlockTimesheet('PM')" 
-                    [disabled]="viewBy == APP_CONSTANT.TimesheetViewBy.People">
-                    <i class="material-icons" style="font-size: 16px; vertical-align: text-bottom; margin-right: 2px; position: relative; top: 1px;">lock_open</i> Unlock PM
-                  </button>
-                </div>
-                <mat-menu #actionsMenu="matMenu">
-                  <button mat-menu-item (click)="btnExport('timesheet')">
-                    Export by timesheet
-                  </button>
-                  <button mat-menu-item (click)="btnExport('day')">
-                    Export by day
-                  </button>
-                  <button mat-menu-item (click)="dialogSelectDay(1)">
-                    Export TimeSheet
-                  </button>
-                  <button mat-menu-item (click)="dialogSelectDay(2)">
-                    Export Remote Request
-                  </button>
-                </mat-menu>
-              </div>
-            </div>
-            <div class="col-sm-1 status-timesheet">
-              <div class="form-group form-float">
-                <div class="example-form m-t-10" class="text-center">
-                  <mat-checkbox name="isCheckAll" color="primary" [checked]="checkedCount == totalCount && checkedCount != 0"
-                    [indeterminate]="
-                      checkedCount < totalCount && checkedCount > 0
-                    " (change)="onTotalCheckedChange($event)"></mat-checkbox>
-                  <div style="color: #000">
-                    {{ checkedCount }}/{{ totalCount }}
-                  </div>
-                </div>
+          <div class="col-md-1 col-sm-12 text-right d-flex align-items-center justify-content-end checked-stats-col">
+            <div class="checked-stats d-flex align-items-center">
+              <mat-checkbox name="isCheckAll" color="primary" class="checkbox-no-margin"
+                [checked]="checkedCount == totalCount && checkedCount != 0"
+                [indeterminate]="checkedCount < totalCount && checkedCount > 0" 
+                (change)="onTotalCheckedChange($event)">
+              </mat-checkbox>
+              <div class="stats-text">
+                {{ checkedCount }}/{{ totalCount }}
               </div>
             </div>
           </div>

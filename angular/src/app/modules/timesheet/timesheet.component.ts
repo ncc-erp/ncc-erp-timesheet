@@ -555,6 +555,11 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     this.getTimesheets();
   }
 
+  handleDateRangeChange(date: { fromDate: string, toDate: string }) {
+    this.setFromAndToDate(date.fromDate, date.toDate);
+    this.getTimesheets();
+  }
+
   setFromAndToDate(fromDate, toDate) {
     this.fromDate = fromDate;
     this.toDate = toDate;
