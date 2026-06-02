@@ -95,15 +95,17 @@ namespace Timesheet.Services.Mezon
 
         public void NotifyToChannel(string MezonUrl, string MezonMessage)
         {
-            var mkList = ExtractMarkdown(MezonMessage);
-            var mentions = ExtractMentions(MezonMessage);
+            var (cleanedText, boldEntries) = ProcessBoldMarkers(MezonMessage);
+            var mkList = ExtractMarkdown(cleanedText);
+            mkList.AddRange(boldEntries);
+            var mentions = ExtractMentions(cleanedText);
 
             Post(MezonUrl, new
             {
                 type = MezonConstant.MEZON_NOTI_TYPE,
                 message = new
                 {
-                    t = MezonMessage,
+                    t = cleanedText,
                     mk = mkList,
                     mentions = mentions
                 }
@@ -132,6 +134,44 @@ namespace Timesheet.Services.Mezon
                 }
             }
             return mkList;
+        }
+
+        public (string cleanedText, List<object> boldEntries) ProcessBoldMarkers(string message)
+        {
+            var boldEntries = new List<object>();
+            var result = new StringBuilder();
+            int i = 0;
+            string marker = MezonConstant.BOLD_MARKER;
+            int markerLength = marker.Length;
+
+            while (i < message.Length)
+            {
+                if (i <= message.Length - markerLength && message.Substring(i, markerLength) == marker)
+                {
+                    int contentStart = i + markerLength;
+                    int closingPos = message.IndexOf(marker, contentStart);
+                    if (closingPos > -1)
+                    {
+                        int boldStart = result.Length;
+                        string boldContent = message.Substring(contentStart, closingPos - contentStart);
+                        result.Append(boldContent);
+
+                        boldEntries.Add(new 
+                        { 
+                            type = MezonConstant.BOLD_TYPE, 
+                            s = boldStart, 
+                            e = result.Length 
+                        });
+
+                        i = closingPos + markerLength;
+                        continue;
+                    }
+                }
+                result.Append(message[i]);
+                i++;
+            }
+
+            return (result.ToString(), boldEntries);
         }
 
         public List<object> ExtractMentions(string message)

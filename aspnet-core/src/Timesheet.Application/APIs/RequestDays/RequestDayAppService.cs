@@ -1019,7 +1019,7 @@ namespace Timesheet.APIs.RequestDays
                 else
                 {
                     var Message = $"PM {project.KomuPMsTag(alreadySentToPMIds)}: {requester.KomuAccountInfo(project.notifyChannel)} " +
-                        $"has sent a request **{input.GetRequestName(offTypeName)}** " +
+                        $"has sent a request**{input.GetRequestName(offTypeName)}**" +
                         $"for following dates:\n ```{input.ToKomuStringRequestDates()}```" +
                         $"Reason: ```{input.Reason}```";
 
@@ -1554,9 +1554,9 @@ namespace Timesheet.APIs.RequestDays
                     var pmsTag = project.KomuPMsTag(alreadySentToPMIds);
                     pmsTag = string.IsNullOrEmpty(pmsTag) ? "" : $"PM {pmsTag}:";
 
-                    var Message = $"{pmsTag} **{approver.FullName}** " +
-                        $"has **{(isApprove ? "approved" : "rejected")}** the request: {requester.KomuAccountInfo(project.notifyChannel)} " +
-                        $"**{GetRequestName(request, requestDetail, offTypeName)}** {requestDetail.ToKomuString()}";
+                    var Message = $"{pmsTag}**{approver.FullName}**" +
+                        $"has**{(isApprove ? "approved" : "rejected")}**the request: {requester.KomuAccountInfo(project.notifyChannel)}" +
+                        $"**{GetRequestName(request, requestDetail, offTypeName)}**{requestDetail.ToKomuString()}";
 
                     switch (project.notifyChannel)
                     {
