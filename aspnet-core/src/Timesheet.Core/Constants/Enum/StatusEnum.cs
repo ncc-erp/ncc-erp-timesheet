@@ -296,7 +296,8 @@ namespace Ncc.Entities.Enum
             UnlockTSIMS = 17,
             UnlockPM = 18,
             UnlockStaff = 19,
-            PMOthers = 20
+            PMOthers = 20,
+            EarlyCheckOut = 21
         }
         public enum PunishmentGroupType
         {
@@ -321,7 +322,8 @@ namespace Ncc.Entities.Enum
             NoCheckIn = 2,
             NoCheckOut = 3,
             LateAndNoCheckOut = 4,
-            NoCheckInAndNoCheckOut = 5
+            NoCheckInAndNoCheckOut = 5,
+            EarlyCheckOut = 21
         }
         public enum WhitelistType
         {
