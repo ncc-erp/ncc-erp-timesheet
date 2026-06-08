@@ -274,8 +274,9 @@ export const APP_CONSTANT = {
     { "name": "Unlock Timesheet IMS", "value": 17 },
     { "name": "Unlock Timesheet PM", "value": 18 },
     { "name": "Unlock Timesheet Staff", "value": 19 },
-    { "name": "PM Others", "value": 20 }
-  ],  
+    { "name": "PM Others", "value": 20 },
+    { "name": "Early CheckOut", "value": 21 }
+  ],
   PunishRulesShortName: [
     { "name": "No Punish", "value": 0 },
     { "name": "Late", "value": 1 },
@@ -297,12 +298,13 @@ export const APP_CONSTANT = {
     { "name": "UnlockTS IMS", "value": 17 },
     { "name": "UnlockTS PM", "value": 18 },
     { "name": "UnlockTS Staff", "value": 19 },
-    { "name": "PM Others", "value": 20 }
+    { "name": "PM Others", "value": 20 },
+    { "name": "Early CheckOut", "value": 21 }
   ],
-  
+
   PunishmentGroups: {
     NO_PUNISH: [0],
-    CHECK_IN_OUT: [1, 2, 3, 4, 5],
+    CHECK_IN_OUT: [1, 2, 3, 4, 5, 21],
     TRACKER: [8, 9, 10, 11],
     PM_REPORT: [13, 14],
     DAILY: [6],
@@ -337,7 +339,8 @@ export const APP_CONSTANT = {
     { value: 17, name: 'UnlockTS IMS' },
     { value: 18, name: 'UnlockTS PM' },
     { value: 19, name: 'UnlockTS Staff' },
-    { value: 20, name: 'PM Others'}
+    { value: 20, name: 'PM Others'},
+    { value: 21, name: 'Early CheckOut' }
   ],
   
   PunishmentTypeMap: {
@@ -361,7 +364,8 @@ export const APP_CONSTANT = {
     17: ['NO_PUNISH', 'UNLOCK_TS_IMS'],
     18: ['NO_PUNISH', 'UNLOCK_TS_PM'],
     19: ['NO_PUNISH', 'UNLOCK_TS_STAFF'],    
-    20: ['NO_PUNISH', 'PM_OTHERS']
+    20: ['NO_PUNISH', 'PM_OTHERS'],
+    21: ['NO_PUNISH', 'CHECK_IN_OUT']
   },
   GroupTypes: [
     { id: -1, name: 'All' },

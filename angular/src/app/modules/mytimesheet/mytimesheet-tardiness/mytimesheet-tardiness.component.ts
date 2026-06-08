@@ -167,7 +167,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
       let punishType = item.userPunishmentType;
       const moneyAmount = item.moneyPunish || 0;
       
-      if (item.statusPunish >= 1 && item.statusPunish <= 5 && punishType === 0) {
+      if ((item.statusPunish >= 1 && item.statusPunish <= 5 || item.statusPunish === 21) && punishType === 0) {
         punishType = item.statusPunish; 
       }
 
@@ -217,7 +217,7 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
         }
       }
 
-      if (punishType >= 1 && punishType <= 5) {
+      if (punishType >= 1 && punishType <= 5 || punishType === 21) {
         record.attendancePunish = (record.attendancePunish || 0) + moneyAmount;
       } else if (punishType === 6) {
         record.dailyPunish = (record.dailyPunish || 0) + moneyAmount;
@@ -491,8 +491,8 @@ export class MytimesheetTardinessComponent extends AppComponentBase implements O
 
   getAttendancePunishmentTypes(item: TimekeepingDto): string {
     if (item.structuredNoteReplies && item.structuredNoteReplies.length > 0) {
-      const attendanceReplies = item.structuredNoteReplies.filter(reply => 
-        reply.punishmentType >= 1 && reply.punishmentType <= 5
+      const attendanceReplies = item.structuredNoteReplies.filter(reply =>
+        reply.punishmentType >= 1 && reply.punishmentType <= 5 || reply.punishmentType === 21
       );
       
       if (attendanceReplies.length > 0) {
