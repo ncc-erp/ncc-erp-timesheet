@@ -89,6 +89,7 @@
                 <span *ngIf="item.statusPunish === 3">No Check Out</span>
                 <span *ngIf="item.statusPunish === 4">Late & No CheckOut</span>
                 <span *ngIf="item.statusPunish === 5">No CheckIn & Out</span>
+                <span *ngIf="item.statusPunish === 21">Early CheckOut</span>
                 <span *ngIf="!item.statusPunish && item.moneyPunish > 0">CheckIn CheckOut</span>
               </span>
             </ng-container>
