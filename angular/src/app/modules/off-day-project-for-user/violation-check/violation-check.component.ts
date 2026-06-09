@@ -40,8 +40,8 @@ export class ViolationCheckComponent extends AppComponentBase implements OnInit 
 
     this.absenceRequestService.getRequestOffViolationByDate(dateStr).subscribe(
       (res: any) => {
-        this.twoOrLessDaysViolations = res.result?.twoOrLessDaysViolations || [];
-        this.moreThanTwoDaysViolations = res.result?.moreThanTwoDaysViolations || [];
+        this.twoOrLessDaysViolations = (res.result && res.result.twoOrLessDaysViolations) || [];
+        this.moreThanTwoDaysViolations = (res.result && res.result.moreThanTwoDaysViolations) || [];
         this.hasChecked = true;
         this.isLoading = false;
       },
