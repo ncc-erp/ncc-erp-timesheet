@@ -1977,6 +1977,82 @@ namespace Timesheet.APIs.RequestDays
             }
         }
 
+        [HttpGet]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin)]
+        public async Task<GetRequestOffViolationResultDto> GetRequestOffViolationByDate(DateTime date)
+        {
+            var matchingRequestIds = await WorkScope.GetAll<AbsenceDayDetail>()
+                .Where(s => s.DateAt.Date == date.Date)
+                .Where(s => s.Request.Type == RequestType.Off)
+                .Where(s => s.Request.Status != RequestStatus.Rejected)
+                .Select(s => s.RequestId)
+                .Distinct()
+                .ToListAsync();
+
+            if (!matchingRequestIds.Any())
+                return new GetRequestOffViolationResultDto();
+
+            var allDetails = await WorkScope.GetAll<AbsenceDayDetail>()
+                .Where(s => matchingRequestIds.Contains(s.RequestId))
+                .Select(s => new
+                {
+                    s.RequestId,
+                    DateAt = s.DateAt.Date,
+                    RequestCreatedAt = s.Request.CreationTime,
+                    UserId = s.Request.UserId,
+                    FullName = s.Request.User.FullName,
+                    EmailAddress = s.Request.User.EmailAddress
+                })
+                .ToListAsync();
+
+            var result = new GetRequestOffViolationResultDto();
+
+            var grouped = allDetails
+                .GroupBy(s => s.RequestId)
+                .Select(g => new
+                {
+                    RequestId = g.Key,
+                    UserId = g.First().UserId,
+                    FullName = g.First().FullName,
+                    EmailAddress = g.First().EmailAddress,
+                    RequestCreatedAt = g.First().RequestCreatedAt,
+                    OffDates = g.Select(x => x.DateAt).Distinct().OrderBy(x => x).ToList(),
+                    TotalDays = g.Select(x => x.DateAt).Distinct().Count(),
+                    EarliestDate = g.Min(x => x.DateAt)
+                })
+                .ToList();
+
+            foreach (var item in grouped)
+            {
+                // ≤ 2 days: must request 3 days before → deadline = earliestDate - 2
+                // > 2 days: must request 7 days before → deadline = earliestDate - 6
+                int noticeDays = item.TotalDays <= 2 ? 3 : 7;
+                var deadline = item.EarliestDate.AddDays(-(noticeDays - 1));
+
+                if (item.RequestCreatedAt.Date <= deadline.Date)
+                    continue;
+
+                var violationItem = new RequestOffViolationItemDto
+                {
+                    RequestId = item.RequestId,
+                    UserId = item.UserId,
+                    FullName = item.FullName,
+                    EmailAddress = item.EmailAddress,
+                    RequestCreatedAt = item.RequestCreatedAt,
+                    DeadlineAt = deadline,
+                    TotalOffDays = item.TotalDays,
+                    OffDates = item.OffDates
+                };
+
+                if (item.TotalDays <= 2)
+                    result.TwoOrLessDaysViolations.Add(violationItem);
+                else
+                    result.MoreThanTwoDaysViolations.Add(violationItem);
+            }
+
+            return result;
+        }
+
         [HttpPost]
         public async Task<List<GetRequestDto>> GetAllRequestForUserByDay(InputRequestDtoForDay input)
         {

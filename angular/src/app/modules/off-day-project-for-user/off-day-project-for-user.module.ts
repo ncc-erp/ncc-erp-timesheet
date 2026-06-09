@@ -13,6 +13,8 @@ import { OffDayProjectForUserComponent } from './off-day-project-for-user.compon
 import { PopupComponent } from './popup/popup.component';
 import { PopupModule } from './popup/popup.module';
 import { ExportDataComponent } from './export-data/export-data.component';
+import { ViolationCheckModule } from './violation-check/violation-check.module';
+import { ViolationCheckComponent } from './violation-check/violation-check.component';
 
 @NgModule({
     declarations: [OffDayProjectForUserComponent, ExportDataComponent],
@@ -25,6 +27,7 @@ import { ExportDataComponent } from './export-data/export-data.component';
         NgxMatSelectSearchModule,
         DragDropModule,
         PopupModule,
+        ViolationCheckModule,
         OffDayProjectForUserRoutingModule,
         CalendarModule.forRoot({
             provide: DateAdapter,
@@ -32,7 +35,8 @@ import { ExportDataComponent } from './export-data/export-data.component';
         }),
     ],
     entryComponents: [PopupComponent,
-    ExportDataComponent],
+    ExportDataComponent,
+    ViolationCheckComponent],
     providers: [
         { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
     ]

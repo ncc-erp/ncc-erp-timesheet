@@ -32,6 +32,16 @@
           </div>
         </div>
         <div class="label-button-group">
+          <div *ngIf="isAdmin" style="width: auto">
+            <button
+              (click)="openViolationCheck()"
+              style="height: 44px"
+              mat-flat-button
+              color="warn"
+            >
+              Check Violations
+            </button>
+          </div>
           <div style="width: auto">
             <button
               *ngIf="shouldShowNotifyPmButton()"
