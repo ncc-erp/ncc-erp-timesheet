@@ -240,6 +240,8 @@ namespace Ncc.Authorization
         public const string Admin_UserWhitelist_Import = "Admin.UserWhitelist.Import";
         public const string Admin_UserWhitelist_DownloadTemplate = "Admin.UserWhitelist.DownloadTemplate";
 
+        public const string Admin_OffViolations_View = "Admin.OffViolations.View";
+
         public const string Project = "Project";
         public const string Project_View = "Project.View";
         public const string Project_View_All = "Project.ViewAll";
@@ -636,6 +638,8 @@ namespace Ncc.Authorization
                     PermissionNames.Admin_UserWhitelist_Delete,
                     PermissionNames.Admin_UserWhitelist_Import,
                     PermissionNames.Admin_UserWhitelist_DownloadTemplate,
+
+                    PermissionNames.Admin_OffViolations_View,
 
                     PermissionNames.Project,
                     PermissionNames.Project_View,
@@ -1198,6 +1202,8 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.Admin_UserWhitelist_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete user whitelist" },
             new SystemPermission{ Name =  PermissionNames.Admin_UserWhitelist_Import, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Import a CSV file to user whitelist" },
             new SystemPermission{ Name =  PermissionNames.Admin_UserWhitelist_DownloadTemplate, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Download user whitelist template" },
+
+            new SystemPermission{ Name =  PermissionNames.Admin_OffViolations_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View user off request violations"},
 
             new SystemPermission{ Name =  PermissionNames.Project, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Projects" },
             new SystemPermission{ Name =  PermissionNames.Project_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View my projects" },
@@ -1847,6 +1853,12 @@ namespace Ncc.Authorization
                             new SystemPermission{ Name =  PermissionNames.Admin_UserWhitelist_DownloadTemplate, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Download user whitelist template"}
                         }
                      },
+                     new SystemPermission{ Name =  PermissionNames.Admin_OffViolations_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Off violations",
+                        Childrens = new List<SystemPermission>()
+                        {
+                            new SystemPermission{ Name =  PermissionNames.Admin_OffViolations_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View user off request violations"},
+                        }
+                     }
                 }
             },
             new SystemPermission{ Name =  PermissionNames.Project, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Projects" ,

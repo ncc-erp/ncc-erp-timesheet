@@ -336,6 +336,9 @@ export const PERMISSIONS_CONSTANT = {
     EditPosition: "Admin.Position.Edit",
     DeletePosition: "Admin.Position.Delete",
 
+    //Off day violations
+    ViewOffViolations: "Admin.OffViolations.View",
+
     // Retro
     //Retro: "Retro",
     Retro: "Retro",
