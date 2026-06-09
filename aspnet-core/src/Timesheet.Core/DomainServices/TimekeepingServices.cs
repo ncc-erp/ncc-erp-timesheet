@@ -118,6 +118,7 @@ namespace Timesheet.DomainServices
                 UserPunishmentType.NoCheckOut,
                 UserPunishmentType.LateAndNoCheckOut,
                 UserPunishmentType.NoCheckInAndNoCheckOut,
+                UserPunishmentType.EarlyCheckOut,
                 UserPunishmentType.Daily,
                 UserPunishmentType.Mention,
                 UserPunishmentType.Tracker_20k,
@@ -539,6 +540,7 @@ namespace Timesheet.DomainServices
                 UserPunishmentType.NoCheckOut,
                 UserPunishmentType.LateAndNoCheckOut,
                 UserPunishmentType.NoCheckInAndNoCheckOut,
+                UserPunishmentType.EarlyCheckOut,
                 UserPunishmentType.Daily,
                 UserPunishmentType.Mention,
                 UserPunishmentType.Tracker_20k,
@@ -1026,7 +1028,8 @@ namespace Timesheet.DomainServices
             var noCheckOut = string.IsNullOrEmpty(timekeeping.CheckOut);
             var checkInLate = !string.IsNullOrEmpty(timekeeping.CheckIn) && CommonUtils.SubtractHHmm(timekeeping.CheckIn, timekeeping.RegisterCheckIn) > limitedMinute;
             var checkIn = !string.IsNullOrEmpty(timekeeping.CheckIn) && CommonUtils.SubtractHHmm(timekeeping.CheckIn, timekeeping.RegisterCheckIn) <= limitedMinute;
-            var checkOut = !string.IsNullOrEmpty(timekeeping.CheckOut);
+            var checkOutEarly = !string.IsNullOrEmpty(timekeeping.CheckOut) && CommonUtils.SubtractHHmm(timekeeping.RegisterCheckOut, timekeeping.CheckOut) > limitedMinute;
+            var checkOutOnTime = !string.IsNullOrEmpty(timekeeping.CheckOut) && !checkOutEarly;
             var noCheckIn = string.IsNullOrEmpty(timekeeping.CheckIn);
 
             if (noCheckInAndNoCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
@@ -1041,7 +1044,9 @@ namespace Timesheet.DomainServices
                 return CheckInCheckOutPunishmentType.LateAndNoCheckOut;
             if (checkIn && noCheckOut && trackerTime < trackerTimeByRegisterWorkingHours)
                 return CheckInCheckOutPunishmentType.NoCheckOut;
-            if (checkIn && checkOut)
+            if (checkIn && checkOutEarly)
+                return CheckInCheckOutPunishmentType.EarlyCheckOut;
+            if (checkIn && checkOutOnTime)
                 return CheckInCheckOutPunishmentType.NoPunish;
             if (checkIn && !timekeeping.CheckOut.HasValue() && trackerTime >= trackerTimeByRegisterWorkingHours)
                 return CheckInCheckOutPunishmentType.NoPunish;
