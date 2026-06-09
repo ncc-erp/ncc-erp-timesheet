@@ -1981,76 +1981,104 @@ namespace Timesheet.APIs.RequestDays
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Admin)]
         public async Task<GetRequestOffViolationResultDto> GetRequestOffViolationByDate(DateTime date)
         {
-            var matchingRequestIds = await WorkScope.GetAll<AbsenceDayDetail>()
+            // Step 1: Find users who have an off request on the input date
+            var requestsOnDate = await WorkScope.GetAll<AbsenceDayDetail>()
                 .Where(s => s.DateAt.Date == date.Date)
                 .Where(s => s.Request.Type == RequestType.Off)
                 .Where(s => s.Request.Status != RequestStatus.Rejected)
-                .Select(s => s.RequestId)
-                .Distinct()
-                .ToListAsync();
-
-            if (!matchingRequestIds.Any())
-                return new GetRequestOffViolationResultDto();
-
-            var allDetails = await WorkScope.GetAll<AbsenceDayDetail>()
-                .Where(s => matchingRequestIds.Contains(s.RequestId))
                 .Select(s => new
                 {
                     s.RequestId,
-                    DateAt = s.DateAt.Date,
-                    RequestCreatedAt = s.Request.CreationTime,
                     UserId = s.Request.UserId,
                     FullName = s.Request.User.FullName,
-                    EmailAddress = s.Request.User.EmailAddress
+                    EmailAddress = s.Request.User.EmailAddress,
+                    RequestCreatedAt = s.Request.CreationTime
                 })
                 .ToListAsync();
 
+            if (!requestsOnDate.Any())
+                return new GetRequestOffViolationResultDto();
+
+            var userIds = requestsOnDate.Select(x => x.UserId).Distinct().ToList();
+
+            // Step 2: Fetch off days within ±3 days of input date to find consecutive blocks.
+            // 3 days is sufficient for any realistic consecutive off period.
+            var windowStart = date.Date.AddDays(-3);
+            var windowEnd = date.Date.AddDays(3);
+
+            var allOffDaysForUsers = await WorkScope.GetAll<AbsenceDayDetail>()
+                .Where(s => userIds.Contains(s.Request.UserId))
+                .Where(s => s.Request.Type == RequestType.Off)
+                .Where(s => s.Request.Status != RequestStatus.Rejected)
+                .Where(s => s.DateAt.Date >= windowStart && s.DateAt.Date <= windowEnd)
+                .Select(s => new { UserId = s.Request.UserId, DateAt = s.DateAt.Date })
+                .ToListAsync();
+
             var result = new GetRequestOffViolationResultDto();
+            var processedUserIds = new HashSet<long>();
 
-            var grouped = allDetails
-                .GroupBy(s => s.RequestId)
-                .Select(g => new
-                {
-                    RequestId = g.Key,
-                    UserId = g.First().UserId,
-                    FullName = g.First().FullName,
-                    EmailAddress = g.First().EmailAddress,
-                    RequestCreatedAt = g.First().RequestCreatedAt,
-                    OffDates = g.Select(x => x.DateAt).Distinct().OrderBy(x => x).ToList(),
-                    TotalDays = g.Select(x => x.DateAt).Distinct().Count(),
-                    EarliestDate = g.Min(x => x.DateAt)
-                })
-                .ToList();
-
-            foreach (var item in grouped)
+            foreach (var req in requestsOnDate)
             {
-                // ≤ 2 days: must request 3 days before → deadline = earliestDate - 2
-                // > 2 days: must request 7 days before → deadline = earliestDate - 6
-                int noticeDays = item.TotalDays <= 2 ? 3 : 7;
-                var deadline = item.EarliestDate.AddDays(-(noticeDays - 1));
+                if (!processedUserIds.Add(req.UserId))
+                    continue;
 
-                if (item.RequestCreatedAt.Date <= deadline.Date)
+                var userOffDates = allOffDaysForUsers
+                    .Where(x => x.UserId == req.UserId)
+                    .Select(x => x.DateAt)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList();
+
+                // Find the consecutive block of off days that contains the input date
+                var block = GetConsecutiveOffBlock(userOffDates, date.Date);
+                int totalDays = block.Count;
+                DateTime earliestDate = block.Min();
+
+                // ≤ 2 days: deadline = earliestDate - 2  (must request 3 days before)
+                // > 2 days: deadline = earliestDate - 6  (must request 7 days before)
+                int noticeDays = totalDays <= 2 ? 3 : 7;
+                var deadline = earliestDate.AddDays(-(noticeDays - 1));
+
+                if (req.RequestCreatedAt.Date <= deadline.Date)
                     continue;
 
                 var violationItem = new RequestOffViolationItemDto
                 {
-                    RequestId = item.RequestId,
-                    UserId = item.UserId,
-                    FullName = item.FullName,
-                    EmailAddress = item.EmailAddress,
-                    RequestCreatedAt = item.RequestCreatedAt,
+                    RequestId = req.RequestId,
+                    UserId = req.UserId,
+                    FullName = req.FullName,
+                    EmailAddress = req.EmailAddress,
+                    RequestCreatedAt = req.RequestCreatedAt,
                     DeadlineAt = deadline,
-                    TotalOffDays = item.TotalDays,
-                    OffDates = item.OffDates
+                    TotalOffDays = totalDays,
+                    OffDates = block
                 };
 
-                if (item.TotalDays <= 2)
+                if (totalDays <= 2)
                     result.TwoOrLessDaysViolations.Add(violationItem);
                 else
                     result.MoreThanTwoDaysViolations.Add(violationItem);
             }
 
             return result;
+        }
+
+        private List<DateTime> GetConsecutiveOffBlock(List<DateTime> sortedDates, DateTime targetDate)
+        {
+            if (!sortedDates.Contains(targetDate))
+                return new List<DateTime> { targetDate };
+
+            int targetIndex = sortedDates.IndexOf(targetDate);
+
+            int start = targetIndex;
+            while (start > 0 && sortedDates[start].AddDays(-1) == sortedDates[start - 1])
+                start--;
+
+            int end = targetIndex;
+            while (end < sortedDates.Count - 1 && sortedDates[end].AddDays(1) == sortedDates[end + 1])
+                end++;
+
+            return sortedDates.GetRange(start, end - start + 1);
         }
 
         [HttpPost]
