@@ -78,4 +78,8 @@ export class AbsenceRequestService extends BaseApiService {
     getAllRequestForUserByDay(date, id, name, offType, dayoffTypeId,dayAbsentStatus, dayType, remoteOfWeek): Observable<any> {
         return this.http.post(this.rootUrl + "/GetAllRequestForUserByDay", {date: date, projectIds: id, name: name, type:offType, dayoffTypeId: dayoffTypeId,  status: dayAbsentStatus, dayType: dayType > 0 ? dayType : undefined, remoteOfWeek: remoteOfWeek > 0 ? remoteOfWeek : undefined});
     }
+
+    getRequestOffViolationByDate(date: string): Observable<any> {
+        return this.http.get(this.rootUrl + `/GetRequestOffViolationByDate?date=${date}`);
+    }
 }

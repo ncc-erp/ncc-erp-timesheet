@@ -1,0 +1,53 @@
+.date-picker-row {
+  margin-bottom: 16px;
+}
+
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.violation-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-count {
+  background-color: #e53935;
+  color: #fff;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+}
+
+.no-data {
+  color: #888;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.date-chip {
+  display: inline-block;
+  background: #e3f2fd;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin: 2px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+table th, table td {
+  font-size: 13px;
+  vertical-align: middle !important;
+}
