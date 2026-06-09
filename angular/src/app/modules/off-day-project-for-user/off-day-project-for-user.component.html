@@ -32,8 +32,9 @@
           </div>
         </div>
         <div class="label-button-group">
-          <div *ngIf="isAdmin" style="width: auto">
+          <div style="width: auto">
             <button
+              *ngIf="permission.isGranted(View_Off_Violations)"
               (click)="openViolationCheck()"
               style="height: 44px"
               mat-flat-button

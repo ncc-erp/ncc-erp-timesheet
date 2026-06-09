@@ -1,12 +1,7 @@
 <div class="header" cdkDragHandle cdkDrag cdkDragRootElement=".cdk-overlay-pane">
   <h4 class="pin">Check off request violations</h4>
-  <button mat-dialog-close class="btn-dialog-close">
-    <i class="material-icons">close</i>
-  </button>
-</div>
-
-<mat-dialog-content class="mat-typography">
-  <div class="date-picker-row">
+  
+  <div class="header-date-picker">
     <mat-form-field appearance="outline">
       <mat-label>Select date</mat-label>
       <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" (dateChange)="onDateChange($event)" placeholder="DD/MM/YYYY">
@@ -14,6 +9,13 @@
       <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
   </div>
+
+  <button mat-dialog-close class="btn-dialog-close">
+    <i class="material-icons">close</i>
+  </button>
+</div>
+
+<mat-dialog-content class="mat-typography">
 
   <div *ngIf="isLoading" class="loading-wrapper">
     <mat-spinner diameter="40"></mat-spinner>
@@ -44,7 +46,7 @@
             <tr *ngFor="let item of twoOrLessDaysViolations; index as i">
               <td>{{ i + 1 }}</td>
               <td>{{ item.fullName }}</td>
-              <td>{{ item.emailAddress }}</td>
+              <td style="text-align: left;">{{ item.emailAddress }}</td>
               <td>
                 <span *ngFor="let d of item.offDates" class="date-chip">{{ d | date:'dd/MM/yyyy' }}</span>
               </td>
@@ -81,7 +83,7 @@
             <tr *ngFor="let item of moreThanTwoDaysViolations; index as i">
               <td>{{ i + 1 }}</td>
               <td>{{ item.fullName }}</td>
-              <td>{{ item.emailAddress }}</td>
+              <td style="text-align: left;">{{ item.emailAddress }}</td>
               <td>
                 <span *ngFor="let d of item.offDates" class="date-chip">{{ d | date:'dd/MM/yyyy' }}</span>
               </td>

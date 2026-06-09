@@ -27,7 +27,7 @@
 
 export class OffDayProjectForUserComponent extends AppComponentBase implements OnInit {
   Export_Team_Working_Calender = PERMISSIONS_CONSTANT.ExportTeamWorkingCalender;
-  isAdmin = this.permission.isGranted('Admin');
+  View_Off_Violations = PERMISSIONS_CONSTANT.ViewOffViolations;
   @ViewChild('modalContent') modalContent: TemplateRef<any>;
   @ViewChild(MatMenuTrigger)
 
