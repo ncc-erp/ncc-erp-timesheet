@@ -1,0 +1,99 @@
+<div class="header" cdkDragHandle cdkDrag cdkDragRootElement=".cdk-overlay-pane">
+  <h4 class="pin">Check off request violations</h4>
+  
+  <div class="header-date-picker">
+    <mat-form-field appearance="outline">
+      <mat-label>Select date</mat-label>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" (dateChange)="onDateChange($event)" placeholder="DD/MM/YYYY">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <button mat-dialog-close class="btn-dialog-close">
+    <i class="material-icons">close</i>
+  </button>
+</div>
+
+<mat-dialog-content class="mat-typography">
+
+  <div *ngIf="isLoading" class="loading-wrapper">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!isLoading && hasChecked">
+    <!-- List 1: ≤ 2 days off (3-day rule) -->
+    <div class="violation-section">
+      <h5 class="section-title">
+        <span class="badge-count">{{ twoOrLessDaysViolations.length }}</span>
+        Violations — ≤ 2 days off (must request 3 days before)
+      </h5>
+      <div *ngIf="twoOrLessDaysViolations.length === 0" class="no-data">No violations found</div>
+      <div class="table-responsive" *ngIf="twoOrLessDaysViolations.length > 0">
+        <table class="table table-hover table-striped">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>User</th>
+              <th>Email</th>
+              <th>Off dates</th>
+              <th>Total days</th>
+              <th>Submitted at</th>
+              <th>Deadline</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of twoOrLessDaysViolations; index as i">
+              <td>{{ i + 1 }}</td>
+              <td>{{ item.fullName }}</td>
+              <td style="text-align: left;">{{ item.emailAddress }}</td>
+              <td>
+                <span *ngFor="let d of item.offDates" class="date-chip">{{ d | date:'dd/MM/yyyy' }}</span>
+              </td>
+              <td style="text-align:center">{{ item.totalOffDays }}</td>
+              <td class="text-danger">{{ item.requestCreatedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ item.deadlineAt | date:'dd/MM/yyyy' }} 23:59</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- List 2: > 2 days off (7-day rule) -->
+    <div class="violation-section">
+      <h5 class="section-title">
+        <span class="badge-count">{{ moreThanTwoDaysViolations.length }}</span>
+        Violations — > 2 days off (must request 7 days before)
+      </h5>
+      <div *ngIf="moreThanTwoDaysViolations.length === 0" class="no-data">No violations found</div>
+      <div class="table-responsive" *ngIf="moreThanTwoDaysViolations.length > 0">
+        <table class="table table-hover table-striped">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>User</th>
+              <th>Email</th>
+              <th>Off dates</th>
+              <th>Total days</th>
+              <th>Submitted at</th>
+              <th>Deadline</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of moreThanTwoDaysViolations; index as i">
+              <td>{{ i + 1 }}</td>
+              <td>{{ item.fullName }}</td>
+              <td style="text-align: left;">{{ item.emailAddress }}</td>
+              <td>
+                <span *ngFor="let d of item.offDates" class="date-chip">{{ d | date:'dd/MM/yyyy' }}</span>
+              </td>
+              <td style="text-align:center">{{ item.totalOffDays }}</td>
+              <td class="text-danger">{{ item.requestCreatedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ item.deadlineAt | date:'dd/MM/yyyy' }} 23:59</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</mat-dialog-content>

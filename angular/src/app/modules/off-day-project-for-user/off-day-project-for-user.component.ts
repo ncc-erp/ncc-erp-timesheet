@@ -17,6 +17,7 @@
   import { dayOffDTO } from '../day-off/day-off.component';
   import { PopupComponent } from './popup/popup.component';
   import { ExportDataComponent } from './export-data/export-data.component';
+  import { ViolationCheckComponent } from './violation-check/violation-check.component';
 
   @Component({
     selector: 'app-off-day-project-for-user',
@@ -26,6 +27,7 @@
 
 export class OffDayProjectForUserComponent extends AppComponentBase implements OnInit {
   Export_Team_Working_Calender = PERMISSIONS_CONSTANT.ExportTeamWorkingCalender;
+  View_Off_Violations = PERMISSIONS_CONSTANT.ViewOffViolations;
   @ViewChild('modalContent') modalContent: TemplateRef<any>;
   @ViewChild(MatMenuTrigger)
 
@@ -315,6 +317,13 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
   onExport() {
     this.diaLog.open(ExportDataComponent, {
       width: "500px",
+    });
+  }
+
+  openViolationCheck() {
+    this.diaLog.open(ViolationCheckComponent, {
+      width: "900px",
+      maxHeight: "90vh",
     });
   }
 

@@ -80,6 +80,7 @@ import { SentryService } from './sentry-service';
 import { ShowProjectInActivePipe } from './pipes/show-project-in-active.pipe';
 import { MezonWebViewService } from '@app/service/api/mezon-webview-service';
 import { ViewRejectReasonDialogComponent } from './view-reject-reason-dialog/view-reject-reason-dialog.component';
+import { DateRangePickerComponent } from "./date-range-picker/date-range-picker.component";
 @NgModule({
   imports: [
     FormsModule,
@@ -126,7 +127,6 @@ import { ViewRejectReasonDialogComponent } from './view-reject-reason-dialog/vie
     TextMaskModule,
     InfiniteScrollModule,
     ReactiveFormsModule,
-
   ],
   declarations: [
     AbpPaginationControlsComponent,
@@ -153,6 +153,7 @@ import { ViewRejectReasonDialogComponent } from './view-reject-reason-dialog/vie
     AddUserOtherProjectComponent,
     ShowProjectInActivePipe,
     ViewRejectReasonDialogComponent,
+    DateRangePickerComponent,
   ],
   exports: [
     AbpPaginationControlsComponent,
@@ -219,11 +220,13 @@ import { ViewRejectReasonDialogComponent } from './view-reject-reason-dialog/vie
     DayTypePipe,
     AddUserOtherProjectComponent,
     ShowProjectInActivePipe,
-    ViewRejectReasonDialogComponent
+    ViewRejectReasonDialogComponent,
+    DateRangePickerComponent,
   ],
   entryComponents: [
     PopupComponent,
-    ViewRejectReasonDialogComponent
+    ViewRejectReasonDialogComponent,
+    DateRangePickerComponent,
   ],
 })
 export class SharedModule {

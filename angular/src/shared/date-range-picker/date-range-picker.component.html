@@ -1,0 +1,103 @@
+<div class="date-range-picker-wrapper" (click)="togglePanel($event)">
+  <mat-form-field appearance="outline" class="date-range-trigger" color="primary">
+    <mat-label>Date Range</mat-label>
+    <input matInput
+           [value]="getDisplayText()"
+           readonly>
+    <mat-icon matSuffix class="trigger-icon">date_range</mat-icon>
+  </mat-form-field>
+
+  <div class="date-range-panel" *ngIf="isOpen" (click)="$event.stopPropagation()">
+    <div class="date-range-panel-body">
+      <div class="preset-sidebar">
+        <div class="preset-header">Presets</div>
+        <div class="preset-list">
+          <div *ngFor="let preset of presets"
+               class="preset-item"
+               [class.active]="selectedPreset === preset.value"
+               (click)="onPresetClick($event, preset)">
+            {{ preset.name }}
+          </div>
+        </div>
+      </div>
+
+      <div class="calendar-area">
+        <div class="calendars-row">
+          <div class="calendar">
+            <div class="calendar-header">
+              <button class="nav-btn" (click)="navigate($event, NavDirection.Prev, PickerSide.Left)">&lsaquo;</button>
+              <span class="month-title" (click)="toggleView(PickerSide.Left)">
+                {{ leftView === PickerView.Days ? leftMonth.format('MMMM YYYY') : leftBrowseYear }}
+              </span>
+              <span class="nav-spacer" *ngIf="leftView === PickerView.Days"></span>
+              <button class="nav-btn" *ngIf="leftView === PickerView.Months" (click)="navigate($event, NavDirection.Next, PickerSide.Left)">&rsaquo;</button>
+            </div>
+            
+            <div class="calendar-grid" *ngIf="leftView === PickerView.Days">
+              <div *ngFor="let wd of weekDays" class="weekday-cell">{{ wd }}</div>
+              <div *ngFor="let day of leftCalendarDays; trackBy: trackByDay"
+                   class="day-cell"
+                   [class.other-month]="!day.isCurrentMonth"
+                   [class.today]="day.isToday"
+                   [class.selected]="day.isSelected"
+                   [class.in-range]="day.isInRange"
+                   [class.range-start]="day.isRangeStart"
+                   [class.range-end]="day.isRangeEnd"
+                   (click)="onDayClick($event, day)"
+                   (mouseenter)="onDayHover(day)">
+                {{ day.day }}
+              </div>
+            </div>
+
+            <div class="month-grid" *ngIf="leftView === PickerView.Months">
+              <div *ngFor="let month of monthsList; let i = index"
+                   class="month-cell"
+                   [class.active]="leftMonth.month() === i && leftMonth.year() === leftBrowseYear"
+                   (click)="selectMonth($event, i, PickerSide.Left)">
+                {{ month }}
+              </div>
+            </div>
+          </div>
+
+          <div class="calendar">
+            <div class="calendar-header">
+              <button class="nav-btn" *ngIf="rightView === PickerView.Months" (click)="navigate($event, NavDirection.Prev, PickerSide.Right)">&lsaquo;</button>
+              <span class="nav-spacer" *ngIf="rightView === PickerView.Days"></span>
+              
+              <span class="month-title" (click)="toggleView(PickerSide.Right)">
+                {{ rightView === PickerView.Days ? rightMonth.format('MMMM YYYY') : rightBrowseYear }}
+              </span>
+              
+              <button class="nav-btn" (click)="navigate($event, NavDirection.Next, PickerSide.Right)">&rsaquo;</button>
+            </div>
+            
+            <div class="calendar-grid" *ngIf="rightView === PickerView.Days">
+              <div *ngFor="let wd of weekDays" class="weekday-cell">{{ wd }}</div>
+              <div *ngFor="let day of rightCalendarDays; trackBy: trackByDay"
+                   class="day-cell"
+                   [class.other-month]="!day.isCurrentMonth"
+                   [class.today]="day.isToday"
+                   [class.selected]="day.isSelected"
+                   [class.in-range]="day.isInRange"
+                   [class.range-start]="day.isRangeStart"
+                   [class.range-end]="day.isRangeEnd"
+                   (click)="onDayClick($event, day)"
+                   (mouseenter)="onDayHover(day)">
+                {{ day.day }}
+              </div>
+            </div>
+
+            <div class="month-grid" *ngIf="rightView === PickerView.Months">
+              <div *ngFor="let month of monthsList; let i = index"
+                   class="month-cell"
+                   [class.active]="rightMonth.month() === i && rightMonth.year() === rightBrowseYear"
+                   (click)="selectMonth($event, i, PickerSide.Right)">
+                {{ month }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

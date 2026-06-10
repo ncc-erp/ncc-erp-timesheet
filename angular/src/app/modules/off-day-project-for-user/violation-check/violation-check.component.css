@@ -1,0 +1,89 @@
+.header {
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: grab;
+  padding-right: 50px;
+}
+
+.header h4.pin {
+  margin-bottom: 10px;
+}
+
+.header button.btn-dialog-close {
+  height: 35px;
+  background-color: transparent;
+  border: none;
+  position: absolute;
+  top: 10px;
+  right: -10px;
+  width: 40px;
+}
+
+.header-date-picker {
+  margin-left: auto;
+}
+
+::ng-deep .header-date-picker .mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+::ng-deep .header-date-picker mat-datepicker-toggle button {
+  top: 6px;
+  left: 8px;
+}
+
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.violation-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-count {
+  background-color: #e53935;
+  color: #fff;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+}
+
+.no-data {
+  color: #888;
+  font-style: italic;
+  padding: 8px 0;
+  text-align: center;
+}
+
+.date-chip {
+  display: inline-block;
+  background: #e3f2fd;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin: 2px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+table th, table td {
+  text-align: center;
+}
+
+table th, table td {
+  font-size: 13px;
+  vertical-align: middle !important;
+}

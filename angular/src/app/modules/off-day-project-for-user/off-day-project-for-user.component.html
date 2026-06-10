@@ -34,6 +34,17 @@
         <div class="label-button-group">
           <div style="width: auto">
             <button
+              *ngIf="permission.isGranted(View_Off_Violations)"
+              (click)="openViolationCheck()"
+              style="height: 44px"
+              mat-flat-button
+              color="warn"
+            >
+              Check Violations
+            </button>
+          </div>
+          <div style="width: auto">
+            <button
               *ngIf="shouldShowNotifyPmButton()"
               (click)="notifyApproveRequestOffToPM()"
               style="height: 44px"

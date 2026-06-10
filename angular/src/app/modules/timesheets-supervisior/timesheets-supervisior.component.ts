@@ -10,6 +10,7 @@ import { TimesheetsSupervisiorService } from '@app/service/api/timesheets-superv
 import { UserService } from '@app/service/api/user.service';
 import { AppComponentBase } from '@shared/app-component-base';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 
 export const MY_FORMATS = {
   parse: {
@@ -49,6 +50,8 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   isCountLoading: boolean;
   rawData: TimeSheetDto[] = [];
   filteredTimesheets: TimeSheetDto[] = [];
+  defaultFromDate: any;
+  defaultToDate: any;
 
   projectSearch: FormControl = new FormControl("");
   projectFilter = []
@@ -144,6 +147,10 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   ngOnInit() {
     this.getProjects();
     this.getUsers();
+    this.defaultFromDate = moment().add(-1, 'months').startOf('month');
+    this.defaultToDate = moment().endOf('month');
+    this.fromDate = this.defaultFromDate.format("YYYY-MM-DD");
+    this.toDate = this.defaultToDate.format("YYYY-MM-DD");
   }
 
   ngAfterViewChecked() {
@@ -207,9 +214,8 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     this.convertData(this.filteredTimesheets);
   }
 
-  handleDateSelectorChange(date) {
-    const { fromDate, toDate } = date;
-    this.setFromAndToDate(fromDate, toDate);
+  handleDateRangeChange(date: { fromDate: string, toDate: string }) {
+    this.setFromAndToDate(date.fromDate, date.toDate);
     this.getData();
   }
 
