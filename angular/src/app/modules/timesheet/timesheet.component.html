@@ -108,7 +108,7 @@
                     <div class="col-md-6 col-xs-6">
                       <mat-form-field appearance="outline" class="w-100">
                         <mat-label>Check In</mat-label>
-                        <mat-select name="checkIn" [(value)]='checkInFilter' (selectionChange)='getTimesheets()'>
+                        <mat-select name="checkIn" [(value)]='checkInFilter'>
                           <mat-option *ngFor="let item of checkInFilterList" [value]='APP_CONSTANT.HaveCheckInFilter[item]'>
                             {{item}}
                           </mat-option>
@@ -118,7 +118,7 @@
                     <div class="col-md-6 col-xs-6">
                       <mat-form-field appearance="outline" class="w-100">
                         <mat-label>Work Location</mat-label>
-                        <mat-select name="workLocation" [(value)]="workLocationFilter" (selectionChange)="getTimesheets()">
+                        <mat-select name="workLocation" [(value)]="workLocationFilter">
                           <mat-option *ngFor="let item of workLocationFilterList" [value]="APP_CONSTANT.WorkLocation[item]">
                             {{ item }}
                           </mat-option>
@@ -131,7 +131,7 @@
                     <div class="col-md-6 col-xs-6">
                       <mat-form-field appearance="outline" class="w-100">
                         <mat-label>Working Type</mat-label>
-                        <mat-select [(ngModel)]="selectedTypeOfWork" name="selectedTypeOfWork" (selectionChange)="getTimesheets()">
+                        <mat-select [(ngModel)]="selectedTypeOfWork" name="selectedTypeOfWork">
                           <mat-option *ngFor="let item of Timesheet_TypeOfWorks" [value]="item.value">
                             {{ item.name }}
                           </mat-option>
@@ -141,7 +141,7 @@
                     <div class="col-md-6 col-xs-6">
                       <mat-form-field appearance="outline" class="w-100">
                         <mat-label>Overtime Filter</mat-label>
-                        <mat-select [(ngModel)]="isCharged" name="isCharged" (selectionChange)="getTimesheets()" [disabled]="selectedTypeOfWork !== APP_CONSTANT.EnumTypeOfWork.Overtime">
+                        <mat-select [(ngModel)]="isCharged" name="isCharged" [disabled]="selectedTypeOfWork !== APP_CONSTANT.EnumTypeOfWork.Overtime">
                           <mat-option *ngFor="let item of Timesheet_OvertimeFilters" [value]="item.value">
                             {{ item.name }}
                           </mat-option>
@@ -155,25 +155,27 @@
                       <mat-form-field appearance="outline" class="w-100">
                         <mat-label>OpenTalk JoinTime Filter</mat-label>
                         <div [class]="!OpenTalkJoinTime ? 'ms-off' : 'ms-on'">
-                          <input type="number" class="opentalkFiler" [(ngModel)]="OpenTalkJoinTime" name="OpenTalkJoinTime" min="0" matInput (input)="resetFilterOpenTalk($event.target.value)">
+                          <input type="number" class="opentalkFiler" [(ngModel)]="OpenTalkJoinTime" name="OpenTalkJoinTime" min="0" matInput>
                         </div>
                       </mat-form-field>
                     </div>
                     <div class="col-md-6 col-xs-6">
                       <mat-form-field appearance="outline" class="w-100">
-                        <mat-label>Type</mat-label>
+                        <mat-label>OpenTalk Type</mat-label>
                         <!-- Using the string format to properly bind value as it was previously -->
-                        <mat-select name="FilterOpenTalk" [value]="OpenTalkJoinTimeType ? 'true' : 'false'" (selectionChange)="filterOpenTalk($event.value === 'true')" [disabled]="OpenTalkJoinTime == null || OpenTalkJoinTime === undefined || OpenTalkJoinTime.toString() === ''">
-                          <mat-option value="true">Higher</mat-option>
-                          <mat-option value="false">Lower</mat-option>
+                        <mat-select [(ngModel)]="OpenTalkJoinTimeType" name="FilterOpenTalk" [disabled]="OpenTalkJoinTime == null || OpenTalkJoinTime === undefined || OpenTalkJoinTime.toString() === ''">
+                          <mat-option *ngFor="let item of Timesheet_OpenTalkFilters" [value]="item.value">
+                            {{ item.name }}
+                          </mat-option>
                         </mat-select>
                       </mat-form-field>
                     </div>
                   </div>
 
                   <div class="row mt-3">
-                    <div class="col-md-12 text-center">
+                    <div class="col-md-12 d-flex justify-content-center filter-action-buttons">
                       <button mat-raised-button (click)="moreFiltersTrigger.closeMenu()">Cancel</button>
+                      <button mat-raised-button color="primary" (click)="getTimesheets(); moreFiltersTrigger.closeMenu()">Apply</button>
                     </div>
                   </div>
                 </div>

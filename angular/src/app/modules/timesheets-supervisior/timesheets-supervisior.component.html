@@ -76,7 +76,7 @@
           <div class="col-md-2 col-sm-12 filter-item-select" style="display: flex; align-items: center;">
             <div class="action-buttons w-100 m-t-10 m-b-10" style="padding-top: 0;">
               <button mat-raised-button color="primary" class="more-filters-btn btn-action m-0" [matMenuTriggerFor]="moreFiltersMenu" #moreFiltersTrigger="matMenuTrigger">
-                <mat-icon>filter_alt</mat-icon> More Filters
+                <mat-icon>filter_alt</mat-icon> More Filters (5)
               </button>
               <mat-menu #moreFiltersMenu="matMenu" class="more-filters-panel" yPosition="below" xPosition="after" [overlapTrigger]="false">
                 <div (click)="$event.stopPropagation()" class="p-3">
@@ -84,7 +84,7 @@
                     <div class="col-md-6 col-xs-6">
                       <mat-form-field appearance="outline" class="w-100">
                         <mat-label>Working Type</mat-label>
-                        <mat-select [(ngModel)]="workingType" name="workingType" (selectionChange)="refresh()">
+                        <mat-select [(ngModel)]="workingType" name="workingType">
                           <mat-option *ngFor="let type of Timesheet_TypeOfWorks" [value]="type.value">
                             {{type.name}}
                           </mat-option>
@@ -94,7 +94,7 @@
                     <div class="col-md-6 col-xs-6">
                       <mat-form-field appearance="outline" class="w-100">
                         <mat-label>Overtime Filter</mat-label>
-                        <mat-select [(ngModel)]="isCharged" name="isCharged" (selectionChange)="refresh()" [disabled]="workingType !== APP_CONSTANT.EnumTypeOfWork.Overtime">
+                        <mat-select [(ngModel)]="isCharged" name="isCharged" [disabled]="workingType !== APP_CONSTANT.EnumTypeOfWork.Overtime">
                           <mat-option *ngFor="let type of Timesheet_OvertimeFilters" [value]="type.value">
                             {{type.name}}
                           </mat-option>
@@ -108,16 +108,17 @@
                       <mat-form-field appearance="outline" class="w-100">
                         <mat-label>OpenTalk JoinTime Filter</mat-label>
                         <div [class]="!OpenTalkJoinTime ? 'ms-off' : 'ms-on'">
-                          <input type="number" class="opentalkFiler" [(ngModel)]="OpenTalkJoinTime" name="OpenTalkJoinTime" min="0" matInput (input)="resetFilterOpenTalk($event.target.value)">
+                          <input type="number" class="opentalkFiler" [(ngModel)]="OpenTalkJoinTime" name="OpenTalkJoinTime" min="0" matInput>
                         </div>
                       </mat-form-field>
                     </div>
                     <div class="col-md-6 col-xs-6">
                       <mat-form-field appearance="outline" class="w-100">
-                        <mat-label>Type</mat-label>
-                        <mat-select name="FilterOpenTalk" [value]="OpenTalkJoinTimeType ? 'true' : 'false'" (selectionChange)="filterOpenTalk($event.value === 'true')" [disabled]="OpenTalkJoinTime == null || OpenTalkJoinTime === undefined || OpenTalkJoinTime.toString() === ''">
-                          <mat-option value="true">Higher</mat-option>
-                          <mat-option value="false">Lower</mat-option>
+                        <mat-label>OpenTalk Type</mat-label>
+                        <mat-select [(ngModel)]="OpenTalkJoinTimeType" name="FilterOpenTalk" [disabled]="OpenTalkJoinTime == null || OpenTalkJoinTime === undefined || OpenTalkJoinTime.toString() === ''">
+                          <mat-option *ngFor="let item of Timesheet_OpenTalkFilters" [value]="item.value">
+                            {{ item.name }}
+                          </mat-option>
                         </mat-select>
                       </mat-form-field>
                     </div>
@@ -127,7 +128,7 @@
                     <div class="col-md-6 col-xs-6">
                       <mat-form-field appearance="outline" class="w-100">
                         <mat-label>User</mat-label>
-                        <mat-select name="userId" [(value)]="userId" (selectionChange)="getData()">
+                        <mat-select name="userId" [(value)]="userId">
                           <mat-option>
                             <ngx-mat-select-search placeholderLabel="Search" [formControl]="userSearch"
                               noEntriesFoundLabel="No matching found">
@@ -142,8 +143,9 @@
                   </div>
 
                   <div class="row mt-3">
-                    <div class="col-md-12 text-center">
+                    <div class="col-md-12 d-flex justify-content-center filter-action-buttons">
                       <button mat-raised-button (click)="moreFiltersTrigger.closeMenu()">Cancel</button>
+                      <button mat-raised-button color="primary" (click)="refresh(); moreFiltersTrigger.closeMenu()">Apply</button>
                     </div>
                   </div>
                 </div>

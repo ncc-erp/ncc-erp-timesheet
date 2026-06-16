@@ -7,7 +7,7 @@ export interface GetTimesheetsInputDto {
     checkInFilter?: number;
     searchText?: string;
     opentalkTime?: number;
-    opentalkTimeType?: boolean;
+    opentalkTimeType?: number;
     workLocation?: number;
     typeOfWork?: number;
     isCharged?: number;

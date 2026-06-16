@@ -253,6 +253,11 @@ export const APP_CONSTANT = {
     NonCharged: 0,
     Charged: 1
   },
+  OpenTalkFilter: {
+    All: -1,
+    Lower: 0,
+    Higher: 1
+  },
   PunishRules: [
     { "name": "No Punish", "value": 0 },
     { "name": "Late", "value": 1 },

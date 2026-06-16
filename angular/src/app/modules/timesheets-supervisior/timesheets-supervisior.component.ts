@@ -64,7 +64,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   users = [];
 
   public OpenTalkJoinTime: number;
-  public OpenTalkJoinTimeType: boolean = true;
+  public OpenTalkJoinTimeType: number = this.APP_CONSTANT.OpenTalkFilter.All;
 
   Timesheet_TypeOfWorks = [
     {
@@ -124,6 +124,21 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
     {
       value: this.APP_CONSTANT.OvertimeFilter.Charged,
       name: 'Charged'
+    }
+  ]
+
+  Timesheet_OpenTalkFilters = [
+    {
+      value: this.APP_CONSTANT.OpenTalkFilter.All,
+      name: 'All'
+    },
+    {
+      value: this.APP_CONSTANT.OpenTalkFilter.Higher,
+      name: 'Higher'
+    },
+    {
+      value: this.APP_CONSTANT.OpenTalkFilter.Lower,
+      name: 'Lower'
     }
   ]
 
@@ -334,10 +349,6 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   }
   filterByProject(){
     this.OpenTalkJoinTime = void 0;
-    this.getData();
-  }
-  filterOpenTalk(type:boolean){
-    this.OpenTalkJoinTimeType = type;
     this.getData();
   }
   resetFilterOpenTalk(value: string): void {

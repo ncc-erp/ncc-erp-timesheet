@@ -31,7 +31,6 @@ export class TimesheetService extends BaseApiService {
     params = params.append("searchText", input.searchText);
     params = params.append("branchId", this.getPara(input.branchId));
     params = params.append("opentalkTime", this.getPara(input.opentalkTime));
-    params = params.append("opentalkTimeType", this.getPara(input.opentalkTimeType));
     params = params.append("workLocation", this.getPara(input.workLocation));
     
     const typeOfWorkParam = input.typeOfWork >= 0 ? input.typeOfWork.toString() : "";
@@ -39,6 +38,9 @@ export class TimesheetService extends BaseApiService {
 
     const isChargedParam = input.isCharged === 1 ? "true" : (input.isCharged === 0 ? "false" : "");
     params = params.append("isCharged", isChargedParam);
+
+    const opentalkTimeTypeParam = input.opentalkTimeType === 1 ? "true" : (input.opentalkTimeType === 0 ? "false" : "");
+    params = params.append("opentalkTimeType", opentalkTimeTypeParam);
     return this.http.get(this.getUrl("GetAll"), { params : params });
     // return this.http.get(this.getUrl(`GetAll?startDate=${startDate}&endDate=${endDate}&status=${status}&projectId=${this.getPara(projectId)}&checkInFilter=${this.getPara(checkInFilter)}&searchText=${searchText}&branchId=${this.getPara(branchId)}`));
   }
@@ -115,7 +117,6 @@ export class TimesheetService extends BaseApiService {
     params = params.append("searchText", input.searchText);
     params = params.append("branchId", input.branchId.toString());
     params = params.append("opentalkTime", this.getPara(input.opentalkTime));
-    params = params.append("opentalkTimeType", this.getPara(input.opentalkTimeType));
     params = params.append("workLocation", this.getPara(input.workLocation));
     
     const typeOfWorkParam = input.typeOfWork >= 0 ? input.typeOfWork.toString() : "";
@@ -123,6 +124,9 @@ export class TimesheetService extends BaseApiService {
 
     const isChargedParam = input.isCharged === 1 ? "true" : (input.isCharged === 0 ? "false" : "");
     params = params.append("isCharged", isChargedParam);
+
+    const opentalkTimeTypeParam = input.opentalkTimeType === 1 ? "true" : (input.opentalkTimeType === 0 ? "false" : "");
+    params = params.append("opentalkTimeType", opentalkTimeTypeParam);
     return this.http.get(this.getUrl("GetQuantiyTimesheetStatus"), { params : params });
   }
 

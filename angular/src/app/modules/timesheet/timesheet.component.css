@@ -149,6 +149,14 @@
   display: none !important;
 }
 
+.filter-action-buttons {
+  gap: 20px;
+}
+
+.filter-action-buttons button {
+  width: 100px;
+}
+
 .btn-action {
   padding: 8px 15px !important;
   height: 35px !important;

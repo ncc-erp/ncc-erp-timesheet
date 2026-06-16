@@ -224,7 +224,7 @@ namespace Timesheet.Timesheets.Timesheets
                 query = query.Where(s => s.WorkLocation == input.WorkLocation.Value).ToList();
             }
 
-            if (input.OpentalkTime.HasValue)
+            if (input.OpentalkTime.HasValue && input.OpentalkTimeType.HasValue)
             {
                 query = query.Where(s =>
                     input.OpentalkTimeType.Value
@@ -967,7 +967,7 @@ namespace Timesheet.Timesheets.Timesheets
                                      TypeOfWork = x.TypeOfWork,
                                      openTalkTime = !input.OpentalkTime.HasValue ? 0 : WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == x.UserId && x.DateAt.Date == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
                                  })
-                                 .WhereIf(input.OpentalkTime.HasValue, x => input.OpentalkTimeType.Value ? x.openTalkTime >= input.OpentalkTime : x.openTalkTime < input.OpentalkTime);
+                                 .WhereIf(input.OpentalkTime.HasValue && input.OpentalkTimeType.HasValue, x => input.OpentalkTimeType.Value ? x.openTalkTime >= input.OpentalkTime : x.openTalkTime < input.OpentalkTime);
 
 
             var listMyTimesheet = new List<QuantiyTimesheetStatusDto>();

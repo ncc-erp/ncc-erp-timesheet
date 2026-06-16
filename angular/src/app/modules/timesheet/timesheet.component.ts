@@ -114,6 +114,20 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
       name: 'Charged'
     }
   ]
+  Timesheet_OpenTalkFilters = [
+    {
+      value: this.APP_CONSTANT.OpenTalkFilter.All,
+      name: 'All'
+    },
+    {
+      value: this.APP_CONSTANT.OpenTalkFilter.Higher,
+      name: 'Higher'
+    },
+    {
+      value: this.APP_CONSTANT.OpenTalkFilter.Lower,
+      name: 'Lower'
+    }
+  ]
   checkedCount: number = 0;
   totalCount: number = 0;
 
@@ -149,7 +163,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
 
   public searchText: string = "";
   public OpenTalkJoinTime: number;
-  public OpenTalkJoinTimeType: boolean = true;
+  public OpenTalkJoinTimeType: number = this.APP_CONSTANT.OpenTalkFilter.All;
 
   public listBranch: BranchDto[] = [];
   public branchId: number = 0;
@@ -746,15 +760,6 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     $('#modalSelectDay').modal('hide');
   }
 
-  filterOpenTalk(type : boolean){
-    this.OpenTalkJoinTimeType = type;
-    this.refresh();
-  }
-  resetFilterOpenTalk(value: string): void {
-    if (value == "") {
-      this.refresh();
-    }
-  }
   isOpenTalk(tasks){
     return tasks.some(task => task.taskName == "Open Talk");
   }

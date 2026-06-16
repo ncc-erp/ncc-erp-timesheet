@@ -2,6 +2,7 @@ export enum DateRangePreset {
   Last7Days = 'last7',
   Last30Days = 'last30',
   ThisWeek = 'thisWeek',
+  LastWeek = 'lastWeek',
   ThisMonth = 'thisMonth',
   ThisQuarter = 'thisQuarter',
   ThisYear = 'thisYear'
