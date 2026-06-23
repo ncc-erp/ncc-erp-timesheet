@@ -32,8 +32,9 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     const isChargedParam = input.isCharged === 1 ? "true" : (input.isCharged === 0 ? "false" : "");
     params = params.append("isCharged", isChargedParam);
 
-    const opentalkTimeTypeParam = input.opentalkTimeType === 1 ? "true" : (input.opentalkTimeType === 0 ? "false" : "");
-    params = params.append("opentalkTimeType", opentalkTimeTypeParam);
+    if (input.opentalkTimeType !== null && input.opentalkTimeType !== undefined) {
+      params = params.append("opentalkTimeType", input.opentalkTimeType.toString()); 
+    }
     return this.http.get(this.getUrl("GetAll"), { params : params });
     //return this.http.get(this.getUrl(`GetAll?startDate=${startDate}&endDate=${endDate}&status=${status}&projectID=${this.getPara(projectId)}&userId=${this.getPara(userId)}`));
   }
@@ -57,8 +58,9 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     const isChargedParam = input.isCharged === 1 ? "true" : (input.isCharged === 0 ? "false" : "");
     params = params.append("isCharged", isChargedParam);
 
-    const opentalkTimeTypeParam = input.opentalkTimeType === 1 ? "true" : (input.opentalkTimeType === 0 ? "false" : "");
-    params = params.append("opentalkTimeType", opentalkTimeTypeParam);
+    if (input.opentalkTimeType !== null && input.opentalkTimeType !== undefined) {
+      params = params.append("opentalkTimeType", input.opentalkTimeType.toString()); 
+    }
     return this.http.get(this.getUrl("GetQuantityTimesheetSupervisorStatus"), { params : params });
     //return this.http.get(this.getUrl(`GetQuantityTimesheetSupervisorStatus?startDate=${startDate}&endDate=${endDate}`));
   }

@@ -100,13 +100,13 @@
           <div class="col-md-11 col-sm-12">
             <div class="action-buttons d-flex align-items-center flex-wrap">
               <button mat-raised-button color="primary" class="more-filters-btn btn-action m-0" [matMenuTriggerFor]="moreFiltersMenu" #moreFiltersTrigger="matMenuTrigger">
-                <mat-icon>filter_alt</mat-icon> More Filters (6)
+                <mat-icon>filter_alt</mat-icon> More Filters ({{ menuFilters?.length || 0 }})
               </button>
               <mat-menu #moreFiltersMenu="matMenu" class="more-filters-panel" yPosition="below" xPosition="after" [overlapTrigger]="false">
                 <div (click)="$event.stopPropagation()" class="p-3">
                   <div class="row">
                     <div class="col-md-6 col-xs-6">
-                      <mat-form-field appearance="outline" class="w-100">
+                      <mat-form-field #menuFilter appearance="outline" class="w-100">
                         <mat-label>Check In</mat-label>
                         <mat-select name="checkIn" [(value)]='checkInFilter'>
                           <mat-option *ngFor="let item of checkInFilterList" [value]='APP_CONSTANT.HaveCheckInFilter[item]'>
@@ -116,7 +116,7 @@
                       </mat-form-field>
                     </div>
                     <div class="col-md-6 col-xs-6">
-                      <mat-form-field appearance="outline" class="w-100">
+                      <mat-form-field #menuFilter appearance="outline" class="w-100">
                         <mat-label>Work Location</mat-label>
                         <mat-select name="workLocation" [(value)]="workLocationFilter">
                           <mat-option *ngFor="let item of workLocationFilterList" [value]="APP_CONSTANT.WorkLocation[item]">
@@ -129,7 +129,7 @@
 
                   <div class="row mt-2">
                     <div class="col-md-6 col-xs-6">
-                      <mat-form-field appearance="outline" class="w-100">
+                      <mat-form-field #menuFilter appearance="outline" class="w-100">
                         <mat-label>Working Type</mat-label>
                         <mat-select [(ngModel)]="selectedTypeOfWork" name="selectedTypeOfWork">
                           <mat-option *ngFor="let item of Timesheet_TypeOfWorks" [value]="item.value">
@@ -139,7 +139,7 @@
                       </mat-form-field>
                     </div>
                     <div class="col-md-6 col-xs-6">
-                      <mat-form-field appearance="outline" class="w-100">
+                      <mat-form-field #menuFilter appearance="outline" class="w-100">
                         <mat-label>Overtime Filter</mat-label>
                         <mat-select [(ngModel)]="isCharged" name="isCharged" [disabled]="selectedTypeOfWork !== APP_CONSTANT.EnumTypeOfWork.Overtime">
                           <mat-option *ngFor="let item of Timesheet_OvertimeFilters" [value]="item.value">
@@ -152,7 +152,7 @@
 
                   <div class="row mt-2">
                     <div class="col-md-6 col-xs-6">
-                      <mat-form-field appearance="outline" class="w-100">
+                      <mat-form-field #menuFilter appearance="outline" class="w-100">
                         <mat-label>OpenTalk JoinTime Filter</mat-label>
                         <div [class]="!OpenTalkJoinTime ? 'ms-off' : 'ms-on'">
                           <input type="number" class="opentalkFiler" [(ngModel)]="OpenTalkJoinTime" name="OpenTalkJoinTime" min="0" matInput>
@@ -160,7 +160,7 @@
                       </mat-form-field>
                     </div>
                     <div class="col-md-6 col-xs-6">
-                      <mat-form-field appearance="outline" class="w-100">
+                      <mat-form-field #menuFilter appearance="outline" class="w-100">
                         <mat-label>OpenTalk Type</mat-label>
                         <!-- Using the string format to properly bind value as it was previously -->
                         <mat-select [(ngModel)]="OpenTalkJoinTimeType" name="FilterOpenTalk" [disabled]="OpenTalkJoinTime == null || OpenTalkJoinTime === undefined || OpenTalkJoinTime.toString() === ''">

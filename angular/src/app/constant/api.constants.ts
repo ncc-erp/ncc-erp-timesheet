@@ -254,9 +254,14 @@ export const APP_CONSTANT = {
     Charged: 1
   },
   OpenTalkFilter: {
-    All: -1,
-    Lower: 0,
-    Higher: 1
+    All: '',
+    Lower: false,
+    Higher: true
+  },
+  OpenTalkFilterName: {
+    All: 'All',
+    Lower: 'Lower',
+    Higher: 'Higher'
   },
   PunishRules: [
     { "name": "No Punish", "value": 0 },

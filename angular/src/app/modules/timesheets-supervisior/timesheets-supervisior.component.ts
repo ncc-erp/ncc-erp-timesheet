@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Injector, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Injector, OnInit, ViewChildren, QueryList } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MomentDateAdapter } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -36,7 +36,7 @@ export const MY_FORMATS = {
 })
 
 export class TimesheetsSupervisiorComponent extends AppComponentBase implements OnInit {
-
+  @ViewChildren('menuFilter') menuFilters: QueryList<any>;
   filterStatus: number = this.APP_CONSTANT.TimesheetStatus.Pending; // ALL
   workingType: number = this.APP_CONSTANT.EnumTypeOfWork.All; // ALL
   isCharged: number = this.APP_CONSTANT.OvertimeFilter.All; // ALL
@@ -64,7 +64,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   users = [];
 
   public OpenTalkJoinTime: number;
-  public OpenTalkJoinTimeType: number = this.APP_CONSTANT.OpenTalkFilter.All;
+  public OpenTalkJoinTimeType: boolean | string = this.APP_CONSTANT.OpenTalkFilter.All;
 
   Timesheet_TypeOfWorks = [
     {
@@ -130,15 +130,15 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
   Timesheet_OpenTalkFilters = [
     {
       value: this.APP_CONSTANT.OpenTalkFilter.All,
-      name: 'All'
+      name: this.APP_CONSTANT.OpenTalkFilterName.All
     },
     {
       value: this.APP_CONSTANT.OpenTalkFilter.Higher,
-      name: 'Higher'
+      name: this.APP_CONSTANT.OpenTalkFilterName.Higher
     },
     {
       value: this.APP_CONSTANT.OpenTalkFilter.Lower,
-      name: 'Lower'
+      name: this.APP_CONSTANT.OpenTalkFilterName.Lower
     }
   ]
 
@@ -179,7 +179,7 @@ export class TimesheetsSupervisiorComponent extends AppComponentBase implements 
       status: this.filterStatus,
       projectId: Number(this.projectId),
       opentalkTime: this.OpenTalkJoinTime,
-      opentalkTimeType: this.OpenTalkJoinTimeType,
+      opentalkTimeType: this.OpenTalkJoinTimeType === '' ? undefined : (this.OpenTalkJoinTimeType as boolean),
       typeOfWork: this.workingType,
       isCharged: (this.workingType === this.APP_CONSTANT.EnumTypeOfWork.Overtime) 
                   ? this.isCharged 
