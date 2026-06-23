@@ -25,13 +25,16 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     params = params.append("projectID", this.getPara(input.projectId));
     params = params.append("userId", this.getPara(input.userId));
     params = params.append("opentalkTime", this.getPara(input.opentalkTime));
-    params = params.append("opentalkTimeType", this.getPara(input.opentalkTimeType));
 
     const typeOfWorkParam = input.typeOfWork >= 0 ? input.typeOfWork.toString() : "";
     params = params.append("typeOfWork", typeOfWorkParam);
 
     const isChargedParam = input.isCharged === 1 ? "true" : (input.isCharged === 0 ? "false" : "");
     params = params.append("isCharged", isChargedParam);
+
+    if (input.opentalkTimeType !== null && input.opentalkTimeType !== undefined) {
+      params = params.append("opentalkTimeType", input.opentalkTimeType.toString()); 
+    }
     return this.http.get(this.getUrl("GetAll"), { params : params });
     //return this.http.get(this.getUrl(`GetAll?startDate=${startDate}&endDate=${endDate}&status=${status}&projectID=${this.getPara(projectId)}&userId=${this.getPara(userId)}`));
   }
@@ -48,13 +51,16 @@ export class TimesheetsSupervisiorService extends BaseApiService{
     params = params.append("projectID", this.getPara(input.projectId));
     params = params.append("userId", this.getPara(input.userId));
     params = params.append("opentalkTime", this.getPara(input.opentalkTime));
-    params = params.append("opentalkTimeType", this.getPara(input.opentalkTimeType));
 
     const typeOfWorkParam = input.typeOfWork >= 0 ? input.typeOfWork.toString() : "";
     params = params.append("typeOfWork", typeOfWorkParam);
 
     const isChargedParam = input.isCharged === 1 ? "true" : (input.isCharged === 0 ? "false" : "");
     params = params.append("isCharged", isChargedParam);
+
+    if (input.opentalkTimeType !== null && input.opentalkTimeType !== undefined) {
+      params = params.append("opentalkTimeType", input.opentalkTimeType.toString()); 
+    }
     return this.http.get(this.getUrl("GetQuantityTimesheetSupervisorStatus"), { params : params });
     //return this.http.get(this.getUrl(`GetQuantityTimesheetSupervisorStatus?startDate=${startDate}&endDate=${endDate}`));
   }

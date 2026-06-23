@@ -1,6 +1,6 @@
 import { ExportService } from './../../service/export.service';
 import { AppComponentBase } from 'shared/app-component-base';
-import { Component, OnInit, Injector, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Injector, ChangeDetectorRef, ViewChildren, QueryList } from '@angular/core';
 import { MatCheckboxChange, MatDialog } from '@angular/material';
 import { TimesheetService } from '@app/service/api/timesheet.service';
 import * as _ from 'lodash';
@@ -41,6 +41,7 @@ export const MY_FORMATS = {
 })
 
 export class TimesheetComponent extends AppComponentBase implements OnInit {
+  @ViewChildren('menuFilter') menuFilters: QueryList<any>;
   APPROVAL_TIMESHEET = PERMISSIONS_CONSTANT.ApprovalTimesheets;
   EXPORT_EXCEL_TIMESHEET = PERMISSIONS_CONSTANT.ExportExcelTimesheets;
   isBasicUser: boolean = false;
@@ -114,6 +115,20 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
       name: 'Charged'
     }
   ]
+  Timesheet_OpenTalkFilters = [
+    {
+      value: this.APP_CONSTANT.OpenTalkFilter.All,
+      name: this.APP_CONSTANT.OpenTalkFilterName.All
+    },
+    {
+      value: this.APP_CONSTANT.OpenTalkFilter.Higher,
+      name: this.APP_CONSTANT.OpenTalkFilterName.Higher
+    },
+    {
+      value: this.APP_CONSTANT.OpenTalkFilter.Lower,
+      name: this.APP_CONSTANT.OpenTalkFilterName.Lower
+    }
+  ]
   checkedCount: number = 0;
   totalCount: number = 0;
 
@@ -149,7 +164,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
 
   public searchText: string = "";
   public OpenTalkJoinTime: number;
-  public OpenTalkJoinTimeType: boolean = true;
+  public OpenTalkJoinTimeType: boolean | string = this.APP_CONSTANT.OpenTalkFilter.All;
 
   public listBranch: BranchDto[] = [];
   public branchId: number = 0;
@@ -270,7 +285,7 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
         searchText: this.searchText,
         branchId: Number(this.branchId),
         opentalkTime: this.OpenTalkJoinTime,
-        opentalkTimeType: this.OpenTalkJoinTimeType,
+        opentalkTimeType: this.OpenTalkJoinTimeType === '' ? undefined : (this.OpenTalkJoinTimeType as boolean),
         workLocation: this.workLocationFilter,
         typeOfWork: this.selectedTypeOfWork,
         isCharged: (this.selectedTypeOfWork === this.APP_CONSTANT.EnumTypeOfWork.Overtime) 
@@ -746,15 +761,6 @@ export class TimesheetComponent extends AppComponentBase implements OnInit {
     $('#modalSelectDay').modal('hide');
   }
 
-  filterOpenTalk(type : boolean){
-    this.OpenTalkJoinTimeType = type;
-    this.refresh();
-  }
-  resetFilterOpenTalk(value: string): void {
-    if (value == "") {
-      this.refresh();
-    }
-  }
   isOpenTalk(tasks){
     return tasks.some(task => task.taskName == "Open Talk");
   }

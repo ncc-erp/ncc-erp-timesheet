@@ -29,6 +29,7 @@ export class DateRangePickerComponent implements OnInit {
   @Input() defaultFromDate: Date;
   @Input() defaultToDate: Date;
   @Input() presets: DateRangePresetItem[] = [
+    { value: DateRangePreset.LastWeek, name: 'Last week' },
     { value: DateRangePreset.Last7Days, name: 'Last 7 days' },
     { value: DateRangePreset.Last30Days, name: 'Last 30 days' },
     { value: DateRangePreset.ThisWeek, name: 'This week' },
@@ -138,6 +139,10 @@ export class DateRangePickerComponent implements OnInit {
     let toDate: moment.Moment = moment();
 
     switch (preset.value) {
+      case DateRangePreset.LastWeek:
+        fromDate = moment().subtract(1, 'weeks').startOf('isoWeek');
+        toDate = moment().subtract(1, 'weeks').endOf('isoWeek');
+        break;
       case DateRangePreset.Last7Days:
         fromDate = moment().subtract(6, 'days');
         break;

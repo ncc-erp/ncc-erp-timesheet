@@ -82,7 +82,7 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                            .WhereIf(input.EndDate != null, s => s.DateAt.Date <= input.EndDate)
                            .WhereIf(input.ProjectId != null, s => s.ProjectId == input.ProjectId)
                            .WhereIf(input.OpentalkTime.HasValue, s => s.ProjectTaskId == OpenTalkID)
-                           .WhereIf(input.OpentalkTime.HasValue, s => input.OpentalkTimeType.Value ? s.openTalkTime >= input.OpentalkTime : s.openTalkTime < input.OpentalkTime)
+                           .WhereIf(input.OpentalkTime.HasValue && input.OpentalkTimeType.HasValue, s => input.OpentalkTimeType.Value ? s.openTalkTime >= input.OpentalkTime : s.openTalkTime < input.OpentalkTime)
                            .WhereIf(input.TypeOfWork.HasValue, s => s.TypeOfWork == input.TypeOfWork.Value)
                            .WhereIf(input.IsCharged.HasValue, s => s.IsCharged == input.IsCharged.Value)
                            .WhereIf(input.UserId != null, s => s.UserId == input.UserId)
@@ -106,7 +106,7 @@ namespace Timesheet.Timesheets.TimesheetsSupervisor
                                      TypeOfWork = x.TypeOfWork,
                                      openTalkTime = !input.OpentalkTime.HasValue ? 0 : WorkScope.GetAll<OpenTalk>().Where(s => s.UserId == x.UserId && x.DateAt.Date == s.DateAt.Date).Select(s => s.totalTime).FirstOrDefault()
                                  })
-                                 .WhereIf(input.OpentalkTime.HasValue, x => input.OpentalkTimeType.Value ? x.openTalkTime >= input.OpentalkTime : x.openTalkTime < input.OpentalkTime)
+                                 .WhereIf(input.OpentalkTime.HasValue && input.OpentalkTimeType.HasValue, x => input.OpentalkTimeType.Value ? x.openTalkTime >= input.OpentalkTime : x.openTalkTime < input.OpentalkTime)
                                  .WhereIf(input.TypeOfWork.HasValue, x => x.TypeOfWork == input.TypeOfWork.Value)
                                  .WhereIf(input.IsCharged.HasValue, x => x.IsCharged == input.IsCharged.Value)
                                  .GroupBy(x => x.Status).Select(x => new
