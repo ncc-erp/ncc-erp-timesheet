@@ -129,6 +129,14 @@
   height: 18px !important;
 }
 
+.filter-action-buttons {
+  gap: 20px;
+}
+
+.filter-action-buttons button {
+  width: 100px;
+}
+
 .desktop-search {
   width: 25%;
   min-width: 220px;
