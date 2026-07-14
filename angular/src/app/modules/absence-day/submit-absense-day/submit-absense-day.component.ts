@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { Inject, Injector } from '@node_modules/@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@node_modules/@angular/material';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Inject, Injector } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { AppComponentBase } from '@shared/app-component-base';
 import { AbsenceDayService } from '@app/service/api/absence-day.service';
 import { DayOffService } from '@app/service/api/day-off.service';
@@ -14,11 +14,13 @@ import { AbsenceDayDto, DayOffType, AbsenceDayRequest } from '@app/service/api/m
 export class SubmitAbsenseDayComponent extends AppComponentBase implements OnInit {
 
     absenceDayReq: AbsenceDayRequest;
+    @ViewChild('dateInput') dateInput: ElementRef;
 
     dayOffTypes = [] as DayOffType[];
 
     startDate: string;
     title: string;
+    tempSelectedDate: any = null;
 
     endDate: string;
     isLoading: boolean
@@ -86,7 +88,7 @@ export class SubmitAbsenseDayComponent extends AppComponentBase implements OnIni
         }
         this.isLoading = true
         this.isSaving = true
-        if (this.data.length !== 0) {
+        if (this.absenceDayReq.absences.length !== 0) {
             this.absenceDayService.submitAbsenceDays(this.absenceDayReq).subscribe(resp => {
                 if (resp && resp.success) {
                     const errorItem = resp.result.absences.find((item: any) => item.status == 3);
@@ -108,6 +110,22 @@ export class SubmitAbsenseDayComponent extends AppComponentBase implements OnIni
         }
        
     }
+
+    onCancel() {
+        this.data.selectedDays.clear();
+        this.absenceDayReq.absences = [];
+        this.diaLogRef.close();
+    }
+
+    removeDate(index: number) {
+        const removed = this.absenceDayReq.absences[index];
+        this.absenceDayReq.absences.splice(index, 1);
+        this.absenceDayReq.absences = [...this.absenceDayReq.absences];
+        if (removed && removed.dateAt) {
+            this.data.selectedDays.delete(removed.dateAt);
+        }
+    }
+
     getNameByValue(data: any) {
         if (data.value === 1) {
             return 'Full Day';
@@ -144,6 +162,55 @@ export class SubmitAbsenseDayComponent extends AppComponentBase implements OnIni
             return 'day-chip-afternoon';
         } 
         return 'day-chip-custom';
+    }
+
+    addAnotherDate(event: any) {
+        console.log('event', event);
+        if (!event.value) return;
+        const selectedDate = moment(event.value).format("YYYY-MM-DD");
+        console.log('selectedDate', selectedDate);
+
+        if (this.absenceDayReq.absences.findIndex(x => x.dateAt === selectedDate) >= 0) {
+            this.notify.error('This date is already selected!');
+            setTimeout(() => {
+                this.tempSelectedDate = null;
+                if (this.dateInput && this.dateInput.nativeElement) {
+                    this.dateInput.nativeElement.value = '';
+                }
+            }, 0);
+            return;
+        }
+
+        let dateType = 1;
+        let hour = 0;
+        let absenceTime = null;
+
+        if (this.data.type === 0 && this.data.absenceTime === 1) {
+            dateType = 4;
+            absenceTime = 1;
+        }
+
+        const newAbsence = {
+            dateAt: selectedDate,
+            dateType: dateType,
+            hour: hour,
+            absenceTime: absenceTime,
+            status: this.absenceDayReq.status
+        } as AbsenceDayDto;
+
+        this.absenceDayReq.absences = [...this.absenceDayReq.absences, newAbsence];
+
+        this.data.selectedDays.set(selectedDate, this.data.type === 0 && this.data.absenceTime === 1 
+            ? { type: dateType, hour: hour, absenceTime: absenceTime } 
+            : dateType
+        );
+
+        setTimeout(() => {
+            this.tempSelectedDate = null;
+            if (this.dateInput && this.dateInput.nativeElement) {
+                this.dateInput.nativeElement.value = '';
+            }
+        }, 0);
     }
 }
 

@@ -1,26 +1,29 @@
 <div class="row clearfix" [busy]="isLoading">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="card main-content">
+      <div class="desktop-view">
       <div class="header">
-        <h2>{{ "My requests" | localize }}</h2>
-        <ul class="header-dropdown m-r--5">
-          <li>
-            <button
-              name="menuBtn"
-              mat-icon-button
-              [matMenuTriggerFor]="headerMenu123"
-              class="header-dropdown-mat-icon-button"
-            >
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #headerMenu123="matMenu">
-              <button name="refreshBtn" mat-menu-item (click)="refreshData()">
-                <mat-icon>refresh</mat-icon>
-                <span>{{ "Refresh" | localize }}</span>
+        <div class="header-group">
+          <h2>{{ "My requests" | localize }}</h2>
+          <ul class="header-dropdown m-r--5">
+            <li>
+              <button
+                name="menuBtn"
+                mat-icon-button
+                [matMenuTriggerFor]="headerMenu123"
+                class="header-dropdown-mat-icon-button"
+              >
+                <mat-icon>more_vert</mat-icon>
               </button>
-            </mat-menu>
-          </li>
-        </ul>
+              <mat-menu #headerMenu123="matMenu">
+                <button name="refreshBtn" mat-menu-item (click)="refreshData()">
+                  <mat-icon>refresh</mat-icon>
+                  <span>{{ "Refresh" | localize }}</span>
+                </button>
+              </mat-menu>
+            </li>
+          </ul>
+        </div>
       </div>
       <div class="text-center" style="padding: 17px">
         <div class="group">
@@ -141,6 +144,108 @@
           </mwl-calendar-month-view>
         </div>
       </div>
+      </div>
+
+      <div class="mobile-view">
+        <div class="header">
+          <div class="header-group">
+            <h2 class="title">{{ "My Requests" | localize }}</h2>
+            <ul class="header-dropdown m-r--5">
+              <li>
+                <button name="menuBtn" mat-icon-button [matMenuTriggerFor]="headerMenu123Mobile" class="header-dropdown-mat-icon-button">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #headerMenu123Mobile="matMenu">
+                  <button name="refreshBtn" mat-menu-item (click)="refreshData()">
+                    <mat-icon>refresh</mat-icon>
+                    <span>{{ "Refresh" | localize }}</span>
+                  </button>
+                </mat-menu>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="mobile-filter px-3 pt-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Request Type</mat-label>
+            <mat-select name="mAbsentDayType" [(ngModel)]="absentDayType" (selectionChange)="selectionChange(true)">
+              <mat-option [value]="-1">All</mat-option>
+              <mat-option *ngFor="let item of dayAbsentTypeList" [value]="APP_CONSTANT.DayAbsenceType[item]">{{ item }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="d-flex justify-content-between align-items-center">
+            <mat-form-field appearance="outline" class="w-48">
+              <mat-label>Year</mat-label>
+              <mat-select name="mYearSelect" [(value)]="year" (selectionChange)="selectionChange($event)">
+                <mat-option *ngFor="let item of years" [value]="item">{{ item }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-48">
+              <mat-label>Month</mat-label>
+              <mat-select name="mMonthSelect" [(value)]="month" (selectionChange)="selectionChange($event)">
+                <mat-option *ngFor="let item of months" [value]="item">{{ item + 1 }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="mobile-requests panel-group px-3" role="tablist" aria-multiselectable="true">
+          <div *ngFor="let group of absenceReqsGroupedByDate; let i = index; trackBy: trackByGroupDate" class="panel panel-col-primary mobile-date-group">
+            <div class="panel-heading date-group-header" role="tab" [attr.id]="'mHeading-' + i">
+              <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" [attr.href]="'#mCollapse-' + i" aria-expanded="false" [attr.aria-controls]="'mCollapse-' + i" class="collapsed">
+                  <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">date_range</i>
+                  <span style="font-weight: bold;">{{ group.dateAt | date: "dd/MM/yyyy" }}</span>
+                </a>
+              </h4>
+            </div>
+            <div [attr.id]="'mCollapse-' + i" class="panel-collapse collapse" role="tabpanel" [attr.aria-labelledby]="'mHeading-' + i">
+              <div class="panel-body">
+                <div *ngFor="let req of group.requests; let last = last; trackBy: trackByRequestId" [style.margin-bottom]="last ? '0' : '10px'" class="request-item-card">
+                  <div class="request-details-grid-mb">
+                    <div class="grid-cell-label">Request Type</div>
+                    <div class="grid-cell-status">
+                       <div class="leave-badges-container">
+                          <span class="pin-wrap" [ngClass]="getListTypeClasses(req.type, req.detail.absenceTime)">{{ getLeaveTypeText(req.type, req.detail.absenceTime) }}</span>
+                          <span class="pin-wrap" [ngClass]="getListClasses(req.detail.dateType)">{{ getLeaveText(req.detail.dateType, req.detail.hour) }}</span>
+                       </div>
+                    </div>
+
+                    <div class="grid-cell-label">Off Type</div>
+                    <div class="grid-cell-value">
+                      <span>{{ req.dayOffName }}</span>
+                    </div>
+
+                    <div class="grid-cell-label">Status</div>
+                    <div class="grid-cell-status">
+                      <span class="label status-label day-off-state-pending" *ngIf="req.status === 1">Pending</span>
+                      <span class="label status-label day-off-state-approved" *ngIf="req.status === 2">Approved</span>
+                      <span class="label status-label day-off-state-reject" *ngIf="req.status === 3">Rejected</span>
+                    </div>
+
+                    <div class="grid-cell-label">Note</div>
+                    <div class="grid-cell-value">
+                      <span>{{ req.detail.reason || req.detail.note || req.reason || '' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mobile-fab-container" *ngIf="isGranted(SEND_REQUEST)" [class.expanded]="isMobileFabExpanded">
+          <div class="fab-actions" [class.show]="isMobileFabExpanded">
+            <button class="fab-action-btn pin-wrap" [ngClass]="getListTypeClasses(0, 0)" (click)="requestOff()">Off</button>
+            <button class="fab-action-btn pin-wrap" [ngClass]="getListTypeClasses(2, 0)" (click)="requestRemote()">Remote</button>
+            <button class="fab-action-btn pin-wrap" [ngClass]="getListTypeClasses(1, 0)" (click)="requestOnsite()">Onsite</button>
+          </div>
+          <button class="main-fab" (click)="toggleMobileFab()">
+            <mat-icon class="fab-icon">{{ isMobileFabExpanded ? 'close' : 'add' }}</mat-icon>
+          </button>
+        </div>
+
+      </div>
+
     </div>
   </div>
 </div>
