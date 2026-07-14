@@ -1,0 +1,94 @@
+<div class="mobile-advanced-dialog">
+  <div class="dialog-header-mb" mat-dialog-title>
+    <h2 class="dialog-title-mb">Advanced Filter</h2>
+    <i class="material-icons dialog-close-icon" (click)="onCancel()">close</i>
+  </div>
+
+  <mat-dialog-content>
+    <div class="filter-row-mb">
+      <div class="filter-group-mb">
+        <mat-form-field appearance="outline">
+          <mat-label>Year</mat-label>
+          <mat-select [(ngModel)]="parent.year" (selectionChange)="parent.onDayOffTypeChange($event, false)">
+            <mat-option *ngFor="let item of parent.listYear" [value]="item">{{item}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    
+      <div class="filter-group-mb">
+        <mat-form-field appearance="outline">
+          <mat-label>Month</mat-label>
+          <mat-select [(ngModel)]="parent.month" (selectionChange)="parent.onDayOffTypeChange($event, false)">
+            <mat-option *ngFor="let item of parent.listMonth" [value]="item">{{item + 1}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    
+      <div class="filter-group-mb">
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="parent.dayAbsentStatus" (selectionChange)="parent.onLeaveDayTypeChange(false)">
+            <mat-option *ngFor="let item of parent.dayAbsentStatusList"
+              [value]="APP_CONSTANT.AbsenceStatusFilter[item]">{{item}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="radio-options-row-mb" *ngIf="parent.permission.isGranted('AbsenceDayByProject.ViewByBranch')">
+      <mat-radio-group aria-label="Select an option" class="filter-work-calendar-mb">
+        <mat-radio-button [value]="true" [checked]="parent.isRadiocheckfilterbyBranch" (change)="parent.onChangeShowFilterByBranch(false)">
+          <div [ngClass]="parent.isRadiocheckfilterbyBranch ? 'filter-radio-active' : 'filter-radio-inactive'" class="filter-label-mb">Filter by project</div>
+        </mat-radio-button>
+        <mat-radio-button [value]="false" [checked]="!parent.isRadiocheckfilterbyBranch" (change)="parent.onChangeShowFilterByBranch(false)" (click)="parent.onFilterBranchDirector(false)">
+          <div [ngClass]="!parent.isRadiocheckfilterbyBranch ? 'filter-radio-active' : 'filter-radio-inactive'" class="filter-label-mb">Filter by branch</div>
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
+
+    <div class="project-filter-row-mb">
+      <div class="filter-group-mb project-col-mb" *ngIf="parent.isRadiocheckfilterbyBranch">
+        <app-multiple-select name="listProjectMb" labelName="Project" [listOption]="parent.listProject"
+          (onChange)="parent.onChangeListProjectIdSelected($event, false)" [defaultValue]="parent.listProjectSelected"
+          [disabled]="parent.isLoading" classCustom="w-100"></app-multiple-select>
+      </div>
+
+      <div class="filter-group-mb request-col-mb">
+        <mat-form-field appearance="outline">
+          <mat-label>Request Type</mat-label>
+          <mat-select [(ngModel)]="parent.absentDayType" (selectionChange)="parent.onLeaveDayTypeChange(false)">
+            <mat-option [value]="-1">All</mat-option>
+            <mat-option *ngFor="let item of parent.dayAbsentTypeList" [value]="APP_CONSTANT.DayAbsenceType[item]">{{item}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="request-type-column-row-mb" *ngIf="parent.absentDayType === 0">
+      <div class="request-type-sub-group-mb">
+        <mat-form-field appearance="outline">
+          <mat-label>Type of Request Type</mat-label>
+          <mat-select [(ngModel)]="parent.dayType" (selectionChange)="parent.onDayTypeChange(false)">
+            <mat-option [value]="-1">All</mat-option>
+            <mat-option *ngFor="let item of parent.dayTypeList" [value]="APP_CONSTANT.AbsenceType[item]">{{item | dayType}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="request-type-sub-group-mb">
+        <mat-form-field appearance="outline">
+          <mat-label>Off Type</mat-label>
+          <mat-select [(ngModel)]="parent.dayOffType" (selectionChange)="parent.onDayOffTypeChange($event, false)">
+            <mat-option [value]="-1">All</mat-option>
+            <mat-option *ngFor="let type of parent.dayOffTypes" [value]="type.id">{{type.name}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-footer-mb">
+    <button name="filterBtn" mat-flat-button (click)="onFilter()" color="primary" class="filter-apply-btn-mb">
+      Filter
+    </button>
+  </mat-dialog-actions>
+</div>
