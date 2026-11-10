@@ -1315,7 +1315,7 @@ namespace Timesheet.APIs.ReviewInterns
                     StringBuilder reviewerHeaderMessage = new StringBuilder();
                     reviewerHeaderMessage.AppendLine($"**[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo đánh giá thực tập sinh**");
                     reviewerHeaderMessage.AppendLine();
-                    reviewerHeaderMessage.AppendLine($"Thông báo các bản ghi đánh giá thực tập sinh tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**đang ở trạng thái**{statusDictionary[ReviewInternStatus.Draft]}**trên hệ thống**Timesheet**");
+                    reviewerHeaderMessage.AppendLine($"Thông báo các bản ghi đánh giá thực tập sinh tháng **{data.MonthReviewIntern}/{data.YearReviewIntern}** đang ở trạng thái **{statusDictionary[ReviewInternStatus.Draft]}** trên hệ thống **Timesheet**");
                     reviewerHeaderMessage.AppendLine($"Các bản ghi cần đánh giá bao gồm:");
                     reviewerHeaderMessage.AppendLine("");
                     _komuService.SendSimpleNotificationToUser(reviewerHeaderMessage.ToString(), reviewer.ReviewerUserName);
@@ -1330,14 +1330,14 @@ namespace Timesheet.APIs.ReviewInterns
                         StringBuilder reviewerChunkMessage = new StringBuilder();
                         foreach (var intern in chunk)
                         {
-                            reviewerChunkMessage.AppendLine($"{idx}. Intern name:**{intern.InternUserName}**");
-                            reviewerChunkMessage.AppendLine($"- Current level:**{intern.InternCurrentLevel}**");
+                            reviewerChunkMessage.AppendLine($"{idx}. Intern name: **{intern.InternUserName}**");
+                            reviewerChunkMessage.AppendLine($"- Current level: **{intern.InternCurrentLevel}**");
                             reviewerChunkMessage.AppendLine("");
                             idx++;
                         }
                         if (isLastChunk)
                         {
-                            reviewerChunkMessage.AppendLine($"Vui lòng thực hiện đánh giá và chuyển trạng thái sang**PM Reviewed**trước ngày**{reviewDeadline:00}/{dateNow.Month:00}/{dateNow.Year}**để hoàn tất quy trình đánh giá.");
+                            reviewerChunkMessage.AppendLine($"Vui lòng thực hiện đánh giá và chuyển trạng thái sang **PM Reviewed** trước ngày **{reviewDeadline:00}/{dateNow.Month:00}/{dateNow.Year}** để hoàn tất quy trình đánh giá.");
                         }
                         _komuService.SendSimpleNotificationToUser(reviewerChunkMessage.ToString(), reviewer.ReviewerUserName);
                         await System.Threading.Tasks.Task.Delay(MESSAGE_DELAY_MS);
@@ -1356,7 +1356,7 @@ namespace Timesheet.APIs.ReviewInterns
                 StringBuilder hrHeaderMessage = new StringBuilder();
                 hrHeaderMessage.AppendLine($"**[NCC] [Review Intern {data.MonthReviewIntern}/{data.YearReviewIntern}] Thông báo đánh giá thực tập sinh**");
                 hrHeaderMessage.AppendLine();
-                hrHeaderMessage.AppendLine($"Thông báo các bản ghi đánh giá thực tập sinh tháng**{data.MonthReviewIntern}/{data.YearReviewIntern}**đang ở trạng thái**{statusDictionary[ReviewInternStatus.Draft]}**trên hệ thống**Timesheet**");
+                hrHeaderMessage.AppendLine($"Thông báo các bản ghi đánh giá thực tập sinh tháng **{data.MonthReviewIntern}/{data.YearReviewIntern}** đang ở trạng thái **{statusDictionary[ReviewInternStatus.Draft]}** trên hệ thống **Timesheet**");
                 _komuService.SendSimpleNotificationToUser(hrHeaderMessage.ToString(), user.UserName);
             }
         }
