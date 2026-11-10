@@ -1372,6 +1372,24 @@ namespace Timesheet.APIs.RequestDays
                           select p).AnyAsync();
 
         }
+
+        private Timesheet.Services.W2.Dto.W2RequestMetaDto ParseW2RequestMeta(string meta)
+        {
+            if (string.IsNullOrWhiteSpace(meta))
+            {
+                return null;
+            }
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<Timesheet.Services.W2.Dto.W2RequestMetaDto>(meta);
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn($"ParseW2RequestMeta failed: {ex.Message}. Meta: {meta}");
+                return null;
+            }
+        }
+
         [HttpPost]
         public async System.Threading.Tasks.Task ApproveRequest(long[] requestIds)
         {
@@ -1433,7 +1451,8 @@ namespace Timesheet.APIs.RequestDays
                         bool isSpecialOff = request.DayOffType.Status == OffTypeStatus.CoPhep;
                         if (request.Type == RequestType.Off && isSpecialOff)
                         {
-                            var firstDate = requestDetails.First().DateAt.ToString("yyyy-MM-dd");
+                            var firstDateAt = requestDetails.Min(s => s.DateAt).Date;
+                            var firstDate = firstDateAt.ToString("yyyy-MM-dd");
                             var w2Requests = _w2Service.GetRequestStatus(request.User.EmailAddress, firstDate, request.User.MezonUserId);
 
                             if (w2Requests == null || !w2Requests.Any())
@@ -1441,26 +1460,24 @@ namespace Timesheet.APIs.RequestDays
                                 throw new UserFriendlyException("This Off request needs to be approved by HR on the W2 system first!");
                             }
 
-                            Timesheet.Services.W2.Dto.W2RequestStatusDto validRequest = null;
-                            foreach (var w2Request in w2Requests)
-                            {
-                                if (w2Request.Status != (int)RequestOffW2RequestStatus.Approved)
-                                {
-                                    continue;
-                                }
+                            var approvedW2Metas = w2Requests
+                                .Where(s => s.Status == (int)RequestOffW2RequestStatus.Approved && s.Date.Date == firstDateAt)
+                                .Select(s => ParseW2RequestMeta(s.Meta))
+                                .Where(s => s != null)
+                                .ToList();
 
-                                var metaObj = Newtonsoft.Json.JsonConvert.DeserializeObject<Timesheet.Services.W2.Dto.W2RequestMetaDto>(w2Request.Meta);
-                                if (metaObj != null && !string.IsNullOrEmpty(metaObj.Reason_label) &&
-                                    metaObj.Reason_label.Trim().Equals(request.DayOffType.Name.Trim(), StringComparison.OrdinalIgnoreCase) &&
-                                    w2Request.Date.Date == requestDetails.First().DateAt.Date)
-                                {
-                                    validRequest = w2Request;
-                                    break;
-                                }
-                            }
+                            // W2 Reason is the Timesheet DayOffTypeId
+                            var isMatched = approvedW2Metas.Any(s =>
+                                long.TryParse(s.Reason?.Trim(), out var reasonId) && reasonId == request.DayOffTypeId);
 
-                            if (validRequest == null)
+                            if (!isMatched)
                             {
+                                if (approvedW2Metas.Any())
+                                {
+                                    var w2Reasons = string.Join(", ", approvedW2Metas.Select(s => $"{s.Reason_label} (id: {s.Reason})"));
+                                    Logger.Warn($"ApproveRequest {requestId}: W2 reason [{w2Reasons}] does not match Timesheet DayOffType [{request.DayOffType.Name} (id: {request.DayOffTypeId})]");
+                                    throw new UserFriendlyException($"The leave type approved on W2 ({w2Reasons}) does not match the leave type on Timesheet ({request.DayOffType.Name})!");
+                                }
                                 throw new UserFriendlyException("This Off request needs to be approved by HR on the W2 system first!");
                             }
                         }

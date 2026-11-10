@@ -80,13 +80,29 @@
                     <tbody>
                         <ng-container>
                             <tr>
-                                <td class="sticky-left"><b>{{round(normalWorkingHourByUserLogin.totalWorkingHour)}}</b></td>
+                                <td class="sticky-left">
+                                    <b>{{round(normalWorkingHourByUserLogin.totalWorkingHour)}}</b>
+                                    <span *ngIf="normalWorkingHourByUserLogin.totalOverTimeChargedHour" class="d-block f-size-11 ot-hour"
+                                        matTooltip="OT charge">
+                                        OT-C: {{round(normalWorkingHourByUserLogin.totalOverTimeChargedHour)}}
+                                    </span>
+                                    <span *ngIf="normalWorkingHourByUserLogin.totalOverTimeNonChargedHour" class="d-block f-size-11 ot-hour ot-non-charged"
+                                        matTooltip="OT none-charge">
+                                        OT-NC: {{round(normalWorkingHourByUserLogin.totalOverTimeNonChargedHour)}}
+                                    </span>
+                                </td>
                                 <td class="sticky-left"><b>{{normalWorkingHourByUserLogin.totalOpenTalk}}</b></td>
                                 <td [id]='"width" + i' *ngFor="let detail of normalWorkingHourByUserLogin.listWorkingHour" class="text-center"
                                     [ngClass]="getCssClass(detail)" [matTooltip]="detail.infoTooltip"
                                     matTooltipClass="custom-tooltip">
                                     <div [className]="detail.isHalfWidth ? 'half-width sticky-left-day' : 'sticky-left-day'">
                                         <span class="d-block f-size-11">{{detail.workingHour}}
+                                        </span>
+                                        <span *ngIf="detail.overTimeChargedHour" class="d-block f-size-11 ot-hour">
+                                            OT-C {{round(detail.overTimeChargedHour)}}
+                                        </span>
+                                        <span *ngIf="detail.overTimeNonChargedHour" class="d-block f-size-11 ot-hour ot-non-charged">
+                                            OT-NC {{round(detail.overTimeNonChargedHour)}}
                                         </span>
                                         <div class="g-absence">
                                             <span *ngFor="let absenceDetaiInDay of detail.listAbsenceDetaiInDay"

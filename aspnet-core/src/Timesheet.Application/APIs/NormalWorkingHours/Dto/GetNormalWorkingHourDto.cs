@@ -44,6 +44,9 @@ namespace Timesheet.APIs.NormalWorkingHours.Dto
         public int Date { get; set; }
         public string DayName { get; set; }
         public double? WorkingHour { get; set; }
+        public double? OverTimeHour { get; set; }
+        public double? OverTimeChargedHour { get; set; }
+        public double? OverTimeNonChargedHour { get; set; }
         public bool IsOpenTalk { get; set; }
         public DayType? AbsenceType { get; set; }
         public double? OffHour { get; set; }
@@ -210,6 +213,9 @@ namespace Timesheet.APIs.NormalWorkingHours.Dto
     {
         public double TotalWorkingHour { get; set; }
         public double TotalOpenTalk { get; set; }
+        public double TotalOverTimeHour { get; set; }
+        public double TotalOverTimeChargedHour { get; set; }
+        public double TotalOverTimeNonChargedHour { get; set; }
         public IEnumerable<WorkingHourDto> ListWorkingHour { get; set; }
     }
 
