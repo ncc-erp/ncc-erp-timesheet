@@ -12,9 +12,10 @@ import { OffDayProjectDetailComponent } from './off-day-project-detail/off-day-p
 import { OffDayProjectDetailModule } from './off-day-project-detail/off-day-project-detail.module';
 import { OffDayProjectRoutingModule } from './off-day-project-routing.module';
 import { OffDayProjectComponent } from './off-day-project.component';
+import { AdvancedFilterComponent } from './advanced-filter/advanced-filter.component';
 
 @NgModule({
-    declarations: [OffDayProjectComponent],
+    declarations: [OffDayProjectComponent, AdvancedFilterComponent],
     imports: [
         CommonModule,
         SharedModule,
@@ -30,7 +31,7 @@ import { OffDayProjectComponent } from './off-day-project.component';
         OffDayProjectDetailModule,
         OffDayProjectRoutingModule,
     ],
-    entryComponents: [OffDayProjectDetailComponent],
+    entryComponents: [OffDayProjectDetailComponent, AdvancedFilterComponent],
     providers: [
         { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
     ]
