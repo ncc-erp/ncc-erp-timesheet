@@ -244,28 +244,19 @@
     }}</span>
     <div class="cal-day-item">
       <div *ngFor="let item of day.events">
-        <div
-          style="
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            margin: 0px 10px;
-          "
-        >
-          <div>
+        <div class="team-calendar-item">
+          <div class="user-info-wrap">
             <img
               style="border-radius: 50%"
               [src]="getAvatar(item)"
               alt="avatar"
               class="avatar-user-request"
             />
-          </div>
-          <div>
-            <span style="background-color: #03a9f4" class="pin-wrap">{{
+            <span style="background-color: #03a9f4" class="pin-wrap user-name-pin">{{
               item.color.secondary
             }}</span>
           </div>
-          <div style="display: flex">
+          <div class="badges-wrap">
             <span
               class="cal-day-badge text-primary day-chip-full-day mr-1"
               *ngIf="item.meta == 0 && !item.absenceTime"
@@ -288,18 +279,23 @@
               >VS</span
             >
             <span
-              class="cal-day-badge text-primary onsite"
+              class="cal-day-badge text-primary onsite mr-1"
               *ngIf="item.meta == 1"
               >Onsite</span
             >
             <span
-              class="cal-day-badge text-primary remote"
+              class="cal-day-badge text-primary remote mr-1"
               *ngIf="item.meta == 2"
               >Remote</span
             >
+            <span
+              class="cal-day-badge text-primary work-at-office mr-1"
+              *ngIf="item.meta == 3"
+              >Work at Office</span
+            >
 
             <span
-              class="mt-1 badge-time-request"
+              class="badge-time-request"
               [ngClass]="getAbsenceClasses(item.color.primary.split(' | ')[0])"
               >{{
                 getAbsenceText(

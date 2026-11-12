@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.MyWorkingTimes.Dto
 {
@@ -12,5 +13,6 @@ namespace Timesheet.APIs.MyWorkingTimes.Dto
         public string AfternoonStartTime { get; set; }
         public string AfternoonEndTime { get; set; }
         public double AfternoonWorkingTime { get; set; }
+        public WorkMode? WorkMode { get; set; }
     }
 }

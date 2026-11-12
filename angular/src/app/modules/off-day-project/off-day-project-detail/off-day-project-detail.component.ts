@@ -59,6 +59,8 @@ export class OffDayProjectDetailComponent extends AppComponentBase implements On
       return ['text-primary', 'day-chip-full-day'];
     }  else if (member.leavedayType == 1) {
       return ['text-danger', 'onsite'];
+    } else if (member.leavedayType == 3) {
+      return ['text-success', 'work-at-office'];
     }
     return ['text-primary', 'day-chip-morning'];
   }
@@ -89,6 +91,8 @@ export class OffDayProjectDetailComponent extends AppComponentBase implements On
       return "Onsite";
     } else if(member.leavedayType == 2) {
       return "Remote";
+    } else if(member.leavedayType == 3) {
+      return "Work at Office";
     }
   }
 

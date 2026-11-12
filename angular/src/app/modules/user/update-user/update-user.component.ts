@@ -410,6 +410,7 @@ export class createUserDTO {
   beginLevel:number;
   endDateAt:any;
   mezonUserId: string;
+  workMode: number;
 }
 
 

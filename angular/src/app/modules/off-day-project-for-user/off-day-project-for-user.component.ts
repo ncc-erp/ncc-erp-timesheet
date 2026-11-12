@@ -227,12 +227,12 @@ export class OffDayProjectForUserComponent extends AppComponentBase implements O
     if(this.absentDayType !== APP_CONSTANT.DayAbsenceType['Remote']){
       this.remoteOfWeek = APP_CONSTANT.FILTER_DEFAULT.All;
     }
-    if(this.absentDayType === 3){
+    if(this.absentDayType === APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"]){
       this.dayType = 4;
       typeAbsenceDay = 0;
-      this.absentDayType = 3;
+      this.absentDayType = APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"];
     }
-    if (this.previousAbsentDayType === 3 && this.absentDayType === APP_CONSTANT.DayAbsenceType["Off"]) {
+    if (this.previousAbsentDayType === APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"] && this.absentDayType === APP_CONSTANT.DayAbsenceType["Off"]) {
       this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
     }
     this.previousAbsentDayType = this.absentDayType;

@@ -31,7 +31,8 @@ export class MyWorkingTimeComponent extends AppComponentBase implements OnInit {
     morningWorkingTime: '',
     afternoonStartTime: '',
     afternoonEndTime: '',
-    afternoonWorkingTime: ''
+    afternoonWorkingTime: '',
+    workMode: 0
   };
   
   constructor(
@@ -59,6 +60,7 @@ export class MyWorkingTimeComponent extends AppComponentBase implements OnInit {
     time.afternoonStartTime = this.currentWorkingTime.afternoonStartTime;
     time.afternoonEndTime = this.currentWorkingTime.afternoonEndTime;
     time.afternoonWorkingTime = this.currentWorkingTime.afternoonWorkingTime;
+    time.workMode = this.currentWorkingTime.workMode !== undefined ? this.currentWorkingTime.workMode : 0;
     this.openDialog(time);
   }
 
@@ -73,6 +75,7 @@ export class MyWorkingTimeComponent extends AppComponentBase implements OnInit {
       afternoonStartTime: infor.afternoonStartTime,
       afternoonEndTime: infor.afternoonEndTime,
       afternoonWorkingTime: infor.afternoonWorkingTime,
+      workMode: infor.workMode !== undefined ? infor.workMode : (this.currentWorkingTime.workMode !== undefined ? this.currentWorkingTime.workMode : 0),
       status: infor.status
     } as RegisterInforDto;
     const dialogRef = this.dialog.open(RegisterWorkingTimeComponent, {
@@ -174,5 +177,6 @@ export interface RegisterInforDto {
   afternoonStartTime: string,
   afternoonEndTime: string,
   afternoonWorkingTime?: string,
+  workMode?: number,
   status?: number
 }

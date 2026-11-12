@@ -17,6 +17,9 @@ export class RegisterWorkingTimeComponent implements OnInit {
 
   ngOnInit() {
     this.title = this.data.morningStartTime != null ? 'Edit registered new working time' : 'Register new working time';
+    if (this.data.workMode === undefined || this.data.workMode === null) {
+      this.data.workMode = 0;
+    }
   }
   onNoClick(): void {
     this.dialogRef.close();

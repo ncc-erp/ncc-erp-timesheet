@@ -121,6 +121,14 @@
                             {{position.name}}
                         </mat-option>
                     </mat-select>
+                </mat-form-field>
+                <mat-form-field class="col-sm-5ths field-padding" appearance="outline">
+                    <mat-label>Work Type</mat-label>
+                    <mat-select name="workMode" [(value)]="workMode" (selectionChange)="searchOrFilter()" [disableOptionCentering]="true">
+                        <mat-option [value]="-1">All</mat-option>
+                        <mat-option [value]="0">Work at Office</mat-option>
+                        <mat-option [value]="1">WFH</mat-option>
+                    </mat-select>
                 </mat-form-field>   
             </div>
             <div class="table-user-wrapper">
@@ -163,7 +171,7 @@
                                 <th *ngIf="tableHeader[14].value">{{ tableHeader[14].name | localize }}</th>
                                 <th *ngIf="tableHeader[15].value">{{ tableHeader[15].name | localize }}</th>
                                 <th *ngIf="tableHeader[16].value">{{ tableHeader[16].name | localize }}</th>
-                                <!-- <th *ngIf="tableHeader[17].value">{{ tableHeader[17].name | localize }}</th> -->
+                                <th *ngIf="tableHeader[17].value" style="text-align: center; min-width: 90px;">{{ tableHeader[17].name | localize }}</th>
                                 <th>
                                     {{ "Actions" | localize }}
                                     <span class="pointer" style="float: right; height: 20px;">
@@ -327,9 +335,11 @@
                                         error
                                     </i>
                                 </td>
-                                <!-- <td *ngIf="tableHeader[17].value">
-                                    <span *ngIf="user.positionId != null">{{ user.positionName}}</span>
-                                </td> -->
+                                <td *ngIf="tableHeader[17].value" align="center">
+                                    <span class="label status-label" [ngClass]="user.workMode === 1 ? 'bg-orange' : 'bg-green'">
+                                        {{ user.workMode === 1 ? 'WFH' : 'Office' }}
+                                    </span>
+                                </td>
                                 <td align="center" style="min-width: 50px;">
                                     <button *ngIf=" permission.isGranted(EDIT_USER) ||
                                                 permission.isGranted(EDIT_USER_ROLE) ||

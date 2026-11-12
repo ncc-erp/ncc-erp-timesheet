@@ -133,6 +133,13 @@ namespace Ncc.Entities.Enum
             Off = 0,
             Onsite = 1,
             Remote = 2,
+            WorkAtOffice = 3,
+        }
+
+        public enum WorkMode
+        {
+            Office = 0,
+            WFH = 1
         }
 
         public enum Branch : byte
@@ -232,7 +239,10 @@ namespace Ncc.Entities.Enum
             EarlyLeave = 8,
             OnsiteFull = 9,
             OnsiteMorning = 10,
-            OnsiteAfternoon = 11
+            OnsiteAfternoon = 11,
+            WorkAtOfficeFull = 12,
+            WorkAtOfficeMorning = 13,
+            WorkAtOfficeAfternoon = 14
         }
 
         public enum TsStatusFilter

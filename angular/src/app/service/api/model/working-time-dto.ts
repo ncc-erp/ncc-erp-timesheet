@@ -5,4 +5,5 @@ export class WorkingTimeDto{
     afternoonWorking: string;
     afternoonStartAt: string;
     afternoonEndAt: string;
+    workMode?: number;
 }

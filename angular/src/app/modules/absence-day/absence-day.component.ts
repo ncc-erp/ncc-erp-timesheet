@@ -7,6 +7,7 @@ import { AbsenceDayService } from '@app/service/api/absence-day.service';
 import { DayOffService } from '@app/service/api/day-off.service';
 import { AbsenceRequestDto } from '@app/service/api/model/absence-day-dto';
 import { WorkingTimeDto } from '@app/service/api/model/working-time-dto';
+import { MyWorkingTimeService } from '@app/service/api/my-working-time.service';
 import { MatDialog } from '@node_modules/@angular/material';
 import { MonthViewDay } from '@node_modules/calendar-utils';
 import { AppComponentBase } from '@shared/app-component-base';
@@ -61,6 +62,16 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
   custom = this.APP_CONSTANT.AbsenceType.Custom;
   off = this.APP_CONSTANT.DayAbsenceType.Off;
   remote = this.APP_CONSTANT.DayAbsenceType.Remote;
+  workAtOffice = this.APP_CONSTANT.DayAbsenceType.WorkAtOffice;
+  workMode: number = 0;
+
+  get isOfficeMode(): boolean {
+    return this.workMode !== 1;
+  }
+
+  get isWfhMode(): boolean {
+    return this.workMode === 1;
+  }
 
   tardiness = this.APP_CONSTANT.OnDayType.BeginOfDay;
   leaveEarly = this.APP_CONSTANT.OnDayType.EndOfDay;
@@ -71,6 +82,7 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
     private dayOffService: DayOffService,
     private datePipe: DatePipe,
     private absenceDayService: AbsenceDayService,
+    private myWorkingTimeService: MyWorkingTimeService,
     private diaLog: MatDialog) {
     super(injector);
     this.branchId = this.appSession.user.branchId;
@@ -86,6 +98,14 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
   }
 
   ngOnInit() {
+    if (this.appSession.user && this.appSession.user.workMode !== undefined && this.appSession.user.workMode !== null) {
+      this.workMode = this.appSession.user.workMode;
+    }
+    this.myWorkingTimeService.getMyCurrentWorkingTime().subscribe((res) => {
+      if (res && res.result && res.result.workMode !== undefined && res.result.workMode !== null) {
+        this.workMode = res.result.workMode;
+      }
+    });
     this.updateDay();
     this.refreshData();
     this.workingTime.morningWorking = this.appSession.user.morningWorking;
@@ -134,10 +154,10 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
       this.refresh.next();
       let sDate = moment(new Date(this.year, this.month - 1, 1)).format("YYYY-MM-DD");
       let tDate = moment(new Date(this.year, this.month + 2, 0)).format("YYYY-MM-DD")
-      if (this.absentDayType === 3) {
+      if (this.absentDayType === this.APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"]) {
         this.dayType = 4;
         typeAbsenceDay = 0;
-        this.absentDayType = 3;
+        this.absentDayType = this.APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"];
       }
       this.absenceDayService.getAllAbsenceReqs(sDate, tDate, typeAbsenceDay, this.dayType).subscribe(resp => {
         this.absenceReqs = resp.result as AbsenceRequestDto[];
@@ -247,9 +267,14 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
     this.mapChanegRequest.set('remote-afternoon', [this.MORMING, this.EMPTY]);
     this.mapChanegRequest.set('onsite-morning', [this.AFTERNOON, this.EMPTY]);
     this.mapChanegRequest.set('onsite-afternoon', [this.MORMING, this.EMPTY]);
+    this.mapChanegRequest.set('work-at-office-full', [this.EMPTY]);
+    this.mapChanegRequest.set('work-at-office-morning', [this.AFTERNOON, this.EMPTY]);
+    this.mapChanegRequest.set('work-at-office-afternoon', [this.MORMING, this.EMPTY]);
 
     this.mapChanegRequest.set('off-morning__remote-afternoon', [this.EMPTY]);
     this.mapChanegRequest.set('off-afternoon__remote-morning', [this.EMPTY]);
+    this.mapChanegRequest.set('off-morning__work-at-office-afternoon', [this.EMPTY]);
+    this.mapChanegRequest.set('off-afternoon__work-at-office-morning', [this.EMPTY]);
     this.mapChanegRequest.set('off-morning__onsite-afternoon', [this.EMPTY]);
     this.mapChanegRequest.set('onsite-morning__off-afternoon', [this.EMPTY]);
   }
@@ -297,6 +322,15 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
       }
       if (_.isEqual(sendItem, this.ONSITE_AFTERNOON)) {
         return 'onsite-afternoon'
+      }
+      if (_.isEqual(sendItem, this.WORK_AT_OFFICE_FULLDAY)) {
+        return 'work-at-office-full'
+      }
+      if (_.isEqual(sendItem, this.WORK_AT_OFFICE_MORNING)) {
+        return 'work-at-office-morning'
+      }
+      if (_.isEqual(sendItem, this.WORK_AT_OFFICE_AFTERNOON)) {
+        return 'work-at-office-afternoon'
       }
     }
 
@@ -435,6 +469,20 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
       ) {
         return 'off-morning__onsite-afternoon'
       }
+
+      if (
+        (_.isEqual(sendItem1, this.OFF_MORMING) && _.isEqual(sendItem2, this.WORK_AT_OFFICE_AFTERNOON)) ||
+        (_.isEqual(sendItem2, this.OFF_MORMING) && _.isEqual(sendItem1, this.WORK_AT_OFFICE_AFTERNOON))
+      ) {
+        return 'off-morning__work-at-office-afternoon'
+      }
+
+      if (
+        (_.isEqual(sendItem1, this.OFF_AFTERNOON) && _.isEqual(sendItem2, this.WORK_AT_OFFICE_MORNING)) ||
+        (_.isEqual(sendItem2, this.OFF_AFTERNOON) && _.isEqual(sendItem1, this.WORK_AT_OFFICE_MORNING))
+      ) {
+        return 'off-afternoon__work-at-office-morning'
+      }
     }
   }
 
@@ -539,6 +587,10 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
 
   requestRemote() {
     this.submitButtonClick(this.APP_CONSTANT.DayAbsenceType.Remote, 0);
+  }
+
+  requestWorkAtOffice() {
+    this.submitButtonClick(this.APP_CONSTANT.DayAbsenceType.WorkAtOffice, 0);
   }
 
   requestOnsite() {
@@ -711,6 +763,24 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
 
   ONSITE_AFTERNOON = {
     type:1,
+    dateType: 3,
+    absenceTime: null
+  }
+
+  WORK_AT_OFFICE_FULLDAY = {
+    type: 3,
+    dateType: 1,
+    absenceTime: null
+  }
+
+  WORK_AT_OFFICE_MORNING = {
+    type: 3,
+    dateType: 2,
+    absenceTime: null
+  }
+
+  WORK_AT_OFFICE_AFTERNOON = {
+    type: 3,
     dateType: 3,
     absenceTime: null
   }

@@ -428,7 +428,8 @@ namespace Ncc.Users
                             AfternoonEndAt = u.AfternoonEndAt,
                             AfternoonWorking = u.AfternoonWorking,
                             PositionId = u.Position.Id,
-                            PositionName = u.Position.Name
+                            PositionName = u.Position.Name,
+                            WorkMode = u.WorkMode ?? WorkMode.Office
                         };
 
             query = query.OrderByDescending(s => s.CreationTime);

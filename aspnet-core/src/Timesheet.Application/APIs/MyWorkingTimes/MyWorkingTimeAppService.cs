@@ -1,4 +1,4 @@
-﻿using Abp.BackgroundJobs;
+using Abp.BackgroundJobs;
 using Abp.UI;
 using Microsoft.AspNetCore.Mvc;
 using Ncc;
@@ -55,7 +55,8 @@ namespace Timesheet.APIs.MyWorkingTimes
                 AfternoonWorkingTime = user.AfternoonWorking.Value,
                 MorningEndTime = user.MorningEndAt,
                 MorningStartTime = user.MorningStartAt,
-                MorningWorkingTime = user.MorningWorking.Value
+                MorningWorkingTime = user.MorningWorking.Value,
+                WorkMode = user.WorkMode ?? WorkMode.Office
             };
         }
 
@@ -111,6 +112,7 @@ namespace Timesheet.APIs.MyWorkingTimes
             data.AfternoonEndTime = newData.AfternoonEndTime;
             data.AfternoonWorkingTime = newData.AfternoonWorkingTime;
             data.ApplyDate = newData.ApplyDate;
+            data.WorkMode = newData.WorkMode ?? WorkMode.Office;
             data.Status = RequestStatus.Pending;
             newData.Id = await WorkScope.GetRepo<HistoryWorkingTime>().InsertAndGetIdAsync(data);
 
@@ -137,6 +139,7 @@ namespace Timesheet.APIs.MyWorkingTimes
                     AfternoonEndTime = h.AfternoonEndTime,
                     AfternoonWorkingTime = h.AfternoonWorkingTime,
                     ApplyDate = h.ApplyDate,
+                    WorkMode = h.WorkMode ?? WorkMode.Office,
                     ReqestTime = h.CreationTime,
                     Status = h.Status
                 })

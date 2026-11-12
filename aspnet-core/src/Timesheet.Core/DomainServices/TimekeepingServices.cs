@@ -79,6 +79,7 @@ namespace Timesheet.DomainServices
                     AfternoonEndAt = u.AfternoonEndAt,
                     AfternoonWorking = u.AfternoonWorking,
                     Type = u.Type,
+                    WorkMode = u.WorkMode ?? WorkMode.Office,
                 }).ToListAsync();
 
             if (!users.Any())
@@ -138,10 +139,11 @@ namespace Timesheet.DomainServices
             }
         }
 
-        private async Task<(Dictionary<long, List<MapAbsenceUserDto>> AbsenceUsers, Dictionary<long, List<MapAbsenceUserDto>> RemoteUsers)> GetAbsenceAndRemoteUsers(DateTime selectedDate)
+        private async Task<(Dictionary<long, List<MapAbsenceUserDto>> AbsenceUsers, Dictionary<long, List<MapAbsenceUserDto>> RemoteUsers, Dictionary<long, List<MapAbsenceUserDto>> WorkAtOfficeUsers)> GetAbsenceAndRemoteUsers(DateTime selectedDate)
         {
             var mapAbsenceUsers = new Dictionary<long, List<MapAbsenceUserDto>>();
             var mapRemoteUsers = new Dictionary<long, List<MapAbsenceUserDto>>();
+            var mapWorkAtOfficeUsers = new Dictionary<long, List<MapAbsenceUserDto>>();
 
             var absenceDayDetails = await WorkScope.GetAll<AbsenceDayDetail>()
                 .Include(s => s.Request)
@@ -159,11 +161,15 @@ namespace Timesheet.DomainServices
 
 
             var nonRemoteRecords = absenceDayDetails
-                .Where(r => r.Type != RequestType.Remote)
+                .Where(r => r.Type != RequestType.Remote && r.Type != RequestType.WorkAtOffice)
                 .GroupBy(r => r.UserId);
 
             var remoteRecords = absenceDayDetails
                 .Where(r => r.Type == RequestType.Remote)
+                .GroupBy(r => r.UserId);
+
+            var workAtOfficeRecords = absenceDayDetails
+                .Where(r => r.Type == RequestType.WorkAtOffice)
                 .GroupBy(r => r.UserId);
 
             foreach (var group in nonRemoteRecords)
@@ -176,7 +182,12 @@ namespace Timesheet.DomainServices
                 mapRemoteUsers[group.Key] = group.OrderBy(x => x.AbsenceTime).ToList();
             }
 
-            return (mapAbsenceUsers, mapRemoteUsers);
+            foreach (var group in workAtOfficeRecords)
+            {
+                mapWorkAtOfficeUsers[group.Key] = group.OrderBy(x => x.AbsenceTime).ToList();
+            }
+
+            return (mapAbsenceUsers, mapRemoteUsers, mapWorkAtOfficeUsers);
         }
 
         private async Task<(Dictionary<string, UserCheckInDto> mapCheckInUsers,
@@ -282,6 +293,7 @@ namespace Timesheet.DomainServices
             Dictionary<long, List<(string NoteReply, string UserNote)>> oldTimekeepingNotes,
             Dictionary<long, List<MapAbsenceUserDto>> mapAbsenceUsers,
             Dictionary<long, List<MapAbsenceUserDto>> mapRemoteUsers,
+            Dictionary<long, List<MapAbsenceUserDto>> mapWorkAtOfficeUsers,
             Dictionary<(long UserId, UserPunishmentType Type), UserPunishmentSnapshotDto> snapshotByUserAndType,
             Dictionary<long, UserWhitelist> mapWhitelistUsers)
         {
@@ -498,7 +510,15 @@ namespace Timesheet.DomainServices
                     }
                 }
 
-                if (isRemoteWork && user.Type != Usertype.Vendor)
+                // Policy: Komu tracker punishment applies to:
+                // 1. WFH employees (on days without an approved Work at Office request)
+                // 2. Office employees on days with an approved Remote request
+                bool isUserWFH = user.WorkMode == WorkMode.WFH;
+                bool hasWorkAtOffice = mapWorkAtOfficeUsers.ContainsKey(user.UserId);
+                bool hasRemote = mapRemoteUsers.ContainsKey(user.UserId);
+                bool shouldCheckTracker = (isUserWFH && !hasWorkAtOffice) || hasRemote;
+
+                if (shouldCheckTracker && user.Type != Usertype.Vendor)
                 {
                     bool isTrackerTimeWhitelisted = mapWhitelistUsers.ContainsKey(user.UserId);
                     if (!isTrackerTimeWhitelisted)
@@ -605,7 +625,7 @@ namespace Timesheet.DomainServices
                 var oldTimekeepingNotes = await SoftDeleteOldTimekeeping(selectedDate);
                 await SoftDeleteOldPunishments(selectedDate);
 
-                var (mapAbsenceUsers, mapRemoteUsers) = await GetAbsenceAndRemoteUsers(selectedDate);
+                var (mapAbsenceUsers, mapRemoteUsers, mapWorkAtOfficeUsers) = await GetAbsenceAndRemoteUsers(selectedDate);
                 var (mapCheckInUsers, mapDailyUsers, mapMentionUsers, mapWFHUsers, dicUserNameToTracker, punishmentSystems) = await LoadExternalData(selectedDate, users);
 
                 var mapWhitelistUsers = await WorkScope.GetAll<UserWhitelist>()
@@ -634,6 +654,7 @@ namespace Timesheet.DomainServices
                                 oldTimekeepingNotes,
                                 mapAbsenceUsers,
                                 mapRemoteUsers,
+                                mapWorkAtOfficeUsers,
                                 snapshotByUserAndType,
                                 mapWhitelistUsers
                             )
