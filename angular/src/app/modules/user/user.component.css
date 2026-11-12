@@ -236,8 +236,9 @@ file-upload>span {
     }
 
     ::ng-deep .user-list-select-wrapper .mat-form-field {
-        flex: 1 1 calc(16.666% - 8px); /* 6 columns */
-        min-width: 150px;
+        flex: 1 1 calc(14.285% - 8px); /* 7 columns */
+        max-width: calc(14.285% - 8px);
+        min-width: 120px;
         margin: 0;
         padding: 0 !important;
     }
@@ -245,7 +246,8 @@ file-upload>span {
     /* Responsive */
     @media (max-width: 1200px) {
         ::ng-deep .user-list-select-wrapper .mat-form-field {
-            flex: 1 1 calc(33.333% - 8px);
+            flex: 0 0 calc(25% - 8px);
+            max-width: calc(25% - 8px);
         }
     }
 
@@ -259,7 +261,8 @@ file-upload>span {
         }
         
         ::ng-deep .user-list-select-wrapper .mat-form-field {
-            flex: 1 1 calc(50% - 8px);
+            flex: 0 0 calc(50% - 8px);
+            max-width: calc(50% - 8px);
         }
     }
 
@@ -281,6 +284,7 @@ file-upload>span {
         
         ::ng-deep .user-list-select-wrapper .mat-form-field {
             flex: 1 1 100%;
+            max-width: 100%;
         }
     }
     .user-wrapper .user-table-button{

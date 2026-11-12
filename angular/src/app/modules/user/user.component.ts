@@ -87,7 +87,7 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     { name: 'Roles', value: true, fieldName: 'role' },
     { name: 'Creation Time', value: true, fieldName: 'createTime' },
     { name: 'Is Active', value: true, fieldName: 'isActive' },
-    //{ name: 'Position', value: true, fieldName: 'position' },
+    { name: 'Work Type', value: true, fieldName: 'workMode' },
   ];
   contextMenuPosition = { x: '0px', y: '0px' };
 
@@ -104,7 +104,7 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
 
   isExpandUserName = false;
 
-  TABLE_NAME = 'TABLE_USERS';
+  TABLE_NAME = 'TABLE_USERS_V2';
   APP_NAME_VERSION = 'NCC_TIMESHEET_VERSION';
 
   listBranch: BranchDto[] = [];
@@ -113,6 +113,7 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
   listPosition: PositionDto[] = [];
   positionSearch: FormControl = new FormControl("")
   listPositionFilter: PositionDto[];
+  workMode: any = -1;
 
   onContextMenu(event: MouseEvent, temp) {
     event.preventDefault();
@@ -290,6 +291,9 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     }
     if (this.positionId != null && this.positionId != -1) {
       this.addFilterItem('positionId', this.positionId);
+    }
+    if (this.workMode != null && this.workMode != -1) {
+      this.addFilterItem('workMode', this.toNumber(this.workMode));
     }
     request.filterItems = this.filterItems;
     this.userService
@@ -632,6 +636,7 @@ export class userDTO {
   isLevelUp: boolean;
   workStartHour: number;
   workStartMinute: number;
+  workMode: number;
 }
 export class ProjectUser {
   projectId: number;

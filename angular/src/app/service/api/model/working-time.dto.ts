@@ -16,4 +16,5 @@ export class UserWorkingTime {
     afternoonStartTime: string;
     afternoonEndTime: string;
     afternoonWorkingTime: string;
+    workMode?: number;
 }

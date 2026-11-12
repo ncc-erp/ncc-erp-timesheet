@@ -1,4 +1,4 @@
-﻿using Abp.Domain.Entities;
+using Abp.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +23,10 @@ namespace Timesheet.Uitls
                 new RequestTypeDto{ MyRequest = new MyRequest{ Type = RequestType.Off,      DateType = DayType.Custom,      AbsenceTime = OnDayType.VeSom },     Type = EnumRequest.EarlyLeave},
                 new RequestTypeDto{ MyRequest = new MyRequest{ Type = RequestType.Onsite,   DateType = DayType.Fullday,     AbsenceTime = null },                   Type = EnumRequest.OnsiteFull},
                 new RequestTypeDto{ MyRequest = new MyRequest{ Type = RequestType.Onsite,   DateType = DayType.Morning,     AbsenceTime = null },                   Type = EnumRequest.OnsiteMorning},
-                new RequestTypeDto{ MyRequest = new MyRequest{ Type = RequestType.Onsite,   DateType = DayType.Afternoon,   AbsenceTime = null },                   Type = EnumRequest.OnsiteAfternoon}
+                new RequestTypeDto{ MyRequest = new MyRequest{ Type = RequestType.Onsite,   DateType = DayType.Afternoon,   AbsenceTime = null },                   Type = EnumRequest.OnsiteAfternoon},
+                new RequestTypeDto{ MyRequest = new MyRequest{ Type = RequestType.WorkAtOffice, DateType = DayType.Fullday, AbsenceTime = null },               Type = EnumRequest.WorkAtOfficeFull},
+                new RequestTypeDto{ MyRequest = new MyRequest{ Type = RequestType.WorkAtOffice, DateType = DayType.Morning, AbsenceTime = null },               Type = EnumRequest.WorkAtOfficeMorning},
+                new RequestTypeDto{ MyRequest = new MyRequest{ Type = RequestType.WorkAtOffice, DateType = DayType.Afternoon, AbsenceTime = null },             Type = EnumRequest.WorkAtOfficeAfternoon}
             };
         }
         public static Dictionary<IEnumerable<EnumRequest>, IEnumerable<EnumRequest>> DictMayRequest()
@@ -34,10 +37,10 @@ namespace Timesheet.Uitls
                 , new List<EnumRequest>()},
 
                 { new List<EnumRequest>() { EnumRequest.OffMorning }
-                , new List<EnumRequest>() { EnumRequest.RemoteAfternoon, EnumRequest.Tardiness, EnumRequest.EarlyLeave, EnumRequest.OnsiteAfternoon}},
+                , new List<EnumRequest>() { EnumRequest.RemoteAfternoon, EnumRequest.Tardiness, EnumRequest.EarlyLeave, EnumRequest.OnsiteAfternoon, EnumRequest.WorkAtOfficeAfternoon}},
 
                 { new List<EnumRequest>() { EnumRequest.OffAfternoon }
-                , new List<EnumRequest>() { EnumRequest.RemoteMorning, EnumRequest.Tardiness, EnumRequest.EarlyLeave, EnumRequest.OnsiteMorning}},
+                , new List<EnumRequest>() { EnumRequest.RemoteMorning, EnumRequest.Tardiness, EnumRequest.EarlyLeave, EnumRequest.OnsiteMorning, EnumRequest.WorkAtOfficeMorning}},
 
                 { new List<EnumRequest>() { EnumRequest.RemoteFull }
                 , new List<EnumRequest>() { EnumRequest.Tardiness, EnumRequest.EarlyLeave}},
@@ -49,10 +52,10 @@ namespace Timesheet.Uitls
                 , new List<EnumRequest>() { EnumRequest.OffMorning, EnumRequest.Tardiness, EnumRequest.EarlyLeave, EnumRequest.OnsiteMorning}},
 
                 { new List<EnumRequest>() { EnumRequest.Tardiness }
-                , new List<EnumRequest>() { EnumRequest.OffMorning, EnumRequest.OffAfternoon, EnumRequest.RemoteFull, EnumRequest.RemoteMorning, EnumRequest.RemoteAfternoon, EnumRequest.EarlyLeave} },
+                , new List<EnumRequest>() { EnumRequest.OffMorning, EnumRequest.OffAfternoon, EnumRequest.RemoteFull, EnumRequest.RemoteMorning, EnumRequest.RemoteAfternoon, EnumRequest.EarlyLeave, EnumRequest.WorkAtOfficeFull, EnumRequest.WorkAtOfficeMorning, EnumRequest.WorkAtOfficeAfternoon} },
 
                 { new List<EnumRequest>() { EnumRequest.EarlyLeave }
-                , new List<EnumRequest>() { EnumRequest.OffMorning, EnumRequest.OffAfternoon, EnumRequest.RemoteFull, EnumRequest.RemoteMorning, EnumRequest.RemoteAfternoon, EnumRequest.Tardiness} },
+                , new List<EnumRequest>() { EnumRequest.OffMorning, EnumRequest.OffAfternoon, EnumRequest.RemoteFull, EnumRequest.RemoteMorning, EnumRequest.RemoteAfternoon, EnumRequest.Tardiness, EnumRequest.WorkAtOfficeFull, EnumRequest.WorkAtOfficeMorning, EnumRequest.WorkAtOfficeAfternoon} },
 
                 { new List<EnumRequest>() { EnumRequest.OnsiteFull }
                 , new List<EnumRequest>() { EnumRequest.Tardiness, EnumRequest.EarlyLeave}},
@@ -62,6 +65,15 @@ namespace Timesheet.Uitls
 
                 { new List<EnumRequest>() { EnumRequest.OnsiteAfternoon}
                 , new List<EnumRequest>() { EnumRequest.OffMorning, EnumRequest.Tardiness, EnumRequest.Tardiness, EnumRequest.RemoteMorning}},
+
+                { new List<EnumRequest>() { EnumRequest.WorkAtOfficeFull }
+                , new List<EnumRequest>() { EnumRequest.Tardiness, EnumRequest.EarlyLeave}},
+
+                { new List<EnumRequest>() { EnumRequest.WorkAtOfficeMorning }
+                , new List<EnumRequest>() { EnumRequest.OffAfternoon, EnumRequest.EarlyLeave, EnumRequest.Tardiness}},
+
+                { new List<EnumRequest>() { EnumRequest.WorkAtOfficeAfternoon}
+                , new List<EnumRequest>() { EnumRequest.OffMorning, EnumRequest.EarlyLeave, EnumRequest.Tardiness}},
 
 
                 { new List<EnumRequest>() { EnumRequest.OffMorning, EnumRequest.RemoteAfternoon }

@@ -1241,10 +1241,10 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.AbsenceDay, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Leave days" },
             new SystemPermission{ Name =  PermissionNames.AbsenceDay_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View leave/onsite requests" },
             new SystemPermission{ Name =  PermissionNames.AbsenceDay_Approval, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Approval requests" },
-            new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage team working calendar" },
-            new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View users leave / onsite by project" },
-            new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_ViewByBranch, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View users leave / onsite by branch" },
-            new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_Approval, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Approval requests" },
+            new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage request off/remote/workatoffice/onsite" },
+            new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View users leave/remote/workatoffice/onsite by project" },
+            new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_ViewByBranch, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View/Approve users leave/remote/workatoffice/onsite by branch" },
+            new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_Approval, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Approve/Reject requests button" },
             new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_ViewDetail, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View detail request" },
             new SystemPermission{ Name =  PermissionNames.AbsenceDayOfTeam, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Team working calendar" },
             new SystemPermission{ Name =  PermissionNames.AbsenceDayOfTeam_View, MultiTenancySides = MultiTenancySides.Host, DisplayName = "View your team member leave / onsite by project" },
@@ -1930,12 +1930,12 @@ namespace Ncc.Authorization
     //        new SystemPermission{ Name =  PermissionNames.AbsenceDay_Approval, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Approval requests" },
     //    }
     //},
-            new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage request off/remote/onsite",
+            new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject, MultiTenancySides = MultiTenancySides.Host, DisplayName = "Manage request off/remote/workatoffice/onsite",
                 Childrens = new List<SystemPermission>()
                 {
-                    new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View users leave/remote/onsite by project" },
-                    new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_ViewByBranch, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View users leave/remote/onsite by branch" },
-                    new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_Approval, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Approval requests" },
+                    new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_View, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View users leave/remote/workatoffice/onsite by project" },
+                    new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_ViewByBranch, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View/Approve users leave/remote/workatoffice/onsite by branch" },
+                    new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_Approval, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Approve/Reject requests button" },
                     new SystemPermission{ Name =  PermissionNames.AbsenceDayByProject_ViewDetail, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View detail request" },
                 }
      },

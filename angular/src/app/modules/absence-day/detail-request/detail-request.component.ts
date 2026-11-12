@@ -51,6 +51,8 @@ export class DetailRequestComponent extends AppComponentBase implements OnInit {
       return ['text-primary', 'day-chip-full-day'];
     } else if (member.leavedayType == 1) {
       return ['text-danger', 'onsite'];
+    } else if (member.leavedayType == 3) {
+      return ['text-primary', 'work-at-office'];
     }
     return ['text-primary', 'day-chip-morning'];
   }
@@ -81,6 +83,8 @@ export class DetailRequestComponent extends AppComponentBase implements OnInit {
       return "Onsite";
     } else if (member.leavedayType == 2) {
       return "Remote";
+    } else if (member.leavedayType == 3) {
+      return "Work at Office";
     }
   }
 
@@ -101,14 +105,19 @@ export class DetailRequestComponent extends AppComponentBase implements OnInit {
 
   cancelAbsenceRequest(requestId) {
     this.isLoading = true;
-    this.absenceRequestService.cancelAbsenceRequest(requestId).subscribe(res => {
-      if (res) {
+    this.absenceRequestService.cancelAbsenceRequest(requestId).subscribe(
+      res => {
+        if (res) {
+          this.isLoading = false;
+          this.notify.success(this.l("Cancel Successfully!"));
+          this.getAllRequestOfUserByDate();
+          this.close(1);
+        }
+      },
+      () => {
         this.isLoading = false;
-        this.notify.success(this.l("Cancel Successfully!"));
-        this.getAllRequestOfUserByDate();
-        this.close(1);
       }
-    });
+    );
   }
 
   close(res): void {

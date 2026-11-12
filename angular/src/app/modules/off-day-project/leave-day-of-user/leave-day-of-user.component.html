@@ -135,9 +135,11 @@
         *ngIf="isSelected(day.date)">✔</span>
     <div *ngFor="let item of day.events;let i = index">
       <div *ngIf="day.badgeTotal <= 0">
-        <span class="cal-day-badge text-primary day-chip-full-day"
+        <span class="cal-day-badge text-primary day-chip-full-day mr-1"
           *ngIf="item.type === 0 && item.absenceTime==null">Off</span>
-        <span class="cal-day-badge text-primary onsite" *ngIf="day.type === 1">Onsite</span>
+        <span class="cal-day-badge text-primary onsite mr-1" *ngIf="item.type === 1">Onsite</span>
+        <span class="cal-day-badge text-primary remote mr-1" *ngIf="item.type === 2">Remote</span>
+        <span class="cal-day-badge text-primary work-at-office mr-1" *ngIf="item.type === 3">Work at Office</span>
 
         <span class="cal-day-badge text-primary day-chip-full-day"
           *ngIf="item.cssClass === 'all-day-absence' || item.cssClass === 'all-day-request'">Full Day</span>

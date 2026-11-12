@@ -1,4 +1,4 @@
-﻿using Abp.Domain.Entities.Auditing;
+using Abp.Domain.Entities.Auditing;
 using Ncc.Authorization.Users;
 using System;
 using System.Collections.Generic;
@@ -27,6 +27,7 @@ namespace Timesheet.Entities
         public string AfternoonEndTime { get; set; }
         [MaxLength(5)]
         public double AfternoonWorkingTime { get; set; }
+        public WorkMode? WorkMode { get; set; }
         public RequestStatus Status { get; set; }
     }
 }

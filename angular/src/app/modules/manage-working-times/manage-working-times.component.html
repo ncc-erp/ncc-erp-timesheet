@@ -116,6 +116,9 @@
                   </td>
                   <td class="table-content">
                     <div>
+                      <span class="label" [ngClass]="u.workMode === 1 ? 'bg-orange' : 'bg-green'">{{ u.workMode === 1 ? 'WFH' : 'Office' }}</span>
+                    </div>
+                    <div>
                       Sáng: {{u.morningStartTime}} - {{u.morningEndTime}}
                     </div>
                     <div>

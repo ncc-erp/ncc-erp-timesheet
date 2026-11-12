@@ -1,4 +1,4 @@
-﻿using Abp.Authorization;
+using Abp.Authorization;
 using Abp.BackgroundJobs;
 using Abp.Collections.Extensions;
 using Abp.UI;
@@ -84,6 +84,7 @@ namespace Timesheet.APIs.ManageWorkingTimes
                     AfternoonEndTime = h.AfternoonEndTime,
                     AfternoonWorkingTime = h.AfternoonWorkingTime,
                     ApplyDate = h.ApplyDate,
+                    WorkMode = h.WorkMode ?? WorkMode.Office,
                     Status = h.Status,
                     LastModificationTime = h.LastModificationTime,
                     LastModifierUser = qUsers.Where(x => x.Id == h.LastModifierUserId).Select(x => x.EmailAddress).FirstOrDefault()
@@ -114,10 +115,12 @@ namespace Timesheet.APIs.ManageWorkingTimes
                 .Where(s => s.Type == ProjectUserType.PM && s.UserId == AbpSession.UserId)
                 .Select(s => s.ProjectId).ToListAsync();
 
+            var isViewAll = await IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll);
+
             var isValid = await WorkScope.GetAll<ProjectUser>()
                 .AnyAsync(s => s.UserId == item.UserId && projectIds.Contains(s.ProjectId));
 
-            if (!isValid)
+            if (!isViewAll && !isValid)
             {
                 throw new UserFriendlyException($"You are not PM of user {itemExt.FullName}");
             }
@@ -187,6 +190,7 @@ namespace Timesheet.APIs.ManageWorkingTimes
             user.AfternoonEndAt = workingTime.AfternoonEndTime;
             user.AfternoonWorking = workingTime.AfternoonWorkingTime;
             user.isWorkingTimeDefault = false;
+            user.WorkMode = workingTime.WorkMode ?? WorkMode.Office;
 
             await WorkScope.UpdateAsync<User>(user);
 
@@ -233,10 +237,12 @@ namespace Timesheet.APIs.ManageWorkingTimes
                 .Where(s => s.Type == ProjectUserType.PM && s.UserId == AbpSession.UserId)
                 .Select(s => s.ProjectId).ToListAsync();
 
+            var isViewAll = await IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll);
+
             var isValid = await WorkScope.GetAll<ProjectUser>()
                 .AnyAsync(s => s.UserId == item.UserId && projectIds.Contains(s.ProjectId));
 
-            if (!isValid)
+            if (!isViewAll && !isValid)
             {
                 throw new UserFriendlyException($"You are not PM of user {itemExt.FullName}");
             }

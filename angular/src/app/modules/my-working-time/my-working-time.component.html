@@ -21,7 +21,12 @@
         <div class="row">
           <div class="col-md-12">
             <div>
-              <h4 class="my-working-time-title">My current working time</h4>
+              <h4 class="my-working-time-title">
+                My current working time
+                <span class="label m-l-10" [ngClass]="currentWorkingTime.workMode === 1 ? 'label-warning' : 'label-success'">
+                  {{ currentWorkingTime.workMode === 1 ? 'WFH' : 'Work at Office' }}
+                </span>
+              </h4>
               <div class="row">
                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 working">
                   <mat-form-field>
@@ -96,6 +101,9 @@
               <td>{{infor.reqestTime | date: 'dd/MM/yyyy HH:mm'}}</td>
               <td>{{infor.applyDate | date: 'dd/MM/yyyy'}}</td>
               <td>
+                <div>
+                  <span class="label" [ngClass]="infor.workMode === 1 ? 'label-warning' : 'label-success'">{{ infor.workMode === 1 ? 'WFH' : 'Office' }}</span>
+                </div>
                 <span>Sáng:</span> {{infor.morningStartTime}} - {{infor.morningEndTime}} <br>
                 <span>Chiều:</span> {{infor.afternoonStartTime}} - {{infor.afternoonEndTime}}
               </td>

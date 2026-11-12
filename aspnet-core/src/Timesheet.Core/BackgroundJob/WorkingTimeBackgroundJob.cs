@@ -1,4 +1,4 @@
-﻿using Abp.BackgroundJobs;
+using Abp.BackgroundJobs;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
@@ -44,6 +44,7 @@ namespace Timesheet.BackgroundJob
             user.AfternoonEndAt = workingTime.AfternoonEndTime;
             user.AfternoonWorking = workingTime.AfternoonWorkingTime;
             user.isWorkingTimeDefault = false;
+            user.WorkMode = workingTime.WorkMode ?? WorkMode.Office;
 
              _userRepository.Update(user);
 
