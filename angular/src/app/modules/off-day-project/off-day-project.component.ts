@@ -95,9 +95,17 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     super(injector);
     // this.updateListYears();
     this.updateDay();
-    this.getListProject();
     this.branchId = this.appSession.user.branchId;
-    this.isRadiocheckfilterbyBranch = true;
+    if (this.permission.isGranted(PERMISSIONS_CONSTANT.ViewAbsenceDayByProject)) {
+      this.isRadiocheckfilterbyBranch = true;
+      this.getListProject();
+    } else if (this.permission.isGranted(PERMISSIONS_CONSTANT.ViewAbsenceDayByBranch)) {
+      this.isRadiocheckfilterbyBranch = false;
+      this.onFilterBranchDirector();
+    } else {
+      this.isRadiocheckfilterbyBranch = true;
+      this.getListProject();
+    }
   }
 
   ngOnInit() {
@@ -141,7 +149,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
       this.listProject.forEach(item => {
         if (data == null || data == "") {
           //if(!this._permissionChecker.isGranted('AbsenceDayByProject.ViewByBranch')) {
-            this.listProjectSelected.push(item.id);
+          this.listProjectSelected.push(item.id);
           //}
         }
         if (item.code) {
@@ -153,7 +161,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
         this.listProject.forEach(project => {
           if (unselectedIds.indexOf(project.id) === -1) {
             //if(!this._permissionChecker.isGranted('AbsenceDayByProject.ViewByBranch')) {
-              this.listProjectSelected.push(project.id);
+            this.listProjectSelected.push(project.id);
             //}
           }
         });
@@ -214,7 +222,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     });
     ///
   }
-  getDayOff(){
+  getDayOff() {
     this.dayOffService.getAll(this.month + 1, this.year, this.branchId).subscribe(res => { // get day off
       this.isLoading = false;
       this.dayOffs = res.result;
@@ -233,16 +241,16 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
     const startDate = moment(this.viewDate).startOf("M").subtract(7, "d").format("YYYY-MM-DD");
     const endDate = moment(this.viewDate).endOf("M").add(7, "d").format("YYYY-MM-DD");
     this.isLoading = true;
-    if(this.absentDayType !== APP_CONSTANT.DayAbsenceType['Off']){
+    if (this.absentDayType !== APP_CONSTANT.DayAbsenceType['Off']) {
       this.dayOffType = APP_CONSTANT.FILTER_DEFAULT.All;
       this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
     }
-    if(this.absentDayType === 3){
+    if (this.absentDayType === APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"]) {
       this.dayType = 4;
       typeAbsenceDay = 0;
-      this.absentDayType = 3;
+      this.absentDayType = APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"];
     }
-    if (this.previousAbsentDayType === 3 && this.absentDayType === APP_CONSTANT.DayAbsenceType["Off"]) {
+    if (this.previousAbsentDayType === APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"] && this.absentDayType === APP_CONSTANT.DayAbsenceType["Off"]) {
       this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
     }
     this.previousAbsentDayType = this.absentDayType;
@@ -252,7 +260,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
       this.absenceRequestList.forEach(item => {
         if (!(this.absentDayType === 0 && item.dateType === 4)) {
           this.events.push({
-            start : moment(item.dateAt, 'YYYY-MM-DD').toDate(),
+            start: moment(item.dateAt, 'YYYY-MM-DD').toDate(),
             end: moment(item.dateAt, 'YYYY-MM-DD').toDate(),
             avatarFullPath: item.avatarFullPath,
             color: { primary: item.dateType.toString() + ' | ' + item.hour, secondary: item.name },
@@ -320,7 +328,7 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
 
   onChangeShowFilterByBranch() {
     this.isRadiocheckfilterbyBranch = this.isRadiocheckfilterbyBranch == true ? false : true;
-    if(this.isRadiocheckfilterbyBranch == true) {
+    if (this.isRadiocheckfilterbyBranch == true) {
       this.getListProject();
     }
   }

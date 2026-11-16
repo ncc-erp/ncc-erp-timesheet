@@ -69,6 +69,7 @@ namespace Timesheet.APIs.RequestDays
         [AbpAuthorize(Ncc.Authorization.PermissionNames.AbsenceDayByProject_View, Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch)]
         public async Task<List<GetRequestDto>> GetAllRequest(InputRequestDto input)
         {
+            var isViewProject = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_View);
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
             var projectPMs = await WorkScope.GetAll<ProjectUser>()
                 .Where(s => s.UserId == AbpSession.UserId)
@@ -94,12 +95,20 @@ namespace Timesheet.APIs.RequestDays
 
             IQueryable<GetRequestDto> query;
             var predicate = PredicateBuilder.New<AbsenceDayDetail>();
-            if (isViewBranch)
+            if (input.projectIds.Any())
             {
-                if (input.projectIds.Count() > 0)
-                    predicate.And(s => (s.Request.User.BranchId == branchIdByPM && projectMember.Contains(s.Request.UserId)) || projectMember.Contains(s.Request.UserId));
+                if (!isViewProject)
+                {
+                    predicate.And(s => s.Request.User.BranchId == branchIdByPM && projectMember.Contains(s.Request.UserId));
+                }
                 else
-                    predicate.And(s => s.Request.User.BranchId == branchIdByPM || projectMember.Contains(s.Request.UserId));
+                {
+                    predicate.And(s => projectMember.Contains(s.Request.UserId));
+                }
+            }
+            else if (isViewBranch)
+            {
+                predicate.And(s => s.Request.User.BranchId == branchIdByPM);
             }
             else
             {
@@ -1409,6 +1418,19 @@ namespace Timesheet.APIs.RequestDays
                 .Include(ar => ar.DayOffType)
                 .FirstOrDefaultAsync(ar => ar.Id == requestId);
 
+                if (request.Type == RequestType.Remote || request.Type == RequestType.WorkAtOffice)
+                {
+                    if (!isViewBranch)
+                    {
+                        throw new UserFriendlyException("Only the Branch Director can approve Remote or Work at Office requests!");
+                    }
+
+                    if (request.User.BranchId != currentUser.BranchId)
+                    {
+                        throw new UserFriendlyException("Only the Branch Director of this branch can approve Remote or Work at Office requests!");
+                    }
+                }
+
                 if (isPM != null && request.UserId == currentUser.Id && !isViewBranch)
                 {
                     throw new UserFriendlyException("You cannot approve your own request!");
@@ -1433,21 +1455,6 @@ namespace Timesheet.APIs.RequestDays
 
                     if (requestDetails.Any())
                     {
-                        if (request.Type == RequestType.Remote && request.Status == RequestStatus.Rejected)
-                        {
-                            var dateRemote = requestDetails.First().DateAt.ToString("yyyy-MM-dd");
-                            var wfhRequestDto = _w2Service.GetWfhRequest(request.User.EmailAddress, dateRemote);
-
-                            if (wfhRequestDto == null)
-                            {
-                                throw new UserFriendlyException("Cannot get request information from the W2 system!");
-                            }
-                            if (wfhRequestDto.Status != WfhW2RequestStatus.Approved)
-                            {
-                                throw new UserFriendlyException("This WFH request cannot be approved because it has not been approved/created on the W2 system!");
-                            }
-                        }
-
                         bool isSpecialOff = request.DayOffType.Status == OffTypeStatus.CoPhep;
                         if (request.Type == RequestType.Off && isSpecialOff)
                         {
@@ -1497,9 +1504,30 @@ namespace Timesheet.APIs.RequestDays
         public async System.Threading.Tasks.Task RejectRequest(long[] requestIds)
         {
             var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.AbsenceDayByProject_ViewByBranch);
+            var currentUser = await WorkScope.GetAsync<User>(AbpSession.UserId.Value);
             foreach (var requestId in requestIds)
             {
-                var request = await WorkScope.GetAsync<AbsenceDayRequest>(requestId);
+                var request = await WorkScope.GetAll<AbsenceDayRequest>()
+                    .Include(ar => ar.User)
+                    .FirstOrDefaultAsync(ar => ar.Id == requestId);
+
+                if (request == null)
+                {
+                    continue;
+                }
+
+                if (request.Type == RequestType.Remote || request.Type == RequestType.WorkAtOffice)
+                {
+                    if (!isViewBranch)
+                    {
+                        throw new UserFriendlyException("Only the Branch Director can reject Remote or Work at Office requests!");
+                    }
+
+                    if (request.User.BranchId != currentUser.BranchId)
+                    {
+                        throw new UserFriendlyException("Only the Branch Director of this branch can reject Remote or Work at Office requests!");
+                    }
+                }
 
                 if (isViewBranch == true || (await CheckSessionUserIsPMOfUser(request.UserId)))
                 {
