@@ -40,12 +40,9 @@ namespace Timesheet.APIs.MyAbsenceDays.WFHSetting
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AllowInternToWorkRemote, input.allowInternToWorkRemote);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.AllowProbationToWorkRemote, input.allowProbationToWorkRemote);
             await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.TotalTimeAbsenceTime, input.totalTimeTardinessAndEarlyLeave);
-            if (!string.IsNullOrEmpty(input.officeDaysInAdvanceToRequestRemote))
-                await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeDaysInAdvanceToRequestRemote, input.officeDaysInAdvanceToRequestRemote);
-            if (!string.IsNullOrEmpty(input.wfhMaxOfficeDaysPerWeek))
-                await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.WfhMaxOfficeDaysPerWeek, input.wfhMaxOfficeDaysPerWeek);
-            if (!string.IsNullOrEmpty(input.wfhDaysInAdvanceToRequestOffice))
-                await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.WfhDaysInAdvanceToRequestOffice, input.wfhDaysInAdvanceToRequestOffice);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.OfficeDaysInAdvanceToRequestRemote, input.officeDaysInAdvanceToRequestRemote);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.WfhMaxOfficeDaysPerWeek, input.wfhMaxOfficeDaysPerWeek);
+            await SettingManager.ChangeSettingForApplicationAsync(AppSettingNames.WfhDaysInAdvanceToRequestOffice, input.wfhDaysInAdvanceToRequestOffice);
             return input;
         }
 
