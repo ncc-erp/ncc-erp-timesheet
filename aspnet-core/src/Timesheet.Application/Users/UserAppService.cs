@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -429,7 +429,7 @@ namespace Ncc.Users
                             AfternoonWorking = u.AfternoonWorking,
                             PositionId = u.Position.Id,
                             PositionName = u.Position.Name,
-                            WorkMode = u.WorkMode ?? WorkMode.Office
+                            WorkMode = u.WorkMode
                         };
 
             query = query.OrderByDescending(s => s.CreationTime);

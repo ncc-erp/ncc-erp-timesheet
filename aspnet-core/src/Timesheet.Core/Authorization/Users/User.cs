@@ -63,7 +63,7 @@ namespace Ncc.Authorization.Users
         public string AfternoonEndAt { get; set; }
         public ulong? KomuUserId { get; set; }
         public bool? isWorkingTimeDefault { get; set; }
-        public WorkMode? WorkMode { get; set; }
+        public WorkMode WorkMode { get; set; }
         public bool IsStopWork { get; set; }
 
         public long? DefaultProjectTaskId { get; set; }

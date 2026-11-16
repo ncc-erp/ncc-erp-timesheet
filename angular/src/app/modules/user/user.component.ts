@@ -104,7 +104,7 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
 
   isExpandUserName = false;
 
-  TABLE_NAME = 'TABLE_USERS_V2';
+  TABLE_NAME = 'TABLE_USERS';
   APP_NAME_VERSION = 'NCC_TIMESHEET_VERSION';
 
   listBranch: BranchDto[] = [];
@@ -113,7 +113,7 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
   listPosition: PositionDto[] = [];
   positionSearch: FormControl = new FormControl("")
   listPositionFilter: PositionDto[];
-  workMode: any = -1;
+  workMode: number = -1;
 
   onContextMenu(event: MouseEvent, temp) {
     event.preventDefault();
@@ -293,7 +293,7 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
       this.addFilterItem('positionId', this.positionId);
     }
     if (this.workMode != null && this.workMode != -1) {
-      this.addFilterItem('workMode', this.toNumber(this.workMode));
+      this.addFilterItem('workMode', this.workMode);
     }
     request.filterItems = this.filterItems;
     this.userService

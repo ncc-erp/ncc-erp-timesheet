@@ -2804,7 +2804,7 @@ export interface IUserLoginInfoDto {
     afternoonWorking: string | undefined;
     afternoonStartAt: string | undefined;
     afternoonEndAt: string | undefined;
-    workMode?: number | undefined;
+    workMode: number | undefined;
 }
 
 export class TenantLoginInfoDto implements ITenantLoginInfoDto {
@@ -3480,7 +3480,7 @@ export interface IUserDto {
     creationTime: moment.Moment | undefined;
     roleNames: string[] | undefined;
     id: number | undefined;
-    workMode?: number | undefined;
+    workMode: number | undefined;
 }
 
 export class BranchDto {

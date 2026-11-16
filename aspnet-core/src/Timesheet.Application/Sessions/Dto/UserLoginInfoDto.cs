@@ -31,6 +31,6 @@ namespace Ncc.Sessions.Dto
         public string AfternoonEndAt { get; set; }
         public bool? isWorkingTimeDefault { get; set; }
         public long? BranchId { get; set; }
-        public WorkMode? WorkMode { get; set; }
+        public WorkMode WorkMode { get; set; }
     }
 }
