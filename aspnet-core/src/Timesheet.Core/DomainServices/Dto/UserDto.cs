@@ -63,7 +63,7 @@ namespace Timesheet.DomainServices.Dto
         public long? PositionId { get; set; }
         public string PositionName { get; set; }
         public string MezonUserId { get; set; }
-        public WorkMode? WorkMode { get; set; }
+        public WorkMode WorkMode { get; set; }
     }
     
 }

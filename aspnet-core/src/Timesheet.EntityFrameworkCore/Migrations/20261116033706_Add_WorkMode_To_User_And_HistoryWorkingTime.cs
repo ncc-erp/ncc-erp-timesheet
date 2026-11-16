@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Timesheet.Migrations
 {
@@ -9,12 +9,14 @@ namespace Timesheet.Migrations
             migrationBuilder.AddColumn<int>(
                 name: "WorkMode",
                 table: "HistoryWorkingTimes",
-                nullable: true);
+                nullable: false,
+                defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
                 name: "WorkMode",
                 table: "AbpUsers",
-                nullable: true);
+                nullable: false,
+                defaultValue: 0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

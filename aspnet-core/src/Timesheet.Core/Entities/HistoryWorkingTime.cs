@@ -27,7 +27,7 @@ namespace Timesheet.Entities
         public string AfternoonEndTime { get; set; }
         [MaxLength(5)]
         public double AfternoonWorkingTime { get; set; }
-        public WorkMode? WorkMode { get; set; }
+        public WorkMode WorkMode { get; set; }
         public RequestStatus Status { get; set; }
     }
 }

@@ -120,10 +120,7 @@ namespace Timesheet.DomainServices
                 user.AfternoonEndAt = input.AfternoonEndAt;
                 user.AfternoonWorking = double.Parse(input.AfternoonWorking);
             }
-            if (input.WorkMode.HasValue)
-            {
-                user.WorkMode = input.WorkMode.Value;
-            }
+            user.WorkMode = input.WorkMode;
             await _userManager.InitializeOptionsAsync(_abpSession.TenantId);
             await _userManager.CreateAsync(user, input.Password);
             //Default role BasicUser
@@ -183,10 +180,7 @@ namespace Timesheet.DomainServices
             user.UserName = input.UserName?.Replace("@gmail.com", "").Replace("@ncc.asia", "");
             user.isWorkingTimeDefault = input.isWorkingTimeDefault.HasValue ? input.isWorkingTimeDefault.Value : user.isWorkingTimeDefault;
             user.EndDateAt = !input.IsActive ? input.EndDateAt.HasValue ? input.EndDateAt : DateTimeUtils.GetNow() : input.EndDateAt;
-            if (input.WorkMode.HasValue)
-            {
-                user.WorkMode = input.WorkMode.Value;
-            }
+            user.WorkMode = input.WorkMode;
 
             if (user.isWorkingTimeDefault.Value)
             {
