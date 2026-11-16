@@ -38,6 +38,8 @@ export class SubmitAbsenseDayComponent extends AppComponentBase implements OnIni
             this.title = "Request off";
         } else if(this.data.type === 2) {
             this.title = "Request remote";
+        } else if(this.data.type === 3) {
+            this.title = "Request work at office";
         }
         else if(this.data.type === 0 && this.data.absenceTime === 1) {
             this.title = "Request đi muộn/về sớm";
@@ -79,7 +81,7 @@ export class SubmitAbsenseDayComponent extends AppComponentBase implements OnIni
     }
 
     submitReq() {
-        if(this.data.type != this.APP_CONSTANT.DayAbsenceType.Remote && !this.absenceDayReq.reason.trim())
+        if(this.data.type != this.APP_CONSTANT.DayAbsenceType.Remote && this.data.type != this.APP_CONSTANT.DayAbsenceType.WorkAtOffice && !this.absenceDayReq.reason.trim())
         {
             abp.message.error('Reason is require');
             return;
