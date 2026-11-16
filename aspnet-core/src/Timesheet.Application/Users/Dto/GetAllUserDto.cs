@@ -72,6 +72,7 @@ namespace Timesheet.Users.Dto
         public string BranchDisplayName { get; set; }
         public long? PositionId { get; set; }
         public string PositionName { get; set; }
+        public WorkMode? WorkMode { get; set; }
     }
 }
 

@@ -65,5 +65,6 @@ namespace Ncc.Users.Dto
         public string AfternoonWorking { get; set; }
         public string AfternoonStartAt { get; set; }
         public string AfternoonEndAt { get; set; }
+        public WorkMode? WorkMode { get; set; }
     }
 }

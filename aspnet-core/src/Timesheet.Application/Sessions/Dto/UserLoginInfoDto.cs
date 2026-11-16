@@ -1,4 +1,4 @@
-﻿using Abp.Application.Services.Dto;
+using Abp.Application.Services.Dto;
 using Abp.AutoMapper;
 using Ncc.Authorization.Users;
 using System;
@@ -31,5 +31,6 @@ namespace Ncc.Sessions.Dto
         public string AfternoonEndAt { get; set; }
         public bool? isWorkingTimeDefault { get; set; }
         public long? BranchId { get; set; }
+        public WorkMode? WorkMode { get; set; }
     }
 }

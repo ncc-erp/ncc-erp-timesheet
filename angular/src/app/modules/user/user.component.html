@@ -121,6 +121,14 @@
                             {{position.name}}
                         </mat-option>
                     </mat-select>
+                </mat-form-field>
+                <mat-form-field class="col-sm-5ths field-padding" appearance="outline">
+                    <mat-label>Work Type</mat-label>
+                    <mat-select name="workMode" [(value)]="workMode" (selectionChange)="searchOrFilter()" [disableOptionCentering]="true">
+                        <mat-option [value]="-1">All</mat-option>
+                        <mat-option [value]="0">Work at Office</mat-option>
+                        <mat-option [value]="1">WFH</mat-option>
+                    </mat-select>
                 </mat-form-field>   
             </div>
             <div class="table-user-wrapper">
@@ -148,22 +156,22 @@
                                     {{ tableHeader[3].name | localize }}</th>
                                 <th *ngIf="tableHeader[4].value" style="min-width: 80px;">
                                     {{ tableHeader[4].name | localize }}</th>
-                                <th *ngIf="tableHeader[5].value">{{ tableHeader[5].name | localize }}</th>
+                                <th *ngIf="tableHeader[5].value" style="text-align: center; min-width: 90px;">{{ tableHeader[5].name | localize }}</th>
                                 <th *ngIf="tableHeader[6].value">{{ tableHeader[6].name | localize }}</th>
                                 <th *ngIf="tableHeader[7].value">{{ tableHeader[7].name | localize }}</th>
-                                <th *ngIf="tableHeader[8].value && permission.isGranted(VIEW_LEVEL_USER)">{{ tableHeader[8].name | localize }}</th>
-                                <th *ngIf="tableHeader[9].value" style="min-width: 90px;">
-                                    {{ tableHeader[9].name | localize }}</th>
-                                <th *ngIf="tableHeader[10].value" style="min-width: 70px;">
+                                <th *ngIf="tableHeader[8].value">{{ tableHeader[8].name | localize }}</th>
+                                <th *ngIf="tableHeader[9].value && permission.isGranted(VIEW_LEVEL_USER)">{{ tableHeader[9].name | localize }}</th>
+                                <th *ngIf="tableHeader[10].value" style="min-width: 90px;">
                                     {{ tableHeader[10].name | localize }}</th>
-                                <th *ngIf="tableHeader[11].value">{{ tableHeader[11].name | localize }}</th>
-                                <th *ngIf="tableHeader[12].value"> {{ tableHeader[12].name  }}</th>
-                                <th *ngIf="tableHeader[13].value" style="min-width: 80px;">
-                                    {{ tableHeader[13].name | localize }}</th>
-                                <th *ngIf="tableHeader[14].value">{{ tableHeader[14].name | localize }}</th>
+                                <th *ngIf="tableHeader[11].value" style="min-width: 70px;">
+                                    {{ tableHeader[11].name | localize }}</th>
+                                <th *ngIf="tableHeader[12].value">{{ tableHeader[12].name | localize }}</th>
+                                <th *ngIf="tableHeader[13].value"> {{ tableHeader[13].name  }}</th>
+                                <th *ngIf="tableHeader[14].value" style="min-width: 80px;">
+                                    {{ tableHeader[14].name | localize }}</th>
                                 <th *ngIf="tableHeader[15].value">{{ tableHeader[15].name | localize }}</th>
                                 <th *ngIf="tableHeader[16].value">{{ tableHeader[16].name | localize }}</th>
-                                <!-- <th *ngIf="tableHeader[17].value">{{ tableHeader[17].name | localize }}</th> -->
+                                <th *ngIf="tableHeader[17].value">{{ tableHeader[17].name | localize }}</th>
                                 <th>
                                     {{ "Actions" | localize }}
                                     <span class="pointer" style="float: right; height: 20px;">
@@ -235,10 +243,15 @@
                                         </p>
                                     </div>
                                 </td>
-                                <td style="text-align: center;" *ngIf="tableHeader[5].value">{{ user.startDateAt }}</td>
-                                <td style="text-align: right;" *ngIf="tableHeader[6].value">{{ user.allowedLeaveDay }}
+                                <td *ngIf="tableHeader[5].value" align="center">
+                                    <span class="label status-label" [ngClass]="user.workMode === 1 ? 'bg-orange' : 'bg-green'">
+                                        {{ user.workMode === 1 ? 'WFH' : 'Office' }}
+                                    </span>
                                 </td>
-                                <td *ngIf="tableHeader[7].value">
+                                <td style="text-align: center;" *ngIf="tableHeader[6].value">{{ user.startDateAt }}</td>
+                                <td style="text-align: right;" *ngIf="tableHeader[7].value">{{ user.allowedLeaveDay }}
+                                </td>
+                                <td *ngIf="tableHeader[8].value">
                                     <div class="align">
                                         <div>
                                             <span *ngIf="user.type == 0"
@@ -254,7 +267,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td *ngIf="tableHeader[8].value && permission.isGranted(VIEW_LEVEL_USER)">
+                                <td *ngIf="tableHeader[9].value && permission.isGranted(VIEW_LEVEL_USER)">
                                     <div class="align">
                                         <span *ngIf="user.level != null">
                                             <span
@@ -264,7 +277,7 @@
                                         </span>
                                     </div>
                                 </td>
-                                <td *ngIf="tableHeader[9].value" style="min-width: 0px;" class="text-left">
+                                <td *ngIf="tableHeader[10].value" style="min-width: 0px;" class="text-left">
                                     <div *ngIf="user.projectUsers" style=" white-space: nowrap;"
                                         [className]="!user.expandProject ? 'overflow-y' : 'fit'">
                                         <div *ngFor="let project of user.projectUsers">
@@ -285,16 +298,16 @@
                                         style="cursor: pointer;" (click)="user.expandProject = !user.expandProject"
                                         title="More...">...</span>
                                 </td>
-                                <td style="text-align: right;" *ngIf="tableHeader[10].value">
+                                <td style="text-align: right;" *ngIf="tableHeader[11].value">
                                     {{ user.salary}}</td>
-                                <td style="text-align: center;" *ngIf="tableHeader[11].value">{{ user.salaryAt }}</td>
-                                <td *ngIf="tableHeader[12].value" align="center">
+                                <td style="text-align: center;" *ngIf="tableHeader[12].value">{{ user.salaryAt }}</td>
+                                <td *ngIf="tableHeader[13].value" align="center">
                                     <div *ngIf="user.sex != null">
                                         <span [className]="sexes[user.sex].class">
                                             {{sexes[user.sex].label}}</span>
                                     </div>
                                 </td>
-                                <td *ngIf="tableHeader[13].value">
+                                <td *ngIf="tableHeader[14].value">
                                     <div style="text-align: center; margin-bottom: 5px;"
                                         *ngIf="user.managerAvatarFullPath != null && user.managerAvatarFullPath.length > 0">
                                         <img style="width: 80px; height: 80px; border-radius: 50%;"
@@ -307,7 +320,7 @@
                                     </div>
                                 </td>
 
-                                <td *ngIf="tableHeader[14].value">
+                                <td *ngIf="tableHeader[15].value">
                                     <div style="white-space: nowrap;"
                                         [className]="!user.expandRole ? 'overflow-y' : ''">
                                         <div *ngFor="let role of user.roleNames">
@@ -318,8 +331,8 @@
                                         style="cursor: pointer;" (click)="user.expandRole = !user.expandRole"
                                         title="More...">...</span>
                                 </td>
-                                <td *ngIf="tableHeader[15].value" align="center">{{user.creationTime}}</td>
-                                <td *ngIf="tableHeader[16].value" align="center">
+                                <td *ngIf="tableHeader[16].value" align="center">{{user.creationTime}}</td>
+                                <td *ngIf="tableHeader[17].value" align="center">
                                     <i class="material-icons" *ngIf="user.isActive" style="color:green;">
                                         check_circle
                                     </i>
@@ -327,9 +340,6 @@
                                         error
                                     </i>
                                 </td>
-                                <!-- <td *ngIf="tableHeader[17].value">
-                                    <span *ngIf="user.positionId != null">{{ user.positionName}}</span>
-                                </td> -->
                                 <td align="center" style="min-width: 50px;">
                                     <button *ngIf=" permission.isGranted(EDIT_USER) ||
                                                 permission.isGranted(EDIT_USER_ROLE) ||

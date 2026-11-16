@@ -91,6 +91,7 @@ export class CreateUserComponent extends AppComponentBase implements OnInit {
   }
 
   ngOnInit(): void {
+    this.user.workMode = 0;
     this.getBranchWorkingTime()
     this.getListBranch();
     this.getListPosition();
@@ -461,6 +462,7 @@ export class createUserDTO {
   beginLevel: number;
   endDateAt: any;
   mezonUserId: string;
+  workMode: number;
 }
 
 

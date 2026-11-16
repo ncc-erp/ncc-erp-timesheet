@@ -41,6 +41,7 @@ namespace Timesheet.DomainServices.Dto
         public int? Salary { get; set; }
         public DateTime? SalaryAt { get; set; }
         public string UserCode { get; set; }
+        public WorkMode? WorkMode { get; set; }
         public void Normalize()
         {
             if (RoleNames == null)
