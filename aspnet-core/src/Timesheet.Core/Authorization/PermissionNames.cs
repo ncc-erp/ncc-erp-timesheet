@@ -301,6 +301,7 @@ namespace Ncc.Authorization
         public const string MyWorkingTime_Delete = "MyWorkingTime.Delete";
         public const string ManageWorkingTime = "ManageWorkingTime";
         public const string ManageWorkingTime_ViewAll = "ManageWorkingTime.ViewAll";
+        public const string ManageWorkingTime_ViewByBranch = "ManageWorkingTime.ViewByBranch";
         public const string ManageWorkingTime_ViewDetail = "ManageWorkingTime.ViewDetail";
         public const string ManageWorkingTime_Approval = "ManageWorkingTime.Approval";
         public const string Report = "Report";
@@ -966,6 +967,7 @@ namespace Ncc.Authorization
                     PermissionNames.MyWorkingTime_Edit,
                     PermissionNames.MyWorkingTime_Delete,
                     PermissionNames.ManageWorkingTime,
+                    PermissionNames.ManageWorkingTime_ViewByBranch,
                     PermissionNames.ManageWorkingTime_ViewDetail,
                     PermissionNames.ManageWorkingTime_Approval,
                     PermissionNames.ReviewIntern_ReviewDetail_AcceptPMReviewForAllIntern,
@@ -1263,6 +1265,7 @@ namespace Ncc.Authorization
             new SystemPermission{ Name =  PermissionNames.MyWorkingTime_Delete, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Delete registration working time" },
             new SystemPermission{ Name =  PermissionNames.ManageWorkingTime, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Manage working time" },
             new SystemPermission{ Name =  PermissionNames.ManageWorkingTime_ViewAll, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View all user working time " },
+            new SystemPermission{ Name =  PermissionNames.ManageWorkingTime_ViewByBranch, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View user working time by branch" },
             new SystemPermission{ Name =  PermissionNames.ManageWorkingTime_ViewDetail, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View my team member Working Time" },
             new SystemPermission{ Name =  PermissionNames.ManageWorkingTime_Approval, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Approval working time of member" },
             new SystemPermission{ Name =  PermissionNames.Report, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Report" },
@@ -1943,6 +1946,7 @@ namespace Ncc.Authorization
                 Childrens = new List<SystemPermission>()
                 {
                     new SystemPermission{ Name =  PermissionNames.ManageWorkingTime_ViewAll, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View all user working time " },
+                    new SystemPermission{ Name =  PermissionNames.ManageWorkingTime_ViewByBranch, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View user working time by branch" },
                     new SystemPermission{ Name =  PermissionNames.ManageWorkingTime_ViewDetail, MultiTenancySides = MultiTenancySides.Host , DisplayName = "View my team member Working Time" },
                     new SystemPermission{ Name =  PermissionNames.ManageWorkingTime_Approval, MultiTenancySides = MultiTenancySides.Host , DisplayName = "Approval working time of member" },
                 }

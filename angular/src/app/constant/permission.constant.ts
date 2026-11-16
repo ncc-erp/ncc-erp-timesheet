@@ -246,6 +246,7 @@ export const PERMISSIONS_CONSTANT = {
     //manage working time   
     ViewManageWorkingTime: "ManageWorkingTime.ViewDetail",
     ViewAllManageWorkingTime: "ManageWorkingTime.ViewAll",
+    ViewByBranchManageWorkingTime: "ManageWorkingTime.ViewByBranch",
     ApprovalWorkingTime: "ManageWorkingTime.Approval",
 
     //over time setting

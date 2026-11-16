@@ -1,4 +1,4 @@
-﻿using Abp.Application.Services.Dto;
+using Abp.Application.Services.Dto;
 using Abp.UI;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -674,11 +674,15 @@ namespace Timesheet.Timesheets.Projects
         {
             var userId = AbpSession.UserId.Value;
             var isViewAllUserWorkingTime = await this.IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll);
+            var isViewBranch = await this.IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewByBranch);
+            var currentBranchId = GetBranchByCurrentUser();
 
             return await WorkScope.GetAll<ProjectUser>()
-                .Where(s => isViewAllUserWorkingTime || s.UserId == userId)
+                .Where(s => isViewAllUserWorkingTime 
+                            || s.UserId == userId 
+                            || (isViewBranch && s.User.BranchId == currentBranchId))
                 .Where(s => s.Project.Status == ProjectStatus.Active)
-                .Where(s => s.Type == ProjectUserType.PM)
+                .Where(s => s.Type == ProjectUserType.PM || (isViewBranch && s.User.BranchId == currentBranchId))
                 .Select(s => new GetProjectFilterDto
                 {
                     Id = s.ProjectId,
