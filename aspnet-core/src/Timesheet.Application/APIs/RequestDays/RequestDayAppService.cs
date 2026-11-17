@@ -380,7 +380,9 @@ namespace Timesheet.APIs.RequestDays
                 .Select(s => s.DayOff.Date)
                 .ToHashSet();
 
-            int MAX_ALLOW_REMOTE_DAY = int.TryParse(await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting), out var maxRemote) ? maxRemote : 1;
+            int MAX_ALLOW_REMOTE_DAY = 2;
+
+            int.TryParse(await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting), out MAX_ALLOW_REMOTE_DAY);
 
             var mapDateAtToRequestCount = new Dictionary<DateTime, int>();
 
@@ -498,43 +500,71 @@ namespace Timesheet.APIs.RequestDays
 
             var timesCanLateAndEarlyInWeek = await SettingManager.GetSettingValueAsync(AppSettingNames.TimesCanLateAndEarlyInWeek);
 
-            var requestWeekAts = input.Absences.Select(s => DateTimeUtils.FirstDayOfWeek(s.DateAt.Date));
-
-            var requestMonthAts = input.Absences.Select(s => s.DateAt.Month);
-
-            var requestYearAts = input.Absences.Select(s => s.DateAt.Year);
-
-            var allowInternToWorkRemote = await SettingManager.GetSettingValueAsync(AppSettingNames.AllowInternToWorkRemote);
-
-            if (allowInternToWorkRemote != "true" && requester.Type == Usertype.Internship && input.Type == RequestType.Remote)
+            if (string.IsNullOrWhiteSpace(input.Reason))
             {
-                throw new UserFriendlyException("Intern is not allowed to work REMOTE at this time");
+                throw new UserFriendlyException("Reason is require!");
             }
 
-            var allowProbationToWorkRemote = await SettingManager.GetSettingValueAsync(AppSettingNames.AllowProbationToWorkRemote);
-
-            if (allowProbationToWorkRemote != "true" && requester.Type == Usertype.ProbationaryStaff && input.Type == RequestType.Remote)
-            {
-                throw new UserFriendlyException("Probation is not allowed to work REMOTE at this time");
-            }
-
-            var userWorkMode = await WorkScope.GetAll<User>()
-                .Where(u => u.Id == userId)
-                .Select(u => u.WorkMode)
-                .FirstOrDefaultAsync();
-
-            if (userWorkMode == WorkMode.Office && input.Type == RequestType.WorkAtOffice)
+            if (requester.WorkMode == WorkMode.Office && input.Type == RequestType.WorkAtOffice)
             {
                 throw new UserFriendlyException("Office users cannot submit Work at Office requests.");
             }
-            if (userWorkMode == WorkMode.WFH && input.Type == RequestType.Remote)
+
+            if (requester.WorkMode == WorkMode.WFH && input.Type == RequestType.Remote)
             {
                 throw new UserFriendlyException("WFH users cannot submit Remote requests.");
             }
 
-            if (input.Type != RequestType.Remote && input.Type != RequestType.WorkAtOffice && string.IsNullOrEmpty(input.Reason))
+            int MAX_ALLOW_REMOTE_DAY = 0;
+            int penaltyDays = 0;
+            int officeDaysInAdvance = 7;
+            int wfhMaxOffice = 1;
+            int wfhDaysInAdvance = 7;
+
+            if (input.Type == RequestType.Remote)
             {
-                throw new UserFriendlyException("Reason is require!");
+                var allowInternToWorkRemote = await SettingManager.GetSettingValueAsync(AppSettingNames.AllowInternToWorkRemote);
+                if (allowInternToWorkRemote != "true" && requester.Type == Usertype.Internship)
+                {
+                    throw new UserFriendlyException("Intern is not allowed to work REMOTE at this time");
+                }
+
+                var allowProbationToWorkRemote = await SettingManager.GetSettingValueAsync(AppSettingNames.AllowProbationToWorkRemote);
+                if (allowProbationToWorkRemote != "true" && requester.Type == Usertype.ProbationaryStaff)
+                {
+                    throw new UserFriendlyException("Probation is not allowed to work REMOTE at this time");
+                }
+
+                var wfhSettingStr = await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting);
+                var officeDaysInAdvanceStr = await SettingManager.GetSettingValueAsync(AppSettingNames.OfficeDaysInAdvanceToRequestRemote);
+                officeDaysInAdvance = int.TryParse(officeDaysInAdvanceStr, out var oda) ? oda : 7;
+
+                bool isFullyRemote = await WorkScope.GetAll<UserWhitelist>()
+                    .Where(uw => uw.UserId == userId && !uw.IsDeleted)
+                    .AnyAsync(uw => uw.WhitelistSystem.Type == WhitelistType.FullyRemote && uw.WhitelistSystem.IsActive);
+
+                int officeMaxRemoteSetting = int.TryParse(wfhSettingStr, out var days) ? days : 1;
+                int wfhSettingDays = isFullyRemote ? 5 : officeMaxRemoteSetting;
+
+                var remoteBlacklistInfo = await WorkScope.GetAll<RemoteBlacklist>()
+                    .Where(b => b.UserId == userId && !b.IsDeleted)
+                    .Select(b => new { b.PenaltyDays })
+                    .FirstOrDefaultAsync();
+
+                penaltyDays = remoteBlacklistInfo?.PenaltyDays ?? 0;
+                MAX_ALLOW_REMOTE_DAY = Math.Max(0, wfhSettingDays - penaltyDays);
+            }
+            else if (input.Type == RequestType.WorkAtOffice)
+            {
+                var wfhMaxOfficeStr = await SettingManager.GetSettingValueAsync(AppSettingNames.WfhMaxOfficeDaysPerWeek);
+                var wfhDaysInAdvanceStr = await SettingManager.GetSettingValueAsync(AppSettingNames.WfhDaysInAdvanceToRequestOffice);
+                wfhMaxOffice = int.TryParse(wfhMaxOfficeStr, out var maxOff) ? maxOff : 1;
+                wfhDaysInAdvance = int.TryParse(wfhDaysInAdvanceStr, out var dAdv) ? dAdv : 7;
+            }
+            else if (input.Absences.Any(s => s.DateType == DayType.Custom))
+            {
+                var wfhSettingStr = await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting);
+                MAX_ALLOW_REMOTE_DAY = int.TryParse(wfhSettingStr, out var days) ? days : 1;
             }
 
             var requestDateAts = input.Absences.Select(s => s.DateAt.Date);
@@ -564,51 +594,19 @@ namespace Timesheet.APIs.RequestDays
                 .Select(s => s.DayOff.Date)
                 .ToHashSet();
 
-            bool isFullyRemote = await WorkScope.GetAll<UserWhitelist>()
-                .Where(uw => uw.UserId == userId && !uw.IsDeleted)
-                .AnyAsync(uw => uw.WhitelistSystem.Type == WhitelistType.FullyRemote && uw.WhitelistSystem.IsActive);
-
-            int officeMaxRemoteSetting = int.TryParse(await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting), out var days) ? days : 1;
-
-            int wfhSettingDays = isFullyRemote ? 5 : officeMaxRemoteSetting;
-
-            var remoteBlacklistInfo = await WorkScope.GetAll<RemoteBlacklist>()
-                .Where(b => b.UserId == userId && !b.IsDeleted)
-                .FirstOrDefaultAsync();
-
-            int penaltyDays = remoteBlacklistInfo != null ? remoteBlacklistInfo.PenaltyDays : 0;
-
-            int MAX_ALLOW_REMOTE_DAY = Math.Max(0, wfhSettingDays - penaltyDays);
+            var lastWeekAbsenceDates = input.Type == RequestType.Remote
+                ? await GetLastWeekAbsenceDatesAsync(input, userId)
+                : new List<DateTime>();
+            var weeklyRequestCounts = (input.Type == RequestType.Remote || input.Type == RequestType.WorkAtOffice)
+                ? await GetWeeklyRequestCountsAsync(input, userId)
+                : new Dictionary<DateTime, int>();
 
             var mapDateAtToRequestCount = new Dictionary<DateTime, int>();
-
             var today = DateTime.Now.Date;
-            var mondayThisWeek = DateTimeUtils.FirstDayOfWeek(today);
-            var mondayNextWeek = mondayThisWeek.AddDays(7);
-            var fridayNextWeek = mondayNextWeek.AddDays(4);
-            var saturdayThisWeek = mondayThisWeek.AddDays(5);
-
-            int officeDaysInAdvance = 7;
-            if (input.Type == RequestType.Remote)
-            {
-                var officeDaysInAdvanceStr = await SettingManager.GetSettingValueAsync(AppSettingNames.OfficeDaysInAdvanceToRequestRemote);
-                officeDaysInAdvance = int.TryParse(officeDaysInAdvanceStr, out var oda) ? oda : 7;
-            }
-
-            int wfhMaxOffice = 1;
-            int wfhDaysInAdvance = 7;
-            if (input.Type == RequestType.WorkAtOffice)
-            {
-                var wfhMaxOfficeStr = await SettingManager.GetSettingValueAsync(AppSettingNames.WfhMaxOfficeDaysPerWeek);
-                wfhMaxOffice = int.TryParse(wfhMaxOfficeStr, out var maxOff) ? maxOff : 1;
-
-                var wfhDaysInAdvanceStr = await SettingManager.GetSettingValueAsync(AppSettingNames.WfhDaysInAdvanceToRequestOffice);
-                wfhDaysInAdvance = int.TryParse(wfhDaysInAdvanceStr, out var dAdv) ? dAdv : 7;
-            }
 
             foreach (var abs in input.Absences)
             {
-                if (setDayOffSetting.Contains(abs.DateAt))
+                if (setDayOffSetting.Contains(abs.DateAt.Date))
                 {
                     throw new UserFriendlyException(string.Format("{0} is not a working day.", DateTimeUtils.ToString(abs.DateAt)));
                 }
@@ -657,111 +655,13 @@ namespace Timesheet.APIs.RequestDays
                     await WorkScope.GetRepo<AbsenceDayDetail>().DeleteAsync(rejectedAbsDetail.Id);
                 }
 
-
                 if (input.Type == RequestType.Remote)
                 {
-                    var hasPendingOrApprovedCustomOff = dbRequests.Any(s => s.Date == abs.DateAt.Date
-                        && s.Type == RequestType.Off
-                        && s.DateType == DayType.Custom
-                        && (s.Status == RequestStatus.Pending || s.Status == RequestStatus.Approved));
-                    if (hasPendingOrApprovedCustomOff)
-                    {
-                        throw new UserFriendlyException($"Cannot submit Remote request for {abs.DateAt:dd/MM/yyyy} due to existing Tardiness/Early request");
-                    }
-
-                    var startOfWeekContainRequest = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
-                    var previousMonday = startOfWeekContainRequest.AddDays(-7);
-                    var previousFriday = previousMonday.AddDays(4);
-
-                    var absenceDaysLastWeek = WorkScope.GetAll<AbsenceDayRequest>()
-                        .Join(WorkScope.GetAll<AbsenceDayDetail>(),
-                            r => r.Id,
-                            d => d.RequestId,
-                            (r, d) => new { Request = r, Detail = d })
-                        .Where(x => x.Request.UserId == userId)
-                        .Where(x => x.Detail.DateAt.Date >= previousMonday && x.Detail.DateAt.Date <= previousFriday)
-                        .Where(x => x.Request.Status == RequestStatus.Pending || x.Request.Status == RequestStatus.Approved)
-                        .Where(x => x.Request.Type == RequestType.Off || x.Request.Type == RequestType.Remote)
-                        .Select(x => x.Detail.DateAt.Date)
-                        .Distinct()
-                        .Count();
-
-                    var numberOfDayOffSettingsLastWeek = WorkScope.GetAll<DayOffSetting>()
-                        .Where(x => x.DayOff.Date >= previousMonday && x.DayOff.Date <= previousFriday)
-                        .Select(x => x.DayOff.Date)
-                        .Count();
-
-                    var threshold = Math.Max(0, MAX_ALLOW_REMOTE_DAY - numberOfDayOffSettingsLastWeek);
-                    bool rejectRemoteDueToLowWorkingDays = absenceDaysLastWeek > threshold;
-
-                    var monday = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
-                    var numberRemoteDayInWeek = 0;
-                    if (mapDateAtToRequestCount.ContainsKey(monday))
-                    {
-                        numberRemoteDayInWeek = mapDateAtToRequestCount[monday];
-                    }
-                    else
-                    {
-                        numberRemoteDayInWeek = CountRemoteDayOfUserInWeek(abs.DateAt, userId);
-                        mapDateAtToRequestCount.Add(monday, numberRemoteDayInWeek);
-                    }
-
-                    if ((abs.DateAt.Date - today).TotalDays < officeDaysInAdvance)
-                    {
-                        absencedayRequest.Status = RequestStatus.Rejected;
-                        abs.ErrorMessage = $"WFH request must be submitted at least {officeDaysInAdvance} day(s) in advance. The request has been automatically rejected and requires Branch Director approval.";
-                    }
-                    else if (numberRemoteDayInWeek > MAX_ALLOW_REMOTE_DAY - 1)
-                    {
-                        absencedayRequest.Status = RequestStatus.Rejected;
-                        if (penaltyDays > 0)
-                        {
-                            abs.ErrorMessage = $"Your maximum allowed remote days per week are reduced to {MAX_ALLOW_REMOTE_DAY} due to a penalty of {penaltyDays} day(s)";
-                        }
-                        else
-                        {
-                            abs.ErrorMessage = $"You have exceeded the maximum allowed remote days ({MAX_ALLOW_REMOTE_DAY} days) per week according to the policy";
-                        }
-                    }
-                    else if (rejectRemoteDueToLowWorkingDays)
-                    {
-                        absencedayRequest.Status = RequestStatus.Rejected;
-                        abs.ErrorMessage = $"Cannot submit Remote request for {abs.DateAt:dd/MM/yyyy} due to insufficient office working days in the previous week";
-                    }
-                    else
-                    {
-                        mapDateAtToRequestCount[monday] = numberRemoteDayInWeek + 1;
-                    }
+                    ApplyRemotePolicy(abs, absencedayRequest, dbRequests, setDayOffSetting, lastWeekAbsenceDates, weeklyRequestCounts, MAX_ALLOW_REMOTE_DAY, penaltyDays, officeDaysInAdvance, today);
                 }
-
-                if (input.Type == RequestType.WorkAtOffice)
+                else if (input.Type == RequestType.WorkAtOffice)
                 {
-                    var monday = DateTimeUtils.FirstDayOfWeek(abs.DateAt);
-                    var numberWorkAtOfficeInWeek = 0;
-                    if (mapDateAtToRequestCount.ContainsKey(monday))
-                    {
-                        numberWorkAtOfficeInWeek = mapDateAtToRequestCount[monday];
-                    }
-                    else
-                    {
-                        numberWorkAtOfficeInWeek = CountWorkAtOfficeDayOfUserInWeek(abs.DateAt, userId);
-                        mapDateAtToRequestCount.Add(monday, numberWorkAtOfficeInWeek);
-                    }
-
-                    if ((abs.DateAt.Date - today).TotalDays < wfhDaysInAdvance)
-                    {
-                        absencedayRequest.Status = RequestStatus.Rejected;
-                        abs.ErrorMessage = $"Work at Office request must be submitted at least {wfhDaysInAdvance} day(s) in advance. The request has been automatically rejected and requires Branch Director approval.";
-                    }
-                    else if (numberWorkAtOfficeInWeek > wfhMaxOffice - 1)
-                    {
-                        absencedayRequest.Status = RequestStatus.Rejected;
-                        abs.ErrorMessage = $"You have exceeded the maximum allowed Work at Office days ({wfhMaxOffice} days) per week according to the policy";
-                    }
-                    else
-                    {
-                        mapDateAtToRequestCount[monday] = numberWorkAtOfficeInWeek + 1;
-                    }
+                    ApplyWorkAtOfficePolicy(abs, absencedayRequest, weeklyRequestCounts, wfhMaxOffice, wfhDaysInAdvance, today);
                 }
 
                 if (abs.DateType == DayType.Custom)
@@ -855,6 +755,142 @@ namespace Timesheet.APIs.RequestDays
 
             await notify(requester, input);
             return input;
+        }
+
+        /// <summary>
+        /// Returns distinct previous-week (Mon-Fri) Off/Remote dates so ApplyRemotePolicy can check if the user worked enough office days last week.
+        /// </summary>
+        private async Task<List<DateTime>> GetLastWeekAbsenceDatesAsync(MyRequestDto input, long userId)
+        {
+            var distinctMondays = input.Absences.Select(a => DateTimeUtils.FirstDayOfWeek(a.DateAt.Date)).Distinct().ToList();
+            var minPrevMonday = distinctMondays.Min().AddDays(-7);
+            var maxPrevFriday = distinctMondays.Max().AddDays(-3);
+
+            return await WorkScope.GetAll<AbsenceDayRequest>()
+                .Join(WorkScope.GetAll<AbsenceDayDetail>(),
+                    r => r.Id,
+                    d => d.RequestId,
+                    (r, d) => new { Request = r, Detail = d })
+                .Where(x => x.Request.UserId == userId)
+                .Where(x => x.Detail.DateAt.Date >= minPrevMonday && x.Detail.DateAt.Date <= maxPrevFriday)
+                .Where(x => x.Request.Status == RequestStatus.Pending || x.Request.Status == RequestStatus.Approved)
+                .Where(x => x.Request.Type == RequestType.Off || x.Request.Type == RequestType.Remote)
+                .Select(x => x.Detail.DateAt.Date)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Returns a week-to-count map (keyed by Monday) of existing non-rejected requests so Remote/WorkAtOffice policies can enforce weekly quotas .
+        /// </summary>
+        private async Task<Dictionary<DateTime, int>> GetWeeklyRequestCountsAsync(MyRequestDto input, long userId)
+        {
+            var distinctMondays = input.Absences.Select(a => DateTimeUtils.FirstDayOfWeek(a.DateAt.Date)).Distinct().ToList();
+            var minMonday = distinctMondays.Min();
+            var maxSunday = distinctMondays.Max().AddDays(6);
+
+            var existingDates = await WorkScope.All<AbsenceDayDetail>()
+                .Where(s => s.Request.UserId == userId)
+                .Where(s => s.Request.Status != RequestStatus.Rejected)
+                .Where(s => s.DateAt.Date >= minMonday && s.DateAt.Date <= maxSunday)
+                .Where(s => input.Type == RequestType.Remote
+                    ? (s.Request.Type == RequestType.Remote || (s.Request.Type == RequestType.Off && s.DateType == DayType.Custom))
+                    : s.Request.Type == RequestType.WorkAtOffice)
+                .Select(s => s.DateAt.Date)
+                .Distinct()
+                .ToListAsync();
+
+            return distinctMondays.ToDictionary(
+                monday => monday,
+                monday => existingDates.Count(d => d >= monday && d <= monday.AddDays(6)));
+        }
+
+        /// <summary>
+        /// Checks Remote request conflicts and updates status/error message for a single absence date (advance notice, weekly quota, and previous-week office days) using preloaded data.
+        /// </summary>
+        private static void ApplyRemotePolicy(
+            AbsenceDayDetailDto abs,
+            AbsenceDayRequest request,
+            List<RequestInfoDto> dbRequests,
+            HashSet<DateTime> setDayOffSetting,
+            List<DateTime> lastWeekAbsenceDates,
+            Dictionary<DateTime, int> weeklyRequestCounts,
+            int maxAllowRemoteDay,
+            int penaltyDays,
+            int officeDaysInAdvance,
+            DateTime today)
+        {
+            var hasPendingOrApprovedCustomOff = dbRequests.Any(s => s.Date == abs.DateAt.Date
+                && s.Type == RequestType.Off
+                && s.DateType == DayType.Custom
+                && (s.Status == RequestStatus.Pending || s.Status == RequestStatus.Approved));
+            if (hasPendingOrApprovedCustomOff)
+            {
+                throw new UserFriendlyException($"Cannot submit Remote request for {abs.DateAt:dd/MM/yyyy} due to existing Tardiness/Early request");
+            }
+
+            var monday = DateTimeUtils.FirstDayOfWeek(abs.DateAt.Date);
+            var previousMonday = monday.AddDays(-7);
+            var previousFriday = monday.AddDays(-3);
+
+            int absenceDaysLastWeek = lastWeekAbsenceDates.Count(d => d >= previousMonday && d <= previousFriday);
+            int numberOfDayOffSettingsLastWeek = setDayOffSetting.Count(d => d >= previousMonday && d <= previousFriday);
+            int threshold = Math.Max(0, maxAllowRemoteDay - numberOfDayOffSettingsLastWeek);
+            bool rejectRemoteDueToLowWorkingDays = absenceDaysLastWeek > threshold;
+
+            int numberRemoteDayInWeek = weeklyRequestCounts.TryGetValue(monday, out var count) ? count : 0;
+
+            if ((abs.DateAt.Date - today).TotalDays < officeDaysInAdvance)
+            {
+                request.Status = RequestStatus.Rejected;
+                abs.ErrorMessage = $"WFH request must be submitted at least {officeDaysInAdvance} day(s) in advance. The request has been automatically rejected and requires Branch Director approval.";
+            }
+            else if (numberRemoteDayInWeek > maxAllowRemoteDay - 1)
+            {
+                request.Status = RequestStatus.Rejected;
+                abs.ErrorMessage = penaltyDays > 0
+                    ? $"Your maximum allowed remote days per week are reduced to {maxAllowRemoteDay} due to a penalty of {penaltyDays} day(s)"
+                    : $"You have exceeded the maximum allowed remote days ({maxAllowRemoteDay} days) per week according to the policy";
+            }
+            else if (rejectRemoteDueToLowWorkingDays)
+            {
+                request.Status = RequestStatus.Rejected;
+                abs.ErrorMessage = $"Cannot submit Remote request for {abs.DateAt:dd/MM/yyyy} due to insufficient office working days in the previous week";
+            }
+            else
+            {
+                weeklyRequestCounts[monday] = numberRemoteDayInWeek + 1;
+            }
+        }
+
+        /// <summary>
+        /// Updates status/error message for a single WorkAtOffice absence date (advance notice and weekly quota) using preloaded weekly counts.
+        /// </summary>
+        private static void ApplyWorkAtOfficePolicy(
+            AbsenceDayDetailDto abs,
+            AbsenceDayRequest request,
+            Dictionary<DateTime, int> weeklyRequestCounts,
+            int wfhMaxOffice,
+            int wfhDaysInAdvance,
+            DateTime today)
+        {
+            var monday = DateTimeUtils.FirstDayOfWeek(abs.DateAt.Date);
+            int numberWorkAtOfficeInWeek = weeklyRequestCounts.TryGetValue(monday, out var count) ? count : 0;
+
+            if ((abs.DateAt.Date - today).TotalDays < wfhDaysInAdvance)
+            {
+                request.Status = RequestStatus.Rejected;
+                abs.ErrorMessage = $"Work at Office request must be submitted at least {wfhDaysInAdvance} day(s) in advance. The request has been automatically rejected and requires Branch Director approval.";
+            }
+            else if (numberWorkAtOfficeInWeek > wfhMaxOffice - 1)
+            {
+                request.Status = RequestStatus.Rejected;
+                abs.ErrorMessage = $"You have exceeded the maximum allowed Work at Office days ({wfhMaxOffice} days) per week according to the policy";
+            }
+            else
+            {
+                weeklyRequestCounts[monday] = numberWorkAtOfficeInWeek + 1;
+            }
         }
         private void validateRequests(long userId, MyRequestDto input, IEnumerable<RequestInfoDto> dbRequests)
         {
@@ -1036,21 +1072,6 @@ namespace Timesheet.APIs.RequestDays
                 .Include(s => s.Request)
                 .Where(s => s.Request.UserId == userId)
                 .Where(s => s.Request.Type == RequestType.Remote || (s.Request.Type == RequestType.Off && s.DateType == DayType.Custom))
-                .Where(s => s.Request.Status != RequestStatus.Rejected)
-                .Where(s => s.DateAt >= startDayOfWeek && s.DateAt.Date <= endDayOfWeek)
-                .Select(s => s.DateAt.Date)
-                .Distinct()
-                .Count();
-        }
-
-        private int CountWorkAtOfficeDayOfUserInWeek(DateTime day, long userId)
-        {
-            DateTime startDayOfWeek = DateTimeUtils.FirstDayOfWeek(day);
-            DateTime endDayOfWeek = DateTimeUtils.LastDayOfWeek(day);
-
-            return WorkScope.All<AbsenceDayDetail>()
-                .Where(s => s.Request.UserId == userId)
-                .Where(s => s.Request.Type == RequestType.WorkAtOffice)
                 .Where(s => s.Request.Status != RequestStatus.Rejected)
                 .Where(s => s.DateAt >= startDayOfWeek && s.DateAt.Date <= endDayOfWeek)
                 .Select(s => s.DateAt.Date)
@@ -1402,22 +1423,6 @@ namespace Timesheet.APIs.RequestDays
             if (requestDetail.Request.UserId != AbpSession.UserId.Value)
             {
                 throw new UserFriendlyException("The request is not your");
-            }
-
-            if (requestDetail.Request.Type == RequestType.Off)
-            {
-                var hasActiveHalfDayRemoteOrOffice = await WorkScope.GetAll<AbsenceDayDetail>()
-                    .Where(d => d.Request.UserId == AbpSession.UserId.Value
-                        && d.DateAt.Date == requestDetail.DateAt.Date
-                        && (d.Request.Type == RequestType.Remote || d.Request.Type == RequestType.WorkAtOffice)
-                        && (d.DateType == DayType.Morning || d.DateType == DayType.Afternoon)
-                        && d.Request.Status != RequestStatus.Rejected)
-                    .AnyAsync();
-
-                if (hasActiveHalfDayRemoteOrOffice)
-                {
-                    throw new UserFriendlyException($"Cannot cancel Off request because there is a half-day Remote/Work at Office request on {requestDetail.DateAt:dd/MM/yyyy}. Please cancel the Remote/Work at Office request first.");
-                }
             }
 
             requestDetail.Request.Status = RequestStatus.Rejected;
