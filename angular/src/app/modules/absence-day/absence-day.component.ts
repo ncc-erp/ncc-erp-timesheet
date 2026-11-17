@@ -154,10 +154,10 @@ export class AbsenceDayComponent extends AppComponentBase implements OnInit {
       this.refresh.next();
       let sDate = moment(new Date(this.year, this.month - 1, 1)).format("YYYY-MM-DD");
       let tDate = moment(new Date(this.year, this.month + 2, 0)).format("YYYY-MM-DD")
-      if (this.absentDayType === this.APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"]) {
+      if (this.absentDayType === 4) {
         this.dayType = 4;
         typeAbsenceDay = 0;
-        this.absentDayType = this.APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"];
+        this.absentDayType = 4;
       }
       this.absenceDayService.getAllAbsenceReqs(sDate, tDate, typeAbsenceDay, this.dayType).subscribe(resp => {
         this.absenceReqs = resp.result as AbsenceRequestDto[];

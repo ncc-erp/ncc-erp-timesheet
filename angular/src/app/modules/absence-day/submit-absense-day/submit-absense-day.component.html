@@ -7,18 +7,16 @@
         <mat-option *ngFor="let type of dayOffTypes" [value]="type.id">{{type.name}}</mat-option>
       </mat-select>
     </mat-form-field>
-    <div *ngIf="reason.errors && (reason.dirty || reason.touched) && data.type != APP_CONSTANT.DayAbsenceType.Remote && data.type != APP_CONSTANT.DayAbsenceType.WorkAtOffice"
+    <div *ngIf="reason.errors && (reason.dirty || reason.touched)"
       class="text-danger">
       <div [hidden]="!reason.errors.required">
-        <ng-container *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Off"> Reason is required!</ng-container>
-        <ng-container *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Onsite"> Note is required!</ng-container>
+        Reason is required!
       </div>
     </div>
     <mat-form-field appearance="outline">
-      <mat-label *ngIf="data.type==APP_CONSTANT.DayAbsenceType.Off">Reason</mat-label>
-      <mat-label *ngIf="data.type!=APP_CONSTANT.DayAbsenceType.Off">Note</mat-label>
+      <mat-label>Reason</mat-label>
       <textarea name="reason" matInput [(ngModel)]="absenceDayReq.reason"
-        [required]="data.type != APP_CONSTANT.DayAbsenceType.Remote && data.type != APP_CONSTANT.DayAbsenceType.WorkAtOffice ? true:false" #reason="ngModel"
+        required #reason="ngModel"
         cdkFocusInitial></textarea>
     </mat-form-field>
     <div class="text-center">

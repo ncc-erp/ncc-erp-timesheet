@@ -81,7 +81,7 @@ export class SubmitAbsenseDayComponent extends AppComponentBase implements OnIni
     }
 
     submitReq() {
-        if(this.data.type != this.APP_CONSTANT.DayAbsenceType.Remote && this.data.type != this.APP_CONSTANT.DayAbsenceType.WorkAtOffice && !this.absenceDayReq.reason.trim())
+        if (!this.absenceDayReq.reason || !this.absenceDayReq.reason.trim())
         {
             abp.message.error('Reason is require');
             return;
