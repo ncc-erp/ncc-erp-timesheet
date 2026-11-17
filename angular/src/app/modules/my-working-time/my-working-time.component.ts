@@ -75,7 +75,7 @@ export class MyWorkingTimeComponent extends AppComponentBase implements OnInit {
       afternoonStartTime: infor.afternoonStartTime,
       afternoonEndTime: infor.afternoonEndTime,
       afternoonWorkingTime: infor.afternoonWorkingTime,
-      workMode: infor.workMode !== undefined ? infor.workMode : this.currentWorkingTime.workMode,
+      workMode: infor.workMode,
       status: infor.status
     } as RegisterInforDto;
     const dialogRef = this.dialog.open(RegisterWorkingTimeComponent, {

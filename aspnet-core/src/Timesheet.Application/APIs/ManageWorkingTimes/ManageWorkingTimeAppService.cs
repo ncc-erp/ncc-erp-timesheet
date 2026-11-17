@@ -30,10 +30,7 @@ using static Ncc.Entities.Enum.StatusEnum;
 
 namespace Timesheet.APIs.ManageWorkingTimes
 {
-    [AbpAuthorize(
-        Ncc.Authorization.PermissionNames.ManageWorkingTime,
-        Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll,
-        Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewByBranch)]
+    [AbpAuthorize(Ncc.Authorization.PermissionNames.ManageWorkingTime)]
     public class ManageWorkingTimeAppService : AppServiceBase
     {
         private readonly IBackgroundJobManager _backgroundJobManager;
@@ -47,29 +44,22 @@ namespace Timesheet.APIs.ManageWorkingTimes
             _mezonService = mezonService;
         }
 
-        [AbpAuthorize(
-            Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewDetail,
-            Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll,
-            Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewByBranch)]
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewByBranch)]
         [HttpPost]
         public async Task<List<UserHistoryWorkingTime>> GetAll(FilterDto input)
         {
             var searchText = Regex.Replace(input.userName.Trim().ToLower(), @"\s+", " ");
-            var isViewAll = await IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll);
-            var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewByBranch);
             var currentBranchId = GetBranchByCurrentUser();
-
-            var qProjectUser = WorkScope.GetAll<ProjectUser>()
-                .Where(s => input.projectIds.Contains(s.ProjectId))
-                .Where(s => s.Type != ProjectUserType.DeActive)
-                .Where(s => s.User.IsActive);
-
-            if (!isViewAll && isViewBranch)
+            if (!currentBranchId.HasValue || input.projectIds == null || !input.projectIds.Any())
             {
-                qProjectUser = qProjectUser.Where(s => s.User.BranchId == currentBranchId);
+                return new List<UserHistoryWorkingTime>();
             }
 
-            var projectMember = await qProjectUser
+            var projectMember = await WorkScope.GetAll<ProjectUser>()
+                .Where(s => input.projectIds.Contains(s.ProjectId))
+                .Where(s => s.Type != ProjectUserType.DeActive)
+                .Where(s => s.User.IsActive)
+                .Where(s => s.User.BranchId == currentBranchId)
                 .Select(s => s.UserId)
                 .Distinct()
                 .ToListAsync();
@@ -126,23 +116,14 @@ namespace Timesheet.APIs.ManageWorkingTimes
                 .Select(s => new { Entity = s, s.User.FullName, s.User.BranchId })
                 .FirstOrDefaultAsync();
 
+            if (itemExt == null)
+            {
+                throw new UserFriendlyException("Working time request not found");
+            }
+
             var item = itemExt.Entity;
 
-            var isViewAll = await IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll);
-            if (!isViewAll)
-            {
-                var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewByBranch);
-                if (!isViewBranch)
-                {
-                    throw new UserFriendlyException("Only the Branch Director can approve working time requests!");
-                }
-
-                var currentBranchId = GetBranchByCurrentUser();
-                if (itemExt.BranchId != currentBranchId)
-                {
-                    throw new UserFriendlyException($"Only the Branch Director of this branch can approve working time of user {itemExt.FullName}!");
-                }
-            }
+            await ValidateBranchApprovePermission(itemExt.FullName, itemExt.BranchId);
 
             item.Status = RequestStatus.Approved;
             await WorkScope.UpdateAsync<HistoryWorkingTime>(item);
@@ -245,6 +226,11 @@ namespace Timesheet.APIs.ManageWorkingTimes
                 .Select(s => new { Entity = s, s.User.FullName, s.User.BranchId })
                 .FirstOrDefaultAsync();
 
+            if (itemExt == null)
+            {
+                throw new UserFriendlyException("Working time request not found");
+            }
+
             var item = itemExt.Entity;
 
             if (item.Status == RequestStatus.Approved && item.ApplyDate.Date <= DateTime.Now.Date)
@@ -252,21 +238,7 @@ namespace Timesheet.APIs.ManageWorkingTimes
                 throw new UserFriendlyException("This working time is approved");
             }
 
-            var isViewAll = await IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll);
-            if (!isViewAll)
-            {
-                var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewByBranch);
-                if (!isViewBranch)
-                {
-                    throw new UserFriendlyException("Only the Branch Director can reject working time requests!");
-                }
-
-                var currentBranchId = GetBranchByCurrentUser();
-                if (itemExt.BranchId != currentBranchId)
-                {
-                    throw new UserFriendlyException($"Only the Branch Director of this branch can reject working time of user {itemExt.FullName}!");
-                }
-            }
+            await ValidateBranchApprovePermission(itemExt.FullName, itemExt.BranchId);
 
             item.Status = RequestStatus.Rejected;
             await WorkScope.UpdateAsync<HistoryWorkingTime>(item);
@@ -396,6 +368,21 @@ namespace Timesheet.APIs.ManageWorkingTimes
                 PMs = queryPMs.ContainsKey(s.ProjectId) ? queryPMs[s.ProjectId] : new List<NotifyUserInfoDto>(),
             }).ToListAsync();
             return result;
+        }
+
+        private async System.Threading.Tasks.Task ValidateBranchApprovePermission(string targetFullName, long? targetBranchId)
+        {
+            var isViewBranch = await IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewByBranch);
+            if (!isViewBranch)
+            {
+                throw new UserFriendlyException("You do not have permission to view working time by branch!");
+            }
+
+            var currentBranchId = GetBranchByCurrentUser();
+            if (!currentBranchId.HasValue || targetBranchId != currentBranchId)
+            {
+                throw new UserFriendlyException($"You can only approve or reject working time of users in your branch ({targetFullName})!");
+            }
         }
     }
 }
