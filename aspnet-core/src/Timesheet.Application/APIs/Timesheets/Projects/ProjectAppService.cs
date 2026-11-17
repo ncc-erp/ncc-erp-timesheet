@@ -672,17 +672,16 @@ namespace Timesheet.Timesheets.Projects
         [AbpAuthorize]
         public async Task<List<GetProjectFilterDto>> GetProjectWorkingTimePM()
         {
-            var userId = AbpSession.UserId.Value;
-            var isViewAllUserWorkingTime = await this.IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewAll);
             var isViewBranch = await this.IsGrantedAsync(Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewByBranch);
             var currentBranchId = GetBranchByCurrentUser();
+            if (!isViewBranch || !currentBranchId.HasValue)
+            {
+                return new List<GetProjectFilterDto>();
+            }
 
             return await WorkScope.GetAll<ProjectUser>()
-                .Where(s => isViewAllUserWorkingTime 
-                            || s.UserId == userId 
-                            || (isViewBranch && s.User.BranchId == currentBranchId))
                 .Where(s => s.Project.Status == ProjectStatus.Active)
-                .Where(s => s.Type == ProjectUserType.PM || (isViewBranch && s.User.BranchId == currentBranchId))
+                .Where(s => s.Type != ProjectUserType.DeActive && s.User.IsActive && s.User.BranchId == currentBranchId)
                 .Select(s => new GetProjectFilterDto
                 {
                     Id = s.ProjectId,
