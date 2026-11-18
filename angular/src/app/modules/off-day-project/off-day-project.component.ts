@@ -245,12 +245,12 @@ export class OffDayProjectComponent extends AppComponentBase implements OnInit {
       this.dayOffType = APP_CONSTANT.FILTER_DEFAULT.All;
       this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
     }
-    if (this.absentDayType === APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"]) {
+    if (this.absentDayType === 4) {
       this.dayType = 4;
       typeAbsenceDay = 0;
-      this.absentDayType = APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"];
+      this.absentDayType = 4;
     }
-    if (this.previousAbsentDayType === APP_CONSTANT.DayAbsenceType["Đi muộn Về sớm"] && this.absentDayType === APP_CONSTANT.DayAbsenceType["Off"]) {
+    if (this.previousAbsentDayType === 4 && this.absentDayType === APP_CONSTANT.DayAbsenceType["Off"]) {
       this.dayType = APP_CONSTANT.FILTER_DEFAULT.All;
     }
     this.previousAbsentDayType = this.absentDayType;
