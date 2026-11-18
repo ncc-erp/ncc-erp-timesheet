@@ -1,4 +1,4 @@
-﻿using Abp.Authorization;
+using Abp.Authorization;
 using Abp.Collections.Extensions;
 using Abp.Configuration;
 using Abp.Domain.Uow;
@@ -48,82 +48,95 @@ namespace Timesheet.APIs.Public
         {
             var targetDate = date.HasValue ? date.Value.Date : DateTimeUtils.GetNow().Date;
 
-            var remoteRequests = await WorkScope.GetAll<AbsenceDayDetail>()
-                .Where(s => s.Request.Status != RequestStatus.Rejected)
-                .Where(s => s.Request.Type == RequestType.Remote)
-                .Where(s => s.DateAt == targetDate)
-                .Select(s => new UserWorkFromHomeDto
+            var dayDetails = await WorkScope.GetAll<AbsenceDayDetail>()
+                .Where(s => s.DateAt == targetDate && s.Request.Status != RequestStatus.Rejected)
+                .Where(s => s.Request.Type == RequestType.Remote
+                         || (s.Request.User.IsActive
+                             && s.Request.User.WorkMode == WorkMode.WFH
+                             && s.DateType != DayType.Custom
+                             && (s.Request.Type == RequestType.WorkAtOffice
+                                 || s.Request.Type == RequestType.Off
+                                 || s.Request.Type == RequestType.Onsite)))
+                .Select(s => new
                 {
                     UserId = s.Request.UserId,
                     EmailAddress = s.Request.User.EmailAddress,
-                    DateAt = targetDate,
-                    Status = Enum.GetName(typeof(RequestStatus), s.Request.Status),
+                    Status = s.Request.Status,
+                    RequestType = s.Request.Type,
                     CreationTime = s.CreationTime,
                     DateType = s.DateType
-                }).ToListAsync();
+                })
+                .ToListAsync();
 
-            var remoteUserIds = remoteRequests.Select(r => r.UserId).ToHashSet();
+            var result = dayDetails
+                .Where(d => d.RequestType == RequestType.Remote)
+                .Select(d => new UserWorkFromHomeDto
+                {
+                    UserId = d.UserId,
+                    EmailAddress = d.EmailAddress,
+                    DateAt = targetDate,
+                    Status = d.Status.ToString(),
+                    CreationTime = d.CreationTime,
+                    DateType = d.DateType
+                })
+                .ToList();
 
             var wfhUsers = await WorkScope.GetAll<User>()
-                .Where(u => u.IsActive && u.WorkMode == WorkMode.WFH && !remoteUserIds.Contains(u.Id))
+                .Where(u => u.IsActive && u.WorkMode == WorkMode.WFH)
                 .Select(u => new { u.Id, u.EmailAddress, u.CreationTime })
                 .ToListAsync();
 
-            if (wfhUsers.Any())
+            if (!wfhUsers.Any())
             {
-                var wfhUserIds = wfhUsers.Select(u => u.Id).ToList();
+                return result;
+            }
 
-                var nonWfhDetails = await WorkScope.GetAll<AbsenceDayDetail>()
-                    .Where(s => s.DateAt == targetDate)
-                    .Where(s => s.Request.Status != RequestStatus.Rejected)
-                    .Where(s => wfhUserIds.Contains(s.Request.UserId))
-                    .Where(s => s.Request.Type == RequestType.WorkAtOffice
-                             || s.Request.Type == RequestType.Off
-                             || s.Request.Type == RequestType.Onsite)
-                    .Where(s => s.DateType != DayType.Custom)
-                    .Select(s => new { s.Request.UserId, s.DateType })
-                    .ToListAsync();
+            var remoteUserIds = result.Select(r => r.UserId).ToHashSet();
+            var nonWfhDayTypesByUser = dayDetails
+                .Where(d => d.RequestType != RequestType.Remote)
+                .ToLookup(d => d.UserId, d => d.DateType);
 
-                var dictNonWfhByUser = nonWfhDetails
-                    .GroupBy(x => x.UserId)
-                    .ToDictionary(g => g.Key, g => g.Select(x => x.DateType).ToList());
-
-                foreach (var u in wfhUsers)
+            foreach (var u in wfhUsers)
+            {
+                if (remoteUserIds.Contains(u.Id))
                 {
-                    DayType? wfhDayType = DayType.Fullday;
-                    if (dictNonWfhByUser.TryGetValue(u.Id, out var dayTypes))
-                    {
-                        if (dayTypes.Contains(DayType.Fullday) ||
-                            (dayTypes.Contains(DayType.Morning) && dayTypes.Contains(DayType.Afternoon)))
-                        {
-                            wfhDayType = null;
-                        }
-                        else if (dayTypes.Contains(DayType.Morning))
-                        {
-                            wfhDayType = DayType.Afternoon;
-                        }
-                        else if (dayTypes.Contains(DayType.Afternoon))
-                        {
-                            wfhDayType = DayType.Morning;
-                        }
-                    }
+                    continue;
+                }
 
-                    if (wfhDayType.HasValue)
+                DayType? wfhDayType = DayType.Fullday;
+                if (nonWfhDayTypesByUser.Contains(u.Id))
+                {
+                    var dayTypes = nonWfhDayTypesByUser[u.Id];
+                    if (dayTypes.Contains(DayType.Fullday) ||
+                        (dayTypes.Contains(DayType.Morning) && dayTypes.Contains(DayType.Afternoon)))
                     {
-                        remoteRequests.Add(new UserWorkFromHomeDto
-                        {
-                            UserId = u.Id,
-                            EmailAddress = u.EmailAddress,
-                            DateAt = targetDate,
-                            Status = Enum.GetName(typeof(RequestStatus), RequestStatus.Approved),
-                            CreationTime = u.CreationTime,
-                            DateType = wfhDayType.Value
-                        });
+                        wfhDayType = null;
                     }
+                    else if (dayTypes.Contains(DayType.Morning))
+                    {
+                        wfhDayType = DayType.Afternoon;
+                    }
+                    else if (dayTypes.Contains(DayType.Afternoon))
+                    {
+                        wfhDayType = DayType.Morning;
+                    }
+                }
+
+                if (wfhDayType.HasValue)
+                {
+                    result.Add(new UserWorkFromHomeDto
+                    {
+                        UserId = u.Id,
+                        EmailAddress = u.EmailAddress,
+                        DateAt = targetDate,
+                        Status = nameof(RequestStatus.Approved),
+                        CreationTime = u.CreationTime,
+                        DateType = wfhDayType.Value
+                    });
                 }
             }
 
-            return remoteRequests;
+            return result;
         }
 
         public async Task<List<WorkingStatusUserDto>> GetAllUserLeaveDay(DateTime? date)
