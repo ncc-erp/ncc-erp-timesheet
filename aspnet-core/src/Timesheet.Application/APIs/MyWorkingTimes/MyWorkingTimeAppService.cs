@@ -1,7 +1,14 @@
-﻿using Abp.BackgroundJobs;
+using Abp.Authorization;
+using Abp.Authorization.Roles;
+using Abp.Authorization.Users;
+using Abp.AutoMapper;
+using Abp.BackgroundJobs;
 using Abp.UI;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Ncc;
+using Ncc.Authorization.Roles;
 using Ncc.Authorization.Users;
 using Ncc.Configuration;
 using Ncc.Users.Dto;
@@ -16,14 +23,10 @@ using Timesheet.Entities;
 using Timesheet.Extension;
 using System.Text.RegularExpressions;
 using static Ncc.Entities.Enum.StatusEnum;
-using Abp.Authorization;
 using Timesheet.DomainServices.Dto;
-using JetBrains.Annotations;
-using Abp.AutoMapper;
 using Timesheet.Uitls;
 using Timesheet.APIs.MyAbsenceDays.Dto;
 using Ncc.Entities;
-using Microsoft.EntityFrameworkCore;
 using Ncc.IoC;
 using Timesheet.Services.Komu;
 using Timesheet.Services.Mezon;
@@ -55,7 +58,8 @@ namespace Timesheet.APIs.MyWorkingTimes
                 AfternoonWorkingTime = user.AfternoonWorking.Value,
                 MorningEndTime = user.MorningEndAt,
                 MorningStartTime = user.MorningStartAt,
-                MorningWorkingTime = user.MorningWorking.Value
+                MorningWorkingTime = user.MorningWorking.Value,
+                WorkMode = user.WorkMode
             };
         }
 
@@ -111,6 +115,7 @@ namespace Timesheet.APIs.MyWorkingTimes
             data.AfternoonEndTime = newData.AfternoonEndTime;
             data.AfternoonWorkingTime = newData.AfternoonWorkingTime;
             data.ApplyDate = newData.ApplyDate;
+            data.WorkMode = newData.WorkMode;
             data.Status = RequestStatus.Pending;
             newData.Id = await WorkScope.GetRepo<HistoryWorkingTime>().InsertAndGetIdAsync(data);
 
@@ -137,6 +142,7 @@ namespace Timesheet.APIs.MyWorkingTimes
                     AfternoonEndTime = h.AfternoonEndTime,
                     AfternoonWorkingTime = h.AfternoonWorkingTime,
                     ApplyDate = h.ApplyDate,
+                    WorkMode = h.WorkMode,
                     ReqestTime = h.CreationTime,
                     Status = h.Status
                 })
@@ -202,6 +208,7 @@ namespace Timesheet.APIs.MyWorkingTimes
             data.AfternoonEndTime = newData.AfternoonEndTime;
             data.AfternoonWorkingTime = newData.AfternoonWorkingTime;
             data.ApplyDate = newData.ApplyDate;
+            data.WorkMode = newData.WorkMode;
             data.Status = RequestStatus.Pending;
             data.CreationTime = DateTime.Now;
 
@@ -220,7 +227,7 @@ namespace Timesheet.APIs.MyWorkingTimes
 
 
             await notifyKomuWhenSubmitRequest(requester, input, receivers);
-            await notifyKomuWhenSubmitRequestToUser(requester, input, receivers);
+            await notifyKomuWhenSubmitRequestToUser(requester, input);
         }
 
         private async System.Threading.Tasks.Task notifyKomuWhenSubmitRequest(NotifyUserInfoDto requester, ChangeWorkingTimeDto input, List<ProjectPMDto> receivers)
@@ -268,53 +275,108 @@ namespace Timesheet.APIs.MyWorkingTimes
                 }
             }
         }
-        private async System.Threading.Tasks.Task notifyKomuWhenSubmitRequestToUser(NotifyUserInfoDto requester, ChangeWorkingTimeDto input, List<ProjectPMDto> receivers)
+        private async System.Threading.Tasks.Task notifyKomuWhenSubmitRequestToUser(NotifyUserInfoDto requester, ChangeWorkingTimeDto input)
         {
-            var user = await WorkScope.GetAsync<User>(requester.UserId);
-            var userInfo = new
+            var enableNotify = await SettingManager.GetSettingValueForApplicationAsync(AppSettingNames.SendKomuRequest);
+            if (enableNotify != "true")
             {
-                user.FullName,
-                user.EmailAddress,
-                user.KomuUserId
-            };
+                return;
+            }
 
+            var user = await WorkScope.GetAsync<User>(requester.UserId);
+            if (!user.BranchId.HasValue)
+            {
+                return;
+            }
+
+            var approverUserNames = await GetBranchWorkingTimeApproverUserNames(user.BranchId.Value);
+            if (!approverUserNames.Any())
+            {
+                return;
+            }
+
+            var workModeText = input.WorkMode == WorkMode.WFH ? "WFH" : "Work at Office";
             var userMessage = new StringBuilder();
-            userMessage.AppendLine($"**{userInfo?.FullName}** ({userInfo?.EmailAddress}) has sent a request to change working time");
+            userMessage.AppendLine($"**{user.FullName}** ({user.EmailAddress}) has sent a request to change working time");
             userMessage.AppendLine("```");
             userMessage.AppendLine($"Morning: {input.MorningStartTime} - {input.MorningEndTime}");
             userMessage.AppendLine($"Afternoon: {input.AfternoonStartTime} - {input.AfternoonEndTime}");
+            userMessage.AppendLine($"Work mode: {workModeText}");
             userMessage.AppendLine($"Apply date: {input.ApplyDate.ToString("dd/MM/yyyy")}");
             userMessage.AppendLine("```");
 
-            var alreadySentToPMIds = new HashSet<long>();
-            foreach (var project in receivers)
+            foreach (var approverUserName in approverUserNames)
             {
-                if (!project.IsNoticeKMRequestChangeWorkingTime)
-                {
-                    continue;
-                }
-
-                foreach (var pm in project.PMs)
-                {
-                    if (alreadySentToPMIds.Contains(pm.UserId))
-                    {
-                        continue;
-                    }
-
-                    if (string.IsNullOrWhiteSpace(pm?.EmailAddress))
-                    {
-                        continue;
-                    }
-
-                    if (string.IsNullOrWhiteSpace(pm.UserName))
-                    {
-                        continue;
-                    }
-
-                    _komuService.SendSimpleNotificationToUser(userMessage.ToString(), pm.UserName);
-                    alreadySentToPMIds.Add(pm.UserId);
-                }
+                _komuService.SendSimpleNotificationToUser(userMessage.ToString(), approverUserName);
             }
+        }
+
+        private async Task<List<string>> GetBranchWorkingTimeApproverUserNames(long branchId)
+        {
+            var requiredPermissions = new[]
+            {
+                Ncc.Authorization.PermissionNames.ManageWorkingTime_ViewByBranch,
+                Ncc.Authorization.PermissionNames.ManageWorkingTime_Approval
+            };
+
+            var branchUsers = await WorkScope.GetAll<User>()
+                .Where(u => u.IsActive && u.BranchId == branchId)
+                .Select(u => new { u.Id, u.UserName, u.EmailAddress })
+                .ToListAsync();
+
+            if (!branchUsers.Any())
+            {
+                return new List<string>();
+            }
+
+            var rolePermissions = await (
+                from rp in WorkScope.GetAll<RolePermissionSetting, long>()
+                join r in WorkScope.GetAll<Role, int>() on rp.RoleId equals r.Id
+                where rp.IsGranted && requiredPermissions.Contains(rp.Name)
+                select new { rp.RoleId, rp.Name }
+            ).ToListAsync();
+
+            var branchUserIds = branchUsers.Select(u => u.Id).ToList();
+
+            var userPermissions = await WorkScope.GetAll<UserPermissionSetting, long>()
+                .Where(up => branchUserIds.Contains(up.UserId) && requiredPermissions.Contains(up.Name))
+                .Select(up => new { up.UserId, up.Name, up.IsGranted })
+                .ToListAsync();
+
+            var userRoles = await WorkScope.GetAll<UserRole>()
+                .Where(ur => branchUserIds.Contains(ur.UserId))
+                .Select(ur => new { ur.UserId, ur.RoleId })
+                .ToListAsync();
+
+            var rolePermsByRole = rolePermissions
+                .GroupBy(x => x.RoleId)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.Name).ToHashSet());
+
+            var userPermsByUser = userPermissions
+                .GroupBy(x => x.UserId)
+                .ToDictionary(g => g.Key, g => g.GroupBy(p => p.Name).ToDictionary(pg => pg.Key, pg => pg.Last().IsGranted));
+
+            var rolesByUser = userRoles
+                .GroupBy(x => x.UserId)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.RoleId).ToList());
+
+            bool HasPermission(long targetUserId, string permName)
+            {
+                if (userPermsByUser.TryGetValue(targetUserId, out var uPerms) && uPerms.TryGetValue(permName, out var granted))
+                {
+                    return granted;
+                }
+
+                return rolesByUser.TryGetValue(targetUserId, out var rIds)
+                    && rIds.Any(rId => rolePermsByRole.TryGetValue(rId, out var rPerms) && rPerms.Contains(permName));
+            }
+
+            return branchUsers
+                .Where(u => requiredPermissions.All(p => HasPermission(u.Id, p)))
+                .Select(u => !string.IsNullOrWhiteSpace(u.EmailAddress) ? u.EmailAddress.Split('@')[0] : u.UserName)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Distinct()
+                .ToList();
         }
 
         private void processAlreadySentToPMs(HashSet<long> alreadySentToPMIds, List<NotifyUserInfoDto> PMs)
