@@ -283,13 +283,16 @@ namespace Timesheet.APIs.MyWorkingTimes
                 return;
             }
 
-            var user = await WorkScope.GetAsync<User>(requester.UserId);
-            if (!user.BranchId.HasValue)
+            var branchId = await WorkScope.GetAll<User>()
+                .Where(u => u.Id == requester.UserId)
+                .Select(u => u.BranchId)
+                .FirstOrDefaultAsync();
+            if (!branchId.HasValue)
             {
                 return;
             }
 
-            var approverUserNames = await GetBranchWorkingTimeApproverUserNames(user.BranchId.Value);
+            var approverUserNames = await GetBranchWorkingTimeApproverUserNames(branchId.Value);
             if (!approverUserNames.Any())
             {
                 return;
@@ -297,7 +300,7 @@ namespace Timesheet.APIs.MyWorkingTimes
 
             var workModeText = input.WorkMode == WorkMode.WFH ? "WFH" : "Work at Office";
             var userMessage = new StringBuilder();
-            userMessage.AppendLine($"**{user.FullName}** ({user.EmailAddress}) has sent a request to change working time");
+            userMessage.AppendLine($"**{requester.FullName}** ({requester.EmailAddress}) has sent a request to change working time");
             userMessage.AppendLine("```");
             userMessage.AppendLine($"Morning: {input.MorningStartTime} - {input.MorningEndTime}");
             userMessage.AppendLine($"Afternoon: {input.AfternoonStartTime} - {input.AfternoonEndTime}");
@@ -319,16 +322,6 @@ namespace Timesheet.APIs.MyWorkingTimes
                 Ncc.Authorization.PermissionNames.ManageWorkingTime_Approval
             };
 
-            var branchUsers = await WorkScope.GetAll<User>()
-                .Where(u => u.IsActive && u.BranchId == branchId)
-                .Select(u => new { u.Id, u.UserName, u.EmailAddress })
-                .ToListAsync();
-
-            if (!branchUsers.Any())
-            {
-                return new List<string>();
-            }
-
             var rolePermissions = await (
                 from rp in WorkScope.GetAll<RolePermissionSetting, long>()
                 join r in WorkScope.GetAll<Role, int>() on rp.RoleId equals r.Id
@@ -336,44 +329,29 @@ namespace Timesheet.APIs.MyWorkingTimes
                 select new { rp.RoleId, rp.Name }
             ).ToListAsync();
 
-            var branchUserIds = branchUsers.Select(u => u.Id).ToList();
-
-            var userPermissions = await WorkScope.GetAll<UserPermissionSetting, long>()
-                .Where(up => branchUserIds.Contains(up.UserId) && requiredPermissions.Contains(up.Name))
-                .Select(up => new { up.UserId, up.Name, up.IsGranted })
-                .ToListAsync();
-
-            var userRoles = await WorkScope.GetAll<UserRole>()
-                .Where(ur => branchUserIds.Contains(ur.UserId))
-                .Select(ur => new { ur.UserId, ur.RoleId })
-                .ToListAsync();
-
-            var rolePermsByRole = rolePermissions
-                .GroupBy(x => x.RoleId)
-                .ToDictionary(g => g.Key, g => g.Select(x => x.Name).ToHashSet());
-
-            var userPermsByUser = userPermissions
-                .GroupBy(x => x.UserId)
-                .ToDictionary(g => g.Key, g => g.GroupBy(p => p.Name).ToDictionary(pg => pg.Key, pg => pg.Last().IsGranted));
-
-            var rolesByUser = userRoles
-                .GroupBy(x => x.UserId)
-                .ToDictionary(g => g.Key, g => g.Select(x => x.RoleId).ToList());
-
-            bool HasPermission(long targetUserId, string permName)
+            var candidateRoleIds = rolePermissions.Select(x => x.RoleId).Distinct().ToList();
+            if (!candidateRoleIds.Any())
             {
-                if (userPermsByUser.TryGetValue(targetUserId, out var uPerms) && uPerms.TryGetValue(permName, out var granted))
-                {
-                    return granted;
-                }
-
-                return rolesByUser.TryGetValue(targetUserId, out var rIds)
-                    && rIds.Any(rId => rolePermsByRole.TryGetValue(rId, out var rPerms) && rPerms.Contains(permName));
+                return new List<string>();
             }
 
-            return branchUsers
-                .Where(u => requiredPermissions.All(p => HasPermission(u.Id, p)))
-                .Select(u => !string.IsNullOrWhiteSpace(u.EmailAddress) ? u.EmailAddress.Split('@')[0] : u.UserName)
+            var userRoles = await (
+                from ur in WorkScope.GetAll<UserRole>()
+                join u in WorkScope.GetAll<User>() on ur.UserId equals u.Id
+                where u.IsActive && u.BranchId == branchId && candidateRoleIds.Contains(ur.RoleId)
+                select new { UserId = u.Id, u.UserName, u.EmailAddress, ur.RoleId }
+            ).ToListAsync();
+
+            var rolePermsByRole = rolePermissions.ToLookup(x => x.RoleId, x => x.Name);
+
+            return userRoles
+                .GroupBy(x => x.UserId)
+                .Where(g => requiredPermissions.All(p => g.Any(ur => rolePermsByRole[ur.RoleId].Contains(p))))
+                .Select(g =>
+                {
+                    var u = g.First();
+                    return !string.IsNullOrWhiteSpace(u.EmailAddress) ? u.EmailAddress.Split('@')[0] : u.UserName;
+                })
                 .Where(name => !string.IsNullOrWhiteSpace(name))
                 .Distinct()
                 .ToList();
