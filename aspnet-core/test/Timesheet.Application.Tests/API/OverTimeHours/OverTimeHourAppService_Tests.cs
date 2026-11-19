@@ -1,4 +1,4 @@
-﻿
+
 using Ncc.IoC;
 using Shouldly;
 using System;
@@ -185,7 +185,7 @@ namespace Timesheet.Application.Tests.API.OverTimeHour
                 var inputMonth = 12;
                 var projectId = 5;
 
-                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId);
+                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId, null);
 
                 Assert.Equal(4, result.TotalCount);
                 result.Items.ShouldContain(x => x.UserId == 1);
@@ -209,7 +209,7 @@ namespace Timesheet.Application.Tests.API.OverTimeHour
                 var inputMonth = 12;
                 var projectId = 5;
 
-                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId);
+                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId, null);
 
                 Assert.Equal(3, result.TotalCount);
                 result.Items.ShouldContain(x => x.UserId == 9);
@@ -232,7 +232,7 @@ namespace Timesheet.Application.Tests.API.OverTimeHour
                 var inputMonth = 12;
                 var projectId = 5;
 
-                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId);
+                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId, null);
 
                 Assert.Equal(4, result.TotalCount);
                 Assert.Equal(1, result.Items[0].UserId);
@@ -258,7 +258,7 @@ namespace Timesheet.Application.Tests.API.OverTimeHour
                 var inputMonth = 12;
                 var projectId = 5;
 
-                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId);
+                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId, null);
 
                 Assert.Equal(4, result.TotalCount);
                 Assert.Equal(13, result.Items[0].UserId);
@@ -283,7 +283,7 @@ namespace Timesheet.Application.Tests.API.OverTimeHour
                 var inputMonth = 12;
                 var projectId = 5;
 
-                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId);
+                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId, null);
 
                 Assert.Equal(4, result.TotalCount);
                 Assert.Equal(2, result.Items.Count);
@@ -310,7 +310,7 @@ namespace Timesheet.Application.Tests.API.OverTimeHour
                 var inputMonth = 12;
                 var projectId = 5;
 
-                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId);
+                var result = await _overTimeHour.GetAllPagging(inputGridParam, inputYear, inputMonth, projectId, null);
                 Assert.Equal(4, result.TotalCount);
                 Assert.Equal(3, result.Items.Count);
                 result.Items.ShouldNotContain(x => x.UserId == 1);
