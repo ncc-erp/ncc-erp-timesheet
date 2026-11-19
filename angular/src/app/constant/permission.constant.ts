@@ -244,8 +244,7 @@ export const PERMISSIONS_CONSTANT = {
     DeleteMyWorkingTime: "MyWorkingTime.Delete",
 
     //manage working time   
-    ViewManageWorkingTime: "ManageWorkingTime.ViewDetail",
-    ViewAllManageWorkingTime: "ManageWorkingTime.ViewAll",
+    ViewByBranchManageWorkingTime: "ManageWorkingTime.ViewByBranch",
     ApprovalWorkingTime: "ManageWorkingTime.Approval",
 
     //over time setting
