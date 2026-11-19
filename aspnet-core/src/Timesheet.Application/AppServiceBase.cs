@@ -1,4 +1,4 @@
-﻿using Abp.Application.Services;
+using Abp.Application.Services;
 using Abp.Configuration;
 using Abp.Dependency;
 using Abp.IdentityFramework;
@@ -91,6 +91,7 @@ namespace Ncc
                    KomuUserId = s.KomuUserId,
                    UserId = s.Id,
                    BranchDisplayName = s.Branch.DisplayName,
+                   WorkMode = s.WorkMode,
                    MorningWorking = s.MorningWorking.HasValue ? s.MorningWorking.Value : 3.5,
                    AfternoonWorking = s.AfternoonWorking.HasValue ? s.AfternoonWorking.Value : 4.5
                }).FirstOrDefault();
