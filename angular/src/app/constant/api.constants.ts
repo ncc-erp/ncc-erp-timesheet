@@ -157,6 +157,10 @@ export const APP_CONSTANT = {
     Afternoon: 3,
     Custom: 4
   },
+  WorkMode: {
+    Office: 0,
+    WFH: 1
+  },
   DayAbsenceType: {
     Off: 0,
     Onsite: 1,
