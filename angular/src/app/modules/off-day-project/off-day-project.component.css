@@ -135,6 +135,52 @@ pre {
 .remote{
     background-color: #0c51a0;
 }
+.work-at-office{
+    background-color: #2e7d32 !important;
+}
+
+.team-calendar-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 2px 4px 4px 4px;
+    gap: 2px 4px;
+}
+
+.user-info-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.badges-wrap {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+.team-calendar-item .pin-wrap {
+    padding: 2px 6px;
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+.team-calendar-item .cal-day-badge {
+    padding: 2px 5px;
+    font-size: 11px;
+    line-height: 1.2;
+    margin-left: 0;
+    margin-right: 2px;
+}
+
+.team-calendar-item .badge-time-request {
+    padding: 2px 5px;
+    font-size: 11px;
+    line-height: 1.2;
+    margin: 0;
+}
 
 .pr-0{
     padding-right: 0px;

@@ -40,6 +40,10 @@
   .onsite {
     background-color: #009688 !important;
   }
+
+  .work-at-office {
+    background-color: #4caf50 !important;
+  }
   
   .pin span {
     display: inline-block;

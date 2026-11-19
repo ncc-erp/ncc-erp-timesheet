@@ -35,7 +35,7 @@
                 <span class="request-text">Request </span><span>Off</span>
               </button>
             </div>
-            <div *ngIf="isGranted(SEND_REQUEST)" class="item">
+            <div *ngIf="isGranted(SEND_REQUEST) && isOfficeMode" class="item">
               <button
                 name="requestRemoteBtn"
                 mat-raised-button
@@ -43,6 +43,16 @@
                 (click)="requestRemote()"
               >
                 <span class="request-text">Request </span><span>Remote</span>
+              </button>
+            </div>
+            <div *ngIf="isGranted(SEND_REQUEST) && isWfhMode" class="item">
+              <button
+                name="requestWorkAtOfficeBtn"
+                mat-raised-button
+                class="btn work-at-office flex"
+                (click)="requestWorkAtOffice()"
+              >
+                <span class="request-text">Request </span><span>Work at Office</span>
               </button>
             </div>
             <div *ngIf="isGranted(SEND_REQUEST)" class="item">
@@ -164,6 +174,9 @@
         >
         <span class="cal-day-badge text-primary remote" *ngIf="item.type === 2"
           >Remote</span
+        >
+        <span class="cal-day-badge text-primary work-at-office" *ngIf="item.type === 3"
+          >Work at Office</span
         >
 
         <span
