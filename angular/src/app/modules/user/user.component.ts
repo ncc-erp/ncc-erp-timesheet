@@ -73,6 +73,7 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     { name: 'Position', value: true, fieldName: 'position' },
     { name: 'Branch', value: true, fieldName: 'branch' },
     { name: 'Working Time', value: true, fieldName: 'workingTime' },
+    { name: 'Work Type', value: true, fieldName: 'workMode' },
     { name: 'Start Date', value: true, fieldName: 'sd' },
     { name: 'Allowed Leaveday', value: true, fieldName: 'allowedLeaveday' },
     { name: 'Type', value: true, fieldName: 'type' },
@@ -87,7 +88,6 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     { name: 'Roles', value: true, fieldName: 'role' },
     { name: 'Creation Time', value: true, fieldName: 'createTime' },
     { name: 'Is Active', value: true, fieldName: 'isActive' },
-    //{ name: 'Position', value: true, fieldName: 'position' },
   ];
   contextMenuPosition = { x: '0px', y: '0px' };
 
@@ -113,6 +113,7 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
   listPosition: PositionDto[] = [];
   positionSearch: FormControl = new FormControl("")
   listPositionFilter: PositionDto[];
+  workMode: number = -1;
 
   onContextMenu(event: MouseEvent, temp) {
     event.preventDefault();
@@ -290,6 +291,9 @@ export class UserSecondComponent extends PagedListingComponentBase<userDTO> impl
     }
     if (this.positionId != null && this.positionId != -1) {
       this.addFilterItem('positionId', this.positionId);
+    }
+    if (this.workMode != null && this.workMode != -1) {
+      this.addFilterItem('workMode', this.workMode);
     }
     request.filterItems = this.filterItems;
     this.userService
@@ -632,6 +636,7 @@ export class userDTO {
   isLevelUp: boolean;
   workStartHour: number;
   workStartMinute: number;
+  workMode: number;
 }
 export class ProjectUser {
   projectId: number;

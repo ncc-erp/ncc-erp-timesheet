@@ -174,6 +174,9 @@ export class WorkingHourDto {
   date: number;
   dayName: string;
   workingHour: number;
+  overTimeHour: number;
+  overTimeChargedHour: number;
+  overTimeNonChargedHour: number;
   isOpenTalk: boolean;
   absenceType: number;
   offHour: number;
@@ -220,6 +223,9 @@ export class KumoTrackerDto {
 export class GetNormalWorkingHourByUserLoginDto {
   totalWorkingHour: number;
   totalOpenTalk: number;
+  totalOverTimeHour: number;
+  totalOverTimeChargedHour: number;
+  totalOverTimeNonChargedHour: number;
   listWorkingHour: WorkingHourDto[];
 }
 

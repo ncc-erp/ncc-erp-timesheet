@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Timesheet.Uitls;
@@ -16,6 +16,7 @@ namespace Timesheet.DomainServices.Dto
         public Usertype? Type { get; set; }
         public UserLevel? Level { get; set; }
         public string BranchDisplayName { get; set; }
+        public WorkMode WorkMode { get; set; }
         public double MorningWorking { get; set; }
         public double AfternoonWorking { get; set; }
         public string UserName => EmailAddress.Split('@')[0];

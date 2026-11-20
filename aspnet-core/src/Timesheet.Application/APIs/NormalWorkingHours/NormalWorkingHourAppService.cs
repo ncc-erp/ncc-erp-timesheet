@@ -608,6 +608,24 @@ namespace Timesheet.APIs.NormalWorkingHours
                                 OffHour = absencedays.Where(abs => abs.DateAt.Day == x.Key.DateAt.Day && abs.Type == RequestType.Off).Select(h => h.Hour).Sum(),
                             }).OrderBy(x => x.Date).ToListAsync();
 
+            var overTimeHourByDay = (await WorkScope.GetAll<MyTimesheet>()
+                        .Where(ts => ts.UserId == userId)
+                        .Where(ts => ts.DateAt.Year == year && ts.DateAt.Month == month)
+                        .Where(ts => ts.TypeOfWork == TypeOfWork.OverTime)
+                        .WhereIf(status == MyTimesheetFilterStatus.Pending, ts => ts.Status == TimesheetStatus.Pending)
+                        .WhereIf(status == MyTimesheetFilterStatus.Approved, ts => ts.Status == TimesheetStatus.Approve)
+                        .WhereIf(status == MyTimesheetFilterStatus.New, ts => ts.Status == TimesheetStatus.None)
+                        .WhereIf(status == MyTimesheetFilterStatus.Rejected, ts => ts.Status == TimesheetStatus.Reject)
+                        .WhereIf(status == MyTimesheetFilterStatus.PendingApproved, ts => ts.Status == TimesheetStatus.Pending ||
+                                                                                        ts.Status == TimesheetStatus.Approve)
+                        .Select(ts => new { ts.DateAt, ts.WorkingTime, ts.IsCharged })
+                        .ToListAsync())
+                        .GroupBy(ts => ts.DateAt.Day)
+                        .ToDictionary(g => g.Key, g => new
+                        {
+                            Charged = (double)g.Where(ts => ts.IsCharged).Sum(ts => ts.WorkingTime) / 60,
+                            NonCharged = (double)g.Where(ts => !ts.IsCharged).Sum(ts => ts.WorkingTime) / 60
+                        });
 
             var isUnlock = unlockUserIds.Contains(userId);
 
@@ -624,6 +642,12 @@ namespace Timesheet.APIs.NormalWorkingHours
                         IsOpenTalk = false,
                     };
                     listMyTimesheet.Add(workingDetail);
+                }
+                if (overTimeHourByDay.TryGetValue(date.Day, out var otHour))
+                {
+                    workingDetail.OverTimeChargedHour = otHour.Charged > 0 ? otHour.Charged : (double?)null;
+                    workingDetail.OverTimeNonChargedHour = otHour.NonCharged > 0 ? otHour.NonCharged : (double?)null;
+                    workingDetail.OverTimeHour = otHour.Charged + otHour.NonCharged;
                 }
                 workingDetail.IsOffDaySetting = dayOffSettings.Contains(date);
                 workingDetail.IsLock = isUnlock ? date < lockDateAfterUnlock : date < lockDate;
@@ -654,6 +678,9 @@ namespace Timesheet.APIs.NormalWorkingHours
             result.TotalWorkingHour = (double)listMyTimesheet
                                     .Sum(s => s.WorkingHour);
             result.TotalOpenTalk = totalOpenTalk;
+            result.TotalOverTimeChargedHour = overTimeHourByDay.Values.Sum(s => s.Charged);
+            result.TotalOverTimeNonChargedHour = overTimeHourByDay.Values.Sum(s => s.NonCharged);
+            result.TotalOverTimeHour = result.TotalOverTimeChargedHour + result.TotalOverTimeNonChargedHour;
 
             return result;
         }

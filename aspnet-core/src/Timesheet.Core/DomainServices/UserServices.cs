@@ -1,4 +1,4 @@
-﻿using Abp.Authorization.Users;
+using Abp.Authorization.Users;
 using Abp.Configuration;
 using Abp.Dependency;
 using Abp.Domain.Repositories;
@@ -99,7 +99,7 @@ namespace Timesheet.DomainServices
             user.isWorkingTimeDefault = true;
             user.NormalizedUserName = input.UserName.ToLower();
             user.NormalizedEmailAddress = input.EmailAddress.ToLower();
-
+            user.WorkMode = input.WorkMode;
 
             if (input.BranchCode != null)
             {
@@ -179,6 +179,7 @@ namespace Timesheet.DomainServices
             user.UserName = input.UserName?.Replace("@gmail.com", "").Replace("@ncc.asia", "");
             user.isWorkingTimeDefault = input.isWorkingTimeDefault.HasValue ? input.isWorkingTimeDefault.Value : user.isWorkingTimeDefault;
             user.EndDateAt = !input.IsActive ? input.EndDateAt.HasValue ? input.EndDateAt : DateTimeUtils.GetNow() : input.EndDateAt;
+            user.WorkMode = input.WorkMode;
 
             if (user.isWorkingTimeDefault.Value)
             {
