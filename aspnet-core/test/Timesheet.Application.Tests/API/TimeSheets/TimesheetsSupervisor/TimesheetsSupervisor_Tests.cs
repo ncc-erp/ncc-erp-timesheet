@@ -1,9 +1,10 @@
-﻿using Ncc.IoC;
+using Ncc.IoC;
 using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Timesheet.APIs.Timesheets.Timesheets.Dto;
 using Timesheet.Entities;
 using Timesheet.Extension;
 using Xunit;
@@ -53,7 +54,16 @@ namespace Timesheet.Application.Tests.API.TimeSheets.TimesheetsSupervisor
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheetsSupervisor.GetAll(opentalkTime: null, opentalkTimeType: null, DateTime.Parse("2022/12/01"), DateTime.Parse("2022/12/31"), TimesheetStatus.Approve, ProjectId: null, UserId: null);
+                var result = await _timesheetsSupervisor.GetAll(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = null,
+                    OpentalkTimeType = null,
+                    StartDate = DateTime.Parse("2022/12/01"),
+                    EndDate = DateTime.Parse("2022/12/31"),
+                    Status = TimesheetStatus.Approve,
+                    ProjectId = null,
+                    UserId = null
+                });
                 Assert.Equal(expectTotalCount, result.Count);
 
                 var myTimeSheet = result.Last();
@@ -87,7 +97,16 @@ namespace Timesheet.Application.Tests.API.TimeSheets.TimesheetsSupervisor
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheetsSupervisor.GetAll(opentalkTime: null, opentalkTimeType: null, DateTime.Parse("2022/10/01"), DateTime.Parse("2022/10/30"), TimesheetStatus.Pending, ProjectId: null, UserId: null);
+                var result = await _timesheetsSupervisor.GetAll(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = null,
+                    OpentalkTimeType = null,
+                    StartDate = DateTime.Parse("2022/10/01"),
+                    EndDate = DateTime.Parse("2022/10/30"),
+                    Status = TimesheetStatus.Pending,
+                    ProjectId = null,
+                    UserId = null
+                });
                 Assert.Equal(expectTotalCount, result.Count);
             });
         }
@@ -99,7 +118,15 @@ namespace Timesheet.Application.Tests.API.TimeSheets.TimesheetsSupervisor
 
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheetsSupervisor.GetQuantityTimesheetSupervisorStatus(opentalkTime: null, opentalkTimeType: null, DateTime.Parse("2022/12/01"), DateTime.Parse("2022/12/31"), projectId: null, userId: null);
+                var result = await _timesheetsSupervisor.GetQuantityTimesheetSupervisorStatus(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = null,
+                    OpentalkTimeType = null,
+                    StartDate = DateTime.Parse("2022/12/01"),
+                    EndDate = DateTime.Parse("2022/12/31"),
+                    ProjectId = null,
+                    UserId = null
+                });
                 List<Object> list = new List<Object>((IEnumerable<Object>)result);
                 Assert.Equal(expectTotalCount, list.Count);
 
