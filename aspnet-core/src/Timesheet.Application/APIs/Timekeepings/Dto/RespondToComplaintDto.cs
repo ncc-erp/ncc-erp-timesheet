@@ -29,4 +29,13 @@ namespace Timesheet.APIs.Timekeepings.Dto
     {
         public long UserPunishmentId { get; set; }
     }
+    public class BulkDeletePunishmentsDto
+    {
+        public List<long> UserPunishmentIds { get; set; }
+        public string NoteReply { get; set; }
+    }
+    public class BulkDeletePunishmentsResultDto
+    {
+        public int DeletedCount { get; set; }
+    }
 }

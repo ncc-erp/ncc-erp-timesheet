@@ -182,7 +182,7 @@
       </div>
 
       <div class="row" style="margin-bottom: 10px; padding-left: 24px;">
-        <div class="col-sm-8 col-md-8">
+        <div class="col-sm-12 col-md-12">
           <div class="action-buttons-left">
             <button class="btn btn-add" name="newUserPunishmentBtn" (click)="createUserPunishment()" style="background-color: #F44336; color: white; margin: 0 10px; border-radius: 4px; padding: 8px 16px; width: 200px;">
               <i class="fa-solid fa-square-plus"></i>&nbsp; New User Punishment
@@ -195,6 +195,16 @@
             <button class="btn btn-import" name="importBtn" (click)="importUserPunishment()" style="background-color: #FF9800; color: white; margin: 0 10px; border-radius: 4px; padding: 8px 16px; width: 200px;">
               <i class="fas fa-upload"></i>&nbsp; Import
             </button>
+            <button *ngIf="permission.isGranted(EDIT_TARDINESS_LEAVE_EARLY)"
+              class="btn btn-danger"
+              name="bulkDeletePunishmentsBtn"
+              (click)="deleteSelectedPunishments()"
+              [disabled]="selectedPunishmentIds.size === 0 || isDeletingBulk"
+              style="background-color: #D32F2F; color: white; margin: 0 10px; border-radius: 4px; padding: 8px 16px; min-width: 200px;">
+              <i class="fas fa-trash-alt" *ngIf="!isDeletingBulk"></i>
+              <i class="fa fa-spinner fa-spin" *ngIf="isDeletingBulk"></i>&nbsp;
+              {{ isDeletingBulk ? 'Deleting...' : ('Delete Selected (' + selectedPunishmentIds.size + ')') }}
+            </button>
           </div>
         </div>
       </div>
@@ -205,7 +215,15 @@
             <table class="table table-hover table-striped styleUser">
               <thead>
                 <tr style="border:none">
-
+                  <th *ngIf="permission.isGranted(EDIT_TARDINESS_LEAVE_EARLY)" style="width: 45px; min-width: 45px;" rowspan="2">
+                    <mat-checkbox
+                      name="selectAllPunishments"
+                      [checked]="isAllSelected"
+                      [indeterminate]="isSomeSelected"
+                      [disabled]="selectablePunishmentIds.length === 0"
+                      (change)="toggleSelectAll($event.checked)">
+                    </mat-checkbox>
+                  </th>
                   <th style="min-width: 50px; max-width: 220px;" rowspan="2"
                   (click)="handleSortByColumn('userName')" style="cursor: pointer">
                     <div class="item-tardiness">
@@ -292,6 +310,14 @@
               <tbody>
                 <tr
                   *ngFor="let item of listTimekeeping | paginate: { itemsPerPage: itemPerPage, currentPage: page }, index as i">
+                  <td *ngIf="permission.isGranted(EDIT_TARDINESS_LEAVE_EARLY)" class="text-center" style="vertical-align: middle;">
+                    <mat-checkbox
+                      *ngIf="item.userpunishmentId != null"
+                      [name]="'selectPunishment-' + item.userpunishmentId"
+                      [checked]="isItemSelected(item)"
+                      (change)="toggleSelectItem(item, $event.checked)">
+                    </mat-checkbox>
+                  </td>
                   <td>
                     <div style="display: flex; justify-content: flex-start; align-items: center;">
                       <div>
@@ -434,3 +460,18 @@
     </div>
   </div>
 </div>
+
+<ng-template #bulkDeleteDialog>
+  <h2 mat-dialog-title>Confirm Bulk Delete</h2>
+  <mat-dialog-content>
+    <p>Are you sure you want to delete <b>{{ selectedPunishmentIds.size }}</b> selected punishment(s)?</p>
+    <mat-form-field appearance="outline" style="width: 100%; margin-top: 8px;">
+      <mat-label>Reply Note (optional)</mat-label>
+      <textarea matInput rows="3" [(ngModel)]="bulkDeleteNoteReply" name="bulkDeleteNoteReply" placeholder="Enter reply note..."></textarea>
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-raised-button [mat-dialog-close]="false">Cancel</button>
+    <button mat-raised-button color="warn" [mat-dialog-close]="true">Delete</button>
+  </mat-dialog-actions>
+</ng-template>

@@ -1308,6 +1308,161 @@ namespace Timesheet.APIs.Timekeepings
             }
         }
 
+        [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_Edit)]
+        [HttpPost]
+        [UnitOfWork(IsolationLevel.ReadCommitted)]
+        public async Task<BulkDeletePunishmentsResultDto> BulkDeletePunishments(BulkDeletePunishmentsDto input)
+        {
+            if (input == null || input.UserPunishmentIds == null || !input.UserPunishmentIds.Any())
+            {
+                throw new UserFriendlyException("Please select at least one punishment to delete.");
+            }
+
+            var ids = input.UserPunishmentIds.Distinct().ToList();
+            var userPunishments = await WorkScope.GetAll<UserPunishment>()
+                .Where(x => ids.Contains(x.Id))
+                .ToListAsync();
+
+            if (!userPunishments.Any())
+            {
+                return new BulkDeletePunishmentsResultDto { DeletedCount = 0 };
+            }
+
+            var now = DateTimeUtils.GetNow();
+            var currentUserId = AbpSession.UserId;
+            var hasNoteReply = !string.IsNullOrWhiteSpace(input.NoteReply);
+
+            var userIdsForBalance = userPunishments
+                .Where(x => x.TotalMoney > 0)
+                .Select(x => x.UserId)
+                .Distinct()
+                .ToList();
+
+            var balanceMap = userIdsForBalance.Any()
+                ? (await WorkScope.GetAll<UserPunishmentBalance>()
+                    .Where(b => userIdsForBalance.Contains(b.UserId))
+                    .ToListAsync())
+                    .ToDictionary(b => b.UserId)
+                : new Dictionary<long, UserPunishmentBalance>();
+
+            var punishmentsNeedingTimekeeping = userPunishments
+                .Where(x => hasNoteReply
+                    || IsCheckInOutPunishment(x.Type)
+                    || x.Type == UserPunishmentType.Daily
+                    || x.Type == UserPunishmentType.Mention)
+                .ToList();
+
+            var timekeepingMap = new Dictionary<(long UserId, DateTime Date), Timekeeping>();
+            if (punishmentsNeedingTimekeeping.Any())
+            {
+                var tkUserIds = punishmentsNeedingTimekeeping.Select(x => x.UserId).Distinct().ToList();
+                var tkDates = punishmentsNeedingTimekeeping.Select(x => x.DateAt.Date).Distinct().ToList();
+                var minDate = tkDates.Min();
+                var maxDate = tkDates.Max().AddDays(1);
+
+                var timekeepings = await WorkScope.GetAll<Timekeeping>()
+                    .Where(t => t.UserId.HasValue
+                        && tkUserIds.Contains(t.UserId.Value)
+                        && t.DateAt >= minDate
+                        && t.DateAt < maxDate)
+                    .ToListAsync();
+
+                var tkDateSet = tkDates.ToHashSet();
+                foreach (var tk in timekeepings)
+                {
+                    var d = tk.DateAt.Date;
+                    if (!tkDateSet.Contains(d)) continue;
+                    var key = (tk.UserId.Value, d);
+                    if (!timekeepingMap.ContainsKey(key))
+                    {
+                        timekeepingMap[key] = tk;
+                    }
+                }
+            }
+
+            var newBalances = new List<UserPunishmentBalance>();
+            var newRefunds = new List<UserPunishmentRefund>();
+
+            foreach (var userPunishment in userPunishments)
+            {
+                var amountReduced = userPunishment.TotalMoney;
+                if (amountReduced > 0)
+                {
+                    if (!balanceMap.TryGetValue(userPunishment.UserId, out var balance))
+                    {
+                        balance = new UserPunishmentBalance
+                        {
+                            UserId = userPunishment.UserId,
+                            TotalPunishmentMoney = 0,
+                            RemainPoints = userPunishment.IsPaid ? amountReduced : 0
+                        };
+                        balanceMap[userPunishment.UserId] = balance;
+                        newBalances.Add(balance);
+                    }
+                    else
+                    {
+                        if (userPunishment.IsPaid)
+                        {
+                            balance.RemainPoints += amountReduced;
+                        }
+                        else
+                        {
+                            balance.TotalPunishmentMoney = Math.Max(0, balance.TotalPunishmentMoney - amountReduced);
+                        }
+                        balance.LastModificationTime = now;
+                        balance.LastModifierUserId = currentUserId;
+                    }
+
+                    if (userPunishment.IsPaid)
+                    {
+                        newRefunds.Add(new UserPunishmentRefund
+                        {
+                            UserId = userPunishment.UserId,
+                            UserPunishmentId = userPunishment.Id,
+                            Points = amountReduced,
+                            Type = PointType.IsClaim
+                        });
+                    }
+                }
+
+                if (timekeepingMap.TryGetValue((userPunishment.UserId, userPunishment.DateAt.Date), out var timekeeping))
+                {
+                    await HandleOldPunishmentType(timekeeping, userPunishment.Type, UserPunishmentType.NoPunish, userPunishment.Count);
+                    if (hasNoteReply)
+                    {
+                        timekeeping.NoteReply = input.NoteReply;
+                    }
+                    timekeeping.LastModificationTime = now;
+                    timekeeping.LastModifierUserId = currentUserId;
+                }
+
+                if (hasNoteReply)
+                {
+                    userPunishment.NoteReply = input.NoteReply;
+                }
+                userPunishment.IsDeleted = true;
+                userPunishment.DeletionTime = now;
+                userPunishment.DeleterUserId = currentUserId;
+            }
+
+            if (newBalances.Any())
+            {
+                await WorkScope.InsertRangeAsync(newBalances);
+            }
+
+            if (newRefunds.Any())
+            {
+                await WorkScope.InsertRangeAsync(newRefunds);
+            }
+
+            await CurrentUnitOfWork.SaveChangesAsync();
+
+            return new BulkDeletePunishmentsResultDto
+            {
+                DeletedCount = userPunishments.Count
+            };
+        }
+
         [AbpAuthorize(Ncc.Authorization.PermissionNames.Report_TardinessLeaveEarly_RetrieveData)]
         [HttpPost]
         public async Task<bool> SnapshotTimekeepingDay(DateTime date)

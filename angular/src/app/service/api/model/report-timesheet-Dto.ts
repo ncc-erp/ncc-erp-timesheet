@@ -58,6 +58,7 @@ export interface UserComplaintResultDto {
 }
 export class TimekeepingDto {
   timekeepingId: number;
+  userpunishmentId?: number;
   userId: number;
   userName: string;
   userEmail: string;
