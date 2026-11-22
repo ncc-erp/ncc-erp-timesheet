@@ -5,7 +5,7 @@ import { CreateEditUserPunishmentComponent } from './create-edit-user-punishment
 import { ImportErrorDialogComponent } from './import-error-dialog/import-error-dialog.component';
 import { MatDialog } from '@angular/material';
 import { DatePipe } from '@angular/common';
-import { Component, Injector, OnInit } from '@angular/core';
+import { Component, Injector, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
@@ -82,6 +82,10 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
   public sortDirection: number = 0;
   public iconSort: string = "";
   public originalList: TimekeepingDto[] = [];
+  @ViewChild('bulkDeleteDialog') bulkDeleteDialog: TemplateRef<any>;
+  public selectedPunishmentIds: Set<number> = new Set<number>();
+  public isDeletingBulk: boolean = false;
+  public bulkDeleteNoteReply: string = '';
 
   // Store original error handlers
   private originalMessageError: (message: string, title?: string, isHtml?: boolean) => any;
@@ -244,6 +248,7 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
       //     }
       //   })
       // })
+      this.selectedPunishmentIds.clear();
       this.isTableLoading = false;
     });
   }
@@ -662,5 +667,75 @@ export class TardinessDetailComponent extends AppComponentBase implements OnInit
 
   createUserPunishment() {
     this.openCreateUserPunishmentDialog();
+  }
+
+  get selectablePunishmentIds(): number[] {
+    return this.listTimekeeping
+      .filter(item => item.userpunishmentId != null)
+      .map(item => item.userpunishmentId);
+  }
+
+  get isAllSelected(): boolean {
+    const ids = this.selectablePunishmentIds;
+    return ids.length > 0 && ids.every(id => this.selectedPunishmentIds.has(id));
+  }
+
+  get isSomeSelected(): boolean {
+    return this.selectedPunishmentIds.size > 0 && !this.isAllSelected;
+  }
+
+  isItemSelected(item: TimekeepingDto): boolean {
+    return item.userpunishmentId != null && this.selectedPunishmentIds.has(item.userpunishmentId);
+  }
+
+  toggleSelectAll(checked: boolean): void {
+    if (checked) {
+      this.selectablePunishmentIds.forEach(id => this.selectedPunishmentIds.add(id));
+    } else {
+      this.selectedPunishmentIds.clear();
+    }
+  }
+
+  toggleSelectItem(item: TimekeepingDto, checked: boolean): void {
+    if (item.userpunishmentId == null) {
+      return;
+    }
+    if (checked) {
+      this.selectedPunishmentIds.add(item.userpunishmentId);
+    } else {
+      this.selectedPunishmentIds.delete(item.userpunishmentId);
+    }
+  }
+
+  deleteSelectedPunishments(): void {
+    const ids = Array.from(this.selectedPunishmentIds);
+    if (ids.length === 0) {
+      return;
+    }
+
+    this.bulkDeleteNoteReply = '';
+    const dialogRef = this.dialog.open(this.bulkDeleteDialog, {
+      width: '500px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) {
+        return;
+      }
+      this.isDeletingBulk = true;
+      const noteReply = this.bulkDeleteNoteReply ? this.bulkDeleteNoteReply.trim() : '';
+      this.timekeepingService.bulkDeletePunishments({
+        userPunishmentIds: ids,
+        noteReply: noteReply || undefined
+      })
+        .pipe(finalize(() => { this.isDeletingBulk = false; }))
+        .subscribe(res => {
+          const deletedCount = res && res.result ? res.result.deletedCount : ids.length;
+          abp.notify.success(`Deleted ${deletedCount} punishment(s) successfully`);
+          this.selectedPunishmentIds.clear();
+          this.getData();
+        });
+    });
   }
 }

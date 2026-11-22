@@ -511,14 +511,17 @@ namespace Timesheet.DomainServices
                 }
 
                 // Policy: Komu tracker punishment applies to:
-                // 1. WFH employees (on days without an approved Work at Office request)
-                // 2. Office employees on days with an approved Remote request
+                // 1. WFH employees (on working days without an approved Work at Office request)
+                // 2. Office employees on working days with an approved Remote request
+                bool isWeekend = selectedDate.DayOfWeek == DayOfWeek.Saturday || selectedDate.DayOfWeek == DayOfWeek.Sunday;
+                bool isStoppedWork = user.IsStopWork || (user.StopWorkingDate.HasValue && user.StopWorkingDate.Value.Date < selectedDate);
+                bool hasNoWorkingSchedule = string.IsNullOrEmpty(t.RegisterCheckIn) || string.IsNullOrEmpty(t.RegisterCheckOut);
                 bool isUserWFH = user.WorkMode == WorkMode.WFH;
                 bool hasWorkAtOffice = mapWorkAtOfficeUsers.ContainsKey(user.UserId);
                 bool hasRemote = mapRemoteUsers.ContainsKey(user.UserId);
                 bool shouldCheckTracker = (isUserWFH && !hasWorkAtOffice) || hasRemote;
 
-                if (shouldCheckTracker && user.Type != Usertype.Vendor)
+                if (!isWeekend && !isStoppedWork && !hasNoWorkingSchedule && shouldCheckTracker && user.Type != Usertype.Vendor)
                 {
                     bool isTrackerTimeWhitelisted = mapWhitelistUsers.ContainsKey(user.UserId);
                     if (!isTrackerTimeWhitelisted)
