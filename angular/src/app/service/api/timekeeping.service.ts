@@ -98,4 +98,7 @@ export class TimekeepingService extends BaseApiService {
     UserPunishmentId: userPunishmentId  
   });
 }
+  bulkDeletePunishments(param: { userPunishmentIds: number[], noteReply?: string }): Observable<any> {
+    return this.http.post<any>(this.rootUrl + '/BulkDeletePunishments', param);
+  }
 }
