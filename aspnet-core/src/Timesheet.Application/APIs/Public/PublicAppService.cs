@@ -283,53 +283,18 @@ namespace Timesheet.APIs.Public
             return results;
         }
 
-         public async Task<WorkingStatusUserDto> GetWorkingStatusByUser(string emailAddress, DateTime? date)
+        public async Task<WorkingStatusUserDto> GetWorkingStatusByUser(string emailAddress, DateTime? date)
         {
             DateTime dateAt = date.HasValue ? date.Value.Date : DateTimeUtils.GetNow().Date;
-            var status = await queryAbsenceDay(dateAt).Where(s => s.EmailAddress == emailAddress).ToListAsync();
+            var normalizedEmail = emailAddress?.ToLower().Trim();
+            var status = await queryAbsenceDay(dateAt).Where(s => s.EmailAddress == normalizedEmail).ToListAsync();
             var RemoteOrOnsite = status.Where(s => s.RequestType == RequestType.Remote || s.RequestType == RequestType.Onsite).FirstOrDefault();
             if (RemoteOrOnsite != null)
                 return RemoteOrOnsite;
 
-            var wfhUser = await WorkScope.GetAll<User>()
-                .Where(u => u.IsActive && u.WorkMode == WorkMode.WFH && u.EmailAddress == emailAddress)
-                .Select(u => new { u.MorningWorking, u.AfternoonWorking })
-                .FirstOrDefaultAsync();
-
-            if (wfhUser != null)
-            {
-                var nonWfhTypes = status
-                    .Where(s => s.DayType != DayType.Custom && (s.RequestType == RequestType.WorkAtOffice || s.RequestType == RequestType.Off))
-                    .Select(s => s.DayType)
-                    .ToList();
-
-                DayType? wfhDayType = nonWfhTypes.Contains(DayType.Fullday)
-                    || (nonWfhTypes.Contains(DayType.Morning) && nonWfhTypes.Contains(DayType.Afternoon))
-                    ? (DayType?)null
-                    : nonWfhTypes.Contains(DayType.Morning) ? DayType.Afternoon
-                    : nonWfhTypes.Contains(DayType.Afternoon) ? DayType.Morning
-                    : DayType.Fullday;
-
-                if (wfhDayType.HasValue)
-                {
-                    double morningHours = wfhUser.MorningWorking ?? 3.5;
-                    double afternoonHours = wfhUser.AfternoonWorking ?? 4.5;
-                    double hour = wfhDayType.Value == DayType.Fullday
-                        ? morningHours + afternoonHours
-                        : (wfhDayType.Value == DayType.Morning ? morningHours : afternoonHours);
-
-                    return new WorkingStatusUserDto
-                    {
-                        EmailAddress = emailAddress,
-                        DateAt = dateAt,
-                        RequestType = RequestType.Remote,
-                        DayType = wfhDayType.Value,
-                        OnDayType = null,
-                        Hour = hour,
-                        Status = RequestStatus.Approved
-                    };
-                }
-            }
+            var defaultWfhStatus = await BuildDefaultWfhStatusIfApplicable(normalizedEmail, dateAt, status);
+            if (defaultWfhStatus != null)
+                return defaultWfhStatus;
 
             return status.FirstOrDefault();
         }
@@ -337,8 +302,79 @@ namespace Timesheet.APIs.Public
         public async Task<List<WorkingStatusUserDto>> GetWorkingStatusByUserV2(string emailAddress, DateTime? date)
         {
             DateTime dateAt = date.HasValue ? date.Value.Date : DateTimeUtils.GetNow().Date;
-            var status = await queryAbsenceDay(dateAt).Where(s => s.EmailAddress == emailAddress).ToListAsync();
+            var normalizedEmail = emailAddress?.ToLower().Trim();
+            var status = await queryAbsenceDay(dateAt).Where(s => s.EmailAddress == normalizedEmail).ToListAsync();
+
+            if (!status.Any(s => s.RequestType == RequestType.Remote))
+            {
+                var defaultWfhStatus = await BuildDefaultWfhStatusIfApplicable(normalizedEmail, dateAt, status);
+                if (defaultWfhStatus != null)
+                {
+                    status.Add(defaultWfhStatus);
+                }
+            }
+
             return status;
+        }
+
+        private async Task<WorkingStatusUserDto> BuildDefaultWfhStatusIfApplicable(
+            string normalizedEmail,
+            DateTime dateAt,
+            List<WorkingStatusUserDto> existingStatuses)
+        {
+            if (string.IsNullOrEmpty(normalizedEmail))
+                return null;
+
+            bool isWeekend = dateAt.DayOfWeek == DayOfWeek.Saturday || dateAt.DayOfWeek == DayOfWeek.Sunday;
+            if (isWeekend)
+                return null;
+
+            bool isOffDate = await WorkScope.GetAll<DayOffSetting>().AnyAsync(s => s.DayOff.Date == dateAt);
+            if (isOffDate)
+                return null;
+
+            var wfhUser = await WorkScope.GetAll<User>()
+                .Where(u => u.IsActive && u.WorkMode == WorkMode.WFH && u.EmailAddress.ToLower().Trim() == normalizedEmail)
+                .Select(u => new { u.MorningWorking, u.AfternoonWorking })
+                .FirstOrDefaultAsync();
+
+            if (wfhUser == null)
+                return null;
+
+            var nonWfhTypes = existingStatuses
+                .Where(s => s.DayType != DayType.Custom
+                    && (s.RequestType == RequestType.WorkAtOffice
+                        || s.RequestType == RequestType.Off
+                        || s.RequestType == RequestType.Onsite))
+                .Select(s => s.DayType)
+                .ToList();
+
+            DayType? wfhDayType = nonWfhTypes.Contains(DayType.Fullday)
+                || (nonWfhTypes.Contains(DayType.Morning) && nonWfhTypes.Contains(DayType.Afternoon))
+                ? (DayType?)null
+                : nonWfhTypes.Contains(DayType.Morning) ? DayType.Afternoon
+                : nonWfhTypes.Contains(DayType.Afternoon) ? DayType.Morning
+                : DayType.Fullday;
+
+            if (!wfhDayType.HasValue)
+                return null;
+
+            double morningHours = wfhUser.MorningWorking ?? 3.5;
+            double afternoonHours = wfhUser.AfternoonWorking ?? 4.5;
+            double hour = wfhDayType.Value == DayType.Fullday
+                ? morningHours + afternoonHours
+                : (wfhDayType.Value == DayType.Morning ? morningHours : afternoonHours);
+
+            return new WorkingStatusUserDto
+            {
+                EmailAddress = normalizedEmail,
+                DateAt = dateAt,
+                RequestType = RequestType.Remote,
+                DayType = wfhDayType.Value,
+                OnDayType = null,
+                Hour = hour,
+                Status = RequestStatus.Approved
+            };
         }
 
         private IQueryable<WorkingStatusUserDto> queryAbsenceDay(DateTime dateAt)
