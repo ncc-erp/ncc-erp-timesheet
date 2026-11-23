@@ -48,8 +48,10 @@ export class PopupComponent extends AppComponentBase implements OnInit {
         return ['text-primary', 'day-chip-tardiness-leave-early'];
       }
       return ['text-primary', 'day-chip-full-day'];
-    }else if(member.leavedayType == 1){
+    } else if (member.leavedayType == 1) {
       return ['text-primary', 'onsite'];
+    } else if (member.leavedayType == 3) {
+      return ['text-success', 'work-at-office'];
     }
     return ['text-primary', 'day-chip-morning'];
   }
@@ -76,8 +78,12 @@ export class PopupComponent extends AppComponentBase implements OnInit {
         return "Về sớm";
       }
       return "Off";
-    }  else if(member.leavedayType == 1){
+    } else if (member.leavedayType == 1) {
       return "Onsite";
+    } else if (member.leavedayType == 2) {
+      return "Remote";
+    } else if (member.leavedayType == 3) {
+      return "Work at Office";
     }
     return "Remote";
   }
