@@ -62,6 +62,16 @@ pre {
     color: white;
 }
 
+.remote{
+    background-color: #0c51a0 !important;
+    color: white;
+}
+
+.work-at-office{
+    background-color: #2e7d32 !important;
+    color: white;
+}
+
 .reason-off-day {
     text-align: center;
     color: indianred !important;

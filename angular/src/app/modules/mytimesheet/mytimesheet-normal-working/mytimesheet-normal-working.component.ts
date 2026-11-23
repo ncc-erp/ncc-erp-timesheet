@@ -24,6 +24,7 @@ export class MytimesheetNormalWorkingComponent extends AppComponentBase implemen
   OFF = this.APP_CONSTANT.DayAbsenceType.Off;
   REMOTE = this.APP_CONSTANT.DayAbsenceType.Remote;
   ONSITE = this.APP_CONSTANT.DayAbsenceType.Onsite;
+  WORK_AT_OFFICE = this.APP_CONSTANT.DayAbsenceType.WorkAtOffice;
   FULLDAY = this.APP_CONSTANT.AbsenceType.FullDay;
   MORMING = this.APP_CONSTANT.AbsenceType.Morning;
   AFTERNOON = this.APP_CONSTANT.AbsenceType.Afternoon;
@@ -99,6 +100,9 @@ export class MytimesheetNormalWorkingComponent extends AppComponentBase implemen
       case this.REMOTE:
         resultClass = 'remote' + cssClass;
         break;
+      case this.WORK_AT_OFFICE:
+        resultClass = 'work-at-office' + cssClass;
+        break;
       default:
         resultClass = 'absence' + cssClass;
     }
@@ -123,6 +127,9 @@ export class MytimesheetNormalWorkingComponent extends AppComponentBase implemen
         break;
       case this.REMOTE:
         result = 'R-';
+        break;
+      case this.WORK_AT_OFFICE:
+        result = 'WO-';
         break;
       default:
         result = 'O-';

@@ -1,4 +1,4 @@
-﻿using Abp.Authorization;
+using Abp.Authorization;
 using Abp.Collections.Extensions;
 using Abp.Linq.Extensions;
 using Abp.UI;
@@ -478,6 +478,9 @@ namespace Timesheet.APIs.NormalWorkingHours
                     break;
                 case RequestType.Remote:
                     result = "R-";
+                    break;
+                case RequestType.WorkAtOffice:
+                    result = "WO-";
                     break;
                 default:
                     result = "O-";

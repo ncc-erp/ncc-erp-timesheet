@@ -144,6 +144,8 @@
         <span class="cal-day-badge text-primary day-chip-full-day"
           *ngIf="item.type === 0 && item.absenceTime==null">Off</span>
         <span class="cal-day-badge text-primary onsite" *ngIf="item.type === 1">Onsite</span>
+        <span class="cal-day-badge text-primary remote" *ngIf="item.type === 2">Remote</span>
+        <span class="cal-day-badge text-primary work-at-office" *ngIf="item.type === 3">Work at Office</span>
 
         <span class="cal-day-badge text-primary day-chip-full-day"
           *ngIf="item.cssClass === 'all-day-absence' || item.cssClass === 'all-day-request'">Full Day</span>
