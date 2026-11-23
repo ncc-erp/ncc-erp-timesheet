@@ -24,6 +24,7 @@ th {
 
 .onsite,
 .remote,
+.work-at-office,
 .absence {
   color: #fff;
   display: inline-block;
@@ -43,6 +44,10 @@ th {
 
 .remote {
   background-color: #0c51a0 !important;
+}
+
+.work-at-office {
+  background-color: #2e7d32 !important;
 }
 
 .day-chip-custom {
@@ -114,9 +119,11 @@ $name-col-width: 0;
 
 .sticky-left-day {
   text-align: center;
-  width: 23px;
+  width: 100%;
+  min-width: 36px;
   height: 80px;
   position: relative;
+  margin: 0 auto;
 }
 
 .table .table-responsive {
@@ -360,6 +367,7 @@ $name-col-width: 0;
 
     .onsite,
     .remote,
+    .work-at-office,
     .absence {
       color: #fff;
       display: inline-block;

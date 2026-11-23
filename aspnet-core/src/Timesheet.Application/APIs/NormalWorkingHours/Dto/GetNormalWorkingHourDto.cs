@@ -1,4 +1,4 @@
-﻿using Abp.Domain.Entities;
+using Abp.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -141,6 +141,9 @@ namespace Timesheet.APIs.NormalWorkingHours.Dto
                     break;
                 case RequestType.Remote:
                     result = "Remote ";
+                    break;
+                case RequestType.WorkAtOffice:
+                    result = "Work at Office ";
                     break;
                 default:
                     result = "Off ";

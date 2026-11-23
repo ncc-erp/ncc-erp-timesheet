@@ -41,6 +41,13 @@ export class ShowDetailDialogComponent extends AppComponentBase implements OnIni
       this.label.absenceTypeLabel = "";
       this.label.reasonLabel = "Note: " + reason;
       this.label.leaveDayLabel = "Onsite Days: ";
+    } else if(this.data.type === 3) {
+      let reason = this.data.reason ? this.data.reason : "Nothing";
+      this.label.titleLabel = "Details Of Work at Office Days";
+      this.label.statusLabel = "Status: ";
+      this.label.absenceTypeLabel = "";
+      this.label.reasonLabel = "Reason: " + reason;
+      this.label.leaveDayLabel = "Work at Office Days: ";
     } else {
       let reason = this.data.reason ? this.data.reason : "Nothing";
       this.label.titleLabel = "Details Of Remote Days";

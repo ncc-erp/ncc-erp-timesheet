@@ -115,6 +115,7 @@ th {
 
 .onsite,
 .remote,
+.work-at-office,
 .absence {
   color: #fff;
   display: inline-block;
@@ -134,6 +135,10 @@ th {
 
 .remote {
   background-color: #0c51a0 !important;
+}
+
+.work-at-office {
+  background-color: #2e7d32 !important;
 }
 
 .day-chip-custom {
