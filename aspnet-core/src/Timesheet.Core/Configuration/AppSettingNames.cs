@@ -64,7 +64,6 @@ namespace Ncc.Configuration
         public const string AutoSubmitAt = "App.AutoSubmitAt";
         public const string AutoSubmitAtHour = "App.AutoSubmitAtHour";
         public const string WFHSetting = "App.WFHSetting";
-        public const string OfficeDaysInAdvanceToRequestRemote = "App.OfficeDaysInAdvanceToRequestRemote";
         public const string WfhMaxOfficeDaysPerWeek = "App.WfhMaxOfficeDaysPerWeek";
         public const string WfhDaysInAdvanceToRequestOffice = "App.WfhDaysInAdvanceToRequestOffice";
         public const string AllowInternToWorkRemote = "App.AllowInternToWorkRemote";
