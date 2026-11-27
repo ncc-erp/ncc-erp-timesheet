@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <VersionPrefix>1.0.0.0</VersionPrefix>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -10,9 +10,6 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\..\src\Timesheet.Core\Authorization\LoginManager.cs" Link="LoginManager.cs" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Timesheet.Application\Timesheet.Application.csproj" />
     <ProjectReference Include="..\..\src\Timesheet.EntityFrameworkCore\Timesheet.EntityFrameworkCore.csproj" />

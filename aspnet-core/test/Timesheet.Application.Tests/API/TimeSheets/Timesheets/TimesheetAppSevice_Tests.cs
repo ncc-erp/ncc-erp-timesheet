@@ -1,4 +1,4 @@
-﻿using Abp.Authorization.Roles;
+using Abp.Authorization.Roles;
 using Abp.BackgroundJobs;
 using Abp.Configuration;
 using Abp.Domain.Entities;
@@ -182,7 +182,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
+                var result = await _timesheet.GetAll(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    Status = inputStatus,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    BranchId = branchId,
+                    SearchText = searchText,
+                    WorkLocation = workLocation
+                });
                 Assert.Equal(28, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldContain(x => x.UserId == 6);
@@ -232,7 +244,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
+                var result = await _timesheet.GetAll(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    Status = inputStatus,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    BranchId = branchId,
+                    SearchText = searchText,
+                    WorkLocation = workLocation
+                });
                 Assert.Equal(3, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldNotContain(x => x.UserId == 6);
@@ -282,7 +306,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
+                var result = await _timesheet.GetAll(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    Status = inputStatus,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    BranchId = branchId,
+                    SearchText = searchText,
+                    WorkLocation = workLocation
+                });
                 Assert.Equal(3, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldContain(x => x.UserId == 6);
@@ -332,7 +368,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
+                var result = await _timesheet.GetAll(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    Status = inputStatus,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    BranchId = branchId,
+                    SearchText = searchText,
+                    WorkLocation = workLocation
+                });
                 Assert.Equal(2, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldNotContain(x => x.UserId == 6);
@@ -382,7 +430,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
+                var result = await _timesheet.GetAll(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    Status = inputStatus,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    BranchId = branchId,
+                    SearchText = searchText,
+                    WorkLocation = workLocation
+                });
                 Assert.Equal(4, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldContain(x => x.UserId == 6);
@@ -432,7 +492,19 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetAll(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputStatus, inputProjectId, inputFilter, branchId, searchText, workLocation);
+                var result = await _timesheet.GetAll(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    Status = inputStatus,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    BranchId = branchId,
+                    SearchText = searchText,
+                    WorkLocation = workLocation
+                });
                 Assert.Equal(24, result.Count);
                 result.ShouldContain(x => x.UserId == 17);
                 result.ShouldContain(x => x.UserId == 6);
@@ -788,7 +860,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    SearchText = searchText,
+                    BranchId = branchId,
+                    WorkLocation = workLocation
+                });
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
@@ -814,7 +897,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             HaveCheckInFilter? inputFilter = HaveCheckInFilter.HaveCheckIn;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    SearchText = searchText,
+                    BranchId = branchId,
+                    WorkLocation = workLocation
+                });
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
@@ -840,7 +934,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    SearchText = searchText,
+                    BranchId = branchId,
+                    WorkLocation = workLocation
+                });
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
@@ -865,7 +970,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    SearchText = searchText,
+                    BranchId = branchId,
+                    WorkLocation = workLocation
+                });
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
@@ -890,7 +1006,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    SearchText = searchText,
+                    BranchId = branchId,
+                    WorkLocation = workLocation
+                });
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
@@ -915,7 +1042,18 @@ namespace Timesheet.Application.Tests.API.Timesheets.Timesheets
             RequestType? workLocation = null;
             await WithUnitOfWorkAsync(async () =>
             {
-                var result = await _timesheet.GetQuantiyTimesheetStatus(opentalkTime, opentalkTimeType, inputStartDate, inputEndDate, inputProjectId, inputFilter, searchText, branchId, workLocation);
+                var result = await _timesheet.GetQuantiyTimesheetStatus(new GetTimesheetsInputDto
+                {
+                    OpentalkTime = opentalkTime,
+                    OpentalkTimeType = opentalkTimeType,
+                    StartDate = inputStartDate,
+                    EndDate = inputEndDate,
+                    ProjectId = inputProjectId,
+                    CheckInFilter = inputFilter,
+                    SearchText = searchText,
+                    BranchId = branchId,
+                    WorkLocation = workLocation
+                });
                 var listStatus = ((IEnumerable)result).Cast<object>().ToList();
                 Assert.Equal(5, listStatus.Count);
                 listStatus[0].ToString().ShouldBe("{ Status = All, Quantity = 0 }");
