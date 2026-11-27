@@ -2453,7 +2453,6 @@ export class WFHSettingDTO {
   allowInternToWorkRemote: string;
   allowProbationToWorkRemote: string;
   totalTimeTardinessAndEarlyLeave : string;
-  officeDaysInAdvanceToRequestRemote: string;
   wfhMaxOfficeDaysPerWeek: string;
   wfhDaysInAdvanceToRequestOffice: string;
 }
