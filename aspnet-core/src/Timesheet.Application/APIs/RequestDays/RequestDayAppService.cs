@@ -526,7 +526,6 @@ namespace Timesheet.APIs.RequestDays
 
             int MAX_ALLOW_REMOTE_DAY = 0;
             int penaltyDays = 0;
-            int officeDaysInAdvance = 7;
             int wfhMaxOffice = 1;
             int wfhDaysInAdvance = 7;
 
@@ -545,8 +544,6 @@ namespace Timesheet.APIs.RequestDays
                 }
 
                 var wfhSettingStr = await SettingManager.GetSettingValueAsync(AppSettingNames.WFHSetting);
-                var officeDaysInAdvanceStr = await SettingManager.GetSettingValueAsync(AppSettingNames.OfficeDaysInAdvanceToRequestRemote);
-                officeDaysInAdvance = int.TryParse(officeDaysInAdvanceStr, out var oda) ? oda : 7;
 
                 bool isFullyRemote = await WorkScope.GetAll<UserWhitelist>()
                     .Where(uw => uw.UserId == userId && !uw.IsDeleted)
@@ -666,7 +663,7 @@ namespace Timesheet.APIs.RequestDays
 
                 if (input.Type == RequestType.Remote)
                 {
-                    ApplyRemotePolicy(abs, absencedayRequest, dbRequests, setDayOffSetting, lastWeekAbsenceDates, weeklyRequestCounts, MAX_ALLOW_REMOTE_DAY, penaltyDays, officeDaysInAdvance, today);
+                    ApplyRemotePolicy(abs, absencedayRequest, dbRequests, setDayOffSetting, lastWeekAbsenceDates, weeklyRequestCounts, MAX_ALLOW_REMOTE_DAY, penaltyDays, today);
                 }
                 else if (input.Type == RequestType.WorkAtOffice)
                 {
@@ -815,7 +812,7 @@ namespace Timesheet.APIs.RequestDays
         }
 
         /// <summary>
-        /// Checks Remote request conflicts and updates status/error message for a single absence date (advance notice, weekly quota, and previous-week office days) using preloaded data.
+        /// Checks Remote request conflicts and updates status/error message for a single absence date (same-week auto-reject, weekly quota, and previous-week office days) using preloaded data.
         /// </summary>
         private static void ApplyRemotePolicy(
             AbsenceDayDetailDto abs,
@@ -826,7 +823,6 @@ namespace Timesheet.APIs.RequestDays
             Dictionary<DateTime, int> weeklyRequestCounts,
             int maxAllowRemoteDay,
             int penaltyDays,
-            int officeDaysInAdvance,
             DateTime today)
         {
             var hasPendingOrApprovedCustomOff = dbRequests.Any(s => s.Date == abs.DateAt.Date
@@ -839,6 +835,7 @@ namespace Timesheet.APIs.RequestDays
             }
 
             var monday = DateTimeUtils.FirstDayOfWeek(abs.DateAt.Date);
+            var currentWeekMonday = DateTimeUtils.FirstDayOfWeek(today);
             var previousMonday = monday.AddDays(-7);
             var previousFriday = monday.AddDays(-3);
 
@@ -849,10 +846,10 @@ namespace Timesheet.APIs.RequestDays
 
             int numberRemoteDayInWeek = weeklyRequestCounts.TryGetValue(monday, out var count) ? count : 0;
 
-            if ((abs.DateAt.Date - today).TotalDays < officeDaysInAdvance)
+            if (monday <= currentWeekMonday)
             {
                 request.Status = RequestStatus.Rejected;
-                abs.ErrorMessage = $"WFH request must be submitted at least {officeDaysInAdvance} day(s) in advance. The request has been automatically rejected and requires Branch Director approval.";
+                abs.ErrorMessage = "WFH request for the current week is automatically rejected and requires Branch Director approval.";
             }
             else if (numberRemoteDayInWeek > maxAllowRemoteDay - 1)
             {
